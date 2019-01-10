@@ -1,0 +1,17 @@
+###############################################
+##                                           ##
+##          WildStacker Custom Names         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# Should this feature be enabled?
+enabled: true
+
+# Here you can specify custom types for entities & items.
+# Please follow the "ITEM_TYPE: CUSTOM_NAME", "'ITEM_TYPE:ITEM_DATA': CUSTOM_NAME" and "ENTITY_TYPE: CUSTOM_NAME" formats.
+# {0} represents item's name, if found
+
+'INK_SACK:15': 'Bone Meal'
+MOB_SPAWNER: '{0}'
+PIG: 'Piggy'

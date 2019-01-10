@@ -1,0 +1,45 @@
+name: WildStacker
+version: 2.5.10
+api-version: 1.13
+main: xyz.wildseries.wildstacker.WildStackerPlugin
+description: Stacking drops, entities, blocks and spawners into one object!
+website: http://wildseries.xyz/
+authors: [Ome_R, WildSeries]
+softdepend: [Vault, SilkSpawners, CustomDrops, DropEdit, ClearLag, EpicSpawners, MergedSpawner, StackSpawners, FastAsyncWorldEdit, HolographicDisplays, Holograms, Arconix, WildTools, MythicMobs]
+loadbefore: [ShopGUIPlus]
+commands:
+  stacker:
+    description: Main command for the plugin
+permissions:
+  wildstacker.*:
+    description: Gives access to all the command.
+    default: op
+    children:
+      wildstacker.give: true
+      wildstacker.info: true
+      wildstacker.kill: true
+      wildstacker.reload: true
+      wildstacker.save: true
+      wildstacker.silktouch: true
+      wildstacker.nosilkdrop: true
+      wildstacker.settings: true
+      wildstacker.place.*: true
+  wildstacker.give:
+    description: Gives access to give spawner and eggs to players.
+  wildstacker.info:
+    description: Gives access to get information about a spawner.
+  wildstacker.kill:
+    description: Gives access to kill all stacked-entities.
+  wildstacker.reload:
+    description: Gives access to reload all configuration files.
+  wildstacker.save:
+    description: Gives access to save cache to files.
+  wildstacker.silktouch:
+    description: Gives access to get spawners with silk-touch.
+  wildstacker.nosilkdrop:
+    description: Gives access to get spawners without silk-touch.
+  wildstacker.settings:
+    description: Gives access to use settings editor.
+  wildstacker.place.*:
+    description: Gives access to place all spawner types
+    default: true

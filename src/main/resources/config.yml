@@ -1,0 +1,418 @@
+###############################################
+##                                           ##
+##         WildStacker Configuration         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# How much time should be passed between saves? (in ticks)
+# Set 0 to disable (not recommended. saving is done async, and will not lag your server)
+save-interval: 6000
+
+# How should the item that is given to players by the give command be called?
+# {0} represents stack size
+# {1} represents entity/block type
+# {2} represents item type (Egg / Spawner / Barrel)
+give-item-name: '&6&lx{0} &7&l{1} {2}'
+
+# Here you can configurable all features related to stacked items.
+items:
+  # Should items get stacked on the server?
+  enabled: true
+
+  # How many blocks from the item should be for checking for other items to stack into?
+  merge-radius: 5
+
+  # Custom display-name for the items on ground.
+  # If you don't want a display-name, use "custom-name: ''"
+  # {0} represents stack amount
+  # {1} represents display name
+  # {2} represents display name in upper case
+  custom-name: '&6&lx{0} &7&l{1}'
+
+  # Blacklisted items are items that won't get stacked.
+  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # If you wish to enable stacking of all items, use "blacklist: []"
+  blacklist:
+  - EGG
+
+  # Set a maximum stack for specific items.
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # You can use 'all' as a global limit (all: 20 will set all items to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  limits:
+    STONE: 1024
+    'LOG:1': 1024
+
+  # A list of worlds items won't get stacked inside them (case-sensitive)
+  disabled-worlds:
+  - disabled_world
+
+  # When fix-stack is disabled, items with a max-stack of 1 will be added to inventories
+  # with a max-stack size of 64. If a player picks up 80 picks, he will get 64 + 16, instead
+  # of 80 different items.
+  fix-stack: false
+
+  # When item-display is enabled, the item's name will be displayed instead of it's type
+  # This will take place on all items, and can only be overridden by custom-display section.
+  item-display: false
+
+  # When buckets stacker is enabled, water & lava buckets will be stacked in your inventory
+  # with a max-stack size of 16.
+  buckets-stacker: true
+
+# Here you can configurable all features related to stacked entities.
+entities:
+  # Should entities get stacked on the server?
+  enabled: true
+
+  # How many blocks from the entity should be for checking for other entities to stack into?
+  merge-radius: 10
+
+  # Custom display-name for the entities.
+  # If you don't want a display-name, use "custom-name: ''"
+  # {0} represents stack amount
+  # {1} represents entity type
+  # {2} represents entity type in upper case
+  custom-name: '&6&lx{0} &7&l{1}'
+
+  # Blacklisted entities are entities that won't get stacked.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # If you wish to enable stacking of all entities, use "blacklist: []"
+  blacklist:
+  - PLAYER
+  - BLAZE
+
+  # Set a maximum stack for specific entities.
+  # Make sure you follow the "ENTITY-TYPE" format.
+  # You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  limits:
+    PIG: 10
+    ZOMBIE: 50
+
+  # A list of worlds entities won't get stacked inside them (case-sensitive)
+  disabled-worlds:
+  - disabled_world
+
+  # Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # If you wish to enable stacking of all entities that are spawned, use "spawn-blacklist: []"
+  spawn-blacklist:
+  - CHUNK_GEN
+
+  # Blacklisted names is a list of names that when an entity has this name, it won't get stacked.
+  # Color codes aren't supported, as well as regex.
+  # If you wish to enable stacking of all entities based on their name, use "name-blacklist: []"
+  name-blacklist:
+  - '&f(.*)'
+
+  # How much time should be passed between auto-stacking? (in ticks)
+  # Use it on your own risk. Every run, the plugin will go over *all* the entities
+  # on your server and will try to stack *each* one of them. It may cause lag with incorrect value.
+  # I recommend setting it to at least 10 seconds (200 ticks)
+  # If you wish to disable the auto-stacking task, set the stack-interval to 0.
+  stack-interval: 0
+
+  # Here you can configurable all features related to the kill-all task.
+  # Every run, the plugin will remove all the stacked entities from your server.
+  # No drops will be drops, and it won't lag your server at all.
+  kill-all:
+    # How much time should be passed between auto-killing? (in ticks)
+    # If you wish to disable the auto-killing task, set the interval to 0.
+    interval: 300
+
+    # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
+    # This feature will work if the interval is set to 0 - these are two different features!
+    clear-lagg: false
+
+  # A list of all checks that the plugin does before trying to stack two entities together.
+  stack-checks:
+    AGE: true
+    EXACT_AGE: false
+    CAN_BREED: true
+    IS_TAMED: true
+    ANIMAL_OWNER: true
+    SKELETON_TYPE: true
+    ZOMBIE_BABY: true
+    SLIME_SIZE: true
+    ZOMBIE_PIGMAN_ANGRY: false
+    ENDERMAN_CARRIED_BLOCK: true
+    BAT_AWAKE: false
+    GUARDIAN_ELDER: true
+    PIG_SADDLE: true
+    SHEEP_SHEARED: true
+    SHEEP_COLOR: true
+    WOLF_ANGRY: false
+    WOLF_COLLAR_COLOR: true
+    OCELOT_TYPE: true
+    HORSE_TYPE: true
+    HORSE_COLOR: true
+    HORSE_STYLE: true
+    HORSE_CARRYING_CHEST: true
+    HORSE_TAME_PROGRESS: true
+    HORSE_MAX_TAME_PROGRESS: true
+    HORSE_JUMP: true
+    RABBIT_TYPE: true
+    VILLAGER_PROFESSION: true
+    LLAMA_COLOR: true
+    LLAMA_STRENGTH: true
+    PARROT_TYPE: true
+    PUFFERFISH_STATE: true
+    TROPICALFISH_TYPE: true
+    TROPICALFISH_BODY_COLOR: true
+    TROPICALFISH_TYPE_COLOR: true
+    PHANTOM_SIZE: true
+
+  # A list of all actions that the plugin check before unstacking an entity stack.
+  stack-split:
+    NAME_TAG: true
+    MUSHROOM_SHEAR: true
+    SHEEP_SHEAR: true
+    SHEEP_DYE: true
+    ENTITY_BREED: true
+
+  # Linked-entities are entities that are linked to one spawner or more.
+  # A spawner that has an entity linked to, will try to stack it's entities first to the linked one.
+  # Linked entities feature won't work if entities-stacking is disabled.
+  linked-entities:
+    # Should entities will be linked to spawners?
+    enabled: true
+
+    # The maximum distance that the linked entity can be from the spawner.
+    # If the entity is too far, it will get unlinked automatically from the spawner.
+    max-distance: 10
+
+  # Instant-kill will kill the entire stack instead of unstack it by one.
+  # When an entire stack dies, their drops are getting multiplied.
+  # DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+  # If you don't want instant-kill, use "instant-kill: []"
+  instant-kill:
+  - FALL
+
+  # Nerfed entities are entities that cannot attack / target other entities and players.
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # If you don't want nerfed entities, use "nerfed-spawning: []"
+  nerfed-spawning:
+  - SPAWNER
+
+  # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
+  # This feature is great for flying entities, like blazes and ghasts.
+  stack-down:
+    # Should the stack-down feature will be enabled on the server?
+    enabled: true
+    # A list of entities that will be forced to only stack down.
+    stack-down-types:
+    - BLAZE
+    - GHAST
+
+  # If a stacked entity dies from fire, should the fire continue to the next entity?
+  keep-fire: true
+
+  # If mythic mobs is enabled, will it's entities get stacked?
+  mythic-mobs-stack: false
+
+  # When this feature is enabled, blazes will always drop blazes and not only when they are killed by players.
+  blazes-always-drop: true
+
+  # When enabled, the stack will keep the lowest health between the two entities that are stacked.
+  keep-lowest-health: false
+
+  # When enabled, parents of the entity will get stacked together after breeding.
+  stack-after-breed: true
+
+  # When enabled, entities' names will be shown only if player looks exactly towards them.
+  hide-names: false
+
+# Here you can configurable all features related to stacked spawners.
+spawners:
+  # Should spawners get stacked on the server?
+  enabled: true
+
+  # How many blocks from the spawner should be for checking for other spawners to stack into?
+  merge-radius: 1
+
+  # Custom hologram for the spawners.
+  # Holograms will be displayed only if one of the following plugins is enabled: HolographicDisplay, Holograms, Arconix
+  # If you don't want a hologram, use "custom-name: ''"
+  # {0} represents stack amount
+  # {1} represents entity type
+  # {2} represents entity type in upper case
+  custom-name: '&6&lx{0} &7&l{1}'
+
+  # Blacklisted spawners are spawners that won't get stacked.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # If you wish to enable stacking of all spawners, use "blacklist: []"
+  blacklist:
+  - BLAZE
+
+  # Set a maximum stack for specific spawners.
+  # Make sure you follow the "ENTITY-TYPE" format.
+  # You can use 'all' as a global limit (all: 20 will set all spawners to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  limits:
+    PIG: 10
+    ZOMBIE: 50
+
+  # A list of worlds spawners won't get stacked inside them (case-sensitive)
+  disabled-worlds:
+  - disabled_world
+
+  # When enabled, the plugin will try to find a spawner in the whole chunk instead
+  # of only in the provided radius. merge-radius will be overridden, and will be used
+  # as a y-level range only.
+  chunk-merge: false
+
+  # Should explosions break the entire stack, or just reducing it by one?
+  explosions-break-stack: true
+
+  # Chance of spawners to be dropped after an explosion.
+  explosions-break-chance: 100
+
+  # Should spawners get dropped without silktouch?
+  # If enabled, only players with wildstacker.nosilkdrop will be able to get the spawners.
+  # This feature will not work with other spawner-providers, such as SilkSpawners
+  drop-without-silk: false
+
+  # Here you can configurable all features related to silk-touch enchantment.
+  silk-spawners:
+    # Should spawners get dropped when mining them using a silk-touch pickaxe?
+    # If another similar plugin to this feature is enabled, it will override this feature.
+    enabled: true
+
+    # Custom name for the item.
+    # If you don't want a custom name, use "custom-name: ''"
+    # {0} represents stack amount
+    # {1} represents entity type
+    custom-name: '&fx{0} &e{1} &fSpawners'
+
+    # Should explosions will act like silk-touch and drop the spawner?
+    explosions-drop-spawner: true
+
+    # Should the spawner item go straight into the player's inventory instead of dropping on ground?
+    drop-to-inventory: true
+
+  # Should sneaking while mining will break the entire stack instead of reducing it by one?
+  shift-get-whole-stack: true
+
+  # Should one item will be dropped for a stacked spawner instead of multiple items?
+  # This feature will not work with other spawner-providers, such as SilkSpawners
+  get-stacked-item: true
+
+  # When enabled, holograms will only be displayed when clicking on spawners.
+  # They will be displayed for 3 seconds.
+  # You must set a valid custom-name for it to work.
+  floating-names: false
+
+  # Here you can configurable all features related to the break menu.
+  break-menu:
+    # When enabled and shift right-clicking a spawner, a "break-menu" will be opened.
+    # You can select there how many spawners you want to remove from the stack.
+    enabled: true
+
+    # How many rows should the gui have?
+    size: 3
+
+    # The title of the gui.
+    title: '&lBreak Menu'
+
+    # Here you can list all fill items for the gui.
+    # If you don't want any, set the type to AIR.
+    fill-items:
+      '1':
+        type: STAINED_GLASS_PANE
+        data: 15
+        name: '&f'
+        slots: 0,1,7,8,9,17,18,19,25,26
+      '2':
+        type: STAINED_GLASS_PANE
+        data: 1
+        name: '&f'
+        slots: 2,3,4,5,6,10,12,14,16,20,21,22,23,24
+
+    # Here you can list all break slots.
+    break-slots:
+      '11':
+        type: MOB_SPAWNER
+        name: '&6&lx64 Spawners'
+        amount: 64
+      '13':
+        type: MOB_SPAWNER
+        name: '&6&lx128 Spawners'
+        amount: 128
+      '15':
+        type: MOB_SPAWNER
+        name: '&6&lx256 Spawners'
+        amount: 256
+
+  # When enabled, you must have the permission wildstacker.place.<entity> to place an entity.
+  # You can give a player the ability to place all spawners with wildstacker.place.*
+  placement-permission: false
+
+  # When enabled and player is placing a spawner while sneaking, all of the spawners the player
+  # is holding will be placed instead of only 1.
+  shift-place-stack: true
+
+  # Set a charge amount for breaking spawners.
+  break-charge:
+    amount: 0
+    multiply-stack-amount: false
+
+  # Set a charge amount for placing spawners.
+  place-charge:
+    amount: 0
+    multiply-stack-amount: false
+
+# Here you can configurable all features related to stacked barrels (aka stacked blocks).
+barrels:
+  # Should blocks get stacked into barrels on the server?
+  enabled: true
+
+  # How many blocks from the barrel should be for checking for other blocks to stack into?
+  merge-radius: 1
+
+  # Custom hologram for the barrels.
+  # Holograms will be displayed only if one of the following plugins is enabled: HolographicDisplay, Holograms, Arconix
+  # If you don't want a hologram, use "custom-name: ''"
+  # {0} represents stack amount
+  # {1} represents barrel type
+  # {2} represents barrel type in upper case
+  custom-name: '&6&lx{0} &7&l{1}'
+
+  # Whitelisted blocks are blocks that will get stacked.
+  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # If you wish to disable stacking of all blocks, use "enabled: false"
+  whitelist:
+  - DIAMOND_BLOCK
+
+  # Set a maximum stack for a specific barrel.
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # You can use 'all' as a global limit (all: 20 will set all barrels to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  limits:
+    DIAMOND_BLOCK: 100
+
+  # A list of worlds barrels won't get stacked inside them (case-sensitive)
+  disabled-worlds:
+  - disabled_world
+
+  # When enabled, the plugin will try to find a block in the whole chunk instead
+  # of only in the provided radius. merge-radius will be overridden, and will be used
+  # as a y-level range only.
+  chunk-merge: false
+
+  # Should explosions break the entire stack, or just reducing it by one?
+  explosions-break-stack: true
+
+  # Here you can configurable all features related to toggle commands.
+  toggle-command:
+    # Should toggle-commands be enabled?
+    enabled: false
+
+    # What's the toggle command will be?
+    command: 'stacker toggle'
+
+  # When enabled and player is clicking a barrel while sneaking, an inventory will be opened, there
+  # he can put blocks to add to the barrel.
+  place-inventory: true
