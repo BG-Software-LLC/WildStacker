@@ -127,8 +127,6 @@ public final class DataHandler {
 
         CACHED_NERFED_ENTITIES.forEach(uuid -> nerfedEntities.add(uuid.toString()));
 
-        System.out.println(nerfedEntities);
-
         if(!nerfedEntities.isEmpty())
             cfg.set("nerfed", nerfedEntities);
 
