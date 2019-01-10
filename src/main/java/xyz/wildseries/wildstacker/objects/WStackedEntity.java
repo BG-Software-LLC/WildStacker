@@ -28,10 +28,12 @@ public final class WStackedEntity extends WStackedObject<LivingEntity> implement
     private static Set<UUID> latestStacked = new HashSet<>();
 
     private boolean ignoreDeathEvent;
+    private boolean nerfed;
 
     public WStackedEntity(LivingEntity livingEntity){
         super(livingEntity, 1);
         ignoreDeathEvent = false;
+        nerfed = false;
     }
 
     /*
@@ -313,6 +315,15 @@ public final class WStackedEntity extends WStackedObject<LivingEntity> implement
     @Override
     public boolean isIgnoreDeathEvent() {
         return ignoreDeathEvent;
+    }
+
+    //Not an API method!
+    public boolean isNerfed(){
+        return nerfed;
+    }
+
+    public void setNerfed(boolean nerfed){
+        this.nerfed = nerfed;
     }
 
     public static StackedEntity of(Entity entity){

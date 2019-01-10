@@ -1,9 +1,11 @@
 package xyz.wildseries.wildstacker.utils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.key.Key;
+import xyz.wildseries.wildstacker.objects.WStackedEntity;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -11,7 +13,7 @@ import java.util.regex.Pattern;
 import static xyz.wildseries.wildstacker.utils.ReflectionUtil.getField;
 import static xyz.wildseries.wildstacker.utils.ReflectionUtil.getNMSClass;
 
-@SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
+@SuppressWarnings("UnusedReturnValue")
 public final class EntityUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -53,14 +55,19 @@ public final class EntityUtil {
             for(Object goal : goals)
                 goal.getClass().getMethod("clear").invoke(goal);
 
+            Bukkit.getScheduler().runTaskLater(plugin, () -> ((WStackedEntity) WStackedEntity.of(livingEntity)).setNerfed(true), 1L);
+
         } catch(Exception ex){
             ex.printStackTrace();
         }
     }
 
     public static boolean isNerfed(LivingEntity livingEntity){
+        WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(livingEntity);
+
         try {
             Class entityInsentientClass = getNMSClass("EntityInsentient");
+
             Object nmsEntity = entityInsentientClass.cast(livingEntity.getClass().getMethod("getHandle").invoke(livingEntity));
 
             Class pathfinderGoalClass = getNMSClass("PathfinderGoalSelector");
@@ -76,13 +83,18 @@ public final class EntityUtil {
             };
 
             for(Object goal : goals) {
-                if (!(boolean) goal.getClass().getMethod("isEmpty").invoke(goal))
+                if (!(boolean) goal.getClass().getMethod("isEmpty").invoke(goal)) {
+                    stackedEntity.setNerfed(false);
                     return false;
+                }
             }
+
+            stackedEntity.setNerfed(true);
 
             return true;
         } catch(Exception ex){
             ex.printStackTrace();
+            stackedEntity.setNerfed(false);
             return false;
         }
     }

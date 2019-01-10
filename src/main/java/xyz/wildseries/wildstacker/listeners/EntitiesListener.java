@@ -6,7 +6,10 @@ import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -26,6 +29,7 @@ import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.enums.StackSplit;
@@ -272,7 +276,7 @@ public final class EntitiesListener implements Listener {
         if(!StackSplit.ENTITY_BREED.isEnabled())
             return;
 
-        if(!(e.getRightClicked() instanceof LivingEntity))
+        if(!(e.getRightClicked() instanceof Animals))
             return;
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -305,6 +309,17 @@ public final class EntitiesListener implements Listener {
 
             AsyncUtil.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()));
         }).start();
+    }
+
+    @EventHandler
+    public void onChunkLoad(ChunkLoadEvent e){
+        for(Entity entity : e.getChunk().getEntities()){
+            if(entity instanceof LivingEntity && !(entity instanceof Player) && !(entity instanceof ArmorStand)){
+                WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(entity);
+                if(stackedEntity.isNerfed())
+                    EntityUtil.nerfEntity((LivingEntity) entity);
+            }
+        }
     }
 
 }

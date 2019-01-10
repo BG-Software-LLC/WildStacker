@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -29,6 +30,7 @@ import xyz.wildseries.wildstacker.objects.WStackedSpawner;
 import xyz.wildseries.wildstacker.tasks.KillTask;
 import xyz.wildseries.wildstacker.tasks.SaveTask;
 import xyz.wildseries.wildstacker.tasks.StackTask;
+import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
@@ -78,8 +80,10 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
-        if(dataHandler.CACHED_OBJECTS.containsKey(livingEntity.getUniqueId()))
-            return (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
+        if(dataHandler.CACHED_OBJECTS.containsKey(livingEntity.getUniqueId())) {
+            if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand))
+                return (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
+        }
 
         StackedEntity stackedEntity = new WStackedEntity(livingEntity);
 
@@ -88,7 +92,13 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId());
         }
 
-        dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
+        if(dataHandler.CACHED_NERFED_ENTITIES.contains(livingEntity.getUniqueId())){
+            EntityUtil.nerfEntity(livingEntity);
+            dataHandler.CACHED_NERFED_ENTITIES.remove(livingEntity.getUniqueId());
+        }
+
+        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand))
+            dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
 
         return stackedEntity;
     }

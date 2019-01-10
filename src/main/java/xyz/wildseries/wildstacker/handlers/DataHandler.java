@@ -12,10 +12,15 @@ import xyz.wildseries.wildstacker.api.objects.StackedObject;
 import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
 import xyz.wildseries.wildstacker.objects.WStackedBarrel;
 import xyz.wildseries.wildstacker.objects.WStackedSpawner;
+import xyz.wildseries.wildstacker.utils.EntityUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +34,7 @@ public final class DataHandler {
     //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
     public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
     public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
+    public final Set<UUID> CACHED_NERFED_ENTITIES = new HashSet<>();
 
     public DataHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -70,8 +76,15 @@ public final class DataHandler {
         int dataAmount = 0;
 
         for(String uuid : cfg.getConfigurationSection("").getKeys(false)) {
-            CACHED_AMOUNT_ENTITIES.put(UUID.fromString(uuid), cfg.getInt(uuid));
-            dataAmount++;
+            if(!uuid.equals("nerfed")) {
+                CACHED_AMOUNT_ENTITIES.put(UUID.fromString(uuid), cfg.getInt(uuid));
+                dataAmount++;
+            }
+        }
+
+        if(cfg.contains("nerfed")) {
+            List<String> nerfedEntities = cfg.getStringList("nerfed");
+            nerfedEntities.forEach(uuid -> CACHED_NERFED_ENTITIES.add(UUID.fromString(uuid)));
         }
 
         return dataAmount;
@@ -94,11 +107,15 @@ public final class DataHandler {
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         int dataAmount = 0;
 
+        List<String> nerfedEntities = new ArrayList<>();
+
         for(StackedEntity stackedEntity : plugin.getSystemManager().getStackedEntities()){
             if(stackedEntity.getStackAmount() > 1){
                 cfg.set(stackedEntity.getUniqueId().toString(), stackedEntity.getStackAmount());
                 dataAmount++;
             }
+            if(EntityUtil.isNerfed(stackedEntity.getLivingEntity()))
+                nerfedEntities.add(stackedEntity.getUniqueId().toString());
         }
 
         for(UUID uuid : CACHED_AMOUNT_ENTITIES.keySet()) {
@@ -107,6 +124,13 @@ public final class DataHandler {
                 dataAmount++;
             }
         }
+
+        CACHED_NERFED_ENTITIES.forEach(uuid -> nerfedEntities.add(uuid.toString()));
+
+        System.out.println(nerfedEntities);
+
+        if(!nerfedEntities.isEmpty())
+            cfg.set("nerfed", nerfedEntities);
 
         try {
             cfg.save(file);
