@@ -1,0 +1,47 @@
+{
+  pairs:[
+    {
+      chance: 100,
+      items:[
+        {
+          type: "ARROW",
+		  chance: 100,
+          min: 0,
+          max: 2,
+          looting: true
+        }
+      ]
+    },
+    {
+      chance: 100,
+      items:[
+        {
+          type: "BONE",
+		  chance: 100,
+          min: 0,
+          max: 2,
+          looting: true
+        }
+      ]
+    },
+    {
+	  killedByPlayer: true,
+      chance: 100,
+      items:[
+        {
+          type: "BONE",
+		  chance: 100,
+          min: 0,
+          max: 1,
+          looting: true,
+		  totalMax: 1,
+		  enchants:[
+		    {
+			  enchant: "SLOWNESS"
+			}
+		  ]
+        }
+      ]
+    }
+  ]
+}

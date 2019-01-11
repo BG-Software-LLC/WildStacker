@@ -1,0 +1,19 @@
+{
+  pairs:[
+    {
+      chance: 100,
+      items:[
+        {
+          type: "COD",
+		  chance: 100,
+          min: 0,
+          max: 1,
+          looting: true,
+		  burnable:{
+		    type: "COOKED_COD"
+		  }
+        }
+      ]
+    }
+  ]
+}

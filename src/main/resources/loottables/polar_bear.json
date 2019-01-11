@@ -1,0 +1,23 @@
+{
+  pairs:[
+    {
+      chance: 100,
+      items:[
+        {
+          type: "COD",
+		  chance: 75,
+          min: 0,
+          max: 2,
+          looting: true
+        },
+        {
+          type: "SALMON",
+		  chance: 25,
+          min: 0,
+          max: 2,
+          looting: true
+        }
+      ]
+    }
+  ]
+}
