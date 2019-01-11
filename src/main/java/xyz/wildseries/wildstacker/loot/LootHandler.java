@@ -1,11 +1,15 @@
-package xyz.wildseries.wildstacker.table;
+package xyz.wildseries.wildstacker.loot;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
-import xyz.wildseries.wildstacker.table.tables.LootTable;
-import xyz.wildseries.wildstacker.table.tables.LootTableSheep;
+import xyz.wildseries.wildstacker.loot.custom.LootTableCustom;
+import xyz.wildseries.wildstacker.loot.custom.LootTableCustomDrops;
+import xyz.wildseries.wildstacker.loot.custom.LootTableDropEdit;
+import xyz.wildseries.wildstacker.loot.custom.LootTableEditDrops;
+import xyz.wildseries.wildstacker.loot.custom.LootTableEpicSpawners;
+import xyz.wildseries.wildstacker.loot.custom.LootTableStackSpawners;
 import xyz.wildseries.wildstacker.utils.legacy.EntityTypes;
 
 import java.io.File;
@@ -13,10 +17,11 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions", "WeakerAccess"})
+@SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions"})
 public class LootHandler {
 
     private final Map<String, LootTable> lootTables = new HashMap<>();
+    private LootTableCustom lootTableCustom = null;
     private final Gson gson = new Gson();
 
     public LootHandler(WildStackerPlugin plugin){
@@ -31,14 +36,7 @@ public class LootHandler {
                 try {
                     JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
                     String key = file.getName().replace(".json", "").toUpperCase();
-                    switch (key){
-                        case "SHEEP":
-                            lootTables.put(key, LootTableSheep.fromJson(jsonObject));
-                            break;
-                        default:
-                            lootTables.put(key, LootTable.fromJson(jsonObject));
-                            break;
-                    }
+                    lootTables.put(key, key.equals("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
                 }catch(Exception ex){
                     ex.printStackTrace();
                 }
@@ -105,16 +103,33 @@ public class LootHandler {
         plugin.saveResource("loottables/zombie_villager.json", true);
     }
 
-    public LootTable getLootTable(LivingEntity livingEntity){
-        if(lootTables.containsKey("CUSTOM")){
-            return lootTables.get("CUSTOM");
+    public void initLootTableCustom(WildStackerPlugin plugin){
+        switch (plugin.getProviders().getDropsProvider()){
+            case CUSTOM_DROPS:
+                lootTableCustom = new LootTableCustomDrops();
+                break;
+            case DROP_EDIT:
+                lootTableCustom = new LootTableDropEdit();
+                break;
+            case EDIT_DROPS:
+                lootTableCustom = new LootTableEditDrops();
+                break;
+            case EPIC_SPAWNERS:
+                lootTableCustom = new LootTableEpicSpawners();
+                break;
+            case STACK_SPAWNERS:
+                lootTableCustom = new LootTableStackSpawners();
+                break;
         }
-        return getNaturalLootTable(livingEntity);
     }
 
-    public LootTable getNaturalLootTable(LivingEntity livingEntity){
+    public LootTable getLootTable(LivingEntity livingEntity){
         EntityTypes entityType = EntityTypes.fromEntity(livingEntity);
         return !lootTables.containsKey(entityType.name()) ? lootTables.get("EMPTY") : lootTables.get(entityType.name());
+    }
+
+    public LootTableCustom getLootTableCustom(){
+        return lootTableCustom;
     }
 
 }

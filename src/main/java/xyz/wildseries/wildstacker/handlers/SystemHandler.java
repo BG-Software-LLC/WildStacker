@@ -39,22 +39,22 @@ import java.util.List;
 
 public final class SystemHandler implements SystemManager {
 
-    private WildStackerPlugin instance;
+    private WildStackerPlugin plugin;
     private DataHandler dataHandler;
 
-    public SystemHandler(WildStackerPlugin instance){
-        this.instance = instance;
-        this.dataHandler = instance.getDataHandler();
+    public SystemHandler(WildStackerPlugin plugin){
+        this.plugin = plugin;
+        this.dataHandler = plugin.getDataHandler();
 
         //Start all required tasks
-        Bukkit.getScheduler().runTaskLater(instance, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             SaveTask.start();
             KillTask.start();
             StackTask.start();
         }, 1L);
 
         //Start the auto-clear
-        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this::performCacheClear, 300L, 300L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
     }
 
     /*
@@ -209,7 +209,7 @@ public final class SystemHandler implements SystemManager {
             if(stackedEntity.getType() == EntityType.ARMOR_STAND || stackedEntity.getStackAmount() == 1) {
                 dataHandler.CACHED_OBJECTS.remove(stackedEntity.getUniqueId());
             }else if(!stackedEntity.getLivingEntity().isValid()) {
-                Bukkit.getScheduler().runTask(instance, stackedEntity::remove);
+                Bukkit.getScheduler().runTask(plugin, stackedEntity::remove);
             }
         }
 
@@ -297,16 +297,11 @@ public final class SystemHandler implements SystemManager {
     }
 
     /*
-     * Loot table methods
+     * Loot loot methods
      */
 
     @Override
-    public void registerCustomLootTable(LootTable lootTable) {
-        xyz.wildseries.wildstacker.loot.LootTable.registerCustomLootTable(lootTable);
-    }
-
-    @Override
-    public LootTable getNaturalLootTable(LivingEntity livingEntity) {
-        return xyz.wildseries.wildstacker.loot.LootTable.forNaturalEntity(livingEntity);
+    public LootTable getLootTable(LivingEntity livingEntity) {
+        return plugin.getLootHandler().getLootTable(livingEntity);
     }
 }

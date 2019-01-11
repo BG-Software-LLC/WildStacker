@@ -30,9 +30,8 @@ import xyz.wildseries.wildstacker.listeners.SpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.ClearLaggListener;
 import xyz.wildseries.wildstacker.listeners.plugins.EpicSpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.SilkSpawnersListener;
-import xyz.wildseries.wildstacker.loot.LootTableMythicMobs;
+import xyz.wildseries.wildstacker.loot.LootHandler;
 import xyz.wildseries.wildstacker.nms.NMSAdapter;
-import xyz.wildseries.wildstacker.table.LootHandler;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
 
 import java.lang.reflect.Field;
@@ -106,9 +105,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //Set WildStacker as SpawnersProvider with ShopGUIPlus
         if(ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
             PluginHook_SpawnerProvider.register();
-        //Set MythicMobs as an additional loot table.
-        if(ReflectionUtil.isPluginEnabled("io.lumine.xikage.mythicmobs.MythicMobs"))
-            LootTableMythicMobs.register();
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();

@@ -119,23 +119,13 @@ public final class WildStackerAPI {
     }
 
     /**
-     * Register a loot table as a custom loot table.
-     * Custom loot tables overrides natural loot tables.
-     *
-     * @param lootTable The loot table to register
-     */
-    public static void registerCustomLootTable(LootTable lootTable){
-        instance.getSystemManager().registerCustomLootTable(lootTable);
-    }
-
-    /**
-     * Returns the loot table of an entity.
+     * Returns the loot loot of an entity.
      *
      * @param livingEntity An entity to check
-     * @return The loot table of the provided entity
+     * @return The loot loot of the provided entity
      */
-    public static LootTable getNaturalLootTable(LivingEntity livingEntity){
-        return instance.getSystemManager().getNaturalLootTable(livingEntity);
+    public static LootTable getLootTable(LivingEntity livingEntity){
+        return instance.getSystemManager().getLootTable(livingEntity);
     }
 
 }

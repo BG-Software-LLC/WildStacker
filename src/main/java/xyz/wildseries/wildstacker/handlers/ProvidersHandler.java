@@ -16,35 +16,40 @@ import xyz.wildseries.wildstacker.hooks.HologramsProvider_HolographicDisplays;
 import xyz.wildseries.wildstacker.hooks.SpawnersProvider;
 import xyz.wildseries.wildstacker.hooks.SpawnersProvider_Default;
 import xyz.wildseries.wildstacker.hooks.SpawnersProvider_SilkSpawners;
-import xyz.wildseries.wildstacker.loot.LootTableCustomDrops;
-import xyz.wildseries.wildstacker.loot.LootTableDropEdit;
-import xyz.wildseries.wildstacker.loot.LootTableEditDrops;
-import xyz.wildseries.wildstacker.loot.LootTableEpicSpawners;
-import xyz.wildseries.wildstacker.loot.LootTableStackSpawners;
 
 @SuppressWarnings("unused")
 public final class ProvidersHandler {
 
     private SpawnersProvider spawnersProvider;
     private HologramsProvider hologramsProvider;
+    private DropsProvider dropsProvider;
 
     public ProvidersHandler(WildStackerPlugin plugin){
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             WildStackerPlugin.log("Loading providers started...");
             long startTime = System.currentTimeMillis();
 
-            if(Bukkit.getPluginManager().isPluginEnabled("CustomDrops"))
-                LootTableCustomDrops.register();
-            else if(Bukkit.getPluginManager().isPluginEnabled("DropEdit"))
-                LootTableDropEdit.register();
-            else if(Bukkit.getPluginManager().isPluginEnabled("EditDrops"))
-                LootTableEditDrops.register();
-            else if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners"))
-                LootTableEpicSpawners.register();
-            else if(Bukkit.getPluginManager().isPluginEnabled("StackSpawners"))
-                LootTableStackSpawners.register();
-            else
+            if(Bukkit.getPluginManager().isPluginEnabled("CustomDrops")) {
+                WildStackerPlugin.log(" - Using CustomDrops as Custom LootTable.");
+                dropsProvider = DropsProvider.CUSTOM_DROPS;
+            }else if(Bukkit.getPluginManager().isPluginEnabled("DropEdit")) {
+                WildStackerPlugin.log(" - Using DropEdit as Custom LootTable.");
+                dropsProvider = DropsProvider.DROP_EDIT;
+            }else if(Bukkit.getPluginManager().isPluginEnabled("EditDrops")) {
+                WildStackerPlugin.log(" - Using EditDrops as Custom LootTable.");
+                dropsProvider = DropsProvider.EDIT_DROPS;
+            }else if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
+                WildStackerPlugin.log(" - Using EpicSpawners as Custom LootTable.");
+                dropsProvider = DropsProvider.EPIC_SPAWNERS;
+            }else if(Bukkit.getPluginManager().isPluginEnabled("StackSpawners")) {
+                WildStackerPlugin.log(" - Using StackSpawners as Custom LootTable.");
+                dropsProvider = DropsProvider.STACK_SPAWNERS;
+            }else{
                 WildStackerPlugin.log(" - Couldn't find any custom loot tables.");
+                dropsProvider = DropsProvider.DEFAULT;
+            }
+
+            plugin.getLootHandler().initLootTableCustom(plugin);
 
             if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners"))
                 spawnersProvider = new SpawnersProvider_SilkSpawners();
@@ -60,6 +65,14 @@ public final class ProvidersHandler {
 
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 1L);
+    }
+
+    /*
+     * Drops Provider
+     */
+
+    public DropsProvider getDropsProvider(){
+        return dropsProvider;
     }
 
     /*
@@ -116,6 +129,10 @@ public final class ProvidersHandler {
 
     public void clearHolograms(){
         hologramsProvider.clearHolograms();
+    }
+
+    public enum DropsProvider{
+        CUSTOM_DROPS, DROP_EDIT, EDIT_DROPS, EPIC_SPAWNERS, STACK_SPAWNERS, DEFAULT
     }
 
 }

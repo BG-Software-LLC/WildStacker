@@ -1,35 +1,52 @@
 package xyz.wildseries.wildstacker.loot;
 
-import org.bukkit.Material;
+import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
+import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LootTableSheep extends LootTable {
 
-    @Override
-    protected int getMaximumAmount() {
-        return 2;
+    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13");
+
+    private LootTableSheep(List<LootPair> lootPairs, int min, int max){
+        super(lootPairs, min, max);
     }
 
     @Override
-    protected int getMinimumAmount() {
-        return 1;
+    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel) {
+        List<ItemStack> drops = super.getDrops(stackedEntity, lootBonusLevel);
+
+        if(stackedEntity.getLivingEntity() instanceof Sheep) {
+            Sheep sheep = (Sheep) stackedEntity.getLivingEntity();
+            ItemStack wool = Materials.getWool(sheep.getColor());
+            for (ItemStack itemStack : drops) {
+                if (itemStack.getType().name().contains("WOOL")) {
+                    if (legacy) {
+                        itemStack.setData(wool.getData());
+                    } else {
+                        itemStack.setType(wool.getType());
+                    }
+                }
+            }
+        }
+
+        return drops;
     }
 
-    @Override
-    protected ItemStack getLoot() {
-        return isBurning() ? new ItemStack(Material.COOKED_MUTTON) : new ItemStack(Material.MUTTON);
+    public static LootTableSheep fromJson(JsonObject jsonObject){
+        int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
+        int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : -1;
+        List<LootPair> lootPairs = new ArrayList<>();
+        if(jsonObject.has("pairs")){
+            jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject())));
+        }
+        return new LootTableSheep(lootPairs, min, max);
     }
 
-    @Override
-    public List<ItemStack> getDeathLoot(int lootBonusLevel) {
-        List<ItemStack> deathLoot = super.getDeathLoot(lootBonusLevel);
-
-        deathLoot.add(Materials.getWool(((Sheep) livingEntity).getColor()));
-
-        return deathLoot;
-    }
 }

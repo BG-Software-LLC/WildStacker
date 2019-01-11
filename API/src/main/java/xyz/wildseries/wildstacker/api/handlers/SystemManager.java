@@ -48,8 +48,6 @@ public interface SystemManager {
 
     void performKillAll();
 
-    void registerCustomLootTable(LootTable lootTable);
-
-    LootTable getNaturalLootTable(LivingEntity livingEntity);
+    LootTable getLootTable(LivingEntity livingEntity);
 
 }
