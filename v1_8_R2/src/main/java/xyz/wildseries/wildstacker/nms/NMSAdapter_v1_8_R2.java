@@ -8,7 +8,8 @@ import org.bukkit.craftbukkit.v1_8_R2.entity.CraftLivingEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
 
-public class NMSAdapter_v1_8_R2 implements NMSAdapter {
+@SuppressWarnings("unused")
+public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
 
     @Override
     public Object getNBTTagCompound(LivingEntity livingEntity) {
@@ -30,6 +31,8 @@ public class NMSAdapter_v1_8_R2 implements NMSAdapter {
         nbtTagCompound.setFloat("Health", 20);
         nbtTagCompound.remove("SaddleItem");
         nbtTagCompound.remove("ArmorItem");
+        nbtTagCompound.remove("ArmorItems");
+        nbtTagCompound.remove("HandItems");
         if(livingEntity instanceof Zombie)
             ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
 
