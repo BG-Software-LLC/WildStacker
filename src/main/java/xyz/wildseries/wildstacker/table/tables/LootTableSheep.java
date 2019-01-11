@@ -1,10 +1,11 @@
-package xyz.wildseries.wildstacker.table;
+package xyz.wildseries.wildstacker.table.tables;
 
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
+import xyz.wildseries.wildstacker.table.LootPair;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
 import java.util.ArrayList;

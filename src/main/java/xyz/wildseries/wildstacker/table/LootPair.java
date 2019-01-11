@@ -3,6 +3,7 @@ package xyz.wildseries.wildstacker.table;
 import com.google.gson.JsonObject;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
+import xyz.wildseries.wildstacker.table.tables.LootTable;
 
 import java.util.ArrayList;
 import java.util.Collections;

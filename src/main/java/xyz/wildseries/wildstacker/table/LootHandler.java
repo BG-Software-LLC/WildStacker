@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
+import xyz.wildseries.wildstacker.table.tables.LootTable;
+import xyz.wildseries.wildstacker.table.tables.LootTableSheep;
 import xyz.wildseries.wildstacker.utils.legacy.EntityTypes;
 
 import java.io.File;

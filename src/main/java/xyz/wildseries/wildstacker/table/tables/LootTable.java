@@ -1,8 +1,9 @@
-package xyz.wildseries.wildstacker.table;
+package xyz.wildseries.wildstacker.table.tables;
 
 import com.google.gson.JsonObject;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
+import xyz.wildseries.wildstacker.table.LootPair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,7 @@ public class LootTable {
     private List<LootPair> lootPairs;
     private int min, max;
 
-    private LootTable(List<LootPair> lootPairs, int min, int max){
+    protected LootTable(List<LootPair> lootPairs, int min, int max){
         this.lootPairs = new ArrayList<>(lootPairs);
         this.min = min;
         this.max = max;
