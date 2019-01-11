@@ -1,6 +1,7 @@
 package xyz.wildseries.wildstacker.listeners;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -15,7 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class CustomEventsListener implements Listener {
+@SuppressWarnings("unused")
+public final class CustomEventsListener implements Listener {
 
     private WildStackerPlugin plugin;
 
@@ -27,7 +29,7 @@ public class CustomEventsListener implements Listener {
 
     @EventHandler
     public void onEntityFeedByPlayer(PlayerInteractAtEntityEvent e){
-        if(!(e.getRightClicked() instanceof LivingEntity))
+        if(!(e.getRightClicked() instanceof Animals))
             return;
 
         if(Bukkit.getBukkitVersion().contains("1.13"))
