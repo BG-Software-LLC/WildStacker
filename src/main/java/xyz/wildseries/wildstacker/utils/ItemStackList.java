@@ -19,7 +19,7 @@ public final class ItemStackList extends AbstractList<ItemStack> {
             itemStack = _itemStack.clone();
             amount = _itemStack.getAmount();
             itemStack.setAmount(1);
-            map.put(itemStack, amount);
+            map.put(itemStack, map.getOrDefault(itemStack, 0) + amount);
         }
     }
 
@@ -38,10 +38,7 @@ public final class ItemStackList extends AbstractList<ItemStack> {
         itemStack = itemStack.clone();
         int amount = itemStack.getAmount();
         itemStack.setAmount(1);
-        if(map.containsKey(itemStack))
-            amount += map.get(itemStack);
-
-        map.put(itemStack, amount);
+        map.put(itemStack, map.getOrDefault(itemStack, 0) + amount);
 
         return true;
     }
