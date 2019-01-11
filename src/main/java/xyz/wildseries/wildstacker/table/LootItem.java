@@ -54,7 +54,7 @@ public class LootItem {
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : 1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
-        boolean fortune = jsonObject.has("fortune") && jsonObject.get("fortune").getAsBoolean();
+        boolean looting = jsonObject.has("looting") && jsonObject.get("looting").getAsBoolean();
 
         if(jsonObject.has("burnable")){
             JsonObject burnable = jsonObject.get("burnable").getAsJsonObject();
@@ -62,7 +62,7 @@ public class LootItem {
             burnableData = burnable.has("data") ? burnable.get("data").getAsShort() : 0;
         }
 
-        return new LootItem(type, burnableType, data, burnableData, min, max, chance, fortune);
+        return new LootItem(type, burnableType, data, burnableData, min, max, chance, looting);
     }
 
 }
