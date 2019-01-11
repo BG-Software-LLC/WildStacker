@@ -2,6 +2,7 @@ package xyz.wildseries.wildstacker.loot;
 
 import com.google.gson.JsonObject;
 import org.bukkit.inventory.ItemStack;
+import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @SuppressWarnings("WeakerAccess")
 public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable {
 
+    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     static ThreadLocalRandom random = ThreadLocalRandom.current();
 
     private List<LootPair> lootPairs;
@@ -31,6 +33,8 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
 
             for(LootPair lootPair : lootPairs)
                 drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
+
+            drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
         }
 
         return drops;

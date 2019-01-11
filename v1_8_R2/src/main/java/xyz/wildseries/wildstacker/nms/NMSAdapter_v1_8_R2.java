@@ -1,15 +1,24 @@
 package xyz.wildseries.wildstacker.nms;
 
 import net.minecraft.server.v1_8_R2.EntityAnimal;
+import net.minecraft.server.v1_8_R2.EntityInsentient;
 import net.minecraft.server.v1_8_R2.EntityLiving;
+import net.minecraft.server.v1_8_R2.ItemStack;
 import net.minecraft.server.v1_8_R2.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
+
+    private ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Override
     public Object getNBTTagCompound(LivingEntity livingEntity) {
@@ -49,6 +58,39 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     public void setInLove(org.bukkit.entity.Entity entity, boolean inLove) {
         EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
         nmsEntity.cs();
+    }
+
+    @Override
+    public List<org.bukkit.inventory.ItemStack> getEquipment(LivingEntity livingEntity) {
+        List<org.bukkit.inventory.ItemStack> equipment = new ArrayList<>();
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+
+        for(int i = 0; i < entityLiving.getEquipment().length; i++){
+            ItemStack itemStack = entityLiving.getEquipment(i);
+            double dropChance = entityLiving.dropChances[i];
+
+            if(itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) && random.nextFloat() - (float)i * 0.01F < dropChance){
+                if(dropChance <= 1 && itemStack.e()) {
+                    int maxData = Math.max(itemStack.j() - 25, 1);
+                    int data = itemStack.j() - this.random.nextInt(this.random.nextInt(maxData) + 1);
+
+                    if (data > maxData) {
+                        data = maxData;
+                    }
+
+                    if (data < 1) {
+                        data = 1;
+                    }
+                    itemStack.setData(data);
+                }
+                equipment.add(CraftItemStack.asBukkitCopy(itemStack));
+            }
+
+            if(dropChance >= 1)
+                entityLiving.dropChances[i] = 0;
+        }
+
+        return equipment;
     }
 
 }

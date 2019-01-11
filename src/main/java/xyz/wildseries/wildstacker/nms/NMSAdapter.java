@@ -2,6 +2,9 @@ package xyz.wildseries.wildstacker.nms;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public interface NMSAdapter {
 
@@ -12,5 +15,7 @@ public interface NMSAdapter {
     boolean isInLove(Entity entity);
 
     void setInLove(Entity entity, boolean inLove);
+
+    List<ItemStack> getEquipment(LivingEntity livingEntity);
 
 }
