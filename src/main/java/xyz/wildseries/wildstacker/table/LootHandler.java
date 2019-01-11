@@ -29,7 +29,14 @@ public class LootHandler {
                 try {
                     JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
                     String key = file.getName().replace(".json", "").toUpperCase();
-                    lootTables.put(key, LootTable.fromJson(jsonObject));
+                    switch (key){
+                        case "SHEEP":
+                            lootTables.put(key, LootTableSheep.fromJson(jsonObject));
+                            break;
+                        default:
+                            lootTables.put(key, LootTable.fromJson(jsonObject));
+                            break;
+                    }
                 }catch(Exception ex){
                     ex.printStackTrace();
                 }
