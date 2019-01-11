@@ -12,9 +12,9 @@ public class LootItem {
     private short data, burnableData;
     private double chance;
     private int min, max;
-    private boolean fortune;
+    private boolean looting;
 
-    private LootItem(Material type, Material burnableType, short data, short burnableData, int min, int max, double chance, boolean fortune){
+    private LootItem(Material type, Material burnableType, short data, short burnableData, int min, int max, double chance, boolean looting){
         this.type = type;
         this.burnableType = burnableType;
         this.data = data;
@@ -22,11 +22,11 @@ public class LootItem {
         this.min = min;
         this.max = max;
         this.chance = chance;
-        this.fortune = fortune;
+        this.looting = looting;
     }
 
-    public double getChance() {
-        return chance;
+    public double getChance(int lootBonusLevel, double lootMultiplier) {
+        return chance + (lootBonusLevel * lootMultiplier);
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int lootBonusLevel){
@@ -34,21 +34,14 @@ public class LootItem {
         if(LootTable.isBurning(stackedEntity))
             itemStack = burnableData == 0 ? new ItemStack(burnableType) : new ItemStack(burnableType, 1, burnableData);
 
-        int itemAmount = 0;
-        int stackAmount = stackedEntity.getStackAmount();
+        int itemAmount = LootTable.random.nextInt(max - min + 1) + min;
 
-        for (int i = 0; i < stackAmount; i++) {
-            int lootAmount = LootTable.random.nextInt(max - min + 1) + min;
-
-            if (fortune && lootBonusLevel > 0) {
-                lootAmount += LootTable.random.nextInt(lootBonusLevel + 1);
-            }
-
-            if(lootAmount > 0)
-                itemAmount += lootAmount;
+        if (looting && lootBonusLevel > 0) {
+            itemAmount += LootTable.random.nextInt(lootBonusLevel + 1);
         }
 
-        itemStack.setAmount(itemAmount);
+        if(itemAmount > 0)
+            itemStack.setAmount(itemAmount);
 
         return itemStack;
     }

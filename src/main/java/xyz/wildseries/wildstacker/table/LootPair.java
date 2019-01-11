@@ -13,43 +13,38 @@ public class LootPair {
 
     private List<LootItem> lootItems = new ArrayList<>();
     private boolean killedByPlayer;
-    private int min, max;
-    private double chance;
+    private double chance, lootingChance;
 
-    private LootPair(List<LootItem> lootItems, boolean killedByPlayer, int min, int max, double chance){
+    private LootPair(List<LootItem> lootItems, boolean killedByPlayer, double chance, double lootingChance){
         this.lootItems.addAll(lootItems);
         this.killedByPlayer = killedByPlayer;
-        this.min = min;
-        this.max = max;
         this.chance = chance;
+        this.lootingChance = lootingChance;
     }
 
     public List<ItemStack> getItems(StackedEntity stackedEntity, int lootBonusLevel){
         List<ItemStack> items = new ArrayList<>();
-        int amountOfItems = LootTable.random.nextInt(max - min + 1) + min;
 
-        for(int i = 0; i < amountOfItems; i++){
-            LootItem lootItem = getLootItem();
+        LootItem lootItem = getLootItem(lootBonusLevel);
 
-            if(lootItem != null) {
-                items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel));
-            }
+        if(lootItem != null) {
+            items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel));
         }
 
         return items;
     }
 
-    private LootItem getLootItem(){
+    private LootItem getLootItem(int lootBonusLevel){
         double chance = LootTable.random.nextDouble(101);
         double baseChance = 0;
 
         Collections.shuffle(lootItems, LootTable.random);
 
         for(LootItem lootItem : lootItems){
-            if(chance < baseChance + lootItem.getChance()) {
+            if(chance < baseChance + lootItem.getChance(lootBonusLevel, lootingChance)) {
                 return lootItem;
             }else{
-                baseChance += lootItem.getChance();
+                baseChance += lootItem.getChance(lootBonusLevel, 0);
             }
         }
 
@@ -67,13 +62,12 @@ public class LootPair {
     public static LootPair fromJson(JsonObject jsonObject){
         boolean killedByPlayer = jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean();
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
-        int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : 1;
-        int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
+        double lootingChance = jsonObject.has("lootingChance") ? jsonObject.get("lootingChance").getAsDouble() : 0;
         List<LootItem> lootItems = new ArrayList<>();
         if(jsonObject.has("items")){
             jsonObject.get("items").getAsJsonArray().forEach(element -> lootItems.add(LootItem.fromJson(element.getAsJsonObject())));
         }
-        return new LootPair(lootItems, killedByPlayer, min, max, chance);
+        return new LootPair(lootItems, killedByPlayer, chance, lootingChance);
     }
 
 }

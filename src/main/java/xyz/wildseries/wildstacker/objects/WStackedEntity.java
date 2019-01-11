@@ -12,7 +12,6 @@ import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.api.objects.StackedObject;
 import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
 import xyz.wildseries.wildstacker.hooks.MythicMobsHook;
-import xyz.wildseries.wildstacker.loot.LootTable;
 import xyz.wildseries.wildstacker.utils.EntityData;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ItemStackList;
@@ -299,12 +298,7 @@ public final class WStackedEntity extends WStackedObject<LivingEntity> implement
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel) {
-        xyz.wildseries.wildstacker.table.LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-        if(lootTable != null){
-            return new ItemStackList(lootTable.getDrops(this, lootBonusLevel)).toList();
-        }else {
-            return new ItemStackList(LootTable.forEntity(object).getDeathLoot(lootBonusLevel)).toList();
-        }
+        return new ItemStackList(plugin.getLootHandler().getLootTable(object).getDrops(this, lootBonusLevel)).toList();
     }
 
     @Override
