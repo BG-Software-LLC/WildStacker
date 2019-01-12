@@ -1,71 +1,71 @@
 {
-  min: 1,
-  max: 1,
-  pairs:[
+  "min": 1,
+  "max": 1,
+  "pairs": [
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "PRISMARINE_SHARD",
-		  chance: 100,
-          min: 0,
-          max: 2,
-          looting: true
+          "type": "PRISMARINE_SHARD",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
         }
       ]
     },
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "RAW_FISH",
-		  chance: 50,
-          min: 1,
-          max: 1,
-		  looting: true,
-		  burnable:{
-		    type: "COOKED_FISH"
-		  }
+          "type": "RAW_FISH",
+          "chance": 50,
+          "min": 1,
+          "max": 1,
+          "looting": true,
+          "burnable": {
+            "type": "COOKED_FISH"
+          }
         },
-		{
-          type: "PRISMARINE_CRYSTALS",
-		  chance: 33,
-          min: 1,
-          max: 1,
-		  looting: true
-		}
+        {
+          "type": "PRISMARINE_CRYSTALS",
+          "chance": 33,
+          "min": 1,
+          "max": 1,
+          "looting": true
+        }
       ]
     },
     {
-      killedByPlayer: true,
-      chance: 2.5,
-      items:[
+      "killedByPlayer": true,
+      "chance": 2.5,
+      "items": [
         {
-          type: "RAW_FISH",
-          chance: 60,
-          min: 1,
-          max: 1
+          "type": "RAW_FISH",
+          "chance": 60,
+          "min": 1,
+          "max": 1
         },
         {
-          type: "RAW_FISH",
-          data: 1,
-          chance: 25,
-          min: 1,
-          max: 1
+          "type": "RAW_FISH",
+          "data": 1,
+          "chance": 25,
+          "min": 1,
+          "max": 1
         },
         {
-          type: "RAW_FISH",
-          data: 2,
-          chance: 13,
-          min: 1,
-          max: 1
+          "type": "RAW_FISH",
+          "data": 2,
+          "chance": 13,
+          "min": 1,
+          "max": 1
         },
         {
-          type: "RAW_FISH",
-          data: 3,
-          chance: 2,
-          min: 1,
-          max: 1
+          "type": "RAW_FISH",
+          "data": 3,
+          "chance": 2,
+          "min": 1,
+          "max": 1
         }
       ]
     }

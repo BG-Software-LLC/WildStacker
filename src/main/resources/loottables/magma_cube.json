@@ -1,14 +1,14 @@
 {
-  pairs:[
+  "pairs": [
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "MAGMA_CREAM",
-		  chance: 25,
-          min: 1,
-          max: 1,
-          looting: true
+          "type": "MAGMA_CREAM",
+          "chance": 25,
+          "min": 1,
+          "max": 1,
+          "looting": true
         }
       ]
     }

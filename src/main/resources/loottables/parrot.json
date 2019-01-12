@@ -1,14 +1,14 @@
 {
-  pairs:[
+  "pairs": [
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "FEATHER",
-		  chance: 100,
-          min: 1,
-          max: 2,
-          looting: true
+          "type": "FEATHER",
+          "chance": 100,
+          "min": 1,
+          "max": 2,
+          "looting": true
         }
       ]
     }

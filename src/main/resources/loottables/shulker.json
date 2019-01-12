@@ -1,14 +1,14 @@
 {
-  pairs:[
+  "pairs": [
     {
-      chance: 50,
-	  lootingChance: 6.25,
-      items:[
+      "chance": 50,
+      "lootingChance": 6.25,
+      "items": [
         {
-          type: "SHULKER_SHELL",
-		  chance: 100,
-          min: 1,
-          max: 1
+          "type": "SHULKER_SHELL",
+          "chance": 100,
+          "min": 1,
+          "max": 1
         }
       ]
     }

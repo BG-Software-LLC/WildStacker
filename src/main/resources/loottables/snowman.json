@@ -1,13 +1,13 @@
 {
-  pairs:[
+  "pairs": [
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "SNOW_BALL",
-		  chance: 100,
-          min: 0,
-          max: 15
+          "type": "SNOW_BALL",
+          "chance": 100,
+          "min": 0,
+          "max": 15
         }
       ]
     }

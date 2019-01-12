@@ -1,25 +1,25 @@
 {
-  pairs:[
+  "pairs": [
     {
-      chance: 100,
-      items:[
+      "chance": 100,
+      "items": [
         {
-          type: "TROPICAL_FISH",
-		  chance: 100,
-          min: 1,
-          max: 1
+          "type": "TROPICAL_FISH",
+          "chance": 100,
+          "min": 1,
+          "max": 1
         }
       ]
     },
     {
-      chance: 5,
-      items:[
+      "chance": 5,
+      "items": [
         {
-          type: "INK_SAC",
-		  data: 15,
-		  chance: 100,
-          min: 1,
-          max: 1
+          "type": "INK_SAC",
+          "data": 15,
+          "chance": 100,
+          "min": 1,
+          "max": 1
         }
       ]
     }
