@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import xyz.wildseries.wildstacker.config.CommentedConfiguration;
 import xyz.wildseries.wildstacker.config.LangComments;
+import xyz.wildseries.wildstacker.utils.FileUtil;
 
 import java.io.File;
 import java.util.HashMap;
@@ -88,7 +89,7 @@ public final class Locale {
         File file = new File(plugin.getDataFolder(), "lang.yml");
 
         if(!file.exists())
-            plugin.saveResource("lang.yml", false);
+            FileUtil.saveResource("lang.yml");
 
         CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class);
         cfg.load(file);

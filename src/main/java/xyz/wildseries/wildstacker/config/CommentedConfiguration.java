@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import xyz.wildseries.wildstacker.utils.FileUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,10 +35,9 @@ public class CommentedConfiguration extends YamlConfiguration{
         this.commentsClass = commentsClass;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void resetYamlFile(Plugin plugin, String resourceName, Class commentsClass){
         File configFile = new File(plugin.getDataFolder(), resourceName);
-        plugin.saveResource(resourceName, true);
+        FileUtil.saveResource(resourceName);
 
         CommentedConfiguration tempConfig = new CommentedConfiguration(commentsClass);
         tempConfig.load(configFile);
