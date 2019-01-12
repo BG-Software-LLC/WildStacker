@@ -30,8 +30,7 @@
 	  lootingChance: 1,
       items:[
         {
-          type: "SKULL_ITEM",
-          data: 1,
+          type: "WITHER_SKELETON_SKULL",
 		  chance: 100,
           min: 1,
           max: 1

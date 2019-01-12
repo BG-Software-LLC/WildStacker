@@ -4,11 +4,14 @@
       chance: 100,
       items:[
         {
-          type: "LEATHER",
+          type: "MUTTON",
 		  chance: 100,
-          min: 0,
+          min: 1,
           max: 2,
-          looting: true
+          looting: true,
+		  burnable:{
+		    type: "COOKED_MUTTON"
+		  }
         }
       ]
     },
@@ -16,14 +19,10 @@
       chance: 100,
       items:[
         {
-          type: "RAW_BEEF",
+          type: "WHITE_WOOL",
 		  chance: 100,
           min: 1,
-          max: 3,
-          looting: true,
-		  burnable:{
-		    type: "COOKED_BEEF"
-		  }
+          max: 1
         }
       ]
     }

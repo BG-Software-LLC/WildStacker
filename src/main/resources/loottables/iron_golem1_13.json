@@ -4,7 +4,7 @@
       chance: 100,
       items:[
         {
-          type: "LEATHER",
+          type: "POPPY",
 		  chance: 100,
           min: 0,
           max: 2,
@@ -16,14 +16,10 @@
       chance: 100,
       items:[
         {
-          type: "RAW_BEEF",
+          type: "IRON_INGOT",
 		  chance: 100,
-          min: 1,
-          max: 3,
-          looting: true,
-		  burnable:{
-		    type: "COOKED_BEEF"
-		  }
+          min: 3,
+          max: 5
         }
       ]
     }

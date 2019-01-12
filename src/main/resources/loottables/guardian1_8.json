@@ -4,7 +4,7 @@
       chance: 100,
       items:[
         {
-          type: "LEATHER",
+          type: "PRISMARINE_SHARD",
 		  chance: 100,
           min: 0,
           max: 2,
@@ -16,15 +16,17 @@
       chance: 100,
       items:[
         {
-          type: "RAW_BEEF",
-		  chance: 100,
+          type: "RAW_FISH",
+		  chance: 33,
           min: 1,
-          max: 3,
-          looting: true,
-		  burnable:{
-		    type: "COOKED_BEEF"
-		  }
-        }
+          max: 1
+        },
+		{
+          type: "PRISMARINE_CRYSTALS",
+		  chance: 33,
+          min: 1,
+          max: 1
+		}
       ]
     }
   ]

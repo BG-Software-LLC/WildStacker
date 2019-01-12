@@ -16,7 +16,7 @@
       chance: 100,
       items:[
         {
-          type: "CHICKEN",
+          type: "RAW_CHICKEN",
 		  chance: 100,
           min: 1,
           max: 1,

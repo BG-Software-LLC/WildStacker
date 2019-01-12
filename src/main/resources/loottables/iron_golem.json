@@ -4,7 +4,7 @@
       chance: 100,
       items:[
         {
-          type: "POPPY",
+          type: "RED_ROSE",
 		  chance: 100,
           min: 0,
           max: 2,

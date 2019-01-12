@@ -1,6 +1,4 @@
 {
-  min: 1,
-  max: 1,
   pairs:[
     {
       chance: 100,
@@ -18,18 +16,18 @@
       chance: 100,
       items:[
         {
-          type: "COD",
-		  chance: 40,
+          type: "RAW_FISH",
+		  chance: 50,
           min: 1,
           max: 1,
 		  looting: true,
 		  burnable:{
-		    type: "COOKED_COD"
+		    type: "COOKED_FISH"
 		  }
         },
 		{
           type: "PRISMARINE_CRYSTALS",
-		  chance: 40,
+		  chance: 33,
           min: 1,
           max: 1,
 		  looting: true
@@ -37,30 +35,47 @@
       ]
     },
     {
-	  killedByPlayer: true,
+      killedByPlayer: true,
+      chance: 100,
+      min: 1,
+      max: 1,
+      items:[
+        {
+          type: "WET_SPONGE",
+		  chance: 100,
+          min: 1,
+          max: 1
+        }
+      ]
+    },
+    {
+      killedByPlayer: true,
       chance: 2.5,
       items:[
         {
-          type: "COD",
-		  chance: 60,
+          type: "RAW_FISH",
+          chance: 60,
           min: 1,
           max: 1
         },
         {
-          type: "SALMON",
-		  chance: 25,
+          type: "RAW_FISH",
+          data: 1,
+          chance: 25,
           min: 1,
           max: 1
         },
         {
-          type: "PUFFERFISH",
-		  chance: 13,
+          type: "RAW_FISH",
+          data: 2,
+          chance: 13,
           min: 1,
           max: 1
         },
         {
-          type: "TROPICAL_FISH",
-		  chance: 2,
+          type: "RAW_FISH",
+          data: 3,
+          chance: 2,
           min: 1,
           max: 1
         }

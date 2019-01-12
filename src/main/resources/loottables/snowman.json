@@ -4,7 +4,7 @@
       chance: 100,
       items:[
         {
-          type: "SNOWBALL",
+          type: "SNOW_BALL",
 		  chance: 100,
           min: 0,
           max: 15
