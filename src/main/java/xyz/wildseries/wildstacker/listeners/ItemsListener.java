@@ -1,5 +1,6 @@
 package xyz.wildseries.wildstacker.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
@@ -61,9 +62,12 @@ public final class ItemsListener implements Listener {
         //We are overriding the merge system
         e.setCancelled(true);
 
-        StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
-
-        AsyncUtil.tryStackInto(stackedItem, targetItem);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if(e.getEntity().isValid() && e.getTarget().isValid()){
+                StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
+                AsyncUtil.tryStackInto(stackedItem, targetItem);
+            }
+        }, 5L);
     }
 
     //This method will be fired even if stacking-drops is disabled.
