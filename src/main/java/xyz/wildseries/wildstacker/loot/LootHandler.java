@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
+import xyz.wildseries.wildstacker.handlers.ProvidersHandler;
 import xyz.wildseries.wildstacker.loot.custom.LootTableCustom;
 import xyz.wildseries.wildstacker.loot.custom.LootTableCustomDrops;
 import xyz.wildseries.wildstacker.loot.custom.LootTableDropEdit;
@@ -103,8 +104,8 @@ public class LootHandler {
         plugin.saveResource("loottables/zombie_villager.json", true);
     }
 
-    public void initLootTableCustom(WildStackerPlugin plugin){
-        switch (plugin.getProviders().getDropsProvider()){
+    public void initLootTableCustom(ProvidersHandler.DropsProvider dropsProvider){
+        switch (dropsProvider){
             case CUSTOM_DROPS:
                 lootTableCustom = new LootTableCustomDrops();
                 break;

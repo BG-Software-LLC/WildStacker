@@ -61,7 +61,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         settingsHandler = new SettingsHandler(this);
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);
-        providersHandler = new ProvidersHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
 
@@ -110,6 +109,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             EconomyHook.register();
 
         runOnFirstTick(() -> {
+            providersHandler = new ProvidersHandler(this);
+
             //Set all holograms of spawners
             for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
                 stackedSpawner.updateName();
