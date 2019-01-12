@@ -40,11 +40,11 @@ public final class ItemsListener implements Listener {
         AsyncUtil.tryStack(item, new AsyncCallback<Item>() {
             @Override
             public void run(Item returnValue) {
-                if(returnValue != null) {
+                if(returnValue == null) {
                     //Set the amount of item-stack to 1
-                    ItemStack is = returnValue.getItemStack();
+                    ItemStack is = item.getItemStack();
                     is.setAmount(1);
-                    returnValue.setItemStack(is);
+                    item.setItemStack(is);
                 }
             }
         });
