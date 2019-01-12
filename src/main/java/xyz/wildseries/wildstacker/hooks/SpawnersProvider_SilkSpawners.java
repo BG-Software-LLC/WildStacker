@@ -94,10 +94,8 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
             if (randomNumber < dropChance) {
                 if (ss.config.getBoolean("dropSpawnerToInventory", false)) {
-                    Bukkit.broadcastMessage("1");
                     ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
                 } else {
-                    Bukkit.broadcastMessage("2");
                     spawner.getWorld().dropItemNaturally(spawner.getLocation(), spawnerItem);
                 }
             }
