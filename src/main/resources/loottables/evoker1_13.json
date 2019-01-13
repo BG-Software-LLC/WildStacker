@@ -4,7 +4,7 @@
       "chance": 100,
       "items": [
         {
-          "type": "TOTEM",
+          "type": "TOTEM_OF_UNDYING",
           "chance": 100,
           "min": 1,
           "max": 1
