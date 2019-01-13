@@ -69,23 +69,25 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         EnumItemSlot[] enumItemSlots = EnumItemSlot.values();
 
         for(int i = 0; i < enumItemSlots.length; i++){
-            EnumItemSlot slot = enumItemSlots[i];
-            ItemStack itemStack = entityLiving.getEquipment(slot);
-            float dropChance = slot.a().ordinal() == 1 ? entityLiving.dropChanceHand[slot.b()] : slot.a().ordinal() == 2 ? entityLiving.dropChanceArmor[slot.b()] : 0;
+            try {
+                EnumItemSlot slot = enumItemSlots[i];
+                ItemStack itemStack = entityLiving.getEquipment(slot);
+                float dropChance = slot.a().ordinal() == 1 ? entityLiving.dropChanceHand[slot.b()] : slot.a().ordinal() == 2 ? entityLiving.dropChanceArmor[slot.b()] : 0;
 
-            if(!itemStack.isEmpty() && !EnchantmentManager.shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
-                    random.nextFloat() - (float)i * 0.01F < dropChance){
-                if(dropChance <= 1 && itemStack.f())
-                    itemStack.setData(itemStack.k() - random.nextInt(1 + random.nextInt(Math.max(itemStack.k() - 3, 1))));
-                equipment.add(CraftItemStack.asBukkitCopy(itemStack));
-            }
+                if (!itemStack.isEmpty() && !EnchantmentManager.shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
+                        random.nextFloat() - (float) i * 0.01F < dropChance) {
+                    if (dropChance <= 1 && itemStack.f())
+                        itemStack.setData(itemStack.k() - random.nextInt(1 + random.nextInt(Math.max(itemStack.k() - 3, 1))));
+                    equipment.add(CraftItemStack.asBukkitCopy(itemStack));
+                }
 
-            if(dropChance >= 1) {
-                if(slot.a() == EnumItemSlot.Function.HAND)
-                    entityLiving.dropChanceHand[slot.b()] = 0;
-                else if(slot.a() == EnumItemSlot.Function.ARMOR)
-                    entityLiving.dropChanceArmor[slot.b()] = 0;
-            }
+                if (dropChance >= 1) {
+                    if (slot.a() == EnumItemSlot.Function.HAND)
+                        entityLiving.dropChanceHand[slot.b()] = 0;
+                    else if (slot.a() == EnumItemSlot.Function.ARMOR)
+                        entityLiving.dropChanceArmor[slot.b()] = 0;
+                }
+            }catch(Exception ignored){}
         }
 
         return equipment;

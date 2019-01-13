@@ -66,28 +66,30 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
 
         for(int i = 0; i < entityLiving.getEquipment().length; i++){
-            ItemStack itemStack = entityLiving.getEquipment(i);
-            double dropChance = entityLiving.dropChances[i];
+            try {
+                ItemStack itemStack = entityLiving.getEquipment(i);
+                double dropChance = entityLiving.dropChances[i];
 
-            if(itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) && random.nextFloat() - (float)i * 0.01F < dropChance){
-                if(dropChance <= 1 && itemStack.e()) {
-                    int maxData = Math.max(itemStack.j() - 25, 1);
-                    int data = itemStack.j() - this.random.nextInt(this.random.nextInt(maxData) + 1);
+                if (itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) && random.nextFloat() - (float) i * 0.01F < dropChance) {
+                    if (dropChance <= 1 && itemStack.e()) {
+                        int maxData = Math.max(itemStack.j() - 25, 1);
+                        int data = itemStack.j() - this.random.nextInt(this.random.nextInt(maxData) + 1);
 
-                    if (data > maxData) {
-                        data = maxData;
+                        if (data > maxData) {
+                            data = maxData;
+                        }
+
+                        if (data < 1) {
+                            data = 1;
+                        }
+                        itemStack.setData(data);
                     }
-
-                    if (data < 1) {
-                        data = 1;
-                    }
-                    itemStack.setData(data);
+                    equipment.add(CraftItemStack.asBukkitCopy(itemStack));
                 }
-                equipment.add(CraftItemStack.asBukkitCopy(itemStack));
-            }
 
-            if(dropChance >= 1)
-                entityLiving.dropChances[i] = 0;
+                if (dropChance >= 1)
+                    entityLiving.dropChances[i] = 0;
+            }catch(Exception ignored){}
         }
 
         return equipment;
