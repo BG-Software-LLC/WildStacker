@@ -142,9 +142,13 @@ public final class EntityData {
         return super.equals(obj);
     }
 
+    private static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+    private static boolean asIntField = version.equals("v1_13_R2");
+    private static boolean dField = version.contains("v1_9") || version.contains("v1_8");
+
     private int getInteger(Object object){
         try{
-            String fieldName = Bukkit.getBukkitVersion().contains("1.13") ? "asInt" : "d";
+            String fieldName = asIntField ? "asInt" : dField ? "d" : "e";
             return (int) object.getClass().getMethod(fieldName).invoke(object);
         }catch(Exception ex){
             ex.printStackTrace();
