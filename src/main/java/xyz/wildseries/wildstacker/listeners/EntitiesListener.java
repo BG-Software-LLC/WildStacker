@@ -37,6 +37,7 @@ import xyz.wildseries.wildstacker.listeners.events.EntityBreedEvent;
 import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
+import xyz.wildseries.wildstacker.utils.async.AsyncCallback;
 import xyz.wildseries.wildstacker.utils.async.AsyncUtil;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
@@ -314,8 +315,23 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler
     public void onEntityBreed(EntityBreedEvent e){
-        if(plugin.getSettings().stackAfterBreed)
-            AsyncUtil.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()));
+        if(plugin.getSettings().stackAfterBreed) {
+            AsyncUtil.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()), new AsyncCallback<Boolean>() {
+                @Override
+                public void run(Boolean returnValue) {
+                    if(returnValue)
+                        WStackedEntity.of(e.getMother()).tryStack();
+                }
+            });
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onCreatureSpawn(CreatureSpawnEvent e){
+        if(e.getEntity() instanceof Animals)
+            try{
+                plugin.getNMSAdapter().addCustomPathfinderGoalBreed(e.getEntity());
+            }catch(UnsupportedOperationException ignored){}
     }
 
     @EventHandler
