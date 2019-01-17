@@ -25,10 +25,11 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
         this.max = max;
     }
 
-    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel){
+
+    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount){
         List<ItemStack> drops = new ArrayList<>();
 
-        for(int i = 0; i < stackedEntity.getStackAmount(); i++) {
+        for(int i = 0; i < stackAmount; i++) {
             List<LootPair> lootPairs = getLootPairs(stackedEntity);
 
             for(LootPair lootPair : lootPairs)

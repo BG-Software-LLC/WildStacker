@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 public class LootTableCustomDrops extends LootTableCustom {
 
     @Override
-    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel) {
+    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new ArrayList<>();
 
         if (CustomDropsAPI.getNaturalDrops(stackedEntity.getType()))
-            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel));
+            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount));
 
-        for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
+        for(int i = 0; i < stackAmount - 1; i++) {
             drops.addAll(CustomDropsAPI.getCustomDrops(stackedEntity.getType()).stream()
                     .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
                     .collect(Collectors.toList()));

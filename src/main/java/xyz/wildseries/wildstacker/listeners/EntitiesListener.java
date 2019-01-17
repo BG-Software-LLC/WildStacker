@@ -41,6 +41,7 @@ import xyz.wildseries.wildstacker.utils.ItemUtil;
 import xyz.wildseries.wildstacker.utils.async.AsyncUtil;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,23 +85,23 @@ public final class EntitiesListener implements Listener {
 
         int amount = stackedEntity.getStackAmount();
 
+        int lootBonusLevel = 0;
+
+        if(lastDamageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK && e.getEntity().getKiller() != null &&
+                e.getEntity().getKiller().getItemInHand() != null){
+            lootBonusLevel = e.getEntity().getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+        }
+
+        List<ItemStack> drops = new ArrayList<>();
+
         if(!plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name())){
             Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
+            drops.addAll(stackedEntity.getDrops(lootBonusLevel, 1));
         }
 
         //Instant-kill drops should only work when entities-stacking is enabled
-        else if(plugin.getSettings().entitiesStackingEnabled){
-            int lootBonusLevel = 0;
-
-            if(lastDamageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK && e.getEntity().getKiller() != null &&
-                    e.getEntity().getKiller().getItemInHand() != null){
-                lootBonusLevel = e.getEntity().getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-            }
-
-            List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel);
-            e.getDrops().clear();
-
-            drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation()));
+        else{
+            drops.addAll(stackedEntity.getDrops(lootBonusLevel));
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
@@ -113,6 +114,9 @@ public final class EntitiesListener implements Listener {
                 }catch(IllegalArgumentException ignored){}
             }
         }
+
+        e.getDrops().clear();
+        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation()));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

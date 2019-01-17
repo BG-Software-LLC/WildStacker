@@ -19,8 +19,8 @@ public class LootTableSheep extends LootTable {
     }
 
     @Override
-    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel) {
-        List<ItemStack> drops = super.getDrops(stackedEntity, lootBonusLevel);
+    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
+        List<ItemStack> drops = super.getDrops(stackedEntity, lootBonusLevel, stackAmount);
 
         if(stackedEntity.getLivingEntity() instanceof Sheep) {
             Sheep sheep = (Sheep) stackedEntity.getLivingEntity();

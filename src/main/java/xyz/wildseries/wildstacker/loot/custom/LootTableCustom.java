@@ -8,6 +8,6 @@ import java.util.List;
 
 public abstract class LootTableCustom {
 
-    public abstract List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel);
+    public abstract List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel, int stackAmount);
 
 }

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class LootTableDropEdit extends LootTableCustom {
 
     @Override
-    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel) {
+    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         List<ItemStack> deathLoot = JavaPlugin.getPlugin(Main.class).getDrops(stackedEntity.getType());
 
         if(deathLoot == null)
@@ -24,7 +24,7 @@ public class LootTableDropEdit extends LootTableCustom {
                 .collect(Collectors.toList());
 
         for(ItemStack itemStack : deathLoot)
-            itemStack.setAmount(itemStack.getAmount() * stackedEntity.getStackAmount());
+            itemStack.setAmount(itemStack.getAmount() * stackAmount);
 
         return deathLoot;
     }

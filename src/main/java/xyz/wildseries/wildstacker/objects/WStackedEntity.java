@@ -300,10 +300,15 @@ public final class WStackedEntity extends WStackedObject<LivingEntity> implement
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel) {
+        return getDrops(lootBonusLevel, stackAmount);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         LootTable lootTable = plugin.getLootHandler().getLootTable(object);
         LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
-        return new ItemStackList(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel) :
-                lootTableCustom.getDrops(lootTable, this, lootBonusLevel)).toList();
+        return new ItemStackList(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
+                lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount)).toList();
     }
 
     @Override

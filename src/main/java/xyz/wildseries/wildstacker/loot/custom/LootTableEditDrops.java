@@ -19,7 +19,7 @@ public class LootTableEditDrops extends LootTableCustom {
     private ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Override
-    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel) {
+    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new ArrayList<>();
 
         Inventory mobInventory = getInventory(stackedEntity.getType());
@@ -32,12 +32,12 @@ public class LootTableEditDrops extends LootTableCustom {
         int rdm = random.nextInt(52);
 
         if (mobInventory.getItem(52).equals(Allitems.naturalTrue.getItemStack())){
-            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel));
+            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount));
         }
 
         if(mobInventory.getItem(rdm) != null) {
             ItemStack itemStack = mobInventory.getItem(rdm).clone();
-            itemStack.setAmount(itemStack.getAmount() * stackedEntity.getStackAmount());
+            itemStack.setAmount(itemStack.getAmount() * stackAmount);
             drops.add(itemStack);
         }
 

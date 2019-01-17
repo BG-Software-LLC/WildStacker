@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface LootTable {
 
-    List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel);
+    List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount);
 
 }

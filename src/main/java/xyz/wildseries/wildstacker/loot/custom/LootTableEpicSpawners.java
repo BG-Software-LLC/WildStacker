@@ -13,7 +13,7 @@ import java.util.List;
 public class LootTableEpicSpawners extends LootTableCustom {
 
     @Override
-    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel) {
+    public List<ItemStack> getDrops(LootTable lootTable, StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new ArrayList<>();
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
@@ -24,13 +24,13 @@ public class LootTableEpicSpawners extends LootTableCustom {
                 drops.addAll(spawnerData.getEntityDroppedItems());
 
                 for(ItemStack itemStack : drops){
-                    itemStack.setAmount(itemStack.getAmount() * stackedEntity.getStackAmount());
+                    itemStack.setAmount(itemStack.getAmount() * stackAmount);
                 }
             }
         }
 
         if(drops.isEmpty())
-            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel));
+            drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount));
 
         return drops;
     }
