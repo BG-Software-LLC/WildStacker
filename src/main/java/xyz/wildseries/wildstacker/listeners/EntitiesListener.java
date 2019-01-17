@@ -1,7 +1,6 @@
 package xyz.wildseries.wildstacker.listeners;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
@@ -158,24 +157,38 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") || !Materials.isValidAndSpawnEgg(e.getItem()))
             return;
 
-        e.setCancelled(true);
+        int eggAmount = ItemUtil.getSpawnerItemAmount(e.getItem());
 
-        EntityType entityType = ItemUtil.getEntityType(e.getItem());
+        if(eggAmount > 1){
+            EntityType entityType = ItemUtil.getEntityType(e.getItem());
 
-        Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
+            Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
 
-        StackedEntity stackedEntity = WStackedEntity.of(
-                plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass()));
+            StackedEntity stackedEntity = WStackedEntity.of(
+                    plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass()));
 
-        stackedEntity.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItem()), true);
+            stackedEntity.setStackAmount(--eggAmount, true);
 
-        AsyncUtil.tryStack(stackedEntity);
-
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack is = e.getItem().clone();
-            is.setAmount(1);
-            ItemUtil.removeItem(is, e);
+            AsyncUtil.tryStack(stackedEntity);
         }
+//        e.setCancelled(true);
+//
+//        EntityType entityType = ItemUtil.getEntityType(e.getItem());
+//
+//        Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
+//
+//        StackedEntity stackedEntity = WStackedEntity.of(
+//                plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass()));
+//
+//        stackedEntity.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItem()), true);
+//
+//        AsyncUtil.tryStack(stackedEntity);
+//
+//        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+//            ItemStack is = e.getItem().clone();
+//            is.setAmount(1);
+//            ItemUtil.removeItem(is, e);
+//        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
