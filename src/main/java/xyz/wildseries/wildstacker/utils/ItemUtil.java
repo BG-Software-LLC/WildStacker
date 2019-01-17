@@ -196,9 +196,10 @@ public final class ItemUtil {
     public static Object getBlockData(Material type, byte data){
         try{
             Class craftBlockDataClass = ReflectionUtil.getBukkitClass("block.data.CraftBlockData");
+            Class blockDataClass = ReflectionUtil.getNMSClass("IBlockData");
             int combined = type.getId() + (data << 12);
             Object iBlockData = getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
-            return craftBlockDataClass.getMethod("fromData", iBlockData.getClass()).invoke(null, iBlockData);
+            return craftBlockDataClass.getMethod("fromData", blockDataClass).invoke(null, iBlockData);
         }catch(Exception ex){
             ex.printStackTrace();
             return null;
