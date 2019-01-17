@@ -77,13 +77,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         if(getServer().getBukkitVersion().contains("1.13"))
             getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), this);
 
-        if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
-            getServer().getPluginManager().registerEvents(new ClearLaggListener(this), this);
-        if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
-            getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
-        if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
-            getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
-
         CommandsHandler commandsHandler = new CommandsHandler(this);
         getCommand("stacker").setExecutor(commandsHandler);
         getCommand("stacker").setTabCompleter(commandsHandler);
@@ -108,6 +101,13 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         runOnFirstTick(() -> {
             providersHandler = new ProvidersHandler(this);
+
+            if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
+                getServer().getPluginManager().registerEvents(new ClearLaggListener(this), this);
+            if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
+                getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
+            if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
+                getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
 
             //Set all holograms of spawners
             for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())

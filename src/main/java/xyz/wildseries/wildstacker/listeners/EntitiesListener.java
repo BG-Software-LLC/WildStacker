@@ -140,7 +140,8 @@ public final class EntitiesListener implements Listener {
         }
 
         //EpicSpawners has it's own event
-        if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners"))
+        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER &&
+                Bukkit.getPluginManager().isPluginEnabled("EpicSpawners"))
             return;
 
         if (!Bukkit.getPluginManager().isPluginEnabled("MergedSpawner") &&
