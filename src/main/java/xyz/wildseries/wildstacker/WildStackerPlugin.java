@@ -20,7 +20,6 @@ import xyz.wildseries.wildstacker.hooks.PluginHook_Novucs;
 import xyz.wildseries.wildstacker.hooks.PluginHook_SpawnerProvider;
 import xyz.wildseries.wildstacker.listeners.BarrelsListener;
 import xyz.wildseries.wildstacker.listeners.BucketsListener;
-import xyz.wildseries.wildstacker.listeners.CustomEventsListener;
 import xyz.wildseries.wildstacker.listeners.EditorListener;
 import xyz.wildseries.wildstacker.listeners.EntitiesListener;
 import xyz.wildseries.wildstacker.listeners.EntitiesListener1_13;
@@ -75,9 +74,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
         getServer().getPluginManager().registerEvents(new EditorListener(this), this);
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
-        getServer().getPluginManager().registerEvents(new CustomEventsListener(this), this);
         if(getServer().getBukkitVersion().contains("1.13"))
-            getServer().getPluginManager().registerEvents(new EntitiesListener1_13(this), this);
+            getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), this);
 
         if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
             getServer().getPluginManager().registerEvents(new ClearLaggListener(this), this);

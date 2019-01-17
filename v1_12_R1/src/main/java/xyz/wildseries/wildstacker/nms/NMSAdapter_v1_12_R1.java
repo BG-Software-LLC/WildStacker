@@ -7,12 +7,18 @@ import net.minecraft.server.v1_12_R1.EntityLiving;
 import net.minecraft.server.v1_12_R1.EnumItemSlot;
 import net.minecraft.server.v1_12_R1.ItemStack;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.PathfinderGoalBreed;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import xyz.wildseries.wildstacker.listeners.events.EntityBreedEvent;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -93,5 +99,47 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         return equipment;
     }
 
+    @Override
+    public void addCustomPathfinderGoalBreed(LivingEntity livingEntity) {
+        if(livingEntity instanceof Animals) {
+            EntityAnimal entityLiving = ((CraftAnimals) livingEntity).getHandle();
+            entityLiving.goalSelector.a(2, new EventablePathfinderGoalBreed(entityLiving, 1.0D));
+        }
+    }
+
+    private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
+
+        private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {
+            super(entityanimal, d0);
+        }
+
+        @Override
+        public void e() {
+            super.e();
+            try {
+                Field bField = PathfinderGoalBreed.class.getDeclaredField("b");
+                bField.setAccessible(true);
+                int b = (int) bField.get(this);
+                bField.setAccessible(false);
+
+                Field animalField = PathfinderGoalBreed.class.getDeclaredField("animal");
+                animalField.setAccessible(true);
+                EntityAnimal animal = (EntityAnimal) animalField.get(this);
+                animalField.setAccessible(false);
+
+                Field partnerField = PathfinderGoalBreed.class.getDeclaredField("partner");
+                partnerField.setAccessible(true);
+                EntityAnimal partner = (EntityAnimal) partnerField.get(this);
+                partnerField.setAccessible(false);
+
+                if (b >= 60 && animal.h(partner) < 9.0D){
+                    EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
+                    Bukkit.getPluginManager().callEvent(event);
+                }
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+    }
 
 }

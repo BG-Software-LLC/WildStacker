@@ -18,4 +18,6 @@ public interface NMSAdapter {
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
+    void addCustomPathfinderGoalBreed(LivingEntity livingEntity);
+
 }

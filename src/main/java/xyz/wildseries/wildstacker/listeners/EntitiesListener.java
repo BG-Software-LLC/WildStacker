@@ -314,19 +314,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler
     public void onEntityBreed(EntityBreedEvent e){
-        if(!plugin.getSettings().stackAfterBreed)
-            return;
-
-        long startTime = System.currentTimeMillis();
-
-        new Thread(() -> {
-            while(plugin.getNMSAdapter().isInLove(e.getMother())){
-                if(System.currentTimeMillis() - startTime > 1000 * 60)
-                    return;
-            }
-
+        if(plugin.getSettings().stackAfterBreed)
             AsyncUtil.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()));
-        }).start();
     }
 
     @EventHandler

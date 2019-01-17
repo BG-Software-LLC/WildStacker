@@ -7,11 +7,16 @@ import net.minecraft.server.v1_13_R2.EntityLiving;
 import net.minecraft.server.v1_13_R2.EnumItemSlot;
 import net.minecraft.server.v1_13_R2.ItemStack;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
+import net.minecraft.server.v1_13_R2.PathfinderGoalBreed;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import xyz.wildseries.wildstacker.listeners.events.EntityBreedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,5 +97,27 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         }
 
         return equipment;
+    }
+
+    @Override
+    public void addCustomPathfinderGoalBreed(LivingEntity livingEntity) {
+        if(livingEntity instanceof Animals) {
+            EntityAnimal entityLiving = ((CraftAnimals) livingEntity).getHandle();
+            entityLiving.goalSelector.a(2, new EventablePathfinderGoalBreed(entityLiving, 1.0D));
+        }
+    }
+
+    private class EventablePathfinderGoalBreed extends PathfinderGoalBreed {
+
+        private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {
+            super(entityanimal, d0);
+        }
+
+        @Override
+        protected void g() {
+            super.g();
+            EntityBreedEvent entityBreedEvent = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
+            Bukkit.getPluginManager().callEvent(entityBreedEvent);
+        }
     }
 }
