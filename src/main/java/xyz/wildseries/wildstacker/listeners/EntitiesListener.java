@@ -320,8 +320,11 @@ public final class EntitiesListener implements Listener {
             AsyncUtil.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()), new AsyncCallback<Boolean>() {
                 @Override
                 public void run(Boolean returnValue) {
-                    if(returnValue)
-                        WStackedEntity.of(e.getMother()).tryStack();
+                    if(returnValue) {
+                        LivingEntity livingEntity = WStackedEntity.of(e.getMother()).tryStack();
+                        if(livingEntity != null)
+                            ((Animals) livingEntity).setBreed(false);
+                    }
                 }
             });
         }
