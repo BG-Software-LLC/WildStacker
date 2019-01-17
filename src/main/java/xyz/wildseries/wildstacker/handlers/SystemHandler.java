@@ -230,8 +230,6 @@ public final class SystemHandler implements SystemManager {
         }
 
         for(StackedBarrel stackedBarrel : getStackedBarrels()) {
-            if(stackedBarrel.getStackAmount() == 1)
-                dataHandler.CACHED_OBJECTS.remove(stackedBarrel.getLocation());
             if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
                 stackedBarrel.remove();
             }
