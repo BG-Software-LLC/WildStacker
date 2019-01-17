@@ -115,7 +115,7 @@ public final class BarrelsListener implements Listener {
         ItemStack dropStack = stackedBarrel.getBarrelItem(stackSize);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
-            e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), dropStack);
+            ItemUtil.dropItem(dropStack, e.getBlock().getLocation());
 
         e.setCancelled(true);
 
@@ -154,7 +154,7 @@ public final class BarrelsListener implements Listener {
             if (Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
-                e.getClickedBlock().getWorld().dropItemNaturally(e.getClickedBlock().getLocation(), stackedBarrel.getBarrelItem(1));
+                ItemUtil.dropItem(stackedBarrel.getBarrelItem(1), e.getClickedBlock().getLocation());
             if (stackedBarrel.getStackAmount() <= 0)
                 e.getClickedBlock().setType(Material.AIR);
         }
@@ -215,7 +215,7 @@ public final class BarrelsListener implements Listener {
 
             int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
 
-            block.getWorld().dropItemNaturally(block.getLocation(), stackedBarrel.getBarrelItem(amount));
+            ItemUtil.dropItem(stackedBarrel.getBarrelItem(amount), block.getLocation());
             stackedBarrel.tryUnstack(amount);
         }
     }

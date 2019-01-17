@@ -99,7 +99,8 @@ public final class EntitiesListener implements Listener {
 
             List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel);
             e.getDrops().clear();
-            e.getDrops().addAll(drops);
+
+            drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation()));
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 

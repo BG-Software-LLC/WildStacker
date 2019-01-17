@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.loot.LootTable;
+import xyz.wildseries.wildstacker.utils.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class LootTableCustomDrops extends LootTableCustom {
 
         //CustomDrops doesn't take items from the event, we need to drop the items.
         Location entityLocation = stackedEntity.getLivingEntity().getLocation();
-        drops.forEach(itemStack -> entityLocation.getWorld().dropItemNaturally(entityLocation, itemStack));
+        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, entityLocation));
 
         return drops;
     }

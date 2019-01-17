@@ -56,8 +56,24 @@ public final class ItemUtil {
             HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
             if (location != null && !additionalItems.isEmpty()) {
                 for (ItemStack additional : additionalItems.values())
-                    location.getWorld().dropItemNaturally(location, additional);
+                    dropItem(additional, location);
             }
+        }
+    }
+
+    public static void dropItem(ItemStack itemStack, Location location){
+        int amount = itemStack.getAmount();
+
+        for(int i = 0; i < amount / 64; i++){
+            ItemStack cloned = itemStack.clone();
+            cloned.setAmount(64);
+            location.getWorld().dropItemNaturally(location, cloned);
+        }
+
+        if(amount % 64 > 0) {
+            ItemStack cloned = itemStack.clone();
+            cloned.setAmount(amount % 64);
+            location.getWorld().dropItemNaturally(location, cloned);
         }
     }
 
@@ -174,25 +190,6 @@ public final class ItemUtil {
         typeName = ChatColor.stripColor(plugin.getSettings().customNames.getOrDefault(itemStack, typeName));
 
         return EntityUtil.getFormattedType(typeName);
-    }
-
-    public static void spawnItem(Location location, ItemStack itemStack) throws IllegalArgumentException{
-        List<Integer> amounts = new ArrayList<>();
-
-        if(Bukkit.getVersion().contains("1.12")) {
-            for (int i = 0; i < itemStack.getAmount() / 127; i++)
-                amounts.add(127);
-
-            if (itemStack.getAmount() % 127 != 0)
-                amounts.add(itemStack.getAmount() % 127);
-        }else{
-            amounts.add(itemStack.getAmount());
-        }
-
-        for(int amount : amounts){
-            itemStack.setAmount(amount);
-            location.getWorld().dropItemNaturally(location, itemStack);
-        }
     }
 
     @SuppressWarnings("deprecation")

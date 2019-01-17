@@ -32,6 +32,7 @@ import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.objects.WStackedSpawner;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
+import xyz.wildseries.wildstacker.utils.async.AsyncUtil;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
 import java.util.ArrayList;
@@ -246,7 +247,8 @@ public final class SpawnersListener implements Listener {
             Bukkit.getPluginManager().callEvent(spawnerSpawnEvent);
 
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-            stackedEntity.trySpawnerStack(stackedSpawner);
+
+            AsyncUtil.trySpawnerStack(stackedEntity, stackedSpawner);
         }
     }
 

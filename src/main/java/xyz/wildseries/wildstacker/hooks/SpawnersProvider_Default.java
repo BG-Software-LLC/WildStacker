@@ -49,7 +49,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         //If player is null, it broke by an explosion.
         if(player == null){
-            spawner.getWorld().dropItemNaturally(spawner.getLocation(), spawnerItem);
+            ItemUtil.dropItem(spawnerItem, spawner.getLocation());
             return;
         }
 
@@ -61,7 +61,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             if (plugin.getSettings().dropToInventory) {
                 ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
             } else {
-                spawner.getWorld().dropItemNaturally(spawner.getLocation(), spawnerItem);
+                ItemUtil.dropItem(spawnerItem, spawner.getLocation());
             }
         }
     }

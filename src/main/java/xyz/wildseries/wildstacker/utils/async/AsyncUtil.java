@@ -6,6 +6,7 @@ import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.api.objects.StackedItem;
+import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
 
 @SuppressWarnings("WeakerAccess")
 public class AsyncUtil {
@@ -77,6 +78,24 @@ public class AsyncUtil {
             boolean succeed = stackedItem.tryStackInto(targetItem);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(succeed));
+        }
+    }
+
+    public static void trySpawnerStack(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
+        trySpawnerStack(stackedEntity, stackedSpawner, null);
+    }
+
+    public static void trySpawnerStack(StackedEntity stackedEntity, StackedSpawner stackedSpawner, AsyncCallback<LivingEntity> asyncCallback){
+        if(Bukkit.isPrimaryThread()) {
+            new Thread(() -> {
+                LivingEntity livingEntity = stackedEntity.trySpawnerStack(stackedSpawner);
+                if (asyncCallback != null)
+                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
+            }).start();
+        }else{
+            LivingEntity livingEntity = stackedEntity.trySpawnerStack(stackedSpawner);
+            if (asyncCallback != null)
+                Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
         }
     }
 

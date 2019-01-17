@@ -80,7 +80,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
                 dropChance = ss.config.getInt("explosionDropChance", 100);
             }
             if (randomNumber < dropChance)
-                spawner.getWorld().dropItemNaturally(spawner.getLocation(), spawnerItem);
+                ItemUtil.dropItem(spawnerItem, spawner.getLocation());
             return;
         }
 
@@ -96,7 +96,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
                 if (ss.config.getBoolean("dropSpawnerToInventory", false)) {
                     ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
                 } else {
-                    spawner.getWorld().dropItemNaturally(spawner.getLocation(), spawnerItem);
+                    ItemUtil.dropItem(spawnerItem, spawner.getLocation());
                 }
             }
         }
