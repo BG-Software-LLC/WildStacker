@@ -1,6 +1,7 @@
 package xyz.wildseries.wildstacker.objects;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
@@ -35,7 +36,10 @@ public final class WStackedItem extends WStackedObject<Item> implements StackedI
 
     @Override
     public void setItemStack(ItemStack itemStack){
-        object.setItemStack(itemStack);
+        if(itemStack == null || itemStack.getType() == Material.AIR)
+            remove();
+        else
+            object.setItemStack(itemStack);
     }
 
     @Override
