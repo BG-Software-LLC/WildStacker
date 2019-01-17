@@ -2,10 +2,12 @@ package xyz.wildseries.wildstacker.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.metadata.MetadataValue;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.enums.StackCheck;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
@@ -14,18 +16,24 @@ public final class EntityData {
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private Object nbtTagCompound;
+    private List<MetadataValue> epicSpawners;
 
     private EntityData(){
         nbtTagCompound = null;
+        epicSpawners = null;
     }
 
     public void loadEntityData(LivingEntity livingEntity){
         nbtTagCompound = plugin.getNMSAdapter().getNBTTagCompound(livingEntity);
+        if(livingEntity.hasMetadata("ES"))
+            epicSpawners = livingEntity.getMetadata("ES");
     }
 
     public void applyEntityData(LivingEntity livingEntity){
         if(nbtTagCompound != null)
             plugin.getNMSAdapter().setNBTTagCompound(livingEntity, nbtTagCompound);
+        if(epicSpawners != null)
+            epicSpawners.forEach(value -> livingEntity.setMetadata("ES", value));
     }
 
     @Override
