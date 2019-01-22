@@ -16,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedItem;
 import xyz.wildseries.wildstacker.objects.WStackedItem;
+import xyz.wildseries.wildstacker.utils.SafeStacker;
 import xyz.wildseries.wildstacker.utils.async.AsyncCallback;
-import xyz.wildseries.wildstacker.utils.async.AsyncUtil;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -38,7 +38,7 @@ public final class ItemsListener implements Listener {
 
         StackedItem item = WStackedItem.of(e.getEntity());
 
-        AsyncUtil.tryStack(item, new AsyncCallback<Item>() {
+        SafeStacker.tryStack(item, new AsyncCallback<Item>() {
             @Override
             public void run(Item returnValue) {
                 if(returnValue == null) {
@@ -65,7 +65,7 @@ public final class ItemsListener implements Listener {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
                 StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
-                AsyncUtil.tryStackInto(stackedItem, targetItem);
+                SafeStacker.tryStackInto(stackedItem, targetItem);
             }
         }, 5L);
     }

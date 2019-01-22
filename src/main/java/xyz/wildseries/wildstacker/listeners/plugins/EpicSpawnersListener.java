@@ -10,7 +10,7 @@ import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
 import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.objects.WStackedSpawner;
-import xyz.wildseries.wildstacker.utils.async.AsyncUtil;
+import xyz.wildseries.wildstacker.utils.SafeStacker;
 
 @SuppressWarnings("unused")
 public final class EpicSpawnersListener implements Listener {
@@ -34,7 +34,7 @@ public final class EpicSpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner().getCreatureSpawner());
 
         //It takes 1 tick for EpicSpawners to set the metadata for the mobs.
-        Bukkit.getScheduler().runTaskLaterAsynchronously(instance, () -> AsyncUtil.trySpawnerStack(stackedEntity, stackedSpawner), 2L);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(instance, () -> SafeStacker.trySpawnerStack(stackedEntity, stackedSpawner), 2L);
     }
 
 }

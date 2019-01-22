@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public interface StackedItem extends StackedObject<Item> {
+public interface StackedItem extends AsyncStackedObject<Item> {
 
     Item getItem();
 

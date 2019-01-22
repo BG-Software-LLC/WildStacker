@@ -1,34 +1,59 @@
-package xyz.wildseries.wildstacker.utils.async;
+package xyz.wildseries.wildstacker.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.api.objects.StackedItem;
 import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
+import xyz.wildseries.wildstacker.utils.async.AsyncCallback;
 
-@SuppressWarnings("WeakerAccess")
-public class AsyncUtil {
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+@SuppressWarnings({"unused", "WeakerAccess", "InfiniteLoopStatement"})
+public class SafeStacker extends Thread {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final SafeStacker instance = new SafeStacker();
+    private static final Map<Integer, Runnable> runnables = new ConcurrentHashMap<>();
+    private static int lastCheckedRunnable = 0;
+    private static int runnableNumber = 0;
+
+    private SafeStacker(){
+        start();
+    }
+
+    @Override
+    public void run() {
+        while(true){
+            if(!runnables.isEmpty()){
+                runnables.get(lastCheckedRunnable).run();
+                runnables.remove(lastCheckedRunnable);
+                lastCheckedRunnable++;
+            }
+        }
+    }
+
+    private static void addOperation(Runnable runnable){
+        runnables.put(runnableNumber++, runnable);
+    }
 
     public static void tryStack(StackedEntity stackedEntity){
         tryStack(stackedEntity, null);
     }
 
     public static void tryStack(StackedEntity stackedEntity, AsyncCallback<LivingEntity> asyncCallback){
-        if(Bukkit.isPrimaryThread()) {
-            new Thread(() -> {
-                LivingEntity livingEntity = stackedEntity.tryStack();
-                if (asyncCallback != null)
-                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
-            }).start();
-        }else{
-            LivingEntity livingEntity = stackedEntity.tryStack();
+        int range = plugin.getSettings().entitiesCheckRange;
+        List<Entity> entities = stackedEntity.getLivingEntity().getNearbyEntities(range, range, range);
+        addOperation(() -> {
+            LivingEntity livingEntity = stackedEntity.tryStackAsync(entities);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
-        }
+        });
     }
 
     public static void tryStackInto(StackedEntity stackedEntity, StackedEntity targetEntity){
@@ -36,31 +61,21 @@ public class AsyncUtil {
     }
 
     public static void tryStackInto(StackedEntity stackedEntity, StackedEntity targetEntity, AsyncCallback<Boolean> asyncCallback){
-        if(Bukkit.isPrimaryThread()) {
-            new Thread(() -> {
-                boolean succeed = stackedEntity.tryStackInto(targetEntity);
-                if (asyncCallback != null)
-                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(succeed));
-            }).start();
-        }else{
+        addOperation(() -> {
             boolean succeed = stackedEntity.tryStackInto(targetEntity);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(succeed));
-        }
+        });
     }
 
     public static void tryStack(StackedItem stackedItem, AsyncCallback<Item> asyncCallback){
-        if(Bukkit.isPrimaryThread()) {
-            new Thread(() -> {
-                Item item = stackedItem.tryStack();
-                if (asyncCallback != null)
-                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(item));
-            }).start();
-        }else{
-            Item item = stackedItem.tryStack();
+        int range = plugin.getSettings().entitiesCheckRange;
+        List<Entity> entities = stackedItem.getItem().getNearbyEntities(range, range, range);
+        addOperation(() -> {
+            Item item = stackedItem.tryStackAsync(entities);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(item));
-        }
+        });
     }
 
     public static void tryStackInto(StackedItem stackedItem, StackedItem targetItem){
@@ -68,17 +83,11 @@ public class AsyncUtil {
     }
 
     public static void tryStackInto(StackedItem stackedItem, StackedItem targetItem, AsyncCallback<Boolean> asyncCallback){
-        if(Bukkit.isPrimaryThread()) {
-            new Thread(() -> {
-                boolean succeed = stackedItem.tryStackInto(targetItem);
-                if (asyncCallback != null)
-                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(succeed));
-            }).start();
-        }else{
+        addOperation(() -> {
             boolean succeed = stackedItem.tryStackInto(targetItem);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(succeed));
-        }
+        });
     }
 
     public static void trySpawnerStack(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
@@ -86,17 +95,13 @@ public class AsyncUtil {
     }
 
     public static void trySpawnerStack(StackedEntity stackedEntity, StackedSpawner stackedSpawner, AsyncCallback<LivingEntity> asyncCallback){
-        if(Bukkit.isPrimaryThread()) {
-            new Thread(() -> {
-                LivingEntity livingEntity = stackedEntity.trySpawnerStack(stackedSpawner);
-                if (asyncCallback != null)
-                    Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
-            }).start();
-        }else{
-            LivingEntity livingEntity = stackedEntity.trySpawnerStack(stackedSpawner);
+        int range = plugin.getSettings().entitiesCheckRange;
+        List<Entity> entities = stackedEntity.getLivingEntity().getNearbyEntities(range, range, range);
+        addOperation(() -> {
+            LivingEntity livingEntity = stackedEntity.trySpawnerStackAsync(stackedSpawner, entities);
             if (asyncCallback != null)
                 Bukkit.getScheduler().runTask(plugin, () -> asyncCallback.run(livingEntity));
-        }
+        });
     }
 
 }

@@ -11,6 +11,7 @@ import xyz.wildseries.wildstacker.api.objects.StackedItem;
 import xyz.wildseries.wildstacker.api.objects.StackedObject;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("RedundantIfStatement")
@@ -61,6 +62,9 @@ public final class WStackedItem extends WStackedObject<Item> implements StackedI
 
     @Override
     public void updateName() {
+        if(!plugin.getSettings().itemsStackingEnabled)
+            return;
+
         String customName = plugin.getSettings().itemsCustomName;
 
         ItemStack itemStack = getItemStack();
@@ -92,70 +96,57 @@ public final class WStackedItem extends WStackedObject<Item> implements StackedI
 
     @Override
     public Item tryStack() {
-        synchronized (StackedItem.class) {
-            int range = plugin.getSettings().itemsCheckRange;
-
-            for (Entity nearby : object.getNearbyEntities(range, range, range)) {
-                if (nearby instanceof Item && nearby.isValid() && tryStackInto(WStackedItem.of(nearby)))
-                    return (Item) nearby;
-            }
-
-            updateName();
-            return null;
-        }
+        int range = plugin.getSettings().itemsCheckRange;
+        return tryStackAsync(object.getNearbyEntities(range, range, range));
     }
 
     @Override
     public boolean canStackInto(StackedObject stackedObject) {
-        synchronized (StackedItem.class) {
-            if (!plugin.getSettings().itemsStackingEnabled)
-                return false;
+        if (!plugin.getSettings().itemsStackingEnabled)
+            return false;
 
-            if (equals(stackedObject) || !(stackedObject instanceof StackedItem) || !isSimilar(stackedObject))
-                return false;
+        if (equals(stackedObject) || !(stackedObject instanceof StackedItem) || !isSimilar(stackedObject))
+            return false;
 
-            if (plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName()))
-                return false;
+        if (plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName()))
+            return false;
 
-            StackedItem targetItem = (StackedItem) stackedObject;
-            int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
+        StackedItem targetItem = (StackedItem) stackedObject;
+        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
 
-            if (plugin.getSettings().blacklistedItems.contains(object.getItemStack()) ||
-                    plugin.getSettings().blacklistedItems.contains(((StackedItem) stackedObject).getItemStack()))
-                return false;
+        if (plugin.getSettings().blacklistedItems.contains(object.getItemStack()) ||
+                plugin.getSettings().blacklistedItems.contains(((StackedItem) stackedObject).getItemStack()))
+            return false;
 
-            if (plugin.getSettings().itemsLimits.getOrDefault(targetItem.getItemStack(), Integer.MAX_VALUE) < newStackAmount)
-                return false;
+        if (plugin.getSettings().itemsLimits.getOrDefault(targetItem.getItemStack(), Integer.MAX_VALUE) < newStackAmount)
+            return false;
 
-            return true;
-        }
+        return true;
     }
 
     @Override
     public boolean tryStackInto(StackedObject stackedObject) {
-        synchronized (StackedItem.class) {
-            if (!canStackInto(stackedObject))
-                return false;
+        if (!canStackInto(stackedObject))
+            return false;
 
-            StackedItem targetItem = (StackedItem) stackedObject;
+        StackedItem targetItem = (StackedItem) stackedObject;
 
-            ItemStackEvent itemStackEvent = new ItemStackEvent(targetItem, this);
-            Bukkit.getPluginManager().callEvent(itemStackEvent);
+        ItemStackEvent itemStackEvent = new ItemStackEvent(targetItem, this);
+        Bukkit.getPluginManager().callEvent(itemStackEvent);
 
-            if (itemStackEvent.isCancelled())
-                return false;
+        if (itemStackEvent.isCancelled())
+            return false;
 
-            targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
+        targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (targetItem.getItem().isValid())
-                    targetItem.updateName();
-            }, 2L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (targetItem.getItem().isValid())
+                targetItem.updateName();
+        }, 2L);
 
-            this.remove();
+        this.remove();
 
-            return true;
-        }
+        return true;
     }
 
     @Override
@@ -211,6 +202,21 @@ public final class WStackedItem extends WStackedObject<Item> implements StackedI
         }
 
         setStackAmount(startAmount - giveAmount, true);
+    }
+
+    /*
+     * Async methods
+     */
+
+    @Override
+    public Item tryStackAsync(List<Entity> nearbyEntities) {
+        for (Entity nearby : nearbyEntities) {
+            if (nearby instanceof Item && nearby.isValid() && tryStackInto(WStackedItem.of(nearby)))
+                return (Item) nearby;
+        }
+
+        updateName();
+        return null;
     }
 
     public static StackedItem of(Entity entity){
