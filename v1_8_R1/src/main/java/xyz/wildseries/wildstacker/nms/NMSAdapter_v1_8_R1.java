@@ -46,8 +46,8 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         nbtTagCompound.setFloat("Health", 20);
         nbtTagCompound.remove("SaddleItem");
         nbtTagCompound.remove("ArmorItem");
-        nbtTagCompound.remove("ArmorItems");
-        nbtTagCompound.remove("HandItems");
+        nbtTagCompound.remove("Equipment");
+        nbtTagCompound.remove("DropChances");
         if(livingEntity instanceof Zombie)
             ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
 
