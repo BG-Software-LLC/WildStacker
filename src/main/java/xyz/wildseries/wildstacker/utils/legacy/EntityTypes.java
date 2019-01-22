@@ -95,8 +95,12 @@ public enum  EntityTypes {
     private static boolean v1_10 = Bukkit.getBukkitVersion().contains("1.10");
 
     public static EntityTypes fromName(String name){
+        try{
+            return EntityTypes.valueOf(name);
+        }catch(IllegalArgumentException ignored){}
+
         for(EntityTypes entityType : values()){
-            if(entityType.name().equals(name) || entityType.bukkitEntityType.equals(name))
+            if(entityType.bukkitEntityType.equals(name))
                 return entityType;
         }
 
@@ -129,7 +133,7 @@ public enum  EntityTypes {
             }
         }
 
-        return fromName(livingEntity.getType().name());
+        return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
     }
 
 }
