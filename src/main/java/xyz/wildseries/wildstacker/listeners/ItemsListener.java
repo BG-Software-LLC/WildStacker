@@ -86,17 +86,22 @@ public final class ItemsListener implements Listener {
         if(stackedItem.getStackAmount() > 1 || e.getItem().getItemStack().getType().name().contains("BUCKET")) {
             e.setCancelled(true);
 
-            Sound pickUpItem;
+            int stackAmount = stackedItem.getStackAmount();
 
-            //Different name on 1.12
-            try {
-                pickUpItem = Sound.valueOf("ITEM_PICKUP");
-            } catch (IllegalArgumentException ex) {
-                pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
+            stackedItem.giveItemStack(e.getPlayer().getInventory());
+
+            if(stackAmount != stackedItem.getStackAmount()){
+                Sound pickUpItem;
+
+                //Different name on 1.12
+                try {
+                    pickUpItem = Sound.valueOf("ITEM_PICKUP");
+                } catch (IllegalArgumentException ex) {
+                    pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
+                }
+                e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem, 1, 1);
             }
 
-            e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem, 1, 1);
-            stackedItem.giveItemStack(e.getPlayer().getInventory());
             if (stackedItem.getStackAmount() <= 0) {
                 e.getItem().remove();
                 stackedItem.remove();
