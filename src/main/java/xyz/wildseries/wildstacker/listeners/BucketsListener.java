@@ -12,9 +12,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
@@ -43,9 +45,9 @@ public class BucketsListener implements Listener {
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                ItemStack inHand = e.getPlayer().getItemInHand().clone();
+                ItemStack inHand = getItem(e);
                 inHand.setAmount(inHand.getAmount() - 1);
-                e.getPlayer().setItemInHand(inHand);
+                //e.getPlayer().setItemInHand(inHand);
                 ItemUtil.addItem(newBucketItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
                 e.getPlayer().updateInventory();
             }, 1L);
@@ -69,13 +71,44 @@ public class BucketsListener implements Listener {
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                ItemStack inHand = e.getPlayer().getItemInHand().clone();
+                ItemStack inHand = getItem(e);
                 inHand.setAmount(inHand.getAmount() - 1);
-                e.getPlayer().setItemInHand(inHand);
+                //setItem(e, inHand.getAmount() <= 0 ? new ItemStack(Material.AIR) : inHand);
                 ItemUtil.addItem(new ItemStack(Material.BUCKET), e.getPlayer().getInventory(), e.getPlayer().getLocation());
                 e.getPlayer().updateInventory();
             }, 1L);
         }
+    }
+
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private ItemStack getItem(PlayerBucketEvent event){
+        try {
+            ItemStack inHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
+            if(inHand != null) {
+                if(event instanceof PlayerBucketEmptyEvent){
+                    if(inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA"))
+                        return inHand;
+                }else {
+                    if(inHand.getType().name().contains("BUCKET") &&
+                            !(inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA")))
+                        return inHand;
+                }
+            }
+        }catch(Throwable ignored){}
+        return event.getPlayer().getItemInHand();
+    }
+
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private void setItem(PlayerBucketEmptyEvent event, ItemStack itemStack){
+        try {
+            ItemStack inHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
+            if(inHand != null && (inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA"))) {
+                PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
+                        .invoke(event.getPlayer().getInventory(), itemStack);
+                return;
+            }
+        }catch(Throwable ignored){}
+        event.getPlayer().setItemInHand(itemStack);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
