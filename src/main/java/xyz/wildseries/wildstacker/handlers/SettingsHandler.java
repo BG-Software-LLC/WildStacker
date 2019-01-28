@@ -141,8 +141,7 @@ public final class SettingsHandler {
         placeChargeAmount = cfg.getDouble("spawners.place-charge.amount", 0);
         placeChargeMultiply = cfg.getBoolean("spawners.place-charge.multiply-stack-amount", false);
 
-        boolean barrelsEnable = !(Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") && Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R"));
-        barrelsStackingEnabled = barrelsEnable && cfg.getBoolean("barrels.enabled", true);
+        barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
         barrelsCheckRange = cfg.getInt("barrels.merge-radius", 1);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
