@@ -53,7 +53,7 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
     @Override
     public void updateName() {
-        String customName = plugin.getSettings().hologramCustomName;
+        String customName = plugin.getSettings().barrelsCustomName;
 
         if (customName.isEmpty())
             return;
