@@ -11,17 +11,22 @@ public class EconomyHook {
     private static boolean vaultEnabled = Bukkit.getPluginManager().getPlugin("Vault") != null;
 
     public static double getMoneyInBank(Player player){
-        if (!economy.hasAccount(player))
-            economy.createPlayerAccount(player);
+        if(isVaultEnabled()) {
+            if (!economy.hasAccount(player))
+                economy.createPlayerAccount(player);
 
-        return economy.getBalance(player);
+            return economy.getBalance(player);
+        }
+        return 0;
     }
 
     public static void withdrawMoney(Player player, double amount){
-        if (!economy.hasAccount(player))
-            economy.createPlayerAccount(player);
+        if(isVaultEnabled()) {
+            if (!economy.hasAccount(player))
+                economy.createPlayerAccount(player);
 
-        economy.withdrawPlayer(player, amount);
+            economy.withdrawPlayer(player, amount);
+        }
     }
 
     public static boolean isVaultEnabled(){
