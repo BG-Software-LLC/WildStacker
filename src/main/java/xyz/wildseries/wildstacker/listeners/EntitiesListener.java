@@ -33,6 +33,7 @@ import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.enums.StackSplit;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
+import xyz.wildseries.wildstacker.hooks.CrazyEnchantmentsHook;
 import xyz.wildseries.wildstacker.listeners.events.EntityBreedEvent;
 import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
@@ -86,9 +87,10 @@ public final class EntitiesListener implements Listener {
         int amount = stackedEntity.getStackAmount();
 
         int lootBonusLevel = 0;
+        ItemStack killerItemHand = null;
 
         if(lastDamageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK && e.getEntity().getKiller() != null &&
-                e.getEntity().getKiller().getItemInHand() != null){
+                (killerItemHand = e.getEntity().getKiller().getItemInHand()) != null){
             lootBonusLevel = e.getEntity().getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
         }
 
@@ -105,7 +107,7 @@ public final class EntitiesListener implements Listener {
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
-            e.setDroppedExp(e.getDroppedExp() * amount);
+            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp() * amount, killerItemHand));
 
             if(e.getEntity().getKiller() != null && amount - 1 > 0) {
                 try {

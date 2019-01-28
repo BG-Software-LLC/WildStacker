@@ -15,6 +15,7 @@ import xyz.wildseries.wildstacker.handlers.EditorHandler;
 import xyz.wildseries.wildstacker.handlers.ProvidersHandler;
 import xyz.wildseries.wildstacker.handlers.SettingsHandler;
 import xyz.wildseries.wildstacker.handlers.SystemHandler;
+import xyz.wildseries.wildstacker.hooks.CrazyEnchantmentsHook;
 import xyz.wildseries.wildstacker.hooks.EconomyHook;
 import xyz.wildseries.wildstacker.hooks.PluginHook_Novucs;
 import xyz.wildseries.wildstacker.hooks.PluginHook_SpawnerProvider;
@@ -98,6 +99,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();
+        //Enable CrazyEnchantments hook
+        CrazyEnchantmentsHook.register();
 
         runOnFirstTick(() -> {
             providersHandler = new ProvidersHandler(this);
