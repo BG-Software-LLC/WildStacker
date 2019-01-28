@@ -145,7 +145,7 @@ public final class SettingsHandler {
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
         barrelsCheckRange = cfg.getInt("barrels.merge-radius", 1);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
-        barrelsCustomName = cfg.getString("barrels.custom-name", "&9&lx{0} {1}");
+        barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
         whitelistedBarrels = new KeySet(cfg.getStringList("barrels.whitelist"));
         explosionsBreakBarrelStack = cfg.getBoolean("barrels.explosions-break-stack", true);
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);
