@@ -72,7 +72,7 @@ public final class PluginHook_SpawnerProvider extends SpawnerProvider {
                 field.set(plugin, new PluginHook_SpawnerProvider());
             }
             field.setAccessible(false);
-        }catch(Exception ignored){ }
+        }catch(Throwable ignored){ }
     }
 
 }
