@@ -19,7 +19,7 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
     private List<LootPair> lootPairs;
     private int min, max;
 
-    protected LootTable(List<LootPair> lootPairs, int min, int max){
+    public LootTable(List<LootPair> lootPairs, int min, int max){
         this.lootPairs = new ArrayList<>(lootPairs);
         this.min = min;
         this.max = max;

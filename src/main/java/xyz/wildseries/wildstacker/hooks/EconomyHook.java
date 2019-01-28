@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-public class EconomyHook {
+public  final class EconomyHook {
 
     private static Economy economy = null;
     private static boolean vaultEnabled = Bukkit.getPluginManager().getPlugin("Vault") != null;

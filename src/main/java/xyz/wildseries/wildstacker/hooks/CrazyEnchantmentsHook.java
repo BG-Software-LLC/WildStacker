@@ -6,7 +6,7 @@ import me.badbones69.crazyenchantments.api.CEnchantments;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
-public class CrazyEnchantmentsHook {
+public final class CrazyEnchantmentsHook {
 
     private static boolean enabled = false;
 

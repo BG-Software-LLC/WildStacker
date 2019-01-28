@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({"unused", "WeakerAccess", "InfiniteLoopStatement"})
-public class SafeStacker extends Thread {
+public final class SafeStacker extends Thread {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final SafeStacker instance = new SafeStacker();

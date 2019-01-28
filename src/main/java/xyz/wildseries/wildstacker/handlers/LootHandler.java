@@ -1,4 +1,4 @@
-package xyz.wildseries.wildstacker.loot;
+package xyz.wildseries.wildstacker.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -6,7 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
-import xyz.wildseries.wildstacker.handlers.ProvidersHandler;
+import xyz.wildseries.wildstacker.loot.LootTable;
+import xyz.wildseries.wildstacker.loot.LootTableSheep;
 import xyz.wildseries.wildstacker.loot.custom.LootTableCustom;
 import xyz.wildseries.wildstacker.loot.custom.LootTableCustomDrops;
 import xyz.wildseries.wildstacker.loot.custom.LootTableDropEdit;
@@ -22,8 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions"})
-public class LootHandler {
+@SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions", "WeakerAccess"})
+public final class LootHandler {
 
     private final Map<String, LootTable> lootTables = new HashMap<>();
     private LootTableCustom lootTableCustom = null;

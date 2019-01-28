@@ -4,7 +4,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class EntityBreedEvent extends Event {
+@SuppressWarnings("unused")
+public final class EntityBreedEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 

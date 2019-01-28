@@ -1,7 +1,7 @@
 package xyz.wildseries.wildstacker.config;
 
 @SuppressWarnings("unused")
-public class ConfigComments {
+public final class ConfigComments {
 
     @Comment("###############################################")
     @Comment("##                                           ##")

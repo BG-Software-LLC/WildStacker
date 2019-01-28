@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CommentedConfiguration extends YamlConfiguration{
+public final class CommentedConfiguration extends YamlConfiguration{
 
     private Class commentsClass;
     private String[] ignoredSections = new String[] {"limits"};

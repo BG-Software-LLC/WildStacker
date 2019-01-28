@@ -21,7 +21,7 @@ import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
 @SuppressWarnings("unused")
-public class BucketsListener implements Listener {
+public final class BucketsListener implements Listener {
 
     private WildStackerPlugin plugin;
 

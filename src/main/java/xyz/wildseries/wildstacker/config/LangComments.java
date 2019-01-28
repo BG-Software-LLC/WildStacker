@@ -1,6 +1,7 @@
 package xyz.wildseries.wildstacker.config;
 
-public class LangComments {
+@SuppressWarnings("unused")
+public final class LangComments {
 
     @Comment("###############################################")
     @Comment("##                                           ##")

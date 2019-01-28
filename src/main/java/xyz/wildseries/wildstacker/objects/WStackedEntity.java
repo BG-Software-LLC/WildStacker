@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@SuppressWarnings({"RedundantIfStatement", "ConstantConditions"})
-public final class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
+@SuppressWarnings("RedundantIfStatement")
+public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     private static Set<UUID> latestStacked = new HashSet<>();
 

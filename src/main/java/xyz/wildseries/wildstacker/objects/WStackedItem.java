@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("RedundantIfStatement")
-public final class WStackedItem extends WStackedObject<Item> implements StackedItem {
+public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
         super(item, item.getItemStack().getAmount());

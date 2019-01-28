@@ -14,7 +14,7 @@ import xyz.wildseries.wildstacker.api.objects.StackedObject;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
 @SuppressWarnings("RedundantIfStatement")
-public final class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
+public class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
 
     private ItemStack barrelItem;
     private ArmorStand blockDisplay;

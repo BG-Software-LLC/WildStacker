@@ -4,7 +4,7 @@ import xyz.wildseries.wildstacker.WildStackerPlugin;
 
 import java.io.File;
 
-public class FileUtil {
+public final class FileUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 

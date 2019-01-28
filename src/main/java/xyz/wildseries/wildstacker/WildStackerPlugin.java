@@ -12,6 +12,7 @@ import xyz.wildseries.wildstacker.command.CommandsHandler;
 import xyz.wildseries.wildstacker.handlers.BreakMenuHandler;
 import xyz.wildseries.wildstacker.handlers.DataHandler;
 import xyz.wildseries.wildstacker.handlers.EditorHandler;
+import xyz.wildseries.wildstacker.handlers.LootHandler;
 import xyz.wildseries.wildstacker.handlers.ProvidersHandler;
 import xyz.wildseries.wildstacker.handlers.SettingsHandler;
 import xyz.wildseries.wildstacker.handlers.SystemHandler;
@@ -23,14 +24,12 @@ import xyz.wildseries.wildstacker.listeners.BarrelsListener;
 import xyz.wildseries.wildstacker.listeners.BucketsListener;
 import xyz.wildseries.wildstacker.listeners.EditorListener;
 import xyz.wildseries.wildstacker.listeners.EntitiesListener;
-import xyz.wildseries.wildstacker.listeners.EntitiesListener1_13;
 import xyz.wildseries.wildstacker.listeners.ItemsListener;
 import xyz.wildseries.wildstacker.listeners.PlayersListener;
 import xyz.wildseries.wildstacker.listeners.SpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.ClearLaggListener;
 import xyz.wildseries.wildstacker.listeners.plugins.EpicSpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.SilkSpawnersListener;
-import xyz.wildseries.wildstacker.loot.LootHandler;
 import xyz.wildseries.wildstacker.nms.NMSAdapter;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
 
@@ -75,8 +74,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
         getServer().getPluginManager().registerEvents(new EditorListener(this), this);
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
-        if(getServer().getBukkitVersion().contains("1.13"))
-            getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
         getCommand("stacker").setExecutor(commandsHandler);

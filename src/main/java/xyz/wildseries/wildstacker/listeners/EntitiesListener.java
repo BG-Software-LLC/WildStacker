@@ -22,6 +22,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -57,6 +58,8 @@ public final class EntitiesListener implements Listener {
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
+        if(plugin.getServer().getBukkitVersion().contains("1.13"))
+            plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
     }
 
     //This method will be fired even if stacking-entities is disabled.
@@ -349,6 +352,21 @@ public final class EntitiesListener implements Listener {
                     EntityUtil.nerfEntity((LivingEntity) entity);
             }
         }
+    }
+
+    class EntitiesListener1_13 implements Listener {
+
+        @EventHandler
+        public void onEntityTransform(EntityTransformEvent e){
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+            if(stackedEntity.getStackAmount() > 1){
+                StackedEntity transformed = WStackedEntity.of(e.getTransformedEntity());
+                transformed.setStackAmount(stackedEntity.getStackAmount(), true);
+                stackedEntity.remove();
+            }
+        }
+
     }
 
 }

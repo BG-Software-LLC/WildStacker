@@ -13,7 +13,7 @@ import xyz.wildseries.wildstacker.api.objects.StackedSpawner;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 
 @SuppressWarnings("RedundantIfStatement")
-public final class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
+public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
 
     private LivingEntity linkedEntity = null;
 
