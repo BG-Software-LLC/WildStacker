@@ -97,7 +97,8 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_NERFED_ENTITIES.remove(livingEntity.getUniqueId());
         }
 
-        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand))
+        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
+                !plugin.getSettings().entitiesStackingEnabled)
             dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
 
         return stackedEntity;
@@ -115,7 +116,8 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
         }
 
-        dataHandler.CACHED_OBJECTS.put(item.getUniqueId(), stackedItem);
+        if(plugin.getSettings().itemsStackingEnabled)
+            dataHandler.CACHED_OBJECTS.put(item.getUniqueId(), stackedItem);
 
         return stackedItem;
     }
@@ -127,7 +129,8 @@ public final class SystemHandler implements SystemManager {
 
         StackedSpawner stackedSpawner = new WStackedSpawner(spawner);
 
-        dataHandler.CACHED_OBJECTS.put(spawner.getLocation(), stackedSpawner);
+        if(plugin.getSettings().spawnersStackingEnabled)
+            dataHandler.CACHED_OBJECTS.put(spawner.getLocation(), stackedSpawner);
 
         return stackedSpawner;
     }
@@ -140,7 +143,8 @@ public final class SystemHandler implements SystemManager {
         StackedBarrel stackedBarrel = new WStackedBarrel(block.getLocation(), block.getState().getData().toItemStack(1));
         stackedBarrel.createDisplayBlock();
 
-        dataHandler.CACHED_OBJECTS.put(block.getLocation(), stackedBarrel);
+        if(plugin.getSettings().barrelsStackingEnabled)
+            dataHandler.CACHED_OBJECTS.put(block.getLocation(), stackedBarrel);
 
         return stackedBarrel;
     }
