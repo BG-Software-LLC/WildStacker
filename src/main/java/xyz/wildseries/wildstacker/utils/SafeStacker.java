@@ -30,11 +30,15 @@ public class SafeStacker extends Thread {
     @Override
     public void run() {
         while(true){
-            if(!runnables.isEmpty()){
+            while(!runnables.isEmpty()){
                 runnables.get(lastCheckedRunnable).run();
                 runnables.remove(lastCheckedRunnable);
                 lastCheckedRunnable++;
             }
+            try {
+                while(runnables.isEmpty())
+                    Thread.sleep(10);
+            }catch(Exception ignored){}
         }
     }
 
