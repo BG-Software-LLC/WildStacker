@@ -330,7 +330,17 @@ public final class SpawnersListener implements Listener {
         int removeAmount = plugin.getBreakMenuHandler().breakSlots.get(e.getRawSlot());
 
         Block spawnerBlock = clickedSpawners.get(player.getUniqueId()).getBlock();
-        StackedSpawner stackedSpawner = WStackedSpawner.of(spawnerBlock);
+        StackedSpawner stackedSpawner;
+
+        try {
+            stackedSpawner = WStackedSpawner.of(spawnerBlock);
+        }catch(IllegalArgumentException ex){
+            //IllegelArgumentException can be thrown if the block no longer exist.
+            player.closeInventory();
+            return;
+        }
+
+
         removeAmount = Math.min(stackedSpawner.getStackAmount(), removeAmount);
 
         double amountToCharge = plugin.getSettings().breakChargeAmount * (plugin.getSettings().breakChargeMultiply ? removeAmount : 1);
