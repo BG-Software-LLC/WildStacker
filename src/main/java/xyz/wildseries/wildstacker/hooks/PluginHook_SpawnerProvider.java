@@ -61,18 +61,16 @@ public final class PluginHook_SpawnerProvider extends SpawnerProvider {
         return EntityUtil.getFormattedType(getSpawnerEntityId(itemStack));
     }
 
-    public static void register(){
-        try{
-            ShopGuiPlugin plugin = JavaPlugin.getPlugin(ShopGuiPlugin.class);
-            Field field = ShopGuiPlugin.class.getDeclaredField("spawnerProvider");
-            field.setAccessible(true);
-            if(!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
-                    !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-                WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
-                field.set(plugin, new PluginHook_SpawnerProvider());
-            }
-            field.setAccessible(false);
-        }catch(Throwable ignored){ }
+    public static void register() throws Throwable{
+        ShopGuiPlugin plugin = JavaPlugin.getPlugin(ShopGuiPlugin.class);
+        Field field = ShopGuiPlugin.class.getDeclaredField("spawnerProvider");
+        field.setAccessible(true);
+        if(!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
+                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
+            WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
+            field.set(plugin, new PluginHook_SpawnerProvider());
+        }
+        field.setAccessible(false);
     }
 
 }

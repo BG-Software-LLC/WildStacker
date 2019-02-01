@@ -92,8 +92,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         log("******** ENABLE DONE ********");
 
         //Set WildStacker as SpawnersProvider with ShopGUIPlus
-        if(ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
-            PluginHook_SpawnerProvider.register();
+        try {
+            if (ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
+                PluginHook_SpawnerProvider.register();
+        }catch(Throwable ignored){}
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();
