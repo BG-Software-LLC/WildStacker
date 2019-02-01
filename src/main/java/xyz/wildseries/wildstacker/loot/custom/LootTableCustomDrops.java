@@ -1,15 +1,24 @@
 package xyz.wildseries.wildstacker.loot.custom;
 
 import net.aminecraftdev.customdrops.CustomDropsAPI;
+import net.aminecraftdev.customdrops.manager.CustomDropsManager;
+import net.aminecraftdev.customdrops.utils.AbstractHolder;
+import net.aminecraftdev.customdrops.utils.itemstack.ItemStackUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
 import xyz.wildseries.wildstacker.loot.LootTable;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class LootTableCustomDrops extends LootTableCustom {
@@ -22,14 +31,54 @@ public class LootTableCustomDrops extends LootTableCustom {
             drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount));
 
         for(int i = 0; i < stackAmount - 1; i++) {
-            drops.addAll(CustomDropsAPI.getCustomDrops(stackedEntity.getType()).stream()
+            drops.addAll(getCustomDrops(stackedEntity.getType()).stream()
                     .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
                     .collect(Collectors.toList()));
         }
 
         //CustomDrops doesn't take items from the event, we need to drop the items.
         Location entityLocation = stackedEntity.getLivingEntity().getLocation();
-        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, entityLocation));
+        Bukkit.getScheduler().runTask(WildStackerPlugin.getPlugin(), () ->
+            drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, entityLocation)));
+
+        return drops;
+    }
+
+    private static CustomDropsManager manager = CustomDropsManager.get();
+    private static ThreadLocalRandom random = ThreadLocalRandom.current();
+
+    private List<ItemStack> getCustomDrops(EntityType entityType){
+        List<ItemStack> drops = new ArrayList<>();
+
+        AbstractHolder<EntityType> abstractHolder = manager.getAbstractHolder(entityType);
+
+        if (abstractHolder == null) {
+            return drops;
+        } else {
+            Object dropsObject = abstractHolder.get("drops");
+            if (dropsObject != null) {
+                //noinspection unchecked
+                List<ConfigurationSection> dropSections = (List)dropsObject;
+                dropSections.forEach((innerSection) -> {
+                    int min = innerSection.getInt("amount.min", 0);
+                    int max = innerSection.getInt("amount.max", 0) + 1;
+                    int amount = random.nextInt(max - min) + min;
+                    if (amount != 0) {
+                        if (innerSection.contains("chance")) {
+                            double chance = innerSection.getDouble("chance");
+                            double randomNumber = (double) random.nextInt(100);
+                            randomNumber += random.nextDouble();
+                            if (randomNumber > chance) {
+                                return;
+                            }
+                        }
+
+                        //noinspection all
+                        drops.add(ItemStackUtils.createItemStack(innerSection, amount, (Map)null));
+                    }
+                });
+            }
+        }
 
         return drops;
     }
