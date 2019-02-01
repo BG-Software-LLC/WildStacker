@@ -247,7 +247,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public LivingEntity trySpawnerStackAsync(StackedSpawner stackedSpawner, List<Entity> nearbyEntities) {
         if (!plugin.getSettings().linkedEntitiesEnabled)
-            return tryStack();
+            return tryStackAsync(nearbyEntities);
 
         LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
