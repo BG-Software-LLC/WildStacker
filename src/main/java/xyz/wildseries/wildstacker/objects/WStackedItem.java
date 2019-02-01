@@ -76,6 +76,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         boolean updateName = plugin.getSettings().itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
+
             String itemType = ItemUtil.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemType;
 
