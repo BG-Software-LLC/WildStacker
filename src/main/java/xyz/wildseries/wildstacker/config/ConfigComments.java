@@ -60,6 +60,10 @@ public final class ConfigComments {
     public static String ITEMS_DISABLED_WORLDS = "items.disabled-worlds";
 
     @Comment("")
+    @Comment("When enabled, all items will have a custom name (even if not stacked)")
+    public static String ITEMS_UNSTACKED_CUSTOM_NAME = "items.unstacked-custom-name";
+
+    @Comment("")
     @Comment("When fix-stack is disabled, items with a max-stack of 1 will be added to inventories")
     @Comment("with a max-stack size of 64. If a player picks up 80 picks, he will get 64 + 16, instead")
     @Comment("of 80 different items.")

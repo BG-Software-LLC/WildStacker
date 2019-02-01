@@ -48,6 +48,9 @@ items:
   disabled-worlds:
   - disabled_world
 
+  # When enabled, all items will have a custom name (even if not stacked)
+  unstacked-custom-name: false
+
   # When fix-stack is disabled, items with a max-stack of 1 will be added to inventories
   # with a max-stack size of 64. If a player picks up 80 picks, he will get 64 + 16, instead
   # of 80 different items.

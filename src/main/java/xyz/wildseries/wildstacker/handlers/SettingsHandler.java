@@ -26,7 +26,8 @@ public final class SettingsHandler {
     public final KeyMap<String> customNames;
 
     //Items settings
-    public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled;
+    public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
+            itemsUnstackedCustomName;
     public final List<String> itemsDisabledWorlds;
     public final KeySet blacklistedItems;
     public final int itemsCheckRange;
@@ -85,6 +86,7 @@ public final class SettingsHandler {
 
         itemsStackingEnabled = cfg.getBoolean("items.enabled", true);
         itemsDisabledWorlds = cfg.getStringList("items.disabled-worlds");
+        itemsUnstackedCustomName = cfg.getBoolean("items.unstacked-custom-name", false);
         itemsFixStackEnabled = cfg.getBoolean("items.fix-stack", false);
         blacklistedItems = new KeySet(cfg.getStringList("items.blacklist"));
         itemsCheckRange = cfg.getInt("items.merge-radius", 5);
