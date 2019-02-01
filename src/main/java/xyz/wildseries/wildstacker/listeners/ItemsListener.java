@@ -80,6 +80,9 @@ public final class ItemsListener implements Listener {
     //Priority is high so it will run before McMMO
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerPickup(PlayerPickupItemEvent e) {
+        if(e.getItem() == null)
+            return;
+
         StackedItem stackedItem = WStackedItem.of(e.getItem());
 
         //Should run only if the item is 1 (stacked item)
