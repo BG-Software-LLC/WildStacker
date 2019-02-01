@@ -29,6 +29,7 @@ import xyz.wildseries.wildstacker.listeners.PlayersListener;
 import xyz.wildseries.wildstacker.listeners.SpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.ClearLaggListener;
 import xyz.wildseries.wildstacker.listeners.plugins.EpicSpawnersListener;
+import xyz.wildseries.wildstacker.listeners.plugins.McMMOListener;
 import xyz.wildseries.wildstacker.listeners.plugins.SilkSpawnersListener;
 import xyz.wildseries.wildstacker.nms.NMSAdapter;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
@@ -107,7 +108,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
                 getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
-                getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
+                getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);;
+            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
+                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
 
             //Set all holograms of spawners
             for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
