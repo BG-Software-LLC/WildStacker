@@ -99,14 +99,24 @@ public final class EntitiesListener implements Listener {
 
         List<ItemStack> drops = new ArrayList<>();
 
+        final int LOOT_BONUS_LEVEL = lootBonusLevel;
+
         if(!plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name())){
             Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
-            drops.addAll(stackedEntity.getDrops(lootBonusLevel, 1));
+            new Thread(() -> {
+                drops.addAll(stackedEntity.getDrops(LOOT_BONUS_LEVEL, 1));
+                Bukkit.getScheduler().runTask(plugin, () ->
+                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation())));
+            }).start();
         }
 
         //Instant-kill drops should only work when entities-stacking is enabled
         else{
-            drops.addAll(stackedEntity.getDrops(lootBonusLevel));
+            new Thread(() -> {
+                drops.addAll(stackedEntity.getDrops(LOOT_BONUS_LEVEL));
+                Bukkit.getScheduler().runTask(plugin, () ->
+                        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation())));
+            }).start();
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
@@ -121,7 +131,6 @@ public final class EntitiesListener implements Listener {
         }
 
         e.getDrops().clear();
-        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation()));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -172,11 +181,12 @@ public final class EntitiesListener implements Listener {
             Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
 
             StackedEntity stackedEntity = WStackedEntity.of(
-                    plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass()));
+                    plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass(),
+                            CreatureSpawnEvent.SpawnReason.SPAWNER_EGG));
 
             stackedEntity.setStackAmount(--eggAmount, true);
 
-            SafeStacker.tryStack(stackedEntity);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> SafeStacker.tryStack(stackedEntity), 5L);
         }
 //        e.setCancelled(true);
 //

@@ -6,6 +6,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import xyz.wildseries.wildstacker.api.loot.LootTable;
 import xyz.wildseries.wildstacker.api.objects.StackedBarrel;
 import xyz.wildseries.wildstacker.api.objects.StackedEntity;
@@ -45,6 +46,8 @@ public interface SystemManager {
     void updateLinkedEntity(LivingEntity livingEntity, LivingEntity newLivingEntity);
 
     <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type);
+
+    <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason);
 
     void performKillAll();
 

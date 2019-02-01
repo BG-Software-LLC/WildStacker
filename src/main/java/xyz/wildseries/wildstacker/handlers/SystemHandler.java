@@ -257,8 +257,13 @@ public final class SystemHandler implements SystemManager {
      */
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type){
+        return spawnEntityWithoutStacking(location, type, CreatureSpawnEvent.SpawnReason.SPAWNER);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason) {
         try{
             World world = location.getWorld();
 
@@ -273,8 +278,7 @@ public final class SystemHandler implements SystemManager {
 
             EntitiesListener.noStackEntities.add(bukkitEntity.getUniqueId());
 
-            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class)
-                    .invoke(craftWorld, entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
+            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class).invoke(craftWorld, entity, spawnReason);
 
             return type.cast(bukkitEntity);
         }catch(Exception ex){
