@@ -17,6 +17,8 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
+import xyz.wildseries.wildstacker.api.objects.StackedItem;
+import xyz.wildseries.wildstacker.objects.WStackedItem;
 import xyz.wildseries.wildstacker.utils.legacy.EntityTypes;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
@@ -64,16 +66,24 @@ public final class ItemUtil {
     public static void dropItem(ItemStack itemStack, Location location){
         int amount = itemStack.getAmount();
 
-        for(int i = 0; i < amount / 64; i++){
-            ItemStack cloned = itemStack.clone();
-            cloned.setAmount(64);
-            location.getWorld().dropItemNaturally(location, cloned);
-        }
+        if(!plugin.getSettings().itemsStackingEnabled) {
+            for (int i = 0; i < amount / 64; i++) {
+                ItemStack cloned = itemStack.clone();
+                cloned.setAmount(64);
+                location.getWorld().dropItemNaturally(location, cloned);
+            }
 
-        if(amount % 64 > 0) {
+            if (amount % 64 > 0) {
+                ItemStack cloned = itemStack.clone();
+                cloned.setAmount(amount % 64);
+                location.getWorld().dropItemNaturally(location, cloned);
+            }
+        }
+        else{
             ItemStack cloned = itemStack.clone();
-            cloned.setAmount(amount % 64);
-            location.getWorld().dropItemNaturally(location, cloned);
+            cloned.setAmount(1);
+            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
+            stackedItem.setStackAmount(itemStack.getAmount(), true);
         }
     }
 
@@ -261,7 +271,7 @@ public final class ItemUtil {
         return itemStack;
     }
 
-    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
     public static void removeItem(ItemStack itemStack, PlayerInteractEvent event){
         try{
             EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEvent.class.getMethod("getHand").invoke(event);
