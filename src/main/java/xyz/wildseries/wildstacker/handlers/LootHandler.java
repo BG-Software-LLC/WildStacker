@@ -97,9 +97,9 @@ public final class LootHandler {
             FileUtil.saveResource("loottables/phantom.json");
         FileUtil.saveResource(!v1_13 ? "loottables/pig.json" : "loottables/pig1_13.json", "loottables/pig.json");
         if(containsEntity("POLAR_BEAR"))
-            FileUtil.saveResource("loottables/polar_bear.json");
+            FileUtil.saveResource(v1_13 ? "loottables/polar_bear1_13.json" : "loottables/polar_bear.json", "loottables/polar_bear.json");
         if(containsEntity("PUFFERFISH"))
-            FileUtil.saveResource(v1_13 ? "loottables/pufferfish1_13.json" : "loottables/pufferfish.json", "loottables/pufferfish.json");
+            FileUtil.saveResource("loottables/pufferfish.json");
         FileUtil.saveResource("loottables/rabbit.json");
         if(containsEntity("SALMON"))
             FileUtil.saveResource("loottables/salmon.json");
