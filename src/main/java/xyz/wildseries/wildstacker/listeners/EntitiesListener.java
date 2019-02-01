@@ -188,24 +188,6 @@ public final class EntitiesListener implements Listener {
 
             Bukkit.getScheduler().runTaskLater(plugin, () -> SafeStacker.tryStack(stackedEntity), 5L);
         }
-//        e.setCancelled(true);
-//
-//        EntityType entityType = ItemUtil.getEntityType(e.getItem());
-//
-//        Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
-//
-//        StackedEntity stackedEntity = WStackedEntity.of(
-//                plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass()));
-//
-//        stackedEntity.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItem()), true);
-//
-//        AsyncUtil.tryStack(stackedEntity);
-//
-//        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-//            ItemStack is = e.getItem().clone();
-//            is.setAmount(1);
-//            ItemUtil.removeItem(is, e);
-//        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
