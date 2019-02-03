@@ -116,14 +116,16 @@ public final class ItemsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryPickup(InventoryPickupItemEvent e){
         StackedItem stackedItem = WStackedItem.of(e.getItem());
-        e.setCancelled(true);
-        stackedItem.giveItemStack(e.getInventory());
-        if(stackedItem.getStackAmount() <= 0) {
-            stackedItem.remove();
-        }
+        if(stackedItem.getStackAmount() > 1) {
+            e.setCancelled(true);
+            stackedItem.giveItemStack(e.getInventory());
+            if (stackedItem.getStackAmount() <= 0) {
+                stackedItem.remove();
+            }
 
-        Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
-        hopper.getState().update();
+            Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
+            hopper.getState().update();
+        }
     }
 
 }
