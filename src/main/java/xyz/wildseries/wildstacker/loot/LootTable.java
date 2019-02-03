@@ -18,11 +18,13 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
 
     private List<LootPair> lootPairs;
     private int min, max;
+    private boolean dropEquipment;
 
-    public LootTable(List<LootPair> lootPairs, int min, int max){
+    public LootTable(List<LootPair> lootPairs, int min, int max, boolean dropEquipment){
         this.lootPairs = new ArrayList<>(lootPairs);
         this.min = min;
         this.max = max;
+        this.dropEquipment = dropEquipment;
     }
 
 
@@ -35,7 +37,8 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
             for(LootPair lootPair : lootPairs)
                 drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
 
-            drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
+            if(dropEquipment)
+                drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
         }
 
         return drops;
@@ -69,13 +72,14 @@ public class LootTable implements xyz.wildseries.wildstacker.api.loot.LootTable 
     }
 
     public static LootTable fromJson(JsonObject jsonObject){
+        boolean dropEquipment = !jsonObject.has("dropEquipment") || jsonObject.get("dropEquipment").getAsBoolean();
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : -1;
         List<LootPair> lootPairs = new ArrayList<>();
         if(jsonObject.has("pairs")){
             jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject())));
         }
-        return new LootTable(lootPairs, min, max);
+        return new LootTable(lootPairs, min, max, dropEquipment);
     }
 
 }
