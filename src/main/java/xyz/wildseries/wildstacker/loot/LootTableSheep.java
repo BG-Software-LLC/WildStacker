@@ -14,8 +14,8 @@ public class LootTableSheep extends LootTable {
 
     private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13");
 
-    private LootTableSheep(List<LootPair> lootPairs, int min, int max){
-        super(lootPairs, min, max);
+    private LootTableSheep(List<LootPair> lootPairs, int min, int max, boolean dropEquipment){
+        super(lootPairs, min, max, dropEquipment);
     }
 
     @Override
@@ -40,13 +40,14 @@ public class LootTableSheep extends LootTable {
     }
 
     public static LootTableSheep fromJson(JsonObject jsonObject){
+        boolean dropEquipment = !jsonObject.has("dropEquipment") || jsonObject.get("dropEquipment").getAsBoolean();
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : -1;
         List<LootPair> lootPairs = new ArrayList<>();
         if(jsonObject.has("pairs")){
             jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject())));
         }
-        return new LootTableSheep(lootPairs, min, max);
+        return new LootTableSheep(lootPairs, min, max, dropEquipment);
     }
 
 }
