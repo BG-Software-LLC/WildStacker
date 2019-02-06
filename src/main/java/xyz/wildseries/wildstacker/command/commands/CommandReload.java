@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 import xyz.wildseries.wildstacker.Locale;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.command.ICommand;
+import xyz.wildseries.wildstacker.handlers.LootHandler;
 import xyz.wildseries.wildstacker.handlers.SettingsHandler;
 import xyz.wildseries.wildstacker.tasks.KillTask;
 import xyz.wildseries.wildstacker.tasks.SaveTask;
@@ -48,6 +49,7 @@ public final class CommandReload implements ICommand {
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         new Thread(() -> {
             SettingsHandler.reload();
+            LootHandler.reload();
             Locale.reload();
             KillTask.start();
             SaveTask.start();
