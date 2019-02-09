@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,18 +57,23 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent e){
-            Material blockType;
+        Material blockType;
 
-            if (e.getBucket().name().contains("LAVA"))
-                blockType = Material.LAVA;
-            else if (e.getBucket().name().contains("WATER"))
-                blockType = Material.WATER;
-            else return;
+        if (e.getBucket().name().contains("LAVA"))
+            blockType = Material.LAVA;
+        else if (e.getBucket().name().contains("WATER"))
+            blockType = Material.WATER;
+        else return;
 
-            e.setCancelled(true);
+        e.setCancelled(true);
+
+        Block toBeReplaced = e.getBlockClicked().getRelative(e.getBlockFace());
+
+        if(toBeReplaced.getType() != Material.AIR)
+            return;
 
         if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER)
-            e.getBlockClicked().getRelative(e.getBlockFace()).setType(blockType);
+            toBeReplaced.setType(blockType);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
