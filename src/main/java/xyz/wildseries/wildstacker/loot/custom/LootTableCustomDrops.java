@@ -50,7 +50,21 @@ public class LootTableCustomDrops extends LootTableCustom {
     private List<ItemStack> getCustomDrops(EntityType entityType){
         List<ItemStack> drops = new ArrayList<>();
 
-        AbstractHolder<EntityType> abstractHolder = manager.getAbstractHolder(entityType);
+        AbstractHolder<EntityType> abstractHolder;
+
+        try{
+            abstractHolder = CustomDropsManager.getMobData().getAbstractHolder(entityType);
+        }catch(Throwable th){
+            try {
+                //noinspection unchecked,JavaReflectionMemberAccess
+                abstractHolder = (AbstractHolder<EntityType>) CustomDropsManager.class.getMethod("getAbstractHolder", EntityType.class)
+                        .invoke(manager, entityType);
+            }catch(Exception ex){
+                ex.printStackTrace();
+                return drops;
+            }
+        }
+
 
         if (abstractHolder == null) {
             return drops;
