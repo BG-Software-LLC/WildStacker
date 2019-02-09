@@ -37,6 +37,15 @@ public final class ItemsListener implements Listener {
             return;
 
         StackedItem item = WStackedItem.of(e.getEntity());
+        int limit;
+
+        if(item.getStackAmount() > (limit = plugin.getSettings().itemsLimits.get(item.getItemStack()))){
+            ItemStack cloned = item.getItemStack().clone();
+            cloned.setAmount(cloned.getAmount() - limit);
+            item.setStackAmount(limit, true);
+            Item spawnedItem = e.getEntity().getWorld().dropItemNaturally(e.getEntity().getLocation(), cloned);
+            spawnedItem.setPickupDelay(40);
+        }
 
         SafeStacker.tryStack(item, new AsyncCallback<Item>() {
             @Override

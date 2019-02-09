@@ -17,8 +17,6 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
-import xyz.wildseries.wildstacker.api.objects.StackedItem;
-import xyz.wildseries.wildstacker.objects.WStackedItem;
 import xyz.wildseries.wildstacker.utils.legacy.EntityTypes;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
@@ -80,10 +78,7 @@ public final class ItemUtil {
             }
         }
         else{
-            ItemStack cloned = itemStack.clone();
-            cloned.setAmount(1);
-            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
-            stackedItem.setStackAmount(itemStack.getAmount(), true);
+            location.getWorld().dropItemNaturally(location, itemStack);
         }
     }
 
