@@ -1,6 +1,7 @@
 package xyz.wildseries.wildstacker.listeners;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
@@ -97,26 +98,22 @@ public final class EntitiesListener implements Listener {
             lootBonusLevel = e.getEntity().getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
         }
 
-        List<ItemStack> drops = new ArrayList<>();
-
         final int LOOT_BONUS_LEVEL = lootBonusLevel;
 
         if(!plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name())){
             Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
-            new Thread(() -> {
-                drops.addAll(stackedEntity.getDrops(LOOT_BONUS_LEVEL, 1));
-                Bukkit.getScheduler().runTask(plugin, () ->
-                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation())));
-            }).start();
+            if(plugin.getSettings().entitiesStackingEnabled) {
+                calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, 1);
+                e.getDrops().clear();
+            }
         }
 
         //Instant-kill drops should only work when entities-stacking is enabled
         else{
-            new Thread(() -> {
-                drops.addAll(stackedEntity.getDrops(LOOT_BONUS_LEVEL));
-                Bukkit.getScheduler().runTask(plugin, () ->
-                        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, e.getEntity().getLocation())));
-            }).start();
+            if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
+                calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, stackedEntity.getStackAmount());
+                e.getDrops().clear();
+            }
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
@@ -129,8 +126,14 @@ public final class EntitiesListener implements Listener {
                 }catch(IllegalArgumentException ignored){}
             }
         }
+    }
 
-        e.getDrops().clear();
+    private void calcAndDrop(StackedEntity stackedEntity, Location location, int lootBonusLevel, int stackAmount){
+        new Thread(() -> {
+            List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
+            Bukkit.getScheduler().runTask(plugin, () ->
+                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
+        }).start();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
