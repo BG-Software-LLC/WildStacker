@@ -31,8 +31,8 @@ public final class ProvidersHandler {
         if(Bukkit.getPluginManager().isPluginEnabled("CustomDrops")) {
             WildStackerPlugin.log(" - Using CustomDrops as Custom LootTable.");
             dropsProvider = DropsProvider.CUSTOM_DROPS;
-        }else if(Bukkit.getPluginManager().isPluginEnabled("DropEdit")) {
-            WildStackerPlugin.log(" - Using DropEdit as Custom LootTable.");
+        }else if(Bukkit.getPluginManager().isPluginEnabled("DropEdit2")) {
+            WildStackerPlugin.log(" - Using DropEdit2 as Custom LootTable.");
             dropsProvider = DropsProvider.DROP_EDIT;
         }else if(Bukkit.getPluginManager().isPluginEnabled("EditDrops")) {
             WildStackerPlugin.log(" - Using EditDrops as Custom LootTable.");
