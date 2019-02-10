@@ -96,7 +96,7 @@ public final class BucketsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST) 
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent e){
         if(!plugin.getSettings().bucketsStackerEnabled)
             return;
