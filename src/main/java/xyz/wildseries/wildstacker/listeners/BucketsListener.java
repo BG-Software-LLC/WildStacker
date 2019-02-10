@@ -3,21 +3,20 @@ package xyz.wildseries.wildstacker.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
 
@@ -31,90 +30,70 @@ public final class BucketsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerBucketFill(PlayerBucketFillEvent e){
-        ItemStack newBucketItem;
-
-        if(e.getBlockClicked().getType().name().contains("LAVA"))
-            newBucketItem = new ItemStack(Material.LAVA_BUCKET);
-        else if(e.getBlockClicked().getType().name().contains("WATER"))
-            newBucketItem = new ItemStack(Material.WATER_BUCKET);
-        else return;
-
-        e.setCancelled(true);
-
-        e.getBlockClicked().setType(Material.AIR);
-
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                ItemStack inHand = getItem(e);
-                inHand.setAmount(inHand.getAmount() - 1);
-                //e.getPlayer().setItemInHand(inHand);
-                ItemUtil.addItem(newBucketItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
-                e.getPlayer().updateInventory();
-            }, 1L);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent e){
-        Material blockType;
-
-        if (e.getBucket().name().contains("LAVA"))
-            blockType = Material.LAVA;
-        else if (e.getBucket().name().contains("WATER"))
-            blockType = Material.WATER;
-        else return;
-
-        e.setCancelled(true);
-
-        Block toBeReplaced = e.getBlockClicked().getRelative(e.getBlockFace());
-
-        if(toBeReplaced.getType() != Material.AIR)
+    public void onBucketUse(PlayerInteractEvent e){
+        if(!plugin.getSettings().bucketsStackerEnabled)
             return;
 
-        if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER)
-            toBeReplaced.setType(blockType);
+        if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
+            return;
+
+        Block toBeReplaced = e.getClickedBlock().getRelative(e.getBlockFace());
+        Material replacedType = e.getItem().getType().name().contains("LAVA") ? Material.LAVA : Material.WATER;
+        ItemStack bucketToAdd = new ItemStack(Material.BUCKET);
+        boolean returnIfNotFullBlock = true;
+
+        switch (e.getItem().getType()){
+            case WATER_BUCKET:
+                if(toBeReplaced.getType().name().contains("WATER"))
+                    returnIfNotFullBlock = false;
+                replacedType = Material.WATER;
+                bucketToAdd = new ItemStack(Material.BUCKET);
+                break;
+            case LAVA_BUCKET:
+                if(toBeReplaced.getType().name().contains("LAVA"))
+                    returnIfNotFullBlock = false;
+                replacedType = Material.LAVA;
+                bucketToAdd = new ItemStack(Material.BUCKET);
+                break;
+            case BUCKET:
+                replacedType = Material.AIR;
+                bucketToAdd = toBeReplaced.getType().name().contains("WATER") ? new ItemStack(Material.WATER_BUCKET) : new ItemStack(Material.LAVA_BUCKET);
+                break;
+            case MILK_BUCKET:
+                return;
+        }
+
+        e.setCancelled(true);
+
+        //noinspection deprecation
+        if(toBeReplaced.getData() != 0 && returnIfNotFullBlock)
+            return;
+
+        switch (replacedType){
+            case WATER:
+            case LAVA:
+                BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(toBeReplaced, toBeReplaced.getState(), e.getClickedBlock(), e.getItem(), e.getPlayer(), true);
+                Bukkit.getPluginManager().callEvent(blockPlaceEvent);
+                if(blockPlaceEvent.isCancelled())
+                    return;
+                break;
+            case AIR:
+                BlockBreakEvent blockBreakEvent = new BlockBreakEvent(toBeReplaced, e.getPlayer());
+                Bukkit.getPluginManager().callEvent(blockBreakEvent);
+                if(blockBreakEvent.isCancelled())
+                    return;
+                break;
+        }
+
+        toBeReplaced.setType(replacedType);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                ItemStack inHand = getItem(e);
-                inHand.setAmount(inHand.getAmount() - 1);
-                //setItem(e, inHand.getAmount() <= 0 ? new ItemStack(Material.AIR) : inHand);
-                ItemUtil.addItem(new ItemStack(Material.BUCKET), e.getPlayer().getInventory(), e.getPlayer().getLocation());
-                e.getPlayer().updateInventory();
-            }, 1L);
+            ItemStack inHand = e.getItem().clone();
+            inHand.setAmount(1);
+            ItemUtil.removeItem(inHand, e);
+
+            ItemUtil.addItem(bucketToAdd, e.getPlayer().getInventory(), e.getPlayer().getLocation());
         }
-    }
-
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    private ItemStack getItem(PlayerBucketEvent event){
-        try {
-            ItemStack inHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
-            if(inHand != null) {
-                if(event instanceof PlayerBucketEmptyEvent){
-                    if(inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA"))
-                        return inHand;
-                }else {
-                    if(inHand.getType().name().contains("BUCKET") &&
-                            !(inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA")))
-                        return inHand;
-                }
-            }
-        }catch(Throwable ignored){}
-        return event.getPlayer().getItemInHand();
-    }
-
-    @SuppressWarnings("JavaReflectionMemberAccess")
-    private void setItem(PlayerBucketEmptyEvent event, ItemStack itemStack){
-        try {
-            ItemStack inHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
-            if(inHand != null && (inHand.getType().name().contains("WATER") || inHand.getType().name().contains("LAVA"))) {
-                PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
-                        .invoke(event.getPlayer().getInventory(), itemStack);
-                return;
-            }
-        }catch(Throwable ignored){}
-        event.getPlayer().setItemInHand(itemStack);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
