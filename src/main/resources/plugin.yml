@@ -1,5 +1,5 @@
 name: WildStacker
-version: 2.6.5
+version: 2.6.6
 api-version: 1.13
 main: xyz.wildseries.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
