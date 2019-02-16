@@ -32,6 +32,7 @@ import xyz.wildseries.wildstacker.tasks.SaveTask;
 import xyz.wildseries.wildstacker.tasks.StackTask;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
+import xyz.wildseries.wildstacker.utils.async.WildStackerThread;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
 import java.util.ArrayList;
@@ -247,7 +248,8 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void updateLinkedEntity(LivingEntity livingEntity, LivingEntity newLivingEntity) {
         for(StackedSpawner stackedSpawner : getStackedSpawners()){
-            if(stackedSpawner.getLinkedEntity() != null && stackedSpawner.getLinkedEntity().equals(livingEntity))
+            LivingEntity linkedEntity = ((WStackedSpawner) stackedSpawner).getRawLinkedEntity();
+            if(linkedEntity != null && linkedEntity.equals(livingEntity))
                 stackedSpawner.setLinkedEntity(newLivingEntity);
         }
     }
@@ -289,7 +291,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
-        new Thread(() -> {
+        new WildStackerThread(() -> {
             for(StackedEntity stackedEntity : getStackedEntities()) {
                 if (stackedEntity.getStackAmount() > 1)
                     stackedEntity.remove();

@@ -194,6 +194,10 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         this.linkedEntity = linkedEntity;
     }
 
+    public LivingEntity getRawLinkedEntity(){
+        return linkedEntity;
+    }
+
     public static StackedSpawner of(Block block){
         if(block.getState() instanceof CreatureSpawner)
             return of((CreatureSpawner) block.getState());

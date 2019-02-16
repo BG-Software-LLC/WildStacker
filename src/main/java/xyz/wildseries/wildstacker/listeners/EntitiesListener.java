@@ -40,8 +40,7 @@ import xyz.wildseries.wildstacker.listeners.events.EntityBreedEvent;
 import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
-import xyz.wildseries.wildstacker.utils.SafeStacker;
-import xyz.wildseries.wildstacker.utils.async.AsyncCallback;
+import xyz.wildseries.wildstacker.utils.async.WildStackerThread;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
 import java.util.ArrayList;
@@ -129,7 +128,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private void calcAndDrop(StackedEntity stackedEntity, Location location, int lootBonusLevel, int stackAmount){
-        new Thread(() -> {
+        new WildStackerThread(() -> {
             List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
             Bukkit.getScheduler().runTask(plugin, () ->
                     drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
@@ -166,8 +165,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-        SafeStacker.tryStack(stackedEntity);
+        stackedEntity.tryStack();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -189,7 +187,7 @@ public final class EntitiesListener implements Listener {
 
             stackedEntity.setStackAmount(--eggAmount, true);
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> SafeStacker.tryStack(stackedEntity), 5L);
+            Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 5L);
         }
     }
 
@@ -217,7 +215,7 @@ public final class EntitiesListener implements Listener {
 
         e.getEntity().setColor(e.getColor());
         stackedEntity.setStackAmount(1, false);
-        SafeStacker.tryStack(stackedEntity);
+        stackedEntity.tryStack();
     }
 
 
@@ -242,7 +240,7 @@ public final class EntitiesListener implements Listener {
             else{
                 ((Sheep) e.getEntity()).setSheared(true);
                 stackedEntity.setStackAmount(1, false);
-                SafeStacker.tryStack(stackedEntity);
+                stackedEntity.tryStack();
             }
         }
     }
@@ -265,7 +263,7 @@ public final class EntitiesListener implements Listener {
             stackedEntity.setStackAmount(1, false);
         }
         e.getEntity().setSheared(false);
-        SafeStacker.tryStack(stackedEntity);
+        stackedEntity.tryStack();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -317,16 +315,11 @@ public final class EntitiesListener implements Listener {
     @EventHandler
     public void onEntityBreed(EntityBreedEvent e){
         if(plugin.getSettings().stackAfterBreed) {
-            SafeStacker.tryStackInto(WStackedEntity.of(e.getFather()), WStackedEntity.of(e.getMother()), new AsyncCallback<Boolean>() {
-                @Override
-                public void run(Boolean returnValue) {
-                    if(returnValue) {
-                        LivingEntity livingEntity = WStackedEntity.of(e.getMother()).tryStack();
-                        if(livingEntity != null)
-                            ((Animals) livingEntity).setBreed(false);
-                    }
-                }
-            });
+            if(WStackedEntity.of(e.getFather()).tryStackInto(WStackedEntity.of(e.getMother()))){
+                LivingEntity livingEntity = WStackedEntity.of(e.getMother()).tryStack();
+                if(livingEntity != null)
+                    ((Animals) livingEntity).setBreed(false);
+            }
         }
     }
 

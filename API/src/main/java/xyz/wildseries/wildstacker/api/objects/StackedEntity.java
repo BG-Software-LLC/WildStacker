@@ -1,6 +1,5 @@
 package xyz.wildseries.wildstacker.api.objects;
 
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public interface StackedEntity extends AsyncStackedObject<LivingEntity> {
+public interface StackedEntity extends StackedObject<LivingEntity> {
 
     LivingEntity getLivingEntity();
 
@@ -26,8 +25,6 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity> {
     void setCustomNameVisible(boolean visible);
 
     LivingEntity trySpawnerStack(StackedSpawner stackedSpawner);
-
-    LivingEntity trySpawnerStackAsync(StackedSpawner stackedSpawner, List<Entity> nearbyEntities);
 
     StackedEntity spawnDuplicate(int amount);
 

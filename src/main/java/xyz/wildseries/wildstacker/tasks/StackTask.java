@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.objects.WStackedEntity;
-import xyz.wildseries.wildstacker.utils.SafeStacker;
 
 import java.util.ConcurrentModificationException;
 import java.util.Set;
@@ -46,7 +45,7 @@ public final class StackTask extends BukkitRunnable {
                         if (plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()))
                             continue;
 
-                        SafeStacker.tryStack(WStackedEntity.of(livingEntity));
+                        WStackedEntity.of(livingEntity).tryStack();
                     }
                 }catch(ConcurrentModificationException ignored){}
             }

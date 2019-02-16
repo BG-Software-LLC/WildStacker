@@ -32,7 +32,6 @@ import xyz.wildseries.wildstacker.objects.WStackedEntity;
 import xyz.wildseries.wildstacker.objects.WStackedSpawner;
 import xyz.wildseries.wildstacker.utils.EntityUtil;
 import xyz.wildseries.wildstacker.utils.ItemUtil;
-import xyz.wildseries.wildstacker.utils.SafeStacker;
 import xyz.wildseries.wildstacker.utils.legacy.Materials;
 
 import java.util.ArrayList;
@@ -248,7 +247,7 @@ public final class SpawnersListener implements Listener {
 
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
 
-            SafeStacker.trySpawnerStack(stackedEntity, stackedSpawner);
+            stackedEntity.trySpawnerStack(stackedSpawner);
         }
     }
 

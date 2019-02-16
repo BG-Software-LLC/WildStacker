@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
+import xyz.wildseries.wildstacker.utils.async.WildStackerThread;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,7 +91,7 @@ public final class EditorListener implements Listener {
                     player.openInventory(instance.getEditor().getBarrelsEditor());
                     break;
                 case 49:
-                    new Thread(() -> {
+                    new WildStackerThread(() -> {
                         instance.getEditor().saveConfiguration();
                         player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
                     }).start();

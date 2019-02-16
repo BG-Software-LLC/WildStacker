@@ -98,7 +98,16 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public Item tryStack() {
         int range = plugin.getSettings().itemsCheckRange;
-        return tryStackAsync(object.getNearbyEntities(range, range, range));
+
+        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
+
+        for (Entity nearby : nearbyEntities) {
+            if (nearby instanceof Item && nearby.isValid() && tryStackInto(WStackedItem.of(nearby)))
+                return (Item) nearby;
+        }
+
+        updateName();
+        return null;
     }
 
     @Override
@@ -203,21 +212,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         }
 
         setStackAmount(startAmount - giveAmount, true);
-    }
-
-    /*
-     * Async methods
-     */
-
-    @Override
-    public Item tryStackAsync(List<Entity> nearbyEntities) {
-        for (Entity nearby : nearbyEntities) {
-            if (nearby instanceof Item && nearby.isValid() && tryStackInto(WStackedItem.of(nearby)))
-                return (Item) nearby;
-        }
-
-        updateName();
-        return null;
     }
 
     public static StackedItem of(Entity entity){

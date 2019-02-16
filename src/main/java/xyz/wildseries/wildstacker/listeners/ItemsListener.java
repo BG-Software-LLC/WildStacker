@@ -16,8 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedItem;
 import xyz.wildseries.wildstacker.objects.WStackedItem;
-import xyz.wildseries.wildstacker.utils.SafeStacker;
-import xyz.wildseries.wildstacker.utils.async.AsyncCallback;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -47,17 +45,12 @@ public final class ItemsListener implements Listener {
             spawnedItem.setPickupDelay(40);
         }
 
-        SafeStacker.tryStack(item, new AsyncCallback<Item>() {
-            @Override
-            public void run(Item returnValue) {
-                if(returnValue == null) {
-                    //Set the amount of item-stack to 1
-                    ItemStack is = item.getItemStack();
-                    is.setAmount(1);
-                    item.setItemStack(is);
-                }
-            }
-        });
+        if(item.tryStack() == null){
+            //Set the amount of item-stack to 1
+            ItemStack is = item.getItemStack();
+            is.setAmount(1);
+            item.setItemStack(is);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -74,7 +67,7 @@ public final class ItemsListener implements Listener {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
                 StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
-                SafeStacker.tryStackInto(stackedItem, targetItem);
+                stackedItem.tryStackInto(targetItem);
             }
         }, 5L);
     }

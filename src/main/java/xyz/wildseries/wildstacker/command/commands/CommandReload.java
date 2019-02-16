@@ -9,6 +9,7 @@ import xyz.wildseries.wildstacker.handlers.SettingsHandler;
 import xyz.wildseries.wildstacker.tasks.KillTask;
 import xyz.wildseries.wildstacker.tasks.SaveTask;
 import xyz.wildseries.wildstacker.tasks.StackTask;
+import xyz.wildseries.wildstacker.utils.async.WildStackerThread;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public final class CommandReload implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        new Thread(() -> {
+        new WildStackerThread(() -> {
             SettingsHandler.reload();
             LootHandler.reload();
             Locale.reload();

@@ -115,7 +115,21 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public LivingEntity tryStack() {
         int range = plugin.getSettings().entitiesCheckRange;
-        return tryStackAsync(object.getNearbyEntities(range, range, range));
+
+        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
+
+        //Making sure it's not armor-stand or player
+        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER)
+            return null;
+
+        for (Entity nearby : nearbyEntities) {
+            if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
+                return (LivingEntity) nearby;
+            }
+        }
+
+        updateName();
+        return null;
     }
 
     @Override
@@ -240,19 +254,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public LivingEntity trySpawnerStack(StackedSpawner stackedSpawner) {
-        int range = plugin.getSettings().entitiesCheckRange;
-        return trySpawnerStackAsync(stackedSpawner, object.getNearbyEntities(range, range, range));
-    }
-
-    @Override
-    public LivingEntity trySpawnerStackAsync(StackedSpawner stackedSpawner, List<Entity> nearbyEntities) {
         if (!plugin.getSettings().linkedEntitiesEnabled)
-            return tryStackAsync(nearbyEntities);
+            tryStack();
 
         LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
         if (linkedEntity == null || !tryStackInto(WStackedEntity.of(linkedEntity))) {
-            linkedEntity = tryStackAsync(nearbyEntities);
+            linkedEntity = tryStack();
 
             if (linkedEntity == null)
                 linkedEntity = object;
@@ -277,7 +285,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         if(plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
             duplicate.getLivingEntity().setFireTicks(160);
-
 
         DuplicateSpawnEvent duplicateSpawnEvent = new DuplicateSpawnEvent(this, duplicate);
         Bukkit.getPluginManager().callEvent(duplicateSpawnEvent);
@@ -309,26 +316,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public boolean isIgnoreDeathEvent() {
         return ignoreDeathEvent;
-    }
-
-    /*
-     * Async methods
-     */
-
-    @Override
-    public LivingEntity tryStackAsync(List<Entity> nearbyEntities){
-        //Making sure it's not armor-stand or player
-        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER)
-            return null;
-
-        for (Entity nearby : nearbyEntities) {
-            if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
-                return (LivingEntity) nearby;
-            }
-        }
-
-        updateName();
-        return null;
     }
 
     //Not an API method!
