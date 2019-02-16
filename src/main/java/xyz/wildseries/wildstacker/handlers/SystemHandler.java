@@ -52,6 +52,14 @@ public final class SystemHandler implements SystemManager {
             SaveTask.start();
             KillTask.start();
             StackTask.start();
+
+            for(World world : Bukkit.getWorlds()){
+                for(LivingEntity livingEntity : world.getLivingEntities()){
+                    if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId()))
+                        getStackedEntity(livingEntity); //Should transfer data from cached amount entities
+                }
+            }
+
         }, 1L);
 
         //Start the auto-clear
