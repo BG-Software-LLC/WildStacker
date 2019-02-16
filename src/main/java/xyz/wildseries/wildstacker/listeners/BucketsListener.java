@@ -78,6 +78,8 @@ public final class BucketsListener implements Listener {
                     return;
                 break;
             case AIR:
+                if(e.getItem().getType() == Material.BUCKET)
+                    return;
                 BlockBreakEvent blockBreakEvent = new BlockBreakEvent(toBeReplaced, e.getPlayer());
                 Bukkit.getPluginManager().callEvent(blockBreakEvent);
                 if(blockBreakEvent.isCancelled())
