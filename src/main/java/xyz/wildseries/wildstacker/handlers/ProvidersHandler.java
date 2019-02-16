@@ -8,6 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.wildseries.wildstacker.WildStackerPlugin;
 import xyz.wildseries.wildstacker.api.objects.StackedObject;
+import xyz.wildseries.wildstacker.hooks.AntiCheatProvider;
+import xyz.wildseries.wildstacker.hooks.AntiCheatProvider_AAC;
+import xyz.wildseries.wildstacker.hooks.AntiCheatProvider_Default;
+import xyz.wildseries.wildstacker.hooks.AntiCheatProvider_NoCheatPlus;
+import xyz.wildseries.wildstacker.hooks.AntiCheatProvider_Spartan;
 import xyz.wildseries.wildstacker.hooks.HologramsProvider;
 import xyz.wildseries.wildstacker.hooks.HologramsProvider_Arconix;
 import xyz.wildseries.wildstacker.hooks.HologramsProvider_Default;
@@ -20,6 +25,7 @@ import xyz.wildseries.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 @SuppressWarnings("unused")
 public final class ProvidersHandler {
 
+    private AntiCheatProvider antiCheatProvider;
     private SpawnersProvider spawnersProvider;
     private HologramsProvider hologramsProvider;
     private DropsProvider dropsProvider;
@@ -61,6 +67,15 @@ public final class ProvidersHandler {
         else if(Bukkit.getPluginManager().isPluginEnabled("Arconix"))
             hologramsProvider = new HologramsProvider_Arconix();
         else hologramsProvider = new HologramsProvider_Default();
+
+        if(Bukkit.getPluginManager().isPluginEnabled("AAC"))
+            antiCheatProvider = new AntiCheatProvider_AAC();
+        else if(Bukkit.getPluginManager().isPluginEnabled("NoCheatPlus"))
+            antiCheatProvider = new AntiCheatProvider_NoCheatPlus();
+        else if(Bukkit.getPluginManager().isPluginEnabled("Spartan"))
+            antiCheatProvider = new AntiCheatProvider_Spartan();
+        else
+            antiCheatProvider = new AntiCheatProvider_Default();
 
         WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
@@ -127,6 +142,18 @@ public final class ProvidersHandler {
 
     public void clearHolograms(){
         hologramsProvider.clearHolograms();
+    }
+
+    /*
+     *  AntiCheat Provider
+     */
+
+    public void enableBypass(Player player){
+        antiCheatProvider.enableBypass(player);
+    }
+
+    public void disableBypass(Player player){
+        antiCheatProvider.disableBypass(player);
     }
 
     public enum DropsProvider{

@@ -30,13 +30,16 @@ public final class BucketsListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBucketUse(PlayerInteractEvent e){
         if(!plugin.getSettings().bucketsStackerEnabled)
             return;
 
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
             return;
+
+        plugin.getProviders().enableBypass(e.getPlayer());
+        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getProviders().disableBypass(e.getPlayer()), 5L);
 
         Block toBeReplaced = e.getClickedBlock().getRelative(e.getBlockFace());
         Material replacedType = e.getItem().getType().name().contains("LAVA") ? Material.LAVA : Material.WATER;
