@@ -73,6 +73,9 @@ public final class BucketsListener implements Listener {
         if(toBeReplaced.getData() != 0 && returnIfNotFullBlock)
             return;
 
+        if(toBeReplaced.getType() == Material.AIR && e.getItem().getType() == Material.BUCKET)
+            return;
+
         switch (replacedType){
             case WATER:
             case LAVA:
@@ -82,8 +85,6 @@ public final class BucketsListener implements Listener {
                     return;
                 break;
             case AIR:
-                if(e.getItem().getType() == Material.BUCKET)
-                    return;
                 BlockBreakEvent blockBreakEvent = new BlockBreakEvent(toBeReplaced, e.getPlayer());
                 Bukkit.getPluginManager().callEvent(blockBreakEvent);
                 if(blockBreakEvent.isCancelled())
