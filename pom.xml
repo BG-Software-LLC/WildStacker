@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>xyz.wildseries</groupId>
+    <groupId>com.bgsoftware</groupId>
     <artifactId>wildstacker</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -49,7 +49,7 @@
         </dependency>
         <!-- WildStacker API -->
         <dependency>
-            <groupId>xyz.wildseries</groupId>
+            <groupId>com.bgsoftware</groupId>
             <artifactId>wildstacker-api</artifactId>
             <version>b9</version>
         </dependency>

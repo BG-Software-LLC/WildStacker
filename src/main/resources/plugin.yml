@@ -1,7 +1,7 @@
 name: WildStacker
 version: 2.6.8
 api-version: 1.13
-main: xyz.wildseries.wildstacker.WildStackerPlugin
+main: com.bgsoftware.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
 website: http://wildseries.xyz/
 authors: [Ome_R, WildSeries]
