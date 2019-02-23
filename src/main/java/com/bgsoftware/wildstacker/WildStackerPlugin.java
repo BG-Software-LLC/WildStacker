@@ -162,7 +162,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private void loadNMSAdapter(){
         String version = getServer().getClass().getPackage().getName().split("\\.")[3];
         try{
-            nmsAdapter = (NMSAdapter) Class.forName("xyz.wildseries.wildstacker.nms.NMSAdapter_" + version).newInstance();
+            nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + version).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + version + " - shutting down...");
             runOnFirstTick(() -> getServer().getPluginManager().disablePlugin(this));
