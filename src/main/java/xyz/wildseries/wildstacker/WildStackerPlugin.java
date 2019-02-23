@@ -30,6 +30,7 @@ import xyz.wildseries.wildstacker.listeners.SpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.ClearLaggListener;
 import xyz.wildseries.wildstacker.listeners.plugins.EpicSpawnersListener;
 import xyz.wildseries.wildstacker.listeners.plugins.SilkSpawnersListener;
+import xyz.wildseries.wildstacker.metrics.Metrics;
 import xyz.wildseries.wildstacker.nms.NMSAdapter;
 import xyz.wildseries.wildstacker.utils.ReflectionUtil;
 
@@ -54,6 +55,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     @Override
     public void onEnable() {
         plugin = this;
+        new Metrics(this);
+
         log("******** ENABLE START ********");
 
         breakMenuHandler = new BreakMenuHandler();
