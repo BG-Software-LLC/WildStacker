@@ -8,14 +8,38 @@ import java.util.UUID;
 
 public interface StackedItem extends StackedObject<Item> {
 
+    /**
+     * Get the item object of bukkit.
+     * @return item
+     */
     Item getItem();
 
+
+    /**
+     * Get the uuid of the item.
+     * @return uuid
+     */
     UUID getUniqueId();
 
+    /**
+     * Set the item stack of the item.
+     * If null or air, the remove method will be called.
+     * @param itemStack a new item stack
+     */
     void setItemStack(ItemStack itemStack);
 
+    /**
+     * Get the item stack of the item.
+     * A duplicated item stack with the stacked object's amount.
+     * @return item stack
+     */
     ItemStack getItemStack();
 
+    /**
+     * Add the duplicated item stack to an inventory.
+     * Respects settings, such as 'item fix stack' and more
+     * @param inventory inventory to add the item to
+     */
     void giveItemStack(Inventory inventory);
 
 }
