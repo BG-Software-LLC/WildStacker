@@ -5,7 +5,7 @@ main: xyz.wildseries.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
 website: http://wildseries.xyz/
 authors: [Ome_R, WildSeries]
-softdepend: [Vault, SilkSpawners, CustomDrops, DropEdit, ClearLag, EpicSpawners, MergedSpawner, StackSpawners, FastAsyncWorldEdit, HolographicDisplays, Holograms, Arconix, WildTools, MythicMobs]
+softdepend: [Multiverse-Core, Vault, SilkSpawners, CustomDrops, DropEdit, ClearLag, EpicSpawners, MergedSpawner, StackSpawners, FastAsyncWorldEdit, HolographicDisplays, Holograms, Arconix, WildTools, MythicMobs]
 loadbefore: [ShopGUIPlus]
 commands:
   stacker:
