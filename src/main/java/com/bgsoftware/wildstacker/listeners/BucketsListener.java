@@ -103,7 +103,7 @@ public final class BucketsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent e){
         if(!plugin.getSettings().bucketsStackerEnabled)
             return;
