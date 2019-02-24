@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
@@ -30,7 +31,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
-import com.boydti.fawe.config.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -182,8 +182,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
         if(Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit") && settingsHandler.itemsStackingEnabled){
             messages.add("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");
+            FastAsyncWEHook.disableTicksLimiter();
             //WildStacker disabled the tick limiter for items.
-            Settings.IMP.TICK_LIMITER.ITEMS = Integer.MAX_VALUE;
         }
 
         if(!messages.isEmpty()){
