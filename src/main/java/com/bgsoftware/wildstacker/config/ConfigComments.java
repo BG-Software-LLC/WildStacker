@@ -123,7 +123,7 @@ public final class ConfigComments {
 
     @Comment("")
     @Comment("Blacklisted names is a list of names that when an entity has this name, it won't get stacked.")
-    @Comment("Color codes aren't supported, as well as regex.")
+    @Comment("Color codes are supported, as well as regex.")
     @Comment("If you wish to enable stacking of all entities based on their name, use \"name-blacklist: []\"")
     public static String ENTITIES_NAME_BLACKLIST = "entities.name-blacklist";
 
