@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import io.lumine.xikage.mythicmobs.MythicMobs;
+import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 
@@ -12,6 +13,16 @@ public final class MythicMobsHook {
         }
 
         return false;
+    }
+
+    public static LivingEntity tryDuplicate(LivingEntity livingEntity){
+        if(isMythicMob(livingEntity)){
+            ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
+            ActiveMob duplicate = MythicMobs.inst().getMobManager().spawnMob(activeMob.getEntity().getName(), livingEntity.getLocation());
+            return duplicate.getLivingEntity();
+        }
+
+        return null;
     }
 
 }
