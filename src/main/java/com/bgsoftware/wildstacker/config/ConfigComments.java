@@ -359,6 +359,10 @@ public final class ConfigComments {
     public static String SPAWNERS_PLACE_CHARGE = "spawners.place-charge";
 
     @Comment("")
+    @Comment("When enabled, players will be able to change spawners by clicking them with spawn eggs.")
+    public static String SPAWNERS_CHANGE_USING_EGGS = "spawners.change-using-eggs";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked barrels (aka stacked blocks).")
     public static String BARRELS = "barrels";
 

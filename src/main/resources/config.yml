@@ -366,6 +366,9 @@ spawners:
     amount: 0
     multiply-stack-amount: false
 
+  # When enabled, players will be able to change spawners by clicking them with spawn eggs.
+  change-using-eggs: true
+
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
   # Should blocks get stacked into barrels on the server?

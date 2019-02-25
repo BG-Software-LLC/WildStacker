@@ -258,6 +258,9 @@ public final class SpawnersListener implements Listener {
                 !Materials.isValidAndSpawnEgg(e.getItem()) || e.getClickedBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;
 
+        if(!plugin.getSettings().changeUsingEggs)
+            e.setCancelled(true);
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> WStackedSpawner.of(e.getClickedBlock()).updateName(), 2L);
     }
 

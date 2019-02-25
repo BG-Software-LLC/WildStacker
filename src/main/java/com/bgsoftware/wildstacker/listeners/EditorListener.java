@@ -38,8 +38,8 @@ public final class EditorListener implements Listener {
             "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner", "spawners.silk-spawners.drop-to-inventory",
             "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names", "spawners.break-menu.enabled",
             "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
-            "spawners.place-charge.multiply-stack-amount", "barrels.enabled", "barrels.chunk-merge", "barrels.explosions-break-stack",
-            "barrels.toggle-command.enabled", "barrels.place-inventory"};
+            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "barrels.enabled",
+            "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
             "items.blacklist", "items.disabled-worlds", "entities.disabled-worlds", "entities.blacklist",
             "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
@@ -332,6 +332,9 @@ public final class EditorListener implements Listener {
                     break;
                 case 23:
                     configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
+                    break;
+                case 24:
+                    configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
                     break;
                 default:
                     return;

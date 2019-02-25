@@ -244,6 +244,9 @@ public final class EditorHandler {
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.place-charge.multiply-stack-amount")).build());
 
+        editor.setItem(24, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
+
         return editor;
     }
 
