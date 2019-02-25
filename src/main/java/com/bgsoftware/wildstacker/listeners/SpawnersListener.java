@@ -308,7 +308,7 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler
     public void onBreakMenuClick(InventoryClickEvent e){
-        if(e.getInventory() == null || !e.getInventory().getName().equals(ChatColor.BOLD + "Break Menu"))
+        if(e.getInventory() == null || !plugin.getBreakMenuHandler().isBreakMenu(e.getInventory()))
             return;
 
         e.setCancelled(true);

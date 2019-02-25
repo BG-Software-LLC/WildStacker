@@ -30,6 +30,10 @@ public final class BreakMenuHandler {
         player.openInventory(inventory);
     }
 
+    public boolean isBreakMenu(Inventory inventory){
+        return inventory.getTitle().equals(title);
+    }
+
     public void loadMenu(ConfigurationSection section){
         Inventory inventory = Bukkit.createInventory(null, 9 * section.getInt("rows", 3));
         title = ChatColor.translateAlternateColorCodes('&', section.getString("title", "&lBreak Menu"));
