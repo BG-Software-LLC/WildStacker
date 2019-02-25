@@ -31,13 +31,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     private static Set<UUID> latestStacked = new HashSet<>();
 
-    private boolean ignoreDeathEvent;
-    private boolean nerfed;
+    private boolean ignoreDeathEvent = false;
+    private boolean nerfed = false;
+    private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     public WStackedEntity(LivingEntity livingEntity){
         super(livingEntity, 1);
-        ignoreDeathEvent = false;
-        nerfed = false;
     }
 
     /*
@@ -310,10 +309,21 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if((object instanceof Ageable && !((Ageable) object).isAdult()) || ((object instanceof Zombie) && ((Zombie) object).isBaby()))
             return new ArrayList<>();
 
+        if(tempLootTable != null){
+            ItemStackList itemStackList = new ItemStackList(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
+            tempLootTable = null;
+            return itemStackList.toList();
+        }
+
         LootTable lootTable = plugin.getLootHandler().getLootTable(object);
         LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
         return new ItemStackList(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
                 lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount)).toList();
+    }
+
+    @Override
+    public void setTempLootTable(com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable) {
+        this.tempLootTable = tempLootTable;
     }
 
     @Override
