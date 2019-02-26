@@ -33,7 +33,7 @@ public final class EpicSpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner().getCreatureSpawner());
 
         //It takes 1 tick for EpicSpawners to set the metadata for the mobs.
-        Bukkit.getScheduler().runTaskLaterAsynchronously(instance, () -> stackedEntity.trySpawnerStack(stackedSpawner), 2L);
+        Bukkit.getScheduler().runTaskLater(instance, () -> stackedEntity.trySpawnerStack(stackedSpawner), 2L);
     }
 
 }
