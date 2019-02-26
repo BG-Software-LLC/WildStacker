@@ -61,21 +61,16 @@ public final class ItemUtil {
     public static void dropItem(ItemStack itemStack, Location location){
         int amount = itemStack.getAmount();
 
-        if(!plugin.getSettings().itemsStackingEnabled) {
-            for (int i = 0; i < amount / 64; i++) {
-                ItemStack cloned = itemStack.clone();
-                cloned.setAmount(64);
-                location.getWorld().dropItemNaturally(location, cloned);
-            }
-
-            if (amount % 64 > 0) {
-                ItemStack cloned = itemStack.clone();
-                cloned.setAmount(amount % 64);
-                location.getWorld().dropItemNaturally(location, cloned);
-            }
+        for (int i = 0; i < amount / 64; i++) {
+            ItemStack cloned = itemStack.clone();
+            cloned.setAmount(64);
+            location.getWorld().dropItemNaturally(location, cloned);
         }
-        else{
-            location.getWorld().dropItemNaturally(location, itemStack);
+
+        if (amount % 64 > 0) {
+            ItemStack cloned = itemStack.clone();
+            cloned.setAmount(amount % 64);
+            location.getWorld().dropItemNaturally(location, cloned);
         }
     }
 
