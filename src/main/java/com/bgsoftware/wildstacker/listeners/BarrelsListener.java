@@ -190,7 +190,17 @@ public final class BarrelsListener implements Listener {
             }
 
             if(amount != 0) {
-                stackedBarrel.setStackAmount(stackedBarrel.getStackAmount() + amount, true);
+                int limit = plugin.getSettings().barrelsLimits.getOrDefault(stackedBarrel.getBarrelItem(1), Integer.MAX_VALUE);
+
+                if(stackedBarrel.getStackAmount() + amount > limit){
+                    ItemStack toAdd = barrelItem.clone();
+                    toAdd.setAmount(stackedBarrel.getStackAmount() + amount - limit);
+                    ItemUtil.addItem(toAdd, e.getPlayer().getInventory(), stackedBarrel.getLocation());
+                    stackedBarrel.setStackAmount(limit, true);
+                }else{
+                    stackedBarrel.setStackAmount(stackedBarrel.getStackAmount() + amount, true);
+                }
+
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtil.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
             }
 
