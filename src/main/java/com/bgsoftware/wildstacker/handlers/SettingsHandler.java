@@ -36,7 +36,7 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
-            stackMythicMobsEnabled, blazesAlwaysDrop, keepLowestHealth, stackAfterBreed, entitiesHideNames;
+            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, blazesAlwaysDrop, keepLowestHealth, stackAfterBreed, entitiesHideNames;
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
@@ -111,7 +111,8 @@ public final class SettingsHandler {
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
         stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
-        stackMythicMobsEnabled = cfg.getBoolean("entities.mythic-mobs-stack", false);
+        mythicMobsStackEnabled = cfg.getBoolean("entities.mythic-mobs-stack", false);
+        mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
         blazesAlwaysDrop = cfg.getBoolean("entities.blazes-always-drop", true);
         keepLowestHealth = cfg.getBoolean("entities.keep-lowest-health", false);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);

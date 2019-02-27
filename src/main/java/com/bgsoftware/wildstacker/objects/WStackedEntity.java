@@ -95,6 +95,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(EntityUtil.isNameBlacklisted(object.getCustomName()))
             return;
 
+        if(MythicMobsHook.isMythicMob(object)){
+            object.setCustomName(object.getCustomName().replace("{}", String.valueOf(stackAmount)));
+            return;
+        }
+
         String customName = plugin.getSettings().entitiesCustomName;
 
         if (customName.isEmpty())

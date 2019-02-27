@@ -205,6 +205,10 @@ public final class ConfigComments {
     public static String ENTITIES_MYTHIC_MOBS_STACK = "entities.mythic-mobs-stack";
 
     @Comment("")
+    @Comment("If enabled, the placeholder '{}' will be replaced with the stack amount for mythic mobs.")
+    public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
+
+    @Comment("")
     @Comment("When this feature is enabled, blazes will always drop blazes and not only when they are killed by players.")
     public static String ENTITIES_BLAZES_ALWAYS_DROP = "entities.blazes-always-drop";
 

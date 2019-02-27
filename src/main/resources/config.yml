@@ -215,6 +215,9 @@ entities:
   # If mythic mobs is enabled, will it's entities get stacked?
   mythic-mobs-stack: false
 
+  # If enabled, the placeholder '{}' will be replaced with the stack amount for mythic mobs.
+  mythic-mobs-custom-name: true
+
   # When this feature is enabled, blazes will always drop blazes and not only when they are killed by players.
   blazes-always-drop: true
 
