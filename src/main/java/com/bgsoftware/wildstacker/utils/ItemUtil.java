@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
@@ -118,6 +119,10 @@ public final class ItemUtil {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
+        if(Bukkit.getPluginManager().isPluginEnabled("SilkSpawners")){
+            return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
+        }
+
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
 
         if(!plugin.getSettings().silkTouchSpawners)
