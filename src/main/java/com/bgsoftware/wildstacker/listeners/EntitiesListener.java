@@ -83,7 +83,7 @@ public final class EntitiesListener implements Listener {
         }
 
         if(MythicMobsHook.isMythicMob(e.getEntity()))
-            stackedEntity.setTempLootTable(e.getDrops());
+            stackedEntity.setTempLootTable(new ArrayList<>(e.getDrops()));
 
         EntityDamageEvent.DamageCause lastDamageCause = EntityDamageEvent.DamageCause.CUSTOM;
 
