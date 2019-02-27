@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.api.objects;
 
-import com.bgsoftware.wildstacker.api.loot.LootTable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -87,9 +86,9 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     /**
      * Set a temporary loot-table for this entity.
      * This loot table can be used one, and getDrops method will remove the temp loot-table.
-     * @param lootTable The loot-table
+     * @param itemStacks The loot to set
      */
-    void setTempLootTable(LootTable lootTable);
+    void setTempLootTable(List<ItemStack> itemStacks);
 
     /**
      * Ignore the death event of this entity.
