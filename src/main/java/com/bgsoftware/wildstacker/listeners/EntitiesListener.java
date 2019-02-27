@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
+import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
@@ -80,6 +81,9 @@ public final class EntitiesListener implements Listener {
             e.getDrops().clear();
             return;
         }
+
+        if(MythicMobsHook.isMythicMob(e.getEntity()))
+            stackedEntity.setTempLootTable(e.getDrops());
 
         EntityDamageEvent.DamageCause lastDamageCause = EntityDamageEvent.DamageCause.CUSTOM;
 

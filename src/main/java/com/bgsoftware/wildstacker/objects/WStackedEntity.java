@@ -8,11 +8,13 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
+import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.EntityData;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -322,8 +324,23 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public void setTempLootTable(com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable) {
-        this.tempLootTable = tempLootTable;
+    public void setTempLootTable(List<ItemStack> itemStacks) {
+        this.tempLootTable = new LootTableTemp() {
+            @Override
+            public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
+                List<ItemStack> drops = new ArrayList<>();
+
+                itemStacks.stream()
+                        .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
+                        .forEach(itemStack -> {
+                            ItemStack cloned = itemStack.clone();
+                            cloned.setAmount(itemStack.getAmount() * stackAmount);
+                            drops.add(cloned);
+                        });
+
+                return drops;
+            }
+        };
     }
 
     @Override
