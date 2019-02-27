@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Random;
@@ -43,6 +44,11 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             itemStack.setAmount(1);
             itemStack = ItemUtil.setSpawnerItemAmount(itemStack, amount);
         }
+        
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtil.getSpawnerItemAmount(itemStack) + ""));
+
+        itemStack.setItemMeta(itemMeta);
 
         return itemStack;
     }
