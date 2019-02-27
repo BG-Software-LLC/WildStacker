@@ -9,7 +9,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ConcurrentModificationException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,11 +33,11 @@ public final class StackTask extends BukkitRunnable {
     public void run() {
         if(Bukkit.getOnlinePlayers().size() > 0) {
             for(World world : Bukkit.getWorlds()){
-                try {
-                    Set<LivingEntity> livingEntities = ConcurrentHashMap.newKeySet();
-                    livingEntities.addAll(world.getLivingEntities());
+                Set<LivingEntity> livingEntities = ConcurrentHashMap.newKeySet();
+                livingEntities.addAll(world.getLivingEntities());
 
-                    for (LivingEntity livingEntity : livingEntities) {
+                for (LivingEntity livingEntity : livingEntities) {
+                    try {
                         if (!livingEntity.isValid() || livingEntity instanceof ArmorStand || livingEntity instanceof Player)
                             continue;
 
@@ -46,8 +45,8 @@ public final class StackTask extends BukkitRunnable {
                             continue;
 
                         WStackedEntity.of(livingEntity).tryStack();
-                    }
-                }catch(ConcurrentModificationException ignored){}
+                    }catch(Throwable ignored){}
+                }
             }
         }
     }
