@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
@@ -316,16 +317,25 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if((object instanceof Ageable && !((Ageable) object).isAdult()) || ((object instanceof Zombie) && ((Zombie) object).isBaby()))
             return new ArrayList<>();
 
+        List<ItemStack> drops;
+
         if(tempLootTable != null){
-            ItemStackList itemStackList = new ItemStackList(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
+            drops = tempLootTable.getDrops(this, lootBonusLevel, stackAmount);
             tempLootTable = null;
-            return itemStackList.toList();
         }
 
-        LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-        LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
-        return new ItemStackList(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
-                lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount)).toList();
+        else{
+            LootTable lootTable = plugin.getLootHandler().getLootTable(object);
+            LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
+            drops = lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
+                    lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount);
+        }
+
+        // SuperiorSkyblock Integration
+        double multiplier = SuperiorSkyblockHook.getDropsMultiplier(object);
+        drops.forEach(itemStack -> itemStack.setAmount((int) (itemStack.getAmount() * multiplier)));
+
+        return new ItemStackList(drops).toList();
     }
 
     @Override
