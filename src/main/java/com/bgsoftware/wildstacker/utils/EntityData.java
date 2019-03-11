@@ -155,6 +155,9 @@ public final class EntityData {
     private static boolean dField = version.contains("v1_9") || version.contains("v1_8");
 
     private int getInteger(Object object){
+        if(object == null)
+            return 0;
+
         try{
             String fieldName = asIntField ? "asInt" : dField ? "d" : "e";
             return (int) object.getClass().getMethod(fieldName).invoke(object);
