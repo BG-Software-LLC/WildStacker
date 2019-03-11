@@ -218,7 +218,7 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!plugin.getSettings().spawnersStackingEnabled || !(e.getEntity() instanceof LivingEntity))
+        if(!(e.getEntity() instanceof LivingEntity))
             return;
 
         if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
