@@ -181,9 +181,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             messages.add("Detected SuperiorSkyblock - Disabling barrels stacking...");
         }
         if(Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit") && settingsHandler.itemsStackingEnabled){
-            messages.add("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");
-            FastAsyncWEHook.disableTicksLimiter();
             //WildStacker disabled the tick limiter for items.
+            try {
+                FastAsyncWEHook.disableTicksLimiter();
+                messages.add("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");
+            }catch(Throwable ignored){}
         }
 
         if(!messages.isEmpty()){
