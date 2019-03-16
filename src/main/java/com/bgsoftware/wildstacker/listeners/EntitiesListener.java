@@ -169,7 +169,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.tryStack();
+        Bukkit.getScheduler().runTask(plugin, stackedEntity::tryStack);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -189,7 +189,7 @@ public final class EntitiesListener implements Listener {
                     plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass(),
                             CreatureSpawnEvent.SpawnReason.SPAWNER_EGG));
 
-            stackedEntity.setStackAmount(--eggAmount, true);
+            stackedEntity.setStackAmount(eggAmount - 1, true);
 
             Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 5L);
         }
