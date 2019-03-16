@@ -62,7 +62,10 @@ items:
 
   # When buckets stacker is enabled, water & lava buckets will be stacked in your inventory
   # with a max-stack size of 16.
-  buckets-stacker: true
+  buckets-stacker:
+    enabled: true
+    name-blacklist:
+    - '&fGenbucket'
 
 # Here you can configurable all features related to stacked entities.
 entities:

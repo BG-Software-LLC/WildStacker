@@ -31,7 +31,7 @@ public final class EditorListener implements Listener {
             "entities.kill-all.interval", "entities.linked-entities.max-distance", "spawners.merge-radius", "spawners.explosions-break-chance",
             "spawners.break-charge.amount", "spawners.place-charge.amount", "barrels.merge-radius"};
     private String[] booleanValues = new String[] {
-            "items.enabled", "items.fix-stack", "items.item-display", "items.buckets-stacker", "entities.enabled", "entities.kill-all.clear-lagg",
+            "items.enabled", "items.fix-stack", "items.item-display", "items.buckets-stacker.enabled", "entities.enabled", "entities.kill-all.clear-lagg",
             "entities.linked-entities.enabled", "entities.stack-down.enabled", "entities.keep-fire", "entities.mythic-mobs-stack",
             "entities.blazes-always-drop", "entities.keep-lowest-health", "entities.stack-after-breed", "entities.hide-names",
             "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack", "spawners.drop-without-silk",
@@ -41,7 +41,7 @@ public final class EditorListener implements Listener {
             "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "barrels.enabled",
             "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
-            "items.blacklist", "items.disabled-worlds", "entities.disabled-worlds", "entities.blacklist",
+            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
             "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
             "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds", "barrels.whitelist",
             "barrels.disabled-worlds"};
@@ -148,7 +148,10 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "items.item-display");
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "items.buckets-stacker");
+                    configValues.put(player.getUniqueId(), "items.buckets-stacker.enabled");
+                    break;
+                case 9:
+                    configValues.put(player.getUniqueId(), "items.buckets-stacker.name-blacklist");
                     break;
                 default:
                     return;

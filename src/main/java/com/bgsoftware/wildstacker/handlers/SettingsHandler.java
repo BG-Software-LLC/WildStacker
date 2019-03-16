@@ -28,7 +28,7 @@ public final class SettingsHandler {
     //Items settings
     public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
             itemsUnstackedCustomName;
-    public final List<String> itemsDisabledWorlds;
+    public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems;
     public final int itemsCheckRange;
     public final String itemsCustomName;
@@ -92,7 +92,8 @@ public final class SettingsHandler {
         itemsCheckRange = cfg.getInt("items.merge-radius", 5);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
-        bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker", true);
+        bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
+        bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
@@ -227,6 +228,8 @@ public final class SettingsHandler {
             cfg.set("items.custom-display", null);
         if(cfg.getConfigurationSection("spawners.break-menu") == null)
             cfg.createSection("spawners.break-menu");
+        if(cfg.isBoolean("buckets-stacker"))
+            cfg.set("buckets-stacker.enabled", cfg.getBoolean("buckets-stacker"));
     }
 
     public static void reload(){

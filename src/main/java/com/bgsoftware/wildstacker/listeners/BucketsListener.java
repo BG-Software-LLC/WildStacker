@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -36,6 +37,9 @@ public final class BucketsListener implements Listener {
             return;
 
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
+            return;
+
+        if(plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
             return;
 
         plugin.getProviders().enableBypass(e.getPlayer());

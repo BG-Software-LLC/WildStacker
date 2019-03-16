@@ -56,7 +56,7 @@ public final class EditorHandler {
     }
 
     public Inventory getItemsEditor(){
-        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
+        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
 
         editor.setItem(0, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Enabled").withLore("&7Value: " + config.getBoolean("items.enabled")).build());
@@ -83,7 +83,10 @@ public final class EditorHandler {
                 .withName("&6Item Display").withLore("&7Value: " + config.getBoolean("items.item-display")).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Buckets Stacker Enabled").withLore("&7Value: " + config.getBoolean("items.buckets-stacker")).build());
+                .withName("&6Buckets Stacker Enabled").withLore("&7Value: " + config.getBoolean("items.buckets-stacker.enabled")).build());
+
+        editor.setItem(9, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Buckets Name Blacklist").withLore("&7Value:", config.getStringList("items.buckets-stacker.name-blacklist")).build());
 
         return editor;
     }
