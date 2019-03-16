@@ -33,20 +33,23 @@ public final class StackTask extends BukkitRunnable {
     public void run() {
         if(Bukkit.getOnlinePlayers().size() > 0) {
             for(World world : Bukkit.getWorlds()){
-                Set<LivingEntity> livingEntities = ConcurrentHashMap.newKeySet();
-                livingEntities.addAll(world.getLivingEntities());
+                try {
+                    Set<LivingEntity> livingEntities = ConcurrentHashMap.newKeySet();
+                    livingEntities.addAll(world.getLivingEntities());
 
-                for (LivingEntity livingEntity : livingEntities) {
-                    try {
-                        if (!livingEntity.isValid() || livingEntity instanceof ArmorStand || livingEntity instanceof Player)
-                            continue;
+                    for (LivingEntity livingEntity : livingEntities) {
+                        try {
+                            if (!livingEntity.isValid() || livingEntity instanceof ArmorStand || livingEntity instanceof Player)
+                                continue;
 
-                        if (plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()))
-                            continue;
+                            if (plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()))
+                                continue;
 
-                        WStackedEntity.of(livingEntity).tryStack();
-                    }catch(Throwable ignored){}
-                }
+                            WStackedEntity.of(livingEntity).tryStack();
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                }catch(Throwable ignored){}
             }
         }
     }
