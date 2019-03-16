@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,6 +51,8 @@ public final class BucketsListener implements Listener {
         ItemStack bucketToAdd = new ItemStack(Material.BUCKET);
         boolean returnIfNotFullBlock = true;
 
+        EntityType toBeSpawned = null;
+
         switch (e.getItem().getType()){
             case WATER_BUCKET:
                 if(toBeReplaced.getType().name().contains("WATER"))
@@ -69,6 +72,10 @@ public final class BucketsListener implements Listener {
                 break;
             case MILK_BUCKET:
                 return;
+            default:
+                try {
+                    toBeSpawned = EntityType.valueOf(e.getItem().getType().name().replace("_BUCKET", ""));
+                }catch(IllegalArgumentException ignored){}
         }
 
         e.setCancelled(true);
@@ -97,6 +104,8 @@ public final class BucketsListener implements Listener {
         }
 
         toBeReplaced.setType(replacedType);
+        if(toBeSpawned != null)
+            toBeReplaced.getWorld().spawnEntity(toBeReplaced.getLocation(), toBeSpawned);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             ItemStack inHand = e.getItem().clone();
