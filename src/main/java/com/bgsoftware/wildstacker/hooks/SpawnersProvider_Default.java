@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildtools.api.WildToolsAPI;
+import com.bgsoftware.wildtools.api.objects.tools.Tool;
 import org.bukkit.Bukkit;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
@@ -12,8 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
-import xyz.wildseries.wildtools.api.WildToolsAPI;
-import xyz.wildseries.wildtools.api.objects.tools.Tool;
 
 public final class SpawnersProvider_Default implements SpawnersProvider {
 
