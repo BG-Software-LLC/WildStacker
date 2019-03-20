@@ -71,6 +71,8 @@ public final class DataHandler {
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         int dataAmount = 0;
 
+        cfg.set("nerfed", null);
+
         for(String uuid : cfg.getConfigurationSection("").getKeys(false)) {
             if(!uuid.equals("spawn-reasons")) {
                 CACHED_AMOUNT_ENTITIES.put(UUID.fromString(uuid), cfg.getInt(uuid));
