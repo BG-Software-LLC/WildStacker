@@ -131,7 +131,7 @@ public final class BarrelsListener implements Listener {
         Locale.BARREL_BREAK.send(e.getPlayer(), stackSize, ItemUtil.getFormattedType(stackedBarrel.getBarrelItem(1)));
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelClick(PlayerInteractEvent e){
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
