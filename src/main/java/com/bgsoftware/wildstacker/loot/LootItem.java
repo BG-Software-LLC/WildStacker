@@ -1,20 +1,26 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class LootItem {
 
     private Material type, burnableType;
+    private Map<Enchantment, Integer> enchantments;
     private short data, burnableData;
     private double chance;
     private int min, max;
     private boolean looting;
 
-    private LootItem(Material type, Material burnableType, short data, short burnableData, int min, int max, double chance, boolean looting){
+    private LootItem(Material type, Material burnableType, Map<Enchantment, Integer> enchantments, short data, short burnableData, int min, int max, double chance, boolean looting){
         this.type = type;
         this.burnableType = burnableType;
         this.data = data;
@@ -23,6 +29,7 @@ public class LootItem {
         this.max = max;
         this.chance = chance;
         this.looting = looting;
+        this.enchantments = Maps.newHashMap(enchantments);
     }
 
     public double getChance(int lootBonusLevel, double lootMultiplier) {
@@ -43,12 +50,15 @@ public class LootItem {
         if(itemAmount > 0)
             itemStack.setAmount(itemAmount);
 
+        itemStack.addEnchantments(enchantments);
+
         return itemStack;
     }
 
     public static LootItem fromJson(JsonObject jsonObject){
         Material burnableType;
         Material type = burnableType = Material.valueOf(jsonObject.get("type").getAsString());
+        Map<Enchantment, Integer> enchantments = Maps.newHashMap();
         short burnableData;
         short data = burnableData = jsonObject.has("data") ? jsonObject.get("data").getAsShort() : 0;
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
@@ -62,7 +72,16 @@ public class LootItem {
             burnableData = burnable.has("data") ? burnable.get("data").getAsShort() : 0;
         }
 
-        return new LootItem(type, burnableType, data, burnableData, min, max, chance, looting);
+        if(jsonObject.has("enchants")){
+            JsonObject enchants = jsonObject.get("enchants").getAsJsonObject();
+            for(Map.Entry<String, JsonElement> entry : enchants.entrySet()){
+                try {
+                    enchantments.put(Enchantment.getByName(entry.getKey()), entry.getValue().getAsInt());
+                }catch(Exception ignored){}
+            }
+        }
+
+        return new LootItem(type, burnableType, enchantments, data, burnableData, min, max, chance, looting);
     }
 
 }
