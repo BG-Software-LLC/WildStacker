@@ -33,8 +33,8 @@ INVALID_PLAYER: '&6&lWildStacker &7Coludn''t find a player called {0}.'
 INVALID_TYPE: '&6&lWildStacker &7Please specify if you want to give an egg or a spawner.'
 
 # Called when a kill-all task is running
-KILL_ALL_ANNOUNCEMENT: '&6&lWildStacker &7All stacked-entities were killed successfully!'
-KILL_ALL_REMAINING_TIME: '&6&lWildStacker &7All stacked-entities will be cleared in {0} seconds!'
+KILL_ALL_ANNOUNCEMENT: '&6&lWildStacker &7All stacked-entities and stacked-items were killed successfully!'
+KILL_ALL_REMAINING_TIME: '&6&lWildStacker &7All stacked-entities and stacked-items will be cleared in {0} seconds!'
 KILL_ALL_OPS: '&7&o[WildStacker: Killed stacked-entities]'
 
 # Called when running a stacker command without permission.
