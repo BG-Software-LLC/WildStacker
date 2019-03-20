@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -28,14 +29,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 @SuppressWarnings("RedundantIfStatement")
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
+    public static WeakHashMap<UUID, CreatureSpawnEvent.SpawnReason> spawnReasons = new WeakHashMap<>();
     private static Set<UUID> latestStacked = new HashSet<>();
 
     private boolean ignoreDeathEvent = false;
-    private boolean nerfed = false;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     public WStackedEntity(LivingEntity livingEntity){
@@ -242,7 +244,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        return stackedObject instanceof StackedEntity && EntityUtil.areEquals(object, ((StackedEntity) stackedObject).getLivingEntity());
+        return stackedObject instanceof StackedEntity && EntityUtil.areEquals(this, (StackedEntity) stackedObject);
     }
 
     @Override
@@ -368,13 +370,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         return ignoreDeathEvent;
     }
 
-    //Not an API method!
-    public boolean isNerfed(){
-        return nerfed;
+    @Override
+    public CreatureSpawnEvent.SpawnReason getSpawnReason() {
+        return spawnReasons.getOrDefault(getUniqueId(), CreatureSpawnEvent.SpawnReason.CHUNK_GEN);
     }
 
-    public void setNerfed(boolean nerfed){
-        this.nerfed = nerfed;
+    @Override
+    public boolean isNerfed(){
+        return plugin.getSettings().nerfedSpawning.contains(getSpawnReason().name());
     }
 
     public static StackedEntity of(Entity entity){

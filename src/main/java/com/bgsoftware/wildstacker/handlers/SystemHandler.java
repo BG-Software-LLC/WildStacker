@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.SaveTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
-import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -99,11 +98,6 @@ public final class SystemHandler implements SystemManager {
         if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())) {
             stackedEntity.setStackAmount(dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId()), false);
             dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId());
-        }
-
-        if(dataHandler.CACHED_NERFED_ENTITIES.contains(livingEntity.getUniqueId())){
-            EntityUtil.nerfEntity(livingEntity);
-            dataHandler.CACHED_NERFED_ENTITIES.remove(livingEntity.getUniqueId());
         }
 
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&

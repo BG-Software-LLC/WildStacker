@@ -1,11 +1,9 @@
 package com.bgsoftware.wildstacker.utils;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.LivingEntity;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,85 +13,18 @@ public final class EntityUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    public static boolean areEquals(LivingEntity en1, LivingEntity en2){
+    public static boolean areEquals(StackedEntity en1, StackedEntity en2){
         if(en1.getType() != en2.getType())
             return false;
 
         //EpicSpawners drops data
-        if(en1.hasMetadata("ES") != en2.hasMetadata("ES"))
+        if(en1.getLivingEntity().hasMetadata("ES") != en2.getLivingEntity().hasMetadata("ES"))
             return false;
 
-        if(isNerfed(en1) != isNerfed(en2))
+        if(en1.isNerfed() != en2.isNerfed())
             return false;
 
         return EntityData.of(en1).equals(EntityData.of(en2));
-    }
-
-    public static void nerfEntity(LivingEntity livingEntity){
-        if(plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))
-            return;
-
-        try {
-            Class entityInsentientClass = ReflectionUtil.getNMSClass("EntityInsentient");
-            Object nmsEntity = entityInsentientClass.cast(livingEntity.getClass().getMethod("getHandle").invoke(livingEntity));
-
-            Class pathfinderGoalClass = ReflectionUtil.getNMSClass("PathfinderGoalSelector");
-
-            Object goalSelector = nmsEntity.getClass().getField("goalSelector").get(nmsEntity);
-            Object targetSelector = nmsEntity.getClass().getField("targetSelector").get(nmsEntity);
-
-            Object[] goals = new Object[]{
-                    ReflectionUtil.getField("b", pathfinderGoalClass).get(goalSelector),
-                    ReflectionUtil.getField("c", pathfinderGoalClass).get(goalSelector),
-                    ReflectionUtil.getField("b", pathfinderGoalClass).get(targetSelector),
-                    ReflectionUtil.getField("c", pathfinderGoalClass).get(targetSelector)
-            };
-
-            for(Object goal : goals)
-                goal.getClass().getMethod("clear").invoke(goal);
-
-            Bukkit.getScheduler().runTaskLater(plugin, () -> ((WStackedEntity) WStackedEntity.of(livingEntity)).setNerfed(true), 1L);
-
-        } catch(Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static boolean isNerfed(LivingEntity livingEntity){
-        WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(livingEntity);
-
-        try {
-            Class entityInsentientClass = ReflectionUtil.getNMSClass("EntityInsentient");
-
-            Object nmsEntity = entityInsentientClass.cast(livingEntity.getClass().getMethod("getHandle").invoke(livingEntity));
-
-            Class pathfinderGoalClass = ReflectionUtil.getNMSClass("PathfinderGoalSelector");
-
-            Object goalSelector = nmsEntity.getClass().getField("goalSelector").get(nmsEntity);
-            Object targetSelector = nmsEntity.getClass().getField("targetSelector").get(nmsEntity);
-
-            Object[] goals = new Object[]{
-                    ReflectionUtil.getField("b", pathfinderGoalClass).get(goalSelector),
-                    ReflectionUtil.getField("c", pathfinderGoalClass).get(goalSelector),
-                    ReflectionUtil.getField("b", pathfinderGoalClass).get(targetSelector),
-                    ReflectionUtil.getField("c", pathfinderGoalClass).get(targetSelector)
-            };
-
-            for(Object goal : goals) {
-                if (!(boolean) goal.getClass().getMethod("isEmpty").invoke(goal)) {
-                    stackedEntity.setNerfed(false);
-                    return false;
-                }
-            }
-
-            stackedEntity.setNerfed(true);
-
-            return true;
-        } catch(Exception ex){
-            ex.printStackTrace();
-            stackedEntity.setNerfed(false);
-            return false;
-        }
     }
 
     public static String getFormattedType(String typeName) {

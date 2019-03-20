@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -18,9 +17,7 @@ import org.bukkit.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -34,6 +31,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
@@ -41,7 +39,6 @@ import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -74,6 +71,8 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesDisabledWorlds.contains(e.getEntity().getWorld().getName()))
             return;
+
+        WStackedEntity.spawnReasons.remove(e.getEntity().getUniqueId());
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
@@ -151,9 +150,6 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
             return;
 
-        if(plugin.getSettings().nerfedSpawning.contains(e.getSpawnReason().name()))
-            EntityUtil.nerfEntity(e.getEntity());
-
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
             noStackEntities.remove(e.getEntity().getUniqueId());
             return;
@@ -169,7 +165,10 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        Bukkit.getScheduler().runTask(plugin, stackedEntity::tryStack);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if(stackedEntity.tryStack() == null)
+                WStackedEntity.spawnReasons.put(stackedEntity.getUniqueId(), e.getSpawnReason());
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -335,13 +334,12 @@ public final class EntitiesListener implements Listener {
             }catch(UnsupportedOperationException ignored){}
     }
 
-    @EventHandler
-    public void onChunkLoad(ChunkLoadEvent e){
-        for(Entity entity : e.getChunk().getEntities()){
-            if(entity instanceof LivingEntity && !(entity instanceof Player) && !(entity instanceof ArmorStand)){
-                WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(entity);
-                if(stackedEntity.isNerfed())
-                    EntityUtil.nerfEntity((LivingEntity) entity);
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityTarget(EntityTargetLivingEntityEvent e){
+        if(e.getEntity() instanceof LivingEntity) {
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+            if (e.getTarget() instanceof Player && stackedEntity.isNerfed()) {
+                e.setCancelled(true);
             }
         }
     }

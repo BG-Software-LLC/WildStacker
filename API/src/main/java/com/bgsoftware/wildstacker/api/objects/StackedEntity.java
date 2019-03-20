@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.api.objects;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -101,5 +102,17 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * @return True if death event is ignored, otherwise false
      */
     boolean isIgnoreDeathEvent();
+
+    /**
+     * Returns the spawn reason of this entity
+     * @return spawn reason
+     */
+    CreatureSpawnEvent.SpawnReason getSpawnReason();
+
+    /**
+     * Checks if the entity is nerfed or not.
+     * @return True if entity is nerfed, otherwise false.
+     */
+    boolean isNerfed();
 
 }

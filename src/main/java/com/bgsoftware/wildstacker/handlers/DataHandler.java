@@ -7,20 +7,17 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.EntityUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +31,6 @@ public final class DataHandler {
     //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
     public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
     public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
-    public final Set<UUID> CACHED_NERFED_ENTITIES = new HashSet<>();
 
     public DataHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -76,15 +72,16 @@ public final class DataHandler {
         int dataAmount = 0;
 
         for(String uuid : cfg.getConfigurationSection("").getKeys(false)) {
-            if(!uuid.equals("nerfed")) {
+            if(!uuid.equals("spawn-reasons")) {
                 CACHED_AMOUNT_ENTITIES.put(UUID.fromString(uuid), cfg.getInt(uuid));
                 dataAmount++;
             }
         }
 
-        if(cfg.contains("nerfed")) {
-            List<String> nerfedEntities = cfg.getStringList("nerfed");
-            nerfedEntities.forEach(uuid -> CACHED_NERFED_ENTITIES.add(UUID.fromString(uuid)));
+        if(cfg.contains("spawn-reasons")){
+            for(String uuid : cfg.getConfigurationSection("spawn-reasons").getKeys(false)){
+                WStackedEntity.spawnReasons.put(UUID.fromString(uuid), CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("spawn-reasons." + uuid)));
+            }
         }
 
         return dataAmount;
@@ -107,15 +104,11 @@ public final class DataHandler {
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         int dataAmount = 0;
 
-        List<String> nerfedEntities = new ArrayList<>();
-
         for(StackedEntity stackedEntity : plugin.getSystemManager().getStackedEntities()){
             if(stackedEntity.getStackAmount() > 1){
                 cfg.set(stackedEntity.getUniqueId().toString(), stackedEntity.getStackAmount());
                 dataAmount++;
             }
-            if(EntityUtil.isNerfed(stackedEntity.getLivingEntity()))
-                nerfedEntities.add(stackedEntity.getUniqueId().toString());
         }
 
         for(UUID uuid : CACHED_AMOUNT_ENTITIES.keySet()) {
@@ -125,10 +118,8 @@ public final class DataHandler {
             }
         }
 
-        CACHED_NERFED_ENTITIES.forEach(uuid -> nerfedEntities.add(uuid.toString()));
-
-        if(!nerfedEntities.isEmpty())
-            cfg.set("nerfed", nerfedEntities);
+        for(UUID uuid : WStackedEntity.spawnReasons.keySet())
+            cfg.set("spawn-reasons." + uuid, WStackedEntity.spawnReasons.get(uuid).name());
 
         try {
             cfg.save(file);
