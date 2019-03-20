@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.google.common.collect.Sets;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,8 +18,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class CommandInfo implements ICommand {
 
@@ -61,7 +62,7 @@ public final class CommandInfo implements ICommand {
 
         Player pl = (Player) sender;
 
-        Block targetBlock = pl.getTargetBlock((HashSet<Material>) null, 10);
+        Block targetBlock = pl.getTargetBlock(getMaterials("AIR", "WATER", "STATIONARY_WATER"), 10);
 
         if(targetBlock != null && targetBlock.getType() == Materials.SPAWNER.toBukkitType()){
             StackedSpawner stackedSpawner = WStackedSpawner.of(targetBlock);
@@ -90,4 +91,17 @@ public final class CommandInfo implements ICommand {
     public List<String> tabComplete(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         return new ArrayList<>();
     }
+
+    private Set<Material> getMaterials(String... materials){
+        Set<Material> materialsSet = Sets.newHashSet();
+
+        for(String material : materials){
+            try{
+                materialsSet.add(Material.valueOf(material));
+            }catch(IllegalArgumentException ignored){}
+        }
+
+        return materialsSet;
+    }
+
 }
