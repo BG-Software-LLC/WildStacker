@@ -41,6 +41,9 @@ public final class HologramsProvider_CMI implements HologramsProvider {
         CMIHologram hologram = new CMIHologram("WS-" + location.toString(), location);
         hologramManager.addHologram(hologram);
         hologram.setLines(Collections.singletonList(line));
+        hologramManager.resetHoloForAllPlayers(hologram);
+        hologram.updatePages();
+        hologramManager.save();
     }
 
     @Override
@@ -91,6 +94,9 @@ public final class HologramsProvider_CMI implements HologramsProvider {
         }
 
         hologram.setLines(Collections.singletonList(newLine));
+        hologramManager.resetHoloForAllPlayers(hologram);
+        hologram.updatePages();
+        hologramManager.save();
     }
 
     @Override
