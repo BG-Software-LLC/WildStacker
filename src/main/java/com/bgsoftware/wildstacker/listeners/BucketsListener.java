@@ -40,7 +40,8 @@ public final class BucketsListener implements Listener {
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
             return;
 
-        if(plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
+        if(e.getItem().hasItemMeta() && e.getItem().getItemMeta().hasDisplayName() &&
+                plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
             return;
 
         plugin.getProviders().enableBypass(e.getPlayer());
