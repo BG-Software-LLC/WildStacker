@@ -130,17 +130,19 @@ public final class CommandGive implements ICommand {
             return;
         }
 
+        args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
+
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
                 .replace("{0}", stackSize + "")
                 .replace("{1}", typeName)
-                .replace("{2}", args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase())
+                .replace("{2}", args[2])
         );
         itemStack.setItemMeta(itemMeta);
 
         ItemUtil.addItem(itemStack, target.getInventory(), target.getLocation());
 
-        Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, args[2]);
+        Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
         if(!target.equals(sender))
             Locale.STACK_RECEIVE.send(target, stackSize, args[2], sender.getName());
     }
