@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_NoCheatPlus;
 import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_Spartan;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Arconix;
+import com.bgsoftware.wildstacker.hooks.HologramsProvider_CMI;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Default;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Holograms;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_HolographicDisplays;
@@ -66,6 +67,8 @@ public final class ProvidersHandler {
             hologramsProvider = new HologramsProvider_Holograms();
         else if(Bukkit.getPluginManager().isPluginEnabled("Arconix"))
             hologramsProvider = new HologramsProvider_Arconix();
+        else if(Bukkit.getPluginManager().isPluginEnabled("CMI"))
+            hologramsProvider = new HologramsProvider_CMI();
         else hologramsProvider = new HologramsProvider_Default();
 
         if(Bukkit.getPluginManager().isPluginEnabled("AAC"))
