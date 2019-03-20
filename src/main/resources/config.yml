@@ -67,6 +67,10 @@ items:
     name-blacklist:
     - '&fGenbucket'
 
+  # Should items get removed when the kill all task is performed?
+  # If you want to configure the task, check the entities section.
+  kill-all: true
+
 # Here you can configurable all features related to stacked entities.
 entities:
   # Should entities get stacked on the server?

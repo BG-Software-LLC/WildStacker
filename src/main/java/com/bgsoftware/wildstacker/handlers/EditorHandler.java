@@ -88,6 +88,9 @@ public final class EditorHandler {
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Buckets Name Blacklist").withLore("&7Value:", config.getStringList("items.buckets-stacker.name-blacklist")).build());
 
+        editor.setItem(10, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean("items.kill-all")).build());
+
         return editor;
     }
 

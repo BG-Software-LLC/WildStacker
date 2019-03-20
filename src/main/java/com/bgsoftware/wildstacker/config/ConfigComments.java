@@ -80,6 +80,11 @@ public final class ConfigComments {
     public static String BUCKETS_STACKER = "items.buckets-stacker";
 
     @Comment("")
+    @Comment("Should items get removed when the kill all task is performed?")
+    @Comment("If you want to configure the task, check the entities section.")
+    public static String ITEMS_KILL_ALL = "items.kill-all";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 

@@ -299,6 +299,14 @@ public final class SystemHandler implements SystemManager {
                     stackedEntity.remove();
             }
 
+            if(plugin.getSettings().itemsKillAll) {
+                for (StackedItem stackedItem : getStackedItems()) {
+                    if (stackedItem.getStackAmount() > 1) {
+                        stackedItem.remove();
+                    }
+                }
+            }
+
             for(Player pl : Bukkit.getOnlinePlayers()) {
                 if (pl.isOp())
                     Locale.KILL_ALL_OPS.send(pl);

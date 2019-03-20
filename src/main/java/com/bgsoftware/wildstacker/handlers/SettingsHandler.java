@@ -27,7 +27,7 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
-            itemsUnstackedCustomName;
+            itemsUnstackedCustomName, itemsKillAll;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems;
     public final int itemsCheckRange;
@@ -94,6 +94,7 @@ public final class SettingsHandler {
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
         bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
+        itemsKillAll = cfg.getBoolean("items.kill-all", true);
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);

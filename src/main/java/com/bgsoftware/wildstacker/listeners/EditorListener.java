@@ -31,13 +31,13 @@ public final class EditorListener implements Listener {
             "entities.kill-all.interval", "entities.linked-entities.max-distance", "spawners.merge-radius", "spawners.explosions-break-chance",
             "spawners.break-charge.amount", "spawners.place-charge.amount", "barrels.merge-radius"};
     private String[] booleanValues = new String[] {
-            "items.enabled", "items.fix-stack", "items.item-display", "items.buckets-stacker.enabled", "entities.enabled", "entities.kill-all.clear-lagg",
-            "entities.linked-entities.enabled", "entities.stack-down.enabled", "entities.keep-fire", "entities.mythic-mobs-stack",
-            "entities.blazes-always-drop", "entities.keep-lowest-health", "entities.stack-after-breed", "entities.hide-names",
-            "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack", "spawners.drop-without-silk",
-            "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner", "spawners.silk-spawners.drop-to-inventory",
-            "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names", "spawners.break-menu.enabled",
-            "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
+            "items.enabled", "items.fix-stack", "items.item-display", "items.buckets-stacker.enabled", "items.kill-all",
+            "entities.enabled", "entities.kill-all.clear-lagg", "entities.linked-entities.enabled", "entities.stack-down.enabled",
+            "entities.keep-fire", "entities.mythic-mobs-stack", "entities.blazes-always-drop", "entities.keep-lowest-health",
+            "entities.stack-after-breed", "entities.hide-names", "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack",
+            "spawners.drop-without-silk", "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner",
+            "spawners.silk-spawners.drop-to-inventory", "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names",
+            "spawners.break-menu.enabled", "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
             "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "barrels.enabled",
             "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
@@ -152,6 +152,9 @@ public final class EditorListener implements Listener {
                     break;
                 case 9:
                     configValues.put(player.getUniqueId(), "items.buckets-stacker.name-blacklist");
+                    break;
+                case 10:
+                    configValues.put(player.getUniqueId(), "items.kill-all");
                     break;
                 default:
                     return;
