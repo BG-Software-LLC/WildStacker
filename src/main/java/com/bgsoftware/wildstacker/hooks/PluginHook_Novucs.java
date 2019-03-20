@@ -51,8 +51,8 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
     public void updateWorth(SpawnerPlaceEvent e){
         StackedSpawner spawner = e.getSpawner();
 
-        int oldMultiplier = 0;
-        int newMultiplier = spawner.getStackAmount();
+        int oldMultiplier = spawner.getStackAmount();
+        int newMultiplier = 0;
 
         SpawnerMultiplierChangeEvent spawnerMultiplierChangeEvent = new SpawnerMultiplierChangeEvent(spawner.getSpawner(), oldMultiplier, newMultiplier);
         Bukkit.getPluginManager().callEvent(spawnerMultiplierChangeEvent);
@@ -63,7 +63,7 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
         StackedSpawner spawner = e.getSpawner();
 
         int oldMultiplier = spawner.getStackAmount();
-        int newMultiplier = spawner.getStackAmount() + 1;
+        int newMultiplier = e.getTarget().getStackAmount() + spawner.getStackAmount();
 
         SpawnerMultiplierChangeEvent spawnerMultiplierChangeEvent = new SpawnerMultiplierChangeEvent(spawner.getSpawner(), oldMultiplier, newMultiplier);
         Bukkit.getPluginManager().callEvent(spawnerMultiplierChangeEvent);
@@ -74,7 +74,7 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
         StackedSpawner spawner = e.getSpawner();
 
         int oldMultiplier = spawner.getStackAmount();
-        int newMultiplier = spawner.getStackAmount() - 1;
+        int newMultiplier = spawner.getStackAmount() - e.getAmount();
 
         SpawnerMultiplierChangeEvent spawnerMultiplierChangeEvent = new SpawnerMultiplierChangeEvent(spawner.getSpawner(), oldMultiplier, newMultiplier);
         Bukkit.getPluginManager().callEvent(spawnerMultiplierChangeEvent);
