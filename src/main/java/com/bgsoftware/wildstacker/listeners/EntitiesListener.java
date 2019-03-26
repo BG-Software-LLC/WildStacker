@@ -150,6 +150,8 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
             return;
 
+        WStackedEntity.spawnReasons.put(e.getEntity().getUniqueId(), e.getSpawnReason());
+
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
             noStackEntities.remove(e.getEntity().getUniqueId());
             return;
@@ -165,10 +167,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if(stackedEntity.tryStack() == null)
-                WStackedEntity.spawnReasons.put(stackedEntity.getUniqueId(), e.getSpawnReason());
-        });
+        stackedEntity.tryStack();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
