@@ -80,7 +80,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
                 ItemStack itemStack = entityLiving.getEquipment(slot);
                 float dropChance = slot.a().ordinal() == 1 ? entityLiving.dropChanceHand[slot.b()] : slot.a().ordinal() == 2 ? entityLiving.dropChanceArmor[slot.b()] : 0;
 
-                if (!itemStack.isEmpty() && !EnchantmentManager.c(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
+                if (!itemStack.isEmpty() && !shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
                         random.nextFloat() - (float) i * 0.01F < dropChance) {
                     if (dropChance <= 1 && itemStack.f())
                         itemStack.setData(itemStack.k() - random.nextInt(1 + random.nextInt(Math.max(itemStack.k() - 3, 1))));
@@ -105,6 +105,21 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             EntityAnimal entityLiving = ((CraftAnimals) livingEntity).getHandle();
             entityLiving.goalSelector.a(2, new EventablePathfinderGoalBreed(entityLiving, 1.0D));
         }
+    }
+
+    private boolean shouldNotDrop(ItemStack itemStack){
+        try{
+            return EnchantmentManager.c(itemStack);
+        }catch(Exception ex){
+            try{
+                //noinspection JavaReflectionMemberAccess
+                return (Boolean) EnchantmentManager.class.getMethod("e", ItemStack.class).invoke(null, itemStack);
+            }catch(Exception ex1){
+                ex1.printStackTrace();
+            }
+        }
+
+        return false;
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
