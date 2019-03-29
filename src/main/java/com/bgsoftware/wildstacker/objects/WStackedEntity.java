@@ -16,11 +16,9 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -316,9 +314,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
-        if((object instanceof Ageable && !((Ageable) object).isAdult()) || ((object instanceof Zombie) && ((Zombie) object).isBaby()))
-            return new ArrayList<>();
-
         List<ItemStack> drops;
 
         if(tempLootTable != null){
