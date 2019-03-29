@@ -104,6 +104,14 @@ public final class BucketsListener implements Listener {
                 break;
         }
 
+        if(e.getClickedBlock().getType() == Material.CAULDRON){
+            if(replacedType == Material.WATER) {
+                //noinspection deprecation
+                e.getClickedBlock().setData((byte) 3);
+                return;
+            }
+        }
+
         toBeReplaced.setType(replacedType);
         if(toBeSpawned != null)
             toBeReplaced.getWorld().spawnEntity(toBeReplaced.getLocation(), toBeSpawned);
