@@ -28,7 +28,8 @@ public class LootTableSheep extends LootTable {
             for (ItemStack itemStack : drops) {
                 if (itemStack.getType().name().contains("WOOL")) {
                     if (legacy) {
-                        itemStack.setData(wool.getData());
+                        //noinspection deprecation
+                        itemStack.setDurability(wool.getData().getData());
                     } else {
                         itemStack.setType(wool.getType());
                     }
