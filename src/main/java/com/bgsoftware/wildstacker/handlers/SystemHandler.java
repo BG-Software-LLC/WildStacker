@@ -101,7 +101,8 @@ public final class SystemHandler implements SystemManager {
         }
 
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
-                plugin.getSettings().entitiesStackingEnabled)
+                plugin.getSettings().entitiesStackingEnabled && !plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()) &&
+                !plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))
             dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
 
         return stackedEntity;

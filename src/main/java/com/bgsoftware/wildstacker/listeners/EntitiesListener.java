@@ -66,12 +66,6 @@ public final class EntitiesListener implements Listener {
         if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
             return;
 
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()))
-            return;
-
-        if(plugin.getSettings().entitiesDisabledWorlds.contains(e.getEntity().getWorld().getName()))
-            return;
-
         WStackedEntity.spawnReasons.remove(e.getEntity().getUniqueId());
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
