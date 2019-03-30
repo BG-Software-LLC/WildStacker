@@ -47,7 +47,7 @@ public final class LootHandler {
             try {
                 JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
                 String key = file.getName().replace(".json", "").toUpperCase();
-                lootTables.put(key, key.equals("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
+                lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
             }catch(Exception ex){
                 System.out.println("Couldn't load " + file.getName());
                 ex.printStackTrace();
