@@ -352,7 +352,22 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
                 return drops;
             }
+
+            @Override
+            public int getExp(int stackAmount, int defaultExp) {
+                return defaultExp;
+            }
         };
+    }
+
+    @Override
+    public int getExp(int defaultExp) {
+        return getExp(stackAmount, defaultExp);
+    }
+
+    @Override
+    public int getExp(int stackAmount, int defaultExp) {
+        return plugin.getLootHandler().getLootTable(object).getExp(stackAmount, defaultExp);
     }
 
     @Override

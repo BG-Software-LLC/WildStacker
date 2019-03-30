@@ -100,6 +100,7 @@ public final class EntitiesListener implements Listener {
             Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
             if(plugin.getSettings().entitiesStackingEnabled) {
                 calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, 1);
+                e.setDroppedExp(stackedEntity.getExp(1, e.getDroppedExp()));
                 e.getDrops().clear();
             }
         }
@@ -108,12 +109,13 @@ public final class EntitiesListener implements Listener {
         else{
             if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
                 calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, stackedEntity.getStackAmount());
+                e.setDroppedExp(stackedEntity.getExp(e.getDroppedExp()));
                 e.getDrops().clear();
             }
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
-            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp() * amount, killerItemHand));
+            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp(), killerItemHand));
 
             if(e.getEntity().getKiller() != null && amount - 1 > 0) {
                 try {

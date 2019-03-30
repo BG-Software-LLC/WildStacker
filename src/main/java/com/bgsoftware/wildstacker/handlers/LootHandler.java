@@ -41,7 +41,7 @@ public final class LootHandler {
             initAllLootTables();
         }
 
-        lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, true));
+        lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, -1, -1, true));
 
         for(File file : folderFile.listFiles()){
             try {

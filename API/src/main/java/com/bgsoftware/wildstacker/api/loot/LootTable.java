@@ -16,4 +16,12 @@ public interface LootTable {
      */
     List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount);
 
+    /**
+     * Get the vanilla exp of a the entity using a stack size.
+     * @param stackAmount the stack size
+     * @param defaultExp the default exp to return if no exp was found
+     * @return The exp of the entity
+     */
+    int getExp(int stackAmount, int defaultExp);
+
 }
