@@ -6,10 +6,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public final class EditorListener implements Listener {
 
-    private WildStackerPlugin instance;
+    private WildStackerPlugin plugin;
 
     private String[] integerValues = new String[] {
             "save-interval", "items.merge-radius", "items.limits", "entities.merge-radius", "entities.stack-interval",
@@ -52,8 +54,32 @@ public final class EditorListener implements Listener {
     private Map<UUID, String> configValues = new HashMap<>();
     private Map<UUID, String> lastInventories = new HashMap<>();
 
-    public EditorListener(WildStackerPlugin instance){
-        this.instance = instance;
+    public EditorListener(WildStackerPlugin plugin){
+        this.plugin = plugin;
+    }
+
+    /**
+     * The following two events are here for patching a dupe glitch caused
+     * by shift clicking and closing the inventory in the same time.
+     */
+
+    private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryClickMonitor(InventoryClickEvent e){
+        latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
+        Bukkit.getScheduler().runTaskLater(plugin, () -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryCloseMonitor(InventoryCloseEvent e){
+        if(latestClickedItem.containsKey(e.getPlayer().getUniqueId())){
+            ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                e.getPlayer().getInventory().removeItem(clickedItem);
+                ((Player) e.getPlayer()).updateInventory();
+            }, 1L);
+        }
     }
 
     @EventHandler
@@ -72,27 +98,27 @@ public final class EditorListener implements Listener {
             switch (e.getRawSlot()){
                 case 20:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getGeneralEditor());
+                    player.openInventory(plugin.getEditor().getGeneralEditor());
                     break;
                 case 22:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getItemsEditor());
+                    player.openInventory(plugin.getEditor().getItemsEditor());
                     break;
                 case 24:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getEntitiesEditor());
+                    player.openInventory(plugin.getEditor().getEntitiesEditor());
                     break;
                 case 30:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getSpawnersEditor());
+                    player.openInventory(plugin.getEditor().getSpawnersEditor());
                     break;
                 case 32:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getBarrelsEditor());
+                    player.openInventory(plugin.getEditor().getBarrelsEditor());
                     break;
                 case 49:
                     new WildStackerThread(() -> {
-                        instance.getEditor().saveConfiguration();
+                        plugin.getEditor().saveConfiguration();
                         player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
                     }).start();
                     break;
@@ -422,11 +448,11 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getPlayer();
 
-        Bukkit.getScheduler().runTaskLater(instance, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
                 if(!noResetClose.contains(player.getUniqueId())) {
-                    Bukkit.getScheduler().runTaskAsynchronously(instance, () ->
-                            instance.getEditor().reloadConfiguration());
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+                            plugin.getEditor().reloadConfiguration());
                 }
             }
 
@@ -436,7 +462,7 @@ public final class EditorListener implements Listener {
                     e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
                     e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
                 noResetClose.remove(player.getUniqueId());
-                player.openInventory(instance.getEditor().getSettingsEditor());
+                player.openInventory(plugin.getEditor().getSettingsEditor());
             }
         }, 1L);
     }
@@ -461,7 +487,7 @@ public final class EditorListener implements Listener {
                     path = path + "." + matcher.group(1);
                     value = matcher.group(2);
 
-                    if(instance.getEditor().config.get(path) != null && instance.getEditor().config.get(path).toString().equals(value.toString())){
+                    if(plugin.getEditor().config.get(path) != null && plugin.getEditor().config.get(path).toString().equals(value.toString())){
                         e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Removed the value " + matcher.group(1) + " from " + path);
                         value = null;
                     }else{
@@ -477,12 +503,12 @@ public final class EditorListener implements Listener {
 
                     }
 
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                 }
             }
 
             else if(Arrays.asList(listValues).contains(path)){
-                List<String> list = instance.getEditor().config.getStringList(path);
+                List<String> list = plugin.getEditor().config.getStringList(path);
 
                 if (list.contains(value.toString())) {
                     list.remove(value.toString());
@@ -492,7 +518,7 @@ public final class EditorListener implements Listener {
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Added the value " + value.toString() + " to " + path);
                 }
 
-                instance.getEditor().config.set(path, list);
+                plugin.getEditor().config.set(path, list);
             }
 
             else{
@@ -516,13 +542,13 @@ public final class EditorListener implements Listener {
                 }
 
                 if(valid) {
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Changed value of " + path + " to " + value.toString());
                 }
             }
         }
 
-        e.getPlayer().openInventory(instance.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+        e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
         lastInventories.remove(e.getPlayer().getUniqueId());
         configValues.remove(e.getPlayer().getUniqueId());
     }
