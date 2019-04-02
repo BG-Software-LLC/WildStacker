@@ -253,6 +253,9 @@ public final class EditorHandler {
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
 
+        editor.setItem(25, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean("spawners.next-spawner-placement")).build());
+
         return editor;
     }
 

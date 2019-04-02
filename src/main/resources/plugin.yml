@@ -24,6 +24,7 @@ permissions:
       wildstacker.nosilkdrop: true
       wildstacker.settings: true
       wildstacker.place.*: true
+      wildstacker.nextplace: true
   wildstacker.give:
     description: Gives access to give spawner and eggs to players.
   wildstacker.info:
@@ -43,3 +44,5 @@ permissions:
   wildstacker.place.*:
     description: Gives access to place all spawner types
     default: true
+  wildstacker.nextplace:
+    description: Gives access to place spawners next to others when the feature is disabled.

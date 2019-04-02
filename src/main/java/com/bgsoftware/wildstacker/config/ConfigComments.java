@@ -372,6 +372,10 @@ public final class ConfigComments {
     public static String SPAWNERS_CHANGE_USING_EGGS = "spawners.change-using-eggs";
 
     @Comment("")
+    @Comment("Should there be the ablity to place spawners next to each other?")
+    public static String SPAWNERS_NEXT_SPAWNER_PLACEMENT = "spawners.next-spawner-placement";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked barrels (aka stacked blocks).")
     public static String BARRELS = "barrels";
 

@@ -34,6 +34,7 @@ public final class Locale {
     public static Locale KILL_ALL_ANNOUNCEMENT = new Locale("KILL_ALL_ANNOUNCEMENT");
     public static Locale KILL_ALL_REMAINING_TIME = new Locale("KILL_ALL_REMAINING_TIME");
     public static Locale KILL_ALL_OPS = new Locale("KILL_ALL_OPS");
+    public static Locale NEXT_SPAWNER_PLACEMENT = new Locale("NEXT_SPAWNER_PLACEMENT");
     public static Locale NO_PERMISSION = new Locale("NO_PERMISSION");
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");

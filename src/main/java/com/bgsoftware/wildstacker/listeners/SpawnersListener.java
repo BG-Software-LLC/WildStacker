@@ -18,6 +18,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -44,6 +45,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @SuppressWarnings("unused")
 public final class SpawnersListener implements Listener {
 
+    private static final BlockFace[] blockFaces = new BlockFace[] {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
     private WildStackerPlugin plugin;
 
     public SpawnersListener(WildStackerPlugin plugin){
@@ -72,6 +74,17 @@ public final class SpawnersListener implements Listener {
             e.setCancelled(true);
             Locale.SPAWNER_PLACE_BLOCKED.send(e.getPlayer(), "wildstacker.place." + stackedSpawner.getSpawnedType().name().toLowerCase());
             return;
+        }
+
+        //Next Spawner Placement
+        if(!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
+            for (BlockFace blockFace : blockFaces) {
+                if (e.getBlockPlaced().getRelative(blockFace).getType() == Material.MOB_SPAWNER){
+                    Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
+                    e.setCancelled(true);
+                    return;
+                }
+            }
         }
 
         int inHandAmount = 1;
