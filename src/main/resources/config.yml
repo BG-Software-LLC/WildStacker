@@ -146,6 +146,8 @@ entities:
 
   # A list of all checks that the plugin does before trying to stack two entities together.
   stack-checks:
+    SPAWN_REASON: false
+    NERFED: true
     AGE: true
     EXACT_AGE: false
     CAN_BREED: true

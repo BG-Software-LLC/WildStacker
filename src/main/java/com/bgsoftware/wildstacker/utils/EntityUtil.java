@@ -21,9 +21,6 @@ public final class EntityUtil {
         if(en1.getLivingEntity().hasMetadata("ES") != en2.getLivingEntity().hasMetadata("ES"))
             return false;
 
-        if(en1.isNerfed() != en2.isNerfed())
-            return false;
-
         return EntityData.of(en1).equals(EntityData.of(en2));
     }
 
