@@ -83,21 +83,13 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
             try {
                 EnumItemSlot slot = enumItemSlots[i];
                 ItemStack itemStack = entityLiving.getEquipment(slot);
-                float dropChance = slot.a() == EnumItemSlot.Function.HAND ? entityLiving.dropChanceHand[slot.b()] :
-                        slot.a() == EnumItemSlot.Function.ARMOR ? entityLiving.dropChanceArmor[slot.b()] : 0;
+                float dropChance = slot.a() == EnumItemSlot.Function.HAND ? entityLiving.dropChanceHand[slot.b()] : entityLiving.dropChanceArmor[slot.b()];
 
                 if (!itemStack.isEmpty() && !EnchantmentManager.shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
                         random.nextFloat() - (float) i * 0.01F < dropChance) {
                     if (dropChance <= 1 && itemStack.e())
                         itemStack.setDamage(itemStack.h() - random.nextInt(1 + random.nextInt(Math.max(itemStack.h() - 3, 1))));
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
-                }
-
-                if (dropChance >= 1) {
-                    if (slot.a() == EnumItemSlot.Function.HAND)
-                        entityLiving.dropChanceHand[slot.b()] = 0;
-                    else if (slot.a() == EnumItemSlot.Function.ARMOR)
-                        entityLiving.dropChanceArmor[slot.b()] = 0;
                 }
             }catch(Exception ignored){}
         }

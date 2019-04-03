@@ -98,9 +98,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
                     }
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
                 }
-
-                if (dropChance >= 1)
-                    entityLiving.dropChances[i] = 0;
             }catch(Exception ignored){}
         }
 

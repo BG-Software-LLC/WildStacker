@@ -82,7 +82,8 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
                 ItemStack itemStack = entityLiving.getEquipment(i);
                 double dropChance = entityLiving.dropChances[i];
 
-                if (itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) && random.nextFloat() - (float) i * 0.01F < dropChance) {
+                if (itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) &&
+                        random.nextFloat() - (float) i * 0.01F < dropChance) {
                     if (dropChance <= 1 && itemStack.e()) {
                         int maxData = Math.max(itemStack.j() - 25, 1);
                         int data = itemStack.j() - this.random.nextInt(this.random.nextInt(maxData) + 1);
@@ -98,9 +99,6 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
                     }
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
                 }
-
-                if (dropChance >= 1)
-                    entityLiving.dropChances[i] = 0;
             }catch(Exception ignored){}
         }
 
