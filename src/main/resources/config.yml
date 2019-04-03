@@ -389,6 +389,10 @@ spawners:
   # When enabled, players will be able to change spawners by clicking them with spawn eggs.
   change-using-eggs: true
 
+  # When enabled and change-using-eggs is enabled, the amount of eggs that will be required to change
+  # a spawner would be the same as the stack size of the spawner.
+  eggs-stack-multiply: true
+
   # Should there be the ablity to place spawners next to each other?
   next-spawner-placement: true
 

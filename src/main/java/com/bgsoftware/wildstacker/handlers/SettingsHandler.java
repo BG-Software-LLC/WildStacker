@@ -48,7 +48,7 @@ public final class SettingsHandler {
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
             explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem, dropSpawnerWithoutSilk,
             floatingSpawnerNames, spawnersBreakMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
-            breakChargeMultiply, placeChargeMultiply, changeUsingEggs, nextSpawnerPlacement;
+            breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement;
     public final int spawnersCheckRange, explosionsBreakChance;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners;
@@ -146,6 +146,7 @@ public final class SettingsHandler {
         placeChargeAmount = cfg.getDouble("spawners.place-charge.amount", 0);
         placeChargeMultiply = cfg.getBoolean("spawners.place-charge.multiply-stack-amount", false);
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
+        eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
         nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);
 
         barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);

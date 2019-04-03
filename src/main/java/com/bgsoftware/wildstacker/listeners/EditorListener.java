@@ -40,8 +40,8 @@ public final class EditorListener implements Listener {
             "spawners.drop-without-silk", "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner",
             "spawners.silk-spawners.drop-to-inventory", "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names",
             "spawners.break-menu.enabled", "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
-            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "spawners.next-spawner-placement", "barrels.enabled",
-            "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
+            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "spawners.eggs-stack-multiply", "spawners.next-spawner-placement",
+            "barrels.enabled", "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
             "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
             "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
@@ -374,6 +374,9 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
                     break;
                 case 25:
+                    configValues.put(player.getUniqueId(), "spawners.eggs-stack-multiply");
+                    break;
+                case 26:
                     configValues.put(player.getUniqueId(), "spawners.next-spawner-placement");
                     break;
                 default:

@@ -271,10 +271,20 @@ public final class SpawnersListener implements Listener {
                 !Materials.isValidAndSpawnEgg(e.getItem()) || e.getClickedBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;
 
-        if(!plugin.getSettings().changeUsingEggs)
-            e.setCancelled(true);
+        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> WStackedSpawner.of(e.getClickedBlock()).updateName(), 2L);
+        if(!plugin.getSettings().changeUsingEggs || (plugin.getSettings().eggsStackMultiply &&
+                stackedSpawner.getStackAmount() > ItemUtil.countItem(e.getPlayer().getInventory(), e.getItem())) ||
+                stackedSpawner.getSpawnedType() == ItemUtil.getEntityType(e.getItem())) {
+            e.setCancelled(true);
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            stackedSpawner.updateName();
+            if(e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
+            ItemUtil.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+        }, 2L);
     }
 
     private Map<UUID, Location> clickedSpawners = new HashMap<>();

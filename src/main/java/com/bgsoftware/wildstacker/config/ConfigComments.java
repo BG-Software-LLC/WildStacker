@@ -379,6 +379,11 @@ public final class ConfigComments {
     public static String SPAWNERS_CHANGE_USING_EGGS = "spawners.change-using-eggs";
 
     @Comment("")
+    @Comment("When enabled and change-using-eggs is enabled, the amount of eggs that will be required to change")
+    @Comment("a spawner would be the same as the stack size of the spawner.")
+    public static String SPAWNERS_EGGS_STACK_MULTIPLY = "spawners.eggs-stack-multiply";
+
+    @Comment("")
     @Comment("Should there be the ablity to place spawners next to each other?")
     public static String SPAWNERS_NEXT_SPAWNER_PLACEMENT = "spawners.next-spawner-placement";
 

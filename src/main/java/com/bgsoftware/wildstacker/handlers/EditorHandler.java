@@ -179,7 +179,7 @@ public final class EditorHandler {
     }
 
     public Inventory getSpawnersEditor(){
-        Inventory editor = Bukkit.createInventory(null, 9 * 3, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
 
         editor.setItem(0, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Enabled").withLore("&7Value: " + config.getBoolean("spawners.enabled")).build());
@@ -257,6 +257,9 @@ public final class EditorHandler {
                 .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean("spawners.eggs-stack-multiply")).build());
+
+        editor.setItem(26, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean("spawners.next-spawner-placement")).build());
 
         return editor;

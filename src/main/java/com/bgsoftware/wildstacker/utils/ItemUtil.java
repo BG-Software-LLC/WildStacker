@@ -280,4 +280,32 @@ public final class ItemUtil {
         event.getPlayer().getInventory().removeItem(itemStack);
     }
 
+    public static int countItem(Inventory inventory, ItemStack itemStack){
+        int counter = 0;
+
+        for(ItemStack _itemStack : inventory.getContents()){
+            if(_itemStack != null && _itemStack.isSimilar(itemStack))
+                counter += _itemStack.getAmount();
+        }
+
+        return counter;
+    }
+
+    public static void removeItem(Inventory inventory, ItemStack itemStack, int amount){
+        int amountRemoved = 0;
+
+        for(int i = 0; i < inventory.getSize() && amountRemoved < amount; i++){
+            ItemStack _itemStack = inventory.getItem(i);
+            if(_itemStack != null && _itemStack.isSimilar(itemStack)){
+                if(amountRemoved + _itemStack.getAmount() <= amount){
+                    amountRemoved += _itemStack.getAmount();
+                    inventory.setItem(i, new ItemStack(Material.AIR));
+                }else{
+                    _itemStack.setAmount(_itemStack.getAmount() - amount + amountRemoved);
+                    amountRemoved = amount;
+                }
+            }
+        }
+    }
+
 }
