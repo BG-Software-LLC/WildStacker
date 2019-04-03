@@ -344,7 +344,7 @@ public final class EntitiesListener implements Listener {
     public void onEntityTarget(EntityTargetLivingEntityEvent e){
         if(e.getEntity() instanceof LivingEntity) {
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-            if (e.getTarget() instanceof Player && stackedEntity.isNerfed()) {
+            if (stackedEntity.isNerfed()) {
                 e.setCancelled(true);
             }
         }
