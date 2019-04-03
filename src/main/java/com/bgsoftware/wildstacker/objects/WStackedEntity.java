@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("RedundantIfStatement")
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
@@ -129,7 +130,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return null;
         }
 
-        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
+        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range).stream()
+                .filter(entity -> entity instanceof LivingEntity).collect(Collectors.toList());
         int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
 
         //Checks if minimmum stack size is enabled
@@ -158,7 +160,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         }
         else{
             for (Entity nearby : nearbyEntities) {
-                if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
+                if (nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
                     return (LivingEntity) nearby;
                 }
             }
