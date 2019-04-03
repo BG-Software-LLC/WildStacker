@@ -101,6 +101,14 @@ entities:
     PIG: 10
     ZOMBIE: 50
 
+  # Set a minimum stack for specific entities.
+  # Make sure you follow the "ENTITY-TYPE" format.
+  # You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  minimum-limits:
+    PIG: 10
+    ZOMBIE: 50
+
   # A list of worlds entities won't get stacked inside them (case-sensitive)
   disabled-worlds:
   - disabled_world

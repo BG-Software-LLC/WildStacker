@@ -117,6 +117,13 @@ public final class ConfigComments {
     public static String ENTITIES_LIMITS = "entities.limits";
 
     @Comment("")
+    @Comment("Set a minimum stack for specific entities.")
+    @Comment("Make sure you follow the \"ENTITY-TYPE\" format.")
+    @Comment("You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)")
+    @Comment("If you don't want any limits, you can set a random type.")
+    public static String ENTITIES_MINIMUM_LIMITS = "entities.minimum-limits";
+
+    @Comment("")
     @Comment("A list of worlds entities won't get stacked inside them (case-sensitive)")
     public static String ENTITIES_DISABLED_WORLDS = "entities.disabled-worlds";
 

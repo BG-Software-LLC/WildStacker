@@ -42,7 +42,7 @@ public final class SettingsHandler {
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
     public final List<String> entitiesDisabledWorlds, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
             entitiesInstantKills, nerfedSpawning, stackDownTypes;
-    public final KeyMap<Integer> entitiesLimits;
+    public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
@@ -170,6 +170,7 @@ public final class SettingsHandler {
 
         loadLimits((itemsLimits = new KeyMap<>()), cfg.getConfigurationSection("items.limits"));
         loadLimits((entitiesLimits = new KeyMap<>()), cfg.getConfigurationSection("entities.limits"));
+        loadLimits((minimumEntitiesLimit = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-limits"));
         loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
         loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
 

@@ -123,15 +123,44 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public LivingEntity tryStack() {
         int range = plugin.getSettings().entitiesCheckRange;
 
-        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
-
         //Making sure it's not armor-stand or player
-        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER)
+        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER) {
+            remove();
             return null;
+        }
 
-        for (Entity nearby : nearbyEntities) {
-            if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
-                return (LivingEntity) nearby;
+        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
+        int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+
+        //Checks if minimmum stack size is enabled
+        if(minimumStackSize > 1){
+            List<StackedEntity> entitiesToStack = new ArrayList<>();
+            StackedEntity toStackInto = null;
+            int totalStackSize = getStackAmount();
+
+            for(Entity nearby : nearbyEntities){
+                StackedEntity stackedNearby = WStackedEntity.of(nearby);
+                if(canStackInto(stackedNearby)) {
+                    entitiesToStack.add(stackedNearby);
+                    totalStackSize += stackedNearby.getStackAmount();
+                    if(toStackInto == null)
+                        toStackInto = stackedNearby;
+                }
+            }
+
+            if(toStackInto != null && totalStackSize >= minimumStackSize){
+                for(StackedEntity stackedEntity : entitiesToStack){
+                    stackedEntity.tryStackInto(toStackInto);
+                }
+                tryStackInto(toStackInto);
+                return toStackInto.getLivingEntity();
+            }
+        }
+        else{
+            for (Entity nearby : nearbyEntities) {
+                if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
+                    return (LivingEntity) nearby;
+                }
             }
         }
 
