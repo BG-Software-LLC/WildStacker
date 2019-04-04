@@ -190,7 +190,7 @@ public final class BarrelsListener implements Listener {
             }
 
             if(amount != 0) {
-                int limit = plugin.getSettings().barrelsLimits.getOrDefault(stackedBarrel.getBarrelItem(1), Integer.MAX_VALUE);
+                int limit = stackedBarrel.getStackLimit();
 
                 if(stackedBarrel.getStackAmount() + amount > limit){
                     ItemStack toAdd = barrelItem.clone();

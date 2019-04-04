@@ -31,6 +31,9 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     }
 
     @Override
+    public abstract int getStackLimit();
+
+    @Override
     public abstract void remove();
 
     @Override

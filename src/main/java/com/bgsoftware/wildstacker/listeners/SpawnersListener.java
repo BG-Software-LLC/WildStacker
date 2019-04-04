@@ -96,7 +96,7 @@ public final class SpawnersListener implements Listener {
         }
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE){
-            int limit = plugin.getSettings().spawnersLimits.getOrDefault(stackedSpawner.getSpawnedType().name(), Integer.MAX_VALUE);
+            int limit = stackedSpawner.getStackLimit();
             //If the spawnerItemAmount is larger than the spawner limit, we want to give to the player the leftovers
             if(limit < spawnerItemAmount){
                 ItemStack spawnerItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(), spawnerItemAmount - limit);
@@ -138,7 +138,7 @@ public final class SpawnersListener implements Listener {
                             Block block = e.getBlockPlaced().getWorld().getBlockAt(x, y, z);
                             if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(e.getBlockPlaced().getLocation())) {
                                 StackedSpawner target = WStackedSpawner.of(block);
-                                if(target.getStackAmount() >= plugin.getSettings().spawnersLimits.getOrDefault(target.getSpawnedType().name(), Integer.MAX_VALUE)){
+                                if(target.getStackAmount() >= target.getStackLimit()){
                                     stackedSpawner.remove();
                                     e.setCancelled(true);
                                     return;
@@ -448,7 +448,7 @@ public final class SpawnersListener implements Listener {
                 }
 
                 if(amount != 0) {
-                    int limit = plugin.getSettings().spawnersLimits.getOrDefault(stackedSpawner.getSpawnedType().name(), Integer.MAX_VALUE);
+                    int limit = stackedSpawner.getStackLimit();
 
                     if(stackedSpawner.getStackAmount() + amount > limit){
                         ItemStack toAdd = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(),stackedSpawner.getStackAmount() + amount - limit);

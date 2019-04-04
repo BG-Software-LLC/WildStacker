@@ -17,6 +17,12 @@ public interface StackedObject<T> {
     void setStackAmount(int stackAmount, boolean updateName);
 
     /**
+     * Get the stack limit
+     * @return stack limit
+     */
+    int getStackLimit();
+
+    /**
      * Remove the stack object from cache and the server
      */
     void remove();

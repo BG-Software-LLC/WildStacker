@@ -87,6 +87,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
      */
 
     @Override
+    public int getStackLimit() {
+        return plugin.getSettings().entitiesLimits.getOrDefault(getType().name(), Integer.MAX_VALUE);
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -192,7 +197,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 EntityUtil.isNameBlacklisted(((StackedEntity) stackedObject).getLivingEntity().getCustomName()))
             return false;
 
-        if (plugin.getSettings().entitiesLimits.getOrDefault(targetEntity.getType().name(), Integer.MAX_VALUE) < newStackAmount)
+        if (getStackLimit() < newStackAmount)
             return false;
 
         if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {

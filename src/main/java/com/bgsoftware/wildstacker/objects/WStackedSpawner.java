@@ -43,6 +43,11 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
      */
 
     @Override
+    public int getStackLimit() {
+        return plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType().name(), Integer.MAX_VALUE);
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         plugin.getProviders().deleteHologram(this);
@@ -119,7 +124,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                 plugin.getSettings().blacklistedSpawners.contains(targetSpawner.getSpawnedType().name()))
             return false;
 
-        if(plugin.getSettings().spawnersLimits.getOrDefault(targetSpawner.getSpawnedType().name(), Integer.MAX_VALUE) < newStackAmount)
+        if(getStackLimit() < newStackAmount)
             return false;
 
         return true;

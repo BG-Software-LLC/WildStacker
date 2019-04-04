@@ -55,6 +55,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
      */
 
     @Override
+    public int getStackLimit() {
+        return plugin.getSettings().itemsLimits.getOrDefault(getItemStack(), Integer.MAX_VALUE);
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -128,7 +133,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
                 plugin.getSettings().blacklistedItems.contains(((StackedItem) stackedObject).getItemStack()))
             return false;
 
-        if (plugin.getSettings().itemsLimits.getOrDefault(targetItem.getItemStack(), Integer.MAX_VALUE) < newStackAmount)
+        if (getStackLimit() < newStackAmount)
             return false;
 
         return true;
