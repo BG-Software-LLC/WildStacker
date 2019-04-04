@@ -368,6 +368,10 @@ spawners:
         name: '&6&lx256 Spawners'
         amount: 256
 
+  # When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there
+  # he can put spawner items to add to the spawner. Make sure break-menu is disabled!
+  place-inventory: false
+
   # When enabled, you must have the permission wildstacker.place.<entity> to place an entity.
   # You can give a player the ability to place all spawners with wildstacker.place.*
   placement-permission: false

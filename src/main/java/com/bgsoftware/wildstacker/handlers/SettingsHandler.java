@@ -47,7 +47,7 @@ public final class SettingsHandler {
     //Spawners settings
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
             explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem, dropSpawnerWithoutSilk,
-            floatingSpawnerNames, spawnersBreakMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
+            floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
             breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement;
     public final int spawnersCheckRange, explosionsBreakChance;
     public final double breakChargeAmount, placeChargeAmount;
@@ -138,6 +138,7 @@ public final class SettingsHandler {
         getStackedItem = cfg.getBoolean("spawners.get-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
         spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
+        spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory", false);
         plugin.getBreakMenuHandler().loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);

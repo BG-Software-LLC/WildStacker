@@ -84,6 +84,12 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         WStackedSpawner.of(spawner).setStackAmount(spawnerItemAmount, updateName);
     }
 
+    @Override
+    public EntityType getSpawnerType(ItemStack itemStack) {
+        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
+        return ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
+    }
+
     private boolean isValidAndHasSilkTouch(ItemStack itemStack){
         if(itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;

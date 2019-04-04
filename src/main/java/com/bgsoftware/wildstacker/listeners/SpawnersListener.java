@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,8 +29,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -300,15 +301,13 @@ public final class SpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
         if(e.getPlayer().isSneaking()){
-            if(!plugin.getSettings().spawnersBreakMenu)
-                return;
-
-            if(e.isCancelled())
-                return;
-
-            clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
-
-            plugin.getBreakMenuHandler().openBreakMenu(e.getPlayer());
+            if(plugin.getSettings().spawnersBreakMenu){
+                clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
+                plugin.getBreakMenuHandler().openBreakMenu(e.getPlayer());
+            }else if(plugin.getSettings().spawnersPlaceMenu){
+                clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
+                e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4, "Add items here (" + EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()) + ")"));
+            }
         }
 
         else{
@@ -395,8 +394,52 @@ public final class SpawnersListener implements Listener {
     }
 
     @EventHandler
+    public void onPlaceMenuClick(InventoryClickEvent e){
+        if(!clickedSpawners.containsKey(e.getWhoClicked().getUniqueId()) || e.getInventory().getSize() != 9*4)
+            return;
+
+        StackedSpawner stackedSpawner = WStackedSpawner.of(clickedSpawners.get(e.getWhoClicked().getUniqueId()).getBlock());
+
+        if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR && (e.getCurrentItem().getType() != Material.MOB_SPAWNER ||
+                plugin.getProviders().getSpawnerType(e.getCurrentItem()) != stackedSpawner.getSpawnedType()))
+            e.setCancelled(true);
+        if(e.getAction() == InventoryAction.HOTBAR_SWAP)
+            e.setCancelled(true);
+    }
+
+    @EventHandler
     public void onInventoryClose(InventoryCloseEvent e){
-        if(e.getInventory().getName().equals(ChatColor.BOLD + "Break Menu")) {
+        if(clickedSpawners.containsKey(e.getPlayer().getUniqueId())){
+            //Place inventory
+            if(e.getInventory().getType() == InventoryType.CHEST && e.getInventory().getSize() == 9 * 4){
+                StackedSpawner stackedSpawner = WStackedSpawner.of(clickedSpawners.get(e.getPlayer().getUniqueId()).getBlock());
+                int amount = 0;
+
+                for(ItemStack itemStack : e.getInventory().getContents()){
+                    if(itemStack != null) {
+                        if (itemStack.getType() == Materials.SPAWNER.toBukkitType() &&
+                                plugin.getProviders().getSpawnerType(itemStack) == stackedSpawner.getSpawnedType())
+                            amount += ItemUtil.getSpawnerItemAmount(itemStack);
+                        else if (itemStack.getType() != Material.AIR)
+                            ItemUtil.addItem(itemStack, e.getPlayer().getInventory(), stackedSpawner.getLocation());
+                    }
+                }
+
+                if(amount != 0) {
+                    int limit = plugin.getSettings().spawnersLimits.getOrDefault(stackedSpawner.getSpawnedType().name(), Integer.MAX_VALUE);
+
+                    if(stackedSpawner.getStackAmount() + amount > limit){
+                        ItemStack toAdd = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(),stackedSpawner.getStackAmount() + amount - limit);
+                        ItemUtil.addItem(toAdd, e.getPlayer().getInventory(), stackedSpawner.getLocation());
+                        stackedSpawner.setStackAmount(limit, true);
+                    }else{
+                        stackedSpawner.setStackAmount(stackedSpawner.getStackAmount() + amount, true);
+                    }
+
+                    Locale.SPAWNER_UPDATE.send(e.getPlayer(), stackedSpawner.getStackAmount());
+                }
+            }
+
             clickedSpawners.remove(e.getPlayer().getUniqueId());
         }
     }

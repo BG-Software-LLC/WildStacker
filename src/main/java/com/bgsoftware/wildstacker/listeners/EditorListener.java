@@ -39,9 +39,10 @@ public final class EditorListener implements Listener {
             "entities.stack-after-breed", "entities.hide-names", "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack",
             "spawners.drop-without-silk", "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner",
             "spawners.silk-spawners.drop-to-inventory", "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names",
-            "spawners.break-menu.enabled", "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
-            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "spawners.eggs-stack-multiply", "spawners.next-spawner-placement",
-            "barrels.enabled", "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
+            "spawners.break-menu.enabled", "spawners.place-inventory", "spawners.placement-permission", "spawners.shift-place-stack",
+            "spawners.break-charge.multiply-stack-amount", "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs",
+            "spawners.eggs-stack-multiply", "spawners.next-spawner-placement", "barrels.enabled", "barrels.chunk-merge", "barrels.explosions-break-stack",
+            "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
             "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
             "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
@@ -353,30 +354,33 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "spawners.break-menu.enabled");
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "spawners.placement-permission");
+                    configValues.put(player.getUniqueId(), "spawners.place-inventory");
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "spawners.shift-place-stack");
+                    configValues.put(player.getUniqueId(), "spawners.placement-permission");
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.amount");
+                    configValues.put(player.getUniqueId(), "spawners.shift-place-stack");
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), "spawners.break-charge.amount");
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.amount");
+                    configValues.put(player.getUniqueId(), "spawners.break-charge.multiply-stack-amount");
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), "spawners.place-charge.amount");
                     break;
                 case 24:
-                    configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
+                    configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
                     break;
                 case 25:
-                    configValues.put(player.getUniqueId(), "spawners.eggs-stack-multiply");
+                    configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
                     break;
                 case 26:
+                    configValues.put(player.getUniqueId(), "spawners.eggs-stack-multiply");
+                    break;
+                case 27:
                     configValues.put(player.getUniqueId(), "spawners.next-spawner-placement");
                     break;
                 default:

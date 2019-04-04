@@ -42,6 +42,7 @@ public final class Locale {
     public static Locale SPAWNER_PLACE = new Locale("SPAWNER_PLACE");
     public static Locale SPAWNER_PLACE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_PLACE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_PLACE_BLOCKED = new Locale("SPAWNER_PLACE_BLOCKED");
+    public static Locale SPAWNER_UPDATE = new Locale("SPAWNER_UPDATE");
     public static Locale STACK_GIVE_PLAYER = new Locale("STACK_GIVE_PLAYER");
     public static Locale STACK_RECEIVE = new Locale("STACK_RECEIVE");
     public static Locale STACK_INFO_INVALID = new Locale("STACK_INFO_INVALID");

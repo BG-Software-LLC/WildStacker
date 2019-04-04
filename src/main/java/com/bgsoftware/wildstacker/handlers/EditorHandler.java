@@ -236,30 +236,33 @@ public final class EditorHandler {
                 .withName("&6Break Menu").withLore("&7Value: " + config.getBoolean("spawners.break-menu.enabled")).build());
 
         editor.setItem(18, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean("spawners.placement-permission")).build());
+                .withName("&6Place Menu").withLore("&7Value: " + config.getBoolean("spawners.place-inventory")).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean("spawners.shift-place-stack")).build());
+                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean("spawners.placement-permission")).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt("spawners.break-charge.amount")).build());
+                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean("spawners.shift-place-stack")).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.break-charge.multiply-stack-amount")).build());
+                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt("spawners.break-charge.amount")).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt("spawners.place-charge.amount")).build());
+                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.break-charge.multiply-stack-amount")).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.place-charge.multiply-stack-amount")).build());
+                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt("spawners.place-charge.amount")).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
+                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.place-charge.multiply-stack-amount")).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean("spawners.eggs-stack-multiply")).build());
+                .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
 
         editor.setItem(26, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean("spawners.eggs-stack-multiply")).build());
+
+        editor.setItem(27, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean("spawners.next-spawner-placement")).build());
 
         return editor;

@@ -357,6 +357,11 @@ public final class ConfigComments {
     public static String SPAWNERS_BREAK_MENU_BREAK_SLOTS = "spawners.break-menu.break-slots";
 
     @Comment("")
+    @Comment("When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there")
+    @Comment("he can put spawner items to add to the spawner. Make sure break-menu is disabled!")
+    public static String SPAWNERS_PLACE_INVENTORY = "spawners.place-inventory";
+
+    @Comment("")
     @Comment("When enabled, you must have the permission wildstacker.place.<entity> to place an entity.")
     @Comment("You can give a player the ability to place all spawners with wildstacker.place.*")
     public static String SPAWNERS_PLACEMENT_PERMISSION = "spawners.placement-permission";
