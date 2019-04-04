@@ -265,6 +265,9 @@ public final class EditorHandler {
         editor.setItem(27, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean("spawners.next-spawner-placement")).build());
 
+        editor.setItem(28, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Only One Spawner").withLore("&7Value: " + config.getBoolean("spawners.only-one-spawner")).build());
+
         return editor;
     }
 

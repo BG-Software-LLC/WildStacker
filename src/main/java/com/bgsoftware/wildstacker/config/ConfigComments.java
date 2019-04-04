@@ -393,6 +393,10 @@ public final class ConfigComments {
     public static String SPAWNERS_NEXT_SPAWNER_PLACEMENT = "spawners.next-spawner-placement";
 
     @Comment("")
+    @Comment("Should there be only one spawner in the merge radius?")
+    public static String SPAWNERS_ONLY_ONE_SPAWNER = "spawners.only-one-spawner";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked barrels (aka stacked blocks).")
     public static String BARRELS = "barrels";
 
