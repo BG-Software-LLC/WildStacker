@@ -90,6 +90,19 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public boolean canStackInto(StackedObject stackedObject) {
+        if(!canStackIntoNoLimit(stackedObject))
+            return false;
+
+        StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
+        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
+
+        if(getStackLimit() < newStackAmount)
+            return false;
+
+        return true;
+    }
+
+    private boolean canStackIntoNoLimit(StackedObject stackedObject){
         if(!plugin.getSettings().spawnersStackingEnabled)
             return false;
 
@@ -100,13 +113,9 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
             return false;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
 
         if(plugin.getSettings().blacklistedSpawners.contains(object.getSpawnedType().name()) ||
                 plugin.getSettings().blacklistedSpawners.contains(targetSpawner.getSpawnedType().name()))
-            return false;
-
-        if(getStackLimit() < newStackAmount)
             return false;
 
         return true;
@@ -204,7 +213,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                     Block block = chunkMerge ? location.getChunk().getBlock(x, y, z) : location.getWorld().getBlockAt(x, y, z);
                     if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(location)) {
                         StackedSpawner stackedSpawner = WStackedSpawner.of(block);
-                        if (canStackInto(stackedSpawner))
+                        if (canStackIntoNoLimit(stackedSpawner))
                             stackedSpawners.add(stackedSpawner);
                     }
                 }
