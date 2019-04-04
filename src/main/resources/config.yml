@@ -113,6 +113,10 @@ entities:
   disabled-worlds:
   - disabled_world
 
+  # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
+  disabled-regions:
+  - spawn
+
   # Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # If you wish to enable stacking of all entities that are spawned, use "spawn-blacklist: []"

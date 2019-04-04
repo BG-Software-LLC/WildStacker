@@ -44,8 +44,8 @@ public final class EditorListener implements Listener {
             "spawners.eggs-stack-multiply", "spawners.next-spawner-placement", "spawners.only-one-spawner", "barrels.enabled",
             "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
-            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
-            "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
+            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.disabled-regions",
+            "entities.blacklist", "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
             "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds", "barrels.whitelist",
             "barrels.disabled-worlds"};
     private String[] sectionValues = new String[] {
@@ -225,60 +225,63 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "entities.disabled-worlds");
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "entities.spawn-blacklist");
+                    configValues.put(player.getUniqueId(), "entities.disabled-regions");
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "entities.name-blacklist");
+                    configValues.put(player.getUniqueId(), "entities.spawn-blacklist");
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "entities.stack-interval");
+                    configValues.put(player.getUniqueId(), "entities.name-blacklist");
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.interval");
+                    configValues.put(player.getUniqueId(), "entities.stack-interval");
                     break;
                 case 11:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.clear-lagg");
+                    configValues.put(player.getUniqueId(), "entities.kill-all.interval");
                     break;
                 case 12:
-                    configValues.put(player.getUniqueId(), "entities.stack-checks");
+                    configValues.put(player.getUniqueId(), "entities.kill-all.clear-lagg");
                     break;
                 case 13:
-                    configValues.put(player.getUniqueId(), "entities.stack-split");
+                    configValues.put(player.getUniqueId(), "entities.stack-checks");
                     break;
                 case 14:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.enabled");
+                    configValues.put(player.getUniqueId(), "entities.stack-split");
                     break;
                 case 15:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.max-distance");
+                    configValues.put(player.getUniqueId(), "entities.linked-entities.enabled");
                     break;
                 case 16:
-                    configValues.put(player.getUniqueId(), "entities.instant-kill");
+                    configValues.put(player.getUniqueId(), "entities.linked-entities.max-distance");
                     break;
                 case 17:
-                    configValues.put(player.getUniqueId(), "entities.nerfed-spawning");
+                    configValues.put(player.getUniqueId(), "entities.instant-kill");
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.enabled");
+                    configValues.put(player.getUniqueId(), "entities.nerfed-spawning");
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.stack-down-types");
+                    configValues.put(player.getUniqueId(), "entities.stack-down.enabled");
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "entities.keep-fire");
+                    configValues.put(player.getUniqueId(), "entities.stack-down.stack-down-types");
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "entities.mythic-mobs-stack");
+                    configValues.put(player.getUniqueId(), "entities.keep-fire");
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "entities.blazes-always-drop");
+                    configValues.put(player.getUniqueId(), "entities.mythic-mobs-stack");
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "entities.keep-lowest-health");
+                    configValues.put(player.getUniqueId(), "entities.blazes-always-drop");
                     break;
                 case 24:
-                    configValues.put(player.getUniqueId(), "entities.stack-after-breed");
+                    configValues.put(player.getUniqueId(), "entities.keep-lowest-health");
                     break;
                 case 25:
+                    configValues.put(player.getUniqueId(), "entities.stack-after-breed");
+                    break;
+                case 26:
                     configValues.put(player.getUniqueId(), "entities.hide-names");
                     break;
                 default:

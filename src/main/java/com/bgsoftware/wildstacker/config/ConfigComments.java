@@ -128,6 +128,10 @@ public final class ConfigComments {
     public static String ENTITIES_DISABLED_WORLDS = "entities.disabled-worlds";
 
     @Comment("")
+    @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
+    public static String ENTITIES_DISABLED_REGIONS = "entities.disabled-regions";
+
+    @Comment("")
     @Comment("Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
     @Comment("If you wish to enable stacking of all entities that are spawned, use \"spawn-blacklist: []\"")

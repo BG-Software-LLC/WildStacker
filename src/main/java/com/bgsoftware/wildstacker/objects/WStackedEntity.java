@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
@@ -23,6 +24,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +32,6 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("RedundantIfStatement")
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     public static WeakHashMap<UUID, CreatureSpawnEvent.SpawnReason> spawnReasons = new WeakHashMap<>();
@@ -206,6 +207,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         }
 
         if (MythicMobsHook.isMythicMob(object) && !plugin.getSettings().mythicMobsStackEnabled)
+            return false;
+
+        //noinspection all
+        if(!Collections.disjoint(plugin.getSettings().entitiesDisabledRegions, WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation())))
             return false;
 
         return true;

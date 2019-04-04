@@ -40,7 +40,7 @@ public final class SettingsHandler {
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
-    public final List<String> entitiesDisabledWorlds, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
+    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
             entitiesInstantKills, nerfedSpawning, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
 
@@ -101,6 +101,7 @@ public final class SettingsHandler {
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
         entitiesCheckRange = cfg.getInt("entities.merge-radius", 10);
+        entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
         linkedEntitiesMaxDistance = cfg.getInt("entities.linked-entities.max-distance", 10);
         blacklistedEntities = cfg.getStringList("entities.blacklist");
