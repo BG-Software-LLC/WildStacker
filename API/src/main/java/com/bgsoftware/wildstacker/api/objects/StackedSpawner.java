@@ -5,6 +5,8 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.List;
+
 public interface StackedSpawner extends StackedObject<CreatureSpawner> {
 
     /**
@@ -38,5 +40,11 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
      * @param linkedEntity an entity to link
      */
     void setLinkedEntity(LivingEntity linkedEntity);
+
+    /**
+     * Get all the nearby stacked-spawners that the spawner can stack into in the merge range.
+     * @return List of stacked-spawners
+     */
+    List<StackedSpawner> getNearbySpawners();
 
 }

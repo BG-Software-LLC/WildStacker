@@ -128,23 +128,11 @@ public final class SpawnersListener implements Listener {
             }
 
             if(plugin.getSettings().onlyOneSpawner){
-                int range = plugin.getSettings().spawnersCheckRange;
-                int maxX = e.getBlockPlaced().getX() + range, maxY = e.getBlockPlaced().getY() + range, maxZ = e.getBlockPlaced().getZ() + range;
-                int minX = e.getBlockPlaced().getX() - range, minY = e.getBlockPlaced().getY() - range, minZ = e.getBlockPlaced().getZ() - range;
-
-                for (int y = maxY; y >= minY; y--) {
-                    for (int x = minX; x <= maxX; x++) {
-                        for (int z = minZ; z <= maxZ; z++) {
-                            Block block = e.getBlockPlaced().getWorld().getBlockAt(x, y, z);
-                            if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(e.getBlockPlaced().getLocation())) {
-                                StackedSpawner target = WStackedSpawner.of(block);
-                                if(target.getStackAmount() >= target.getStackLimit()){
-                                    stackedSpawner.remove();
-                                    e.setCancelled(true);
-                                    return;
-                                }
-                            }
-                        }
+                for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
+                    if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()){
+                        stackedSpawner.remove();
+                        e.setCancelled(true);
+                        return;
                     }
                 }
             }
