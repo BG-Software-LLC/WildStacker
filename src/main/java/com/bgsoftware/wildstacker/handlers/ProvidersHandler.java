@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -100,7 +101,6 @@ public final class ProvidersHandler {
             claimsProviders.add(new ClaimsProvider_PlotSquared());
         if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
             claimsProviders.add(new ClaimsProvider_WorldGuard());
-        Bukkit.broadcastMessage(claimsProviders.size() + "");
 
         WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
@@ -131,6 +131,10 @@ public final class ProvidersHandler {
 
     public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName){
         spawnersProvider.setSpawnerType(spawner, itemStack, updateName);
+    }
+
+    public EntityType getSpawnerType(ItemStack itemStack){
+        return spawnersProvider.getSpawnerType(itemStack);
     }
 
     /*
@@ -185,6 +189,7 @@ public final class ProvidersHandler {
      * Claims Provider
      */
 
+    @SuppressWarnings("all")
     public boolean hasClaimAccess(Player player, Location location){
         for(ClaimsProvider claimsProvider : claimsProviders) {
             if (!claimsProvider.hasClaimAccess(player, location))
