@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 
 @SuppressWarnings("unused")
-public class NoClaimConflictListener implements Listener {
+public final class NoClaimConflictListener implements Listener {
 
     private final WildStackerPlugin plugin;
     private final Map<Location, UUID> placers = new WeakHashMap<>();
