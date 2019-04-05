@@ -176,15 +176,12 @@ public final class BucketsListener implements Listener {
                 break;
             case SHIFT_LEFT:
             case SHIFT_RIGHT:
-                e.setCancelled(true);
+                Inventory invToAddItem = e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()) ?
+                        e.getWhoClicked().getOpenInventory().getBottomInventory() : e.getWhoClicked().getOpenInventory().getTopInventory();
 
-                Inventory invToAddItem = e.getWhoClicked().getOpenInventory().getTopInventory();
-                if(e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()))
-                    invToAddItem = e.getWhoClicked().getOpenInventory().getBottomInventory();
+                clicked = e.getCurrentItem();
 
-                if(ItemUtil.stackBucket(e.getCurrentItem(), invToAddItem) || invToAddItem.addItem(e.getCurrentItem()).isEmpty()){
-                    e.setCurrentItem(new ItemStack(Material.AIR));
-                }
+                Bukkit.getScheduler().runTask(plugin, () -> ItemUtil.stackBucket(clicked, invToAddItem));
                 break;
             default:
                 return;

@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -210,23 +211,37 @@ public final class ItemUtil {
 
     public static boolean stackBucket(ItemStack bucket, Inventory inventory){
         if(plugin.getSettings().bucketsStackerEnabled) {
+            int amountOfBuckets = 0;
+
             for (int slot = 0; slot < inventory.getSize(); slot++) {
                 ItemStack itemStack = inventory.getItem(slot);
-                if (itemStack != null && itemStack.isSimilar(bucket) && itemStack.getAmount() < 16) {
-                    if (itemStack.getAmount() + bucket.getAmount() <= 16) {
-                        itemStack.setAmount(itemStack.getAmount() + bucket.getAmount());
-                        inventory.setItem(slot, itemStack);
-                        return true;
-                    } else {
-                        int toAdd = 16 - itemStack.getAmount();
-                        itemStack.setAmount(16);
-                        inventory.setItem(slot, itemStack);
-                        bucket.setAmount(bucket.getAmount() - toAdd);
-                    }
+                if (itemStack != null && itemStack.isSimilar(bucket)) {
+                    amountOfBuckets += itemStack.getAmount();
+                    inventory.setItem(slot, new ItemStack(Material.AIR));
                 }
             }
+
+            updateInventory(inventory);
+
+            ItemStack cloned = bucket.clone();
+            cloned.setAmount(16);
+
+            for(int i = 0; i < amountOfBuckets / 16; i++)
+                inventory.addItem(cloned);
+
+            if(amountOfBuckets % 16 > 0){
+                cloned.setAmount(amountOfBuckets % 16);
+                inventory.addItem(cloned);
+            }
+
+            updateInventory(inventory);
         }
         return false;
+    }
+
+    private static void updateInventory(Inventory inventory){
+        inventory.getViewers().stream().filter(humanEntity -> humanEntity instanceof Player)
+                .forEach(player -> ((Player) player).updateInventory());
     }
 
     public static ItemStack getFromConfig(ConfigurationSection section){
