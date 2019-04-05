@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
-import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -21,7 +21,7 @@ public class WorldGuardHook {
             ApplicableRegionSet applicableRegionSet;
             try {
                 RegionContainer regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
-                Location location = new Location(BukkitUtil.getLocalWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
+                Location location = new Location(new BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
                 applicableRegionSet = regionContainer.createQuery().getApplicableRegions(location);
             }catch(Throwable ex){
                 try {
