@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.loot;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.google.gson.JsonObject;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -36,8 +37,11 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         for(int i = 0; i < stackAmount; i++) {
             List<LootPair> lootPairs = getLootPairs(stackedEntity);
 
-            for(LootPair lootPair : lootPairs)
+            for(LootPair lootPair : lootPairs) {
                 drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
+                if(isKilledByPlayer(stackedEntity))
+                    lootPair.executeCommands(getKiller(stackedEntity), lootBonusLevel);
+            }
         }
 
         if(dropEquipment)
@@ -84,7 +88,11 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     }
 
     static boolean isKilledByPlayer(StackedEntity stackedEntity){
-        return stackedEntity.getLivingEntity().getKiller() != null;
+        return getKiller(stackedEntity) != null;
+    }
+
+    private static Player getKiller(StackedEntity stackedEntity){
+        return stackedEntity.getLivingEntity().getKiller();
     }
 
     public static LootTable fromJson(JsonObject jsonObject){
