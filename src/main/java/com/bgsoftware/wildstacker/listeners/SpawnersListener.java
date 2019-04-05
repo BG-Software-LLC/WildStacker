@@ -80,7 +80,7 @@ public final class SpawnersListener implements Listener {
         //Next Spawner Placement
         if(!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
             for (BlockFace blockFace : blockFaces) {
-                if (e.getBlockPlaced().getRelative(blockFace).getType() == Material.MOB_SPAWNER){
+                if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()){
                     Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
                     e.setCancelled(true);
                     return;
@@ -410,7 +410,7 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(clickedSpawners.get(e.getWhoClicked().getUniqueId()).getBlock());
 
-        if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR && (e.getCurrentItem().getType() != Material.MOB_SPAWNER ||
+        if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR && (e.getCurrentItem().getType() != Materials.SPAWNER.toBukkitType() ||
                 plugin.getProviders().getSpawnerType(e.getCurrentItem()) != stackedSpawner.getSpawnedType()))
             e.setCancelled(true);
         if(e.getAction() == InventoryAction.HOTBAR_SWAP)
