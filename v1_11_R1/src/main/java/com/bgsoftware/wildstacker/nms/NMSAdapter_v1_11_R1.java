@@ -109,7 +109,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     private boolean shouldNotDrop(ItemStack itemStack){
         try{
             return EnchantmentManager.c(itemStack);
-        }catch(Exception ex){
+        }catch(Throwable ex){
             try{
                 //noinspection JavaReflectionMemberAccess
                 return (Boolean) EnchantmentManager.class.getMethod("e", ItemStack.class).invoke(null, itemStack);
