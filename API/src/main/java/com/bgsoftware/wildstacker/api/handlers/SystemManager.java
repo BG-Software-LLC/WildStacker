@@ -47,11 +47,25 @@ public interface SystemManager {
     StackedSpawner getStackedSpawner(CreatureSpawner spawner);
 
     /**
+     * Get the stacked spawner object of a creature-spawner by location.
+     * @param location The location of the creature-spawner.
+     * @return stacked spawner object
+     */
+    StackedSpawner getStackedSpawner(Location location);
+
+    /**
      * Get the stacked barrel object of a block.
      * @param block The block
      * @return stacked barrel object
      */
     StackedBarrel getStackedBarrel(Block block);
+
+    /**
+     * Get the stacked barrel object of a block by location.
+     * @param location The location of the block.
+     * @return stacked barrel object
+     */
+    StackedBarrel getStackedBarrel(Location location);
 
     /**
      * Get all the stacked entities from cache.
