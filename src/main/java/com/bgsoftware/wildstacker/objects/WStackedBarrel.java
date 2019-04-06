@@ -45,6 +45,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     }
 
     @Override
+    public int getStackLimit() {
+        return plugin.getSettings().barrelsLimits.getOrDefault(getBarrelItem(1), Integer.MAX_VALUE);
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         plugin.getProviders().deleteHologram(this);
@@ -118,7 +123,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
         int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
-        if(plugin.getSettings().barrelsLimits.getOrDefault(targetBarrel.getBarrelItem(1), Integer.MAX_VALUE) < newStackAmount)
+        if(getStackLimit() < newStackAmount)
             return false;
 
         return true;

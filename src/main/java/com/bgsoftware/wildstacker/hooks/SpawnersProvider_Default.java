@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildtools.api.WildToolsAPI;
@@ -74,14 +75,17 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         spawner.setSpawnedType(entityType);
         spawner.update();
 
-        int spawnerItemAmount = ItemUtil.getSpawnerItemAmount(itemStack);
+        StackedSpawner stackedSpawner = WStackedSpawner.of(spawner);
 
-        if ((plugin.getSettings().spawnersLimits.containsKey(entityType.name())) &&
-                (plugin.getSettings().spawnersLimits.get(entityType.name()) < spawnerItemAmount)) {
-            spawnerItemAmount = plugin.getSettings().spawnersLimits.get(entityType.name());
-        }
+        int spawnerItemAmount = Math.max(ItemUtil.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
 
-        WStackedSpawner.of(spawner).setStackAmount(spawnerItemAmount, updateName);
+        stackedSpawner.setStackAmount(spawnerItemAmount, updateName);
+    }
+
+    @Override
+    public EntityType getSpawnerType(ItemStack itemStack) {
+        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
+        return ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
     }
 
     private boolean isValidAndHasSilkTouch(ItemStack itemStack){

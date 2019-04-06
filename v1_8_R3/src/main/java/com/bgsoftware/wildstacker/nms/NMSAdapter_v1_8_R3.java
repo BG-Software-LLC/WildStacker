@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityLiving;
@@ -15,6 +17,7 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -31,6 +34,9 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
+        nbtTagCompound.setString("SpawnReason", WStackedEntity.spawnReasons.getOrDefault(livingEntity.getUniqueId(),
+                CreatureSpawnEvent.SpawnReason.CHUNK_GEN).name());
+        nbtTagCompound.setBoolean("Nerfed", WildStackerPlugin.getPlugin().getSettings().nerfedSpawning.contains(nbtTagCompound.getString("SpawnReason")));
         return nbtTagCompound;
     }
 
@@ -92,9 +98,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
                     }
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
                 }
-
-                if (dropChance >= 1)
-                    entityLiving.dropChances[i] = 0;
             }catch(Exception ignored){}
         }
 

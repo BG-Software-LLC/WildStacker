@@ -14,8 +14,10 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Zombie;
 
 import java.io.File;
 import java.io.FileReader;
@@ -39,13 +41,13 @@ public final class LootHandler {
             initAllLootTables();
         }
 
-        lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, true));
+        lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, -1, -1, true));
 
         for(File file : folderFile.listFiles()){
             try {
                 JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
                 String key = file.getName().replace(".json", "").toUpperCase();
-                lootTables.put(key, key.equals("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
+                lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
             }catch(Exception ex){
                 System.out.println("Couldn't load " + file.getName());
                 ex.printStackTrace();
@@ -165,7 +167,13 @@ public final class LootHandler {
 
     public LootTable getLootTable(LivingEntity livingEntity){
         EntityTypes entityType = EntityTypes.fromEntity(livingEntity);
-        return !lootTables.containsKey(entityType.name()) ? lootTables.get("EMPTY") : lootTables.get(entityType.name());
+        String entityTypeName = entityType.name();
+
+        if((livingEntity instanceof Ageable && !((Ageable) livingEntity).isAdult()) ||
+                ((livingEntity instanceof Zombie) && ((Zombie) livingEntity).isBaby()))
+            entityTypeName += "_BABY";
+
+        return lootTables.getOrDefault(entityTypeName, lootTables.get("EMPTY"));
     }
 
     public LootTableCustom getLootTableCustom(){

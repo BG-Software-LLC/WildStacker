@@ -40,7 +40,8 @@ public final class BucketsListener implements Listener {
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
             return;
 
-        if(plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
+        if(e.getItem().hasItemMeta() && e.getItem().getItemMeta().hasDisplayName() &&
+                plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
             return;
 
         plugin.getProviders().enableBypass(e.getPlayer());
@@ -101,6 +102,14 @@ public final class BucketsListener implements Listener {
                 if(blockBreakEvent.isCancelled())
                     return;
                 break;
+        }
+
+        if(e.getClickedBlock().getType() == Material.CAULDRON){
+            if(replacedType == Material.WATER) {
+                //noinspection deprecation
+                e.getClickedBlock().setData((byte) 3);
+                return;
+            }
         }
 
         toBeReplaced.setType(replacedType);
@@ -167,15 +176,12 @@ public final class BucketsListener implements Listener {
                 break;
             case SHIFT_LEFT:
             case SHIFT_RIGHT:
-                e.setCancelled(true);
+                Inventory invToAddItem = e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()) ?
+                        e.getWhoClicked().getOpenInventory().getBottomInventory() : e.getWhoClicked().getOpenInventory().getTopInventory();
 
-                Inventory invToAddItem = e.getWhoClicked().getOpenInventory().getTopInventory();
-                if(e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()))
-                    invToAddItem = e.getWhoClicked().getOpenInventory().getBottomInventory();
+                clicked = e.getCurrentItem();
 
-                if(ItemUtil.stackBucket(e.getCurrentItem(), invToAddItem) || invToAddItem.addItem(e.getCurrentItem()).isEmpty()){
-                    e.setCurrentItem(new ItemStack(Material.AIR));
-                }
+                Bukkit.getScheduler().runTask(plugin, () -> ItemUtil.stackBucket(clicked, invToAddItem));
                 break;
             default:
                 return;

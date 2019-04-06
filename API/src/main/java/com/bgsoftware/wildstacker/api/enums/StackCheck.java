@@ -2,6 +2,8 @@ package com.bgsoftware.wildstacker.api.enums;
 
 public enum StackCheck {
 
+    SPAWN_REASON("SpawnReason"),
+    NERFED("Nerfed"),
     AGE(""),
     EXACT_AGE("Age"),
     CAN_BREED(""),

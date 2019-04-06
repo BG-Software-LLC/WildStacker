@@ -117,8 +117,19 @@ public final class ConfigComments {
     public static String ENTITIES_LIMITS = "entities.limits";
 
     @Comment("")
+    @Comment("Set a minimum stack for specific entities.")
+    @Comment("Make sure you follow the \"ENTITY-TYPE\" format.")
+    @Comment("You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)")
+    @Comment("If you don't want any limits, you can set a random type.")
+    public static String ENTITIES_MINIMUM_LIMITS = "entities.minimum-limits";
+
+    @Comment("")
     @Comment("A list of worlds entities won't get stacked inside them (case-sensitive)")
     public static String ENTITIES_DISABLED_WORLDS = "entities.disabled-worlds";
+
+    @Comment("")
+    @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
+    public static String ENTITIES_DISABLED_REGIONS = "entities.disabled-regions";
 
     @Comment("")
     @Comment("Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.")
@@ -350,6 +361,11 @@ public final class ConfigComments {
     public static String SPAWNERS_BREAK_MENU_BREAK_SLOTS = "spawners.break-menu.break-slots";
 
     @Comment("")
+    @Comment("When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there")
+    @Comment("he can put spawner items to add to the spawner. Make sure break-menu is disabled!")
+    public static String SPAWNERS_PLACE_INVENTORY = "spawners.place-inventory";
+
+    @Comment("")
     @Comment("When enabled, you must have the permission wildstacker.place.<entity> to place an entity.")
     @Comment("You can give a player the ability to place all spawners with wildstacker.place.*")
     public static String SPAWNERS_PLACEMENT_PERMISSION = "spawners.placement-permission";
@@ -370,6 +386,19 @@ public final class ConfigComments {
     @Comment("")
     @Comment("When enabled, players will be able to change spawners by clicking them with spawn eggs.")
     public static String SPAWNERS_CHANGE_USING_EGGS = "spawners.change-using-eggs";
+
+    @Comment("")
+    @Comment("When enabled and change-using-eggs is enabled, the amount of eggs that will be required to change")
+    @Comment("a spawner would be the same as the stack size of the spawner.")
+    public static String SPAWNERS_EGGS_STACK_MULTIPLY = "spawners.eggs-stack-multiply";
+
+    @Comment("")
+    @Comment("Should there be the ablity to place spawners next to each other?")
+    public static String SPAWNERS_NEXT_SPAWNER_PLACEMENT = "spawners.next-spawner-placement";
+
+    @Comment("")
+    @Comment("Should there be only one spawner in the merge radius?")
+    public static String SPAWNERS_ONLY_ONE_SPAWNER = "spawners.only-one-spawner";
 
     @Comment("")
     @Comment("Here you can configurable all features related to stacked barrels (aka stacked blocks).")

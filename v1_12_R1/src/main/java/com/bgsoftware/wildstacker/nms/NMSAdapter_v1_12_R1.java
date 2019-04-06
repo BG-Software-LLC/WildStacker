@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
 import net.minecraft.server.v1_12_R1.EntityAnimal;
 import net.minecraft.server.v1_12_R1.EntityInsentient;
@@ -17,6 +19,7 @@ import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -33,6 +36,9 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
+        nbtTagCompound.setString("SpawnReason", WStackedEntity.spawnReasons.getOrDefault(livingEntity.getUniqueId(),
+                CreatureSpawnEvent.SpawnReason.CHUNK_GEN).name());
+        nbtTagCompound.setBoolean("Nerfed", WildStackerPlugin.getPlugin().getSettings().nerfedSpawning.contains(nbtTagCompound.getString("SpawnReason")));
         return nbtTagCompound;
     }
 
@@ -78,20 +84,13 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
             try {
                 EnumItemSlot slot = enumItemSlots[i];
                 ItemStack itemStack = entityLiving.getEquipment(slot);
-                float dropChance = slot.a().ordinal() == 1 ? entityLiving.dropChanceHand[slot.b()] : slot.a().ordinal() == 2 ? entityLiving.dropChanceArmor[slot.b()] : 0;
+                float dropChance = slot.a() == EnumItemSlot.Function.HAND ? entityLiving.dropChanceHand[slot.b()] : entityLiving.dropChanceArmor[slot.b()];
 
                 if (!itemStack.isEmpty() && !EnchantmentManager.shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
-                        random.nextFloat() - (float) i * 0.01F < dropChance) {
+                        (random.nextFloat() - (float) i * 0.01F) < dropChance) {
                     if (dropChance <= 1 && itemStack.f())
                         itemStack.setData(itemStack.k() - random.nextInt(1 + random.nextInt(Math.max(itemStack.k() - 3, 1))));
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
-                }
-
-                if (dropChance >= 1) {
-                    if (slot.a() == EnumItemSlot.Function.HAND)
-                        entityLiving.dropChanceHand[slot.b()] = 0;
-                    else if (slot.a() == EnumItemSlot.Function.ARMOR)
-                        entityLiving.dropChanceArmor[slot.b()] = 0;
                 }
             }catch(Exception ignored){}
         }

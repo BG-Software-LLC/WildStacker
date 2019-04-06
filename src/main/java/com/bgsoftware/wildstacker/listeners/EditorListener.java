@@ -6,10 +6,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,10 +26,10 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public final class EditorListener implements Listener {
 
-    private WildStackerPlugin instance;
+    private WildStackerPlugin plugin;
 
     private String[] integerValues = new String[] {
-            "save-interval", "items.merge-radius", "items.limits", "entities.merge-radius", "entities.stack-interval",
+            "save-interval", "items.merge-radius", "entities.merge-radius", "entities.stack-interval",
             "entities.kill-all.interval", "entities.linked-entities.max-distance", "spawners.merge-radius", "spawners.explosions-break-chance",
             "spawners.break-charge.amount", "spawners.place-charge.amount", "barrels.merge-radius"};
     private String[] booleanValues = new String[] {
@@ -37,23 +39,50 @@ public final class EditorListener implements Listener {
             "entities.stack-after-breed", "entities.hide-names", "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack",
             "spawners.drop-without-silk", "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner",
             "spawners.silk-spawners.drop-to-inventory", "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names",
-            "spawners.break-menu.enabled", "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
-            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "barrels.enabled",
+            "spawners.break-menu.enabled", "spawners.place-inventory", "spawners.placement-permission", "spawners.shift-place-stack",
+            "spawners.break-charge.multiply-stack-amount", "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs",
+            "spawners.eggs-stack-multiply", "spawners.next-spawner-placement", "spawners.only-one-spawner", "barrels.enabled",
             "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
     private String[] listValues = new String[] {
-            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
-            "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
+            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.disabled-regions",
+            "entities.blacklist", "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
             "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds", "barrels.whitelist",
             "barrels.disabled-worlds"};
     private String[] sectionValues = new String[] {
-            "items.limits", "entities.limits", "entities.stack-checks", "entities.stack-split", "spawners.limits", "barrels.limits"};
+            "items.limits", "entities.limits", "entities.minimum-limits", "entities.stack-checks", "entities.stack-split", "spawners.limits", "barrels.limits"};
 
     private Set<UUID> noResetClose = new HashSet<>();
     private Map<UUID, String> configValues = new HashMap<>();
     private Map<UUID, String> lastInventories = new HashMap<>();
 
-    public EditorListener(WildStackerPlugin instance){
-        this.instance = instance;
+    public EditorListener(WildStackerPlugin plugin){
+        this.plugin = plugin;
+    }
+
+    /**
+     * The following two events are here for patching a dupe glitch caused
+     * by shift clicking and closing the inventory in the same time.
+     */
+
+    private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryClickMonitor(InventoryClickEvent e){
+        if(e.getCurrentItem() != null && e.isCancelled()) {
+            latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryCloseMonitor(InventoryCloseEvent e){
+        if(latestClickedItem.containsKey(e.getPlayer().getUniqueId())){
+            ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                e.getPlayer().getInventory().removeItem(clickedItem);
+                ((Player) e.getPlayer()).updateInventory();
+            }, 1L);
+        }
     }
 
     @EventHandler
@@ -72,27 +101,27 @@ public final class EditorListener implements Listener {
             switch (e.getRawSlot()){
                 case 20:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getGeneralEditor());
+                    player.openInventory(plugin.getEditor().getGeneralEditor());
                     break;
                 case 22:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getItemsEditor());
+                    player.openInventory(plugin.getEditor().getItemsEditor());
                     break;
                 case 24:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getEntitiesEditor());
+                    player.openInventory(plugin.getEditor().getEntitiesEditor());
                     break;
                 case 30:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getSpawnersEditor());
+                    player.openInventory(plugin.getEditor().getSpawnersEditor());
                     break;
                 case 32:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getBarrelsEditor());
+                    player.openInventory(plugin.getEditor().getBarrelsEditor());
                     break;
                 case 49:
                     new WildStackerThread(() -> {
-                        instance.getEditor().saveConfiguration();
+                        plugin.getEditor().saveConfiguration();
                         player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
                     }).start();
                     break;
@@ -190,63 +219,69 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "entities.limits");
                     break;
                 case 5:
-                    configValues.put(player.getUniqueId(), "entities.disabled-worlds");
+                    configValues.put(player.getUniqueId(), "entities.minimum-limits");
                     break;
                 case 6:
-                    configValues.put(player.getUniqueId(), "entities.spawn-blacklist");
+                    configValues.put(player.getUniqueId(), "entities.disabled-worlds");
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "entities.name-blacklist");
+                    configValues.put(player.getUniqueId(), "entities.disabled-regions");
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "entities.stack-interval");
+                    configValues.put(player.getUniqueId(), "entities.spawn-blacklist");
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.interval");
+                    configValues.put(player.getUniqueId(), "entities.name-blacklist");
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.clear-lagg");
+                    configValues.put(player.getUniqueId(), "entities.stack-interval");
                     break;
                 case 11:
-                    configValues.put(player.getUniqueId(), "entities.stack-checks");
+                    configValues.put(player.getUniqueId(), "entities.kill-all.interval");
                     break;
                 case 12:
-                    configValues.put(player.getUniqueId(), "entities.stack-split");
+                    configValues.put(player.getUniqueId(), "entities.kill-all.clear-lagg");
                     break;
                 case 13:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.enabled");
+                    configValues.put(player.getUniqueId(), "entities.stack-checks");
                     break;
                 case 14:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.max-distance");
+                    configValues.put(player.getUniqueId(), "entities.stack-split");
                     break;
                 case 15:
-                    configValues.put(player.getUniqueId(), "entities.instant-kill");
+                    configValues.put(player.getUniqueId(), "entities.linked-entities.enabled");
                     break;
                 case 16:
-                    configValues.put(player.getUniqueId(), "entities.nerfed-spawning");
+                    configValues.put(player.getUniqueId(), "entities.linked-entities.max-distance");
                     break;
                 case 17:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.enabled");
+                    configValues.put(player.getUniqueId(), "entities.instant-kill");
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.stack-down-types");
+                    configValues.put(player.getUniqueId(), "entities.nerfed-spawning");
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "entities.keep-fire");
+                    configValues.put(player.getUniqueId(), "entities.stack-down.enabled");
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "entities.mythic-mobs-stack");
+                    configValues.put(player.getUniqueId(), "entities.stack-down.stack-down-types");
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "entities.blazes-always-drop");
+                    configValues.put(player.getUniqueId(), "entities.keep-fire");
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "entities.keep-lowest-health");
+                    configValues.put(player.getUniqueId(), "entities.mythic-mobs-stack");
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "entities.stack-after-breed");
+                    configValues.put(player.getUniqueId(), "entities.blazes-always-drop");
                     break;
                 case 24:
+                    configValues.put(player.getUniqueId(), "entities.keep-lowest-health");
+                    break;
+                case 25:
+                    configValues.put(player.getUniqueId(), "entities.stack-after-breed");
+                    break;
+                case 26:
                     configValues.put(player.getUniqueId(), "entities.hide-names");
                     break;
                 default:
@@ -322,25 +357,37 @@ public final class EditorListener implements Listener {
                     configValues.put(player.getUniqueId(), "spawners.break-menu.enabled");
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "spawners.placement-permission");
+                    configValues.put(player.getUniqueId(), "spawners.place-inventory");
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "spawners.shift-place-stack");
+                    configValues.put(player.getUniqueId(), "spawners.placement-permission");
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.amount");
+                    configValues.put(player.getUniqueId(), "spawners.shift-place-stack");
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), "spawners.break-charge.amount");
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.amount");
+                    configValues.put(player.getUniqueId(), "spawners.break-charge.multiply-stack-amount");
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), "spawners.place-charge.amount");
                     break;
                 case 24:
+                    configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
+                    break;
+                case 25:
                     configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
+                    break;
+                case 26:
+                    configValues.put(player.getUniqueId(), "spawners.eggs-stack-multiply");
+                    break;
+                case 27:
+                    configValues.put(player.getUniqueId(), "spawners.next-spawner-placement");
+                    break;
+                case 28:
+                    configValues.put(player.getUniqueId(), "spawners.only-one-spawner");
                     break;
                 default:
                     return;
@@ -422,11 +469,11 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getPlayer();
 
-        Bukkit.getScheduler().runTaskLater(instance, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
                 if(!noResetClose.contains(player.getUniqueId())) {
-                    Bukkit.getScheduler().runTaskAsynchronously(instance, () ->
-                            instance.getEditor().reloadConfiguration());
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+                            plugin.getEditor().reloadConfiguration());
                 }
             }
 
@@ -436,7 +483,7 @@ public final class EditorListener implements Listener {
                     e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
                     e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
                 noResetClose.remove(player.getUniqueId());
-                player.openInventory(instance.getEditor().getSettingsEditor());
+                player.openInventory(plugin.getEditor().getSettingsEditor());
             }
         }, 1L);
     }
@@ -461,7 +508,7 @@ public final class EditorListener implements Listener {
                     path = path + "." + matcher.group(1);
                     value = matcher.group(2);
 
-                    if(instance.getEditor().config.get(path) != null && instance.getEditor().config.get(path).toString().equals(value.toString())){
+                    if(plugin.getEditor().config.get(path) != null && plugin.getEditor().config.get(path).toString().equals(value.toString())){
                         e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Removed the value " + matcher.group(1) + " from " + path);
                         value = null;
                     }else{
@@ -477,12 +524,12 @@ public final class EditorListener implements Listener {
 
                     }
 
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                 }
             }
 
             else if(Arrays.asList(listValues).contains(path)){
-                List<String> list = instance.getEditor().config.getStringList(path);
+                List<String> list = plugin.getEditor().config.getStringList(path);
 
                 if (list.contains(value.toString())) {
                     list.remove(value.toString());
@@ -492,7 +539,7 @@ public final class EditorListener implements Listener {
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Added the value " + value.toString() + " to " + path);
                 }
 
-                instance.getEditor().config.set(path, list);
+                plugin.getEditor().config.set(path, list);
             }
 
             else{
@@ -516,13 +563,13 @@ public final class EditorListener implements Listener {
                 }
 
                 if(valid) {
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Changed value of " + path + " to " + value.toString());
                 }
             }
         }
 
-        e.getPlayer().openInventory(instance.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+        e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
         lastInventories.remove(e.getPlayer().getUniqueId());
         configValues.remove(e.getPlayer().getUniqueId());
     }

@@ -37,6 +37,9 @@ KILL_ALL_ANNOUNCEMENT: '&6&lWildStacker &7All stacked-entities and stacked-items
 KILL_ALL_REMAINING_TIME: '&6&lWildStacker &7All stacked-entities and stacked-items will be cleared in {0} seconds!'
 KILL_ALL_OPS: '&7&o[WildStacker: Killed stacked-entities]'
 
+# Called when placing a spawner next to another one when the it's disabled.
+NEXT_SPAWNER_PLACEMENT: '&6&lWildStacker &7You cannot place spawners next to other spawners.'
+
 # Called when running a stacker command without permission.
 NO_PERMISSION: '&fUnknown command. Type "/help" for help.'
 
@@ -49,6 +52,7 @@ SPAWNER_BREAK_NOT_ENOUGH_MONEY: '&6&lWildStacker &fYou need {0} in order to brea
 SPAWNER_PLACE: '&6&lWildStacker &7You placed a {0} spawner (x{1}) and were charged for ${2}.'
 SPAWNER_PLACE_NOT_ENOUGH_MONEY: '&6&lWildStacker &fYou need {0} in order to place this amount of spawners.'
 SPAWNER_PLACE_BLOCKED: '&6&lWildStacker &7You don''t have the required permission to place this spawner! ({0})'
+SPAWNER_UPDATE: '&6&lWildStacker &7You updated the spawner (x{0}).'
 
 # Called when a player successfully runs a give command.
 STACK_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} {2} {3}.'

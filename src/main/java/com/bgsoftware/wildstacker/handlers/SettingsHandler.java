@@ -40,15 +40,15 @@ public final class SettingsHandler {
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
-    public final List<String> entitiesDisabledWorlds, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
+    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
             entitiesInstantKills, nerfedSpawning, stackDownTypes;
-    public final KeyMap<Integer> entitiesLimits;
+    public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
             explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem, dropSpawnerWithoutSilk,
-            floatingSpawnerNames, spawnersBreakMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
-            breakChargeMultiply, placeChargeMultiply, changeUsingEggs;
+            floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
+            breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners;
@@ -101,6 +101,7 @@ public final class SettingsHandler {
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
         entitiesCheckRange = cfg.getInt("entities.merge-radius", 10);
+        entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
         linkedEntitiesMaxDistance = cfg.getInt("entities.linked-entities.max-distance", 10);
         blacklistedEntities = cfg.getStringList("entities.blacklist");
@@ -138,6 +139,7 @@ public final class SettingsHandler {
         getStackedItem = cfg.getBoolean("spawners.get-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
         spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
+        spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory", false);
         plugin.getBreakMenuHandler().loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
@@ -146,6 +148,9 @@ public final class SettingsHandler {
         placeChargeAmount = cfg.getDouble("spawners.place-charge.amount", 0);
         placeChargeMultiply = cfg.getBoolean("spawners.place-charge.multiply-stack-amount", false);
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
+        eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
+        nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);
+        onlyOneSpawner = cfg.getBoolean("spawners.only-one-spawner", true);
 
         barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
@@ -169,6 +174,7 @@ public final class SettingsHandler {
 
         loadLimits((itemsLimits = new KeyMap<>()), cfg.getConfigurationSection("items.limits"));
         loadLimits((entitiesLimits = new KeyMap<>()), cfg.getConfigurationSection("entities.limits"));
+        loadLimits((minimumEntitiesLimit = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-limits"));
         loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
         loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
 

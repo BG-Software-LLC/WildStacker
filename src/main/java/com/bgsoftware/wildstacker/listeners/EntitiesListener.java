@@ -66,12 +66,6 @@ public final class EntitiesListener implements Listener {
         if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
             return;
 
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()))
-            return;
-
-        if(plugin.getSettings().entitiesDisabledWorlds.contains(e.getEntity().getWorld().getName()))
-            return;
-
         WStackedEntity.spawnReasons.remove(e.getEntity().getUniqueId());
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -106,6 +100,7 @@ public final class EntitiesListener implements Listener {
             Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
             if(plugin.getSettings().entitiesStackingEnabled) {
                 calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, 1);
+                e.setDroppedExp(stackedEntity.getExp(1, e.getDroppedExp()));
                 e.getDrops().clear();
             }
         }
@@ -114,12 +109,13 @@ public final class EntitiesListener implements Listener {
         else{
             if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
                 calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, stackedEntity.getStackAmount());
+                e.setDroppedExp(stackedEntity.getExp(e.getDroppedExp()));
                 e.getDrops().clear();
             }
 
             stackedEntity.tryUnstack(stackedEntity.getStackAmount());
 
-            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp() * amount, killerItemHand));
+            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp(), killerItemHand));
 
             if(e.getEntity().getKiller() != null && amount - 1 > 0) {
                 try {
@@ -150,6 +146,8 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
             return;
 
+        WStackedEntity.spawnReasons.put(e.getEntity().getUniqueId(), e.getSpawnReason());
+
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
             noStackEntities.remove(e.getEntity().getUniqueId());
             return;
@@ -165,10 +163,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if(stackedEntity.tryStack() == null)
-                WStackedEntity.spawnReasons.put(stackedEntity.getUniqueId(), e.getSpawnReason());
-        });
+        stackedEntity.tryStack();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -338,7 +333,7 @@ public final class EntitiesListener implements Listener {
     public void onEntityTarget(EntityTargetLivingEntityEvent e){
         if(e.getEntity() instanceof LivingEntity) {
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-            if (e.getTarget() instanceof Player && stackedEntity.isNerfed()) {
+            if (stackedEntity.isNerfed()) {
                 e.setCancelled(true);
             }
         }

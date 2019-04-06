@@ -101,7 +101,8 @@ public final class SystemHandler implements SystemManager {
         }
 
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
-                plugin.getSettings().entitiesStackingEnabled)
+                plugin.getSettings().entitiesStackingEnabled && !plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()) &&
+                !plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))
             dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
 
         return stackedEntity;
@@ -127,27 +128,37 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
-        if(dataHandler.CACHED_OBJECTS.containsKey(spawner.getLocation()))
-            return (StackedSpawner) dataHandler.CACHED_OBJECTS.get(spawner.getLocation());
+        return getStackedSpawner(spawner.getLocation());
+    }
 
-        StackedSpawner stackedSpawner = new WStackedSpawner(spawner);
+    @Override
+    public StackedSpawner getStackedSpawner(Location location) {
+        if(dataHandler.CACHED_OBJECTS.containsKey(location))
+            return (StackedSpawner) dataHandler.CACHED_OBJECTS.get(location);
+
+        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
 
         if(plugin.getSettings().spawnersStackingEnabled)
-            dataHandler.CACHED_OBJECTS.put(spawner.getLocation(), stackedSpawner);
+            dataHandler.CACHED_OBJECTS.put(location, stackedSpawner);
 
         return stackedSpawner;
     }
 
     @Override
     public StackedBarrel getStackedBarrel(Block block) {
-        if(dataHandler.CACHED_OBJECTS.containsKey(block.getLocation()))
-            return (StackedBarrel) dataHandler.CACHED_OBJECTS.get(block.getLocation());
+        return getStackedBarrel(block.getLocation());
+    }
 
-        StackedBarrel stackedBarrel = new WStackedBarrel(block.getLocation(), block.getState().getData().toItemStack(1));
+    @Override
+    public StackedBarrel getStackedBarrel(Location location) {
+        if(dataHandler.CACHED_OBJECTS.containsKey(location))
+            return (StackedBarrel) dataHandler.CACHED_OBJECTS.get(location);
+
+        StackedBarrel stackedBarrel = new WStackedBarrel(location, location.getBlock().getState().getData().toItemStack(1));
         stackedBarrel.createDisplayBlock();
 
         if(plugin.getSettings().barrelsStackingEnabled)
-            dataHandler.CACHED_OBJECTS.put(block.getLocation(), stackedBarrel);
+            dataHandler.CACHED_OBJECTS.put(location, stackedBarrel);
 
         return stackedBarrel;
     }

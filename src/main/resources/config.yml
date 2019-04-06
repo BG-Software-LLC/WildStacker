@@ -101,9 +101,21 @@ entities:
     PIG: 10
     ZOMBIE: 50
 
+  # Set a minimum stack for specific entities.
+  # Make sure you follow the "ENTITY-TYPE" format.
+  # You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)
+  # If you don't want any limits, you can set a random type.
+  minimum-limits:
+    PIG: 10
+    ZOMBIE: 50
+
   # A list of worlds entities won't get stacked inside them (case-sensitive)
   disabled-worlds:
   - disabled_world
+
+  # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
+  disabled-regions:
+  - spawn
 
   # Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
@@ -138,6 +150,8 @@ entities:
 
   # A list of all checks that the plugin does before trying to stack two entities together.
   stack-checks:
+    SPAWN_REASON: false
+    NERFED: true
     AGE: true
     EXACT_AGE: false
     CAN_BREED: true
@@ -358,6 +372,10 @@ spawners:
         name: '&6&lx256 Spawners'
         amount: 256
 
+  # When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there
+  # he can put spawner items to add to the spawner. Make sure break-menu is disabled!
+  place-inventory: false
+
   # When enabled, you must have the permission wildstacker.place.<entity> to place an entity.
   # You can give a player the ability to place all spawners with wildstacker.place.*
   placement-permission: false
@@ -378,6 +396,16 @@ spawners:
 
   # When enabled, players will be able to change spawners by clicking them with spawn eggs.
   change-using-eggs: true
+
+  # When enabled and change-using-eggs is enabled, the amount of eggs that will be required to change
+  # a spawner would be the same as the stack size of the spawner.
+  eggs-stack-multiply: true
+
+  # Should there be the ablity to place spawners next to each other?
+  next-spawner-placement: true
+
+  # Should there be only one spawner in the merge radius?
+  only-one-spawner: true
 
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:

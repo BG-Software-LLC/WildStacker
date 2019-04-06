@@ -35,9 +35,9 @@ public final class ItemsListener implements Listener {
             return;
 
         StackedItem item = WStackedItem.of(e.getEntity());
-        int limit;
+        int limit = item.getStackLimit();
 
-        if(item.getStackAmount() > (limit = plugin.getSettings().itemsLimits.getOrDefault(item.getItemStack(), Integer.MAX_VALUE))){
+        if(item.getStackAmount() > limit){
             ItemStack cloned = item.getItemStack().clone();
             cloned.setAmount(cloned.getAmount() - limit);
             item.setStackAmount(limit, true);

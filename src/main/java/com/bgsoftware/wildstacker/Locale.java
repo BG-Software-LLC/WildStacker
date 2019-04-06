@@ -34,6 +34,7 @@ public final class Locale {
     public static Locale KILL_ALL_ANNOUNCEMENT = new Locale("KILL_ALL_ANNOUNCEMENT");
     public static Locale KILL_ALL_REMAINING_TIME = new Locale("KILL_ALL_REMAINING_TIME");
     public static Locale KILL_ALL_OPS = new Locale("KILL_ALL_OPS");
+    public static Locale NEXT_SPAWNER_PLACEMENT = new Locale("NEXT_SPAWNER_PLACEMENT");
     public static Locale NO_PERMISSION = new Locale("NO_PERMISSION");
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");
@@ -41,6 +42,7 @@ public final class Locale {
     public static Locale SPAWNER_PLACE = new Locale("SPAWNER_PLACE");
     public static Locale SPAWNER_PLACE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_PLACE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_PLACE_BLOCKED = new Locale("SPAWNER_PLACE_BLOCKED");
+    public static Locale SPAWNER_UPDATE = new Locale("SPAWNER_UPDATE");
     public static Locale STACK_GIVE_PLAYER = new Locale("STACK_GIVE_PLAYER");
     public static Locale STACK_RECEIVE = new Locale("STACK_RECEIVE");
     public static Locale STACK_INFO_INVALID = new Locale("STACK_INFO_INVALID");

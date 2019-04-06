@@ -117,6 +117,13 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         WStackedSpawner.of(spawner).setStackAmount(ItemUtil.getSpawnerItemAmount(itemStack), updateName);
     }
 
+    @Override
+    public EntityType getSpawnerType(ItemStack itemStack) {
+        Object entityType = getStoredSpawnerItemEntityID(itemStack);
+        //noinspection deprecation
+        return entityType instanceof String ? EntityType.fromName((String) entityType) : EntityType.fromId((short) entityType);
+    }
+
     @SuppressWarnings("deprecation")
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
         try {

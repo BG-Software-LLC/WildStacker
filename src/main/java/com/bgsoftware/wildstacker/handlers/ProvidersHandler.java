@@ -7,6 +7,11 @@ import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_AAC;
 import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_Default;
 import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_NoCheatPlus;
 import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_Spartan;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Arconix;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_CMI;
@@ -20,8 +25,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public final class ProvidersHandler {
@@ -30,6 +39,7 @@ public final class ProvidersHandler {
     private SpawnersProvider spawnersProvider;
     private HologramsProvider hologramsProvider;
     private DropsProvider dropsProvider;
+    private List<ClaimsProvider> claimsProviders;
 
     public ProvidersHandler(WildStackerPlugin plugin){
         WildStackerPlugin.log("Loading providers started...");
@@ -80,6 +90,18 @@ public final class ProvidersHandler {
         else
             antiCheatProvider = new AntiCheatProvider_Default();
 
+        claimsProviders = new ArrayList<>();
+        if(Bukkit.getPluginManager().isPluginEnabled("Factions")){
+            if(Bukkit.getPluginManager().isPluginEnabled("MassiveCore"))
+                claimsProviders.add(new ClaimsProvider_MassiveFactions());
+            else
+                claimsProviders.add(new ClaimsProvider_FactionsUUID());
+        }
+        if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared"))
+            claimsProviders.add(new ClaimsProvider_PlotSquared());
+        if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
+            claimsProviders.add(new ClaimsProvider_WorldGuard());
+
         WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
@@ -109,6 +131,10 @@ public final class ProvidersHandler {
 
     public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName){
         spawnersProvider.setSpawnerType(spawner, itemStack, updateName);
+    }
+
+    public EntityType getSpawnerType(ItemStack itemStack){
+        return spawnersProvider.getSpawnerType(itemStack);
     }
 
     /*
@@ -157,6 +183,20 @@ public final class ProvidersHandler {
 
     public void disableBypass(Player player){
         antiCheatProvider.disableBypass(player);
+    }
+
+    /*
+     * Claims Provider
+     */
+
+    @SuppressWarnings("all")
+    public boolean hasClaimAccess(Player player, Location location){
+        for(ClaimsProvider claimsProvider : claimsProviders) {
+            if (!claimsProvider.hasClaimAccess(player, location))
+                return false;
+        }
+
+        return true;
     }
 
     public enum DropsProvider{

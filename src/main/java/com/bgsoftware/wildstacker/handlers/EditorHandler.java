@@ -113,70 +113,76 @@ public final class EditorHandler {
                 .withName("&6Limits").withLore("&7Value:", config.getConfigurationSection("entities.limits")).build());
 
         editor.setItem(5, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList("entities.disabled-worlds")).build());
+                .withName("&6Minimum Limits").withLore("&7Value:", config.getConfigurationSection("entities.minimum-limits")).build());
 
         editor.setItem(6, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Spawn Blacklist").withLore("&7Value:", config.getStringList("entities.spawn-blacklist")).build());
+                .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList("entities.disabled-worlds")).build());
 
         editor.setItem(7, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Name Blacklist").withLore("&7Value:", config.getStringList("entities.name-blacklist")).build());
+                .withName("&6Disabled Regions").withLore("&7Value:", config.getStringList("entities.disabled-regions")).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Interval").withLore("&7Value: " + config.getInt("entities.stack-interval")).build());
+                .withName("&6Spawn Blacklist").withLore("&7Value:", config.getStringList("entities.spawn-blacklist")).build());
 
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Kill-All Interval").withLore("&7Value: " + config.getInt("entities.kill-all.interval")).build());
+                .withName("&6Name Blacklist").withLore("&7Value:", config.getStringList("entities.name-blacklist")).build());
 
         editor.setItem(10, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Kill-All ClearLagg").withLore("&7Value: " + config.getBoolean("entities.kill-all.clear-lagg")).build());
+                .withName("&6Stack Interval").withLore("&7Value: " + config.getInt("entities.stack-interval")).build());
 
         editor.setItem(11, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Checks").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection("entities.stack-checks")).build());
+                .withName("&6Kill-All Interval").withLore("&7Value: " + config.getInt("entities.kill-all.interval")).build());
 
         editor.setItem(12, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Split").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection("entities.stack-split")).build());
+                .withName("&6Kill-All ClearLagg").withLore("&7Value: " + config.getBoolean("entities.kill-all.clear-lagg")).build());
 
         editor.setItem(13, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Linked Entities Enabled").withLore("&7Value: " + config.getBoolean("entities.linked-entities.enabled")).build());
+                .withName("&6Stack Checks").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection("entities.stack-checks")).build());
 
         editor.setItem(14, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Linked Entities Max Distance").withLore("&7Value: " + config.getInt("entities.linked-entities.max-distance")).build());
+                .withName("&6Stack Split").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection("entities.stack-split")).build());
 
         editor.setItem(15, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Instant Kill").withLore("&7Value:", config.getStringList("entities.instant-kill")).build());
+                .withName("&6Linked Entities Enabled").withLore("&7Value: " + config.getBoolean("entities.linked-entities.enabled")).build());
 
         editor.setItem(16, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Nerfed Spawning").withLore("&7Value:", config.getStringList("entities.nerfed-spawning")).build());
+                .withName("&6Linked Entities Max Distance").withLore("&7Value: " + config.getInt("entities.linked-entities.max-distance")).build());
 
         editor.setItem(17, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean("entities.stack-down.enabled")).build());
+                .withName("&6Instant Kill").withLore("&7Value:", config.getStringList("entities.instant-kill")).build());
 
         editor.setItem(18, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList("entities.stack-down.stack-down-types")).build());
+                .withName("&6Nerfed Spawning").withLore("&7Value:", config.getStringList("entities.nerfed-spawning")).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean("entities.keep-fire")).build());
+                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean("entities.stack-down.enabled")).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean("entities.mythic-mobs-stack")).build());
+                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList("entities.stack-down.stack-down-types")).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Blazes Always Drop").withLore("&7Value: " + config.getBoolean("entities.blazes-always-drop")).build());
+                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean("entities.keep-fire")).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean("entities.keep-lowest-health")).build());
+                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean("entities.mythic-mobs-stack")).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean("entities.stack-after-breed")).build());
+                .withName("&6Blazes Always Drop").withLore("&7Value: " + config.getBoolean("entities.blazes-always-drop")).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean("entities.keep-lowest-health")).build());
+
+        editor.setItem(25, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean("entities.stack-after-breed")).build());
+
+        editor.setItem(26, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Hide Names").withLore("&7Value: " + config.getBoolean("entities.hide-names")).build());
 
         return editor;
     }
 
     public Inventory getSpawnersEditor(){
-        Inventory editor = Bukkit.createInventory(null, 9 * 3, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
 
         editor.setItem(0, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Enabled").withLore("&7Value: " + config.getBoolean("spawners.enabled")).build());
@@ -233,25 +239,37 @@ public final class EditorHandler {
                 .withName("&6Break Menu").withLore("&7Value: " + config.getBoolean("spawners.break-menu.enabled")).build());
 
         editor.setItem(18, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean("spawners.placement-permission")).build());
+                .withName("&6Place Menu").withLore("&7Value: " + config.getBoolean("spawners.place-inventory")).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean("spawners.shift-place-stack")).build());
+                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean("spawners.placement-permission")).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt("spawners.break-charge.amount")).build());
+                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean("spawners.shift-place-stack")).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.break-charge.multiply-stack-amount")).build());
+                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt("spawners.break-charge.amount")).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt("spawners.place-charge.amount")).build());
+                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.break-charge.multiply-stack-amount")).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.place-charge.multiply-stack-amount")).build());
+                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt("spawners.place-charge.amount")).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean("spawners.place-charge.multiply-stack-amount")).build());
+
+        editor.setItem(25, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean("spawners.change-using-eggs")).build());
+
+        editor.setItem(26, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean("spawners.eggs-stack-multiply")).build());
+
+        editor.setItem(27, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean("spawners.next-spawner-placement")).build());
+
+        editor.setItem(28, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Only One Spawner").withLore("&7Value: " + config.getBoolean("spawners.only-one-spawner")).build());
 
         return editor;
     }

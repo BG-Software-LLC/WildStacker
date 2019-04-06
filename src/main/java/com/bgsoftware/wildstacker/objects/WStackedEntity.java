@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
@@ -16,22 +17,21 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
-@SuppressWarnings("RedundantIfStatement")
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     public static WeakHashMap<UUID, CreatureSpawnEvent.SpawnReason> spawnReasons = new WeakHashMap<>();
@@ -88,6 +88,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
      */
 
     @Override
+    public int getStackLimit() {
+        return plugin.getSettings().entitiesLimits.getOrDefault(getType().name(), Integer.MAX_VALUE);
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -125,15 +130,45 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public LivingEntity tryStack() {
         int range = plugin.getSettings().entitiesCheckRange;
 
-        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
-
         //Making sure it's not armor-stand or player
-        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER)
+        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER) {
+            remove();
             return null;
+        }
 
-        for (Entity nearby : nearbyEntities) {
-            if (nearby instanceof LivingEntity && nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
-                return (LivingEntity) nearby;
+        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range).stream()
+                .filter(entity -> entity instanceof LivingEntity).collect(Collectors.toList());
+        int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+
+        //Checks if minimmum stack size is enabled
+        if(minimumStackSize > 1){
+            List<StackedEntity> entitiesToStack = new ArrayList<>();
+            StackedEntity toStackInto = null;
+            int totalStackSize = getStackAmount();
+
+            for(Entity nearby : nearbyEntities){
+                StackedEntity stackedNearby = WStackedEntity.of(nearby);
+                if(canStackInto(stackedNearby)) {
+                    entitiesToStack.add(stackedNearby);
+                    totalStackSize += stackedNearby.getStackAmount();
+                    if(toStackInto == null)
+                        toStackInto = stackedNearby;
+                }
+            }
+
+            if(toStackInto != null && totalStackSize >= minimumStackSize){
+                for(StackedEntity stackedEntity : entitiesToStack){
+                    stackedEntity.tryStackInto(toStackInto);
+                }
+                tryStackInto(toStackInto);
+                return toStackInto.getLivingEntity();
+            }
+        }
+        else{
+            for (Entity nearby : nearbyEntities) {
+                if (nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
+                    return (LivingEntity) nearby;
+                }
             }
         }
 
@@ -163,7 +198,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 EntityUtil.isNameBlacklisted(((StackedEntity) stackedObject).getLivingEntity().getCustomName()))
             return false;
 
-        if (plugin.getSettings().entitiesLimits.getOrDefault(targetEntity.getType().name(), Integer.MAX_VALUE) < newStackAmount)
+        if (getStackLimit() < newStackAmount)
             return false;
 
         if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {
@@ -172,6 +207,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         }
 
         if (MythicMobsHook.isMythicMob(object) && !plugin.getSettings().mythicMobsStackEnabled)
+            return false;
+
+        //noinspection all
+        if(!Collections.disjoint(plugin.getSettings().entitiesDisabledRegions, WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation())))
             return false;
 
         return true;
@@ -316,9 +355,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
-        if((object instanceof Ageable && !((Ageable) object).isAdult()) || ((object instanceof Zombie) && ((Zombie) object).isBaby()))
-            return new ArrayList<>();
-
         List<ItemStack> drops;
 
         if(tempLootTable != null){
@@ -357,7 +393,22 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
                 return drops;
             }
+
+            @Override
+            public int getExp(int stackAmount, int defaultExp) {
+                return defaultExp;
+            }
         };
+    }
+
+    @Override
+    public int getExp(int defaultExp) {
+        return getExp(stackAmount, defaultExp);
+    }
+
+    @Override
+    public int getExp(int stackAmount, int defaultExp) {
+        return plugin.getLootHandler().getLootTable(object).getExp(stackAmount, defaultExp);
     }
 
     @Override
