@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.google.common.base.Predicate;
+import net.minecraft.server.v1_8_R1.Entity;
 import net.minecraft.server.v1_8_R1.EntityAnimal;
 import net.minecraft.server.v1_8_R1.EntityInsentient;
 import net.minecraft.server.v1_8_R1.EntityLiving;
@@ -23,6 +25,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
@@ -145,6 +148,15 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
                 ex.printStackTrace();
             }
         }
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    public List<org.bukkit.entity.Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super org.bukkit.entity.Entity> predicate) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Predicate<? super Entity> wrapper = entity -> predicate.apply(entity.getBukkitEntity());
+        return ((List<Entity>) entityLiving.world.a(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper))
+                .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 
 }

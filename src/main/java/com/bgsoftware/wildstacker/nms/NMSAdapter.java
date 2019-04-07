@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.google.common.base.Predicate;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -19,5 +20,8 @@ public interface NMSAdapter {
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
     void addCustomPathfinderGoalBreed(LivingEntity livingEntity);
+
+    @SuppressWarnings("all")
+    List<Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super Entity> predicate);
 
 }
