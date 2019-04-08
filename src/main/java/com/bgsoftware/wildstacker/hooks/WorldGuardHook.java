@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class WorldGuardHook {
+public final class WorldGuardHook {
 
     @SuppressWarnings("JavaReflectionMemberAccess")
     public static List<String> getRegionsName(org.bukkit.Location bukkitLocation){
