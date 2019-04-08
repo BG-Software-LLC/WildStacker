@@ -69,7 +69,8 @@ public final class BucketsListener implements Listener {
                 break;
             case BUCKET:
                 replacedType = Material.AIR;
-                bucketToAdd = toBeReplaced.getType().name().contains("WATER") ? new ItemStack(Material.WATER_BUCKET) : new ItemStack(Material.LAVA_BUCKET);
+                bucketToAdd = toBeReplaced.getType().name().contains("WATER") ||
+                        toBeReplaced.getType().name().contains("BUBBLE_COLUMN") ? new ItemStack(Material.WATER_BUCKET) : new ItemStack(Material.LAVA_BUCKET);
                 break;
             case MILK_BUCKET:
                 return;
