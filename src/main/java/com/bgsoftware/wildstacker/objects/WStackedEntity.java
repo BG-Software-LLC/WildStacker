@@ -210,7 +210,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return false;
 
         //noinspection all
-        if(!Collections.disjoint(plugin.getSettings().entitiesDisabledRegions, WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation())))
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard") &&
+                !Collections.disjoint(plugin.getSettings().entitiesDisabledRegions, WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation())))
             return false;
 
         return true;
