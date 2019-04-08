@@ -26,16 +26,13 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     public static WeakHashMap<UUID, CreatureSpawnEvent.SpawnReason> spawnReasons = new WeakHashMap<>();
-    private static Set<UUID> latestStacked = new HashSet<>();
 
     private boolean ignoreDeathEvent = false;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
@@ -241,9 +238,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         double health = plugin.getSettings().keepLowestHealth ? Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
         int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
-
-//        latestStacked.add(getUniqueId());
-//        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> latestStacked.remove(getUniqueId()), 5L);
 
         targetEntity.setStackAmount(newStackAmount, false);
         targetEntity.setHealth(health);
