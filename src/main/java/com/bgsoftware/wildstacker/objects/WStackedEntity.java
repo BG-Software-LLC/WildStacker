@@ -22,6 +22,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -190,6 +191,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         StackedEntity targetEntity = (StackedEntity) stackedObject;
         int newStackAmount = this.getStackAmount() + targetEntity.getStackAmount();
 
+        if(targetEntity.getLivingEntity().hasMetadata("async-stacked"))
+            return false;
+
         if (plugin.getSettings().blacklistedEntities.contains(object.getType().name()) ||
                 plugin.getSettings().blacklistedEntities.contains(targetEntity.getType().name()))
             return false;
@@ -219,22 +223,27 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean tryStackInto(StackedObject stackedObject) {
-        if (!canStackInto(stackedObject) || latestStacked.contains(getUniqueId()))
+        if (!canStackInto(stackedObject) /*|| latestStacked.contains(getUniqueId())*/)
             return false;
+
+        if(!Bukkit.isPrimaryThread())
+            object.setMetadata("async-stacked", new FixedMetadataValue(plugin, "1"));
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
 
         EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
         Bukkit.getPluginManager().callEvent(entityStackEvent);
 
-        if (entityStackEvent.isCancelled())
+        if (entityStackEvent.isCancelled()) {
+            object.removeMetadata("async-stacked", plugin);
             return false;
+        }
 
         double health = plugin.getSettings().keepLowestHealth ? Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
         int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
-        latestStacked.add(getUniqueId());
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> latestStacked.remove(getUniqueId()), 5L);
+//        latestStacked.add(getUniqueId());
+//        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> latestStacked.remove(getUniqueId()), 5L);
 
         targetEntity.setStackAmount(newStackAmount, false);
         targetEntity.setHealth(health);
