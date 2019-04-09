@@ -92,6 +92,12 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     void setTempLootTable(List<ItemStack> itemStacks);
 
     /**
+     * Set a multiplier for loot. It will multiply all the drops by the given multiplier.
+     * @param multiplier The multiplier
+     */
+    void setLootMultiplier(int multiplier);
+
+    /**
      * Get the exp of this entity.
      * @param defaultExp the default exp to return if not found
      * @return The amount of exp to drop.

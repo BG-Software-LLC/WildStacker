@@ -406,6 +406,28 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    public void setLootMultiplier(int multiplier) {
+        this.tempLootTable = new LootTableTemp() {
+            @Override
+            public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
+                LootTable lootTable = plugin.getLootHandler().getLootTable(object);
+                LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
+                List<ItemStack> drops = new ArrayList<>(lootTableCustom == null ? lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount) :
+                        lootTableCustom.getDrops(lootTable, stackedEntity, lootBonusLevel, stackAmount));
+
+                drops.forEach(itemStack -> itemStack.setAmount((itemStack.getAmount() * multiplier)));
+
+                return new ItemStackList(drops).toList();
+            }
+
+            @Override
+            public int getExp(int stackAmount, int defaultExp) {
+                return defaultExp;
+            }
+        };
+    }
+
+    @Override
     public int getExp(int defaultExp) {
         return getExp(stackAmount, defaultExp);
     }
