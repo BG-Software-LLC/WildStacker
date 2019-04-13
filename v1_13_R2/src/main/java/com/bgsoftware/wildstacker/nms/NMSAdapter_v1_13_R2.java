@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.google.common.base.Predicate;
@@ -21,7 +21,6 @@ import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +37,9 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
-        nbtTagCompound.setString("SpawnReason", WStackedEntity.spawnReasons.getOrDefault(livingEntity.getUniqueId(),
-                CreatureSpawnEvent.SpawnReason.CHUNK_GEN).name());
-        nbtTagCompound.setBoolean("Nerfed", WildStackerPlugin.getPlugin().getSettings().nerfedSpawning.contains(nbtTagCompound.getString("SpawnReason")));
+        StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
+        nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnReason().name());
+        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 

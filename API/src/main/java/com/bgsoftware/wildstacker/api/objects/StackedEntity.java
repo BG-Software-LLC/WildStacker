@@ -131,6 +131,12 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     CreatureSpawnEvent.SpawnReason getSpawnReason();
 
     /**
+     * Set the spawn reason of the entity.
+     * @param spawnReason The spawn reason
+     */
+    void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason);
+
+    /**
      * Checks if the entity is nerfed or not.
      * @return True if entity is nerfed, otherwise false.
      */

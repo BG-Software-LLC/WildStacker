@@ -100,6 +100,11 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId());
         }
 
+        if(dataHandler.CACHED_SPAWN_REASON_ENTITIES.containsKey(livingEntity.getUniqueId())){
+            stackedEntity.setSpawnReason(dataHandler.CACHED_SPAWN_REASON_ENTITIES.get(livingEntity.getUniqueId()));
+            dataHandler.CACHED_SPAWN_REASON_ENTITIES.remove(livingEntity.getUniqueId());
+        }
+
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
                 plugin.getSettings().entitiesStackingEnabled && !plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()) &&
                 !plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))

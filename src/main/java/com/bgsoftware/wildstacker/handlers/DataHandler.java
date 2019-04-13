@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,6 +29,7 @@ public final class DataHandler {
 
     //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
     public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
+    public final Map<UUID, CreatureSpawnEvent.SpawnReason> CACHED_SPAWN_REASON_ENTITIES = new ConcurrentHashMap<>();
     public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
 
     public DataHandler(WildStackerPlugin plugin){
@@ -82,7 +82,7 @@ public final class DataHandler {
 
         if(cfg.contains("spawn-reasons")){
             for(String uuid : cfg.getConfigurationSection("spawn-reasons").getKeys(false)){
-                WStackedEntity.spawnReasons.put(UUID.fromString(uuid), CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("spawn-reasons." + uuid)));
+                CACHED_SPAWN_REASON_ENTITIES.put(UUID.fromString(uuid), CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("spawn-reasons." + uuid)));
             }
         }
 
@@ -111,6 +111,8 @@ public final class DataHandler {
                 cfg.set(stackedEntity.getUniqueId().toString(), stackedEntity.getStackAmount());
                 dataAmount++;
             }
+            if(stackedEntity.getSpawnReason() != CreatureSpawnEvent.SpawnReason.CHUNK_GEN)
+                cfg.set("spawn-reasons." + stackedEntity.getUniqueId(), stackedEntity.getSpawnReason().name());
         }
 
         for(UUID uuid : CACHED_AMOUNT_ENTITIES.keySet()) {
@@ -120,8 +122,9 @@ public final class DataHandler {
             }
         }
 
-        for(UUID uuid : WStackedEntity.spawnReasons.keySet())
-            cfg.set("spawn-reasons." + uuid, WStackedEntity.spawnReasons.get(uuid).name());
+        for(UUID uuid : CACHED_SPAWN_REASON_ENTITIES.keySet()){
+            cfg.set("spawn-reasons." + uuid, CACHED_SPAWN_REASON_ENTITIES.get(uuid).name());
+        }
 
         try {
             cfg.save(file);

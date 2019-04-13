@@ -28,13 +28,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.WeakHashMap;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
-    public static WeakHashMap<UUID, CreatureSpawnEvent.SpawnReason> spawnReasons = new WeakHashMap<>();
-
     private boolean ignoreDeathEvent = false;
+    private CreatureSpawnEvent.SpawnReason spawnReason = null;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     public WStackedEntity(LivingEntity livingEntity){
@@ -449,7 +447,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public CreatureSpawnEvent.SpawnReason getSpawnReason() {
-        return spawnReasons.getOrDefault(getUniqueId(), CreatureSpawnEvent.SpawnReason.CHUNK_GEN);
+        if(spawnReason == null)
+            spawnReason = CreatureSpawnEvent.SpawnReason.CHUNK_GEN;
+        return spawnReason;
+    }
+
+    @Override
+    public void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason) {
+        this.spawnReason = spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
     }
 
     @Override

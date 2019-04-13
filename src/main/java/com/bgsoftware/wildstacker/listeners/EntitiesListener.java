@@ -68,8 +68,6 @@ public final class EntitiesListener implements Listener {
         if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
             return;
 
-        WStackedEntity.spawnReasons.remove(e.getEntity().getUniqueId());
-
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         if(stackedEntity.isIgnoreDeathEvent()) {
@@ -148,7 +146,8 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
             return;
 
-        WStackedEntity.spawnReasons.put(e.getEntity().getUniqueId(), e.getSpawnReason());
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+        stackedEntity.setSpawnReason(e.getSpawnReason());
 
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
             noStackEntities.remove(e.getEntity().getUniqueId());
@@ -164,7 +163,6 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.tryStack();
     }
 
