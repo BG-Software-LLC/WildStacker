@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
@@ -156,7 +157,7 @@ public final class EntitiesListener implements Listener {
 
         //EpicSpawners has it's own event
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER &&
-                Bukkit.getPluginManager().isPluginEnabled("EpicSpawners"))
+                Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && EpicSpawnersListener.isEnabled())
             return;
 
         if (!Bukkit.getPluginManager().isPluginEnabled("MergedSpawner") &&

@@ -14,10 +14,15 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class EpicSpawnersListener implements Listener {
 
+    private static boolean enabled = false;
     private WildStackerPlugin instance;
 
     public EpicSpawnersListener(WildStackerPlugin instance){
         this.instance = instance;
+        try {
+            Class.forName("com.songoda.epicspawners.api.events.SpawnerSpawnEvent");
+            enabled = true;
+        }catch(Exception ignored){}
     }
 
     @EventHandler
@@ -34,6 +39,10 @@ public final class EpicSpawnersListener implements Listener {
 
         //It takes 1 tick for EpicSpawners to set the metadata for the mobs.
         Bukkit.getScheduler().runTaskLater(instance, () -> stackedEntity.trySpawnerStack(stackedSpawner), 2L);
+    }
+
+    public static boolean isEnabled(){
+        return enabled;
     }
 
 }
