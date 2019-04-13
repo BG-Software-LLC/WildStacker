@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.listeners;
 
+import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -7,6 +8,7 @@ import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -336,6 +338,33 @@ public final class EntitiesListener implements Listener {
             if (stackedEntity.isNerfed()) {
                 e.setCancelled(true);
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityInspect(PlayerInteractAtEntityEvent e){
+        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
+                !(e.getRightClicked() instanceof LivingEntity))
+            return;
+
+        e.setCancelled(true);
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+
+        Locale.ENTITY_INFO_HEADER.send(e.getPlayer());
+        Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
+        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedEntity.getType().name()));
+        Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
+        Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnReason().name());
+        Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
+        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    private boolean isOffHand(PlayerInteractAtEntityEvent event){
+        try{
+            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
+        }catch(Throwable ex){
+            return true;
         }
     }
 

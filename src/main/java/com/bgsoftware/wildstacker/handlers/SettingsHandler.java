@@ -8,10 +8,13 @@ import com.bgsoftware.wildstacker.config.ConfigComments;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
+import com.bgsoftware.wildstacker.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -23,6 +26,7 @@ public final class SettingsHandler {
     //Global settings
     public final long saveInterval;
     public final String giveItemName;
+    public final ItemStack inspectTool;
     public final KeyMap<String> customNames;
 
     //Items settings
@@ -81,6 +85,9 @@ public final class SettingsHandler {
 
         saveInterval = cfg.getLong("save-interval", 6000);
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&e{0} &f{1} x{2}"));
+        inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
+                .withName(cfg.getString("inspect-tool.name"))
+                .withLore(cfg.getStringList("inspect-tool.lore")).build();
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 

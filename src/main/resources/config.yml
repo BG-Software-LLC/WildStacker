@@ -15,6 +15,15 @@ save-interval: 6000
 # {2} represents item type (Egg / Spawner / Barrel)
 give-item-name: '&6&lx{0} &7&l{1} {2}'
 
+# The inspect tool of the plugin.
+# When clicking an item, entity, barrel or spawner, all the information
+# about the object will be displayed to the player.
+inspect-tool:
+  type: STICK
+  name: '&6Inspect Tool'
+  lore:
+    - '&7Click on an object to get more details about it.'
+
 # Here you can configurable all features related to stacked items.
 items:
   # Should items get stacked on the server?

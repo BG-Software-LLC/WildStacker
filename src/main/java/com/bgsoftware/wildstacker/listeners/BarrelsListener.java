@@ -136,7 +136,7 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if(isOffHand(e) || e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
         if(!plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
@@ -280,6 +280,29 @@ public final class BarrelsListener implements Listener {
                 e.setCancelled(true);
                 break;
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBarrelInspect(PlayerInteractEvent e){
+        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
+            return;
+
+        e.setCancelled(true);
+
+        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
+
+        Locale.BARREL_INFO_HEADER.send(e.getPlayer());
+        Locale.BARREL_INFO_TYPE.send(e.getPlayer(), ItemUtil.getFormattedType(stackedBarrel.getBarrelItem(1)));
+        Locale.BARREL_INFO_AMOUNT.send(e.getPlayer(), stackedBarrel.getStackAmount());
+        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    private boolean isOffHand(PlayerInteractEvent event){
+        try{
+            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
+        }catch(Throwable ex){
+            return true;
         }
     }
 
