@@ -164,7 +164,11 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
-        stackedEntity.tryStack();
+        //Need to add a delay so eggs will get removed from inventory
+        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
+            Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 1L);
+        else
+            stackedEntity.tryStack();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
