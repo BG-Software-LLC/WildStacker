@@ -231,14 +231,14 @@ public final class SystemHandler implements SystemManager {
         for(StackedEntity stackedEntity : getStackedEntities()) {
             if(stackedEntity.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedEntity.getUniqueId());
-            if(isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && (!stackedEntity.getLivingEntity().isValid() || stackedEntity.getLivingEntity().isDead()))
-                Executor.sync(stackedEntity::remove);
+            if(isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead())
+                stackedEntity.remove();
         }
 
         for(StackedItem stackedItem : getStackedItems()) {
             if(stackedItem.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedItem.getUniqueId());
-            if(isChunkLoaded(stackedItem.getItem().getLocation()) && (!stackedItem.getItem().isValid() || stackedItem.getItem().isDead()))
+            if(isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead())
                 stackedItem.remove();
         }
 
