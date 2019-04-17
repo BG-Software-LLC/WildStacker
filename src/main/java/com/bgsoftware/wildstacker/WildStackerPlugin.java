@@ -119,6 +119,13 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 //            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
 //                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
 
+            //Set WildStacker as SpawnersProvider with Novucs
+            if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
+                    getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
+                PluginHook_Novucs.register(this);
+        });
+
+        Executor.sync(() -> {
             //Set all holograms of spawners
             for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
                 stackedSpawner.updateName();
@@ -129,12 +136,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 stackedBarrel.getLocation().getChunk().load(true);
                 stackedBarrel.createDisplayBlock();
             }
-
-            //Set WildStacker as SpawnersProvider with Novucs
-            if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
-                    getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
-                PluginHook_Novucs.register(this);
-        });
+        }, 5L);
     }
 
     @Override
