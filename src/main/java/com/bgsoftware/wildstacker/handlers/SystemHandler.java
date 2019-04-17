@@ -229,36 +229,29 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void performCacheClear() {
         for(StackedEntity stackedEntity : getStackedEntities()) {
-            if(stackedEntity.getStackAmount() == 1) {
+            if(stackedEntity.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedEntity.getUniqueId());
-            }
-            if(isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && (!stackedEntity.getLivingEntity().isValid() || stackedEntity.getLivingEntity().isDead())) {
-                Bukkit.broadcastMessage("Removing Entity: " + stackedEntity.getUniqueId());
+            if(isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && (!stackedEntity.getLivingEntity().isValid() || stackedEntity.getLivingEntity().isDead()))
                 Executor.sync(stackedEntity::remove);
-            }
         }
 
         for(StackedItem stackedItem : getStackedItems()) {
             if(stackedItem.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedItem.getUniqueId());
-            if(isChunkLoaded(stackedItem.getItem().getLocation()) && (!stackedItem.getItem().isValid() || stackedItem.getItem().isDead())) {
-                Bukkit.broadcastMessage("Removing Item: " + stackedItem.getUniqueId());
+            if(isChunkLoaded(stackedItem.getItem().getLocation()) && (!stackedItem.getItem().isValid() || stackedItem.getItem().isDead()))
                 stackedItem.remove();
-            }
         }
 
         for(StackedSpawner stackedSpawner : getStackedSpawners()) {
             if(stackedSpawner.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedSpawner.getLocation());
-            if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
+            if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock()))
                 stackedSpawner.remove();
-            }
         }
 
         for(StackedBarrel stackedBarrel : getStackedBarrels()) {
-            if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
+            if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock()))
                 stackedBarrel.remove();
-            }
         }
     }
 
