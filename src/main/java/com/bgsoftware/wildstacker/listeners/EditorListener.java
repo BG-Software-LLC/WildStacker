@@ -1,8 +1,7 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -72,7 +71,7 @@ public final class EditorListener implements Listener {
         if(e.getCurrentItem() != null && e.isCancelled() && e.getClickedInventory().getType() == InventoryType.CHEST &&
                 e.getView().getTopInventory().equals(e.getClickedInventory())) {
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
-            Bukkit.getScheduler().runTaskLater(plugin, () -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
+            Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
     }
 
@@ -80,7 +79,7 @@ public final class EditorListener implements Listener {
     public void onInventoryCloseMonitor(InventoryCloseEvent e){
         if(latestClickedItem.containsKey(e.getPlayer().getUniqueId())){
             ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Executor.sync(() -> {
                 e.getPlayer().getInventory().removeItem(clickedItem);
                 ((Player) e.getPlayer()).updateInventory();
             }, 1L);
@@ -122,10 +121,10 @@ public final class EditorListener implements Listener {
                     player.openInventory(plugin.getEditor().getBarrelsEditor());
                     break;
                 case 49:
-                    new WildStackerThread(() -> {
+                    Executor.async(() -> {
                         plugin.getEditor().saveConfiguration();
                         player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
-                    }).start();
+                    });
                     break;
             }
         }
@@ -471,11 +470,10 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getPlayer();
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
                 if(!noResetClose.contains(player.getUniqueId())) {
-                    Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                            plugin.getEditor().reloadConfiguration());
+                    Executor.async(() -> plugin.getEditor().reloadConfiguration());
                 }
             }
 

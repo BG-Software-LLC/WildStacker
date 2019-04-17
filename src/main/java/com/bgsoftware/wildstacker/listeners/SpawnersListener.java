@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
@@ -102,7 +103,7 @@ public final class SpawnersListener implements Listener {
                 ItemStack spawnerItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(), spawnerItemAmount - limit);
                 //Adding the item to the inventory after the spawner is placed
                 spawnerItemAmount = limit;
-                Bukkit.getScheduler().runTaskLater(plugin, () -> ItemUtil.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation()), 1L);
+                Executor.sync(() -> ItemUtil.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation()), 1L);
             }
         }
 
@@ -252,7 +253,7 @@ public final class SpawnersListener implements Listener {
         //DO NOT CANCEL EVENT - CAUSES ENTITIES TO SPAWN LIKE CRAZY
         //e.setCancelled(true);
         //Doing it on the next tick so taco paper won't get weird message
-        Bukkit.getScheduler().runTaskLater(plugin, () -> e.getEntity().remove(), 1L);
+        Executor.sync(() -> e.getEntity().remove(), 1L);
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
@@ -291,10 +292,10 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             stackedSpawner.updateName();
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
-            ItemUtil.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+                ItemUtil.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
 
@@ -337,7 +338,7 @@ public final class SpawnersListener implements Listener {
                     .replace("{2}", EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()).toUpperCase());
             plugin.getProviders().changeLine(stackedSpawner, customName, true);
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getProviders().deleteHologram(stackedSpawner), 60L);
+            Executor.sync(() -> plugin.getProviders().deleteHologram(stackedSpawner), 60L);
         }
     }
 

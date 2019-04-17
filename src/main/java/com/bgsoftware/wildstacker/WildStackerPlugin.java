@@ -31,6 +31,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -106,7 +107,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //Enable CrazyEnchantments hook
         CrazyEnchantmentsHook.register();
 
-        runOnFirstTick(() -> {
+        Executor.sync(() -> {
             providersHandler = new ProvidersHandler(this);
 
             if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
@@ -167,7 +168,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + version).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + version + " - shutting down...");
-            runOnFirstTick(() -> getServer().getPluginManager().disablePlugin(this));
+            Executor.sync(() -> getServer().getPluginManager().disablePlugin(this));
         }
     }
 
@@ -196,10 +197,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 log(msg);
         }
 
-    }
-
-    private void runOnFirstTick(final Runnable runnable){
-        Bukkit.getScheduler().runTaskLater(this, runnable, 1L);
     }
 
     public NMSAdapter getNMSAdapter() {

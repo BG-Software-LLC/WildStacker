@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.command.commands;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -43,10 +43,10 @@ public final  class CommandSave implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        new WildStackerThread(() -> {
+        Executor.async(() -> {
             plugin.getDataHandler().saveDatabase();
             sender.sendMessage(ChatColor.YELLOW + "Successfully saved all cached data.");
-        }).start();
+        });
     }
 
     @Override

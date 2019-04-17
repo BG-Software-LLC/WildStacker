@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -45,7 +46,7 @@ public final class BucketsListener implements Listener {
             return;
 
         plugin.getProviders().enableBypass(e.getPlayer());
-        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getProviders().disableBypass(e.getPlayer()), 5L);
+        Executor.sync(() -> plugin.getProviders().disableBypass(e.getPlayer()), 5L);
 
         Block toBeReplaced = e.getClickedBlock().getRelative(e.getBlockFace());
         Material replacedType = e.getItem().getType().name().contains("LAVA") ? Material.LAVA : Material.WATER;
@@ -182,7 +183,7 @@ public final class BucketsListener implements Listener {
 
                 clicked = e.getCurrentItem();
 
-                Bukkit.getScheduler().runTask(plugin, () -> ItemUtil.stackBucket(clicked, invToAddItem));
+                Executor.sync(() -> ItemUtil.stackBucket(clicked, invToAddItem));
                 break;
             default:
                 return;

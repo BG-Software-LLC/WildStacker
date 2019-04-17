@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,8 +10,6 @@ import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class LootCommand {
-
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private List<String> commands = new ArrayList<>();
     private double chance;
@@ -36,8 +34,7 @@ public class LootCommand {
             commands.add(command.replace("{player-name}", player.getName()).replace("{number}", String.valueOf(randomNumber)));
         }
 
-        Bukkit.getScheduler().runTask(plugin, () ->
-            commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
+        Executor.sync(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
     }
 
     public static LootCommand fromJson(JsonObject jsonObject){

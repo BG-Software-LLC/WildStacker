@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
@@ -34,7 +35,7 @@ public final class DataHandler {
 
     public DataHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             long startTime = System.currentTimeMillis();
             WildStackerPlugin.log("Loading database started...");
 

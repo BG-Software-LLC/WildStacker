@@ -2,10 +2,10 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -33,7 +33,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         WildStackerPlugin.log(" - Using SilkSpawners as SpawnersProvider.");
         ss = JavaPlugin.getPlugin(SilkSpawners.class);
         rnd = new Random();
-        Bukkit.getScheduler().runTaskLater(plugin, () -> silkUtil = SilkUtil.hookIntoSilkSpanwers(), 1L);
+        Executor.sync(() -> silkUtil = SilkUtil.hookIntoSilkSpanwers(), 1L);
     }
 
     @Override

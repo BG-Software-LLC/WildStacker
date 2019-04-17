@@ -9,8 +9,8 @@ import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -146,7 +146,7 @@ public final class EntitiesListener implements Listener {
 
             calcAndDrop(stackedEntity, e.getEntity().getLocation(), lootBonusLevel, unstackAmount);
 
-            Bukkit.getScheduler().runTask(plugin, () -> stackedEntity.tryUnstack(unstackAmount));
+            Executor.sync(() -> stackedEntity.tryUnstack(unstackAmount));
 
             if(livingEntity.getKiller() != null) {
                 try {
@@ -188,7 +188,7 @@ public final class EntitiesListener implements Listener {
 
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
-            Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 1L);
+            Executor.sync(stackedEntity::tryStack, 1L);
         else
             stackedEntity.tryStack();
     }
@@ -212,7 +212,7 @@ public final class EntitiesListener implements Listener {
 
             stackedEntity.setStackAmount(eggAmount - 1, true);
 
-            Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 5L);
+            Executor.sync(stackedEntity::tryStack, 5L);
         }
     }
 
@@ -233,7 +233,7 @@ public final class EntitiesListener implements Listener {
 
         DyeColor originalColor = e.getEntity().getColor();
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Executor.sync(() -> {
             if(amount > 1) {
                 e.getEntity().setColor(originalColor);
                 stackedEntity.setStackAmount(amount - 1, true);
@@ -267,7 +267,7 @@ public final class EntitiesListener implements Listener {
 
         else if(e.getEntity() instanceof Sheep){
             int amount = stackedEntity.getStackAmount();
-            Bukkit.getScheduler().runTask(plugin, () -> {
+            Executor.sync(() -> {
                 if(amount > 1) {
                     ((Sheep) e.getEntity()).setSheared(false);
                     stackedEntity.setStackAmount(amount - 1, true);
@@ -293,7 +293,7 @@ public final class EntitiesListener implements Listener {
         if(!e.getEntity().isSheared())
             return;
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Executor.sync(() -> {
             if(amount > 1){
                 e.getEntity().setSheared(true);
                 stackedEntity.setStackAmount(amount - 1, true);
@@ -320,7 +320,7 @@ public final class EntitiesListener implements Listener {
 
         int amount = stackedEntity.getStackAmount();
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Executor.sync(() -> {
             if(amount > 1){
                 stackedEntity.setCustomName("");
                 stackedEntity.setStackAmount(amount - 1, true);
@@ -341,7 +341,7 @@ public final class EntitiesListener implements Listener {
         if(!(e.getRightClicked() instanceof Animals))
             return;
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if(!plugin.getNMSAdapter().isInLove(e.getRightClicked()))
                 return;
 
@@ -418,11 +418,10 @@ public final class EntitiesListener implements Listener {
         if(MythicMobsHook.isMythicMob(stackedEntity.getLivingEntity()))
             return;
 
-        new WildStackerThread(() -> {
+        Executor.async(() -> {
             List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
-            Bukkit.getScheduler().runTask(plugin, () ->
-                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
-        }).start();
+            Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
+        });
     }
 
     private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){

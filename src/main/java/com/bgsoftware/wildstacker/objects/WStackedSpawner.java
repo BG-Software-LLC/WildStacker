@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -153,7 +154,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         setStackAmount(stackAmount - amount, true);
 
         if(stackAmount < 1) {
-            Bukkit.getScheduler().runTaskLater(plugin, this::remove, 2L);
+            Executor.sync(this::remove, 2L);
         }
 
         return true;

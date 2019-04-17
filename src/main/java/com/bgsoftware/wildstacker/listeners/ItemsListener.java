@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
@@ -64,7 +64,7 @@ public final class ItemsListener implements Listener {
         //We are overriding the merge system
         e.setCancelled(true);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
                 StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
                 stackedItem.tryStackInto(targetItem);

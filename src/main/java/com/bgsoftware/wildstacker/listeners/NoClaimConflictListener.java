@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,7 +35,7 @@ public final class NoClaimConflictListener implements Listener {
         else if(plugin.getSettings().barrelsStackingEnabled && plugin.getSettings().whitelistedBarrels.contains(e.getItemInHand())){
             placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
         }
-        Bukkit.getScheduler().runTaskLater(plugin, () -> placers.remove(e.getBlockPlaced().getLocation()), 2L);
+        Executor.sync(() -> placers.remove(e.getBlockPlaced().getLocation()), 2L);
     }
 
     @EventHandler

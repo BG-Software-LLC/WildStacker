@@ -17,8 +17,8 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.SaveTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -48,7 +48,7 @@ public final class SystemHandler implements SystemManager {
         this.dataHandler = plugin.getDataHandler();
 
         //Start all required tasks
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             SaveTask.start();
             KillTask.start();
             StackTask.start();
@@ -233,7 +233,7 @@ public final class SystemHandler implements SystemManager {
             if(stackedEntity.getType() == EntityType.ARMOR_STAND || stackedEntity.getStackAmount() == 1) {
                 dataHandler.CACHED_OBJECTS.remove(stackedEntity.getUniqueId());
             }else if(!stackedEntity.getLivingEntity().isValid()) {
-                Bukkit.getScheduler().runTask(plugin, stackedEntity::remove);
+                Executor.sync(stackedEntity::remove);
             }
         }
 
@@ -337,7 +337,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
-        new WildStackerThread(() -> {
+        Executor.async(() -> {
             for(StackedEntity stackedEntity : getStackedEntities()) {
                 if (stackedEntity.getStackAmount() > 1)
                     stackedEntity.remove();
@@ -355,7 +355,7 @@ public final class SystemHandler implements SystemManager {
                 if (pl.isOp())
                     Locale.KILL_ALL_OPS.send(pl);
             }
-        }).start();
+        });
     }
 
     /*

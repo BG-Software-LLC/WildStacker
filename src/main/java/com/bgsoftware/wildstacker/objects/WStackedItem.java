@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -154,7 +155,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if (targetItem.getItem().isValid())
                 targetItem.updateName();
         }, 2L);

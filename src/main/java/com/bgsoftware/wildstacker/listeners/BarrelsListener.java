@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -82,7 +83,7 @@ public final class BarrelsListener implements Listener {
             if(barrelPlaceEvent.isCancelled())
                 return;
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> e.getBlockPlaced().setType(Material.CAULDRON), 1L);
+            Executor.sync(() -> e.getBlockPlaced().setType(Material.CAULDRON), 1L);
             Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtil.getFormattedType(stackedBarrel.getBarrelItem(1)));
         }
         else {

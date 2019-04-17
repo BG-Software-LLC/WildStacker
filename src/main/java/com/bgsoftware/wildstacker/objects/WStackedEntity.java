@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.EntityData;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -241,7 +242,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         targetEntity.setStackAmount(newStackAmount, false);
         targetEntity.setHealth(health);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if (targetEntity.getLivingEntity().isValid())
                 targetEntity.updateName();
         }, 2L);
