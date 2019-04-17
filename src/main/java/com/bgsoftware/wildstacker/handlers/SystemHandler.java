@@ -28,7 +28,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -230,9 +229,11 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void performCacheClear() {
         for(StackedEntity stackedEntity : getStackedEntities()) {
-            if(stackedEntity.getType() == EntityType.ARMOR_STAND || stackedEntity.getStackAmount() == 1) {
+            if(stackedEntity.getStackAmount() == 1) {
                 dataHandler.CACHED_OBJECTS.remove(stackedEntity.getUniqueId());
-            }else if(!stackedEntity.getLivingEntity().isValid()) {
+            }
+            if(isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && (!stackedEntity.getLivingEntity().isValid() || stackedEntity.getLivingEntity().isDead())) {
+                Bukkit.broadcastMessage("Removing Entity: " + stackedEntity.getUniqueId());
                 Executor.sync(stackedEntity::remove);
             }
         }
@@ -241,6 +242,7 @@ public final class SystemHandler implements SystemManager {
             if(stackedItem.getStackAmount() == 1)
                 dataHandler.CACHED_OBJECTS.remove(stackedItem.getUniqueId());
             if(isChunkLoaded(stackedItem.getItem().getLocation()) && (!stackedItem.getItem().isValid() || stackedItem.getItem().isDead())) {
+                Bukkit.broadcastMessage("Removing Item: " + stackedItem.getUniqueId());
                 stackedItem.remove();
             }
         }
