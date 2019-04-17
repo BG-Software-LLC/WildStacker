@@ -134,6 +134,13 @@ public interface SystemManager {
     <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason);
 
     /**
+     * Spawn a corpse for a stacked entity.
+     * @param stackedEntity the stacked entity.
+     * @param expToDrop amount of exp to drop
+     */
+    void spawnCorpse(StackedEntity stackedEntity, int expToDrop);
+
+    /**
      * Perform a kill all.
      */
     void performKillAll();

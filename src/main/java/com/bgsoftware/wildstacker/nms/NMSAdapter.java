@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.google.common.base.Predicate;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface NMSAdapter {
 
     boolean isInLove(Entity entity);
 
-    void setInLove(Entity entity, boolean inLove);
+    void setInLove(Entity entity, Player breeder, boolean inLove);
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 

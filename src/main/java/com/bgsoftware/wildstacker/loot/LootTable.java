@@ -44,8 +44,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             }
         }
 
-        if(dropEquipment)
+        if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
+            stackedEntity.getLivingEntity().getEquipment().clear();
+        }
 
         return drops;
     }

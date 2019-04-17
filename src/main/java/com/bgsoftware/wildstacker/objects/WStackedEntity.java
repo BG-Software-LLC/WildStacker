@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
@@ -262,23 +263,20 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         int stackAmount = this.stackAmount - amount;
 
-        ignoreDeathEvent();
+        setStackAmount(stackAmount, true);
+
+        ItemStack killerItemHand = object.getKiller() == null ? null : object.getKiller().getItemInHand();
+
+        int expToDrop = getExp(amount, -1);
+        expToDrop = CrazyEnchantmentsHook.getNewExpValue(expToDrop, killerItemHand);
 
         if(stackAmount < 1){
+            object.setMetadata("corpse", new FixedMetadataValue(plugin, expToDrop));
             setHealth(0.0D);
             return true;
         }
 
-        //So the entity won't have a name
-        setStackAmount(0, true);
-        setHealth(0.0D);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            //Spawning the duplicate in the next tick
-            StackedEntity duplicate = spawnDuplicate(stackAmount);
-            //Updating linked entities
-            plugin.getSystemManager().updateLinkedEntity(object, duplicate.getLivingEntity());
-        },1L);
+        spawnCorpse(expToDrop);
 
         return true;
     }
@@ -334,7 +332,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return duplicate;
         }
 
-        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass()));
+        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass(), getSpawnReason()));
         duplicate.setStackAmount(amount, true);
 
         EntityData entityData = EntityData.of(this);
@@ -348,6 +346,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         Bukkit.getPluginManager().callEvent(duplicateSpawnEvent);
 
         return duplicate;
+    }
+
+    @Override
+    public void spawnCorpse(int expToDrop) {
+        plugin.getSystemManager().spawnCorpse(this, expToDrop);
     }
 
     @Override

@@ -68,6 +68,12 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     StackedEntity spawnDuplicate(int amount);
 
     /**
+     * Spawn a corpse for this entity.
+     * @param expToDrop exp to drop when corpse is spawned.
+     */
+    void spawnCorpse(int expToDrop);
+
+    /**
      * Get the drops of this entity with a specific fortune level.
      * SHOULD BE USED ASYNC OR MAY CAUSE LAG WITH LARGE STACK SIZES!!!
      * @param lootBonusLevel the fortune level

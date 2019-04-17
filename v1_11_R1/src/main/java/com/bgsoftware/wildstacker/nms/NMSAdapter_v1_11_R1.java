@@ -20,6 +20,7 @@ import org.bukkit.craftbukkit.v1_11_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 
 import java.lang.reflect.Field;
@@ -70,7 +71,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     }
 
     @Override
-    public void setInLove(org.bukkit.entity.Entity entity, boolean inLove) {
+    public void setInLove(org.bukkit.entity.Entity entity, Player breeder, boolean inLove) {
         EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
         nmsEntity.resetLove();
     }
