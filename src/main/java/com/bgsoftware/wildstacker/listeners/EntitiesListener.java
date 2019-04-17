@@ -130,7 +130,7 @@ public final class EntitiesListener implements Listener {
         if(stackedEntity.isIgnoreDeathEvent())
             return;
 
-        EntityDamageEvent.DamageCause lastDamageCause = getLastDamage(livingEntity);
+        EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
         final int lootBonusLevel = getFortuneLevel(livingEntity);
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
