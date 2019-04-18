@@ -4,7 +4,9 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.LivingEntity;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -57,6 +59,38 @@ public final class EntityUtil {
         }
 
         return false;
+    }
+
+    public static int getEntityExp(LivingEntity livingEntity){
+//        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+//        try{
+//            Bukkit.broadcastMessage(entityInsentient.killer + "");
+//            Method method = EntityLiving.class.getDeclaredMethod("getExpValue", EntityHuman.class);
+//            method.setAccessible(true);
+//            int exp = (int) method.invoke(entityInsentient, entityInsentient.killer);
+//            method.setAccessible(false);
+//            return exp;
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//            return 0;
+//        }
+        int exp = 0;
+
+        try{
+            Class entityInsentientClass = ReflectionUtil.getNMSClass("EntityInsentient");
+            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
+            Class entityHumanClass = ReflectionUtil.getNMSClass("EntityHuman");
+            Object entityInsentient = entityInsentientClass.cast(livingEntity.getClass().getMethod("getHandle").invoke(livingEntity));
+            //noinspection unchecked
+            Method method = entityLivingClass.getDeclaredMethod("getExpValue", entityHumanClass);
+            method.setAccessible(true);
+            exp = (int) method.invoke(entityInsentient, entityInsentientClass.getField("killer").get(entityInsentient));
+            method.setAccessible(false);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return exp;
     }
 
 }

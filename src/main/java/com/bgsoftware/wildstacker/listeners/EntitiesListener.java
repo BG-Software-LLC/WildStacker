@@ -108,7 +108,7 @@ public final class EntitiesListener implements Listener {
         so -8 is a stack size of 8 and so on.
          */
 
-        e.setDroppedExp(expToDrop < 0 ? e.getDroppedExp() * (expToDrop / (-1)) : expToDrop);
+        e.setDroppedExp(expToDrop < 0 ? EntityUtil.getEntityExp(e.getEntity()) * (expToDrop / (-1)) : expToDrop);
 
         //We don't need to drop drops.
         e.getDrops().clear();
