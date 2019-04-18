@@ -191,7 +191,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         StackedEntity targetEntity = (StackedEntity) stackedObject;
         int newStackAmount = this.getStackAmount() + targetEntity.getStackAmount();
 
-        if(targetEntity.getLivingEntity().hasMetadata("async-stacked"))
+        if(targetEntity.getLivingEntity().hasMetadata("async-stacked") ||
+                targetEntity.getLivingEntity().hasMetadata("corpse"))
             return false;
 
         if (plugin.getSettings().blacklistedEntities.contains(object.getType().name()) ||

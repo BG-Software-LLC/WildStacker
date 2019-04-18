@@ -22,6 +22,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
@@ -71,46 +72,28 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         //Checks if the entity should be handled here
-        if(!stackedEntity.isIgnoreDeathEvent() && !e.getEntity().hasMetadata("corpse") && !e.getEntity().hasMetadata("mythic-mob"))
-            return;
-
-        //Checks if it's mythic-mob
-        if(e.getEntity().hasMetadata("mythic-mob")){
-            //The only way to get drops of mythic-mobs is using the event#getDrops
-            stackedEntity.setTempLootTable(new ArrayList<>(e.getDrops()));
-
-            int unstackAmount = e.getEntity().getMetadata("mythic-mob").get(0).asInt();
-            EntityDamageEvent.DamageCause lastDamageCause = getLastDamage(e.getEntity());
-            final int lootBonusLevel = getFortuneLevel(e.getEntity());
-
-            //Dropping the mythic mobs loot
-            calcAndDrop(stackedEntity, e.getEntity().getLocation(), lootBonusLevel, unstackAmount);
+        if(!stackedEntity.isIgnoreDeathEvent() && !e.getEntity().hasMetadata("mythic-mob")) {
+            e.setDroppedExp(0);
             e.getDrops().clear();
             return;
         }
 
-        /*
-        The entity is a corpse. We only need to drop the exp.
-        It's done here because that's the easiest way of getting the default exp
-        of the entity.
-         */
+        int stackAmount = 1;
 
-        int expToDrop = -1;
-
-        if(e.getEntity().hasMetadata("corpse")){
-            try {
-                expToDrop = e.getEntity().getMetadata("corpse").get(0).asInt();
-            }catch(Exception ignored){}
+        if(e.getEntity().hasMetadata("mythic-mob")) {
+            //The only way to get drops of mythic-mobs is using the event#getDrops
+            stackedEntity.setTempLootTable(new ArrayList<>(e.getDrops()));
+            stackAmount = e.getEntity().getMetadata("mythic-mob").get(0).asInt();
         }
 
-        /*
-        Any number between 0 presents the default exp. The stack size is the expToDrop / (-1),
-        so -8 is a stack size of 8 and so on.
-         */
+        EntityDamageEvent.DamageCause lastDamageCause = getLastDamage(e.getEntity());
+        final int lootBonusLevel = getFortuneLevel(e.getEntity());
 
-        e.setDroppedExp(expToDrop < 0 ? EntityUtil.getEntityExp(e.getEntity()) * (expToDrop / (-1)) : expToDrop);
+        //Dropping the mythic mobs loot and exp
+        calcAndDrop(stackedEntity, e.getEntity().getLocation(), lootBonusLevel, stackAmount);
 
-        //We don't need to drop drops.
+        //Clearing the default values
+        e.setDroppedExp(0);
         e.getDrops().clear();
     }
 
@@ -421,6 +404,19 @@ public final class EntitiesListener implements Listener {
         Executor.async(() -> {
             List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
             Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
+        });
+
+        Executor.async(() -> {
+            int exp = 0;
+            for(int i = 0; i < stackAmount; i++)
+                exp += EntityUtil.getEntityExp(stackedEntity.getLivingEntity());
+            if(exp > 0) {
+                final int EXP = exp;
+                Executor.sync(() -> {
+                    ExperienceOrb experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+                    experienceOrb.setExperience(EXP);
+                });
+            }
         });
     }
 

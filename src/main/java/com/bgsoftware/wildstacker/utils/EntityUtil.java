@@ -62,18 +62,6 @@ public final class EntityUtil {
     }
 
     public static int getEntityExp(LivingEntity livingEntity){
-//        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-//        try{
-//            Bukkit.broadcastMessage(entityInsentient.killer + "");
-//            Method method = EntityLiving.class.getDeclaredMethod("getExpValue", EntityHuman.class);
-//            method.setAccessible(true);
-//            int exp = (int) method.invoke(entityInsentient, entityInsentient.killer);
-//            method.setAccessible(false);
-//            return exp;
-//        }catch(Exception ex){
-//            ex.printStackTrace();
-//            return 0;
-//        }
         int exp = 0;
 
         try{
