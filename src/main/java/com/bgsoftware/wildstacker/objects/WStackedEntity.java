@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.hooks.BossHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
@@ -362,6 +363,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops;
+
+        //Boss Integration
+        if(BossHook.isBoss(object))
+            return new ItemStackList(BossHook.getDrops(object)).toList();
 
         if(tempLootTable != null){
             drops = tempLootTable.getDrops(this, lootBonusLevel, stackAmount);
