@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
@@ -107,8 +106,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             EconomyHook.register();
         if(getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
             ProtocolLibHook.register();
-        //Enable CrazyEnchantments hook
-        CrazyEnchantmentsHook.register();
 
         Executor.sync(() -> {
             providersHandler = new ProvidersHandler(this);
