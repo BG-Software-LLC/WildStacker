@@ -33,6 +33,8 @@ public final class Locale {
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
     public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
     public static Locale INSPECT_RECEIVE = new Locale("INSPECT_RECEIVE");
+    public static Locale ITEM_NAMES_TOGGLE_ON = new Locale("ITEM_NAMES_TOGGLE_ON");
+    public static Locale ITEM_NAMES_TOGGLE_OFF = new Locale("ITEM_NAMES_TOGGLE_OFF");
     public static Locale KILL_ALL_ANNOUNCEMENT = new Locale("KILL_ALL_ANNOUNCEMENT");
     public static Locale KILL_ALL_REMAINING_TIME = new Locale("KILL_ALL_REMAINING_TIME");
     public static Locale KILL_ALL_OPS = new Locale("KILL_ALL_OPS");

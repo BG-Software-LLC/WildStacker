@@ -36,6 +36,10 @@ INVALID_TYPE: '&6&lWildStacker &7Please specify if you want to give an egg or a 
 INSPECT_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} inspect tool(s).'
 INSPECT_RECEIVE: '&6&lWildStacker &7You received x{0} inspect tool(s) from {1}.'
 
+# Called when a player runs the item names toggle command.
+ITEM_NAMES_TOGGLE_ON: '&6&lWildStacker &7Item names are now enabled.'
+ITEM_NAMES_TOGGLE_OFF: '&6&lWildStacker &7Item names are now disabled.'
+
 # Called when a kill-all task is running
 KILL_ALL_ANNOUNCEMENT: '&6&lWildStacker &7All stacked-entities and stacked-items were killed successfully!'
 KILL_ALL_REMAINING_TIME: '&6&lWildStacker &7All stacked-entities and stacked-items will be cleared in {0} seconds!'

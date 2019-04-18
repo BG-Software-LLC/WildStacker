@@ -1,11 +1,16 @@
 package com.bgsoftware.wildstacker.listeners;
 
+import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.Executor;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,6 +19,7 @@ import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -127,6 +133,41 @@ public final class ItemsListener implements Listener {
 
             Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
             hopper.getState().update();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
+        if(!plugin.getSettings().itemsNamesToggleEnabled)
+            return;
+
+        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
+            return;
+        }
+
+        String commandSyntax = "/" + plugin.getSettings().itemsNamesToggleCommand;
+
+        if(!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
+            return;
+
+        e.setCancelled(true);
+
+        if(ProtocolLibHook.disabledNames.contains(e.getPlayer().getUniqueId())){
+            ProtocolLibHook.disabledNames.remove(e.getPlayer().getUniqueId());
+            Locale.ITEM_NAMES_TOGGLE_ON.send(e.getPlayer());
+        }
+        else{
+            ProtocolLibHook.disabledNames.add(e.getPlayer().getUniqueId());
+            Locale.ITEM_NAMES_TOGGLE_OFF.send(e.getPlayer());
+        }
+
+        //Refresh item names
+        for(Entity entity : e.getPlayer().getNearbyEntities(50, 256, 50)){
+            if(entity instanceof Item && entity.isCustomNameVisible()){
+                ProtocolLibHook.updateName(e.getPlayer(), entity);
+            }
         }
     }
 

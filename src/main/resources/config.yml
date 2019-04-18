@@ -80,6 +80,15 @@ items:
   # If you want to configure the task, check the entities section.
   kill-all: true
 
+  # Should players be able to disable item names for themselves?
+  # In order to work, ProtocolLib should be installed.
+  names-toggle:
+    # Should item names can be toggled?
+    enabled: false
+
+    # What's the toggle command will be?
+    command: 'stacker names'
+
 # Here you can configurable all features related to stacked entities.
 entities:
   # Should entities get stacked on the server?

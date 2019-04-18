@@ -85,6 +85,18 @@ public final class ConfigComments {
     public static String ITEMS_KILL_ALL = "items.kill-all";
 
     @Comment("")
+    @Comment("Should players be able to disable item names for themselves?")
+    @Comment("In order to work, ProtocolLib should be installed.")
+    public static String ITEMS_NAMES_TOGGLE = "items.names-toggle";
+
+    @Comment("Should item names can be toggled?")
+    public static String ITEMS_NAMES_TOGGLE_ENABLED = "items.names-toggle.enabled";
+
+    @Comment("")
+    @Comment("What's the toggle command will be?")
+    public static String ITEMS_NAMES_TOGGLE_COMMAND = "items.names-toggle.command";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 

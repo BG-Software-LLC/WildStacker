@@ -18,6 +18,7 @@ import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
+import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
 import com.bgsoftware.wildstacker.listeners.EditorListener;
@@ -104,6 +105,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();
+        if(getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
+            ProtocolLibHook.register();
         //Enable CrazyEnchantments hook
         CrazyEnchantmentsHook.register();
 
@@ -116,6 +119,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
                 getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
+
 //            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
 //                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
 

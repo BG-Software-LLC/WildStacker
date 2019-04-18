@@ -37,6 +37,8 @@ public final class SettingsHandler {
     public final int itemsCheckRange;
     public final String itemsCustomName;
     public final KeyMap<Integer> itemsLimits;
+    public final boolean itemsNamesToggleEnabled;
+    public final String itemsNamesToggleCommand;
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
@@ -102,6 +104,8 @@ public final class SettingsHandler {
         bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
         bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
         itemsKillAll = cfg.getBoolean("items.kill-all", true);
+        itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
+        itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names");
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
