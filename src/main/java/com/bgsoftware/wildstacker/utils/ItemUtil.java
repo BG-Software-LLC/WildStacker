@@ -61,6 +61,7 @@ public final class ItemUtil {
     }
 
     public static void dropItem(ItemStack itemStack, Location location){
+        if(itemStack.getType() == Material.AIR) return;
         int amount = itemStack.getAmount();
 
         for (int i = 0; i < amount / 64; i++) {
