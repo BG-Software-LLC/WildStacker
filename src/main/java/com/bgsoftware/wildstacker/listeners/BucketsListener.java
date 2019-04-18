@@ -51,20 +51,15 @@ public final class BucketsListener implements Listener {
         Block toBeReplaced = e.getClickedBlock().getRelative(e.getBlockFace());
         Material replacedType = e.getItem().getType().name().contains("LAVA") ? Material.LAVA : Material.WATER;
         ItemStack bucketToAdd = new ItemStack(Material.BUCKET);
-        boolean returnIfNotFullBlock = true;
 
         EntityType toBeSpawned = null;
 
         switch (e.getItem().getType()){
             case WATER_BUCKET:
-                if(toBeReplaced.getType().name().contains("WATER"))
-                    returnIfNotFullBlock = false;
                 replacedType = Material.WATER;
                 bucketToAdd = new ItemStack(Material.BUCKET);
                 break;
             case LAVA_BUCKET:
-                if(toBeReplaced.getType().name().contains("LAVA"))
-                    returnIfNotFullBlock = false;
                 replacedType = Material.LAVA;
                 bucketToAdd = new ItemStack(Material.BUCKET);
                 break;
@@ -82,10 +77,6 @@ public final class BucketsListener implements Listener {
         }
 
         e.setCancelled(true);
-
-        //noinspection deprecation
-        if(toBeReplaced.getData() != 0 && returnIfNotFullBlock)
-            return;
 
         if(toBeReplaced.getType() == Material.AIR && e.getItem().getType() == Material.BUCKET)
             return;
