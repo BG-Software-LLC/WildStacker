@@ -87,7 +87,7 @@ items:
     enabled: false
 
     # What's the toggle command will be?
-    command: 'stacker names'
+    command: 'stacker names item'
 
 # Here you can configurable all features related to stacked entities.
 entities:
@@ -276,7 +276,7 @@ entities:
     enabled: false
 
     # What's the toggle command will be?
-    command: 'stacker entity names'
+    command: 'stacker names entity'
 
 # Here you can configurable all features related to stacked spawners.
 spawners:

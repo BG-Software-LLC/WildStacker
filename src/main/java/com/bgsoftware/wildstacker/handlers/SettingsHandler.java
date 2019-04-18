@@ -107,7 +107,7 @@ public final class SettingsHandler {
         bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
         itemsKillAll = cfg.getBoolean("items.kill-all", true);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
-        itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names");
+        itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
@@ -134,7 +134,7 @@ public final class SettingsHandler {
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
-        entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker entity names");
+        entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
 
         boolean stackingEnable = !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && !Bukkit.getPluginManager().isPluginEnabled("MergedSpawner");
         spawnersStackingEnabled = stackingEnable && cfg.getBoolean("spawners.enabled", true);
