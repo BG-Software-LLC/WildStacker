@@ -111,17 +111,19 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if (customName.isEmpty())
             return;
 
-        if (stackAmount <= 1) {
-            setCustomName("");
-            setCustomNameVisible(false);
-        }
-        else {
-            setCustomName(customName
+        String newName = "";
+        boolean newNameVisible = false;
+
+        if(stackAmount > 1) {
+            newName = customName
                     .replace("{0}", Integer.toString(stackAmount))
                     .replace("{1}", EntityUtil.getFormattedType(getType().name()))
-                    .replace("{2}", EntityUtil.getFormattedType(getType().name()).toUpperCase()));
-            setCustomNameVisible(!plugin.getSettings().entitiesHideNames);
+                    .replace("{2}", EntityUtil.getFormattedType(getType().name()).toUpperCase());
+            newNameVisible = !plugin.getSettings().entitiesHideNames;
         }
+
+        setCustomName(newName);
+        setCustomNameVisible(newNameVisible);
     }
 
     @Override
