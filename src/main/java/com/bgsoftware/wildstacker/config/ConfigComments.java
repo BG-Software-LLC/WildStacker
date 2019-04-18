@@ -24,6 +24,12 @@ public final class ConfigComments {
     public static String GIVE_ITEM_NAME = "give-item-name";
 
     @Comment("")
+    @Comment("The inspect tool of the plugin.")
+    @Comment("When clicking an item, entity, barrel or spawner, all the information")
+    @Comment("about the object will be displayed to the player.")
+    public static String INSPECT_TOOL = "inspect-tool";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";
 
