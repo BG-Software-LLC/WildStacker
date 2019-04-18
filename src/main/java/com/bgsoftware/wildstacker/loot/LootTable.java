@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -53,6 +54,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     }
 
     @Override
+    @Deprecated
     public int getExp(int stackAmount, int defaultExp){
         int exp = defaultExp * stackAmount;
 
@@ -61,6 +63,22 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             for(int i = 0; i < stackAmount; i++){
                 exp += random.nextInt(maxExp - minExp + 1) + minExp;
             }
+        }
+
+        return exp;
+    }
+
+    @Override
+    public int getExp(StackedEntity stackedEntity, int stackAmount) {
+        int exp = 0;
+
+        if(minExp >= 0 && maxExp >= 0){
+            for(int i = 0; i < stackAmount; i++)
+                exp += random.nextInt(maxExp - minExp + 1) + minExp;
+        }
+        else{
+            for(int i = 0; i < stackAmount; i++)
+                exp += EntityUtil.getEntityExp(stackedEntity.getLivingEntity());
         }
 
         return exp;

@@ -68,41 +68,16 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityDeath(EntityDeathEvent e){
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
-            return;
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-        //Checks if the entity should be handled here
-        if(!stackedEntity.isIgnoreDeathEvent() && !e.getEntity().hasMetadata("mythic-mob")) {
-            e.setDroppedExp(0);
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityDeathMonitor(EntityDeathEvent e){
+        if(e.getEntity().hasMetadata("corpse")){
             e.getDrops().clear();
-            return;
+            e.setDroppedExp(0);
         }
-
-        int stackAmount = 1;
-
-        if(e.getEntity().hasMetadata("mythic-mob")) {
-            //The only way to get drops of mythic-mobs is using the event#getDrops
-            stackedEntity.setTempLootTable(new ArrayList<>(e.getDrops()));
-            stackAmount = e.getEntity().getMetadata("mythic-mob").get(0).asInt();
-        }
-
-        EntityDamageEvent.DamageCause lastDamageCause = getLastDamage(e.getEntity());
-        final int lootBonusLevel = getFortuneLevel(e.getEntity());
-
-        //Dropping the mythic mobs loot and exp
-        calcAndDrop(stackedEntity, e.getEntity().getLocation(), lootBonusLevel, stackAmount);
-
-        //Clearing the default values
-        e.setDroppedExp(0);
-        e.getDrops().clear();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityDeath(EntityDamageEvent e){
+    public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
         if(!(e.getEntity() instanceof LivingEntity) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
@@ -113,34 +88,51 @@ public final class EntitiesListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
-        //Should be handled in the EntityDeathEvent
-        if(stackedEntity.isIgnoreDeathEvent())
-            return;
-
-        EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
-        final int lootBonusLevel = getFortuneLevel(livingEntity);
-
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            int unstackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ? stackedEntity.getStackAmount() : 1;
-
-            if (MythicMobsHook.isMythicMob(livingEntity)) {
-                livingEntity.setMetadata("mythic-mob", new FixedMetadataValue(plugin, unstackAmount));
-                return;
-            }
+            EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
+            int lootBonusLevel = getFortuneLevel(livingEntity);
+            int stackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ? stackedEntity.getStackAmount() : 1;
 
             e.setCancelled(true);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
-            calcAndDrop(stackedEntity, e.getEntity().getLocation(), lootBonusLevel, unstackAmount);
+            livingEntity.setLastDamageCause(e);
+            livingEntity.setMetadata("unstack-amount", new FixedMetadataValue(plugin, stackAmount));
 
-            Executor.sync(() -> stackedEntity.tryUnstack(unstackAmount));
+            Executor.async(() -> {
+                List<ItemStack> drops = new ArrayList<>();
+                int expToDrop = 0;
 
-            if(livingEntity.getKiller() != null) {
-                try {
-                    livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, unstackAmount);
-                    livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), unstackAmount);
-                }catch(IllegalArgumentException ignored){}
-            }
+                for(int i = 0; i < stackAmount; i++) {
+                    try {
+                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
+                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                        drops.addAll(entityDeathEvent.getDrops());
+                        expToDrop += entityDeathEvent.getDroppedExp();
+                    }catch(Exception ignored){}
+                }
+
+                final int EXP = expToDrop;
+
+                Executor.sync(() -> {
+                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+
+                    if(EXP > 0){
+                        ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+                        experienceOrb.setExperience(EXP);
+                    }
+
+                    stackedEntity.tryUnstack(stackAmount);
+
+                    if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
+                        try {
+                            livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                            livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                        }catch(IllegalArgumentException ignored){}
+                    }
+                });
+            });
+
         }
     }
 

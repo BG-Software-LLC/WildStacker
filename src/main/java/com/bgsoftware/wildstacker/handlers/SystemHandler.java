@@ -304,29 +304,12 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void spawnCorpse(StackedEntity stackedEntity, int expToDrop) {
-        try{
-            World world = stackedEntity.getLivingEntity().getWorld();
-
-            Class craftWorldClass = ReflectionUtil.getBukkitClass("CraftWorld");
-            Object craftWorld = craftWorldClass.cast(world);
-
-            Class entityClass = ReflectionUtil.getNMSClass("Entity");
-
-            Object entity = craftWorldClass.getMethod("createEntity", Location.class, Class.class)
-                    .invoke(craftWorld, stackedEntity.getLivingEntity().getLocation(), stackedEntity.getType().getEntityClass());
-
-            LivingEntity bukkitEntity = (LivingEntity) entity.getClass().getMethod("getBukkitEntity").invoke(entity);
-
-            bukkitEntity.setMetadata("corpse", new FixedMetadataValue(plugin, expToDrop));
-
-            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class)
-                    .invoke(craftWorld, entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
-
-            bukkitEntity.setHealth(0);
-        }catch(Exception ex){
-            ex.printStackTrace();
+    public void spawnCorpse(StackedEntity stackedEntity) {
+        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(),
+                stackedEntity.getType().getEntityClass(), CreatureSpawnEvent.SpawnReason.CUSTOM);
+        if(livingEntity != null) {
+            livingEntity.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
+            livingEntity.setHealth(0);
         }
     }
 

@@ -6,10 +6,7 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.hooks.BossHook;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
@@ -270,18 +267,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         setStackAmount(stackAmount, true);
 
-        ItemStack killerItemHand = object.getKiller() == null ? null : object.getKiller().getItemInHand();
-
-        int expToDrop = getExp(amount, -1);
-        expToDrop = CrazyEnchantmentsHook.getNewExpValue(expToDrop, killerItemHand);
-
         if(stackAmount < 1){
-            object.setMetadata("corpse", new FixedMetadataValue(plugin, expToDrop));
+            object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
             setHealth(0.0D);
             return true;
         }
 
-        spawnCorpse(expToDrop);
+        spawnCorpse();
 
         return true;
     }
@@ -354,8 +346,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public void spawnCorpse(int expToDrop) {
-        plugin.getSystemManager().spawnCorpse(this, expToDrop);
+    public void spawnCorpse() {
+        plugin.getSystemManager().spawnCorpse(this);
     }
 
     @Override
@@ -365,29 +357,19 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
-        List<ItemStack> drops;
-
-        //Boss Integration
-        if(BossHook.isBoss(object))
-            return new ItemStackList(BossHook.getDrops(object)).toList();
+        ItemStackList drops = new ItemStackList();
 
         if(tempLootTable != null){
-            drops = tempLootTable.getDrops(this, lootBonusLevel, stackAmount);
+            drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
             tempLootTable = null;
         }
 
         else{
             LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-            LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
-            drops = lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
-                    lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount);
+            drops.addAll(lootTable.getDrops(this, lootBonusLevel, stackAmount));
         }
 
-        // SuperiorSkyblock Integration
-        double multiplier = SuperiorSkyblockHook.getDropsMultiplier(object);
-        drops.forEach(itemStack -> itemStack.setAmount((int) (itemStack.getAmount() * multiplier)));
-
-        return new ItemStackList(drops).toList();
+        return drops.toList();
     }
 
     @Override
@@ -407,11 +389,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
                 return drops;
             }
-
-            @Override
-            public int getExp(int stackAmount, int defaultExp) {
-                return defaultExp;
-            }
         };
     }
 
@@ -429,22 +406,18 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
                 return new ItemStackList(drops).toList();
             }
-
-            @Override
-            public int getExp(int stackAmount, int defaultExp) {
-                return defaultExp;
-            }
         };
     }
 
     @Override
+    @Deprecated
     public int getExp(int defaultExp) {
         return getExp(stackAmount, defaultExp);
     }
 
     @Override
     public int getExp(int stackAmount, int defaultExp) {
-        return plugin.getLootHandler().getLootTable(object).getExp(stackAmount, defaultExp);
+        return plugin.getLootHandler().getLootTable(object).getExp(this, stackAmount);
     }
 
     @Override

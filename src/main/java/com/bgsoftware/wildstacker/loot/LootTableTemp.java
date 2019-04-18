@@ -1,7 +1,12 @@
 package com.bgsoftware.wildstacker.loot;
 
-import com.bgsoftware.wildstacker.api.loot.LootTable;
+import java.util.ArrayList;
 
-public abstract class LootTableTemp implements LootTable {
+@SuppressWarnings("WeakerAccess")
+public class LootTableTemp extends LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
+
+    public LootTableTemp(){
+        super(new ArrayList<>(), -1, -1, -1, -1, false);
+    }
 
 }

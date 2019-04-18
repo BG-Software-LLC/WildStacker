@@ -136,9 +136,8 @@ public interface SystemManager {
     /**
      * Spawn a corpse for a stacked entity.
      * @param stackedEntity the stacked entity.
-     * @param expToDrop amount of exp to drop
      */
-    void spawnCorpse(StackedEntity stackedEntity, int expToDrop);
+    void spawnCorpse(StackedEntity stackedEntity);
 
     /**
      * Perform a kill all.

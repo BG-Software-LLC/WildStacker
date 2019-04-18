@@ -69,9 +69,8 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
 
     /**
      * Spawn a corpse for this entity.
-     * @param expToDrop exp to drop when corpse is spawned.
      */
-    void spawnCorpse(int expToDrop);
+    void spawnCorpse();
 
     /**
      * Get the drops of this entity with a specific fortune level.
@@ -107,7 +106,10 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * Get the exp of this entity.
      * @param defaultExp the default exp to return if not found
      * @return The amount of exp to drop.
+     *
+     * @deprecated Will be swiched with getExp(int stackSize) in the next updates
      */
+    @Deprecated
     int getExp(int defaultExp);
 
     /**
