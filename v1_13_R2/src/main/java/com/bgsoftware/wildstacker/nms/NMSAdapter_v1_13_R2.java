@@ -9,6 +9,7 @@ import net.minecraft.server.v1_13_R2.Entity;
 import net.minecraft.server.v1_13_R2.EntityAnimal;
 import net.minecraft.server.v1_13_R2.EntityInsentient;
 import net.minecraft.server.v1_13_R2.EntityLiving;
+import net.minecraft.server.v1_13_R2.EntityPlayer;
 import net.minecraft.server.v1_13_R2.EnumItemSlot;
 import net.minecraft.server.v1_13_R2.ItemStack;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
@@ -17,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
@@ -72,7 +74,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public void setInLove(org.bukkit.entity.Entity entity, Player breeder, boolean inLove) {
         EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
-        nmsEntity.resetLove();
+        EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
+        if(inLove)
+            nmsEntity.f(entityPlayer);
+        else
+            nmsEntity.resetLove();
     }
 
     @Override
