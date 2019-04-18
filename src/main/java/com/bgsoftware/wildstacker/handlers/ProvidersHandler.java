@@ -38,34 +38,11 @@ public final class ProvidersHandler {
     private AntiCheatProvider antiCheatProvider;
     private SpawnersProvider spawnersProvider;
     private HologramsProvider hologramsProvider;
-    private DropsProvider dropsProvider;
     private List<ClaimsProvider> claimsProviders;
 
     public ProvidersHandler(WildStackerPlugin plugin){
         WildStackerPlugin.log("Loading providers started...");
         long startTime = System.currentTimeMillis();
-
-        if(Bukkit.getPluginManager().isPluginEnabled("CustomDrops")) {
-            WildStackerPlugin.log(" - Using CustomDrops as Custom LootTable.");
-            dropsProvider = DropsProvider.CUSTOM_DROPS;
-        }else if(Bukkit.getPluginManager().isPluginEnabled("DropEdit2")) {
-            WildStackerPlugin.log(" - Using DropEdit2 as Custom LootTable.");
-            dropsProvider = DropsProvider.DROP_EDIT;
-        }else if(Bukkit.getPluginManager().isPluginEnabled("EditDrops")) {
-            WildStackerPlugin.log(" - Using EditDrops as Custom LootTable.");
-            dropsProvider = DropsProvider.EDIT_DROPS;
-        }else if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-            WildStackerPlugin.log(" - Using EpicSpawners as Custom LootTable.");
-            dropsProvider = DropsProvider.EPIC_SPAWNERS;
-        }else if(Bukkit.getPluginManager().isPluginEnabled("StackSpawners")) {
-            WildStackerPlugin.log(" - Using StackSpawners as Custom LootTable.");
-            dropsProvider = DropsProvider.STACK_SPAWNERS;
-        }else{
-            WildStackerPlugin.log(" - Couldn't find any custom loot tables.");
-            dropsProvider = DropsProvider.DEFAULT;
-        }
-
-        plugin.getLootHandler().initLootTableCustom(dropsProvider);
 
         if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners"))
             spawnersProvider = new SpawnersProvider_SilkSpawners();
@@ -103,14 +80,6 @@ public final class ProvidersHandler {
             claimsProviders.add(new ClaimsProvider_WorldGuard());
 
         WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
-    }
-
-    /*
-     * Drops Provider
-     */
-
-    public DropsProvider getDropsProvider(){
-        return dropsProvider;
     }
 
     /*

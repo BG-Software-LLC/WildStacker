@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
-import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.EntityData;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
@@ -397,14 +396,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         this.tempLootTable = new LootTableTemp() {
             @Override
             public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
-                LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-                LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
-                List<ItemStack> drops = new ArrayList<>(lootTableCustom == null ? lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount) :
-                        lootTableCustom.getDrops(lootTable, stackedEntity, lootBonusLevel, stackAmount));
-
+                List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                 drops.forEach(itemStack -> itemStack.setAmount((itemStack.getAmount() * multiplier)));
-
-                return new ItemStackList(drops).toList();
+                return drops;
             }
         };
     }
