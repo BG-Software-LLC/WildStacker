@@ -29,7 +29,7 @@ items:
   # Should items get stacked on the server?
   enabled: true
 
-  # How many blocks from the item should be for checking for other items to stack into?
+  # How many blocks from the item should be checked for other items to stack into?
   merge-radius: 5
 
   # Custom display-name for the items on ground.
@@ -83,10 +83,10 @@ items:
   # Should players be able to disable item names for themselves?
   # In order to work, ProtocolLib should be installed.
   names-toggle:
-    # Should item names can be toggled?
+    # Can item names be toggled?
     enabled: false
 
-    # What's the toggle command will be?
+    # What the toggle command will be?
     command: 'stacker names item'
 
 # Here you can configurable all features related to stacked entities.
@@ -94,7 +94,7 @@ entities:
   # Should entities get stacked on the server?
   enabled: true
 
-  # How many blocks from the entity should be for checking for other entities to stack into?
+  # How many blocks from the entity should be checked for other entities to stack into?
   merge-radius: 10
 
   # Custom display-name for the entities.
@@ -218,7 +218,7 @@ entities:
   # A spawner that has an entity linked to, will try to stack it's entities first to the linked one.
   # Linked entities feature won't work if entities-stacking is disabled.
   linked-entities:
-    # Should entities will be linked to spawners?
+    # Should entities be linked to spawners?
     enabled: true
 
     # The maximum distance that the linked entity can be from the spawner.
@@ -241,7 +241,7 @@ entities:
   # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
   # This feature is great for flying entities, like blazes and ghasts.
   stack-down:
-    # Should the stack-down feature will be enabled on the server?
+    # Should the stack-down feature be enabled on the server?
     enabled: true
     # A list of entities that will be forced to only stack down.
     stack-down-types:
@@ -272,10 +272,10 @@ entities:
   # Should players be able to disable entity names for themselves?
   # In order to work, ProtocolLib should be installed.
   names-toggle:
-    # Should entity names can be toggled?
+    # Can entity names be toggled?
     enabled: false
 
-    # What's the toggle command will be?
+    # What the toggle command will be?
     command: 'stacker names entity'
 
 # Here you can configurable all features related to stacked spawners.
@@ -283,7 +283,7 @@ spawners:
   # Should spawners get stacked on the server?
   enabled: true
 
-  # How many blocks from the spawner should be for checking for other spawners to stack into?
+  # How many blocks from the spawner should be checked for other spawners to stack into?
   merge-radius: 1
 
   # Custom hologram for the spawners.
@@ -340,16 +340,16 @@ spawners:
     # {1} represents entity type
     custom-name: '&fx{0} &e{1} &fSpawners'
 
-    # Should explosions will act like silk-touch and drop the spawner?
+    # Should explosions act like silk-touch and drop the spawner?
     explosions-drop-spawner: true
 
     # Should the spawner item go straight into the player's inventory instead of dropping on ground?
     drop-to-inventory: true
 
-  # Should sneaking while mining will break the entire stack instead of reducing it by one?
+  # Should sneaking while mining break the entire stack instead of reducing it by one?
   shift-get-whole-stack: true
 
-  # Should one item will be dropped for a stacked spawner instead of multiple items?
+  # Should one item be dropped for a stacked spawner instead of multiple items?
   # This feature will not work with other spawner-providers, such as SilkSpawners
   get-stacked-item: true
 
@@ -439,7 +439,7 @@ barrels:
   # Should blocks get stacked into barrels on the server?
   enabled: true
 
-  # How many blocks from the barrel should be for checking for other blocks to stack into?
+  # How many blocks from the barrel should be checked for other blocks to stack into?
   merge-radius: 1
 
   # Custom hologram for the barrels.
@@ -481,7 +481,7 @@ barrels:
     # Should toggle-commands be enabled?
     enabled: false
 
-    # What's the toggle command will be?
+    # What the toggle command will be?
     command: 'stacker toggle'
 
   # When enabled and player is clicking a barrel while sneaking, an inventory will be opened, there

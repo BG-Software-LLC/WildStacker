@@ -37,7 +37,7 @@ public final class ConfigComments {
     public static String ITEMS_ENABLED = "items.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the item should be for checking for other items to stack into?")
+    @Comment("How many blocks from the item should be checked for other items to stack into?")
     public static String ITEMS_MERGE_RADIUS = "items.merge-radius";
 
     @Comment("")
@@ -95,11 +95,11 @@ public final class ConfigComments {
     @Comment("In order to work, ProtocolLib should be installed.")
     public static String ITEMS_NAMES_TOGGLE = "items.names-toggle";
 
-    @Comment("Should item names can be toggled?")
+    @Comment("Can item names be toggled?")
     public static String ITEMS_NAMES_TOGGLE_ENABLED = "items.names-toggle.enabled";
 
     @Comment("")
-    @Comment("What's the toggle command will be?")
+    @Comment("What the toggle command will be?")
     public static String ITEMS_NAMES_TOGGLE_COMMAND = "items.names-toggle.command";
 
     @Comment("")
@@ -110,7 +110,7 @@ public final class ConfigComments {
     public static String ENTITIES_ENABLED = "entities.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the entity should be for checking for other entities to stack into?")
+    @Comment("How many blocks from the entity should be checked for other entities to stack into?")
     public static String ENTITIES_MERGE_RADIUS = "entities.merge-radius";
 
     @Comment("")
@@ -198,7 +198,7 @@ public final class ConfigComments {
     @Comment("Linked entities feature won't work if entities-stacking is disabled.")
     public static String ENTITIES_LINKED_ENTITIES = "entities.linked-entities";
 
-    @Comment("Should entities will be linked to spawners?")
+    @Comment("Should entities be linked to spawners?")
     public static String ENTITIES_LINKED_ENTITIES_ENABLED = "entities.linked-entities.enabled";
 
     @Comment("")
@@ -224,7 +224,7 @@ public final class ConfigComments {
     @Comment("This feature is great for flying entities, like blazes and ghasts.")
     public static String ENTITIES_STACK_DOWN = "entities.stack-down";
 
-    @Comment("Should the stack-down feature will be enabled on the server?")
+    @Comment("Should the stack-down feature be enabled on the server?")
     public static String ENTITIES_STACK_DOWN_ENABLED = "entities.stack-down.enabled";
 
     @Comment("A list of entities that will be forced to only stack down.")
@@ -263,11 +263,11 @@ public final class ConfigComments {
     @Comment("In order to work, ProtocolLib should be installed.")
     public static String ENTITIES_NAMES_TOGGLE = "entities.names-toggle";
 
-    @Comment("Should entity names can be toggled?")
+    @Comment("Can entity names be toggled?")
     public static String ENTITIES_NAMES_TOGGLE_ENABLED = "entities.names-toggle.enabled";
 
     @Comment("")
-    @Comment("What's the toggle command will be?")
+    @Comment("What the toggle command will be?")
     public static String ENTITIES_NAMES_TOGGLE_COMMAND = "entities.names-toggle.command";
 
     @Comment("")
@@ -278,7 +278,7 @@ public final class ConfigComments {
     public static String SPAWNERS_ENABLED = "spawners.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the spawner should be for checking for other spawners to stack into?")
+    @Comment("How many blocks from the spawner should be checked for other spawners to stack into?")
     public static String SPAWNERS_MERGE_RADIUS = "spawners.merge-radius";
 
     @Comment("")
@@ -343,7 +343,7 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_NAME = "spawners.silk-spawners.custom-name";
 
     @Comment("")
-    @Comment("Should explosions will act like silk-touch and drop the spawner?")
+    @Comment("Should explosions act like silk-touch and drop the spawner?")
     public static String SPAWNERS_SILK_SPAWNERS_EXPLOSIONS_DROP_SPAWNER = "spawners.silk-spawners.explosions-drop-spawner";
 
     @Comment("")
@@ -351,11 +351,11 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_DROP_TO_INVENTORY = "spawners.silk-spawners.drop-to-inventory";
 
     @Comment("")
-    @Comment("Should sneaking while mining will break the entire stack instead of reducing it by one?")
+    @Comment("Should sneaking while mining break the entire stack instead of reducing it by one?")
     public static String SPAWNERS_SHIFT_GET_WHOLE_STACK = "spawners.shift-get-whole-stack";
 
     @Comment("")
-    @Comment("Should one item will be dropped for a stacked spawner instead of multiple items?")
+    @Comment("Should one item be dropped for a stacked spawner instead of multiple items?")
     @Comment("This feature will not work with other spawner-providers, such as SilkSpawners")
     public static String SPAWNERS_GET_STACKED_ITEM = "spawners.get-stacked-item";
 
@@ -438,7 +438,7 @@ public final class ConfigComments {
     public static String BARRELS_ENABLED = "barrels.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the barrel should be for checking for other blocks to stack into?")
+    @Comment("How many blocks from the barrel should be checked for other blocks to stack into?")
     public static String BARRELS_MERGE_RADIUS = "barrels.merge-radius";
 
     @Comment("")
@@ -486,7 +486,7 @@ public final class ConfigComments {
     public static String BARRELS_TOGGLE_COMMAND_ENABLED = "barrels.toggle-command.enabled";
 
     @Comment("")
-    @Comment("What's the toggle command will be?")
+    @Comment("What the toggle command will be?")
     public static String BARRELS_TOGGLE_COMMAND_COMMAND = "barrels.toggle-command.command";
 
     @Comment("")
