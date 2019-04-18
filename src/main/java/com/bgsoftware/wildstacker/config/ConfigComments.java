@@ -259,6 +259,18 @@ public final class ConfigComments {
     public static String ENTITIES_HIDE_NAMES = "entities.hide-names";
 
     @Comment("")
+    @Comment("Should players be able to disable entity names for themselves?")
+    @Comment("In order to work, ProtocolLib should be installed.")
+    public static String ENTITIES_NAMES_TOGGLE = "entities.names-toggle";
+
+    @Comment("Should entity names can be toggled?")
+    public static String ENTITIES_NAMES_TOGGLE_ENABLED = "entities.names-toggle.enabled";
+
+    @Comment("")
+    @Comment("What's the toggle command will be?")
+    public static String ENTITIES_NAMES_TOGGLE_COMMAND = "entities.names-toggle.command";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 

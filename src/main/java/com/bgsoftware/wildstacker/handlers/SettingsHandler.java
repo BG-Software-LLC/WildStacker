@@ -49,6 +49,8 @@ public final class SettingsHandler {
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
             entitiesInstantKills, nerfedSpawning, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
+    public final boolean entitiesNamesToggleEnabled;
+    public final String entitiesNamesToggleCommand;
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
@@ -131,6 +133,8 @@ public final class SettingsHandler {
         keepLowestHealth = cfg.getBoolean("entities.keep-lowest-health", false);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
+        entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
+        entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker entity names");
 
         boolean stackingEnable = !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && !Bukkit.getPluginManager().isPluginEnabled("MergedSpawner");
         spawnersStackingEnabled = stackingEnable && cfg.getBoolean("spawners.enabled", true);

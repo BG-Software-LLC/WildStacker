@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -13,6 +14,7 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,6 +23,7 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
@@ -39,6 +42,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
@@ -387,6 +391,40 @@ public final class EntitiesListener implements Listener {
         Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnReason().name());
         Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
         Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
+        if(!plugin.getSettings().entitiesNamesToggleEnabled)
+            return;
+
+        String commandSyntax = "/" + plugin.getSettings().entitiesNamesToggleCommand;
+
+        if(!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
+            return;
+
+        e.setCancelled(true);
+
+        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
+            return;
+        }
+
+        if(ProtocolLibHook.entitiesDisabledNames.contains(e.getPlayer().getUniqueId())){
+            ProtocolLibHook.entitiesDisabledNames.remove(e.getPlayer().getUniqueId());
+            Locale.ENTITY_NAMES_TOGGLE_ON.send(e.getPlayer());
+        }
+        else{
+            ProtocolLibHook.entitiesDisabledNames.add(e.getPlayer().getUniqueId());
+            Locale.ENTITY_NAMES_TOGGLE_OFF.send(e.getPlayer());
+        }
+
+        //Refresh item names
+        for(Entity entity : e.getPlayer().getNearbyEntities(50, 256, 50)){
+            if(entity instanceof LivingEntity && entity.isCustomNameVisible()){
+                ProtocolLibHook.updateName(e.getPlayer(), entity);
+            }
+        }
     }
 
     private boolean isOffHand(PlayerInteractAtEntityEvent event){

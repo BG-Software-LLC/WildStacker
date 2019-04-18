@@ -12,6 +12,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,25 +23,31 @@ import java.util.UUID;
 
 public final class ProtocolLibHook {
 
-    public static Set<UUID> disabledNames = new HashSet<>();
+    public static Set<UUID> itemsDisabledNames = new HashSet<>();
+    public static Set<UUID> entitiesDisabledNames = new HashSet<>();
 
     public static void register(){
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(WildStackerPlugin.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
             @Override
             public void onPacketSending(PacketEvent event) {
-                if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA && disabledNames.contains(event.getPlayer().getUniqueId())) {
+                if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
                     PacketContainer packetContainer = event.getPacket();
                     StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
-                    if(entityModifier.size() > 0 && entityModifier.read(0) instanceof Item) {
-                        StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
-                        if (structureModifier.size() > 0) {
-                            WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
-                            if (watcher.hasIndex(2) || (watcher.hasIndex(3) && (boolean) watcher.getObject(3))) {
-                                WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
+                    if(entityModifier.size() > 0) {
+                        if ((itemsDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof Item) ||
+                                (entitiesDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof LivingEntity)) {
+                            StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
+                            if (structureModifier.size() > 0) {
+                                WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
+                                if (watcher.hasIndex(2) || (watcher.hasIndex(3) && (boolean) watcher.getObject(3))) {
+                                    WrappedDataWatcher.Serializer stringSerializer = WrappedDataWatcher.Registry.get(String.class);
+                                    WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
-                                watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), false);
+                                    watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, stringSerializer), "");
+                                    watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), false);
 
-                                packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+                                    packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+                                }
                             }
                         }
                     }
@@ -55,9 +62,11 @@ public final class ProtocolLibHook {
         WrappedDataWatcher watcher = new WrappedDataWatcher();
         watcher.setEntity(entity);
 
+        WrappedDataWatcher.Serializer stringSerializer = WrappedDataWatcher.Registry.get(String.class);
         WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
-        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), true);
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, stringSerializer), entity.getCustomName());
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), entity.isCustomNameVisible());
 
         packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
 

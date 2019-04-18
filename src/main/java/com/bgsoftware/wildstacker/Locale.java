@@ -23,6 +23,8 @@ public final class Locale {
     public static Locale BARREL_TOGGLE_ON = new Locale("BARREL_TOGGLE_ON");
     public static Locale BARREL_TOGGLE_OFF = new Locale("BARREL_TOGGLE_OFF");
     public static Locale COMMAND_USAGE = new Locale("COMMAND_USAGE");
+    public static Locale ENTITY_NAMES_TOGGLE_ON = new Locale("ENTITY_NAMES_TOGGLE_ON");
+    public static Locale ENTITY_NAMES_TOGGLE_OFF = new Locale("ENTITY_NAMES_TOGGLE_OFF");
     public static Locale HELP_COMMAND_HEADER = new Locale("HELP_COMMAND_HEADER");
     public static Locale HELP_COMMAND_LINE = new Locale("HELP_COMMAND_LINE");
     public static Locale HELP_COMMAND_FOOTER = new Locale("HELP_COMMAND_FOOTER");

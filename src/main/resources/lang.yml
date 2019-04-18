@@ -20,6 +20,10 @@ BARREL_TOGGLE_OFF: '&6&lWildStacker &7Barrels placement has been disabled.'
 # Called when a player runs a command not in the required usage
 COMMAND_USAGE: '&6&lWildStacker &7Usage: /{0}'
 
+# Called when a player runs the entity names toggle command.
+ENTITY_NAMES_TOGGLE_ON: '&6&lWildStacker &7Entity names are now enabled.'
+ENTITY_NAMES_TOGGLE_OFF: '&6&lWildStacker &7Entity names are now disabled.'
+
 # Called when a player runs an invalid stacker sub-command.
 HELP_COMMAND_HEADER: '&8&m---------------&6&l WildStacker &8&m---------------'
 HELP_COMMAND_LINE: '&7- &6/{0} &8- &f{1}'

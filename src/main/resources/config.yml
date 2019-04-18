@@ -269,6 +269,15 @@ entities:
   # When enabled, entities' names will be shown only if player looks exactly towards them.
   hide-names: false
 
+  # Should players be able to disable entity names for themselves?
+  # In order to work, ProtocolLib should be installed.
+  names-toggle:
+    # Should entity names can be toggled?
+    enabled: false
+
+    # What's the toggle command will be?
+    command: 'stacker entity names'
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

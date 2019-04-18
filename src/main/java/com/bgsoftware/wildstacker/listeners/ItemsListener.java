@@ -141,12 +141,6 @@ public final class ItemsListener implements Listener {
         if(!plugin.getSettings().itemsNamesToggleEnabled)
             return;
 
-        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
-            e.setCancelled(true);
-            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-            return;
-        }
-
         String commandSyntax = "/" + plugin.getSettings().itemsNamesToggleCommand;
 
         if(!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
@@ -154,12 +148,17 @@ public final class ItemsListener implements Listener {
 
         e.setCancelled(true);
 
-        if(ProtocolLibHook.disabledNames.contains(e.getPlayer().getUniqueId())){
-            ProtocolLibHook.disabledNames.remove(e.getPlayer().getUniqueId());
+        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
+            return;
+        }
+
+        if(ProtocolLibHook.itemsDisabledNames.contains(e.getPlayer().getUniqueId())){
+            ProtocolLibHook.itemsDisabledNames.remove(e.getPlayer().getUniqueId());
             Locale.ITEM_NAMES_TOGGLE_ON.send(e.getPlayer());
         }
         else{
-            ProtocolLibHook.disabledNames.add(e.getPlayer().getUniqueId());
+            ProtocolLibHook.itemsDisabledNames.add(e.getPlayer().getUniqueId());
             Locale.ITEM_NAMES_TOGGLE_OFF.send(e.getPlayer());
         }
 
