@@ -31,6 +31,7 @@ public enum  EntityTypes {
     GUARDIAN,
     HORSE,
     HUSK,
+    ILLUSIONER,
     IRON_GOLEM,
     LLAMA,
     MAGMA_CUBE,
