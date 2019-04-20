@@ -35,6 +35,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
@@ -99,17 +100,19 @@ public final class EntitiesListener implements Listener {
             livingEntity.setLastDamageCause(e);
             livingEntity.setMetadata("unstack-amount", new FixedMetadataValue(plugin, stackAmount));
 
+            if(e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player){
+                EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+            }
+
             Executor.async(() -> {
                 List<ItemStack> drops = new ArrayList<>();
                 int expToDrop = 0;
 
                 for(int i = 0; i < stackAmount; i++) {
-                    try {
-                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
-                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
-                        drops.addAll(entityDeathEvent.getDrops());
-                        expToDrop += entityDeathEvent.getDroppedExp();
-                    }catch(Exception ignored){}
+                    EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
+                    Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                    drops.addAll(entityDeathEvent.getDrops());
+                    expToDrop += entityDeathEvent.getDroppedExp();
                 }
 
                 final int EXP = expToDrop;
