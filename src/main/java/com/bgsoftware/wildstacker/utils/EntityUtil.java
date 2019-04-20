@@ -5,8 +5,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -65,20 +65,26 @@ public final class EntityUtil {
         int exp = 0;
 
         try{
-            Class entityInsentientClass = ReflectionUtil.getNMSClass("EntityInsentient");
             Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
-            Class entityHumanClass = ReflectionUtil.getNMSClass("EntityHuman");
-            Object entityInsentient = entityInsentientClass.cast(livingEntity.getClass().getMethod("getHandle").invoke(livingEntity));
+            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
             //noinspection unchecked
-            Method method = entityLivingClass.getDeclaredMethod("getExpValue", entityHumanClass);
-            method.setAccessible(true);
-            exp = (int) method.invoke(entityInsentient, entityInsentientClass.getField("killer").get(entityInsentient));
-            method.setAccessible(false);
+            exp = (int) entityLivingClass.getMethod("getExpReward").invoke(entityLiving);
         }catch(Exception ex){
             ex.printStackTrace();
         }
 
         return exp;
+    }
+
+    public static void setKiller(LivingEntity livingEntity, Player killer){
+        try{
+            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
+            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
+            Object entityHuman = killer.getClass().getMethod("getHandle").invoke(killer);
+            entityLivingClass.getField("killer").set(entityLiving, entityHuman);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
 
 }
