@@ -228,6 +228,7 @@ entities:
   # Instant-kill will kill the entire stack instead of unstack it by one.
   # When an entire stack dies, their drops are getting multiplied.
   # DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # If you don't want instant-kill, use "instant-kill: []"
   instant-kill:
   - FALL

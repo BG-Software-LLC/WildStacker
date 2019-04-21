@@ -210,6 +210,7 @@ public final class ConfigComments {
     @Comment("Instant-kill will kill the entire stack instead of unstack it by one.")
     @Comment("When an entire stack dies, their drops are getting multiplied.")
     @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("If you don't want instant-kill, use \"instant-kill: []\"")
     public static String ENTITIES_INSTANT_KILL = "entities.instant-kill";
 
