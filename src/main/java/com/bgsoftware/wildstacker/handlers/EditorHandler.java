@@ -95,7 +95,7 @@ public final class EditorHandler {
     }
 
     public Inventory getEntitiesEditor(){
-        Inventory editor = Bukkit.createInventory(null, 9 * 3, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings");
 
         editor.setItem(0, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Enabled").withLore("&7Value: " + config.getBoolean("entities.enabled")).build());
@@ -155,27 +155,30 @@ public final class EditorHandler {
                 .withName("&6Nerfed Spawning").withLore("&7Value:", config.getStringList("entities.nerfed-spawning")).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean("entities.stack-down.enabled")).build());
+                .withName("&6Nerfed Worlds").withLore("&7Value:", config.getStringList("entities.nerfed-worlds")).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList("entities.stack-down.stack-down-types")).build());
+                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean("entities.stack-down.enabled")).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean("entities.keep-fire")).build());
+                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList("entities.stack-down.stack-down-types")).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean("entities.mythic-mobs-stack")).build());
+                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean("entities.keep-fire")).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Blazes Always Drop").withLore("&7Value: " + config.getBoolean("entities.blazes-always-drop")).build());
+                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean("entities.mythic-mobs-stack")).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean("entities.keep-lowest-health")).build());
+                .withName("&6Blazes Always Drop").withLore("&7Value: " + config.getBoolean("entities.blazes-always-drop")).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean("entities.stack-after-breed")).build());
+                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean("entities.keep-lowest-health")).build());
 
         editor.setItem(26, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean("entities.stack-after-breed")).build());
+
+        editor.setItem(27, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Hide Names").withLore("&7Value: " + config.getBoolean("entities.hide-names")).build());
 
         return editor;
@@ -287,7 +290,7 @@ public final class EditorHandler {
                 .withName("&6Custom Name").withLore("&7Value: " + config.getString("barrels.custom-name")).build());
 
         editor.setItem(3, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Blacklist").withLore("&7Value:", config.getStringList("barrels.blacklist")).build());
+                .withName("&6Whitelist").withLore("&7Value:", config.getStringList("barrels.whitelist")).build());
 
         editor.setItem(4, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Limits").withLore("&7Value:", config.getConfigurationSection("barrels.limits")).build());

@@ -46,8 +46,8 @@ public final class EditorListener implements Listener {
     private String[] listValues = new String[] {
             "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.disabled-regions",
             "entities.blacklist", "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
-            "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds", "barrels.whitelist",
-            "barrels.disabled-worlds"};
+            "entities.nerfed-worlds", "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds",
+            "barrels.whitelist", "barrels.disabled-worlds"};
     private String[] sectionValues = new String[] {
             "items.limits", "entities.limits", "entities.minimum-limits", "entities.stack-checks", "entities.stack-split", "spawners.limits", "barrels.limits"};
 
