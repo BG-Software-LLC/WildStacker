@@ -438,7 +438,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isNerfed(){
-        return plugin.getSettings().nerfedSpawning.contains(getSpawnReason().name());
+        return plugin.getSettings().nerfedSpawning.contains(getSpawnReason().name()) &&
+                plugin.getSettings().nerfedWorlds.contains(object.getWorld().getName());
     }
 
     public static StackedEntity of(Entity entity){

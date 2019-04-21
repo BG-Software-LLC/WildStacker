@@ -47,7 +47,7 @@ public final class SettingsHandler {
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
-            entitiesInstantKills, nerfedSpawning, stackDownTypes;
+            entitiesInstantKills, nerfedSpawning, nerfedWorlds, noAiSpawning, noAiWorlds, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
 
     //Spawners settings
@@ -122,6 +122,9 @@ public final class SettingsHandler {
         entitiesKillAllInterval = cfg.getLong("entities.kill-all.interval", 6000);
         clearLaggHookEnabled = cfg.getBoolean("entities.kill-all.clear-lagg", true);
         nerfedSpawning = cfg.getStringList("entities.nerfed-spawning");
+        nerfedWorlds = cfg.getStringList("entities.nerfed-worlds");
+        noAiSpawning = cfg.getStringList("entities.no-ai-spawning");
+        noAiWorlds = cfg.getStringList("entities.no-ai-worlds");
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
         stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
