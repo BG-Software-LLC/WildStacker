@@ -242,16 +242,6 @@ entities:
   nerfed-worlds:
     - 'world'
 
-  # A list of entities without AI.
-  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
-  # If you don't want no-ai entities, use "no-ai-spawning: []"
-  no-ai-spawning:
-  - SPAWNER
-
-  # A list of worlds that entities can have no-ai in.
-  no-ai-worlds:
-    - 'world'
-
   # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
   # This feature is great for flying entities, like blazes and ghasts.
   stack-down:

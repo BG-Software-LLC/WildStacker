@@ -220,6 +220,10 @@ public final class ConfigComments {
     public static String ENTITIES_NERFED_SPAWNING = "entities.nerfed-spawning";
 
     @Comment("")
+    @Comment("A list of worlds that entities can get nerfed in.")
+    public static String ENTITIES_NERFED_WORLDS = "entities.nerfed-worlds";
+
+    @Comment("")
     @Comment("Stack-down is a feature that will force entities to stack to other entities that are below their y level.")
     @Comment("This feature is great for flying entities, like blazes and ghasts.")
     public static String ENTITIES_STACK_DOWN = "entities.stack-down";
