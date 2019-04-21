@@ -42,15 +42,13 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
-            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, blazesAlwaysDrop, keepLowestHealth, stackAfterBreed, entitiesHideNames;
+            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled;
     public final long entitiesStackInterval, entitiesKillAllInterval;
-    public final String entitiesCustomName;
+    public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
             entitiesInstantKills, nerfedSpawning, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
-    public final boolean entitiesNamesToggleEnabled;
-    public final String entitiesNamesToggleCommand;
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
@@ -129,7 +127,6 @@ public final class SettingsHandler {
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
         mythicMobsStackEnabled = cfg.getBoolean("entities.mythic-mobs-stack", false);
         mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
-        blazesAlwaysDrop = cfg.getBoolean("entities.blazes-always-drop", true);
         keepLowestHealth = cfg.getBoolean("entities.keep-lowest-health", false);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);

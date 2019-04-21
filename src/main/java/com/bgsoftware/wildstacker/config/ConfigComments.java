@@ -243,10 +243,6 @@ public final class ConfigComments {
     public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
 
     @Comment("")
-    @Comment("When this feature is enabled, blazes will always drop blazes and not only when they are killed by players.")
-    public static String ENTITIES_BLAZES_ALWAYS_DROP = "entities.blazes-always-drop";
-
-    @Comment("")
     @Comment("When enabled, the stack will keep the lowest health between the two entities that are stacked.")
     public static String ENTITIES_KEEP_LOWEST_HEALTH = "entities.keep-lowest-health";
 
