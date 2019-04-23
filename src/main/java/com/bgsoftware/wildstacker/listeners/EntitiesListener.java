@@ -103,6 +103,8 @@ public final class EntitiesListener implements Listener {
 
             if(e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player){
                 EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+            }else{
+                EntityUtil.setKiller(livingEntity, null);
             }
 
             Executor.async(() -> {

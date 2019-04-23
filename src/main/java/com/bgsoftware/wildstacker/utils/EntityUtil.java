@@ -80,7 +80,7 @@ public final class EntityUtil {
         try{
             Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
             Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
-            Object entityHuman = killer.getClass().getMethod("getHandle").invoke(killer);
+            Object entityHuman = killer == null ? null : killer.getClass().getMethod("getHandle").invoke(killer);
             entityLivingClass.getField("killer").set(entityLiving, entityHuman);
         }catch(Exception ex){
             ex.printStackTrace();
