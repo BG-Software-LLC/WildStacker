@@ -82,7 +82,7 @@ public final class SettingsHandler {
 
         dataConvertor(cfg);
 
-        cfg.resetYamlFile(plugin, "config.yml", ConfigComments.class);
+        cfg.resetYamlFile(plugin, "config.yml");
 
         saveInterval = cfg.getLong("save-interval", 6000);
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&e{0} &f{1} x{2}"));

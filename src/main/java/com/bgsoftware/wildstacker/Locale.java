@@ -108,7 +108,7 @@ public final class Locale {
 
         CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class, file);
 
-        cfg.resetYamlFile(plugin, "lang.yml", LangComments.class);
+        cfg.resetYamlFile(plugin, "lang.yml");
 
         for(String identifier : localeMap.keySet()){
             localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));
