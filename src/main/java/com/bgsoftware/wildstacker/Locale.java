@@ -106,8 +106,7 @@ public final class Locale {
         if(!file.exists())
             FileUtil.saveResource("lang.yml");
 
-        CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class);
-        cfg.load(file);
+        CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class, file);
 
         cfg.resetYamlFile(plugin, "lang.yml", LangComments.class);
 

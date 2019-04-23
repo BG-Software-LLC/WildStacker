@@ -23,8 +23,7 @@ public final class EditorHandler {
 
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
-        this.config = new CommentedConfiguration(ConfigComments.class);
-        this.config.load(new File(plugin.getDataFolder(), "config.yml"));
+        this.config = new CommentedConfiguration(ConfigComments.class, new File(plugin.getDataFolder(), "config.yml"));
         loadSettingsEditor();
     }
 
