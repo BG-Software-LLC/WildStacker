@@ -172,7 +172,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         //Need to add a delay so eggs will get removed from inventory
-        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
+        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER)
             Executor.sync(stackedEntity::tryStack, 1L);
         else
             stackedEntity.tryStack();
