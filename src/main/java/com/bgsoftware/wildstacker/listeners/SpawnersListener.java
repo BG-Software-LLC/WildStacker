@@ -103,7 +103,10 @@ public final class SpawnersListener implements Listener {
                 ItemStack spawnerItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(), spawnerItemAmount - limit);
                 //Adding the item to the inventory after the spawner is placed
                 spawnerItemAmount = limit;
-                Executor.sync(() -> ItemUtil.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation()), 1L);
+                Executor.sync(() -> {
+                    if (!e.isCancelled())
+                        ItemUtil.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
+                }, 1L);
             }
         }
 
@@ -131,8 +134,8 @@ public final class SpawnersListener implements Listener {
             if(plugin.getSettings().onlyOneSpawner){
                 for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
                     if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()){
-                        stackedSpawner.remove();
                         e.setCancelled(true);
+                        stackedSpawner.remove();
                         return;
                     }
                 }
