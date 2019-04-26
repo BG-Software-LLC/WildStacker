@@ -11,6 +11,63 @@
           "looting": true
         }
       ]
+    },
+    {
+      "killer": [
+        "SKELETON",
+        "STRAY"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "MUSIC_DISC_11",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_13",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_BLOCKS",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_CAT",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_CHIRP",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_FAR",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_MALL",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_MELLOHI",
+          "chance": 8.33
+        },
+        {
+          "type": "MUSIC_DISC_STAL",
+          "chance": 8.34
+        },
+        {
+          "type": "MUSIC_DISC_STRAD",
+          "chance": 8.34
+        },
+        {
+          "type": "MUSIC_DISC_WAIT",
+          "chance": 8.34
+        },
+        {
+          "type": "MUSIC_DISC_WARD",
+          "chance": 8.34
+        }
+      ]
     }
   ]
 }

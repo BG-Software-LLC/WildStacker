@@ -4,7 +4,12 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.google.gson.JsonObject;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -91,7 +96,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         for(LootPair lootPair : this.lootPairs){
             if(max != -1 && lootPairs.size() >= max)
                 break;
-            if(lootPair.isKilledByPlayer() && !isKilledByPlayer(stackedEntity))
+            if(!lootPair.getKiller().isEmpty() && !lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
                 continue;
             if(random.nextDouble(101) < lootPair.getChance())
                 lootPairs.add(lootPair);
@@ -107,7 +112,27 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getFireTicks() > 0;
     }
 
-    static boolean isKilledByPlayer(StackedEntity stackedEntity){
+    static EntityType getEntityKiller(StackedEntity stackedEntity){
+        EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
+        EntityType returnType = EntityType.UNKNOWN;
+
+        if(damageEvent instanceof EntityDamageByEntityEvent){
+            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
+            if(entityDamageByEntityEvent.getDamager() instanceof Projectile) {
+                Projectile projectile = (Projectile) entityDamageByEntityEvent.getDamager();
+                if(projectile.getShooter() instanceof Entity)
+                    returnType = ((Entity) projectile.getShooter()).getType();
+                else
+                    returnType = projectile.getType();
+            }else{
+                returnType = entityDamageByEntityEvent.getDamager().getType();
+            }
+        }
+
+        return returnType;
+    }
+
+    private static boolean isKilledByPlayer(StackedEntity stackedEntity){
         return getKiller(stackedEntity) != null;
     }
 

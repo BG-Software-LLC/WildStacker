@@ -62,7 +62,8 @@ public final class LootHandler {
         if(containsEntity("COD"))
             FileUtil.saveResource("loottables/cod.json");
         FileUtil.saveResource(!v1_13 ? "loottables/cow.json" : "loottables/cow1_13.json", "loottables/cow.json");
-        FileUtil.saveResource(!v1_13 ? "loottables/creeper.json" : "loottables/creeper1_13.json", "loottables/creeper.json");
+        FileUtil.saveResource(v1_10 || v1_11 || v1_12 ? "loottables/creeper1_10.json" :
+                v1_13 ? "loottables/creeper1_13.json" : "loottables/creeper.json", "loottables/creeper.json");
         if(containsEntity("DOLPHIN"))
             FileUtil.saveResource("loottables/dolphin.json");
         FileUtil.saveResource("loottables/donkey.json");

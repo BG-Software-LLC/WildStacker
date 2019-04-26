@@ -14,13 +14,13 @@ public class LootPair {
 
     private List<LootItem> lootItems = new ArrayList<>();
     private List<LootCommand> lootCommands = new ArrayList<>();
-    private boolean killedByPlayer;
+    private List<String> killer = new ArrayList<>();
     private double chance, lootingChance;
 
-    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, boolean killedByPlayer, double chance, double lootingChance){
+    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance){
         this.lootItems.addAll(lootItems);
         this.lootCommands.addAll(lootCommands);
-        this.killedByPlayer = killedByPlayer;
+        this.killer.addAll(killer);
         this.chance = chance;
         this.lootingChance = lootingChance;
     }
@@ -69,8 +69,8 @@ public class LootPair {
         return null;
     }
 
-    public boolean isKilledByPlayer(){
-        return killedByPlayer;
+    public List<String> getKiller(){
+        return killer;
     }
 
     public double getChance() {
@@ -78,18 +78,28 @@ public class LootPair {
     }
 
     public static LootPair fromJson(JsonObject jsonObject){
-        boolean killedByPlayer = jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean();
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
         double lootingChance = jsonObject.has("lootingChance") ? jsonObject.get("lootingChance").getAsDouble() : 0;
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
+        List<String> killer = new ArrayList<>();
         if(jsonObject.has("items")){
             jsonObject.get("items").getAsJsonArray().forEach(element -> lootItems.add(LootItem.fromJson(element.getAsJsonObject())));
         }
         if(jsonObject.has("commands")){
             jsonObject.get("commands").getAsJsonArray().forEach(element -> lootCommands.add(LootCommand.fromJson(element.getAsJsonObject())));
         }
-        return new LootPair(lootItems, lootCommands, killedByPlayer, chance, lootingChance);
+        if(jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean()){
+            killer.add("PLAYER");
+        }
+        if(jsonObject.has("killer")){
+            if(jsonObject.get("killer").isJsonArray()){
+                jsonObject.getAsJsonArray("killer").forEach(type -> killer.add(type.getAsString().toUpperCase()));
+            }else{
+                killer.add(jsonObject.get("killer").getAsString().toUpperCase());
+            }
+        }
+        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance);
     }
 
 }

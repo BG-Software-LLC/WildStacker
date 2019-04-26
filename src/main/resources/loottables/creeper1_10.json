@@ -14,7 +14,8 @@
     },
     {
       "killer": [
-        "SKELETON"
+        "SKELETON",
+        "STRAY"
       ],
       "chance": 100,
       "items": [
