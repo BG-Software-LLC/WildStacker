@@ -151,6 +151,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             stackedBarrel.removeDisplayBlock();
         }
         dataHandler.saveDatabase();
+        Bukkit.getScheduler().cancelAllTasks();
     }
 
     private void loadAPI(){
