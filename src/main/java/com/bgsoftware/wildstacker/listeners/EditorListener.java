@@ -9,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -65,11 +64,12 @@ public final class EditorListener implements Listener {
      */
 
     private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
+    private String[] inventoryTitles = new String[] {WildStackerPlugin.getPlugin().getBreakMenuHandler().getTitle(), "Add items here",
+            "WildStacker", "General Settings", "Items Settings", "Entities Settings", "Spawners Settings", "Barrels Settings"};
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClickMonitor(InventoryClickEvent e){
-        if(e.getCurrentItem() != null && e.isCancelled() && e.getClickedInventory().getType() == InventoryType.CHEST &&
-                e.getView().getTopInventory().equals(e.getClickedInventory())) {
+        if(e.getCurrentItem() != null && e.isCancelled() && Arrays.stream(inventoryTitles).anyMatch(title -> e.getClickedInventory().getTitle().contains(title))) {
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
