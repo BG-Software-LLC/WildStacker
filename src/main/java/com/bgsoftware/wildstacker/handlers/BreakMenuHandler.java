@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public final class BreakMenuHandler {
         player.openInventory(inventory);
     }
 
-    public boolean isBreakMenu(Inventory inventory){
+    public boolean isBreakMenu(InventoryView inventory){
         return inventory.getTitle().equals(title);
     }
 

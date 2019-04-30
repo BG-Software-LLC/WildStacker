@@ -10,6 +10,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -18,6 +19,7 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,21 +41,35 @@ public final class ProtocolLibHook {
                             StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
                             if (structureModifier.size() > 0) {
                                 WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
-                                if (watcher.hasIndex(2) || (watcher.hasIndex(3) && (boolean) watcher.getObject(3))) {
-                                    WrappedDataWatcher.Serializer stringSerializer = WrappedDataWatcher.Registry.get(String.class);
-                                    WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
-
-                                    watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, stringSerializer), "");
-                                    watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), false);
-
-                                    packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
-                                }
+                                watcher.setObject(2, new WrappedWatchableObject(2, getCustomName("")));
+                                watcher.setObject(3, new WrappedWatchableObject(3, false));
+                                packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
                             }
                         }
                     }
                 }
             }
         });
+//        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(WildStackerPlugin.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
+//            @Override
+//            public void onPacketSending(PacketEvent event) {
+//                if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
+//                    PacketContainer packetContainer = event.getPacket();
+//                    StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
+//                    if(entityModifier.size() > 0) {
+//                        StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
+//                        if (structureModifier.size() > 0) {
+//                            WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
+//                            if(watcher.hasIndex(2)) {
+//                                WrappedWatchableObject watchableObject = watcher.getWatchableObject(2);
+//                                watchableObject.set
+//                                Bukkit.broadcastMessage(watchableObject + "");
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        });
     }
 
     public static void updateName(Player player, Entity entity){
@@ -62,11 +78,12 @@ public final class ProtocolLibHook {
         WrappedDataWatcher watcher = new WrappedDataWatcher();
         watcher.setEntity(entity);
 
-        WrappedDataWatcher.Serializer stringSerializer = WrappedDataWatcher.Registry.get(String.class);
-        WrappedDataWatcher.Serializer booleanSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
+        WrappedDataWatcher.Serializer nameSerializer = getNameSerializer();
+        WrappedDataWatcher.Serializer visibleSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
-        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, stringSerializer), entity.getCustomName());
-        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, booleanSerializer), entity.isCustomNameVisible());
+//        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer), getCustomName(entity.getCustomName()));
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer), getCustomName(entity.getCustomName()));
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer), entity.isCustomNameVisible());
 
         packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
 
@@ -76,6 +93,19 @@ public final class ProtocolLibHook {
             WildStackerPlugin.log("There was an error while sending the name toggle packet to " + player.getName() + ":");
             e.printStackTrace();
         }
+    }
+
+    private static Object getCustomName(String customName){
+        if(Bukkit.getBukkitVersion().contains("1.13")) {
+            return Optional.of("");
+        }
+        return customName;
+    }
+
+    private static WrappedDataWatcher.Serializer getNameSerializer(){
+        if(Bukkit.getBukkitVersion().contains("1.13"))
+            WrappedDataWatcher.Registry.getChatComponentSerializer(true);
+        return WrappedDataWatcher.Registry.get(String.class);
     }
 
 }

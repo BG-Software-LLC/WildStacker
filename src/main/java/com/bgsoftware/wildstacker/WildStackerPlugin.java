@@ -34,7 +34,9 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -151,7 +153,13 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             stackedBarrel.removeDisplayBlock();
         }
         dataHandler.saveDatabase();
-        Bukkit.getScheduler().cancelAllTasks();
+        try{
+            //Bukkit.getScheduler().cancelAllTasks();
+        }catch(Throwable ex){
+            try {
+                BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
+            } catch (Exception ignored) { }
+        }
     }
 
     private void loadAPI(){

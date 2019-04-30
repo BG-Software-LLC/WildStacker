@@ -69,7 +69,7 @@ public final class EditorListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClickMonitor(InventoryClickEvent e){
-        if(e.getCurrentItem() != null && e.isCancelled() && Arrays.stream(inventoryTitles).anyMatch(title -> e.getClickedInventory().getTitle().contains(title))) {
+        if(e.getCurrentItem() != null && e.isCancelled() && Arrays.stream(inventoryTitles).anyMatch(title -> e.getView().getTitle().contains(title))) {
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
@@ -96,7 +96,7 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getWhoClicked();
 
-        if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
+        if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -129,7 +129,7 @@ public final class EditorListener implements Listener {
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -149,7 +149,7 @@ public final class EditorListener implements Listener {
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -200,7 +200,7 @@ public final class EditorListener implements Listener {
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -299,7 +299,7 @@ public final class EditorListener implements Listener {
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -404,7 +404,7 @@ public final class EditorListener implements Listener {
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
@@ -471,17 +471,17 @@ public final class EditorListener implements Listener {
         Player player = (Player) e.getPlayer();
 
         Executor.sync(() -> {
-            if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
+            if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
                 if(!noResetClose.contains(player.getUniqueId())) {
                     Executor.async(() -> plugin.getEditor().reloadConfiguration());
                 }
             }
 
-            else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+            else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
                 noResetClose.remove(player.getUniqueId());
                 player.openInventory(plugin.getEditor().getSettingsEditor());
             }

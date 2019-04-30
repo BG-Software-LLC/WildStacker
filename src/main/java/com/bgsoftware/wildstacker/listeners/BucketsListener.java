@@ -100,7 +100,7 @@ public final class BucketsListener implements Listener {
         if(e.getClickedBlock().getType() == Material.CAULDRON){
             if(replacedType == Material.WATER) {
                 //noinspection deprecation
-                e.getClickedBlock().setData((byte) 3);
+                e.getClickedBlock().getState().setRawData((byte) 3);
                 return;
             }
         }
