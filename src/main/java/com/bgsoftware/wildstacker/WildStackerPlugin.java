@@ -154,7 +154,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
         dataHandler.saveDatabase();
         try{
-            //Bukkit.getScheduler().cancelAllTasks();
+            Bukkit.getScheduler().cancelAllTasks();
         }catch(Throwable ex){
             try {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
