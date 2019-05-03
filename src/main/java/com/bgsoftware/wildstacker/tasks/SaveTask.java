@@ -26,7 +26,7 @@ public final class SaveTask extends BukkitRunnable {
     @Override
     public void run() {
         if(Bukkit.getOnlinePlayers().size() > 0) {
-            plugin.getDataHandler().saveDatabase();
+            plugin.getDataHandler().saveChunkData(false, true);
             for (Player pl : Bukkit.getOnlinePlayers()) {
                 if (pl.isOp())
                     Locale.AUTO_SAVE.send(pl);

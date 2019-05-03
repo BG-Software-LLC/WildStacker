@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,8 +20,12 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     private ItemStack barrelItem;
     private ArmorStand blockDisplay;
 
-    public WStackedBarrel(Location location, ItemStack itemStack){
-        super(location.getBlock(), 1);
+    public WStackedBarrel(Block block, ItemStack itemStack){
+        this(block, itemStack, 1);
+    }
+
+    public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
+        super(block, stackAmount);
         this.barrelItem = itemStack;
     }
 
@@ -42,6 +47,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     @Override
     public Location getLocation() {
         return object.getLocation();
+    }
+
+    @Override
+    public Chunk getChunk() {
+        return getLocation().getChunk();
     }
 
     @Override

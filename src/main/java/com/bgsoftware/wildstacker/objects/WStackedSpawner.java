@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -21,8 +22,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     private LivingEntity linkedEntity = null;
 
-    public WStackedSpawner(CreatureSpawner spawner){
-        super(spawner, 1);
+    public WStackedSpawner(CreatureSpawner creatureSpawner){
+        this(creatureSpawner, 1);
+    }
+
+    public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
+        super(creatureSpawner, stackAmount);
     }
 
     @Override
@@ -45,6 +50,11 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     /*
      * StackedObject's methods
      */
+
+    @Override
+    public Chunk getChunk() {
+        return getLocation().getChunk();
+    }
 
     @Override
     public int getStackLimit() {

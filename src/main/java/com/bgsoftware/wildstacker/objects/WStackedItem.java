@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -19,7 +20,11 @@ import java.util.UUID;
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
-        super(item, item.getItemStack().getAmount());
+        this(item, item.getItemStack().getAmount());
+    }
+
+    public WStackedItem(Item item, int stackAmount){
+        super(item, stackAmount);
     }
 
     /*
@@ -54,6 +59,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     /*
      * StackedObject's methods
      */
+
+    @Override
+    public Chunk getChunk() {
+        return object.getLocation().getChunk();
+    }
 
     @Override
     public int getStackLimit() {

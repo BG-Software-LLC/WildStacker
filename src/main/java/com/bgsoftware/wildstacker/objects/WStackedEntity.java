@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -22,6 +23,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,11 +33,16 @@ import java.util.UUID;
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     private boolean ignoreDeathEvent = false;
-    private CreatureSpawnEvent.SpawnReason spawnReason = null;
+    private CreatureSpawnEvent.SpawnReason spawnReason;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     public WStackedEntity(LivingEntity livingEntity){
-        super(livingEntity, 1);
+        this(livingEntity, 1, null);
+    }
+
+    public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable CreatureSpawnEvent.SpawnReason spawnReason){
+        super(livingEntity, stackAmount);
+        this.spawnReason = spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
     }
 
     /*
@@ -80,6 +87,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     /*
      * StackedObject's methods
      */
+
+    @Override
+    public Chunk getChunk() {
+        return object.getLocation().getChunk();
+    }
 
     @Override
     public int getStackLimit() {

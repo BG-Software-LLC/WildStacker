@@ -9,7 +9,12 @@ import java.util.concurrent.Executors;
 public final class Executor {
 
     private static final java.util.concurrent.Executor executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WildStacker Thread").build());
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static Thread thread;
+
+    static {
+        executor.execute(() -> thread = Thread.currentThread());
+    }
 
     public static void sync(Runnable runnable){
         Bukkit.getScheduler().runTask(plugin, runnable);
@@ -20,7 +25,10 @@ public final class Executor {
     }
 
     public static void async(Runnable runnable){
-        executor.execute(runnable);
+        if(Thread.currentThread().getId() == thread.getId())
+            runnable.run();
+        else
+            executor.execute(runnable);
     }
 
 }

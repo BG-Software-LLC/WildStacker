@@ -44,7 +44,7 @@ public final  class CommandSave implements ICommand {
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         Executor.async(() -> {
-            plugin.getDataHandler().saveDatabase();
+            plugin.getDataHandler().saveChunkData(false, true);
             sender.sendMessage(ChatColor.YELLOW + "Successfully saved all cached data.");
         });
     }

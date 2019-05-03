@@ -6,8 +6,9 @@ import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
+import com.bgsoftware.wildstacker.data.AbstractDataHandler;
+import com.bgsoftware.wildstacker.data.FilesDataHandler;
 import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
-import com.bgsoftware.wildstacker.handlers.DataHandler;
 import com.bgsoftware.wildstacker.handlers.EditorHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
@@ -20,6 +21,7 @@ import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
+import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.listeners.EditorListener;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.listeners.ItemsListener;
@@ -34,6 +36,8 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -48,7 +52,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private SettingsHandler settingsHandler;
     private SystemHandler systemManager;
-    private DataHandler dataHandler;
+    private AbstractDataHandler dataHandler;
     private ProvidersHandler providersHandler;
     private EditorHandler editorHandler;
     private BreakMenuHandler breakMenuHandler;
@@ -65,7 +69,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
-        dataHandler = new DataHandler(this);
+        dataHandler = new FilesDataHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
@@ -82,6 +86,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new EditorListener(this), this);
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
         getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
         getCommand("stacker").setExecutor(commandsHandler);
@@ -129,15 +134,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         });
 
         Executor.sync(() -> {
-            //Set all holograms of spawners
-            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-                stackedSpawner.updateName();
-
-            //Set all holograms and block displays of barrlels
-            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-                stackedBarrel.updateName();
-                stackedBarrel.getLocation().getChunk().load(true);
-                stackedBarrel.createDisplayBlock();
+            for(World world : Bukkit.getWorlds()){
+                for(Chunk chunk : world.getLoadedChunks())
+                    dataHandler.loadChunkData(chunk);
             }
         }, 5L);
     }
@@ -152,7 +151,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             stackedBarrel.getLocation().getChunk().load(true);
             stackedBarrel.removeDisplayBlock();
         }
-        dataHandler.saveDatabase();
+
+        //We need to save the entire database
+        dataHandler.clearDatabase();
+        dataHandler.saveChunkData(true, false);
+
         try{
             Bukkit.getScheduler().cancelAllTasks();
         }catch(Throwable ex){
@@ -231,7 +234,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return providersHandler;
     }
 
-    public DataHandler getDataHandler(){
+    public AbstractDataHandler getDataHandler(){
         return dataHandler;
     }
 

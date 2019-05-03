@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import org.bukkit.Chunk;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class WStackedObject<T> implements StackedObject<T> {
@@ -29,6 +30,8 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         if(updateName)
             updateName();
     }
+
+    public abstract Chunk getChunk();
 
     @Override
     public abstract int getStackLimit();
