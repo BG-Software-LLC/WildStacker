@@ -242,9 +242,13 @@ public final class FilesDataHandler extends AbstractDataHandler {
     @Override
     public void clearDatabase(){
         File dataFolder = new File(plugin.getDataFolder(), "data");
-        for(File worldFolder : dataFolder.listFiles()){
-            for(File chunkFile : worldFolder.listFiles()){
-                chunkFile.delete();
+        if(dataFolder.exists()) {
+            for (File worldFolder : dataFolder.listFiles()) {
+                if(worldFolder.isDirectory()) {
+                    for (File chunkFile : worldFolder.listFiles()) {
+                        chunkFile.delete();
+                    }
+                }
             }
         }
     }
@@ -292,6 +296,8 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 CACHED_SPAWN_REASON_ENTITIES.put(UUID.fromString(uuid), CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("spawn-reasons." + uuid)));
             }
         }
+
+        file.delete();
     }
 
     private void saveCachedItems(){
@@ -309,6 +315,8 @@ public final class FilesDataHandler extends AbstractDataHandler {
         } catch(IOException e){
             e.printStackTrace();
         }
+
+        file.delete();
     }
 
     private void loadCachedItems(){
@@ -319,6 +327,8 @@ public final class FilesDataHandler extends AbstractDataHandler {
         for(String uuid : cfg.getConfigurationSection("").getKeys(false)) {
             CACHED_AMOUNT_ITEMS.put(UUID.fromString(uuid), cfg.getInt(uuid));
         }
+
+        file.delete();
     }
 
     private void loadCachedSpawners(){
@@ -333,8 +343,11 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) realLocation.getBlock().getState());
                 stackedSpawner.setStackAmount(cfg.getInt(location), false);
                 CACHED_SPAWNERS.put(realLocation.getChunk(), realLocation, stackedSpawner);
+                stackedSpawner.updateName();
             }
         }
+
+        file.delete();
     }
 
     private void loadCachedBarrels(){
@@ -348,7 +361,11 @@ public final class FilesDataHandler extends AbstractDataHandler {
             StackedBarrel stackedBarrel = new WStackedBarrel(realLocation.getBlock(), cfg.getItemStack(location + ".item"));
             stackedBarrel.setStackAmount(cfg.getInt(location + ".amount"), false);
             CACHED_BARRELS.put(realLocation.getChunk(), realLocation, stackedBarrel);
+            stackedBarrel.updateName();
+            stackedBarrel.createDisplayBlock();
         }
+
+        file.delete();
     }
 
 
