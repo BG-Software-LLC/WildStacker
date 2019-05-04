@@ -129,41 +129,6 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
         }
     }
 
-    private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
-
-        private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {
-            super(entityanimal, d0);
-        }
-
-        @Override
-        public void e() {
-            super.e();
-            try {
-                Field bField = PathfinderGoalBreed.class.getDeclaredField("b");
-                bField.setAccessible(true);
-                int b = (int) bField.get(this);
-                bField.setAccessible(false);
-
-                Field animalField = PathfinderGoalBreed.class.getDeclaredField("d");
-                animalField.setAccessible(true);
-                EntityAnimal animal = (EntityAnimal) animalField.get(this);
-                animalField.setAccessible(false);
-
-                Field partnerField = PathfinderGoalBreed.class.getDeclaredField("e");
-                partnerField.setAccessible(true);
-                EntityAnimal partner = (EntityAnimal) partnerField.get(this);
-                partnerField.setAccessible(false);
-
-                if (b >= 60 && animal.h(partner) < 9.0D){
-                    EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
-                    Bukkit.getPluginManager().callEvent(event);
-                }
-            }catch(Exception ex){
-                ex.printStackTrace();
-            }
-        }
-    }
-
     @Override
     @SuppressWarnings("all")
     public List<org.bukkit.entity.Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super org.bukkit.entity.Entity> predicate) {
@@ -209,5 +174,39 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
 
     }
 
+    private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
+
+        private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {
+            super(entityanimal, d0);
+        }
+
+        @Override
+        public void e() {
+            super.e();
+            try {
+                Field bField = PathfinderGoalBreed.class.getDeclaredField("b");
+                bField.setAccessible(true);
+                int b = (int) bField.get(this);
+                bField.setAccessible(false);
+
+                Field animalField = PathfinderGoalBreed.class.getDeclaredField("d");
+                animalField.setAccessible(true);
+                EntityAnimal animal = (EntityAnimal) animalField.get(this);
+                animalField.setAccessible(false);
+
+                Field partnerField = PathfinderGoalBreed.class.getDeclaredField("e");
+                partnerField.setAccessible(true);
+                EntityAnimal partner = (EntityAnimal) partnerField.get(this);
+                partnerField.setAccessible(false);
+
+                if (b >= 60 && animal.h(partner) < 9.0D){
+                    EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
+                    Bukkit.getPluginManager().callEvent(event);
+                }
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+    }
 
 }
