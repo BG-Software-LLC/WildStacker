@@ -32,4 +32,8 @@ public interface NMSAdapter {
     @Nullable
     ItemStack deserialize(String serialized);
 
+    default Object getChatMessage(String message){
+        return message;
+    }
+
 }

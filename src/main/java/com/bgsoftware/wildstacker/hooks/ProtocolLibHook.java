@@ -25,11 +25,14 @@ import java.util.UUID;
 
 public final class ProtocolLibHook {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final boolean isLegacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
+
     public static Set<UUID> itemsDisabledNames = new HashSet<>();
     public static Set<UUID> entitiesDisabledNames = new HashSet<>();
 
     public static void register(){
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(WildStackerPlugin.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
@@ -50,26 +53,6 @@ public final class ProtocolLibHook {
                 }
             }
         });
-//        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(WildStackerPlugin.getPlugin(), ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
-//            @Override
-//            public void onPacketSending(PacketEvent event) {
-//                if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
-//                    PacketContainer packetContainer = event.getPacket();
-//                    StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
-//                    if(entityModifier.size() > 0) {
-//                        StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
-//                        if (structureModifier.size() > 0) {
-//                            WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
-//                            if(watcher.hasIndex(2)) {
-//                                WrappedWatchableObject watchableObject = watcher.getWatchableObject(2);
-//                                watchableObject.set
-//                                Bukkit.broadcastMessage(watchableObject + "");
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        });
     }
 
     public static void updateName(Player player, Entity entity){
@@ -81,7 +64,6 @@ public final class ProtocolLibHook {
         WrappedDataWatcher.Serializer nameSerializer = getNameSerializer();
         WrappedDataWatcher.Serializer visibleSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
-//        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer), getCustomName(entity.getCustomName()));
         watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer), getCustomName(entity.getCustomName()));
         watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer), entity.isCustomNameVisible());
 
@@ -96,16 +78,11 @@ public final class ProtocolLibHook {
     }
 
     private static Object getCustomName(String customName){
-        if(Bukkit.getBukkitVersion().contains("1.13")) {
-            return Optional.of("");
-        }
-        return customName;
+        return isLegacy ? customName : customName.isEmpty() ? Optional.empty() : Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
     }
 
     private static WrappedDataWatcher.Serializer getNameSerializer(){
-        if(Bukkit.getBukkitVersion().contains("1.13"))
-            WrappedDataWatcher.Registry.getChatComponentSerializer(true);
-        return WrappedDataWatcher.Registry.get(String.class);
+        return isLegacy ? WrappedDataWatcher.Registry.get(String.class) : WrappedDataWatcher.Registry.getChatComponentSerializer(true);
     }
 
 }

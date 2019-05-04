@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.google.common.base.Predicate;
+import net.minecraft.server.v1_13_R1.ChatMessage;
 import net.minecraft.server.v1_13_R1.EnchantmentManager;
 import net.minecraft.server.v1_13_R1.Entity;
 import net.minecraft.server.v1_13_R1.EntityAnimal;
@@ -164,6 +165,11 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
             return null;
         }
 
+    }
+
+    @Override
+    public Object getChatMessage(String message) {
+        return new ChatMessage(message);
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
