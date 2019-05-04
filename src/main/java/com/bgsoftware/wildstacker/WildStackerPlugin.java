@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
 import com.bgsoftware.wildstacker.data.AbstractDataHandler;
 import com.bgsoftware.wildstacker.data.FilesDataHandler;
+import com.bgsoftware.wildstacker.data.SQLDataHandler;
 import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
 import com.bgsoftware.wildstacker.handlers.EditorHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
@@ -69,7 +70,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
-        dataHandler = new FilesDataHandler(this);
+       // dataHandler = new FilesDataHandler(this);
+        dataHandler = settingsHandler.dataHandler.equals("SQL") ? new SQLDataHandler(this) : new FilesDataHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);

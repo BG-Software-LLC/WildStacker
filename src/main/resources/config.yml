@@ -24,6 +24,11 @@ inspect-tool:
   lore:
     - '&7Click on an object to get more details about it.'
 
+# What data handler should be used?
+# Use the followings: SQL, FILE
+# Warning: You can't move change data handlers, or data will be deleted.
+data-handler: 'FILE'
+
 # Here you can configurable all features related to stacked items.
 items:
   # Should items get stacked on the server?

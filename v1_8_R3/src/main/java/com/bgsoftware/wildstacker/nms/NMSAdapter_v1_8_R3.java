@@ -10,6 +10,7 @@ import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.ItemStack;
+import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
@@ -23,7 +24,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -164,5 +171,42 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         return ((List<Entity>) entityLiving.world.a(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper))
                 .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
+
+    @Override
+    public String serialize(org.bukkit.inventory.ItemStack itemStack) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(outputStream);
+
+        NBTTagCompound tagCompound = new NBTTagCompound();
+
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+
+        nmsItem.save(tagCompound);
+
+        try {
+            NBTCompressedStreamTools.a(tagCompound, dataOutput);
+        }catch(Exception ex){
+            return null;
+        }
+
+        return new BigInteger(1, outputStream.toByteArray()).toString(32);
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack deserialize(String serialized) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
+
+        try {
+            NBTTagCompound nbtTagCompoundRoot = NBTCompressedStreamTools.a(new DataInputStream(inputStream));
+
+            ItemStack nmsItem = ItemStack.createStack(nbtTagCompoundRoot);
+
+            return CraftItemStack.asBukkitCopy(nmsItem);
+        }catch(Exception ex){
+            return null;
+        }
+
+    }
+
 
 }

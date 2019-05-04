@@ -27,6 +27,7 @@ public final class SettingsHandler {
     public final long saveInterval;
     public final String giveItemName;
     public final ItemStack inspectTool;
+    public final String dataHandler;
     public final KeyMap<String> customNames;
 
     //Items settings
@@ -89,6 +90,7 @@ public final class SettingsHandler {
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
                 .withName(cfg.getString("inspect-tool.name"))
                 .withLore(cfg.getStringList("inspect-tool.lore")).build();
+        dataHandler = cfg.getString("data-handler", "FILE");
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 

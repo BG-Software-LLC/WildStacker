@@ -23,10 +23,8 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -151,15 +149,8 @@ public final class FilesDataHandler extends AbstractDataHandler {
     }
 
     @Override
-    public void saveChunkData(boolean remove, boolean async){
-        Set<Chunk> chunks = new HashSet<>();
-
-        asList(CACHED_ENTITIES.iterator()).forEach(stackedEntity -> chunks.add(((WStackedEntity) stackedEntity).getChunk()));
-        chunks.addAll(CACHED_ITEMS.getChunks());
-        chunks.addAll(CACHED_SPAWNERS.getChunks());
-        chunks.addAll(CACHED_BARRELS.getChunks());
-
-        chunks.forEach(chunk -> saveChunkData(chunk, remove, async));
+    public void saveChunkData(boolean remove, boolean async) {
+        super.saveChunkData(remove, async);
 
         if(!CACHED_SPAWN_REASON_ENTITIES.isEmpty() || !CACHED_AMOUNT_ENTITIES.isEmpty()){
             saveCachedEntities();
@@ -194,13 +185,15 @@ public final class FilesDataHandler extends AbstractDataHandler {
         Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
         while(items.hasNext()){
             StackedItem stackedItem = items.next();
-            cfg.set("items." + stackedItem.getUniqueId(), stackedItem.getStackAmount());
+            if(stackedItem.getStackAmount() > 1)
+                cfg.set("items." + stackedItem.getUniqueId(), stackedItem.getStackAmount());
         }
 
         Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
         while(spawners.hasNext()){
             StackedSpawner stackedSpawner = spawners.next();
-            cfg.set("spawners." + getChunkLocation(stackedSpawner.getLocation()), stackedSpawner.getStackAmount());
+            if(stackedSpawner.getStackAmount() > 1)
+                cfg.set("spawners." + getChunkLocation(stackedSpawner.getLocation()), stackedSpawner.getStackAmount());
             if(remove) plugin.getProviders().deleteHologram(stackedSpawner);
         }
 
@@ -235,20 +228,6 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 CACHED_ITEMS.remove(chunk);
                 CACHED_SPAWNERS.remove(chunk);
                 CACHED_BARRELS.remove(chunk);
-            }
-        }
-    }
-
-    @Override
-    public void clearDatabase(){
-        File dataFolder = new File(plugin.getDataFolder(), "data");
-        if(dataFolder.exists()) {
-            for (File worldFolder : dataFolder.listFiles()) {
-                if(worldFolder.isDirectory()) {
-                    for (File chunkFile : worldFolder.listFiles()) {
-                        chunkFile.delete();
-                    }
-                }
             }
         }
     }

@@ -10,6 +10,7 @@ import net.minecraft.server.v1_8_R1.EntityInsentient;
 import net.minecraft.server.v1_8_R1.EntityLiving;
 import net.minecraft.server.v1_8_R1.EntityPlayer;
 import net.minecraft.server.v1_8_R1.ItemStack;
+import net.minecraft.server.v1_8_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R1.NBTTagCompound;
 import net.minecraft.server.v1_8_R1.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
@@ -23,7 +24,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -165,4 +172,30 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
                 .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 
+    @Override
+    public String serialize(org.bukkit.inventory.ItemStack itemStack) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(outputStream);
+
+        NBTTagCompound tagCompound = new NBTTagCompound();
+
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+
+        nmsItem.save(tagCompound);
+
+        NBTCompressedStreamTools.a(tagCompound, dataOutput);
+
+        return new BigInteger(1, outputStream.toByteArray()).toString(32);
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack deserialize(String serialized) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
+
+        NBTTagCompound nbtTagCompoundRoot = NBTCompressedStreamTools.a(new DataInputStream(inputStream));
+
+        ItemStack nmsItem = ItemStack.createStack(nbtTagCompoundRoot);
+
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
 }

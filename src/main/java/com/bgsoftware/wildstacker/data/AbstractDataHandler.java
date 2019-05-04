@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -17,9 +18,12 @@ import org.bukkit.entity.LivingEntity;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,11 +46,34 @@ public abstract class AbstractDataHandler {
 
     public abstract void loadChunkData(Chunk chunk);
 
-    public abstract void saveChunkData(boolean remove, boolean async);
-
     public abstract void saveChunkData(Chunk chunk, boolean remove, boolean async);
 
-    public abstract void clearDatabase();
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void clearDatabase(){
+        File dataFolder = new File(plugin.getDataFolder(), "data");
+        if(dataFolder.exists()) {
+            for (File worldFolder : Objects.requireNonNull(dataFolder.listFiles())) {
+                if(worldFolder.isDirectory()) {
+                    for (File chunkFile : Objects.requireNonNull(worldFolder.listFiles())) {
+                        chunkFile.delete();
+                    }
+                }else{
+                    worldFolder.delete();
+                }
+            }
+        }
+    }
+
+    public void saveChunkData(boolean remove, boolean async){
+        Set<Chunk> chunks = new HashSet<>();
+
+        asList(CACHED_ENTITIES.iterator()).forEach(stackedEntity -> chunks.add(((WStackedEntity) stackedEntity).getChunk()));
+        chunks.addAll(CACHED_ITEMS.getChunks());
+        chunks.addAll(CACHED_SPAWNERS.getChunks());
+        chunks.addAll(CACHED_BARRELS.getChunks());
+
+        chunks.forEach(chunk -> saveChunkData(chunk, remove, async));
+    }
 
     protected String getChunkLocation(Location location){
         return (location.getBlockX() & 15) + "," + location.getBlockY() + "," + (location.getBlockZ() & 15);

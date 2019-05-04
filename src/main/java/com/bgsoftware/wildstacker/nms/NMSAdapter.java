@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -24,5 +25,11 @@ public interface NMSAdapter {
 
     @SuppressWarnings("all")
     List<Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super Entity> predicate);
+
+    @Nullable
+    String serialize(ItemStack itemStack);
+
+    @Nullable
+    ItemStack deserialize(String serialized);
 
 }
