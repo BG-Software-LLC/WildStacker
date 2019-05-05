@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 public final class HologramsProvider_CMI implements HologramsProvider {
@@ -65,7 +66,11 @@ public final class HologramsProvider_CMI implements HologramsProvider {
         if(!isHologram(location))
             return;
 
-        hologramManager.removeHolo(hologramManager.getByLoc(location));
+        CMIHologram hologram = getHologram(location);
+        hologram.setLines(new ArrayList<>());
+        hologramManager.resetHoloForAllPlayers(hologram);
+        hologram.updatePages();
+        hologramManager.removeHolo(hologram);
     }
 
     @Override
@@ -84,7 +89,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void changeLine(Location location, String newLine, boolean createIfNull) {
-        CMIHologram hologram = hologramManager.getByLoc(location);
+        CMIHologram hologram = getHologram(location);
 
         if(hologram == null) {
             if(!createIfNull)
@@ -112,7 +117,11 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public boolean isHologram(Location location) {
-        return hologramManager.getByLoc(location) != null;
+        return getHologram(location) != null;
+    }
+
+    private CMIHologram getHologram(Location location){
+        return hologramManager.getByName("WS-" + location.toString());
     }
 
 }
