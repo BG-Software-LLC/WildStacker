@@ -25,8 +25,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -168,96 +170,101 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
     @Override
     public void saveChunkData(Chunk chunk, boolean remove, boolean async) {
-        if(async && Bukkit.isPrimaryThread()){
-            Executor.async(() -> saveChunkData(chunk, remove, async));
-            return;
-        }
+        List<String> preparedStatementList = new ArrayList<>();
 
-        try{
-            Connection conn = connectionMap.get(chunk.getWorld().getName());
+        preparedStatementList.add(String.format("DELETE FROM entities WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
+        preparedStatementList.add(String.format("DELETE FROM items WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
+        preparedStatementList.add(String.format("DELETE FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
+        preparedStatementList.add(String.format("DELETE FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
 
-            conn.prepareStatement(String.format("DELETE FROM entities WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeUpdate();
-            conn.prepareStatement(String.format("DELETE FROM items WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeUpdate();
-            conn.prepareStatement(String.format("DELETE FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeUpdate();
-            conn.prepareStatement(String.format("DELETE FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeUpdate();
-
-            Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
-            //noinspection all
-            while(entities.hasNext()){
-                StackedEntity stackedEntity = entities.next();
-                if (stackedEntity != null && stackedEntity.getLivingEntity() != null &&
-                        isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation())) {
-                    conn.prepareStatement(String.format("INSERT INTO entities VALUES('%s', '%s', %s, '%s');",
-                            chunk.getX() + "," + chunk.getZ(),
-                            stackedEntity.getUniqueId(),
-                            stackedEntity.getStackAmount(),
-                            stackedEntity.getSpawnReason().name())
-                    ).executeUpdate();
-                }
-            }
-
-            Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
-            while(items.hasNext()){
-                StackedItem stackedItem = items.next();
-                if(stackedItem.getStackAmount() > 1)
-                    conn.prepareStatement(String.format("INSERT INTO items VALUES('%s', '%s', %s);",
-                            chunk.getX() + "," + chunk.getZ(),
-                            stackedItem.getUniqueId(),
-                            stackedItem.getStackAmount())
-                    ).executeUpdate();
-            }
-
-            Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
-            while(spawners.hasNext()){
-                StackedSpawner stackedSpawner = spawners.next();
-                if(stackedSpawner.getStackAmount() > 1)
-                    conn.prepareStatement(String.format("INSERT INTO spawners VALUES('%s', '%s', %s);",
-                            chunk.getX() + "," + chunk.getZ(),
-                            getChunkLocation(stackedSpawner.getLocation()),
-                            stackedSpawner.getStackAmount())
-                    ).executeUpdate();
-                if(remove) plugin.getProviders().deleteHologram(stackedSpawner);
-            }
-
-            Iterator<StackedBarrel> barrels = CACHED_BARRELS.iterator(chunk);
-            while(barrels.hasNext()){
-                StackedBarrel stackedBarrel = barrels.next();
-                ItemStack barrelItem = stackedBarrel.getBarrelItem(1);
-                conn.prepareStatement(String.format("INSERT INTO barrels VALUES('%s', '%s', %s, '%s');",
+        Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
+        //noinspection all
+        while(entities.hasNext()){
+            StackedEntity stackedEntity = entities.next();
+            if (stackedEntity != null && stackedEntity.getLivingEntity() != null &&
+                    isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation())) {
+                preparedStatementList.add(String.format("INSERT INTO entities VALUES('%s', '%s', %s, '%s');",
                         chunk.getX() + "," + chunk.getZ(),
-                        getChunkLocation(stackedBarrel.getLocation()),
-                        stackedBarrel.getStackAmount(),
-                        plugin.getNMSAdapter().serialize(barrelItem))
-                ).executeUpdate();
+                        stackedEntity.getUniqueId(),
+                        stackedEntity.getStackAmount(),
+                        stackedEntity.getSpawnReason().name())
+                );
             }
-        }catch (SQLException ex){
-            //throw new RuntimeException("Couldn't save the file " + file.getPath() + " - data won't be saved!");
-            ex.printStackTrace();
         }
+
+        Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
+        while(items.hasNext()){
+            StackedItem stackedItem = items.next();
+            if(stackedItem.getStackAmount() > 1)
+                preparedStatementList.add(String.format("INSERT INTO items VALUES('%s', '%s', %s);",
+                        chunk.getX() + "," + chunk.getZ(),
+                        stackedItem.getUniqueId(),
+                        stackedItem.getStackAmount())
+                );
+        }
+
+        Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
+        while(spawners.hasNext()){
+            StackedSpawner stackedSpawner = spawners.next();
+            if(stackedSpawner.getStackAmount() > 1)
+                preparedStatementList.add(String.format("INSERT INTO spawners VALUES('%s', '%s', %s);",
+                        chunk.getX() + "," + chunk.getZ(),
+                        getChunkLocation(stackedSpawner.getLocation()),
+                        stackedSpawner.getStackAmount())
+                );
+            if(remove) plugin.getProviders().deleteHologram(stackedSpawner);
+        }
+
+        Iterator<StackedBarrel> barrels = CACHED_BARRELS.iterator(chunk);
+        while(barrels.hasNext()){
+            StackedBarrel stackedBarrel = barrels.next();
+            ItemStack barrelItem = stackedBarrel.getBarrelItem(1);
+            preparedStatementList.add(String.format("INSERT INTO barrels VALUES('%s', '%s', %s, '%s');",
+                    chunk.getX() + "," + chunk.getZ(),
+                    getChunkLocation(stackedBarrel.getLocation()),
+                    stackedBarrel.getStackAmount(),
+                    plugin.getNMSAdapter().serialize(barrelItem))
+            );
+        }
+
+        if(async)
+            Executor.async(() -> executeUpdates(preparedStatementList, chunk));
+        else
+            executeUpdates(preparedStatementList, chunk);
 
         if(remove){
             asList(CACHED_ENTITIES.iterator()).stream()
                     .filter(stackedEntity -> isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation()))
                     .forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
             CACHED_ITEMS.remove(chunk);
-            Executor.sync(() -> {
-                Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
-                while(spawners.hasNext()){
-                    StackedSpawner stackedSpawner = spawners.next();
-                    plugin.getProviders().deleteHologram(stackedSpawner);
-                }
 
-                Iterator<StackedBarrel> barrels = CACHED_BARRELS.iterator(chunk);
-                while(barrels.hasNext()){
-                    StackedBarrel stackedBarrel = barrels.next();
-                    plugin.getProviders().deleteHologram(stackedBarrel);
-                    stackedBarrel.removeDisplayBlock();
-                }
+            spawners = CACHED_SPAWNERS.iterator(chunk);
+            while(spawners.hasNext()){
+                StackedSpawner stackedSpawner = spawners.next();
+                plugin.getProviders().deleteHologram(stackedSpawner);
+            }
 
-                CACHED_SPAWNERS.remove(chunk);
-                CACHED_BARRELS.remove(chunk);
-            });
+            barrels = CACHED_BARRELS.iterator(chunk);
+            while(barrels.hasNext()){
+                StackedBarrel stackedBarrel = barrels.next();
+                plugin.getProviders().deleteHologram(stackedBarrel);
+                stackedBarrel.removeDisplayBlock();
+            }
+
+            CACHED_SPAWNERS.remove(chunk);
+            CACHED_BARRELS.remove(chunk);
         }
+    }
+
+    private void executeUpdates(List<String> preparedStatementList, Chunk chunk){
+        Connection conn = connectionMap.get(chunk.getWorld().getName());
+        preparedStatementList.forEach(preparedStatement -> {
+            try{
+                conn.prepareStatement(preparedStatement).executeUpdate();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        });
     }
 
     @Override

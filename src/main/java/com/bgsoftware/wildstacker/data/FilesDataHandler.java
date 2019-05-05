@@ -163,13 +163,6 @@ public final class FilesDataHandler extends AbstractDataHandler {
 
     @Override
     public void saveChunkData(Chunk chunk, boolean remove, boolean async){
-        if(async && Bukkit.isPrimaryThread()){
-            Executor.async(() -> saveChunkData(chunk, remove, async));
-            return;
-        }
-
-        File file = new File(plugin.getDataFolder(), "data/" + chunk.getWorld().getName() + "/" + chunk.getX() + "," + chunk.getZ() + ".yml");
-
         YamlConfiguration cfg = new YamlConfiguration();
 
         Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
@@ -210,15 +203,10 @@ public final class FilesDataHandler extends AbstractDataHandler {
         }
 
         if(cfg.contains("entities") || cfg.contains("items") || cfg.contains("spawners") || cfg.contains("barrels")) {
-            try {
-                if (!file.exists()) {
-                    file.getParentFile().mkdirs();
-                    file.createNewFile();
-                }
-
-                cfg.save(file);
-            }catch(Throwable ex){
-                throw new RuntimeException("Couldn't save the file " + file.getPath() + " - data won't be saved!");
+            if(async){
+                Executor.async(() -> save(cfg, chunk));
+            }else{
+                save(cfg, chunk);
             }
 
             if (remove) {
@@ -229,6 +217,19 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 CACHED_SPAWNERS.remove(chunk);
                 CACHED_BARRELS.remove(chunk);
             }
+        }
+    }
+
+    private void save(YamlConfiguration cfg, Chunk chunk){
+        File file = new File(plugin.getDataFolder(), "data/" + chunk.getWorld().getName() + "/" + chunk.getX() + "," + chunk.getZ() + ".yml");
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+            cfg.save(file);
+        }catch(Throwable ex){
+            throw new RuntimeException("Couldn't save the file " + file.getPath() + " - data won't be saved!");
         }
     }
 
