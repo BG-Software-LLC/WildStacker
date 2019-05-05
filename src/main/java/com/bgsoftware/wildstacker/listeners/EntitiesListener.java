@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.listeners.events.AsyncEntityDeathEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -112,10 +113,11 @@ public final class EntitiesListener implements Listener {
                 int expToDrop = 0;
 
                 for(int i = 0; i < stackAmount; i++) {
-                    EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
-                    Bukkit.getPluginManager().callEvent(entityDeathEvent);
-                    drops.addAll(entityDeathEvent.getDrops());
-                    expToDrop += entityDeathEvent.getDroppedExp();
+                    AsyncEntityDeathEvent asyncEntityDeathEvent =
+                            new AsyncEntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
+                    Bukkit.getPluginManager().callEvent(asyncEntityDeathEvent);
+                    drops.addAll(asyncEntityDeathEvent.getDrops());
+                    expToDrop += asyncEntityDeathEvent.getDroppedExp();
                 }
 
                 final int EXP = expToDrop;
