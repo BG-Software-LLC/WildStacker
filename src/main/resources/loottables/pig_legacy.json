@@ -4,13 +4,13 @@
       "chance": 100,
       "items": [
         {
-          "type": "PORKCHOP",
+          "type": "PORK",
           "chance": 100,
           "min": 1,
           "max": 3,
           "looting": true,
           "burnable": {
-            "type": "COOKED_PORKCHOP"
+            "type": "GRILLED_PORK"
           }
         }
       ]

@@ -4,14 +4,11 @@
       "chance": 100,
       "items": [
         {
-          "type": "MUTTON",
+          "type": "RED_ROSE",
           "chance": 100,
-          "min": 1,
+          "min": 0,
           "max": 2,
-          "looting": true,
-          "burnable": {
-            "type": "COOKED_MUTTON"
-          }
+          "looting": true
         }
       ]
     },
@@ -19,10 +16,10 @@
       "chance": 100,
       "items": [
         {
-          "type": "WHITE_WOOL",
+          "type": "IRON_INGOT",
           "chance": 100,
-          "min": 1,
-          "max": 1
+          "min": 3,
+          "max": 5
         }
       ]
     }

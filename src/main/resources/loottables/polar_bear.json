@@ -4,15 +4,14 @@
       "chance": 100,
       "items": [
         {
-          "type": "RAW_FISH",
+          "type": "COD",
           "chance": 75,
           "min": 0,
           "max": 2,
           "looting": true
         },
         {
-          "type": "RAW_FISH",
-          "data": 1,
+          "type": "SALMON",
           "chance": 25,
           "min": 0,
           "max": 2,
