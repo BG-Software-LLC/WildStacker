@@ -23,8 +23,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -165,11 +167,14 @@ public final class FilesDataHandler extends AbstractDataHandler {
     public void saveChunkData(Chunk chunk, boolean remove, boolean async){
         YamlConfiguration cfg = new YamlConfiguration();
 
+        Set<StackedEntity> stackedEntities = new HashSet<>();
+
         Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
         while(entities.hasNext()){
             StackedEntity stackedEntity = entities.next();
             if(stackedEntity != null && stackedEntity.getLivingEntity() != null &&
                     isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation())) {
+                stackedEntities.add(stackedEntity);
                 cfg.set("entities." + stackedEntity.getUniqueId() + ".amount", stackedEntity.getStackAmount());
                 cfg.set("entities." + stackedEntity.getUniqueId() + ".spawn-reason", stackedEntity.getSpawnReason().name());
             }
@@ -210,10 +215,23 @@ public final class FilesDataHandler extends AbstractDataHandler {
             }
 
             if (remove) {
-                asList(CACHED_ENTITIES.iterator()).stream()
-                        .filter(stackedEntity -> isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation()))
-                        .forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+                stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+
                 CACHED_ITEMS.remove(chunk);
+
+                spawners = CACHED_SPAWNERS.iterator(chunk);
+                while(spawners.hasNext()){
+                    StackedSpawner stackedSpawner = spawners.next();
+                    plugin.getProviders().deleteHologram(stackedSpawner);
+                }
+
+                barrels = CACHED_BARRELS.iterator(chunk);
+                while(barrels.hasNext()){
+                    StackedBarrel stackedBarrel = barrels.next();
+                    plugin.getProviders().deleteHologram(stackedBarrel);
+                    stackedBarrel.removeDisplayBlock();
+                }
+
                 CACHED_SPAWNERS.remove(chunk);
                 CACHED_BARRELS.remove(chunk);
             }

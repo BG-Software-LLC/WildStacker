@@ -27,9 +27,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public final class SQLDataHandler extends AbstractDataHandler {
@@ -177,12 +179,15 @@ public final class SQLDataHandler extends AbstractDataHandler {
         preparedStatementList.add(String.format("DELETE FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
         preparedStatementList.add(String.format("DELETE FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
 
+        Set<StackedEntity> stackedEntities = new HashSet<>();
+
         Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
         //noinspection all
         while(entities.hasNext()){
             StackedEntity stackedEntity = entities.next();
             if (stackedEntity != null && stackedEntity.getLivingEntity() != null &&
                     isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation())) {
+                stackedEntities.add(stackedEntity);
                 preparedStatementList.add(String.format("INSERT INTO entities VALUES('%s', '%s', %s, '%s');",
                         chunk.getX() + "," + chunk.getZ(),
                         stackedEntity.getUniqueId(),
@@ -233,9 +238,8 @@ public final class SQLDataHandler extends AbstractDataHandler {
             executeUpdates(preparedStatementList, chunk);
 
         if(remove){
-            asList(CACHED_ENTITIES.iterator()).stream()
-                    .filter(stackedEntity -> isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation()))
-                    .forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+            stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+
             CACHED_ITEMS.remove(chunk);
 
             spawners = CACHED_SPAWNERS.iterator(chunk);

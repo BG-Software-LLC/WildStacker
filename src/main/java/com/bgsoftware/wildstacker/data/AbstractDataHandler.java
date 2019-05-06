@@ -80,7 +80,7 @@ public abstract class AbstractDataHandler {
     }
 
     protected boolean isSameChunk(Chunk chunk, Location location){
-        return chunk.getX() == location.getBlockX() >> 4 && chunk.getZ() == location.getBlockZ() >> 4;
+        return chunk.getX() == (location.getBlockX() >> 4) && chunk.getZ() == (location.getBlockZ() >> 4);
     }
 
     protected List<StackedEntity> asList(Iterator<StackedEntity> iterator){

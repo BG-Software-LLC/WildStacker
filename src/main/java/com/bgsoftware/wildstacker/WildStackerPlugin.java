@@ -155,8 +155,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         //We need to save the entire database
-        dataHandler.clearDatabase();
         dataHandler.saveChunkData(true, false);
+        dataHandler.clearDatabase();
 
         try{
             Bukkit.getScheduler().cancelAllTasks();
