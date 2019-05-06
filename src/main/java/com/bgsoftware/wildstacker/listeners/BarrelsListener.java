@@ -69,7 +69,7 @@ public final class BarrelsListener implements Listener {
 
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
-        stackedBarrel.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItemInHand()), true);
+        stackedBarrel.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItemInHand()), false);
 
         //Stacking barrel
         Block targetBarrel = stackedBarrel.tryStack();
@@ -96,9 +96,9 @@ public final class BarrelsListener implements Listener {
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = e.getItemInHand().clone();
+            ItemStack inHand = e.getItemInHand();
             inHand.setAmount(inHand.getAmount() - 1);
-            e.getPlayer().setItemInHand(inHand);
+            e.getPlayer().updateInventory();
         }
     }
 
