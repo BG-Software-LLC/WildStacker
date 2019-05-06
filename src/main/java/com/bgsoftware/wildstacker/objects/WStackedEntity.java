@@ -90,7 +90,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public Chunk getChunk() {
-        return object.getLocation().getChunk();
+        return plugin.getDataHandler().DEFAULT_CHUNK;
     }
 
     @Override
