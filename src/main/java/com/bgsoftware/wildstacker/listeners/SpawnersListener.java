@@ -89,11 +89,11 @@ public final class SpawnersListener implements Listener {
             }
         }
 
-        int inHandAmount = 1;
+        int toPlace = 1;
 
         if(e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
-            inHandAmount = e.getItemInHand().getAmount();
-            spawnerItemAmount *= inHandAmount;
+            toPlace = e.getItemInHand().getAmount();
+            spawnerItemAmount *= toPlace;
         }
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE){
@@ -140,13 +140,6 @@ public final class SpawnersListener implements Listener {
                     }
                 }
             }
-
-            //Removing item from player's inventory
-            if(e.getPlayer().getGameMode() != GameMode.CREATIVE && inHandAmount > 1) {
-                ItemStack is = e.getItemInHand().clone();
-                is.setAmount(inHandAmount);
-                e.getPlayer().getInventory().removeItem(is);
-            }
         }
 
         else{
@@ -155,14 +148,14 @@ public final class SpawnersListener implements Listener {
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getBlock(), true);
 
-            //Removing item from player's inventory
-            if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                ItemStack is = e.getItemInHand().clone();
-                is.setAmount(inHandAmount);
-                e.getPlayer().getInventory().removeItem(is);
-            }
-
             stackedSpawner = WStackedSpawner.of(targetSpawner);
+        }
+
+        //Removing item from player's inventory
+        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            ItemStack is = e.getItemInHand();
+            is.setAmount(Math.max(0, is.getAmount() - toPlace));
+            e.getPlayer().updateInventory();
         }
 
         EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
