@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.config;
 
-import com.bgsoftware.wildstacker.utils.FileUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -37,7 +36,7 @@ public final class CommentedConfiguration extends YamlConfiguration{
 
     public void resetYamlFile(Plugin plugin, String resourceName){
         File configFile = new File(plugin.getDataFolder(), resourceName);
-        FileUtil.saveResource(resourceName);
+        plugin.saveResource(resourceName, true);
         CommentedConfiguration destination = new CommentedConfiguration(commentsClass, configFile);
 
         copyConfigurationSection(getConfigurationSection(""), destination.getConfigurationSection(""));
@@ -47,9 +46,9 @@ public final class CommentedConfiguration extends YamlConfiguration{
     }
 
     private void copyConfigurationSection(ConfigurationSection source, ConfigurationSection dest){
-        for(String key : dest.getKeys(false)){
-            if(source.contains(key)) {
-                if (source.isConfigurationSection(key) && !Arrays.asList(ignoredSections).contains(key)) {
+        for (String key : dest.getKeys(false)) {
+            if (source.contains(key)) {
+                if (source.isConfigurationSection(key) && dest.contains(key) && !Arrays.asList(ignoredSections).contains(key)) {
                     copyConfigurationSection(source.getConfigurationSection(key), dest.getConfigurationSection(key));
                 } else {
                     dest.set(key, source.get(key));
