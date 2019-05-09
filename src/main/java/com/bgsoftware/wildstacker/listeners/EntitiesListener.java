@@ -96,7 +96,7 @@ public final class EntitiesListener implements Listener {
             int stackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ||
                     plugin.getSettings().entitiesInstantKills.contains(e.getEntityType().name()) ? stackedEntity.getStackAmount() : 1;
 
-            e.setCancelled(true);
+            e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
