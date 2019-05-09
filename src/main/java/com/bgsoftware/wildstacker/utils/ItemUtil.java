@@ -201,8 +201,16 @@ public final class ItemUtil {
         try{
             Class craftBlockDataClass = ReflectionUtil.getBukkitClass("block.data.CraftBlockData");
             Class blockDataClass = ReflectionUtil.getNMSClass("IBlockData");
-            int combined = type.getId() + (data << 12);
-            Object iBlockData = ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
+            Object iBlockData;
+
+            try{
+                int combined = type.getId() + (data << 12);
+                iBlockData = ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
+            }catch(Exception ex){
+                iBlockData = ReflectionUtil.getBukkitClass("util.CraftMagicNumbers")
+                        .getMethod("getBlock", Material.class, byte.class).invoke(null, type, data);
+            }
+
             return craftBlockDataClass.getMethod("fromData", blockDataClass).invoke(null, iBlockData);
         }catch(Exception ex){
             ex.printStackTrace();
