@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.api.objects;
 
-@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public interface StackedObject<T> {
 
     /**
@@ -21,6 +20,24 @@ public interface StackedObject<T> {
      * @return stack limit
      */
     int getStackLimit();
+
+    /**
+     * Checks if an object is blacklisted.
+     * @return True if the object is blacklisted, otherwise false.
+     */
+    boolean isBlacklisted();
+
+    /**
+     * Checks if an object is whitelisted.
+     * @return True if the object is whitelisted, otherwise false.
+     */
+    boolean isWhitelisted();
+
+    /**
+     * Checks if the world of the object is disabled.
+     * @return True if the world is disabled, otherwise false.
+     */
+    boolean isWorldDisabled();
 
     /**
      * Remove the stack object from cache and the server

@@ -152,12 +152,11 @@ public final class EntitiesListener implements Listener {
         if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER || e.getEntity().hasMetadata("corpse"))
             return;
 
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
-            return;
-
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setSpawnReason(e.getSpawnReason());
+
+        if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
+            return;
 
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
             noStackEntities.remove(e.getEntity().getUniqueId());

@@ -61,10 +61,7 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());
 
-        if(plugin.getSettings().blacklistedSpawners.contains(stackedSpawner.getSpawnedType().name()))
-            return;
-
-        if(plugin.getSettings().spawnersDisabledWorlds.contains(e.getBlockPlaced().getWorld().getName()))
+        if(stackedSpawner.isBlacklisted() || !stackedSpawner.isWhitelisted() || stackedSpawner.isWorldDisabled())
             return;
 
         //Try and set a custom entity type
@@ -250,7 +247,7 @@ public final class SpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
         if(!plugin.getSettings().entitiesStackingEnabled || plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER")) {
+                plugin.getSettings().blacklistedEntities.contains("SPAWNER")) {
             for (int i = 0; i < stackedSpawner.getStackAmount(); i++) {
                 StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
                 com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);

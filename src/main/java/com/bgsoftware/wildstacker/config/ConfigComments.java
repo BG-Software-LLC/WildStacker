@@ -57,8 +57,16 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted items are items that won't get stacked.")
     @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
-    @Comment("If you wish to enable stacking of all items, use \"blacklist: []\"")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable blacklisted items, use \"blacklist: []\"")
     public static String ITEMS_BLACKLIST = "items.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted items are items that will get stacked.")
+    @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable whitelisted items, use \"whitelist: []\"")
+    public static String ITEMS_WHITELIST = "items.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific items.")
@@ -130,8 +138,16 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted entities are entities that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
-    @Comment("If you wish to enable stacking of all entities, use \"blacklist: []\"")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
     public static String ENTITIES_BLACKLIST = "entities.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted entities are entities that will get stacked.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("If you wish to disable whitelisted entities, use \"whitelist: []\"")
+    public static String ENTITIES_WHITELIST = "entities.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific entities.")
@@ -300,8 +316,14 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted spawners are spawners that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
-    @Comment("If you wish to enable stacking of all spawners, use \"blacklist: []\"")
+    @Comment("If you wish to disable blacklisted spawners, use \"blacklist: []\"")
     public static String SPAWNERS_BLACKLIST = "spawners.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted spawners are spawners that will get stacked.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("If you wish to disable whitelisted spawners, use \"whitelist: []\"")
+    public static String SPAWNERS_WHITELIST = "spawners.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific spawners.")
@@ -458,10 +480,17 @@ public final class ConfigComments {
     public static String BARRELS_CUSTOM_NAME = "barrels.custom-name";
 
     @Comment("")
+    @Comment("Blacklisted barrels are barrels that won't get stacked.")
+    @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable blacklisted spawners, use \"blacklist: []\"")
+    public static String BARRELS_BLACKLIST = "barrels.blacklist";
+
+    @Comment("")
     @Comment("Whitelisted blocks are blocks that will get stacked.")
     @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
     @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
-    @Comment("If you wish to disable stacking of all blocks, use \"enabled: false\"")
+    @Comment("If you wish to disable whitelisted spawners, use \"whitelist: []\"")
     public static String BARRELS_WHITELIST = "barrels.whitelist";
 
     @Comment("")

@@ -99,6 +99,23 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedEntities.contains(getType().name()) ||
+                plugin.getSettings().blacklistedEntities.contains(getSpawnReason().name());
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return !plugin.getSettings().whitelistedEntities.isEmpty() &&
+                (plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnReason().name()));
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().entitiesDisabledWorlds.contains(object.getWorld().getName());
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -193,22 +210,17 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if (equals(stackedObject) || !(stackedObject instanceof StackedEntity) || !isSimilar(stackedObject))
             return false;
 
-        if (plugin.getSettings().entitiesDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled() || isNameBlacklisted())
             return false;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
+
+        if(!targetEntity.isWhitelisted() || targetEntity.isBlacklisted() || targetEntity.isWorldDisabled() || targetEntity.isNameBlacklisted())
+            return false;
+
         int newStackAmount = this.getStackAmount() + targetEntity.getStackAmount();
 
-        if(targetEntity.getLivingEntity().hasMetadata("async-stacked") ||
-                targetEntity.getLivingEntity().hasMetadata("corpse"))
-            return false;
-
-        if (plugin.getSettings().blacklistedEntities.contains(object.getType().name()) ||
-                plugin.getSettings().blacklistedEntities.contains(targetEntity.getType().name()))
-            return false;
-
-        if (EntityUtil.isNameBlacklisted(object.getCustomName()) ||
-                EntityUtil.isNameBlacklisted(((StackedEntity) stackedObject).getLivingEntity().getCustomName()))
+        if(targetEntity.getLivingEntity().hasMetadata("async-stacked") || targetEntity.getLivingEntity().hasMetadata("corpse"))
             return false;
 
         if (getStackLimit() < newStackAmount)
@@ -452,6 +464,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public boolean isNerfed(){
         return plugin.getSettings().nerfedSpawning.contains(getSpawnReason().name()) &&
                 plugin.getSettings().nerfedWorlds.contains(object.getWorld().getName());
+    }
+
+    @Override
+    public boolean isNameBlacklisted() {
+        return EntityUtil.isNameBlacklisted(object.getCustomName());
     }
 
     public static StackedEntity of(Entity entity){

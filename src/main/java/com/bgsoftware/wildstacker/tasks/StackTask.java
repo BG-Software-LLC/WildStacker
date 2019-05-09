@@ -48,12 +48,13 @@ public final class StackTask extends BukkitRunnable {
                             if (!livingEntity.isValid() || livingEntity instanceof ArmorStand || livingEntity instanceof Player)
                                 continue;
 
-                            if (plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()))
+                            StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
+
+                            if (!stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled())
                                 continue;
 
-                            stackedEntities.add(WStackedEntity.of(livingEntity));
-                        } catch (Throwable ignored) {
-                        }
+                            stackedEntities.add(stackedEntity);
+                        } catch (Throwable ignored) { }
                     }
                 }catch(Throwable ignored){}
             }

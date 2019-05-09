@@ -150,4 +150,10 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      */
     boolean isNerfed();
 
+    /**
+     * Checks if the name of the entity is blacklisted.
+     * @return True if the name is blacklisted, otherwise false.
+     */
+    boolean isNameBlacklisted();
+
 }

@@ -34,7 +34,7 @@ public final class SettingsHandler {
     public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
             itemsUnstackedCustomName, itemsKillAll;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
-    public final KeySet blacklistedItems;
+    public final KeySet blacklistedItems, whitelistedItems;
     public final int itemsCheckRange;
     public final String itemsCustomName;
     public final KeyMap<Integer> itemsLimits;
@@ -47,8 +47,9 @@ public final class SettingsHandler {
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
-    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames,
-            entitiesInstantKills, nerfedSpawning, nerfedWorlds, noAiSpawning, noAiWorlds, stackDownTypes;
+    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
+            blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
+            noAiSpawning, noAiWorlds, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
 
     //Spawners settings
@@ -58,7 +59,7 @@ public final class SettingsHandler {
             breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance;
     public final double breakChargeAmount, placeChargeAmount;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners;
     public final String hologramCustomName, silkCustomName;
     public final KeyMap<Integer> spawnersLimits;
 
@@ -68,7 +69,7 @@ public final class SettingsHandler {
     public final int barrelsCheckRange;
     public final String barrelsCustomName, barrelsToggleCommandSyntax;
     public final List<String> barrelsDisabledWorlds;
-    public final KeySet whitelistedBarrels;
+    public final KeySet blacklistedBarrels, whitelistedBarrels;
     public final KeyMap<Integer> barrelsLimits;
 
     public SettingsHandler(WildStackerPlugin plugin){
@@ -99,6 +100,7 @@ public final class SettingsHandler {
         itemsUnstackedCustomName = cfg.getBoolean("items.unstacked-custom-name", false);
         itemsFixStackEnabled = cfg.getBoolean("items.fix-stack", false);
         blacklistedItems = new KeySet(cfg.getStringList("items.blacklist"));
+        whitelistedItems = new KeySet(cfg.getStringList("items.whitelist"));
         itemsCheckRange = cfg.getInt("items.merge-radius", 5);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
@@ -117,6 +119,7 @@ public final class SettingsHandler {
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
         linkedEntitiesMaxDistance = cfg.getInt("entities.linked-entities.max-distance", 10);
         blacklistedEntities = cfg.getStringList("entities.blacklist");
+        whitelistedEntities = cfg.getStringList("entities.whitelist");
         blacklistedEntitiesSpawnReasons = cfg.getStringList("entities.spawn-blacklist");
         blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist");
         entitiesInstantKills = cfg.getStringList("entities.instant-kill");
@@ -143,6 +146,7 @@ public final class SettingsHandler {
         spawnersCheckRange = cfg.getInt("spawners.merge-radius", 1);
         chunkMergeSpawners = cfg.getBoolean("spawners.chunk-merge", false);
         blacklistedSpawners = cfg.getStringList("spawners.blacklist");
+        whitelistedSpawners = cfg.getStringList("spawners.whitelist");
         hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
         explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
         explosionsBreakChance = cfg.getInt("spawners.explosions-break-chance", 100);
@@ -173,6 +177,7 @@ public final class SettingsHandler {
         barrelsCheckRange = cfg.getInt("barrels.merge-radius", 1);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
         barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
+        blacklistedBarrels = new KeySet(cfg.getStringList("barrels.blacklist"));
         whitelistedBarrels = new KeySet(cfg.getStringList("barrels.whitelist"));
         explosionsBreakBarrelStack = cfg.getBoolean("barrels.explosions-break-stack", true);
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);
@@ -253,6 +258,11 @@ public final class SettingsHandler {
             cfg.createSection("spawners.break-menu");
         if(cfg.isBoolean("buckets-stacker"))
             cfg.set("buckets-stacker.enabled", cfg.getBoolean("buckets-stacker"));
+        if(cfg.contains("entities.spawn-blacklist")){
+            List<String> blacklisted = cfg.getStringList("entities.blacklist");
+            blacklisted.addAll(cfg.getStringList("entities.spawn-blacklist"));
+            cfg.set("entities.blacklist", blacklisted);
+        }
     }
 
     public static void reload(){

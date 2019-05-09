@@ -111,8 +111,7 @@ public final class SystemHandler implements SystemManager {
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
-                plugin.getSettings().entitiesStackingEnabled && !plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()) &&
-                !plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))
+                plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled())
             dataHandler.CACHED_ENTITIES.put(dataHandler.DEFAULT_CHUNK, stackedEntity.getUniqueId(), stackedEntity);
 
         return stackedEntity;
@@ -143,8 +142,7 @@ public final class SystemHandler implements SystemManager {
         stackedItem = new WStackedItem(item);
 
         //A new item was created. Let's see if we need to add him
-        if(plugin.getSettings().itemsStackingEnabled && !plugin.getSettings().blacklistedItems.contains(item.getItemStack()) &&
-                !plugin.getSettings().itemsDisabledWorlds.contains(item.getWorld().getName()))
+        if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
             dataHandler.CACHED_ITEMS.put(item.getLocation().getChunk(), stackedItem.getUniqueId(), stackedItem);
 
         return stackedItem;
@@ -175,8 +173,7 @@ public final class SystemHandler implements SystemManager {
         stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
 
         //A new spawner was created. Let's see if we need to add him
-        if(plugin.getSettings().spawnersStackingEnabled && !plugin.getSettings().blacklistedSpawners.contains(stackedSpawner.getSpawnedType().name()) &&
-                !plugin.getSettings().spawnersDisabledWorlds.contains(location.getWorld().getName()))
+        if(plugin.getSettings().spawnersStackingEnabled && stackedSpawner.isWhitelisted() && !stackedSpawner.isBlacklisted() && !stackedSpawner.isWorldDisabled())
             dataHandler.CACHED_SPAWNERS.put(location.getChunk(), stackedSpawner.getLocation(), stackedSpawner);
 
         return stackedSpawner;
@@ -209,8 +206,7 @@ public final class SystemHandler implements SystemManager {
         stackedBarrel.createDisplayBlock();
 
         //A new barrel was created. Let's see if we need to add him
-        if(plugin.getSettings().barrelsStackingEnabled && plugin.getSettings().whitelistedBarrels.contains(stackedBarrel.getBarrelItem(1)) &&
-                !plugin.getSettings().barrelsDisabledWorlds.contains(location.getWorld().getName()))
+        if(plugin.getSettings().barrelsStackingEnabled && stackedBarrel.isWhitelisted() && !stackedBarrel.isBlacklisted() && !stackedBarrel.isWorldDisabled())
             dataHandler.CACHED_BARRELS.put(location.getChunk(), stackedBarrel.getLocation(), stackedBarrel);
 
         return stackedBarrel;

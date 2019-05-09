@@ -15,10 +15,8 @@ import org.bukkit.event.Listener;
 public final class EpicSpawnersListener implements Listener {
 
     private static boolean enabled = false;
-    private WildStackerPlugin plugin;
 
     public EpicSpawnersListener(WildStackerPlugin plugin){
-        this.plugin = plugin;
         try {
             Class.forName("com.songoda.epicspawners.api.events.SpawnerSpawnEvent");
             enabled = true;
@@ -30,11 +28,11 @@ public final class EpicSpawnersListener implements Listener {
         if(!(e.getEntity() instanceof LivingEntity))
             return;
 
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER"))
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+        if(!stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled())
             return;
 
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner().getCreatureSpawner());
 
         //It takes 1 tick for EpicSpawners to set the metadata for the mobs.

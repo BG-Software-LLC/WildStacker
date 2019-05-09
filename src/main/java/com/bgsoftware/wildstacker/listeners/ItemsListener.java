@@ -34,28 +34,29 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled || plugin.getSettings().blacklistedItems.contains(e.getEntity().getItemStack()))
+        if(!plugin.getSettings().itemsStackingEnabled)
             return;
 
-        if(plugin.getSettings().itemsDisabledWorlds.contains(e.getEntity().getWorld().getName()))
+        StackedItem stackedItem = WStackedItem.of(e.getEntity());
+
+        if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
             return;
 
-        StackedItem item = WStackedItem.of(e.getEntity());
-        int limit = item.getStackLimit();
+        int limit = stackedItem.getStackLimit();
 
-        if(item.getStackAmount() > limit){
-            ItemStack cloned = item.getItemStack().clone();
+        if(stackedItem.getStackAmount() > limit){
+            ItemStack cloned = stackedItem.getItemStack().clone();
             cloned.setAmount(cloned.getAmount() - limit);
-            item.setStackAmount(limit, true);
+            stackedItem.setStackAmount(limit, true);
             Item spawnedItem = e.getEntity().getWorld().dropItemNaturally(e.getEntity().getLocation(), cloned);
             spawnedItem.setPickupDelay(40);
         }
 
-        if(item.tryStack() == null){
+        if(stackedItem.tryStack() == null){
             //Set the amount of item-stack to 1
-            ItemStack is = item.getItemStack();
+            ItemStack is = stackedItem.getItemStack();
             is.setAmount(1);
-            item.setItemStack(is);
+            stackedItem.setItemStack(is);
         }
     }
 
@@ -64,7 +65,9 @@ public final class ItemsListener implements Listener {
         if(!plugin.getSettings().itemsStackingEnabled)
             return;
 
-        if(plugin.getSettings().blacklistedItems.contains(e.getEntity().getItemStack()))
+        StackedItem stackedItem = WStackedItem.of(e.getEntity());
+
+        if(stackedItem.isWorldDisabled())
             return;
 
         //We are overriding the merge system
@@ -72,7 +75,7 @@ public final class ItemsListener implements Listener {
 
         Executor.sync(() -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
-                StackedItem stackedItem = WStackedItem.of(e.getEntity()), targetItem = WStackedItem.of(e.getTarget());
+                StackedItem targetItem = WStackedItem.of(e.getTarget());
                 stackedItem.tryStackInto(targetItem);
             }
         }, 5L);

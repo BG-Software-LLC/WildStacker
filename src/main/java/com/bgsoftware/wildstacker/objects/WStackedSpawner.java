@@ -62,6 +62,22 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     }
 
     @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType().name());
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return !plugin.getSettings().whitelistedSpawners.isEmpty() &&
+                plugin.getSettings().whitelistedSpawners.contains(getSpawnedType().name());
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().spawnersDisabledWorlds.contains(object.getWorld().getName());
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         plugin.getProviders().deleteHologram(this);
@@ -120,13 +136,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         if(equals(stackedObject) || !(stackedObject instanceof StackedSpawner) || !isSimilar(stackedObject))
             return false;
 
-        if(plugin.getSettings().spawnersDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
 
-        if(plugin.getSettings().blacklistedSpawners.contains(object.getSpawnedType().name()) ||
-                plugin.getSettings().blacklistedSpawners.contains(targetSpawner.getSpawnedType().name()))
+        if(!targetSpawner.isWhitelisted() || targetSpawner.isBlacklisted() || targetSpawner.isWorldDisabled())
             return false;
 
         return true;

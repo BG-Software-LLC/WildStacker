@@ -53,21 +53,21 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelPlace(BlockPlaceEvent e){
-        if(!plugin.getSettings().barrelsStackingEnabled || !plugin.getSettings().whitelistedBarrels.contains(e.getItemInHand()))
+        if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
         if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
             return;
 
-        if(plugin.getSettings().barrelsDisabledWorlds.contains(e.getBlockPlaced().getWorld().getName()))
+        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
+
+        if(stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled())
             return;
 
         if(e.getBlockPlaced().getY() > e.getBlockAgainst().getY() && plugin.getSystemManager().isStackedBarrel(e.getBlockAgainst())){
             e.setCancelled(true);
             return;
         }
-
-        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
         stackedBarrel.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItemInHand()), false);
 

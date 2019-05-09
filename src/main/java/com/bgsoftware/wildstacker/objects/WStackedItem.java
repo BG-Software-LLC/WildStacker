@@ -71,6 +71,22 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedItems.contains(getItemStack());
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return !plugin.getSettings().whitelistedItems.isEmpty() &&
+                plugin.getSettings().whitelistedItems.contains(getItemStack());
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName());
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -134,15 +150,15 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         if (equals(stackedObject) || !(stackedObject instanceof StackedItem) || !isSimilar(stackedObject))
             return false;
 
-        if (plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedItem targetItem = (StackedItem) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
 
-        if (plugin.getSettings().blacklistedItems.contains(object.getItemStack()) ||
-                plugin.getSettings().blacklistedItems.contains(((StackedItem) stackedObject).getItemStack()))
+        if(!targetItem.isWhitelisted() || targetItem.isBlacklisted() || targetItem.isWorldDisabled())
             return false;
+
+        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
 
         if (getStackLimit() < newStackAmount)
             return false;

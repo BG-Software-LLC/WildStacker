@@ -60,6 +60,22 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     }
 
     @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedBarrels.contains(getBarrelItem(1));
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return !plugin.getSettings().whitelistedBarrels.isEmpty() &&
+                plugin.getSettings().whitelistedBarrels.contains(getBarrelItem(1));
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().barrelsDisabledWorlds.contains(object.getWorld().getName());
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         plugin.getProviders().deleteHologram(this);
@@ -127,10 +143,14 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         if(equals(stackedObject) || !(stackedObject instanceof StackedBarrel) || !isSimilar(stackedObject))
             return false;
 
-        if(plugin.getSettings().barrelsDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
+
+        if(!targetBarrel.isWhitelisted() || targetBarrel.isBlacklisted() || targetBarrel.isWorldDisabled())
+            return false;
+
         int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
         if(getStackLimit() < newStackAmount)

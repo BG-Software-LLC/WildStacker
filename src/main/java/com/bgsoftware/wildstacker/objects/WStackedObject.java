@@ -37,6 +37,15 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract int getStackLimit();
 
     @Override
+    public abstract boolean isBlacklisted();
+
+    @Override
+    public abstract boolean isWhitelisted();
+
+    @Override
+    public abstract boolean isWorldDisabled();
+
+    @Override
     public abstract void remove();
 
     @Override

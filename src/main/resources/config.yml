@@ -46,9 +46,16 @@ items:
 
   # Blacklisted items are items that won't get stacked.
   # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
-  # If you wish to enable stacking of all items, use "blacklist: []"
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # If you wish to disable blacklisted items, use "blacklist: []"
   blacklist:
   - EGG
+
+  # Whitelisted items are items that will get stacked.
+  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # If you wish to disable whitelisted items, use "whitelist: []"
+  whitelist: []
 
   # Set a maximum stack for specific items.
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
@@ -111,10 +118,17 @@ entities:
 
   # Blacklisted entities are entities that won't get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
-  # If you wish to enable stacking of all entities, use "blacklist: []"
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # If you wish to disable blacklisted entities, use "blacklist: []"
   blacklist:
   - PLAYER
   - BLAZE
+
+  # Whitelisted entities are entities that will get stacked.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # If you wish to disable whitelisted entities, use "whitelist: []"
+  whitelist: []
 
   # Set a maximum stack for specific entities.
   # Make sure you follow the "ENTITY-TYPE" format.
@@ -303,9 +317,14 @@ spawners:
 
   # Blacklisted spawners are spawners that won't get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
-  # If you wish to enable stacking of all spawners, use "blacklist: []"
+  # If you wish to disable blacklisted spawners, use "blacklist: []"
   blacklist:
   - BLAZE
+
+  # Whitelisted spawners are spawners that will get stacked.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # If you wish to disable whitelisted spawners, use "whitelist: []"
+  whitelist: []
 
   # Set a maximum stack for specific spawners.
   # Make sure you follow the "ENTITY-TYPE" format.
@@ -457,10 +476,16 @@ barrels:
   # {2} represents barrel type in upper case
   custom-name: '&6&lx{0} &7&l{1}'
 
+  # Blacklisted barrels are barrels that won't get stacked.
+  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  # If you wish to disable blacklisted spawners, use "blacklist: []"
+  blacklist: []
+
   # Whitelisted blocks are blocks that will get stacked.
   # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
-  # If you wish to disable stacking of all blocks, use "enabled: false"
+  # If you wish to disable whitelisted spawners, use "whitelist: []"
   whitelist:
   - DIAMOND_BLOCK
 
