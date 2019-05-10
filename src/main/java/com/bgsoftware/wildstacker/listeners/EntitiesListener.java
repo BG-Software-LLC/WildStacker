@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.ItemStackList;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
@@ -109,25 +110,47 @@ public final class EntitiesListener implements Listener {
             }
 
             Executor.async(() -> {
-                List<ItemStack> drops = new ArrayList<>();
-                int expToDrop = 0;
+                List<List<ItemStack>> entityDrops = new ArrayList<>();
+                List<Integer> entityExp = new ArrayList<>();
 
                 for(int i = 0; i < stackAmount; i++) {
-                    AsyncEntityDeathEvent asyncEntityDeathEvent =
-                            new AsyncEntityDeathEvent(livingEntity, stackedEntity.getDrops(lootBonusLevel, 1), stackedEntity.getExp(1, -1));
-                    Bukkit.getPluginManager().callEvent(asyncEntityDeathEvent);
-                    drops.addAll(asyncEntityDeathEvent.getDrops());
-                    expToDrop += asyncEntityDeathEvent.getDroppedExp();
+                    entityDrops.add(stackedEntity.getDrops(lootBonusLevel, 1));
+                    entityExp.add(stackedEntity.getExp(1, -1));
+                }
+
+                ItemStackList drops = new ItemStackList();
+                int expToDrop = 0;
+
+                if(plugin.getSettings().asyncEvent) {
+                    for (int i = 0; i < stackAmount; i++) {
+                        AsyncEntityDeathEvent asyncEntityDeathEvent = new AsyncEntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
+                        Bukkit.getPluginManager().callEvent(asyncEntityDeathEvent);
+                        drops.addAll(asyncEntityDeathEvent.getDrops());
+                        expToDrop += asyncEntityDeathEvent.getDroppedExp();
+                    }
                 }
 
                 final int EXP = expToDrop;
 
                 Executor.sync(() -> {
-                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+                    int exp = 0;
 
-                    if(EXP > 0){
+                    if(!plugin.getSettings().asyncEvent){
+                        for (int i = 0; i < stackAmount; i++) {
+                            EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
+                            Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                            drops.addAll(entityDeathEvent.getDrops());
+                            exp += entityDeathEvent.getDroppedExp();
+                        }
+                    }else{
+                        exp = EXP;
+                    }
+
+                    drops.toList().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+
+                    if(exp > 0){
                         ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-                        experienceOrb.setExperience(EXP);
+                        experienceOrb.setExperience(exp);
                     }
 
                     stackedEntity.tryUnstack(stackAmount);
@@ -139,8 +162,32 @@ public final class EntitiesListener implements Listener {
                         }catch(IllegalArgumentException ignored){}
                     }
                 });
+
             });
 
+
+//            Executor.async(() -> {
+//
+//                final int EXP = expToDrop;
+//
+//                Executor.sync(() -> {
+//                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+//
+//                    if(EXP > 0){
+//                        ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+//                        experienceOrb.setExperience(EXP);
+//                    }
+//
+//                    stackedEntity.tryUnstack(stackAmount);
+//
+//                    if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
+//                        try {
+//                            livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+//                            livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+//                        }catch(IllegalArgumentException ignored){}
+//                    }
+//                });
+//            });
         }
     }
 

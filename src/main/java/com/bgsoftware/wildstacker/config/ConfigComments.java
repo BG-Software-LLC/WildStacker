@@ -288,6 +288,11 @@ public final class ConfigComments {
     public static String ENTITIES_NAMES_TOGGLE_COMMAND = "entities.names-toggle.command";
 
     @Comment("")
+    @Comment("Should the EntityDeathEvent get called async?")
+    @Comment("If you get issues with other plugins, set it to false.")
+    public static String ENTITIES_ASYNC_EVENT = "entities.async-event";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 

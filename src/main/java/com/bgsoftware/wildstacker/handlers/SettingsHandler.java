@@ -43,7 +43,8 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
-            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled;
+            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled,
+            asyncEvent;
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance;
@@ -139,6 +140,7 @@ public final class SettingsHandler {
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
+        asyncEvent = cfg.getBoolean("entities.async-event", true);
 
         boolean stackingEnable = !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && !Bukkit.getPluginManager().isPluginEnabled("MergedSpawner");
         spawnersStackingEnabled = stackingEnable && cfg.getBoolean("spawners.enabled", true);

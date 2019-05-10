@@ -293,6 +293,10 @@ entities:
     # What the toggle command will be?
     command: 'stacker names entity'
 
+  # Should the EntityDeathEvent get called async?
+  # If you get issues with other plugins, set it to false.
+  async-event: true
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?
