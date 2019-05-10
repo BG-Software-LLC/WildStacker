@@ -172,12 +172,6 @@ public final class ConfigComments {
     public static String ENTITIES_DISABLED_REGIONS = "entities.disabled-regions";
 
     @Comment("")
-    @Comment("Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.")
-    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
-    @Comment("If you wish to enable stacking of all entities that are spawned, use \"spawn-blacklist: []\"")
-    public static String ENTITIES_SPAWN_BLACKLIST = "entities.spawn-blacklist";
-
-    @Comment("")
     @Comment("Blacklisted names is a list of names that when an entity has this name, it won't get stacked.")
     @Comment("Color codes are supported, as well as regex.")
     @Comment("If you wish to enable stacking of all entities based on their name, use \"name-blacklist: []\"")
