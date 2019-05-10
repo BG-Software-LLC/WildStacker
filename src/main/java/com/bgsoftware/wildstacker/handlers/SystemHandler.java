@@ -78,29 +78,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
-//        if(dataHandler.CACHED_OBJECTS.containsKey(livingEntity.getUniqueId())) {
-//            if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand))
-//                return (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
-//        }
-//
-//        StackedEntity stackedEntity = new WStackedEntity(livingEntity);
-//
-//        if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())) {
-//            stackedEntity.setStackAmount(dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId()), false);
-//            dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId());
-//        }
-//
-//        if(dataHandler.CACHED_SPAWN_REASON_ENTITIES.containsKey(livingEntity.getUniqueId())){
-//            stackedEntity.setSpawnReason(dataHandler.CACHED_SPAWN_REASON_ENTITIES.get(livingEntity.getUniqueId()));
-//            dataHandler.CACHED_SPAWN_REASON_ENTITIES.remove(livingEntity.getUniqueId());
-//        }
-//
-//        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
-//                plugin.getSettings().entitiesStackingEnabled && !plugin.getSettings().blacklistedEntities.contains(livingEntity.getType().name()) &&
-//                !plugin.getSettings().entitiesDisabledWorlds.contains(livingEntity.getWorld().getName()))
-//            dataHandler.CACHED_OBJECTS.put(livingEntity.getUniqueId(), stackedEntity);
-//
-//        return stackedEntity;
         StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.get(dataHandler.DEFAULT_CHUNK, livingEntity.getUniqueId());
 
         if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
@@ -108,6 +85,12 @@ public final class SystemHandler implements SystemManager {
 
         //Entity wasn't found, creating a new object
         stackedEntity = new WStackedEntity(livingEntity);
+
+        //Checks if the entity still exists after a few ticks
+        Executor.sync(() -> {
+            if(livingEntity.isDead())
+                dataHandler.CACHED_ENTITIES.remove(dataHandler.DEFAULT_CHUNK, livingEntity.getUniqueId());
+        }, 10L);
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
@@ -119,20 +102,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem getStackedItem(Item item) {
-//        if(dataHandler.CACHED_OBJECTS.containsKey(item.getUniqueId()))
-//            return (StackedItem) dataHandler.CACHED_OBJECTS.get(item.getUniqueId());
-//
-//        StackedItem stackedItem = new WStackedItem(item);
-//
-//        if(dataHandler.CACHED_AMOUNT_ITEMS.containsKey(item.getUniqueId())) {
-//            stackedItem.setStackAmount(dataHandler.CACHED_AMOUNT_ITEMS.get(item.getUniqueId()), false);
-//            dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
-//        }
-//
-//        if(plugin.getSettings().itemsStackingEnabled)
-//            dataHandler.CACHED_OBJECTS.put(item.getUniqueId(), stackedItem);
-//
-//        return stackedItem;
         StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(item.getLocation().getChunk(), item.getUniqueId());
 
         if(stackedItem != null && stackedItem.getItem() != null)
@@ -140,6 +109,12 @@ public final class SystemHandler implements SystemManager {
 
         //Item wasn't found, creating a new object.
         stackedItem = new WStackedItem(item);
+
+        //Checks if the item still exists after a few ticks
+        Executor.sync(() -> {
+            if(item.isDead())
+                dataHandler.CACHED_ITEMS.remove(item.getLocation().getChunk(), item.getUniqueId());
+        }, 10L);
 
         //A new item was created. Let's see if we need to add him
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
@@ -155,15 +130,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSpawner getStackedSpawner(Location location) {
-//        if(dataHandler.CACHED_OBJECTS.containsKey(location))
-//            return (StackedSpawner) dataHandler.CACHED_OBJECTS.get(location);
-//
-//        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
-//
-//        if(plugin.getSettings().spawnersStackingEnabled)
-//            dataHandler.CACHED_OBJECTS.put(location, stackedSpawner);
-//
-//        return stackedSpawner;
         StackedSpawner stackedSpawner = dataHandler.CACHED_SPAWNERS.get(location.getChunk(), location);
 
         if(stackedSpawner != null)
@@ -171,6 +137,12 @@ public final class SystemHandler implements SystemManager {
 
         //Spawner wasn't found, creating a new object
         stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
+
+        //Checks if the spawner still exists after a few ticks
+        Executor.sync(() -> {
+            if(!isStackedSpawner(location.getBlock()))
+                dataHandler.CACHED_SPAWNERS.remove(location.getChunk(), location);
+        }, 10L);
 
         //A new spawner was created. Let's see if we need to add him
         if(plugin.getSettings().spawnersStackingEnabled && stackedSpawner.isWhitelisted() && !stackedSpawner.isBlacklisted() && !stackedSpawner.isWorldDisabled())
@@ -186,16 +158,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedBarrel getStackedBarrel(Location location) {
-//        if(dataHandler.CACHED_OBJECTS.containsKey(location))
-//            return (StackedBarrel) dataHandler.CACHED_OBJECTS.get(location);
-//
-//        StackedBarrel stackedBarrel = new WStackedBarrel(location, location.getBlock().getState().getData().toItemStack(1));
-//        stackedBarrel.createDisplayBlock();
-//
-//        if(plugin.getSettings().barrelsStackingEnabled)
-//            dataHandler.CACHED_OBJECTS.put(location, stackedBarrel);
-//
-//        return stackedBarrel;
         StackedBarrel stackedBarrel = dataHandler.CACHED_BARRELS.get(location.getChunk(), location);
 
         if(stackedBarrel != null)
@@ -203,10 +165,18 @@ public final class SystemHandler implements SystemManager {
 
         //Barrel wasn't found, creating a new object
         stackedBarrel = new WStackedBarrel(location.getBlock(), location.getBlock().getState().getData().toItemStack(1));
+
+        //Checks if the barrel still exists after a few ticks
         Executor.sync(() -> {
             if(isStackedBarrel(location.getBlock()))
                 WStackedBarrel.of(location.getBlock()).createDisplayBlock();
         }, 2L);
+
+        //Checks if the barrel still exists after a few ticks
+        Executor.sync(() -> {
+            if(!isStackedBarrel(location.getBlock()))
+                dataHandler.CACHED_BARRELS.remove(location.getChunk(), location);
+        }, 10L);
 
         //A new barrel was created. Let's see if we need to add him
         if(plugin.getSettings().barrelsStackingEnabled && stackedBarrel.isWhitelisted() && !stackedBarrel.isBlacklisted() && !stackedBarrel.isWorldDisabled())
