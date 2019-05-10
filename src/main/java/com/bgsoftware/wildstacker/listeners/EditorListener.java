@@ -167,6 +167,9 @@ public final class EditorListener implements Listener {
                 case 11:
                     configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_11);
                     break;
+                case 12:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_12);
+                    break;
                 default:
                     return;
             }
@@ -266,6 +269,9 @@ public final class EditorListener implements Listener {
                     break;
                 case 26:
                     configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_26);
+                    break;
+                case 27:
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_27);
                     break;
                 default:
                     return;
@@ -376,6 +382,9 @@ public final class EditorListener implements Listener {
                 case 29:
                     configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_29);
                     break;
+                case 30:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_30);
+                    break;
                 default:
                     return;
             }
@@ -430,6 +439,9 @@ public final class EditorListener implements Listener {
                     break;
                 case 11:
                     configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_11);
+                    break;
+                case 12:
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_12);
                     break;
                 default:
                     return;

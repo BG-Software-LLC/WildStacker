@@ -80,6 +80,11 @@ public final class ConfigComments {
     public static String ITEMS_DISABLED_WORLDS = "items.disabled-worlds";
 
     @Comment("")
+    @Comment("Set a maximum amount of item objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String ITEMS_CHUNK_LIMIT = "items.chunk-limit";
+
+    @Comment("")
     @Comment("When enabled, all items will have a custom name (even if not stacked)")
     public static String ITEMS_UNSTACKED_CUSTOM_NAME = "items.unstacked-custom-name";
 
@@ -166,6 +171,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("A list of worlds entities won't get stacked inside them (case-sensitive)")
     public static String ENTITIES_DISABLED_WORLDS = "entities.disabled-worlds";
+
+    @Comment("")
+    @Comment("Set a maximum amount of entity objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String ENTITIES_CHUNK_LIMIT = "entities.chunk-limit";
 
     @Comment("")
     @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
@@ -336,6 +346,11 @@ public final class ConfigComments {
     public static String SPAWNERS_DISABLED_WORLDS = "spawners.disabled-worlds";
 
     @Comment("")
+    @Comment("Set a maximum amount of spawner objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String SPAWNERS_CHUNK_LIMIT = "spawners.chunk-limit";
+
+    @Comment("")
     @Comment("When enabled, the plugin will try to find a spawner in the whole chunk instead")
     @Comment("of only in the provided radius. merge-radius will be overridden, and will be used")
     @Comment("as a y-level range only.")
@@ -502,6 +517,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("A list of worlds barrels won't get stacked inside them (case-sensitive)")
     public static String BARRELS_DISABLED_WORLD = "barrels.disabled-worlds";
+
+    @Comment("")
+    @Comment("Set a maximum amount of barrel objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String BARRELS_CHUNK_LIMIT = "barrels.chunk-limit";
 
     @Comment("")
     @Comment("When enabled, the plugin will try to find a block in the whole chunk instead")

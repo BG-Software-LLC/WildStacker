@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -35,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,6 +79,9 @@ public final class BarrelsListener implements Listener {
         e.setCancelled(true);
 
         if(targetBarrel == null) {
+            if(isChunkLimit(e.getBlock().getChunk()))
+                return;
+
             BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel);
             Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
@@ -305,6 +310,26 @@ public final class BarrelsListener implements Listener {
         }catch(Throwable ex){
             return true;
         }
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().barrelsChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int barrelsInsideChunk = getStackedBarrels(chunk).size();
+        return barrelsInsideChunk > chunkLimit;
+    }
+
+    private List<StackedBarrel> getStackedBarrels(Chunk chunk){
+        List<StackedBarrel> stackedBarrels = new ArrayList<>();
+
+        Iterator<StackedBarrel> stackedBarrelIterator = plugin.getDataHandler().CACHED_BARRELS.iterator(chunk);
+        while (stackedBarrelIterator.hasNext())
+            stackedBarrels.add(stackedBarrelIterator.next());
+
+        return stackedBarrels;
     }
 
 }

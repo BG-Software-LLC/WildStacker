@@ -25,46 +25,48 @@ public final class EditorHandler {
 
     public static String ITEMS_SLOT_0 = "items.enabled", ITEMS_SLOT_1 = "items.merge-radius",
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
-            ITEMS_SLOT_5 = "items.limits", ITEMS_SLOT_6 = "items.disabled-worlds", ITEMS_SLOT_7 = "items.fix-stack",
-            ITEMS_SLOT_8 = "items.item-display", ITEMS_SLOT_9 = "items.buckets-stacker.enabled",
-            ITEMS_SLOT_10 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_11 = "items.kill-all";
+            ITEMS_SLOT_5 = "items.limits", ITEMS_SLOT_6 = "items.disabled-worlds", ITEMS_SLOT_7 = "items.chunk-limit",
+            ITEMS_SLOT_8 = "items.fix-stack", ITEMS_SLOT_9 = "items.item-display", ITEMS_SLOT_10 = "items.buckets-stacker.enabled",
+            ITEMS_SLOT_11 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_12 = "items.kill-all";
 
     public static String ENTITIES_SLOT_0 = "entities.enabled", ENTITIES_SLOT_1 = "entities.merge-radius",
             ENTITIES_SLOT_2 = "entities.custom-name", ENTITIES_SLOT_3 = "entities.blacklist",
             ENTITIES_SLOT_4 = "entities.whitelist", ENTITIES_SLOT_5 = "entities.limits",
             ENTITIES_SLOT_6 = "entities.minimum-limits", ENTITIES_SLOT_7 = "entities.disabled-worlds",
-            ENTITIES_SLOT_8 = "entities.disabled-regions", ENTITIES_SLOT_9 = "entities.name-blacklist",
-            ENTITIES_SLOT_10 = "entities.stack-interval", ENTITIES_SLOT_11 = "entities.kill-all.interval",
-            ENTITIES_SLOT_12 = "entities.kill-all.clear-lagg", ENTITIES_SLOT_13 = "entities.stack-checks",
-            ENTITIES_SLOT_14 = "entities.stack-split", ENTITIES_SLOT_15 = "entities.linked-entities.enabled",
-            ENTITIES_SLOT_16 = "entities.linked-entities.max-distance", ENTITIES_SLOT_17 = "entities.instant-kill",
-            ENTITIES_SLOT_18 = "entities.nerfed-spawning", ENTITIES_SLOT_19 = "entities.nerfed-worlds",
-            ENTITIES_SLOT_20 = "entities.stack-down.enabled", ENTITIES_SLOT_21 = "entities.stack-down.stack-down-types",
-            ENTITIES_SLOT_22 = "entities.keep-fire", ENTITIES_SLOT_23 = "entities.mythic-mobs-stack",
-            ENTITIES_SLOT_24 = "entities.keep-lowest-health", ENTITIES_SLOT_25 = "entities.stack-after-breed",
-            ENTITIES_SLOT_26 = "entities.hide-names";
+            ENTITIES_SLOT_8 = "entities.chunk-limit", ENTITIES_SLOT_9 = "entities.disabled-regions",
+            ENTITIES_SLOT_10 = "entities.name-blacklist", ENTITIES_SLOT_11 = "entities.stack-interval",
+            ENTITIES_SLOT_12 = "entities.kill-all.interval", ENTITIES_SLOT_13 = "entities.kill-all.clear-lagg",
+            ENTITIES_SLOT_14 = "entities.stack-checks", ENTITIES_SLOT_15 = "entities.stack-split",
+            ENTITIES_SLOT_16 = "entities.linked-entities.enabled", ENTITIES_SLOT_17 = "entities.linked-entities.max-distance",
+            ENTITIES_SLOT_18 = "entities.instant-kill", ENTITIES_SLOT_19 = "entities.nerfed-spawning",
+            ENTITIES_SLOT_20 = "entities.nerfed-worlds", ENTITIES_SLOT_21 = "entities.stack-down.enabled",
+            ENTITIES_SLOT_22 = "entities.stack-down.stack-down-types", ENTITIES_SLOT_23 = "entities.keep-fire",
+            ENTITIES_SLOT_24 = "entities.mythic-mobs-stack", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
+            ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names";
 
     public static String SPAWNERS_SLOT_0 = "spawners.enabled", SPAWNERS_SLOT_1 = "spawners.merge-radius",
             SPAWNERS_SLOT_2 = "spawners.custom-name", SPAWNERS_SLOT_3 = "spawners.blacklist",
             SPAWNERS_SLOT_4 = "spawners.whitelist", SPAWNERS_SLOT_5 = "spawners.limits",
-            SPAWNERS_SLOT_6 = "spawners.disabled-worlds", SPAWNERS_SLOT_7 = "spawners.chunk-merge",
-            SPAWNERS_SLOT_8 = "spawners.explosions-break-stack", SPAWNERS_SLOT_9 = "spawners.explosions-break-chance",
-            SPAWNERS_SLOT_10 = "spawners.drop-without-silk", SPAWNERS_SLOT_11 = "spawners.silk-spawners.enabled",
-            SPAWNERS_SLOT_12 = "spawners.silk-spawners.custom-name", SPAWNERS_SLOT_13 = "spawners.silk-spawners.explosions-drop-spawner",
-            SPAWNERS_SLOT_14 = "spawners.silk-spawners.drop-to-inventory", SPAWNERS_SLOT_15 = "spawners.shift-get-whole-stack",
-            SPAWNERS_SLOT_16 = "spawners.get-stacked-item", SPAWNERS_SLOT_17 = "spawners.floating-names",
-            SPAWNERS_SLOT_18 = "spawners.break-menu.enabled", SPAWNERS_SLOT_19 = "spawners.place-inventory",
-            SPAWNERS_SLOT_20 = "spawners.placement-permission", SPAWNERS_SLOT_21 = "spawners.shift-place-stack",
-            SPAWNERS_SLOT_22 = "spawners.break-charge.amount", SPAWNERS_SLOT_23 = "spawners.break-charge.multiply-stack-amount",
-            SPAWNERS_SLOT_24 = "spawners.place-charge.amount", SPAWNERS_SLOT_25 = "spawners.place-charge.multiply-stack-amount",
-            SPAWNERS_SLOT_26 = "spawners.change-using-eggs", SPAWNERS_SLOT_27 = "spawners.eggs-stack-multiply",
-            SPAWNERS_SLOT_28 = "spawners.next-spawner-placement", SPAWNERS_SLOT_29 = "spawners.only-one-spawner";
+            SPAWNERS_SLOT_6 = "spawners.disabled-worlds", SPAWNERS_SLOT_7 = "spawners.chunk-limit",
+            SPAWNERS_SLOT_8 = "spawners.chunk-merge", SPAWNERS_SLOT_9 = "spawners.explosions-break-stack",
+            SPAWNERS_SLOT_10 = "spawners.explosions-break-chance", SPAWNERS_SLOT_11 = "spawners.drop-without-silk",
+            SPAWNERS_SLOT_12 = "spawners.silk-spawners.enabled", SPAWNERS_SLOT_13 = "spawners.silk-spawners.custom-name",
+            SPAWNERS_SLOT_14 = "spawners.silk-spawners.explosions-drop-spawner", SPAWNERS_SLOT_15 = "spawners.silk-spawners.drop-to-inventory",
+            SPAWNERS_SLOT_16 = "spawners.shift-get-whole-stack", SPAWNERS_SLOT_17 = "spawners.get-stacked-item",
+            SPAWNERS_SLOT_18 = "spawners.floating-names", SPAWNERS_SLOT_19 = "spawners.break-menu.enabled",
+            SPAWNERS_SLOT_20 = "spawners.place-inventory", SPAWNERS_SLOT_21 = "spawners.placement-permission",
+            SPAWNERS_SLOT_22 = "spawners.shift-place-stack", SPAWNERS_SLOT_23 = "spawners.break-charge.amount",
+            SPAWNERS_SLOT_24 = "spawners.break-charge.multiply-stack-amount", SPAWNERS_SLOT_25 = "spawners.place-charge.amount",
+            SPAWNERS_SLOT_26 = "spawners.place-charge.multiply-stack-amount", SPAWNERS_SLOT_27 = "spawners.change-using-eggs",
+            SPAWNERS_SLOT_28 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_29 = "spawners.next-spawner-placement",
+            SPAWNERS_SLOT_30 = "spawners.only-one-spawner";
 
     public static String BARRELS_SLOT_0 = "barrels.enabled", BARRELS_SLOT_1 = "barrels.merge-radius",
             BARRELS_SLOT_2 = "barrels.custom-name", BARRELS_SLOT_3 = "barrels.blacklist", BARRELS_SLOT_4 = "barrels.whitelist",
-            BARRELS_SLOT_5 = "barrels.limits", BARRELS_SLOT_6 = "barrels.disabled-worlds", BARRELS_SLOT_7 = "barrels.chunk-merge",
-            BARRELS_SLOT_8 = "barrels.explosions-break-stack", BARRELS_SLOT_9 = "barrels.toggle-command.enabled",
-            BARRELS_SLOT_10 = "barrels.toggle-command.command", BARRELS_SLOT_11 = "barrels.place-inventory";
+            BARRELS_SLOT_5 = "barrels.limits", BARRELS_SLOT_6 = "barrels.disabled-worlds", BARRELS_SLOT_7 = "barrels.chunk-limit",
+            BARRELS_SLOT_8 = "barrels.chunk-merge", BARRELS_SLOT_9 = "barrels.explosions-break-stack",
+            BARRELS_SLOT_10 = "barrels.toggle-command.enabled", BARRELS_SLOT_11 = "barrels.toggle-command.command",
+            BARRELS_SLOT_12 = "barrels.place-inventory";
 
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -124,19 +126,22 @@ public final class EditorHandler {
                 .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList(ITEMS_SLOT_6)).build());
 
         editor.setItem(7, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Fix Stack").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_7)).build());
+                .withName("&6Chunk Limit").withLore("&7Value: " + config.getInt(ITEMS_SLOT_7)).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Item Display").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_8)).build());
+                .withName("&6Fix Stack").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_8)).build());
 
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Buckets Stacker Enabled").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_9)).build());
+                .withName("&6Item Display").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_9)).build());
 
         editor.setItem(10, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Buckets Name Blacklist").withLore("&7Value:", config.getStringList(ITEMS_SLOT_10)).build());
+                .withName("&6Buckets Stacker Enabled").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_10)).build());
 
         editor.setItem(11, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_11)).build());
+                .withName("&6Buckets Name Blacklist").withLore("&7Value:", config.getStringList(ITEMS_SLOT_11)).build());
+
+        editor.setItem(12, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_12)).build());
 
         return editor;
     }
@@ -169,61 +174,64 @@ public final class EditorHandler {
                 .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_7)).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Disabled Regions").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_8)).build());
+                .withName("&6Chunk Limit").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_8)).build());
 
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Name Blacklist").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_9)).build());
+                .withName("&6Disabled Regions").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_9)).build());
 
         editor.setItem(10, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Interval").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_10)).build());
+                .withName("&6Name Blacklist").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_10)).build());
 
         editor.setItem(11, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Kill-All Interval").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_11)).build());
+                .withName("&6Stack Interval").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_11)).build());
 
         editor.setItem(12, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Kill-All ClearLagg").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_12)).build());
+                .withName("&6Kill-All Interval").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_12)).build());
 
         editor.setItem(13, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Checks").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection(ENTITIES_SLOT_13)).build());
+                .withName("&6Kill-All ClearLagg").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_13)).build());
 
         editor.setItem(14, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Split").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection(ENTITIES_SLOT_14)).build());
+                .withName("&6Stack Checks").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection(ENTITIES_SLOT_14)).build());
 
         editor.setItem(15, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Linked Entities Enabled").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_15)).build());
+                .withName("&6Stack Split").withLore("&7Value &c(Do not remove sections)&7:", config.getConfigurationSection(ENTITIES_SLOT_15)).build());
 
         editor.setItem(16, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Linked Entities Max Distance").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_16)).build());
+                .withName("&6Linked Entities Enabled").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_16)).build());
 
         editor.setItem(17, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Instant Kill").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_17)).build());
+                .withName("&6Linked Entities Max Distance").withLore("&7Value: " + config.getInt(ENTITIES_SLOT_17)).build());
 
         editor.setItem(18, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Nerfed Spawning").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_18)).build());
+                .withName("&6Instant Kill").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_18)).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Nerfed Worlds").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_19)).build());
+                .withName("&6Nerfed Spawning").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_19)).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_20)).build());
+                .withName("&6Nerfed Worlds").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_20)).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_21)).build());
+                .withName("&6Stack Down Enabled").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_21)).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_22)).build());
+                .withName("&6Stack Down Types").withLore("&7Value:", config.getStringList(ENTITIES_SLOT_22)).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_23)).build());
+                .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_23)).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_24)).build());
+                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_24)).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_25)).build());
+                .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_25)).build());
 
         editor.setItem(26, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Hide Names").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_26)).build());
+                .withName("&6Stack After Breed").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_26)).build());
+
+        editor.setItem(27, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Hide Names").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_27)).build());
 
         return editor;
     }
@@ -253,73 +261,76 @@ public final class EditorHandler {
                 .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList(SPAWNERS_SLOT_6)).build());
 
         editor.setItem(7, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Chunk Merge").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_7)).build());
+                .withName("&6Chunk Limit").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_7)).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Explosions Break Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_8)).build());
+                .withName("&6Chunk Merge").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_8)).build());
 
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Explosions Break Chance").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_9)).build());
+                .withName("&6Explosions Break Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_9)).build());
 
         editor.setItem(10, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Drop Without Silk").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_10)).build());
+                .withName("&6Explosions Break Chance").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_10)).build());
 
         editor.setItem(11, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Silk-Spawners Enabled").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_11)).build());
+                .withName("&6Drop Without Silk").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_11)).build());
 
         editor.setItem(12, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Silk-Spawners Custom Name").withLore("&7Value: " + config.getString(SPAWNERS_SLOT_12)).build());
+                .withName("&6Silk-Spawners Enabled").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_12)).build());
 
         editor.setItem(13, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Silk-Spawners Explosions Drop Spawner").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_13)).build());
+                .withName("&6Silk-Spawners Custom Name").withLore("&7Value: " + config.getString(SPAWNERS_SLOT_13)).build());
 
         editor.setItem(14, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Silk-Spawners Drop To Inventory").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_14)).build());
+                .withName("&6Silk-Spawners Explosions Drop Spawner").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_14)).build());
 
         editor.setItem(15, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Shift Get Whole Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_15)).build());
+                .withName("&6Silk-Spawners Drop To Inventory").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_15)).build());
 
         editor.setItem(16, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Get Stacked Item").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_16)).build());
+                .withName("&6Shift Get Whole Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_16)).build());
 
         editor.setItem(17, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Floating Names").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_17)).build());
+                .withName("&6Get Stacked Item").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_17)).build());
 
         editor.setItem(18, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Menu").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_18)).build());
+                .withName("&6Floating Names").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_18)).build());
 
         editor.setItem(19, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Menu").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_19)).build());
+                .withName("&6Break Menu").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_19)).build());
 
         editor.setItem(20, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_20)).build());
+                .withName("&6Place Menu").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_20)).build());
 
         editor.setItem(21, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_21)).build());
+                .withName("&6Placement Permission").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_21)).build());
 
         editor.setItem(22, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_22)).build());
+                .withName("&6Shift Place Stack").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_22)).build());
 
         editor.setItem(23, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_23)).build());
+                .withName("&6Break Charge Amount").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_23)).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_24)).build());
+                .withName("&6Break Charge Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_24)).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_25)).build());
+                .withName("&6Place Charge Amount").withLore("&7Value: " + config.getInt(SPAWNERS_SLOT_25)).build());
 
         editor.setItem(26, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_26)).build());
+                .withName("&6Place Charge Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_26)).build());
 
         editor.setItem(27, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_27)).build());
+                .withName("&6Change Using Eggs").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_27)).build());
 
         editor.setItem(28, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_28)).build());
+                .withName("&6Eggs Stack Multiply").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_28)).build());
 
         editor.setItem(29, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Only One Spawner").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_29)).build());
+                .withName("&6Next Spawner Placement").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_29)).build());
+
+        editor.setItem(30, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Only One Spawner").withLore("&7Value: " + config.getBoolean(SPAWNERS_SLOT_30)).build());
 
         return editor;
     }
@@ -349,19 +360,22 @@ public final class EditorHandler {
                 .withName("&6Disabled Worlds").withLore("&7Value:", config.getStringList(BARRELS_SLOT_6)).build());
 
         editor.setItem(7, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Chunk Merge").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_7)).build());
+                .withName("&6Chunk Limit").withLore("&7Value: " + config.getInt(BARRELS_SLOT_7)).build());
 
         editor.setItem(8, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Explosions Break Stack").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_8)).build());
+                .withName("&6Chunk Merge").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_8)).build());
 
         editor.setItem(9, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Toggle Command Enabled").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_9)).build());
+                .withName("&6Explosions Break Stack").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_9)).build());
 
         editor.setItem(10, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Toggle Command Command").withLore("&7Value: " + config.getString(BARRELS_SLOT_10)).build());
+                .withName("&6Toggle Command Enabled").withLore("&7Value: " + config.getBoolean(BARRELS_SLOT_10)).build());
 
         editor.setItem(11, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Place Inventory").withLore("&7Value: " + config.getString(BARRELS_SLOT_11)).build());
+                .withName("&6Toggle Command Command").withLore("&7Value: " + config.getString(BARRELS_SLOT_11)).build());
+
+        editor.setItem(12, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Place Inventory").withLore("&7Value: " + config.getString(BARRELS_SLOT_12)).build());
 
         return editor;
     }

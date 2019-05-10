@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -22,6 +23,8 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Arrays;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -58,6 +61,12 @@ public final class ItemsListener implements Listener {
             is.setAmount(1);
             stackedItem.setItemStack(is);
         }
+
+        //Chunk Limit
+        Executor.sync(() -> {
+            if(isChunkLimit(e.getLocation().getChunk()))
+                stackedItem.remove();
+        }, 2L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -171,6 +180,16 @@ public final class ItemsListener implements Listener {
                 ProtocolLibHook.updateName(e.getPlayer(), entity);
             }
         }
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().itemsChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int itemsInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count();
+        return itemsInsideChunk >= chunkLimit;
     }
 
 }

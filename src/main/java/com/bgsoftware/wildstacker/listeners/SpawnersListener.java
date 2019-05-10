@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,6 +39,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +122,11 @@ public final class SpawnersListener implements Listener {
         CreatureSpawner targetSpawner = stackedSpawner.tryStack();
 
         if(targetSpawner == null){
+            if(isChunkLimit(e.getBlock().getChunk())){
+                e.setCancelled(true);
+                return;
+            }
+
             SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner);
             Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
 
@@ -458,6 +465,16 @@ public final class SpawnersListener implements Listener {
         Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()));
         Locale.SPAWNER_INFO_AMOUNT.send(e.getPlayer(), stackedSpawner.getStackAmount());
         Locale.SPAWNER_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().spawnersChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int spawnersInsideChunk = (int) Arrays.stream(chunk.getTileEntities()).filter(blockState -> blockState instanceof CreatureSpawner).count();
+        return spawnersInsideChunk >= chunkLimit;
     }
 
 }

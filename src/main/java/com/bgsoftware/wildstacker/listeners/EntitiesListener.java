@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -53,6 +54,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -224,6 +226,12 @@ public final class EntitiesListener implements Listener {
             Executor.sync(stackedEntity::tryStack, 1L);
         else
             stackedEntity.tryStack();
+
+        //Chunk Limit
+        Executor.sync(() -> {
+            if(isChunkLimit(e.getLocation().getChunk()))
+                stackedEntity.remove();
+        }, 2L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -506,6 +514,16 @@ public final class EntitiesListener implements Listener {
 
     private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){
         return livingEntity.getLastDamageCause() == null ? EntityDamageEvent.DamageCause.CUSTOM : livingEntity.getLastDamageCause().getCause();
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().entitiesChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof LivingEntity).count();
+        return entitiesInsideChunk > chunkLimit;
     }
 
     private int getFortuneLevel(LivingEntity livingEntity){

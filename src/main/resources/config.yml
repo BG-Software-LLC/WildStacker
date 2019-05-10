@@ -69,6 +69,10 @@ items:
   disabled-worlds:
   - disabled_world
 
+  # Set a maximum amount of item objects in a chunk.
+  # If you want to disable the feature, set it to 0.
+  chunk-limit: 0
+
   # When enabled, all items will have a custom name (even if not stacked)
   unstacked-custom-name: false
 
@@ -149,6 +153,10 @@ entities:
   # A list of worlds entities won't get stacked inside them (case-sensitive)
   disabled-worlds:
   - disabled_world
+
+  # Set a maximum amount of entity objects in a chunk.
+  # If you want to disable the feature, set it to 0.
+  chunk-limit: 0
 
   # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
   disabled-regions:
@@ -336,6 +344,10 @@ spawners:
   disabled-worlds:
   - disabled_world
 
+  # Set a maximum amount of spawner objects in a chunk.
+  # If you want to disable the feature, set it to 0.
+  chunk-limit: 0
+
   # When enabled, the plugin will try to find a spawner in the whole chunk instead
   # of only in the provided radius. merge-radius will be overridden, and will be used
   # as a y-level range only.
@@ -497,6 +509,10 @@ barrels:
   # A list of worlds barrels won't get stacked inside them (case-sensitive)
   disabled-worlds:
   - disabled_world
+
+  # Set a maximum amount of barrel objects in a chunk.
+  # If you want to disable the feature, set it to 0.
+  chunk-limit: 0
 
   # When enabled, the plugin will try to find a block in the whole chunk instead
   # of only in the provided radius. merge-radius will be overridden, and will be used
