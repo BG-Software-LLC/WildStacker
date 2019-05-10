@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("WeakerAccess")
 public final class StackedRegistry<K, V> implements Iterable<V>{
 
     private final Map<Chunk, Map<K, V>> registryMap = new ConcurrentHashMap<>();
@@ -56,6 +55,10 @@ public final class StackedRegistry<K, V> implements Iterable<V>{
 
     public Iterator<V> iterator(Chunk chunk) {
         return getMap(chunk).values().iterator();
+    }
+
+    public Iterator<Map.Entry<K, V>> entryIterator(Chunk chunk){
+        return getMap(chunk).entrySet().iterator();
     }
 
     @Override
