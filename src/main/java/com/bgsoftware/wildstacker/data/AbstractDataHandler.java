@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,21 +47,7 @@ public abstract class AbstractDataHandler {
 
     public abstract void saveChunkData(Chunk chunk, boolean remove, boolean async);
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void clearDatabase(){
-        File dataFolder = new File(plugin.getDataFolder(), "data");
-        if(dataFolder.exists()) {
-            for (File worldFolder : Objects.requireNonNull(dataFolder.listFiles())) {
-                if(worldFolder.isDirectory()) {
-                    for (File chunkFile : Objects.requireNonNull(worldFolder.listFiles())) {
-                        chunkFile.delete();
-                    }
-                }else{
-                    worldFolder.delete();
-                }
-            }
-        }
-    }
+    public abstract void clearDatabase();
 
     public void saveChunkData(boolean remove, boolean async){
         Set<Chunk> chunks = new HashSet<>();

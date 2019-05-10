@@ -195,12 +195,14 @@ public final class SQLDataHandler extends AbstractDataHandler {
                         stackedEntity.getSpawnReason().name())
                 );
             }
+            if(stackedEntity == null || stackedEntity.getLivingEntity() == null)
+                Bukkit.broadcastMessage("1");
         }
 
         Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
         while(items.hasNext()){
             StackedItem stackedItem = items.next();
-            if(stackedItem.getStackAmount() > 1)
+            if(stackedItem != null && stackedItem.getItem() != null && stackedItem.getStackAmount() > 1)
                 preparedStatementList.add(String.format("INSERT INTO items VALUES('%s', '%s', %s);",
                         chunk.getX() + "," + chunk.getZ(),
                         stackedItem.getUniqueId(),
@@ -217,7 +219,10 @@ public final class SQLDataHandler extends AbstractDataHandler {
                         getChunkLocation(stackedSpawner.getLocation()),
                         stackedSpawner.getStackAmount())
                 );
-            if(remove) plugin.getProviders().deleteHologram(stackedSpawner);
+
+            if(remove){
+                plugin.getProviders().deleteHologram(stackedSpawner);
+            }
         }
 
         Iterator<StackedBarrel> barrels = CACHED_BARRELS.iterator(chunk);
@@ -230,6 +235,10 @@ public final class SQLDataHandler extends AbstractDataHandler {
                     stackedBarrel.getStackAmount(),
                     plugin.getNMSAdapter().serialize(barrelItem))
             );
+            if(remove){
+                plugin.getProviders().deleteHologram(stackedBarrel);
+                stackedBarrel.removeDisplayBlock();
+            }
         }
 
         if(async)
@@ -239,22 +248,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
         if(remove){
             stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
-
             CACHED_ITEMS.remove(chunk);
-
-            spawners = CACHED_SPAWNERS.iterator(chunk);
-            while(spawners.hasNext()){
-                StackedSpawner stackedSpawner = spawners.next();
-                plugin.getProviders().deleteHologram(stackedSpawner);
-            }
-
-            barrels = CACHED_BARRELS.iterator(chunk);
-            while(barrels.hasNext()){
-                StackedBarrel stackedBarrel = barrels.next();
-                plugin.getProviders().deleteHologram(stackedBarrel);
-                stackedBarrel.removeDisplayBlock();
-            }
-
             CACHED_SPAWNERS.remove(chunk);
             CACHED_BARRELS.remove(chunk);
         }
@@ -273,7 +267,6 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
     @Override
     public void clearDatabase() {
-        super.clearDatabase();
         //We need to close all connections
         for(Connection conn : connectionMap.values()){
             try{

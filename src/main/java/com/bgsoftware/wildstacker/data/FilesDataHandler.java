@@ -151,19 +151,6 @@ public final class FilesDataHandler extends AbstractDataHandler {
     }
 
     @Override
-    public void saveChunkData(boolean remove, boolean async) {
-        super.saveChunkData(remove, async);
-
-        if(!CACHED_SPAWN_REASON_ENTITIES.isEmpty() || !CACHED_AMOUNT_ENTITIES.isEmpty()){
-            saveCachedEntities();
-        }
-
-        if(!CACHED_AMOUNT_ITEMS.isEmpty()){
-            saveCachedItems();
-        }
-    }
-
-    @Override
     public void saveChunkData(Chunk chunk, boolean remove, boolean async){
         YamlConfiguration cfg = new YamlConfiguration();
 
@@ -183,7 +170,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
         Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
         while(items.hasNext()){
             StackedItem stackedItem = items.next();
-            if(stackedItem.getStackAmount() > 1)
+            if(stackedItem != null && stackedItem.getItem() != null && stackedItem.getStackAmount() > 1)
                 cfg.set("items." + stackedItem.getUniqueId(), stackedItem.getStackAmount());
         }
 
@@ -192,7 +179,9 @@ public final class FilesDataHandler extends AbstractDataHandler {
             StackedSpawner stackedSpawner = spawners.next();
             if(stackedSpawner.getStackAmount() > 1)
                 cfg.set("spawners." + getChunkLocation(stackedSpawner.getLocation()), stackedSpawner.getStackAmount());
-            if(remove) plugin.getProviders().deleteHologram(stackedSpawner);
+            if(remove){
+                plugin.getProviders().deleteHologram(stackedSpawner);
+            }
         }
 
         Iterator<StackedBarrel> barrels = CACHED_BARRELS.iterator(chunk);
@@ -201,7 +190,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
             String location = getChunkLocation(stackedBarrel.getLocation());
             cfg.set("barrels." + location + ".amount", stackedBarrel.getStackAmount());
             cfg.set("barrels." + location + ".item", stackedBarrel.getBarrelItem(1));
-            if(remove) {
+            if(remove){
                 plugin.getProviders().deleteHologram(stackedBarrel);
                 stackedBarrel.removeDisplayBlock();
             }
@@ -213,28 +202,24 @@ public final class FilesDataHandler extends AbstractDataHandler {
             }else{
                 save(cfg, chunk);
             }
+        }
 
-            if (remove) {
-                stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+        if (remove) {
+            stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+            CACHED_ITEMS.remove(chunk);
+            CACHED_SPAWNERS.remove(chunk);
+            CACHED_BARRELS.remove(chunk);
+        }
+    }
 
-                CACHED_ITEMS.remove(chunk);
+    @Override
+    public void clearDatabase() {
+        if(!CACHED_SPAWN_REASON_ENTITIES.isEmpty() || !CACHED_AMOUNT_ENTITIES.isEmpty()){
+            saveCachedEntities();
+        }
 
-                spawners = CACHED_SPAWNERS.iterator(chunk);
-                while(spawners.hasNext()){
-                    StackedSpawner stackedSpawner = spawners.next();
-                    plugin.getProviders().deleteHologram(stackedSpawner);
-                }
-
-                barrels = CACHED_BARRELS.iterator(chunk);
-                while(barrels.hasNext()){
-                    StackedBarrel stackedBarrel = barrels.next();
-                    plugin.getProviders().deleteHologram(stackedBarrel);
-                    stackedBarrel.removeDisplayBlock();
-                }
-
-                CACHED_SPAWNERS.remove(chunk);
-                CACHED_BARRELS.remove(chunk);
-            }
+        if(!CACHED_AMOUNT_ITEMS.isEmpty()){
+            saveCachedItems();
         }
     }
 

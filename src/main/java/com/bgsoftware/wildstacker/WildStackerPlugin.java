@@ -3,8 +3,6 @@ package com.bgsoftware.wildstacker;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
 import com.bgsoftware.wildstacker.data.AbstractDataHandler;
 import com.bgsoftware.wildstacker.data.FilesDataHandler;
@@ -145,15 +143,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     @Override
     public void onDisable() {
-        //We need to remove all holograms of spawners
-        for(StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-            providersHandler.deleteHologram(stackedSpawner);
-        for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-            providersHandler.deleteHologram(stackedBarrel);
-            stackedBarrel.getLocation().getChunk().load(true);
-            stackedBarrel.removeDisplayBlock();
-        }
-
         //We need to save the entire database
         dataHandler.saveChunkData(true, false);
         dataHandler.clearDatabase();
