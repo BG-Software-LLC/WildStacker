@@ -203,7 +203,10 @@ public final class SystemHandler implements SystemManager {
 
         //Barrel wasn't found, creating a new object
         stackedBarrel = new WStackedBarrel(location.getBlock(), location.getBlock().getState().getData().toItemStack(1));
-        stackedBarrel.createDisplayBlock();
+        Executor.sync(() -> {
+            if(isStackedBarrel(location.getBlock()))
+                WStackedBarrel.of(location.getBlock()).createDisplayBlock();
+        }, 2L);
 
         //A new barrel was created. Let's see if we need to add him
         if(plugin.getSettings().barrelsStackingEnabled && stackedBarrel.isWhitelisted() && !stackedBarrel.isBlacklisted() && !stackedBarrel.isWorldDisabled())
