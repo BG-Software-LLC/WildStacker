@@ -77,7 +77,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public boolean isWhitelisted() {
-        return !plugin.getSettings().whitelistedItems.isEmpty() &&
+        return plugin.getSettings().whitelistedItems.isEmpty() ||
                 plugin.getSettings().whitelistedItems.contains(getItemStack());
     }
 

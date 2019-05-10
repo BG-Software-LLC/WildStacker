@@ -106,8 +106,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isWhitelisted() {
-        return !plugin.getSettings().whitelistedEntities.isEmpty() &&
-                (plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnReason().name()));
+        return plugin.getSettings().whitelistedEntities.isEmpty() ||
+                plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnReason().name());
     }
 
     @Override

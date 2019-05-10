@@ -68,7 +68,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public boolean isWhitelisted() {
-        return !plugin.getSettings().whitelistedSpawners.isEmpty() &&
+        return plugin.getSettings().whitelistedSpawners.isEmpty() ||
                 plugin.getSettings().whitelistedSpawners.contains(getSpawnedType().name());
     }
 

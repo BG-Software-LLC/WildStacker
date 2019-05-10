@@ -66,7 +66,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
     @Override
     public boolean isWhitelisted() {
-        return !plugin.getSettings().whitelistedBarrels.isEmpty() &&
+        return plugin.getSettings().whitelistedBarrels.isEmpty() ||
                 plugin.getSettings().whitelistedBarrels.contains(getBarrelItem(1));
     }
 
