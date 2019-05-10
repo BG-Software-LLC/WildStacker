@@ -103,7 +103,7 @@ public final class SystemHandler implements SystemManager {
 //        return stackedEntity;
         StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.get(dataHandler.DEFAULT_CHUNK, livingEntity.getUniqueId());
 
-        if(stackedEntity != null)
+        if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
             return stackedEntity;
 
         //Entity wasn't found, creating a new object
@@ -135,7 +135,7 @@ public final class SystemHandler implements SystemManager {
 //        return stackedItem;
         StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(item.getLocation().getChunk(), item.getUniqueId());
 
-        if(stackedItem != null)
+        if(stackedItem != null && stackedItem.getItem() != null)
             return stackedItem;
 
         //Item wasn't found, creating a new object.
