@@ -195,8 +195,6 @@ public final class SQLDataHandler extends AbstractDataHandler {
                         stackedEntity.getSpawnReason().name())
                 );
             }
-            if(stackedEntity == null || stackedEntity.getLivingEntity() == null)
-                Bukkit.broadcastMessage("1");
         }
 
         Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
