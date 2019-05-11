@@ -4,12 +4,15 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -52,10 +55,35 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
         if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
-            stackedEntity.getLivingEntity().getEquipment().clear();
+            clearEquipment(stackedEntity.getLivingEntity().getEquipment());
         }
 
         return drops;
+    }
+
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private void clearEquipment(EntityEquipment entityEquipment){
+        if(Bukkit.getBukkitVersion().contains("1.8")) {
+            if (entityEquipment.getItemInHandDropChance() >= 2.0F)
+                entityEquipment.setItemInHand(new ItemStack(Material.AIR));
+        }else{
+            try{
+                if((Float) EntityEquipment.class.getMethod("getItemInMainHandDropChance").invoke(entityEquipment) >= 2.0F)
+                    EntityEquipment.class.getMethod("setItemInMainHand", ItemStack.class).invoke(entityEquipment, new ItemStack(Material.AIR));
+                if((Float) EntityEquipment.class.getMethod("getItemInOffHandDropChance").invoke(entityEquipment) >= 2.0F)
+                    EntityEquipment.class.getMethod("setItemInOffHand", ItemStack.class).invoke(entityEquipment, new ItemStack(Material.AIR));
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        if(entityEquipment.getHelmetDropChance() >= 2.0F)
+            entityEquipment.setHelmet(new ItemStack(Material.AIR));
+        if(entityEquipment.getChestplateDropChance() >= 2.0F)
+            entityEquipment.setChestplate(new ItemStack(Material.AIR));
+        if(entityEquipment.getLeggingsDropChance() >= 2.0F)
+            entityEquipment.setLeggings(new ItemStack(Material.AIR));
+        if(entityEquipment.getBootsDropChance() >= 2.0F)
+            entityEquipment.setBoots(new ItemStack(Material.AIR));
     }
 
     @Override
