@@ -1,9 +1,11 @@
 package com.bgsoftware.wildstacker.loot;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -11,12 +13,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class LootItem {
+
+    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final ItemStack itemStack, burnableItem;
     private final double chance;
@@ -83,7 +88,7 @@ public class LootItem {
         }
 
         if(jsonObject.has("enchants")){
-            JsonObject enchants = jsonObject.get("enchants").getAsJsonObject();
+            JsonObject enchants = jsonObject.getAsJsonObject("enchants");
             for(Map.Entry<String, JsonElement> entry : enchants.entrySet()){
                 try {
                     itemMeta.addEnchant(Enchantment.getByName(entry.getKey()), entry.getValue().getAsInt(), true);
@@ -93,7 +98,28 @@ public class LootItem {
 
         itemStack.setItemMeta(itemMeta);
 
+        if(jsonObject.has("nbt-data")){
+            JsonObject nbtData = jsonObject.getAsJsonObject("nbt-data");
+            for(Map.Entry<String, JsonElement> entry : nbtData.entrySet()){
+                if(entry.getValue().isJsonPrimitive())
+                    itemStack = plugin.getNMSAdapter().setTag(itemStack, entry.getKey(), getValue(entry.getValue().getAsJsonPrimitive()));
+            }
+        }
+
         return itemStack;
+    }
+
+    private static Object getValue(JsonPrimitive jsonPrimitive){
+        try{
+            Field valueField = JsonPrimitive.class.getDeclaredField("value");
+            valueField.setAccessible(true);
+            Object value = valueField.get(jsonPrimitive);
+            valueField.setAccessible(false);
+            return value;
+        }catch(Exception ex){
+            ex.printStackTrace();
+            return null;
+        }
     }
 
 }

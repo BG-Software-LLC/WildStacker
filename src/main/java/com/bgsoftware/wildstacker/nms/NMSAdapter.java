@@ -36,4 +36,6 @@ public interface NMSAdapter {
         return message;
     }
 
+    ItemStack setTag(ItemStack itemStack, String key, Object value);
+
 }

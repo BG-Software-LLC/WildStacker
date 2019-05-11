@@ -168,6 +168,34 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
 
     }
 
+    @Override
+    @SuppressWarnings("ConstantConditions")
+    public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, Object value) {
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        if(value instanceof Boolean)
+            tagCompound.setBoolean(key, (boolean) value);
+        else if(value instanceof Integer)
+            tagCompound.setInt(key, (int) value);
+        else if(value instanceof String)
+            tagCompound.setString(key, (String) value);
+        else if(value instanceof Double)
+            tagCompound.setDouble(key, (double) value);
+        else if(value instanceof Short)
+            tagCompound.setShort(key, (short) value);
+        else if(value instanceof Byte)
+            tagCompound.setByte(key, (byte) value);
+        else if(value instanceof Float)
+            tagCompound.setFloat(key, (float) value);
+        else if(value instanceof Long)
+            tagCompound.setLong(key, (long) value);
+
+        nmsItem.setTag(tagCompound);
+
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
     private boolean shouldNotDrop(ItemStack itemStack){
         try{
             return EnchantmentManager.c(itemStack);

@@ -66,6 +66,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("******** ENABLE START ********");
 
+        loadNMSAdapter();
+
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
        // dataHandler = new FilesDataHandler(this);
@@ -76,7 +78,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         Locale.reload();
         loadAPI();
-        loadNMSAdapter();
 
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
         getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
