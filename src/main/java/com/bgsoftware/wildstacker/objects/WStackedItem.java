@@ -223,27 +223,40 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         int startAmount = itemStack.getAmount();
         int giveAmount = itemStack.getAmount() >= freeSpace ? freeSpace : itemStack.getAmount();
 
+        if(giveAmount <= 0)
+            return;
+
         /*
          * I am not using ItemUtil#addItem so it won't drop the leftovers
          * (If it will, the leftovers will get stacked again - infinite loop)
          */
 
-        if (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")) {
-            itemStack.setAmount(1);
+        if (itemStack.getMaxStackSize() != 64 &&
+                (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX"))) {
+            int amountOfStacks = giveAmount / itemStack.getMaxStackSize();
+            int leftOvers = giveAmount % itemStack.getMaxStackSize();
 
-            //Basically I want to add the item giveAmount times, when it's amount is 1.
-            for (int i = 0; i < giveAmount; i++) {
-                if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
-                    inventory.addItem(itemStack);
+            itemStack.setAmount(itemStack.getMaxStackSize());
+
+            for(int i = 0; i < amountOfStacks; i++)
+                giveItem(inventory, itemStack);
+
+            if(leftOvers > 0) {
+                itemStack.setAmount(leftOvers);
+                giveItem(inventory, itemStack);
             }
         }
         else {
             itemStack.setAmount(giveAmount);
-            if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
-                inventory.addItem(itemStack);
+            giveItem(inventory, itemStack);
         }
 
         setStackAmount(startAmount - giveAmount, true);
+    }
+
+    private void giveItem(Inventory inventory, ItemStack itemStack){
+        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
+            inventory.addItem(itemStack);
     }
 
     public static StackedItem of(Entity entity){
