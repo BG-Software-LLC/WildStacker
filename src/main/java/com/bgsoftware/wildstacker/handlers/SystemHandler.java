@@ -256,7 +256,7 @@ public final class SystemHandler implements SystemManager {
             Iterator<Map.Entry<Location, StackedBarrel>> stackedBarrelIterator = dataHandler.CACHED_BARRELS.entryIterator(chunk);
             while (stackedBarrelIterator.hasNext()){
                 Map.Entry<Location, StackedBarrel> entry = stackedBarrelIterator.next();
-                if(isChunkLoaded(entry.getKey()) && !isStackedSpawner(entry.getValue().getBlock()))
+                if(isChunkLoaded(entry.getKey()) && !isStackedBarrel(entry.getValue().getBlock()))
                     stackedBarrelIterator.remove();
             }
         });
