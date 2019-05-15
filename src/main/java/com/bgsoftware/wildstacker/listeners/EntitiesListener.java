@@ -93,6 +93,11 @@ public final class EntitiesListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
+        if(stackedEntity.isIgnoreDeathEvent()) {
+            e.setCancelled(true);
+            return;
+        }
+
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int lootBonusLevel = getFortuneLevel(livingEntity);
@@ -110,6 +115,8 @@ public final class EntitiesListener implements Listener {
             }else{
                 EntityUtil.setKiller(livingEntity, null);
             }
+
+            stackedEntity.ignoreDeathEvent();
 
             Executor.async(() -> {
                 List<List<ItemStack>> entityDrops = new ArrayList<>();

@@ -20,6 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Parrot;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -272,6 +273,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         }, 2L);
 
         plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
+
+        if(object.getType().name().equals("PARROT"))
+            EntityUtil.removeParrotIfShoulder((Parrot) object);
 
         this.remove();
 

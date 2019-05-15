@@ -4,7 +4,10 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -85,6 +88,25 @@ public final class EntityUtil {
         }catch(Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    public static void removeParrotIfShoulder(Parrot parrot){
+        List<Entity> nearbyPlayers = plugin.getNMSAdapter().getNearbyEntities(parrot, 1, en -> en instanceof Player);
+
+        try {
+            for (Entity entity : nearbyPlayers) {
+                //noinspection JavaReflectionMemberAccess
+                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))){
+                    HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, null);
+                    break;
+                }
+                //noinspection JavaReflectionMemberAccess
+                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))){
+                    HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, null);
+                    break;
+                }
+            }
+        }catch(Exception ignored){}
     }
 
 }
