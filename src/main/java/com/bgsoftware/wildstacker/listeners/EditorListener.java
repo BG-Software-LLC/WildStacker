@@ -42,12 +42,13 @@ public final class EditorListener implements Listener {
      */
 
     private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
-    private String[] inventoryTitles = new String[] {WildStackerPlugin.getPlugin().getBreakMenuHandler().getTitle(), "Add items here",
-            "WildStacker", "General Settings", "Items Settings", "Entities Settings", "Spawners Settings", "Barrels Settings"};
+    private String[] inventoryTitles = new String[] {"Add items here", "WildStacker", "General Settings", "Items Settings",
+            "Entities Settings", "Spawners Settings", "Barrels Settings"};
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClickMonitor(InventoryClickEvent e){
-        if(e.getCurrentItem() != null && e.isCancelled() && Arrays.stream(inventoryTitles).anyMatch(title -> e.getView().getTitle().contains(title))) {
+        if(e.getCurrentItem() != null && e.isCancelled() &&
+                (Arrays.stream(inventoryTitles).anyMatch(title -> e.getView().getTitle().contains(title)) || plugin.getBreakMenuHandler().isBreakMenu(e.getView()))) {
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }

@@ -25,10 +25,6 @@ public final class BreakMenuHandler {
         title = "";
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public void openBreakMenu(Player player){
         Inventory inventory = Bukkit.createInventory(null, 9 *3, title);
         inventory.setContents(contents);
