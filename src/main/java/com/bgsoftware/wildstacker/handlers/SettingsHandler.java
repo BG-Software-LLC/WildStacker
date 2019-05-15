@@ -56,7 +56,7 @@ public final class SettingsHandler {
             explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem, dropSpawnerWithoutSilk,
             floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
             breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
-    public final int spawnersCheckRange, explosionsBreakChance, spawnersChunkLimit;
+    public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners;
     public final String hologramCustomName, silkCustomName;
@@ -153,6 +153,7 @@ public final class SettingsHandler {
         hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
         explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
         explosionsBreakChance = cfg.getInt("spawners.explosions-break-chance", 100);
+        silkTouchBreakChance = cfg.getInt("spawners.silk-touch-break-chance", 100);
         dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
         silkTouchSpawners = cfg.getBoolean("spawners.silk-spawners.enabled", true);
         silkCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.silk-spawners.custom-name", "&e{0} &fSpawner"));

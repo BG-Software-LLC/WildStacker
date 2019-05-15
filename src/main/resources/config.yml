@@ -359,6 +359,9 @@ spawners:
   # Chance of spawners to be dropped after an explosion.
   explosions-break-chance: 100
 
+  # Chance of spawners to be dropped after break of silk touch.
+  silk-touch-break-chance: 100
+
   # Should spawners get dropped without silktouch?
   # If enabled, only players with wildstacker.nosilkdrop will be able to get the spawners.
   # This feature will not work with other spawner-providers, such as SilkSpawners

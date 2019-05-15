@@ -16,6 +16,8 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public final class SpawnersProvider_Default implements SpawnersProvider {
 
     private WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -57,12 +59,14 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         if(!plugin.getSettings().silkTouchSpawners)
             return;
 
-        if ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
-                (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
-            if (plugin.getSettings().dropToInventory) {
-                ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
-            } else {
-                ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+        if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) {
+            if ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
+                    (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
+                if (plugin.getSettings().dropToInventory) {
+                    ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+                } else {
+                    ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+                }
             }
         }
     }

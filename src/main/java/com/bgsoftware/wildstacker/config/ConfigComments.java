@@ -365,6 +365,10 @@ public final class ConfigComments {
     public static String SPAWNERS_EXPLOSIONS_BREAK_CHANCE = "spawners.explosions-break-chance";
 
     @Comment("")
+    @Comment("Chance of spawners to be dropped after break of silk touch.")
+    public static String SPAWNERS_SILK_TOUCH_BREAK_CHANCE = "spawners.silk-touch-break-chance";
+
+    @Comment("")
     @Comment("Should spawners get dropped without silktouch?")
     @Comment("If enabled, only players with wildstacker.nosilkdrop will be able to get the spawners.")
     @Comment("This feature will not work with other spawner-providers, such as SilkSpawners")
