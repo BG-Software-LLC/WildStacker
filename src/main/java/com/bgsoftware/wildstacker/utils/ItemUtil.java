@@ -332,4 +332,10 @@ public final class ItemUtil {
         }
     }
 
+    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
+        int slotItem = inventory.first(inHand);
+        if(slotItem != -1)
+            inventory.setItem(slotItem, itemStack);
+    }
+
 }

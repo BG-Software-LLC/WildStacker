@@ -101,9 +101,9 @@ public final class BarrelsListener implements Listener {
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = e.getItemInHand();
+            ItemStack inHand = e.getItemInHand().clone();
             inHand.setAmount(inHand.getAmount() - 1);
-            e.getPlayer().updateInventory();
+            ItemUtil.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), inHand);
         }
     }
 

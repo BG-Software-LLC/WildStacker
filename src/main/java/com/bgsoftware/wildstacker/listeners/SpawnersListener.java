@@ -157,9 +157,9 @@ public final class SpawnersListener implements Listener {
 
         //Removing item from player's inventory
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack is = e.getItemInHand();
+            ItemStack is = e.getItemInHand().clone();
             is.setAmount(Math.max(0, is.getAmount() - toPlace));
-            e.getPlayer().updateInventory();
+            ItemUtil.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), is);
         }
 
         EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
