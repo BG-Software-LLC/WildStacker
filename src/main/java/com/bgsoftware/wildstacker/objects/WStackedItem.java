@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -156,6 +157,9 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         StackedItem targetItem = (StackedItem) stackedObject;
 
         if(!targetItem.isWhitelisted() || targetItem.isBlacklisted() || targetItem.isWorldDisabled())
+            return false;
+
+        if(targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
             return false;
 
         int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();

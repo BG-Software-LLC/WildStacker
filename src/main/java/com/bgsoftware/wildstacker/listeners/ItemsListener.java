@@ -76,7 +76,7 @@ public final class ItemsListener implements Listener {
 
         StackedItem stackedItem = WStackedItem.of(e.getEntity());
 
-        if(stackedItem.isWorldDisabled())
+        if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
             return;
 
         //We are overriding the merge system

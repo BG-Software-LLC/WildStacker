@@ -22,31 +22,12 @@ public enum Materials {
     INK_SAC("INK_SACK"),
     BONE_MEAL("INK_SACK", 15),
     GOLDEN_SWORD("GOLD_SWORD"),
-    MUSIC_DISC_13(""),
-    MUSIC_DISC_CAT(""),
-    MUSIC_DISC_BLOCKS(""),
-    MUSIC_DISC_CHIRP(""),
-    MUSIC_DISC_FAR(""),
-    MUSIC_DISC_MALL(""),
-    MUSIC_DISC_MELLOHI(""),
-    MUSIC_DISC_STAL(""),
-    MUSIC_DISC_STRAD(""),
-    MUSIC_DISC_WARD(""),
-    MUSIC_DISC_11(""),
-    MUSIC_DISC_WAIT(""),
-    TROPICAL_FISH(""),
-    PUFFERFISH(""),
-    SALMON(""),
-    PHANTOM_MEMBRANE(""),
     WITHER_SKELETON_SKULL("SKULL", 3),
     BLACK_STAINED_GLASS_PANE("STAINED_GLASS_PANE", 15),
     SNOWBALL("SNOW_BALL"),
-    TOTEM_OF_UNDYING(""),
-    SEAGRASS(""),
-    SHULKER_SHELL(""),
     POPPY("RED_ROSE"),
     WET_SPONGE("SPONGE", 1),
-    TIPPED_ARROW("");
+    NETHER_PORTAL("PORTAL");
 
     Materials(String bukkitType){
         this(bukkitType, 0);
