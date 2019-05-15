@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
@@ -13,6 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -21,7 +23,7 @@ import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
@@ -96,13 +98,8 @@ public final class ItemsListener implements Listener {
         WStackedItem.of(e.getEntity()).remove();
     }
 
-    //This method will be fired even if stacking-drops is disabled.
-    //Priority is high so it will run before McMMO
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerPickup(PlayerPickupItemEvent e) {
-        if(e.getItem() == null)
-            return;
-
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityPickup(EntityPickupItemEvent e) {
         StackedItem stackedItem = WStackedItem.of(e.getItem());
 
         //Should run only if the item is 1 (stacked item)
@@ -111,9 +108,19 @@ public final class ItemsListener implements Listener {
 
             int stackAmount = stackedItem.getStackAmount();
 
-            stackedItem.giveItemStack(e.getPlayer().getInventory());
+            if(e.getInventory() != null) {
+                stackedItem.giveItemStack(e.getInventory());
+            }else{
+                ItemStack itemStack = stackedItem.getItemStack();
+                int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
+                if(itemStack.getAmount() > maxStackSize){
+                    itemStack.setAmount(maxStackSize);
+                    stackedItem.setStackAmount(stackAmount - maxStackSize, true);
+                }
+                setItemInHand(e.getEntity(), itemStack);
+            }
 
-            if(stackAmount != stackedItem.getStackAmount()){
+            if(e.getPlayer() != null && stackAmount != stackedItem.getStackAmount()){
                 Sound pickUpItem;
 
                 //Different name on 1.12
@@ -190,6 +197,15 @@ public final class ItemsListener implements Listener {
 
         int itemsInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count();
         return itemsInsideChunk >= chunkLimit;
+    }
+
+    private void setItemInHand(LivingEntity entity, ItemStack itemStack){
+        try{
+            //noinspection JavaReflectionMemberAccess
+            EntityEquipment.class.getMethod("setItemInMainHand", ItemStack.class).invoke(entity.getEquipment(), itemStack);
+        }catch(Exception ex){
+            entity.getEquipment().setItemInHand(itemStack);
+        }
     }
 
 }
