@@ -211,12 +211,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if (equals(stackedObject) || !(stackedObject instanceof StackedEntity) || !isSimilar(stackedObject))
             return false;
 
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled() || isNameBlacklisted())
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled() || isNameBlacklisted() || object.isDead())
             return false;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
 
-        if(!targetEntity.isWhitelisted() || targetEntity.isBlacklisted() || targetEntity.isWorldDisabled() || targetEntity.isNameBlacklisted())
+        if(!targetEntity.isWhitelisted() || targetEntity.isBlacklisted() || targetEntity.isWorldDisabled() ||
+                targetEntity.isNameBlacklisted() || targetEntity.getLivingEntity().isDead())
             return false;
 
         int newStackAmount = this.getStackAmount() + targetEntity.getStackAmount();
