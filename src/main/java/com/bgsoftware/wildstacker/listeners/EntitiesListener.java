@@ -166,30 +166,6 @@ public final class EntitiesListener implements Listener {
                 });
 
             });
-
-
-//            Executor.async(() -> {
-//
-//                final int EXP = expToDrop;
-//
-//                Executor.sync(() -> {
-//                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
-//
-//                    if(EXP > 0){
-//                        ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-//                        experienceOrb.setExperience(EXP);
-//                    }
-//
-//                    stackedEntity.tryUnstack(stackAmount);
-//
-//                    if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
-//                        try {
-//                            livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-//                            livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-//                        }catch(IllegalArgumentException ignored){}
-//                    }
-//                });
-//            });
         }
     }
 

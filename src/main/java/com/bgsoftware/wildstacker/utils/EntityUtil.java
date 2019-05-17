@@ -90,19 +90,18 @@ public final class EntityUtil {
         }
     }
 
+    @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
     public static void removeParrotIfShoulder(Parrot parrot){
         List<Entity> nearbyPlayers = plugin.getNMSAdapter().getNearbyEntities(parrot, 1, en -> en instanceof Player);
 
         try {
             for (Entity entity : nearbyPlayers) {
-                //noinspection JavaReflectionMemberAccess
                 if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))){
-                    HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, null);
+                    HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
                     break;
                 }
-                //noinspection JavaReflectionMemberAccess
                 if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))){
-                    HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, null);
+                    HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
                     break;
                 }
             }
