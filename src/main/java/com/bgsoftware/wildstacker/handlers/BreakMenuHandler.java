@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -16,28 +15,25 @@ import java.util.Map;
 public final class BreakMenuHandler {
 
     public final Map<Integer, Integer> breakSlots;
-    private ItemStack[] contents;
-    private String title;
+    private Inventory inventory;
 
     public BreakMenuHandler(){
         breakSlots = new HashMap<>();
-        contents = new ItemStack[0];
-        title = "&lBreak Menu";
+        inventory = null;
     }
 
     public void openBreakMenu(Player player){
-        Inventory inventory = Bukkit.createInventory(null, 9 *3, title);
-        inventory.setContents(contents);
-        player.openInventory(inventory);
+        if(inventory != null)
+            player.openInventory(inventory);
     }
 
-    public boolean isBreakMenu(InventoryView inventory){
-        return inventory.getTitle().equals(title);
+    public boolean isBreakMenu(Inventory inventory){
+        return inventory.equals(this.inventory);
     }
 
     public void loadMenu(ConfigurationSection section){
-        Inventory inventory = Bukkit.createInventory(null, 9 * section.getInt("rows", 3));
-        title = ChatColor.translateAlternateColorCodes('&', section.getString("title", "&lBreak Menu"));
+        String title = ChatColor.translateAlternateColorCodes('&', section.getString("title", "&lBreak Menu"));
+        inventory = Bukkit.createInventory(null, 9 * section.getInt("rows", 3), title);
 
         if(section.contains("fill-items")){
             for(String key : section.getConfigurationSection("fill-items").getKeys(false)){
@@ -55,8 +51,6 @@ public final class BreakMenuHandler {
                 breakSlots.put(Integer.valueOf(slot), section.getInt("break-slots." + slot + ".amount"));
             }
         }
-
-        contents = inventory.getContents();
     }
 
 }

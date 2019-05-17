@@ -341,7 +341,7 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler
     public void onBreakMenuClick(InventoryClickEvent e){
-        if(e.getInventory() == null || !plugin.getBreakMenuHandler().isBreakMenu(e.getView()))
+        if(e.getInventory() == null || !plugin.getBreakMenuHandler().isBreakMenu(e.getInventory()))
             return;
 
         e.setCancelled(true);
