@@ -34,6 +34,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
@@ -316,6 +317,9 @@ public final class SystemHandler implements SystemManager {
                 stackedEntity.getType().getEntityClass(), CreatureSpawnEvent.SpawnReason.CUSTOM);
         if(livingEntity != null) {
             livingEntity.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
+            if(stackedEntity.getLivingEntity() instanceof Slime){
+                ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
+            }
             livingEntity.setHealth(0);
         }
     }
