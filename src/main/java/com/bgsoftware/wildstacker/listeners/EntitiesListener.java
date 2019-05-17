@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.AsyncEntityDeathEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
@@ -19,7 +18,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
@@ -463,29 +461,6 @@ public final class EntitiesListener implements Listener {
         }catch(Throwable ex){
             return true;
         }
-    }
-
-    private void calcAndDrop(StackedEntity stackedEntity, Location location, int lootBonusLevel, int stackAmount){
-        if(MythicMobsHook.isMythicMob(stackedEntity.getLivingEntity()))
-            return;
-
-        Executor.async(() -> {
-            List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
-            Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
-        });
-
-        Executor.async(() -> {
-            int exp = 0;
-            for(int i = 0; i < stackAmount; i++)
-                exp += EntityUtil.getEntityExp(stackedEntity.getLivingEntity());
-            if(exp > 0) {
-                final int EXP = exp;
-                Executor.sync(() -> {
-                    ExperienceOrb experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
-                    experienceOrb.setExperience(EXP);
-                });
-            }
-        });
     }
 
     private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){

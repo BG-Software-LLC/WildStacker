@@ -22,7 +22,7 @@ public final class BreakMenuHandler {
     public BreakMenuHandler(){
         breakSlots = new HashMap<>();
         contents = new ItemStack[0];
-        title = "";
+        title = "&lBreak Menu";
     }
 
     public void openBreakMenu(Player player){
