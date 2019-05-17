@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,6 +194,25 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         nmsItem.setTag(tagCompound);
 
         return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        int exp = 0;
+
+        try{
+            Field expField = EntityInsentient.class.getDeclaredField("b_");
+            expField.setAccessible(true);
+            int defaultEntityExp = (int) expField.get(entityLiving);
+            exp = entityLiving.getExpReward();
+            expField.set(entityLiving, defaultEntityExp);
+            expField.setAccessible(false);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return exp;
     }
 
     @Override

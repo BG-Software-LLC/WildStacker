@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -111,7 +110,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         }
         else{
             for(int i = 0; i < stackAmount; i++)
-                exp += EntityUtil.getEntityExp(stackedEntity.getLivingEntity());
+                exp += plugin.getNMSAdapter().getEntityExp(stackedEntity.getLivingEntity());
         }
 
         return exp;

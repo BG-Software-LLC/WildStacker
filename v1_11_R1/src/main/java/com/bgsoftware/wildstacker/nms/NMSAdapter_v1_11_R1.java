@@ -196,6 +196,25 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
 
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        int exp = 0;
+
+        try{
+            Field expField = EntityInsentient.class.getDeclaredField("b_");
+            expField.setAccessible(true);
+            int defaultEntityExp = (int) expField.get(entityLiving);
+            exp = entityLiving.getExpReward();
+            expField.set(entityLiving, defaultEntityExp);
+            expField.setAccessible(false);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return exp;
+    }
+
     private boolean shouldNotDrop(ItemStack itemStack){
         try{
             return EnchantmentManager.c(itemStack);

@@ -38,4 +38,6 @@ public interface NMSAdapter {
 
     ItemStack setTag(ItemStack itemStack, String key, Object value);
 
+    int getEntityExp(LivingEntity livingEntity);
+
 }
