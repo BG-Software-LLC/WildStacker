@@ -8,7 +8,7 @@ import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.SaveTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public final class CommandReload implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        new WildStackerThread(() -> {
+        Executor.async(() -> {
             SettingsHandler.reload();
             LootHandler.reload();
             Locale.reload();
@@ -57,7 +57,7 @@ public final class CommandReload implements ICommand {
             StackTask.start();
             plugin.getEditor().reloadConfiguration();
             Locale.RELOAD_SUCCESS.send(sender);
-        }).start();
+        });
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 import java.lang.reflect.Field;
 
+@SuppressWarnings("WeakerAccess")
 public final class ReflectionUtil {
 
     private static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];

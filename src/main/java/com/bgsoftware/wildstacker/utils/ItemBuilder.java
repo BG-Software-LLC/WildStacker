@@ -9,6 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class ItemBuilder{
@@ -21,7 +22,8 @@ public final class ItemBuilder{
     }
 
     public ItemBuilder(ItemStack itemStack){
-        this(itemStack.getType(), itemStack.getDurability());
+        this.itemStack = itemStack.clone();
+        this.itemMeta = itemStack.getItemMeta();
     }
 
     public ItemBuilder(Material type){
@@ -79,6 +81,11 @@ public final class ItemBuilder{
         return this;
     }
 
+    public ItemBuilder withLore(List<String> lore){
+        itemMeta.setLore(lore.stream().map(s -> ChatColor.translateAlternateColorCodes('&', s)).collect(Collectors.toList()));
+        return this;
+    }
+
     public ItemBuilder withLore(String... lore){
         List<String> loreList = new ArrayList<>();
 
@@ -91,7 +98,12 @@ public final class ItemBuilder{
     }
 
     public ItemStack build(){
+        return build(1);
+    }
+
+    public ItemStack build(int amount){
         itemStack.setItemMeta(itemMeta);
+        itemStack.setAmount(amount);
         return itemStack;
     }
 

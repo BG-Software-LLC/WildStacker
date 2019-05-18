@@ -1,0 +1,19 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "PORK",
+          "chance": 100,
+          "min": 1,
+          "max": 3,
+          "looting": true,
+          "burnable": {
+            "type": "GRILLED_PORK"
+          }
+        }
+      ]
+    }
+  ]
+}

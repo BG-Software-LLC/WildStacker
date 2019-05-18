@@ -23,6 +23,8 @@ public final class Locale {
     public static Locale BARREL_TOGGLE_ON = new Locale("BARREL_TOGGLE_ON");
     public static Locale BARREL_TOGGLE_OFF = new Locale("BARREL_TOGGLE_OFF");
     public static Locale COMMAND_USAGE = new Locale("COMMAND_USAGE");
+    public static Locale ENTITY_NAMES_TOGGLE_ON = new Locale("ENTITY_NAMES_TOGGLE_ON");
+    public static Locale ENTITY_NAMES_TOGGLE_OFF = new Locale("ENTITY_NAMES_TOGGLE_OFF");
     public static Locale HELP_COMMAND_HEADER = new Locale("HELP_COMMAND_HEADER");
     public static Locale HELP_COMMAND_LINE = new Locale("HELP_COMMAND_LINE");
     public static Locale HELP_COMMAND_FOOTER = new Locale("HELP_COMMAND_FOOTER");
@@ -31,9 +33,14 @@ public final class Locale {
     public static Locale INVALID_NUMBER = new Locale("INVALID_NUMBER");
     public static Locale INVALID_PLAYER = new Locale("INVALID_PLAYER");
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
+    public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
+    public static Locale INSPECT_RECEIVE = new Locale("INSPECT_RECEIVE");
+    public static Locale ITEM_NAMES_TOGGLE_ON = new Locale("ITEM_NAMES_TOGGLE_ON");
+    public static Locale ITEM_NAMES_TOGGLE_OFF = new Locale("ITEM_NAMES_TOGGLE_OFF");
     public static Locale KILL_ALL_ANNOUNCEMENT = new Locale("KILL_ALL_ANNOUNCEMENT");
     public static Locale KILL_ALL_REMAINING_TIME = new Locale("KILL_ALL_REMAINING_TIME");
     public static Locale KILL_ALL_OPS = new Locale("KILL_ALL_OPS");
+    public static Locale NEXT_SPAWNER_PLACEMENT = new Locale("NEXT_SPAWNER_PLACEMENT");
     public static Locale NO_PERMISSION = new Locale("NO_PERMISSION");
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");
@@ -41,6 +48,7 @@ public final class Locale {
     public static Locale SPAWNER_PLACE = new Locale("SPAWNER_PLACE");
     public static Locale SPAWNER_PLACE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_PLACE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_PLACE_BLOCKED = new Locale("SPAWNER_PLACE_BLOCKED");
+    public static Locale SPAWNER_UPDATE = new Locale("SPAWNER_UPDATE");
     public static Locale STACK_GIVE_PLAYER = new Locale("STACK_GIVE_PLAYER");
     public static Locale STACK_RECEIVE = new Locale("STACK_RECEIVE");
     public static Locale STACK_INFO_INVALID = new Locale("STACK_INFO_INVALID");
@@ -52,6 +60,13 @@ public final class Locale {
     public static Locale SPAWNER_INFO_TYPE = new Locale("SPAWNER_INFO_TYPE");
     public static Locale SPAWNER_INFO_AMOUNT = new Locale("SPAWNER_INFO_AMOUNT");
     public static Locale SPAWNER_INFO_FOOTER = new Locale("SPAWNER_INFO_FOOTER");
+    public static Locale ENTITY_INFO_HEADER = new Locale("ENTITY_INFO_HEADER");
+    public static Locale ENTITY_INFO_UUID = new Locale("ENTITY_INFO_UUID");
+    public static Locale ENTITY_INFO_TYPE = new Locale("ENTITY_INFO_TYPE");
+    public static Locale ENTITY_INFO_AMOUNT = new Locale("ENTITY_INFO_AMOUNT");
+    public static Locale ENTITY_INFO_SPAWN_REASON = new Locale("ENTITY_INFO_SPAWN_REASON");
+    public static Locale ENTITY_INFO_NERFED = new Locale("ENTITY_INFO_NERFED");
+    public static Locale ENTITY_INFO_FOOTER = new Locale("ENTITY_INFO_FOOTER");
 
     private Locale(String identifier){
         localeMap.put(identifier, this);
@@ -91,10 +106,9 @@ public final class Locale {
         if(!file.exists())
             FileUtil.saveResource("lang.yml");
 
-        CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class);
-        cfg.load(file);
+        CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class, file);
 
-        cfg.resetYamlFile(plugin, "lang.yml", LangComments.class);
+        cfg.resetYamlFile(plugin, "lang.yml");
 
         for(String identifier : localeMap.keySet()){
             localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));

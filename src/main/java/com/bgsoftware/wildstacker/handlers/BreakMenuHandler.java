@@ -15,28 +15,25 @@ import java.util.Map;
 public final class BreakMenuHandler {
 
     public final Map<Integer, Integer> breakSlots;
-    private ItemStack[] contents;
-    private String title;
+    private Inventory inventory;
 
     public BreakMenuHandler(){
         breakSlots = new HashMap<>();
-        contents = new ItemStack[0];
-        title = "";
+        inventory = null;
     }
 
     public void openBreakMenu(Player player){
-        Inventory inventory = Bukkit.createInventory(null, 9 *3, title);
-        inventory.setContents(contents);
-        player.openInventory(inventory);
+        if(inventory != null)
+            player.openInventory(inventory);
     }
 
     public boolean isBreakMenu(Inventory inventory){
-        return inventory.getTitle().equals(title);
+        return inventory.equals(this.inventory);
     }
 
     public void loadMenu(ConfigurationSection section){
-        Inventory inventory = Bukkit.createInventory(null, 9 * section.getInt("rows", 3));
-        title = ChatColor.translateAlternateColorCodes('&', section.getString("title", "&lBreak Menu"));
+        String title = ChatColor.translateAlternateColorCodes('&', section.getString("title", "&lBreak Menu"));
+        inventory = Bukkit.createInventory(null, 9 * section.getInt("rows", 3), title);
 
         if(section.contains("fill-items")){
             for(String key : section.getConfigurationSection("fill-items").getKeys(false)){
@@ -54,8 +51,6 @@ public final class BreakMenuHandler {
                 breakSlots.put(Integer.valueOf(slot), section.getInt("break-slots." + slot + ".amount"));
             }
         }
-
-        contents = inventory.getContents();
     }
 
 }

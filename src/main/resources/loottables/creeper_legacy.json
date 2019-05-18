@@ -1,0 +1,73 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "SULPHUR",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "killer": [
+        "SKELETON",
+        "STRAY"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "GOLD_RECORD",
+          "chance": 8.33
+        },
+        {
+          "type": "GREEN_RECORD",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_3",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_4",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_5",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_6",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_7",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_8",
+          "chance": 8.33
+        },
+        {
+          "type": "RECORD_9",
+          "chance": 8.34
+        },
+        {
+          "type": "RECORD_10",
+          "chance": 8.34
+        },
+        {
+          "type": "RECORD_11",
+          "chance": 8.34
+        },
+        {
+          "type": "RECORD_12",
+          "chance": 8.34
+        }
+      ]
+    }
+  ]
+}

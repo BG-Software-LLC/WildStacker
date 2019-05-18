@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,8 +20,12 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     private ItemStack barrelItem;
     private ArmorStand blockDisplay;
 
-    public WStackedBarrel(Location location, ItemStack itemStack){
-        super(location.getBlock(), 1);
+    public WStackedBarrel(Block block, ItemStack itemStack){
+        this(block, itemStack, 1);
+    }
+
+    public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
+        super(block, stackAmount);
         this.barrelItem = itemStack;
     }
 
@@ -42,6 +47,32 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     @Override
     public Location getLocation() {
         return object.getLocation();
+    }
+
+    @Override
+    public Chunk getChunk() {
+        return getLocation().getChunk();
+    }
+
+    @Override
+    public int getStackLimit() {
+        return plugin.getSettings().barrelsLimits.getOrDefault(getBarrelItem(1), Integer.MAX_VALUE);
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedBarrels.contains(getBarrelItem(1));
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return plugin.getSettings().whitelistedBarrels.isEmpty() ||
+                plugin.getSettings().whitelistedBarrels.contains(getBarrelItem(1));
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().barrelsDisabledWorlds.contains(object.getWorld().getName());
     }
 
     @Override
@@ -112,13 +143,17 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         if(equals(stackedObject) || !(stackedObject instanceof StackedBarrel) || !isSimilar(stackedObject))
             return false;
 
-        if(plugin.getSettings().barrelsDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
+
+        if(!targetBarrel.isWhitelisted() || targetBarrel.isBlacklisted() || targetBarrel.isWorldDisabled())
+            return false;
+
         int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
-        if(plugin.getSettings().barrelsLimits.getOrDefault(targetBarrel.getBarrelItem(1), Integer.MAX_VALUE) < newStackAmount)
+        if(getStackLimit() < newStackAmount)
             return false;
 
         return true;

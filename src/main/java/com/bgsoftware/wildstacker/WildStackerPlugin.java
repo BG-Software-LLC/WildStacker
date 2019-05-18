@@ -3,36 +3,44 @@ package com.bgsoftware.wildstacker;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
+import com.bgsoftware.wildstacker.data.AbstractDataHandler;
+import com.bgsoftware.wildstacker.data.FilesDataHandler;
+import com.bgsoftware.wildstacker.data.SQLDataHandler;
 import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
-import com.bgsoftware.wildstacker.handlers.DataHandler;
 import com.bgsoftware.wildstacker.handlers.EditorHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
+import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
+import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.listeners.EditorListener;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.listeners.ItemsListener;
+import com.bgsoftware.wildstacker.listeners.NoClaimConflictListener;
 import com.bgsoftware.wildstacker.listeners.PlayersListener;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
+import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -44,7 +52,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private SettingsHandler settingsHandler;
     private SystemHandler systemManager;
-    private DataHandler dataHandler;
+    private AbstractDataHandler dataHandler;
     private ProvidersHandler providersHandler;
     private EditorHandler editorHandler;
     private BreakMenuHandler breakMenuHandler;
@@ -59,16 +67,18 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("******** ENABLE START ********");
 
+        loadNMSAdapter();
+
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
-        dataHandler = new DataHandler(this);
+       // dataHandler = new FilesDataHandler(this);
+        dataHandler = settingsHandler.dataHandler.equals("SQL") ? new SQLDataHandler(this) : new FilesDataHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
 
         Locale.reload();
         loadAPI();
-        loadNMSAdapter();
 
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
         getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
@@ -77,6 +87,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
         getServer().getPluginManager().registerEvents(new EditorListener(this), this);
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
+        getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
+        EventsListener.register(this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
         getCommand("stacker").setExecutor(commandsHandler);
@@ -101,10 +114,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();
-        //Enable CrazyEnchantments hook
-        CrazyEnchantmentsHook.register();
+        if(getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
+            ProtocolLibHook.register();
 
-        runOnFirstTick(() -> {
+        Executor.sync(() -> {
             providersHandler = new ProvidersHandler(this);
 
             if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
@@ -113,38 +126,37 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
                 getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
+
 //            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
 //                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
-
-            //Set all holograms of spawners
-            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-                stackedSpawner.updateName();
-
-            //Set all holograms and block displays of barrlels
-            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-                stackedBarrel.updateName();
-                stackedBarrel.getLocation().getChunk().load(true);
-                stackedBarrel.createDisplayBlock();
-            }
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
                     getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
                 PluginHook_Novucs.register(this);
         });
+
+        Executor.sync(() -> {
+            for(World world : Bukkit.getWorlds()){
+                for(Chunk chunk : world.getLoadedChunks())
+                    dataHandler.loadChunkData(chunk);
+            }
+        }, 5L);
     }
 
     @Override
     public void onDisable() {
-        //We need to remove all holograms of spawners
-        for(StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-            providersHandler.deleteHologram(stackedSpawner);
-        for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-            providersHandler.deleteHologram(stackedBarrel);
-            stackedBarrel.getLocation().getChunk().load(true);
-            stackedBarrel.removeDisplayBlock();
+        //We need to save the entire database
+        dataHandler.saveChunkData(true, false);
+        dataHandler.clearDatabase();
+
+        try{
+            Bukkit.getScheduler().cancelAllTasks();
+        }catch(Throwable ex){
+            try {
+                BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
+            } catch (Exception ignored) { }
         }
-        dataHandler.saveDatabase();
     }
 
     private void loadAPI(){
@@ -165,7 +177,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + version).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + version + " - shutting down...");
-            runOnFirstTick(() -> getServer().getPluginManager().disablePlugin(this));
+            Executor.sync(() -> getServer().getPluginManager().disablePlugin(this));
         }
     }
 
@@ -196,10 +208,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     }
 
-    private void runOnFirstTick(final Runnable runnable){
-        Bukkit.getScheduler().runTaskLater(this, runnable, 1L);
-    }
-
     public NMSAdapter getNMSAdapter() {
         return nmsAdapter;
     }
@@ -220,7 +228,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return providersHandler;
     }
 
-    public DataHandler getDataHandler(){
+    public AbstractDataHandler getDataHandler(){
         return dataHandler;
     }
 

@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -60,6 +61,7 @@ public final class ItemUtil {
     }
 
     public static void dropItem(ItemStack itemStack, Location location){
+        if(itemStack.getType() == Material.AIR) return;
         int amount = itemStack.getAmount();
 
         for (int i = 0; i < amount / 64; i++) {
@@ -199,8 +201,16 @@ public final class ItemUtil {
         try{
             Class craftBlockDataClass = ReflectionUtil.getBukkitClass("block.data.CraftBlockData");
             Class blockDataClass = ReflectionUtil.getNMSClass("IBlockData");
-            int combined = type.getId() + (data << 12);
-            Object iBlockData = ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
+            Object iBlockData;
+
+            try{
+                int combined = type.getId() + (data << 12);
+                iBlockData = ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
+            }catch(Exception ex){
+                iBlockData = ReflectionUtil.getBukkitClass("util.CraftMagicNumbers")
+                        .getMethod("getBlock", Material.class, byte.class).invoke(null, type, data);
+            }
+
             return craftBlockDataClass.getMethod("fromData", blockDataClass).invoke(null, iBlockData);
         }catch(Exception ex){
             ex.printStackTrace();
@@ -210,23 +220,37 @@ public final class ItemUtil {
 
     public static boolean stackBucket(ItemStack bucket, Inventory inventory){
         if(plugin.getSettings().bucketsStackerEnabled) {
+            int amountOfBuckets = 0;
+
             for (int slot = 0; slot < inventory.getSize(); slot++) {
                 ItemStack itemStack = inventory.getItem(slot);
-                if (itemStack != null && itemStack.isSimilar(bucket) && itemStack.getAmount() < 16) {
-                    if (itemStack.getAmount() + bucket.getAmount() <= 16) {
-                        itemStack.setAmount(itemStack.getAmount() + bucket.getAmount());
-                        inventory.setItem(slot, itemStack);
-                        return true;
-                    } else {
-                        int toAdd = 16 - itemStack.getAmount();
-                        itemStack.setAmount(16);
-                        inventory.setItem(slot, itemStack);
-                        bucket.setAmount(bucket.getAmount() - toAdd);
-                    }
+                if (itemStack != null && itemStack.isSimilar(bucket)) {
+                    amountOfBuckets += itemStack.getAmount();
+                    inventory.setItem(slot, new ItemStack(Material.AIR));
                 }
             }
+
+            updateInventory(inventory);
+
+            ItemStack cloned = bucket.clone();
+            cloned.setAmount(16);
+
+            for(int i = 0; i < amountOfBuckets / 16; i++)
+                inventory.addItem(cloned);
+
+            if(amountOfBuckets % 16 > 0){
+                cloned.setAmount(amountOfBuckets % 16);
+                inventory.addItem(cloned);
+            }
+
+            updateInventory(inventory);
         }
         return false;
+    }
+
+    private static void updateInventory(Inventory inventory){
+        inventory.getViewers().stream().filter(humanEntity -> humanEntity instanceof Player)
+                .forEach(player -> ((Player) player).updateInventory());
     }
 
     public static ItemStack getFromConfig(ConfigurationSection section){
@@ -278,6 +302,40 @@ public final class ItemUtil {
         }catch(Exception ignored){}
 
         event.getPlayer().getInventory().removeItem(itemStack);
+    }
+
+    public static int countItem(Inventory inventory, ItemStack itemStack){
+        int counter = 0;
+
+        for(ItemStack _itemStack : inventory.getContents()){
+            if(_itemStack != null && _itemStack.isSimilar(itemStack))
+                counter += _itemStack.getAmount();
+        }
+
+        return counter;
+    }
+
+    public static void removeItem(Inventory inventory, ItemStack itemStack, int amount){
+        int amountRemoved = 0;
+
+        for(int i = 0; i < inventory.getSize() && amountRemoved < amount; i++){
+            ItemStack _itemStack = inventory.getItem(i);
+            if(_itemStack != null && _itemStack.isSimilar(itemStack)){
+                if(amountRemoved + _itemStack.getAmount() <= amount){
+                    amountRemoved += _itemStack.getAmount();
+                    inventory.setItem(i, new ItemStack(Material.AIR));
+                }else{
+                    _itemStack.setAmount(_itemStack.getAmount() - amount + amountRemoved);
+                    amountRemoved = amount;
+                }
+            }
+        }
+    }
+
+    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
+        int slotItem = inventory.first(inHand);
+        if(slotItem != -1)
+            inventory.setItem(slotItem, itemStack);
     }
 
 }

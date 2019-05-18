@@ -3,8 +3,11 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -18,7 +21,11 @@ import java.util.UUID;
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
-        super(item, item.getItemStack().getAmount());
+        this(item, item.getItemStack().getAmount());
+    }
+
+    public WStackedItem(Item item, int stackAmount){
+        super(item, stackAmount);
     }
 
     /*
@@ -53,6 +60,32 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     /*
      * StackedObject's methods
      */
+
+    @Override
+    public Chunk getChunk() {
+        return object.getLocation().getChunk();
+    }
+
+    @Override
+    public int getStackLimit() {
+        return plugin.getSettings().itemsLimits.getOrDefault(getItemStack(), Integer.MAX_VALUE);
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedItems.contains(getItemStack());
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return plugin.getSettings().whitelistedItems.isEmpty() ||
+                plugin.getSettings().whitelistedItems.contains(getItemStack());
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName());
+    }
 
     @Override
     public void remove() {
@@ -118,17 +151,20 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         if (equals(stackedObject) || !(stackedObject instanceof StackedItem) || !isSimilar(stackedObject))
             return false;
 
-        if (plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedItem targetItem = (StackedItem) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
 
-        if (plugin.getSettings().blacklistedItems.contains(object.getItemStack()) ||
-                plugin.getSettings().blacklistedItems.contains(((StackedItem) stackedObject).getItemStack()))
+        if(!targetItem.isWhitelisted() || targetItem.isBlacklisted() || targetItem.isWorldDisabled())
             return false;
 
-        if (plugin.getSettings().itemsLimits.getOrDefault(targetItem.getItemStack(), Integer.MAX_VALUE) < newStackAmount)
+        if(targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+            return false;
+
+        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
+
+        if (getStackLimit() < newStackAmount)
             return false;
 
         return true;
@@ -149,7 +185,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if (targetItem.getItem().isValid())
                 targetItem.updateName();
         }, 2L);
@@ -191,27 +227,40 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         int startAmount = itemStack.getAmount();
         int giveAmount = itemStack.getAmount() >= freeSpace ? freeSpace : itemStack.getAmount();
 
+        if(giveAmount <= 0)
+            return;
+
         /*
          * I am not using ItemUtil#addItem so it won't drop the leftovers
          * (If it will, the leftovers will get stacked again - infinite loop)
          */
 
-        if (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")) {
-            itemStack.setAmount(1);
+        if (itemStack.getMaxStackSize() != 64 &&
+                (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX"))) {
+            int amountOfStacks = giveAmount / itemStack.getMaxStackSize();
+            int leftOvers = giveAmount % itemStack.getMaxStackSize();
 
-            //Basically I want to add the item giveAmount times, when it's amount is 1.
-            for (int i = 0; i < giveAmount; i++) {
-                if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
-                    inventory.addItem(itemStack);
+            itemStack.setAmount(itemStack.getMaxStackSize());
+
+            for(int i = 0; i < amountOfStacks; i++)
+                giveItem(inventory, itemStack);
+
+            if(leftOvers > 0) {
+                itemStack.setAmount(leftOvers);
+                giveItem(inventory, itemStack);
             }
         }
         else {
             itemStack.setAmount(giveAmount);
-            if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
-                inventory.addItem(itemStack);
+            giveItem(inventory, itemStack);
         }
 
         setStackAmount(startAmount - giveAmount, true);
+    }
+
+    private void giveItem(Inventory inventory, ItemStack itemStack){
+        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
+            inventory.addItem(itemStack);
     }
 
     public static StackedItem of(Entity entity){

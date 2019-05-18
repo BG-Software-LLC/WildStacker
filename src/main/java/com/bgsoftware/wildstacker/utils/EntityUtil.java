@@ -4,6 +4,11 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,9 +24,6 @@ public final class EntityUtil {
 
         //EpicSpawners drops data
         if(en1.getLivingEntity().hasMetadata("ES") != en2.getLivingEntity().hasMetadata("ES"))
-            return false;
-
-        if(en1.isNerfed() != en2.isNerfed())
             return false;
 
         return EntityData.of(en1).equals(EntityData.of(en2));
@@ -60,6 +62,50 @@ public final class EntityUtil {
         }
 
         return false;
+    }
+
+    public static int getEntityExp(LivingEntity livingEntity){
+        int exp = 0;
+
+        try{
+            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
+            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
+            //noinspection unchecked
+            exp = (int) entityLivingClass.getMethod("getExpReward").invoke(entityLiving);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return exp;
+    }
+
+    public static void setKiller(LivingEntity livingEntity, Player killer){
+        try{
+            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
+            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
+            Object entityHuman = killer == null ? null : killer.getClass().getMethod("getHandle").invoke(killer);
+            entityLivingClass.getField("killer").set(entityLiving, entityHuman);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
+    public static void removeParrotIfShoulder(Parrot parrot){
+        List<Entity> nearbyPlayers = plugin.getNMSAdapter().getNearbyEntities(parrot, 1, en -> en instanceof Player);
+
+        try {
+            for (Entity entity : nearbyPlayers) {
+                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))){
+                    HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
+                    break;
+                }
+                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))){
+                    HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
+                    break;
+                }
+            }
+        }catch(Exception ignored){}
     }
 
 }

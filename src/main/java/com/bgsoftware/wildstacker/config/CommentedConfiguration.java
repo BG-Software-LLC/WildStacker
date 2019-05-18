@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.config;
 
-import com.bgsoftware.wildstacker.utils.FileUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -29,34 +27,31 @@ import java.util.Map;
 public final class CommentedConfiguration extends YamlConfiguration{
 
     private Class commentsClass;
-    private String[] ignoredSections = new String[] {"limits"};
+    private String[] ignoredSections = new String[] {"limits", "minimum-limits"};
 
-    public CommentedConfiguration(Class commentsClass){
+    public CommentedConfiguration(Class commentsClass, File file){
         this.commentsClass = commentsClass;
+        load(file);
     }
 
-    public void resetYamlFile(Plugin plugin, String resourceName, Class commentsClass){
+    public void resetYamlFile(Plugin plugin, String resourceName){
         File configFile = new File(plugin.getDataFolder(), resourceName);
-        FileUtil.saveResource(resourceName);
+        plugin.saveResource(resourceName, true);
+        CommentedConfiguration destination = new CommentedConfiguration(commentsClass, configFile);
 
-        CommentedConfiguration tempConfig = new CommentedConfiguration(commentsClass);
-        tempConfig.load(configFile);
+        copyConfigurationSection(getConfigurationSection(""), destination.getConfigurationSection(""));
 
-        checkConfigurationSection(plugin, tempConfig.getConfigurationSection(""));
-
-        save(configFile);
+        destination.save(configFile);
+        load(configFile);
     }
 
-    private void checkConfigurationSection(Plugin plugin, ConfigurationSection section){
-        for(String path : section.getKeys(false)){
-            if(section.isConfigurationSection(path) && !Arrays.asList(ignoredSections).contains(path)) {
-                checkConfigurationSection(plugin, section.getConfigurationSection(path));
-            }else{
-                String fullPath = section.getCurrentPath() + "." + path;
-                if (!contains(fullPath)) {
-                    plugin.getServer().getConsoleSender()
-                            .sendMessage(ChatColor.RED + "[" + plugin.getDescription().getName() + "] Couldn''t find path " + fullPath + "... Check out the config!");
-                    set(fullPath, section.get(path));
+    private void copyConfigurationSection(ConfigurationSection source, ConfigurationSection dest){
+        for (String key : dest.getKeys(false)) {
+            if (source.contains(key)) {
+                if (source.isConfigurationSection(key) && dest.contains(key) && !Arrays.asList(ignoredSections).contains(key)) {
+                    copyConfigurationSection(source.getConfigurationSection(key), dest.getConfigurationSection(key));
+                } else {
+                    dest.set(key, source.get(key));
                 }
             }
         }

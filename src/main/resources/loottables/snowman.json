@@ -4,7 +4,7 @@
       "chance": 100,
       "items": [
         {
-          "type": "SNOW_BALL",
+          "type": "SNOWBALL",
           "chance": 100,
           "min": 0,
           "max": 15

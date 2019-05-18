@@ -1,0 +1,31 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "LEATHER",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "RAW_BEEF",
+          "chance": 100,
+          "min": 1,
+          "max": 3,
+          "looting": true,
+          "burnable": {
+            "type": "COOKED_BEEF"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,17 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.handlers.EditorHandler;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,36 +26,43 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public final class EditorListener implements Listener {
 
-    private WildStackerPlugin instance;
-
-    private String[] integerValues = new String[] {
-            "save-interval", "items.merge-radius", "items.limits", "entities.merge-radius", "entities.stack-interval",
-            "entities.kill-all.interval", "entities.linked-entities.max-distance", "spawners.merge-radius", "spawners.explosions-break-chance",
-            "spawners.break-charge.amount", "spawners.place-charge.amount", "barrels.merge-radius"};
-    private String[] booleanValues = new String[] {
-            "items.enabled", "items.fix-stack", "items.item-display", "items.buckets-stacker.enabled", "items.kill-all",
-            "entities.enabled", "entities.kill-all.clear-lagg", "entities.linked-entities.enabled", "entities.stack-down.enabled",
-            "entities.keep-fire", "entities.mythic-mobs-stack", "entities.blazes-always-drop", "entities.keep-lowest-health",
-            "entities.stack-after-breed", "entities.hide-names", "spawners.enabled", "spawners.chunk-merge", "spawners.explosions-break-stack",
-            "spawners.drop-without-silk", "spawners.silk-spawners.enabled", "spawners.silk-spawners.explosions-drop-spawner",
-            "spawners.silk-spawners.drop-to-inventory", "spawners.shift-get-whole-stack", "spawners.get-stacked-item", "spawners.floating-names",
-            "spawners.break-menu.enabled", "spawners.placement-permission", "spawners.shift-place-stack", "spawners.break-charge.multiply-stack-amount",
-            "spawners.place-charge.multiply-stack-amount", "spawners.change-using-eggs", "barrels.enabled",
-            "barrels.chunk-merge", "barrels.explosions-break-stack", "barrels.toggle-command.enabled", "barrels.place-inventory"};
-    private String[] listValues = new String[] {
-            "items.blacklist", "items.disabled-worlds", "items.buckets-stacker.name-blacklist", "entities.disabled-worlds", "entities.blacklist",
-            "entities.spawn-blacklist", "entities.name-blacklist", "entities.instant-kill", "entities.nerfed-spawning",
-            "entities.stack-down.stack-down-types", "spawners.blacklist", "spawners.disabled-worlds", "barrels.whitelist",
-            "barrels.disabled-worlds"};
-    private String[] sectionValues = new String[] {
-            "items.limits", "entities.limits", "entities.stack-checks", "entities.stack-split", "spawners.limits", "barrels.limits"};
+    private WildStackerPlugin plugin;
 
     private Set<UUID> noResetClose = new HashSet<>();
     private Map<UUID, String> configValues = new HashMap<>();
     private Map<UUID, String> lastInventories = new HashMap<>();
 
-    public EditorListener(WildStackerPlugin instance){
-        this.instance = instance;
+    public EditorListener(WildStackerPlugin plugin){
+        this.plugin = plugin;
+    }
+
+    /**
+     * The following two events are here for patching a dupe glitch caused
+     * by shift clicking and closing the inventory in the same time.
+     */
+
+    private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
+    private List<String> inventoryTitles = Arrays.asList("Add items here", "WildStacker", "General Settings", "Items Settings",
+            "Entities Settings", "Spawners Settings", "Barrels Settings");
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryClickMonitor(InventoryClickEvent e){
+        if(e.getCurrentItem() != null && e.isCancelled() && (inventoryTitles.contains(e.getView().getTitle()) ||
+                plugin.getBreakMenuHandler().isBreakMenu(e.getInventory()))) {
+            latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
+            Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryCloseMonitor(InventoryCloseEvent e){
+        if(latestClickedItem.containsKey(e.getPlayer().getUniqueId())){
+            ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
+            Executor.sync(() -> {
+                e.getPlayer().getInventory().removeItem(clickedItem);
+                ((Player) e.getPlayer()).updateInventory();
+            }, 1L);
+        }
     }
 
     @EventHandler
@@ -66,48 +75,48 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getWhoClicked();
 
-        if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
+        if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 20:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getGeneralEditor());
+                    player.openInventory(plugin.getEditor().getGeneralEditor());
                     break;
                 case 22:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getItemsEditor());
+                    player.openInventory(plugin.getEditor().getItemsEditor());
                     break;
                 case 24:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getEntitiesEditor());
+                    player.openInventory(plugin.getEditor().getEntitiesEditor());
                     break;
                 case 30:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getSpawnersEditor());
+                    player.openInventory(plugin.getEditor().getSpawnersEditor());
                     break;
                 case 32:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(instance.getEditor().getBarrelsEditor());
+                    player.openInventory(plugin.getEditor().getBarrelsEditor());
                     break;
                 case 49:
-                    new WildStackerThread(() -> {
-                        instance.getEditor().saveConfiguration();
+                    Executor.async(() -> {
+                        plugin.getEditor().saveConfiguration();
                         player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
-                    }).start();
+                    });
                     break;
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 0:
-                    configValues.put(player.getUniqueId(), "save-interval");
+                    configValues.put(player.getUniqueId(), EditorHandler.GENERAL_SLOT_0);
                     break;
                 case 1:
-                    configValues.put(player.getUniqueId(), "give-item-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.GENERAL_SLOT_1);
                     break;
                 default:
                     return;
@@ -119,42 +128,48 @@ public final class EditorListener implements Listener {
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 0:
-                    configValues.put(player.getUniqueId(), "items.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_0);
                     break;
                 case 1:
-                    configValues.put(player.getUniqueId(), "items.merge-radius");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_1);
                     break;
                 case 2:
-                    configValues.put(player.getUniqueId(), "items.custom-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_2);
                     break;
                 case 3:
-                    configValues.put(player.getUniqueId(), "items.blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_3);
                     break;
                 case 4:
-                    configValues.put(player.getUniqueId(), "items.limits");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_4);
                     break;
                 case 5:
-                    configValues.put(player.getUniqueId(), "items.disabled-worlds");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_5);
                     break;
                 case 6:
-                    configValues.put(player.getUniqueId(), "items.fix-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_6);
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "items.item-display");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_7);
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "items.buckets-stacker.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_8);
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "items.buckets-stacker.name-blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_9);
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "items.kill-all");
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_10);
+                    break;
+                case 11:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_11);
+                    break;
+                case 12:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_12);
                     break;
                 default:
                     return;
@@ -165,89 +180,99 @@ public final class EditorListener implements Listener {
             player.closeInventory();
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
 
-            if(Arrays.asList(listValues).contains(configValues.get(player.getUniqueId())) || Arrays.asList(sectionValues).contains(configValues.get(player.getUniqueId()))){
+            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
+                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
                 player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 0:
-                    configValues.put(player.getUniqueId(), "entities.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_0);
                     break;
                 case 1:
-                    configValues.put(player.getUniqueId(), "entities.merge-radius");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_1);
                     break;
                 case 2:
-                    configValues.put(player.getUniqueId(), "entities.custom-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_2);
                     break;
                 case 3:
-                    configValues.put(player.getUniqueId(), "entities.blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_3);
                     break;
                 case 4:
-                    configValues.put(player.getUniqueId(), "entities.limits");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_4);
                     break;
                 case 5:
-                    configValues.put(player.getUniqueId(), "entities.disabled-worlds");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_5);
                     break;
                 case 6:
-                    configValues.put(player.getUniqueId(), "entities.spawn-blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_6);
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "entities.name-blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_7);
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "entities.stack-interval");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_8);
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.interval");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_9);
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "entities.kill-all.clear-lagg");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_10);
                     break;
                 case 11:
-                    configValues.put(player.getUniqueId(), "entities.stack-checks");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_11);
                     break;
                 case 12:
-                    configValues.put(player.getUniqueId(), "entities.stack-split");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_12);
                     break;
                 case 13:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_13);
                     break;
                 case 14:
-                    configValues.put(player.getUniqueId(), "entities.linked-entities.max-distance");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_14);
                     break;
                 case 15:
-                    configValues.put(player.getUniqueId(), "entities.instant-kill");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_15);
                     break;
                 case 16:
-                    configValues.put(player.getUniqueId(), "entities.nerfed-spawning");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_16);
                     break;
                 case 17:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_17);
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "entities.stack-down.stack-down-types");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_18);
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "entities.keep-fire");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_19);
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "entities.mythic-mobs-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_20);
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "entities.blazes-always-drop");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_21);
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "entities.keep-lowest-health");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_22);
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "entities.stack-after-breed");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_23);
                     break;
                 case 24:
-                    configValues.put(player.getUniqueId(), "entities.hide-names");
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_24);
+                    break;
+                case 25:
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_25);
+                    break;
+                case 26:
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_26);
+                    break;
+                case 27:
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_27);
                     break;
                 default:
                     return;
@@ -258,89 +283,111 @@ public final class EditorListener implements Listener {
             player.closeInventory();
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
 
-            if(Arrays.asList(listValues).contains(configValues.get(player.getUniqueId())) || Arrays.asList(sectionValues).contains(configValues.get(player.getUniqueId()))){
+            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
+                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
                 player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 0:
-                    configValues.put(player.getUniqueId(), "spawners.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_0);
                     break;
                 case 1:
-                    configValues.put(player.getUniqueId(), "spawners.merge-radius");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_1);
                     break;
                 case 2:
-                    configValues.put(player.getUniqueId(), "spawners.custom-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_2);
                     break;
                 case 3:
-                    configValues.put(player.getUniqueId(), "spawners.blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_3);
                     break;
                 case 4:
-                    configValues.put(player.getUniqueId(), "spawners.limits");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_4);
                     break;
                 case 5:
-                    configValues.put(player.getUniqueId(), "spawners.disabled-worlds");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_5);
                     break;
                 case 6:
-                    configValues.put(player.getUniqueId(), "spawners.chunk-merge");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_6);
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "spawners.explosions-break-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_7);
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "spawners.explosions-break-chance");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_8);
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "spawners.drop-without-silk");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_9);
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "spawners.silk-spawners.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_10);
                     break;
                 case 11:
-                    configValues.put(player.getUniqueId(), "spawners.silk-spawners.custom-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_11);
                     break;
                 case 12:
-                    configValues.put(player.getUniqueId(), "spawners.silk-spawners.explosions-drop-spawner");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_12);
                     break;
                 case 13:
-                    configValues.put(player.getUniqueId(), "spawners.silk-spawners.drop-to-inventory");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_13);
                     break;
                 case 14:
-                    configValues.put(player.getUniqueId(), "spawners.shift-get-whole-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_14);
                     break;
                 case 15:
-                    configValues.put(player.getUniqueId(), "spawners.get-stacked-item");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_15);
                     break;
                 case 16:
-                    configValues.put(player.getUniqueId(), "spawners.floating-names");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_16);
                     break;
                 case 17:
-                    configValues.put(player.getUniqueId(), "spawners.break-menu.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_17);
                     break;
                 case 18:
-                    configValues.put(player.getUniqueId(), "spawners.placement-permission");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_18);
                     break;
                 case 19:
-                    configValues.put(player.getUniqueId(), "spawners.shift-place-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_19);
                     break;
                 case 20:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.amount");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_20);
                     break;
                 case 21:
-                    configValues.put(player.getUniqueId(), "spawners.break-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_21);
                     break;
                 case 22:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.amount");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_22);
                     break;
                 case 23:
-                    configValues.put(player.getUniqueId(), "spawners.place-charge.multiply-stack-amount");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_23);
                     break;
                 case 24:
-                    configValues.put(player.getUniqueId(), "spawners.change-using-eggs");
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_24);
+                    break;
+                case 25:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_25);
+                    break;
+                case 26:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_26);
+                    break;
+                case 27:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_27);
+                    break;
+                case 28:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_28);
+                    break;
+                case 29:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_29);
+                    break;
+                case 30:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_30);
+                    break;
+                case 31:
+                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_31);
                     break;
                 default:
                     return;
@@ -351,47 +398,54 @@ public final class EditorListener implements Listener {
             player.closeInventory();
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
 
-            if(Arrays.asList(listValues).contains(configValues.get(player.getUniqueId())) || Arrays.asList(sectionValues).contains(configValues.get(player.getUniqueId()))){
+            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
+                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
                 player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
             }
         }
 
-        else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
                 case 0:
-                    configValues.put(player.getUniqueId(), "barrels.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_0);
                     break;
                 case 1:
-                    configValues.put(player.getUniqueId(), "barrels.merge-radius");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_1);
                     break;
                 case 2:
-                    configValues.put(player.getUniqueId(), "barrels.custom-name");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_2);
                     break;
                 case 3:
-                    configValues.put(player.getUniqueId(), "barrels.blacklist");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_3);
                     break;
                 case 4:
-                    configValues.put(player.getUniqueId(), "barrels.limits");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_4);
                     break;
                 case 5:
-                    configValues.put(player.getUniqueId(), "barrels.disabled-worlds");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_5);
                     break;
                 case 6:
-                    configValues.put(player.getUniqueId(), "barrels.chunk-merge");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_6);
                     break;
                 case 7:
-                    configValues.put(player.getUniqueId(), "barrels.explosions-break-stack");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_7);
                     break;
                 case 8:
-                    configValues.put(player.getUniqueId(), "barrels.toggle-command.enabled");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_8);
                     break;
                 case 9:
-                    configValues.put(player.getUniqueId(), "barrels.toggle-command.command");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_9);
                     break;
                 case 10:
-                    configValues.put(player.getUniqueId(), "barrels.place-inventory");
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_10);
+                    break;
+                case 11:
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_11);
+                    break;
+                case 12:
+                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_12);
                     break;
                 default:
                     return;
@@ -402,7 +456,8 @@ public final class EditorListener implements Listener {
             player.closeInventory();
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
 
-            if(Arrays.asList(listValues).contains(configValues.get(player.getUniqueId())) || Arrays.asList(sectionValues).contains(configValues.get(player.getUniqueId()))){
+            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
+                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
                 player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
             }
         }
@@ -422,21 +477,20 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getPlayer();
 
-        Bukkit.getScheduler().runTaskLater(instance, () -> {
-            if(e.getInventory().getName().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
+        Executor.sync(() -> {
+            if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
                 if(!noResetClose.contains(player.getUniqueId())) {
-                    Bukkit.getScheduler().runTaskAsynchronously(instance, () ->
-                            instance.getEditor().reloadConfiguration());
+                    Executor.async(() -> plugin.getEditor().reloadConfiguration());
                 }
             }
 
-            else if(e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
-                    e.getInventory().getName().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+            else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
                 noResetClose.remove(player.getUniqueId());
-                player.openInventory(instance.getEditor().getSettingsEditor());
+                player.openInventory(plugin.getEditor().getSettingsEditor());
             }
         }, 1L);
     }
@@ -452,7 +506,7 @@ public final class EditorListener implements Listener {
         Object value = e.getMessage();
 
         if(!value.toString().equalsIgnoreCase("-cancel")){
-            if(Arrays.asList(sectionValues).contains(path)){
+            if(plugin.getEditor().config.isConfigurationSection(path)){
                 Matcher matcher;
                 if(!(matcher = Pattern.compile("(.*):(.*)").matcher(value.toString())).matches()){
                     e.getPlayer().sendMessage(ChatColor.RED + "Please follow the <sub-section>:<value> format");
@@ -461,7 +515,7 @@ public final class EditorListener implements Listener {
                     path = path + "." + matcher.group(1);
                     value = matcher.group(2);
 
-                    if(instance.getEditor().config.get(path) != null && instance.getEditor().config.get(path).toString().equals(value.toString())){
+                    if(plugin.getEditor().config.get(path) != null && plugin.getEditor().config.get(path).toString().equals(value.toString())){
                         e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Removed the value " + matcher.group(1) + " from " + path);
                         value = null;
                     }else{
@@ -477,12 +531,12 @@ public final class EditorListener implements Listener {
 
                     }
 
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                 }
             }
 
-            else if(Arrays.asList(listValues).contains(path)){
-                List<String> list = instance.getEditor().config.getStringList(path);
+            else if(plugin.getEditor().config.isList(path)){
+                List<String> list = plugin.getEditor().config.getStringList(path);
 
                 if (list.contains(value.toString())) {
                     list.remove(value.toString());
@@ -492,12 +546,12 @@ public final class EditorListener implements Listener {
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Added the value " + value.toString() + " to " + path);
                 }
 
-                instance.getEditor().config.set(path, list);
+                plugin.getEditor().config.set(path, list);
             }
 
             else{
                 boolean valid = true;
-                if(Arrays.asList(integerValues).contains(path)){
+                if(plugin.getEditor().config.isInt(path)){
                     try{
                         value = Integer.valueOf(value.toString());
                     }catch(IllegalArgumentException ex){
@@ -506,7 +560,7 @@ public final class EditorListener implements Listener {
                     }
                 }
 
-                else if(Arrays.asList(booleanValues).contains(path)){
+                else if(plugin.getEditor().config.isBoolean(path)){
                     if(value.toString().equalsIgnoreCase("true") || value.toString().equalsIgnoreCase("false")){
                         value = Boolean.valueOf(value.toString());
                     }else{
@@ -516,13 +570,13 @@ public final class EditorListener implements Listener {
                 }
 
                 if(valid) {
-                    instance.getEditor().config.set(path, value);
+                    plugin.getEditor().config.set(path, value);
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Changed value of " + path + " to " + value.toString());
                 }
             }
         }
 
-        e.getPlayer().openInventory(instance.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+        e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
         lastInventories.remove(e.getPlayer().getUniqueId());
         configValues.remove(e.getPlayer().getUniqueId());
     }

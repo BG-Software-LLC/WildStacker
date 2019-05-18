@@ -1,0 +1,31 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "FEATHER",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "RAW_CHICKEN",
+          "chance": 100,
+          "min": 1,
+          "max": 1,
+          "looting": true,
+          "burnable": {
+            "type": "COOKED_CHICKEN"
+          }
+        }
+      ]
+    }
+  ]
+}

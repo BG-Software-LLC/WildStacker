@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -40,35 +41,32 @@ public final class BucketsListener implements Listener {
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getItem() == null || !e.getItem().getType().name().contains("BUCKET"))
             return;
 
-        if(plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
+        if(e.getItem().hasItemMeta() && e.getItem().getItemMeta().hasDisplayName() &&
+                plugin.getSettings().bucketsBlacklistedNames.contains(e.getItem().getItemMeta().getDisplayName().replace(ChatColor.COLOR_CHAR, '&')))
             return;
 
         plugin.getProviders().enableBypass(e.getPlayer());
-        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getProviders().disableBypass(e.getPlayer()), 5L);
+        Executor.sync(() -> plugin.getProviders().disableBypass(e.getPlayer()), 5L);
 
         Block toBeReplaced = e.getClickedBlock().getRelative(e.getBlockFace());
         Material replacedType = e.getItem().getType().name().contains("LAVA") ? Material.LAVA : Material.WATER;
         ItemStack bucketToAdd = new ItemStack(Material.BUCKET);
-        boolean returnIfNotFullBlock = true;
 
         EntityType toBeSpawned = null;
 
         switch (e.getItem().getType()){
             case WATER_BUCKET:
-                if(toBeReplaced.getType().name().contains("WATER"))
-                    returnIfNotFullBlock = false;
                 replacedType = Material.WATER;
                 bucketToAdd = new ItemStack(Material.BUCKET);
                 break;
             case LAVA_BUCKET:
-                if(toBeReplaced.getType().name().contains("LAVA"))
-                    returnIfNotFullBlock = false;
                 replacedType = Material.LAVA;
                 bucketToAdd = new ItemStack(Material.BUCKET);
                 break;
             case BUCKET:
                 replacedType = Material.AIR;
-                bucketToAdd = toBeReplaced.getType().name().contains("WATER") ? new ItemStack(Material.WATER_BUCKET) : new ItemStack(Material.LAVA_BUCKET);
+                bucketToAdd = toBeReplaced.getType().name().contains("WATER") ||
+                        toBeReplaced.getType().name().contains("BUBBLE_COLUMN") ? new ItemStack(Material.WATER_BUCKET) : new ItemStack(Material.LAVA_BUCKET);
                 break;
             case MILK_BUCKET:
                 return;
@@ -79,10 +77,6 @@ public final class BucketsListener implements Listener {
         }
 
         e.setCancelled(true);
-
-        //noinspection deprecation
-        if(toBeReplaced.getData() != 0 && returnIfNotFullBlock)
-            return;
 
         if(toBeReplaced.getType() == Material.AIR && e.getItem().getType() == Material.BUCKET)
             return;
@@ -101,6 +95,14 @@ public final class BucketsListener implements Listener {
                 if(blockBreakEvent.isCancelled())
                     return;
                 break;
+        }
+
+        if(e.getClickedBlock().getType() == Material.CAULDRON){
+            if(replacedType == Material.WATER) {
+                //noinspection deprecation
+                e.getClickedBlock().getState().setRawData((byte) 3);
+                return;
+            }
         }
 
         toBeReplaced.setType(replacedType);
@@ -167,15 +169,12 @@ public final class BucketsListener implements Listener {
                 break;
             case SHIFT_LEFT:
             case SHIFT_RIGHT:
-                e.setCancelled(true);
+                Inventory invToAddItem = e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()) ?
+                        e.getWhoClicked().getOpenInventory().getBottomInventory() : e.getWhoClicked().getOpenInventory().getTopInventory();
 
-                Inventory invToAddItem = e.getWhoClicked().getOpenInventory().getTopInventory();
-                if(e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()))
-                    invToAddItem = e.getWhoClicked().getOpenInventory().getBottomInventory();
+                clicked = e.getCurrentItem();
 
-                if(ItemUtil.stackBucket(e.getCurrentItem(), invToAddItem) || invToAddItem.addItem(e.getCurrentItem()).isEmpty()){
-                    e.setCurrentItem(new ItemStack(Material.AIR));
-                }
+                Executor.sync(() -> ItemUtil.stackBucket(clicked, invToAddItem));
                 break;
             default:
                 return;

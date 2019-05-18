@@ -11,10 +11,12 @@ import java.util.Set;
 
 public class KeySet extends AbstractSet<Key> implements Set<Key> {
 
-    private Set<String> set;
+    private final Set<String> set = new HashSet<>();
+    private final Set<Key> keySet = new HashSet<>();
 
     public KeySet(List<String> keys){
-        this.set = new HashSet<>(keys);
+        this.set.addAll(keys);
+        keys.forEach(key -> keySet.add(Key.of(key)));
     }
 
     @Override
@@ -58,11 +60,13 @@ public class KeySet extends AbstractSet<Key> implements Set<Key> {
 
     @Override
     public boolean add(Key key) {
+        keySet.add(key);
         return set.add(key.toString());
     }
 
     @Override
     public boolean remove(Object o) {
+        keySet.remove(o);
         return set.remove(o);
     }
 
@@ -71,9 +75,7 @@ public class KeySet extends AbstractSet<Key> implements Set<Key> {
     }
 
     private Set<Key> asKeySet(){
-        Set<Key> set = new HashSet<>();
-        this.set.forEach(string -> set.add(Key.of(string)));
-        return set;
+        return new HashSet<>(keySet);
     }
 
 }

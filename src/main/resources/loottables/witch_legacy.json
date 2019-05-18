@@ -1,0 +1,90 @@
+{
+  "min": 1,
+  "max": 3,
+  "pairs": [
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "GLOWSTONE_DUST",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "SUGAR",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "REDSTONE",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "SPIDER_EYE",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "GLASS_BOTTLE",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 12.5,
+      "items": [
+        {
+          "type": "SULPHUR",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 25,
+      "items": [
+        {
+          "type": "STICK",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    }
+  ]
+}

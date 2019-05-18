@@ -68,6 +68,11 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     StackedEntity spawnDuplicate(int amount);
 
     /**
+     * Spawn a corpse for this entity.
+     */
+    void spawnCorpse();
+
+    /**
      * Get the drops of this entity with a specific fortune level.
      * SHOULD BE USED ASYNC OR MAY CAUSE LAG WITH LARGE STACK SIZES!!!
      * @param lootBonusLevel the fortune level
@@ -92,6 +97,30 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     void setTempLootTable(List<ItemStack> itemStacks);
 
     /**
+     * Set a multiplier for loot. It will multiply all the drops by the given multiplier.
+     * @param multiplier The multiplier
+     */
+    void setLootMultiplier(int multiplier);
+
+    /**
+     * Get the exp of this entity.
+     * @param defaultExp the default exp to return if not found
+     * @return The amount of exp to drop.
+     *
+     * @deprecated Will be swiched with getExp(int stackSize) in the next updates
+     */
+    @Deprecated
+    int getExp(int defaultExp);
+
+    /**
+     * Get the exp of this entity with a stack size.
+     * @param stackAmount the stack size
+     * @param defaultExp the default exp to return if not found
+     * @return The amount of exp to drop.
+     */
+    int getExp(int stackAmount, int defaultExp);
+
+    /**
      * Ignore the death event of this entity.
      * Should be used if you want to override the behaviour of the entity.
      */
@@ -110,9 +139,21 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     CreatureSpawnEvent.SpawnReason getSpawnReason();
 
     /**
+     * Set the spawn reason of the entity.
+     * @param spawnReason The spawn reason
+     */
+    void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason);
+
+    /**
      * Checks if the entity is nerfed or not.
      * @return True if entity is nerfed, otherwise false.
      */
     boolean isNerfed();
+
+    /**
+     * Checks if the name of the entity is blacklisted.
+     * @return True if the name is blacklisted, otherwise false.
+     */
+    boolean isNameBlacklisted();
 
 }

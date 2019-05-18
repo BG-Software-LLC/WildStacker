@@ -1,0 +1,24 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "RAW_FISH",
+          "chance": 75,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        },
+        {
+          "type": "RAW_FISH",
+          "data": 1,
+          "chance": 25,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,27 +1,34 @@
 package com.bgsoftware.wildstacker.listeners;
 
+import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.listeners.events.AsyncEntityDeathEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.ItemStackList;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
-import com.bgsoftware.wildstacker.utils.async.WildStackerThread;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
@@ -29,6 +36,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
@@ -36,12 +44,15 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,82 +71,100 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
     }
 
-    //This method will be fired even if stacking-entities is disabled.
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityDeath(EntityDeathEvent e){
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
-            return;
-
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()))
-            return;
-
-        if(plugin.getSettings().entitiesDisabledWorlds.contains(e.getEntity().getWorld().getName()))
-            return;
-
-        WStackedEntity.spawnReasons.remove(e.getEntity().getUniqueId());
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-        if(stackedEntity.isIgnoreDeathEvent()) {
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityDeathMonitor(EntityDeathEvent e){
+        if(e.getEntity().hasMetadata("corpse")){
             e.getDrops().clear();
-            return;
-        }
-
-        if(MythicMobsHook.isMythicMob(e.getEntity()))
-            stackedEntity.setTempLootTable(new ArrayList<>(e.getDrops()));
-
-        EntityDamageEvent.DamageCause lastDamageCause = EntityDamageEvent.DamageCause.CUSTOM;
-
-        if(e.getEntity().getLastDamageCause() != null) {
-            lastDamageCause = e.getEntity().getLastDamageCause().getCause();
-        }
-
-        int amount = stackedEntity.getStackAmount();
-
-        int lootBonusLevel = 0;
-        ItemStack killerItemHand = null;
-
-        if(lastDamageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK && e.getEntity().getKiller() != null &&
-                (killerItemHand = e.getEntity().getKiller().getItemInHand()) != null){
-            lootBonusLevel = e.getEntity().getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-        }
-
-        final int LOOT_BONUS_LEVEL = lootBonusLevel;
-
-        if(!plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name())){
-            Bukkit.getScheduler().runTaskLater(plugin, () -> stackedEntity.tryUnstack(1), 1L);
-            if(plugin.getSettings().entitiesStackingEnabled) {
-                calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, 1);
-                e.getDrops().clear();
-            }
-        }
-
-        //Instant-kill drops should only work when entities-stacking is enabled
-        else{
-            if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-                calcAndDrop(stackedEntity, e.getEntity().getLocation(), LOOT_BONUS_LEVEL, stackedEntity.getStackAmount());
-                e.getDrops().clear();
-            }
-
-            stackedEntity.tryUnstack(stackedEntity.getStackAmount());
-
-            e.setDroppedExp(CrazyEnchantmentsHook.getNewExpValue(e.getDroppedExp() * amount, killerItemHand));
-
-            if(e.getEntity().getKiller() != null && amount - 1 > 0) {
-                try {
-                    e.getEntity().getKiller().incrementStatistic(Statistic.MOB_KILLS, amount - 1);
-                    e.getEntity().getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), amount - 1);
-                }catch(IllegalArgumentException ignored){}
-            }
+            e.setDroppedExp(0);
         }
     }
 
-    private void calcAndDrop(StackedEntity stackedEntity, Location location, int lootBonusLevel, int stackAmount){
-        new WildStackerThread(() -> {
-            List<ItemStack> drops = new ArrayList<>(stackedEntity.getDrops(lootBonusLevel, stackAmount));
-            Bukkit.getScheduler().runTask(plugin, () ->
-                    drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, location)));
-        }).start();
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityLastDamage(EntityDamageEvent e){
+        //Checks that it's the last hit of the entity
+        if(!(e.getEntity() instanceof LivingEntity) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
+            return;
+
+        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
+            return;
+
+        LivingEntity livingEntity = (LivingEntity) e.getEntity();
+        StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
+
+        if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
+            EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
+            int lootBonusLevel = getFortuneLevel(livingEntity);
+            int stackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ||
+                    plugin.getSettings().entitiesInstantKills.contains(e.getEntityType().name()) ? stackedEntity.getStackAmount() : 1;
+
+            e.setDamage(0);
+            livingEntity.setHealth(livingEntity.getMaxHealth());
+
+            livingEntity.setLastDamageCause(e);
+            livingEntity.setMetadata("unstack-amount", new FixedMetadataValue(plugin, stackAmount));
+
+            if(e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player){
+                EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+            }else{
+                EntityUtil.setKiller(livingEntity, null);
+            }
+
+            Executor.async(() -> {
+                List<List<ItemStack>> entityDrops = new ArrayList<>();
+                List<Integer> entityExp = new ArrayList<>();
+
+                for(int i = 0; i < stackAmount; i++) {
+                    entityDrops.add(stackedEntity.getDrops(lootBonusLevel, 1));
+                    entityExp.add(stackedEntity.getExp(1, -1));
+                }
+
+                ItemStackList drops = new ItemStackList();
+                int expToDrop = 0;
+
+                if(plugin.getSettings().asyncEvent) {
+                    for (int i = 0; i < stackAmount; i++) {
+                        AsyncEntityDeathEvent asyncEntityDeathEvent = new AsyncEntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
+                        Bukkit.getPluginManager().callEvent(asyncEntityDeathEvent);
+                        drops.addAll(asyncEntityDeathEvent.getDrops());
+                        expToDrop += asyncEntityDeathEvent.getDroppedExp();
+                    }
+                }
+
+                final int EXP = expToDrop;
+
+                Executor.sync(() -> {
+                    int exp = 0;
+
+                    if(!plugin.getSettings().asyncEvent){
+                        for (int i = 0; i < stackAmount; i++) {
+                            EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
+                            Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                            drops.addAll(entityDeathEvent.getDrops());
+                            exp += entityDeathEvent.getDroppedExp();
+                        }
+                    }else{
+                        exp = EXP;
+                    }
+
+                    drops.toList().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+
+                    if(exp > 0){
+                        ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+                        experienceOrb.setExperience(exp);
+                    }
+
+                    stackedEntity.tryUnstack(stackAmount);
+
+                    if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
+                        try {
+                            livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                            livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                        }catch(IllegalArgumentException ignored){}
+                    }
+                });
+
+            });
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -143,11 +172,13 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getSettings().entitiesStackingEnabled)
             return;
 
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
+        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER || e.getEntity().hasMetadata("corpse"))
             return;
 
-        if(plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains(e.getSpawnReason().name()))
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+        stackedEntity.setSpawnReason(e.getSpawnReason());
+
+        if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
             return;
 
         if(noStackEntities.contains(e.getEntity().getUniqueId())) {
@@ -157,18 +188,24 @@ public final class EntitiesListener implements Listener {
 
         //EpicSpawners has it's own event
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER &&
-                Bukkit.getPluginManager().isPluginEnabled("EpicSpawners"))
+                Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && EpicSpawnersListener.isEnabled())
             return;
 
         if (!Bukkit.getPluginManager().isPluginEnabled("MergedSpawner") &&
                 plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if(stackedEntity.tryStack() == null)
-                WStackedEntity.spawnReasons.put(stackedEntity.getUniqueId(), e.getSpawnReason());
-        });
+        //Need to add a delay so eggs will get removed from inventory
+        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER)
+            Executor.sync(stackedEntity::tryStack, 1L);
+        else
+            stackedEntity.tryStack();
+
+        //Chunk Limit
+        Executor.sync(() -> {
+            if(isChunkLimit(e.getLocation().getChunk()))
+                stackedEntity.remove();
+        }, 2L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -190,7 +227,7 @@ public final class EntitiesListener implements Listener {
 
             stackedEntity.setStackAmount(eggAmount - 1, true);
 
-            Bukkit.getScheduler().runTaskLater(plugin, stackedEntity::tryStack, 5L);
+            Executor.sync(stackedEntity::tryStack, 5L);
         }
     }
 
@@ -203,22 +240,25 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSheepDye(SheepDyeWoolEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled)
+        if(!plugin.getSettings().entitiesStackingEnabled || !StackSplit.SHEEP_DYE.isEnabled())
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-        if(!StackSplit.SHEEP_DYE.isEnabled())
-            return;
-
         int amount = stackedEntity.getStackAmount();
 
-        if (amount > 1)
-            stackedEntity.spawnDuplicate(amount - 1);
+        DyeColor originalColor = e.getEntity().getColor();
 
-        e.getEntity().setColor(e.getColor());
-        stackedEntity.setStackAmount(1, false);
-        stackedEntity.tryStack();
+        Executor.sync(() -> {
+            if(amount > 1) {
+                e.getEntity().setColor(originalColor);
+                stackedEntity.setStackAmount(amount - 1, true);
+                StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                ((Sheep) duplicate.getLivingEntity()).setColor(e.getColor());
+                duplicate.tryStack();
+            }else{
+                stackedEntity.tryStack();
+            }
+        });
     }
 
 
@@ -235,16 +275,24 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
-        if(e.getEntity() instanceof Sheep || e.getEntity() instanceof MushroomCow) {
+        if(e.getEntity() instanceof MushroomCow){
             stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
-            if(e.getEntity() instanceof MushroomCow) {
-                stackedEntity.remove();
-            }
-            else{
-                ((Sheep) e.getEntity()).setSheared(true);
-                stackedEntity.setStackAmount(1, false);
-                stackedEntity.tryStack();
-            }
+            stackedEntity.remove();
+        }
+
+        else if(e.getEntity() instanceof Sheep){
+            int amount = stackedEntity.getStackAmount();
+            Executor.sync(() -> {
+                if(amount > 1) {
+                    ((Sheep) e.getEntity()).setSheared(false);
+                    stackedEntity.setStackAmount(amount - 1, true);
+                    StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                    ((Sheep) duplicate.getLivingEntity()).setSheared(true);
+                    duplicate.tryStack();
+                }else{
+                    stackedEntity.tryStack();
+                }
+            });
         }
     }
 
@@ -260,36 +308,44 @@ public final class EntitiesListener implements Listener {
         if(!e.getEntity().isSheared())
             return;
 
-        if(amount > 1){
-            Sheep sheared = (Sheep) stackedEntity.spawnDuplicate(amount - 1).getLivingEntity();
-            sheared.setSheared(true);
-            stackedEntity.setStackAmount(1, false);
-        }
-        e.getEntity().setSheared(false);
-        stackedEntity.tryStack();
+        Executor.sync(() -> {
+            if(amount > 1){
+                e.getEntity().setSheared(true);
+                stackedEntity.setStackAmount(amount - 1, true);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                ((Sheep) duplicated.getLivingEntity()).setSheared(false);
+                duplicated.tryStack();
+            }else{
+                stackedEntity.tryStack();
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onNameTagOrSaddle(PlayerInteractAtEntityEvent e){
+    public void onEntityNameTag(PlayerInteractAtEntityEvent e){
         if(!plugin.getSettings().entitiesStackingEnabled || !(e.getRightClicked() instanceof LivingEntity) || !StackSplit.NAME_TAG.isEnabled())
             return;
 
         ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
-        if(inHand.getType() == Material.NAME_TAG){
-            if(!inHand.hasItemMeta() || !inHand.getItemMeta().hasDisplayName() || e.getRightClicked() instanceof EnderDragon || e.getRightClicked() instanceof Player)
+        if(inHand == null || inHand.getType() != Material.NAME_TAG || !inHand.hasItemMeta() || !inHand.getItemMeta().hasDisplayName()
+                || e.getRightClicked() instanceof EnderDragon || e.getRightClicked() instanceof Player)
                 return;
-        }else if(inHand.getType() == Material.SADDLE){
-            if(!(e.getRightClicked() instanceof Pig))
-                return;
-        }else return;
 
-        stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
+        int amount = stackedEntity.getStackAmount();
 
-        stackedEntity.setStackAmount(1, false);
-        stackedEntity.setCustomName(inHand.getItemMeta().getDisplayName());
-        stackedEntity.setCustomNameVisible(false);
+        Executor.sync(() -> {
+            if(amount > 1){
+                stackedEntity.setCustomName("");
+                stackedEntity.setStackAmount(amount - 1, true);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
+                duplicated.tryStack();
+            }else{
+                stackedEntity.tryStack();
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -300,28 +356,30 @@ public final class EntitiesListener implements Listener {
         if(!(e.getRightClicked() instanceof Animals))
             return;
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Executor.sync(() -> {
             if(!plugin.getNMSAdapter().isInLove(e.getRightClicked()))
                 return;
 
             StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+            int amount = stackedEntity.getStackAmount();
 
-            if(stackedEntity.getStackAmount() > 1){
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
-                plugin.getNMSAdapter().setInLove(duplicated.getLivingEntity(), false);
-                stackedEntity.setStackAmount(1, true);
+            if(amount > 1){
+                plugin.getNMSAdapter().setInLove(stackedEntity.getLivingEntity(), e.getPlayer(), false);
+                stackedEntity.setStackAmount(amount - 1, true);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                plugin.getNMSAdapter().setInLove(duplicated.getLivingEntity(), e.getPlayer(), true);
             }
-
         }, 1L);
     }
 
     @EventHandler
     public void onEntityBreed(EntityBreedEvent e){
         if(plugin.getSettings().stackAfterBreed) {
-            if(WStackedEntity.of(e.getFather()).tryStackInto(WStackedEntity.of(e.getMother()))){
-                LivingEntity livingEntity = WStackedEntity.of(e.getMother()).tryStack();
-                if(livingEntity != null)
-                    ((Animals) livingEntity).setBreed(false);
+            StackedEntity motherEntity = WStackedEntity.of(e.getMother());
+            StackedEntity fatherEntity = WStackedEntity.of(e.getFather());
+            if(fatherEntity.tryStackInto(motherEntity)){
+                ((Animals) motherEntity.getLivingEntity()).setBreed(false);
+                motherEntity.tryStack();
             }
         }
     }
@@ -338,10 +396,96 @@ public final class EntitiesListener implements Listener {
     public void onEntityTarget(EntityTargetLivingEntityEvent e){
         if(e.getEntity() instanceof LivingEntity) {
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-            if (e.getTarget() instanceof Player && stackedEntity.isNerfed()) {
+            if (stackedEntity.isNerfed()) {
                 e.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityInspect(PlayerInteractAtEntityEvent e){
+        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
+                !(e.getRightClicked() instanceof LivingEntity))
+            return;
+
+        e.setCancelled(true);
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+
+        Locale.ENTITY_INFO_HEADER.send(e.getPlayer());
+        Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
+        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedEntity.getType().name()));
+        Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
+        Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnReason().name());
+        Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
+        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
+        if(!plugin.getSettings().entitiesNamesToggleEnabled)
+            return;
+
+        String commandSyntax = "/" + plugin.getSettings().entitiesNamesToggleCommand;
+
+        if(!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
+            return;
+
+        e.setCancelled(true);
+
+        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
+            return;
+        }
+
+        if(ProtocolLibHook.entitiesDisabledNames.contains(e.getPlayer().getUniqueId())){
+            ProtocolLibHook.entitiesDisabledNames.remove(e.getPlayer().getUniqueId());
+            Locale.ENTITY_NAMES_TOGGLE_ON.send(e.getPlayer());
+        }
+        else{
+            ProtocolLibHook.entitiesDisabledNames.add(e.getPlayer().getUniqueId());
+            Locale.ENTITY_NAMES_TOGGLE_OFF.send(e.getPlayer());
+        }
+
+        //Refresh item names
+        for(Entity entity : e.getPlayer().getNearbyEntities(50, 256, 50)){
+            if(entity instanceof LivingEntity && entity.isCustomNameVisible()){
+                ProtocolLibHook.updateName(e.getPlayer(), entity);
+            }
+        }
+    }
+
+    private boolean isOffHand(PlayerInteractAtEntityEvent event){
+        try{
+            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
+        }catch(Throwable ex){
+            return true;
+        }
+    }
+
+    private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){
+        return livingEntity.getLastDamageCause() == null ? EntityDamageEvent.DamageCause.CUSTOM : livingEntity.getLastDamageCause().getCause();
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().entitiesChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof LivingEntity).count();
+        return entitiesInsideChunk > chunkLimit;
+    }
+
+    private int getFortuneLevel(LivingEntity livingEntity){
+        int fortuneLevel = 0;
+
+        if(getLastDamage(livingEntity) == EntityDamageEvent.DamageCause.ENTITY_ATTACK &&
+                livingEntity.getKiller() != null && livingEntity.getKiller().getItemInHand() != null){
+            fortuneLevel = livingEntity.getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+        }
+
+        return fortuneLevel;
     }
 
     class EntitiesListener1_13 implements Listener {

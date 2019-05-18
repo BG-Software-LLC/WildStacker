@@ -1,25 +1,40 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.google.common.base.Predicate;
+import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.ItemStack;
+import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
@@ -31,6 +46,9 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
+        StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
+        nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnReason().name());
+        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 
@@ -61,9 +79,13 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     }
 
     @Override
-    public void setInLove(org.bukkit.entity.Entity entity, boolean inLove) {
+    public void setInLove(org.bukkit.entity.Entity entity, Player breeder, boolean inLove) {
         EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
-        nmsEntity.cs();
+        EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
+        if(inLove)
+            nmsEntity.c(entityPlayer);
+        else
+            nmsEntity.cs();
     }
 
     @Override
@@ -92,9 +114,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
                     }
                     equipment.add(CraftItemStack.asBukkitCopy(itemStack));
                 }
-
-                if (dropChance >= 1)
-                    entityLiving.dropChances[i] = 0;
             }catch(Exception ignored){}
         }
 
@@ -107,6 +126,97 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
             EntityAnimal entityLiving = ((CraftAnimals) livingEntity).getHandle();
             entityLiving.goalSelector.a(2, new EventablePathfinderGoalBreed(entityLiving, 1.0D));
         }
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    public List<org.bukkit.entity.Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super org.bukkit.entity.Entity> predicate) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Predicate<? super Entity> wrapper = entity -> predicate.apply(entity.getBukkitEntity());
+        return ((List<Entity>) entityLiving.world.a(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper))
+                .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
+    }
+
+    @Override
+    public String serialize(org.bukkit.inventory.ItemStack itemStack) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(outputStream);
+
+        NBTTagCompound tagCompound = new NBTTagCompound();
+
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+
+        nmsItem.save(tagCompound);
+
+        try {
+            NBTCompressedStreamTools.a(tagCompound, dataOutput);
+        }catch(Exception ex){
+            return null;
+        }
+
+        return new BigInteger(1, outputStream.toByteArray()).toString(32);
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack deserialize(String serialized) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
+
+        try {
+            NBTTagCompound nbtTagCompoundRoot = NBTCompressedStreamTools.a(new DataInputStream(inputStream));
+
+            ItemStack nmsItem = ItemStack.createStack(nbtTagCompoundRoot);
+
+            return CraftItemStack.asBukkitCopy(nmsItem);
+        }catch(Exception ex){
+            return null;
+        }
+
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack itemStack, String key, Object value) {
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+
+        if(value instanceof Boolean)
+            tagCompound.setBoolean(key, (boolean) value);
+        else if(value instanceof Integer)
+            tagCompound.setInt(key, (int) value);
+        else if(value instanceof String)
+            tagCompound.setString(key, (String) value);
+        else if(value instanceof Double)
+            tagCompound.setDouble(key, (double) value);
+        else if(value instanceof Short)
+            tagCompound.setShort(key, (short) value);
+        else if(value instanceof Byte)
+            tagCompound.setByte(key, (byte) value);
+        else if(value instanceof Float)
+            tagCompound.setFloat(key, (float) value);
+        else if(value instanceof Long)
+            tagCompound.setLong(key, (long) value);
+
+        nmsItem.setTag(tagCompound);
+
+        return CraftItemStack.asBukkitCopy(nmsItem);
+    }
+
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        int exp = 0;
+
+        try{
+            Field expField = EntityInsentient.class.getDeclaredField("b_");
+            expField.setAccessible(true);
+            int defaultEntityExp = (int) expField.get(entityLiving);
+            exp = entityLiving.getExpReward();
+            expField.set(entityLiving, defaultEntityExp);
+            expField.setAccessible(false);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+        return exp;
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{

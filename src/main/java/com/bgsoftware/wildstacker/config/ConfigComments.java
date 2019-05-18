@@ -24,6 +24,18 @@ public final class ConfigComments {
     public static String GIVE_ITEM_NAME = "give-item-name";
 
     @Comment("")
+    @Comment("The inspect tool of the plugin.")
+    @Comment("When clicking an item, entity, barrel or spawner, all the information")
+    @Comment("about the object will be displayed to the player.")
+    public static String INSPECT_TOOL = "inspect-tool";
+
+    @Comment("")
+    @Comment("What data handler should be used?")
+    @Comment("Use the followings: SQL, FILE")
+    @Comment("Warning: You can't move change data handlers, or data will be deleted.")
+    public static String DATA_HANDLER = "data-handler";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";
 
@@ -31,7 +43,7 @@ public final class ConfigComments {
     public static String ITEMS_ENABLED = "items.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the item should be for checking for other items to stack into?")
+    @Comment("How many blocks from the item should be checked for other items to stack into?")
     public static String ITEMS_MERGE_RADIUS = "items.merge-radius";
 
     @Comment("")
@@ -45,8 +57,16 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted items are items that won't get stacked.")
     @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
-    @Comment("If you wish to enable stacking of all items, use \"blacklist: []\"")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable blacklisted items, use \"blacklist: []\"")
     public static String ITEMS_BLACKLIST = "items.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted items are items that will get stacked.")
+    @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable whitelisted items, use \"whitelist: []\"")
+    public static String ITEMS_WHITELIST = "items.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific items.")
@@ -58,6 +78,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("A list of worlds items won't get stacked inside them (case-sensitive)")
     public static String ITEMS_DISABLED_WORLDS = "items.disabled-worlds";
+
+    @Comment("")
+    @Comment("Set a maximum amount of item objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String ITEMS_CHUNK_LIMIT = "items.chunk-limit";
 
     @Comment("")
     @Comment("When enabled, all items will have a custom name (even if not stacked)")
@@ -85,6 +110,18 @@ public final class ConfigComments {
     public static String ITEMS_KILL_ALL = "items.kill-all";
 
     @Comment("")
+    @Comment("Should players be able to disable item names for themselves?")
+    @Comment("In order to work, ProtocolLib should be installed.")
+    public static String ITEMS_NAMES_TOGGLE = "items.names-toggle";
+
+    @Comment("Can item names be toggled?")
+    public static String ITEMS_NAMES_TOGGLE_ENABLED = "items.names-toggle.enabled";
+
+    @Comment("")
+    @Comment("What the toggle command will be?")
+    public static String ITEMS_NAMES_TOGGLE_COMMAND = "items.names-toggle.command";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 
@@ -92,7 +129,7 @@ public final class ConfigComments {
     public static String ENTITIES_ENABLED = "entities.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the entity should be for checking for other entities to stack into?")
+    @Comment("How many blocks from the entity should be checked for other entities to stack into?")
     public static String ENTITIES_MERGE_RADIUS = "entities.merge-radius";
 
     @Comment("")
@@ -106,8 +143,16 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted entities are entities that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
-    @Comment("If you wish to enable stacking of all entities, use \"blacklist: []\"")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
     public static String ENTITIES_BLACKLIST = "entities.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted entities are entities that will get stacked.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("If you wish to disable whitelisted entities, use \"whitelist: []\"")
+    public static String ENTITIES_WHITELIST = "entities.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific entities.")
@@ -117,14 +162,24 @@ public final class ConfigComments {
     public static String ENTITIES_LIMITS = "entities.limits";
 
     @Comment("")
+    @Comment("Set a minimum stack for specific entities.")
+    @Comment("Make sure you follow the \"ENTITY-TYPE\" format.")
+    @Comment("You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)")
+    @Comment("If you don't want any limits, you can set a random type.")
+    public static String ENTITIES_MINIMUM_LIMITS = "entities.minimum-limits";
+
+    @Comment("")
     @Comment("A list of worlds entities won't get stacked inside them (case-sensitive)")
     public static String ENTITIES_DISABLED_WORLDS = "entities.disabled-worlds";
 
     @Comment("")
-    @Comment("Blacklisted spawn reasons are spawn reasons that entities that were spawned with these reasons won't get stacked.")
-    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
-    @Comment("If you wish to enable stacking of all entities that are spawned, use \"spawn-blacklist: []\"")
-    public static String ENTITIES_SPAWN_BLACKLIST = "entities.spawn-blacklist";
+    @Comment("Set a maximum amount of entity objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String ENTITIES_CHUNK_LIMIT = "entities.chunk-limit";
+
+    @Comment("")
+    @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
+    public static String ENTITIES_DISABLED_REGIONS = "entities.disabled-regions";
 
     @Comment("")
     @Comment("Blacklisted names is a list of names that when an entity has this name, it won't get stacked.")
@@ -169,7 +224,7 @@ public final class ConfigComments {
     @Comment("Linked entities feature won't work if entities-stacking is disabled.")
     public static String ENTITIES_LINKED_ENTITIES = "entities.linked-entities";
 
-    @Comment("Should entities will be linked to spawners?")
+    @Comment("Should entities be linked to spawners?")
     public static String ENTITIES_LINKED_ENTITIES_ENABLED = "entities.linked-entities.enabled";
 
     @Comment("")
@@ -181,6 +236,7 @@ public final class ConfigComments {
     @Comment("Instant-kill will kill the entire stack instead of unstack it by one.")
     @Comment("When an entire stack dies, their drops are getting multiplied.")
     @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("If you don't want instant-kill, use \"instant-kill: []\"")
     public static String ENTITIES_INSTANT_KILL = "entities.instant-kill";
 
@@ -191,11 +247,15 @@ public final class ConfigComments {
     public static String ENTITIES_NERFED_SPAWNING = "entities.nerfed-spawning";
 
     @Comment("")
+    @Comment("A list of worlds that entities can get nerfed in.")
+    public static String ENTITIES_NERFED_WORLDS = "entities.nerfed-worlds";
+
+    @Comment("")
     @Comment("Stack-down is a feature that will force entities to stack to other entities that are below their y level.")
     @Comment("This feature is great for flying entities, like blazes and ghasts.")
     public static String ENTITIES_STACK_DOWN = "entities.stack-down";
 
-    @Comment("Should the stack-down feature will be enabled on the server?")
+    @Comment("Should the stack-down feature be enabled on the server?")
     public static String ENTITIES_STACK_DOWN_ENABLED = "entities.stack-down.enabled";
 
     @Comment("A list of entities that will be forced to only stack down.")
@@ -214,10 +274,6 @@ public final class ConfigComments {
     public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
 
     @Comment("")
-    @Comment("When this feature is enabled, blazes will always drop blazes and not only when they are killed by players.")
-    public static String ENTITIES_BLAZES_ALWAYS_DROP = "entities.blazes-always-drop";
-
-    @Comment("")
     @Comment("When enabled, the stack will keep the lowest health between the two entities that are stacked.")
     public static String ENTITIES_KEEP_LOWEST_HEALTH = "entities.keep-lowest-health";
 
@@ -230,6 +286,23 @@ public final class ConfigComments {
     public static String ENTITIES_HIDE_NAMES = "entities.hide-names";
 
     @Comment("")
+    @Comment("Should players be able to disable entity names for themselves?")
+    @Comment("In order to work, ProtocolLib should be installed.")
+    public static String ENTITIES_NAMES_TOGGLE = "entities.names-toggle";
+
+    @Comment("Can entity names be toggled?")
+    public static String ENTITIES_NAMES_TOGGLE_ENABLED = "entities.names-toggle.enabled";
+
+    @Comment("")
+    @Comment("What the toggle command will be?")
+    public static String ENTITIES_NAMES_TOGGLE_COMMAND = "entities.names-toggle.command";
+
+    @Comment("")
+    @Comment("Should the EntityDeathEvent get called async?")
+    @Comment("If you get issues with other plugins, set it to false.")
+    public static String ENTITIES_ASYNC_EVENT = "entities.async-event";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 
@@ -237,7 +310,7 @@ public final class ConfigComments {
     public static String SPAWNERS_ENABLED = "spawners.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the spawner should be for checking for other spawners to stack into?")
+    @Comment("How many blocks from the spawner should be checked for other spawners to stack into?")
     public static String SPAWNERS_MERGE_RADIUS = "spawners.merge-radius";
 
     @Comment("")
@@ -252,8 +325,14 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Blacklisted spawners are spawners that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
-    @Comment("If you wish to enable stacking of all spawners, use \"blacklist: []\"")
+    @Comment("If you wish to disable blacklisted spawners, use \"blacklist: []\"")
     public static String SPAWNERS_BLACKLIST = "spawners.blacklist";
+
+    @Comment("")
+    @Comment("Whitelisted spawners are spawners that will get stacked.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("If you wish to disable whitelisted spawners, use \"whitelist: []\"")
+    public static String SPAWNERS_WHITELIST = "spawners.whitelist";
 
     @Comment("")
     @Comment("Set a maximum stack for specific spawners.")
@@ -265,6 +344,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("A list of worlds spawners won't get stacked inside them (case-sensitive)")
     public static String SPAWNERS_DISABLED_WORLDS = "spawners.disabled-worlds";
+
+    @Comment("")
+    @Comment("Set a maximum amount of spawner objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String SPAWNERS_CHUNK_LIMIT = "spawners.chunk-limit";
 
     @Comment("")
     @Comment("When enabled, the plugin will try to find a spawner in the whole chunk instead")
@@ -279,6 +363,10 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Chance of spawners to be dropped after an explosion.")
     public static String SPAWNERS_EXPLOSIONS_BREAK_CHANCE = "spawners.explosions-break-chance";
+
+    @Comment("")
+    @Comment("Chance of spawners to be dropped after break of silk touch.")
+    public static String SPAWNERS_SILK_TOUCH_BREAK_CHANCE = "spawners.silk-touch-break-chance";
 
     @Comment("")
     @Comment("Should spawners get dropped without silktouch?")
@@ -302,7 +390,7 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_NAME = "spawners.silk-spawners.custom-name";
 
     @Comment("")
-    @Comment("Should explosions will act like silk-touch and drop the spawner?")
+    @Comment("Should explosions act like silk-touch and drop the spawner?")
     public static String SPAWNERS_SILK_SPAWNERS_EXPLOSIONS_DROP_SPAWNER = "spawners.silk-spawners.explosions-drop-spawner";
 
     @Comment("")
@@ -310,11 +398,11 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_DROP_TO_INVENTORY = "spawners.silk-spawners.drop-to-inventory";
 
     @Comment("")
-    @Comment("Should sneaking while mining will break the entire stack instead of reducing it by one?")
+    @Comment("Should sneaking while mining break the entire stack instead of reducing it by one?")
     public static String SPAWNERS_SHIFT_GET_WHOLE_STACK = "spawners.shift-get-whole-stack";
 
     @Comment("")
-    @Comment("Should one item will be dropped for a stacked spawner instead of multiple items?")
+    @Comment("Should one item be dropped for a stacked spawner instead of multiple items?")
     @Comment("This feature will not work with other spawner-providers, such as SilkSpawners")
     public static String SPAWNERS_GET_STACKED_ITEM = "spawners.get-stacked-item";
 
@@ -350,6 +438,11 @@ public final class ConfigComments {
     public static String SPAWNERS_BREAK_MENU_BREAK_SLOTS = "spawners.break-menu.break-slots";
 
     @Comment("")
+    @Comment("When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there")
+    @Comment("he can put spawner items to add to the spawner. Make sure break-menu is disabled!")
+    public static String SPAWNERS_PLACE_INVENTORY = "spawners.place-inventory";
+
+    @Comment("")
     @Comment("When enabled, you must have the permission wildstacker.place.<entity> to place an entity.")
     @Comment("You can give a player the ability to place all spawners with wildstacker.place.*")
     public static String SPAWNERS_PLACEMENT_PERMISSION = "spawners.placement-permission";
@@ -372,6 +465,19 @@ public final class ConfigComments {
     public static String SPAWNERS_CHANGE_USING_EGGS = "spawners.change-using-eggs";
 
     @Comment("")
+    @Comment("When enabled and change-using-eggs is enabled, the amount of eggs that will be required to change")
+    @Comment("a spawner would be the same as the stack size of the spawner.")
+    public static String SPAWNERS_EGGS_STACK_MULTIPLY = "spawners.eggs-stack-multiply";
+
+    @Comment("")
+    @Comment("Should there be the ablity to place spawners next to each other?")
+    public static String SPAWNERS_NEXT_SPAWNER_PLACEMENT = "spawners.next-spawner-placement";
+
+    @Comment("")
+    @Comment("Should there be only one spawner in the merge radius?")
+    public static String SPAWNERS_ONLY_ONE_SPAWNER = "spawners.only-one-spawner";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked barrels (aka stacked blocks).")
     public static String BARRELS = "barrels";
 
@@ -379,7 +485,7 @@ public final class ConfigComments {
     public static String BARRELS_ENABLED = "barrels.enabled";
 
     @Comment("")
-    @Comment("How many blocks from the barrel should be for checking for other blocks to stack into?")
+    @Comment("How many blocks from the barrel should be checked for other blocks to stack into?")
     public static String BARRELS_MERGE_RADIUS = "barrels.merge-radius";
 
     @Comment("")
@@ -392,10 +498,17 @@ public final class ConfigComments {
     public static String BARRELS_CUSTOM_NAME = "barrels.custom-name";
 
     @Comment("")
+    @Comment("Blacklisted barrels are barrels that won't get stacked.")
+    @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
+    @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
+    @Comment("If you wish to disable blacklisted spawners, use \"blacklist: []\"")
+    public static String BARRELS_BLACKLIST = "barrels.blacklist";
+
+    @Comment("")
     @Comment("Whitelisted blocks are blocks that will get stacked.")
     @Comment("Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html")
     @Comment("Make sure you follow the \"TYPE\" and \"TYPE:DATA\" formats.")
-    @Comment("If you wish to disable stacking of all blocks, use \"enabled: false\"")
+    @Comment("If you wish to disable whitelisted spawners, use \"whitelist: []\"")
     public static String BARRELS_WHITELIST = "barrels.whitelist";
 
     @Comment("")
@@ -408,6 +521,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("A list of worlds barrels won't get stacked inside them (case-sensitive)")
     public static String BARRELS_DISABLED_WORLD = "barrels.disabled-worlds";
+
+    @Comment("")
+    @Comment("Set a maximum amount of barrel objects in a chunk.")
+    @Comment("If you want to disable the feature, set it to 0.")
+    public static String BARRELS_CHUNK_LIMIT = "barrels.chunk-limit";
 
     @Comment("")
     @Comment("When enabled, the plugin will try to find a block in the whole chunk instead")
@@ -427,7 +545,7 @@ public final class ConfigComments {
     public static String BARRELS_TOGGLE_COMMAND_ENABLED = "barrels.toggle-command.enabled";
 
     @Comment("")
-    @Comment("What's the toggle command will be?")
+    @Comment("What the toggle command will be?")
     public static String BARRELS_TOGGLE_COMMAND_COMMAND = "barrels.toggle-command.command";
 
     @Comment("")

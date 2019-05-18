@@ -7,8 +7,10 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,13 +55,15 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelPlace(BlockPlaceEvent e){
-        if(!plugin.getSettings().barrelsStackingEnabled || !plugin.getSettings().whitelistedBarrels.contains(e.getItemInHand()))
+        if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
         if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
             return;
 
-        if(plugin.getSettings().barrelsDisabledWorlds.contains(e.getBlockPlaced().getWorld().getName()))
+        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
+
+        if(stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled())
             return;
 
         if(e.getBlockPlaced().getY() > e.getBlockAgainst().getY() && plugin.getSystemManager().isStackedBarrel(e.getBlockAgainst())){
@@ -66,9 +71,7 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
-
-        stackedBarrel.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItemInHand()), true);
+        stackedBarrel.setStackAmount(ItemUtil.getSpawnerItemAmount(e.getItemInHand()), false);
 
         //Stacking barrel
         Block targetBarrel = stackedBarrel.tryStack();
@@ -76,13 +79,16 @@ public final class BarrelsListener implements Listener {
         e.setCancelled(true);
 
         if(targetBarrel == null) {
+            if(isChunkLimit(e.getBlock().getChunk()))
+                return;
+
             BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel);
             Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
             if(barrelPlaceEvent.isCancelled())
                 return;
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> e.getBlockPlaced().setType(Material.CAULDRON), 1L);
+            Executor.sync(() -> e.getBlockPlaced().setType(Material.CAULDRON), 1L);
             Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtil.getFormattedType(stackedBarrel.getBarrelItem(1)));
         }
         else {
@@ -97,7 +103,7 @@ public final class BarrelsListener implements Listener {
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             ItemStack inHand = e.getItemInHand().clone();
             inHand.setAmount(inHand.getAmount() - 1);
-            e.getPlayer().setItemInHand(inHand);
+            ItemUtil.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), inHand);
         }
     }
 
@@ -136,7 +142,7 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if(isOffHand(e) || e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
         if(!plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
@@ -190,7 +196,7 @@ public final class BarrelsListener implements Listener {
             }
 
             if(amount != 0) {
-                int limit = plugin.getSettings().barrelsLimits.getOrDefault(stackedBarrel.getBarrelItem(1), Integer.MAX_VALUE);
+                int limit = stackedBarrel.getStackLimit();
 
                 if(stackedBarrel.getStackAmount() + amount > limit){
                     ItemStack toAdd = barrelItem.clone();
@@ -281,6 +287,49 @@ public final class BarrelsListener implements Listener {
                 break;
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBarrelInspect(PlayerInteractEvent e){
+        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
+            return;
+
+        e.setCancelled(true);
+
+        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
+
+        Locale.BARREL_INFO_HEADER.send(e.getPlayer());
+        Locale.BARREL_INFO_TYPE.send(e.getPlayer(), ItemUtil.getFormattedType(stackedBarrel.getBarrelItem(1)));
+        Locale.BARREL_INFO_AMOUNT.send(e.getPlayer(), stackedBarrel.getStackAmount());
+        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
+    }
+
+    private boolean isOffHand(PlayerInteractEvent event){
+        try{
+            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
+        }catch(Throwable ex){
+            return true;
+        }
+    }
+
+    private boolean isChunkLimit(Chunk chunk){
+        int chunkLimit = plugin.getSettings().barrelsChunkLimit;
+
+        if(chunkLimit <= 0)
+            return false;
+
+        int barrelsInsideChunk = getStackedBarrels(chunk).size();
+        return barrelsInsideChunk > chunkLimit;
+    }
+
+    private List<StackedBarrel> getStackedBarrels(Chunk chunk){
+        List<StackedBarrel> stackedBarrels = new ArrayList<>();
+
+        Iterator<StackedBarrel> stackedBarrelIterator = plugin.getDataHandler().CACHED_BARRELS.iterator(chunk);
+        while (stackedBarrelIterator.hasNext())
+            stackedBarrels.add(stackedBarrelIterator.next());
+
+        return stackedBarrels;
     }
 
 }

@@ -11,9 +11,10 @@ public final class KillTask extends BukkitRunnable {
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static int taskID = -1;
-    private long timeLeft = plugin.getSettings().entitiesKillAllInterval;
+    private long timeLeft;
 
     private KillTask(){
+        timeLeft = plugin.getSettings().entitiesKillAllInterval;
         taskID = runTaskTimerAsynchronously(plugin, 20L,20L).getTaskId();
     }
 

@@ -151,7 +151,7 @@ public final class EntityData {
     }
 
     private static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-    private static boolean asIntField = version.equals("v1_13_R2");
+    private static boolean asIntField = version.equals("v1_13_R2") || version.equals("v1_14_R1");
     private static boolean dField = version.contains("v1_9") || version.contains("v1_8");
 
     private int getInteger(Object object){

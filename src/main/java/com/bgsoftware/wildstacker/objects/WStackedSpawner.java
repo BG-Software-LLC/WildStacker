@@ -5,20 +5,29 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings("RedundantIfStatement")
 public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
 
     private LivingEntity linkedEntity = null;
 
-    public WStackedSpawner(CreatureSpawner spawner){
-        super(spawner, 1);
+    public WStackedSpawner(CreatureSpawner creatureSpawner){
+        this(creatureSpawner, 1);
+    }
+
+    public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
+        super(creatureSpawner, stackAmount);
     }
 
     @Override
@@ -41,6 +50,32 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     /*
      * StackedObject's methods
      */
+
+    @Override
+    public Chunk getChunk() {
+        return getLocation().getChunk();
+    }
+
+    @Override
+    public int getStackLimit() {
+        return plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType().name(), Integer.MAX_VALUE);
+    }
+
+    @Override
+    public boolean isBlacklisted() {
+        return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType().name());
+    }
+
+    @Override
+    public boolean isWhitelisted() {
+        return plugin.getSettings().whitelistedSpawners.isEmpty() ||
+                plugin.getSettings().whitelistedSpawners.contains(getSpawnedType().name());
+    }
+
+    @Override
+    public boolean isWorldDisabled() {
+        return plugin.getSettings().spawnersDisabledWorlds.contains(object.getWorld().getName());
+    }
 
     @Override
     public void remove() {
@@ -71,30 +106,9 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public CreatureSpawner tryStack(){
-        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
-        int range = plugin.getSettings().spawnersCheckRange;
-
-        Location location = getLocation();
-
-        int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-        int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
-
-        if(chunkMerge) {
-            minX = 0; maxX = 16;
-            minZ = 0; maxZ = 16;
-        }
-
-        for (int y = maxY; y >= minY; y--) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = chunkMerge ? location.getChunk().getBlock(x, y, z) : location.getWorld().getBlockAt(x, y, z);
-                    if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(location)) {
-                        StackedSpawner target = WStackedSpawner.of(block);
-                        if (tryStackInto(target))
-                            return target.getSpawner();
-                    }
-                }
-            }
+        for(StackedSpawner stackedSpawner : getNearbySpawners()){
+            if(tryStackInto(stackedSpawner))
+                return stackedSpawner.getSpawner();
         }
 
         updateName();
@@ -103,23 +117,31 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public boolean canStackInto(StackedObject stackedObject) {
+        if(!canStackIntoNoLimit(stackedObject))
+            return false;
+
+        StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
+        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
+
+        if(getStackLimit() < newStackAmount)
+            return false;
+
+        return true;
+    }
+
+    private boolean canStackIntoNoLimit(StackedObject stackedObject){
         if(!plugin.getSettings().spawnersStackingEnabled)
             return false;
 
         if(equals(stackedObject) || !(stackedObject instanceof StackedSpawner) || !isSimilar(stackedObject))
             return false;
 
-        if(plugin.getSettings().spawnersDisabledWorlds.contains(object.getWorld().getName()))
+        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
             return false;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
 
-        if(plugin.getSettings().blacklistedSpawners.contains(object.getSpawnedType().name()) ||
-                plugin.getSettings().blacklistedSpawners.contains(targetSpawner.getSpawnedType().name()))
-            return false;
-
-        if(plugin.getSettings().spawnersLimits.getOrDefault(targetSpawner.getSpawnedType().name(), Integer.MAX_VALUE) < newStackAmount)
+        if(!targetSpawner.isWhitelisted() || targetSpawner.isBlacklisted() || targetSpawner.isWorldDisabled())
             return false;
 
         return true;
@@ -157,7 +179,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         setStackAmount(stackAmount - amount, true);
 
         if(stackAmount < 1) {
-            Bukkit.getScheduler().runTaskLater(plugin, this::remove, 2L);
+            Executor.sync(this::remove, 2L);
         }
 
         return true;
@@ -192,6 +214,39 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     @Override
     public void setLinkedEntity(LivingEntity linkedEntity){
         this.linkedEntity = linkedEntity;
+    }
+
+    @Override
+    public List<StackedSpawner> getNearbySpawners() {
+        List<StackedSpawner> stackedSpawners = new ArrayList<>();
+
+        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+        int range = plugin.getSettings().spawnersCheckRange;
+
+        Location location = getLocation();
+
+        int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
+        int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+
+        if(chunkMerge) {
+            minX = 0; maxX = 16;
+            minZ = 0; maxZ = 16;
+        }
+
+        for (int y = maxY; y >= minY; y--) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = chunkMerge ? location.getChunk().getBlock(x, y, z) : location.getWorld().getBlockAt(x, y, z);
+                    if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(location)) {
+                        StackedSpawner stackedSpawner = WStackedSpawner.of(block);
+                        if (canStackIntoNoLimit(stackedSpawner))
+                            stackedSpawners.add(stackedSpawner);
+                    }
+                }
+            }
+        }
+
+        return stackedSpawners;
     }
 
     public LivingEntity getRawLinkedEntity(){

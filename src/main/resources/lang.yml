@@ -20,6 +20,10 @@ BARREL_TOGGLE_OFF: '&6&lWildStacker &7Barrels placement has been disabled.'
 # Called when a player runs a command not in the required usage
 COMMAND_USAGE: '&6&lWildStacker &7Usage: /{0}'
 
+# Called when a player runs the entity names toggle command.
+ENTITY_NAMES_TOGGLE_ON: '&6&lWildStacker &7Entity names are now enabled.'
+ENTITY_NAMES_TOGGLE_OFF: '&6&lWildStacker &7Entity names are now disabled.'
+
 # Called when a player runs an invalid stacker sub-command.
 HELP_COMMAND_HEADER: '&8&m---------------&6&l WildStacker &8&m---------------'
 HELP_COMMAND_LINE: '&7- &6/{0} &8- &f{1}'
@@ -32,10 +36,21 @@ INVALID_NUMBER: '&6&lWildStacker &7Please specify a valid number.'
 INVALID_PLAYER: '&6&lWildStacker &7Coludn''t find a player called {0}.'
 INVALID_TYPE: '&6&lWildStacker &7Please specify if you want to give an egg or a spawner.'
 
+# Called when a player successfully runs a inspect command.
+INSPECT_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} inspect tool(s).'
+INSPECT_RECEIVE: '&6&lWildStacker &7You received x{0} inspect tool(s) from {1}.'
+
+# Called when a player runs the item names toggle command.
+ITEM_NAMES_TOGGLE_ON: '&6&lWildStacker &7Item names are now enabled.'
+ITEM_NAMES_TOGGLE_OFF: '&6&lWildStacker &7Item names are now disabled.'
+
 # Called when a kill-all task is running
 KILL_ALL_ANNOUNCEMENT: '&6&lWildStacker &7All stacked-entities and stacked-items were killed successfully!'
 KILL_ALL_REMAINING_TIME: '&6&lWildStacker &7All stacked-entities and stacked-items will be cleared in {0} seconds!'
 KILL_ALL_OPS: '&7&o[WildStacker: Killed stacked-entities]'
+
+# Called when placing a spawner next to another one when the it's disabled.
+NEXT_SPAWNER_PLACEMENT: '&6&lWildStacker &7You cannot place spawners next to other spawners.'
 
 # Called when running a stacker command without permission.
 NO_PERMISSION: '&fUnknown command. Type "/help" for help.'
@@ -49,6 +64,7 @@ SPAWNER_BREAK_NOT_ENOUGH_MONEY: '&6&lWildStacker &fYou need {0} in order to brea
 SPAWNER_PLACE: '&6&lWildStacker &7You placed a {0} spawner (x{1}) and were charged for ${2}.'
 SPAWNER_PLACE_NOT_ENOUGH_MONEY: '&6&lWildStacker &fYou need {0} in order to place this amount of spawners.'
 SPAWNER_PLACE_BLOCKED: '&6&lWildStacker &7You don''t have the required permission to place this spawner! ({0})'
+SPAWNER_UPDATE: '&6&lWildStacker &7You updated the spawner (x{0}).'
 
 # Called when a player successfully runs a give command.
 STACK_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} {2} {3}.'
@@ -64,3 +80,10 @@ SPAWNER_INFO_HEADER: '&8&m---------------&6&l WildStacker &8&m---------------'
 SPAWNER_INFO_TYPE: '&6 Spawner&7: &f{0}'
 SPAWNER_INFO_AMOUNT: '&6 Stack-Amount&7: &f{0}'
 SPAWNER_INFO_FOOTER: '&8&m---------------&6&l WildStacker &8&m---------------'
+ENTITY_INFO_HEADER: '&8&m---------------&6&l WildStacker &8&m---------------'
+ENTITY_INFO_UUID: '&6 UUID&7: &f{0}'
+ENTITY_INFO_TYPE: '&6 Type&7: &f{0}'
+ENTITY_INFO_AMOUNT: '&6 Stack-Amount&7: &f{0}'
+ENTITY_INFO_SPAWN_REASON: '&6 Spawn Reason&7: &f{0}'
+ENTITY_INFO_NERFED: '&6 Nerfed&7: &f{0}'
+ENTITY_INFO_FOOTER: '&8&m---------------&6&l WildStacker &8&m---------------'

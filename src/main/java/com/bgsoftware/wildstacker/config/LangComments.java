@@ -36,6 +36,10 @@ public final class LangComments {
     public static String INVALID_BARREL = "INVALID_BARREL";
 
     @Comment("")
+    @Comment("Called when a player runs the names toggle command.")
+    public static String ITEM_NAMES_TOGGLE_ON = "ITEM_NAMES_TOGGLE_ON";
+
+    @Comment("")
     @Comment("Called when a kill-all task is running")
     public static String KILL_ALL_ANNOUNCEMENT = "KILL_ALL_ANNOUNCEMENT";
 

@@ -16,7 +16,7 @@
       "chance": 100,
       "items": [
         {
-          "type": "SULPHUR",
+          "type": "GUNPOWDER",
           "chance": 100,
           "min": 0,
           "max": 2,
