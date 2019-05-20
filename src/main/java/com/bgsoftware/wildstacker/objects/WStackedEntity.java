@@ -233,7 +233,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 return false;
         }
 
-        if (MythicMobsHook.isMythicMob(object) && !plugin.getSettings().mythicMobsStackEnabled)
+        if (!plugin.getSettings().mythicMobsStackEnabled && (MythicMobsHook.isMythicMob(object) ||
+                MythicMobsHook.isMythicMob(targetEntity.getLivingEntity())))
             return false;
 
         //noinspection all
