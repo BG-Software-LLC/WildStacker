@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    static ThreadLocalRandom random = ThreadLocalRandom.current();
 
     private final List<LootPair> lootPairs = new ArrayList<>();
     private final int min, max, minExp, maxExp;
@@ -88,6 +87,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     @Override
     @Deprecated
     public int getExp(int stackAmount, int defaultExp){
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         int exp = defaultExp * stackAmount;
 
         if(minExp >= 0 && maxExp >= 0){
@@ -102,6 +102,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Override
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         int exp = 0;
 
         if(minExp >= 0 && maxExp >= 0){
@@ -117,6 +118,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     }
 
     private List<LootPair> getLootPairs(StackedEntity stackedEntity){
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         List<LootPair> lootPairs = new ArrayList<>();
         Collections.shuffle(this.lootPairs, random);
 

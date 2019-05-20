@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("WeakerAccess")
 public class LootCommand {
@@ -27,10 +28,11 @@ public class LootCommand {
     }
 
     public void executeCommands(Player player){
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         List<String> commands = new ArrayList<>();
 
         for(String command : this.commands){
-            int randomNumber = min == null || max == null ? 0 : LootTable.random.nextInt(max - min + 1) + min;
+            int randomNumber = min == null || max == null ? 0 : random.nextInt(max - min + 1) + min;
             commands.add(command.replace("{player-name}", player.getName()).replace("{number}", String.valueOf(randomNumber)));
         }
 

@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("WeakerAccess")
 public class LootPair {
@@ -38,10 +39,11 @@ public class LootPair {
     }
 
     public void executeCommands(Player player, int lootBonusLevel){
-        double chance = LootTable.random.nextDouble(101);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double chance = random.nextDouble(101);
         double baseChance = 0;
 
-        Collections.shuffle(lootCommands, LootTable.random);
+        Collections.shuffle(lootCommands, random);
 
         for(LootCommand lootCommand: lootCommands){
             if(chance < baseChance + lootCommand.getChance(lootBonusLevel, lootingChance)) {
@@ -53,10 +55,11 @@ public class LootPair {
     }
 
     private LootItem getLootItem(int lootBonusLevel){
-        double chance = LootTable.random.nextDouble(101);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double chance = random.nextDouble(101);
         double baseChance = 0;
 
-        Collections.shuffle(lootItems, LootTable.random);
+        Collections.shuffle(lootItems, random);
 
         for(LootItem lootItem : lootItems){
             if(chance < baseChance + lootItem.getChance(lootBonusLevel, lootingChance)) {
