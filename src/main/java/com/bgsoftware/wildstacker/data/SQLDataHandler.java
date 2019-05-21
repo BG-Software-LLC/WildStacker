@@ -79,95 +79,12 @@ public final class SQLDataHandler extends AbstractDataHandler {
     }
 
     @Override
-    public void loadChunkData(Chunk chunk) {
+    public void loadChunkData(Chunk chunk, boolean async) {
         ChunkRegistry chunkRegistry = new ChunkRegistry(chunk);
-        Executor.async(() -> {
-            try{
-                Connection conn = connectionMap.get(chunk.getWorld().getName());
-                ResultSet resultSet;
-
-                //Entities
-                if(doesTableExist(conn, "entities")) {
-                    resultSet = conn.prepareStatement(
-                            String.format("SELECT * FROM entities WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
-                    while (resultSet.next()) {
-                        UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                        int stackAmount = resultSet.getInt("amount");
-                        CreatureSpawnEvent.SpawnReason spawnReason = CreatureSpawnEvent.SpawnReason.valueOf(resultSet.getString("spawn_reason"));
-
-                        StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(uuid), stackAmount, spawnReason);
-
-                        //Entities are moving. There's no point in storing them based on chunks.
-                        CACHED_ENTITIES.put(DEFAULT_CHUNK, uuid, stackedEntity);
-                    }
-                }
-
-                //Items
-                if(doesTableExist(conn, "items")) {
-                    resultSet = conn.prepareStatement(
-                            String.format("SELECT * FROM items WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
-                    while (resultSet.next()) {
-                        UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                        int stackAmount = resultSet.getInt("amount");
-
-                        StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(uuid), stackAmount);
-
-                        CACHED_ITEMS.put(chunk, uuid, stackedItem);
-                    }
-                }
-
-                //Spawners
-                if(doesTableExist(conn, "spawners")) {
-                    resultSet = conn.prepareStatement(
-                            String.format("SELECT * FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
-                    while (resultSet.next()) {
-                        String[] locationSections = resultSet.getString("location").split(",");
-                        int stackAmount = resultSet.getInt("amount");
-                        Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
-                                Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                        if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                            StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                            CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
-                        }
-                    }
-                }
-
-                //Barrels
-                if(doesTableExist(conn, "barrels")) {
-                    resultSet = conn.prepareStatement(
-                            String.format("SELECT * FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
-                    while (resultSet.next()) {
-                        String[] locationSections = resultSet.getString("location").split(",");
-                        int stackAmount = resultSet.getInt("amount");
-                        Block barrelBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
-                                Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                        if (barrelBlock.getType() == Material.CAULDRON) {
-                            ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                            StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                            CACHED_BARRELS.put(chunk, stackedBarrel.getLocation(), stackedBarrel);
-
-                        }
-                    }
-                }
-
-                Iterator<StackedSpawner> stackedSpawners = CACHED_SPAWNERS.iterator(chunk);
-                Iterator<StackedBarrel> stackedBarrels = CACHED_BARRELS.iterator(chunk);
-
-                Executor.sync(() -> {
-                    while(stackedSpawners.hasNext()) {
-                        stackedSpawners.next().updateName();
-                    }
-
-                    while(stackedBarrels.hasNext()){
-                        StackedBarrel stackedBarrel = stackedBarrels.next();
-                        stackedBarrel.updateName();
-                        stackedBarrel.createDisplayBlock();
-                    }
-                });
-            }catch(SQLException ex){
-                ex.printStackTrace();
-            }
-        });
+        if(async)
+            Executor.async(() -> load(chunk, chunkRegistry));
+        else
+            load(chunk, chunkRegistry);
     }
 
     @Override
@@ -261,6 +178,94 @@ public final class SQLDataHandler extends AbstractDataHandler {
                 ex.printStackTrace();
             }
         });
+    }
+
+    private void load(Chunk chunk, ChunkRegistry chunkRegistry){
+        try{
+            Connection conn = connectionMap.get(chunk.getWorld().getName());
+            ResultSet resultSet;
+
+            //Entities
+            if(doesTableExist(conn, "entities")) {
+                resultSet = conn.prepareStatement(
+                        String.format("SELECT * FROM entities WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
+                while (resultSet.next()) {
+                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    int stackAmount = resultSet.getInt("amount");
+                    CreatureSpawnEvent.SpawnReason spawnReason = CreatureSpawnEvent.SpawnReason.valueOf(resultSet.getString("spawn_reason"));
+
+                    StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(uuid), stackAmount, spawnReason);
+
+                    //Entities are moving. There's no point in storing them based on chunks.
+                    CACHED_ENTITIES.put(DEFAULT_CHUNK, uuid, stackedEntity);
+                }
+            }
+
+            //Items
+            if(doesTableExist(conn, "items")) {
+                resultSet = conn.prepareStatement(
+                        String.format("SELECT * FROM items WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
+                while (resultSet.next()) {
+                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    int stackAmount = resultSet.getInt("amount");
+
+                    StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(uuid), stackAmount);
+
+                    CACHED_ITEMS.put(chunk, uuid, stackedItem);
+                }
+            }
+
+            //Spawners
+            if(doesTableExist(conn, "spawners")) {
+                resultSet = conn.prepareStatement(
+                        String.format("SELECT * FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
+                while (resultSet.next()) {
+                    String[] locationSections = resultSet.getString("location").split(",");
+                    int stackAmount = resultSet.getInt("amount");
+                    Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
+                            Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
+                    if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
+                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                        CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
+                    }
+                }
+            }
+
+            //Barrels
+            if(doesTableExist(conn, "barrels")) {
+                resultSet = conn.prepareStatement(
+                        String.format("SELECT * FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
+                while (resultSet.next()) {
+                    String[] locationSections = resultSet.getString("location").split(",");
+                    int stackAmount = resultSet.getInt("amount");
+                    Block barrelBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
+                            Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
+                    if (barrelBlock.getType() == Material.CAULDRON) {
+                        ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                        StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
+                        CACHED_BARRELS.put(chunk, stackedBarrel.getLocation(), stackedBarrel);
+
+                    }
+                }
+            }
+
+            Iterator<StackedSpawner> stackedSpawners = CACHED_SPAWNERS.iterator(chunk);
+            Iterator<StackedBarrel> stackedBarrels = CACHED_BARRELS.iterator(chunk);
+
+            Executor.sync(() -> {
+                while(stackedSpawners.hasNext()) {
+                    stackedSpawners.next().updateName();
+                }
+
+                while(stackedBarrels.hasNext()){
+                    StackedBarrel stackedBarrel = stackedBarrels.next();
+                    stackedBarrel.updateName();
+                    stackedBarrel.createDisplayBlock();
+                }
+            });
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
     }
 
     @Override

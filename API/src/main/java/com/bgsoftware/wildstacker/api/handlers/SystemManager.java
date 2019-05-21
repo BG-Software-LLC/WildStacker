@@ -5,7 +5,9 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -150,5 +152,13 @@ public interface SystemManager {
      * @return loot-table
      */
     LootTable getLootTable(LivingEntity livingEntity);
+
+    /**
+     * Get a stacked snapshot of a chunk.
+     * @param chunk The chunk
+     * @param loadData Should data be loaded if isn't already?
+     * @return StackedSnapshot object
+     */
+    StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData);
 
 }

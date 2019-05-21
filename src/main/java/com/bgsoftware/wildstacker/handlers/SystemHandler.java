@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.data.AbstractDataHandler;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
@@ -15,6 +16,7 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedObject;
+import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.SaveTask;
@@ -24,6 +26,7 @@ import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.google.common.collect.Iterators;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -345,6 +348,11 @@ public final class SystemHandler implements SystemManager {
                     Locale.KILL_ALL_OPS.send(pl);
             }
         });
+    }
+
+    @Override
+    public StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData) {
+        return new WStackedSnapshot(chunk, loadData);
     }
 
     /*

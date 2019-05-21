@@ -43,7 +43,11 @@ public abstract class AbstractDataHandler {
         this.plugin = plugin;
     }
 
-    public abstract void loadChunkData(Chunk chunk);
+    public abstract void loadChunkData(Chunk chunk, boolean async);
+
+    public void loadChunkData(Chunk chunk){
+        loadChunkData(chunk, true);
+    }
 
     public abstract void saveChunkData(Chunk chunk, boolean remove, boolean async);
 
