@@ -28,10 +28,10 @@ public final class LootHandler {
     public LootHandler(WildStackerPlugin plugin){
         File folderFile = new File(plugin.getDataFolder(), "loottables");
 
-        if(!folderFile.exists()){
+        if(!folderFile.exists())
             folderFile.mkdirs();
-            initAllLootTables();
-        }
+
+        initAllLootTables();
 
         lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, -1, -1, true));
 
@@ -50,6 +50,8 @@ public final class LootHandler {
     private void initAllLootTables(){
         FileUtil.saveResource("loottables/bat.json");
         FileUtil.saveResource("loottables/blaze.json");
+        if(containsEntity("CAT"))
+            FileUtil.saveResource("loottables/cat.json");
         FileUtil.saveResource("loottables/cave_spider.json");
         FileUtil.saveResource("loottables/chicken.json");
         if(containsEntity("COD"))
@@ -67,6 +69,8 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/endermite.json");
         if(containsEntity("EVOKER"))
             FileUtil.saveResource("loottables/evoker.json");
+        if(containsEntity("FOX"))
+            FileUtil.saveResource("loottables/fox.json");
         FileUtil.saveResource("loottables/ghast.json");
         FileUtil.saveResource("loottables/giant.json");
         FileUtil.saveResource("loottables/guardian.json");
@@ -78,16 +82,22 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/mule.json");
         FileUtil.saveResource("loottables/mushroom_cow.json");
         FileUtil.saveResource("loottables/ocelot.json");
+        if(containsEntity("PANDA"))
+            FileUtil.saveResource("loottables/panda.json");
         if(containsEntity("PARROT"))
             FileUtil.saveResource("loottables/parrot.json");
         if(containsEntity("PHANTOM"))
             FileUtil.saveResource("loottables/phantom.json");
         FileUtil.saveResource("loottables/pig.json");
+        if(containsEntity("PILLAGER"))
+            FileUtil.saveResource("loottables/pillager.json");
         if(containsEntity("POLAR_BEAR"))
             FileUtil.saveResource("loottables/polar_bear.json");
         if(containsEntity("PUFFERFISH"))
             FileUtil.saveResource("loottables/pufferfish.json");
         FileUtil.saveResource("loottables/rabbit.json");
+        if(containsEntity("RAVAGER"))
+            FileUtil.saveResource("loottables/ravager.json");
         if(containsEntity("SALMON"))
             FileUtil.saveResource("loottables/salmon.json");
         FileUtil.saveResource("loottables/sheep.json");
@@ -102,6 +112,8 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/squid.json");
         if(containsEntity("STRAY"))
             FileUtil.saveResource("loottables/stray.json");
+        if(containsEntity("TRADER_LLAMA"))
+            FileUtil.saveResource("loottables/trader_llama.json");
         if(containsEntity("TROPICAL_FISH"))
             FileUtil.saveResource("loottables/tropical_fish.json");
         if(containsEntity("TURTLE"))
@@ -111,6 +123,8 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/villager.json");
         if(containsEntity("VINDICATOR"))
             FileUtil.saveResource("loottables/vindicator.json");
+        if(containsEntity("WANDERING_TRADER"))
+            FileUtil.saveResource("loottables/wandering_trader.json");
         FileUtil.saveResource("loottables/witch.json");
         FileUtil.saveResource("loottables/wither_skeleton.json");
         FileUtil.saveResource("loottables/wolf.json");
