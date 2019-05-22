@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -56,8 +57,8 @@ public abstract class AbstractDataHandler {
     public void saveChunkData(boolean remove, boolean async){
         Set<Chunk> chunks = new HashSet<>();
 
-        asList(CACHED_ENTITIES.iterator()).forEach(stackedEntity -> chunks.add(((WStackedEntity) stackedEntity).getChunk()));
-        chunks.addAll(CACHED_ITEMS.getChunks());
+        asEntityList(CACHED_ENTITIES.iterator()).forEach(stackedEntity -> chunks.add(((WStackedEntity) stackedEntity).getChunk()));
+        asItemList(CACHED_ITEMS.iterator()).forEach(stackedItem -> chunks.add(((WStackedItem) stackedItem).getChunk()));
         chunks.addAll(CACHED_SPAWNERS.getChunks());
         chunks.addAll(CACHED_BARRELS.getChunks());
 
@@ -72,9 +73,14 @@ public abstract class AbstractDataHandler {
         return chunk.getX() == (location.getBlockX() >> 4) && chunk.getZ() == (location.getBlockZ() >> 4);
     }
 
-    protected List<StackedEntity> asList(Iterator<StackedEntity> iterator){
+    protected List<StackedEntity> asEntityList(Iterator<StackedEntity> iterator){
         return Lists.newArrayList(iterator).stream()
                 .filter(stackedEntity -> stackedEntity.getLivingEntity() != null).collect(Collectors.toList());
+    }
+
+    protected List<StackedItem> asItemList(Iterator<StackedItem> iterator){
+        return Lists.newArrayList(iterator).stream()
+                .filter(stackedItem -> stackedItem.getItem() != null).collect(Collectors.toList());
     }
 
     protected class ChunkRegistry {

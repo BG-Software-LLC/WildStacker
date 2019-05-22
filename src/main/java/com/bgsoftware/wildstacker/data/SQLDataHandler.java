@@ -97,6 +97,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
         preparedStatementList.add(String.format("DELETE FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ()));
 
         Set<StackedEntity> stackedEntities = new HashSet<>();
+        Set<StackedItem> stackedItems = new HashSet<>();
 
         Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
         //noinspection all
@@ -114,15 +115,19 @@ public final class SQLDataHandler extends AbstractDataHandler {
             }
         }
 
-        Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
+        Iterator<StackedItem> items = CACHED_ITEMS.iterator();
+        //noinspection all
         while(items.hasNext()){
             StackedItem stackedItem = items.next();
-            if(stackedItem != null && stackedItem.getItem() != null && stackedItem.getStackAmount() > 1)
+            if (stackedItem != null && stackedItem.getItem() != null && stackedItem.getStackAmount() > 1 &&
+                    isSameChunk(chunk, stackedItem.getItem().getLocation())) {
+                stackedItems.add(stackedItem);
                 preparedStatementList.add(String.format("INSERT INTO items VALUES('%s', '%s', %s);",
                         chunk.getX() + "," + chunk.getZ(),
                         stackedItem.getUniqueId(),
                         stackedItem.getStackAmount())
                 );
+            }
         }
 
         Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
@@ -163,7 +168,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
         if(remove){
             stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
-            CACHED_ITEMS.remove(chunk);
+            stackedItems.forEach(stackedItem -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedItem.getUniqueId()));
             CACHED_SPAWNERS.remove(chunk);
             CACHED_BARRELS.remove(chunk);
         }
@@ -211,7 +216,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
                     StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(uuid), stackAmount);
 
-                    CACHED_ITEMS.put(chunk, uuid, stackedItem);
+                    CACHED_ITEMS.put(DEFAULT_CHUNK, uuid, stackedItem);
                 }
             }
 

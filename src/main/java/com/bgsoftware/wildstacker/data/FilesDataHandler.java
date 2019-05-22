@@ -74,11 +74,13 @@ public final class FilesDataHandler extends AbstractDataHandler {
             }
         }
 
-        Iterator<StackedItem> items = CACHED_ITEMS.iterator(chunk);
+        Iterator<StackedItem> items = CACHED_ITEMS.iterator();
         while(items.hasNext()){
             StackedItem stackedItem = items.next();
-            if(stackedItem != null && stackedItem.getItem() != null && stackedItem.getStackAmount() > 1)
+            if(stackedItem != null && stackedItem.getItem() != null &&
+                    isSameChunk(chunk, stackedItem.getItem().getLocation())) {
                 cfg.set("items." + stackedItem.getUniqueId(), stackedItem.getStackAmount());
+            }
         }
 
         Iterator<StackedSpawner> spawners = CACHED_SPAWNERS.iterator(chunk);
@@ -113,7 +115,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
 
         if (remove) {
             stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
-            CACHED_ITEMS.remove(chunk);
+            stackedEntities.forEach(stackedEntity -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
             CACHED_SPAWNERS.remove(chunk);
             CACHED_BARRELS.remove(chunk);
         }
@@ -191,7 +193,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
 
                 StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(_uuid), stackAmount);
 
-                CACHED_ITEMS.put(chunk, _uuid, stackedItem);
+                CACHED_ITEMS.put(DEFAULT_CHUNK, _uuid, stackedItem);
 
                 if(CACHED_AMOUNT_ITEMS.containsKey(_uuid))
                     CACHED_AMOUNT_ITEMS.remove(_uuid);

@@ -77,7 +77,7 @@ public final class SystemHandler implements SystemManager {
         if(stackedObject instanceof StackedEntity)
             dataHandler.CACHED_ENTITIES.remove(dataHandler.DEFAULT_CHUNK, ((StackedEntity) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedItem)
-            dataHandler.CACHED_ITEMS.remove(((WStackedObject) stackedObject).getChunk(), ((StackedItem) stackedObject).getUniqueId());
+            dataHandler.CACHED_ITEMS.remove(dataHandler.DEFAULT_CHUNK, ((StackedItem) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedSpawner)
             dataHandler.CACHED_SPAWNERS.remove(((WStackedObject) stackedObject).getChunk(), ((StackedSpawner) stackedObject).getLocation());
         else if(stackedObject instanceof StackedBarrel)
@@ -110,7 +110,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem getStackedItem(Item item) {
-        StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(item.getLocation().getChunk(), item.getUniqueId());
+        StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(dataHandler.DEFAULT_CHUNK, item.getUniqueId());
 
         if(stackedItem != null && stackedItem.getItem() != null)
             return stackedItem;
@@ -121,12 +121,12 @@ public final class SystemHandler implements SystemManager {
         //Checks if the item still exists after a few ticks
         Executor.sync(() -> {
             if(item.isDead())
-                dataHandler.CACHED_ITEMS.remove(item.getLocation().getChunk(), item.getUniqueId());
+                dataHandler.CACHED_ITEMS.remove(dataHandler.DEFAULT_CHUNK, item.getUniqueId());
         }, 10L);
 
         //A new item was created. Let's see if we need to add him
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
-            dataHandler.CACHED_ITEMS.put(item.getLocation().getChunk(), stackedItem.getUniqueId(), stackedItem);
+            dataHandler.CACHED_ITEMS.put(dataHandler.DEFAULT_CHUNK, stackedItem.getUniqueId(), stackedItem);
 
         return stackedItem;
     }
