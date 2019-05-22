@@ -312,9 +312,11 @@ public final class SpawnersListener implements Listener {
             if(plugin.getSettings().spawnersBreakMenu){
                 clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
                 plugin.getBreakMenuHandler().openBreakMenu(e.getPlayer());
+                e.setCancelled(true);
             }else if(plugin.getSettings().spawnersPlaceMenu){
                 clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
                 e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4, "Add items here (" + EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()) + ")"));
+                e.setCancelled(true);
             }
         }
 
