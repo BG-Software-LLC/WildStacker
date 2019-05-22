@@ -156,6 +156,9 @@ public final class EntitiesListener implements Listener {
 
                     stackedEntity.tryUnstack(stackAmount);
 
+                    if(plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+                        livingEntity.setFireTicks(160);
+
                     if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
                         try {
                             livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
