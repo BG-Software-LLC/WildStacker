@@ -62,6 +62,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
         YamlConfiguration cfg = new YamlConfiguration();
 
         Set<StackedEntity> stackedEntities = new HashSet<>();
+        Set<StackedItem> stackedItems = new HashSet<>();
 
         Iterator<StackedEntity> entities = CACHED_ENTITIES.iterator();
         while(entities.hasNext()){
@@ -79,6 +80,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
             StackedItem stackedItem = items.next();
             if(stackedItem != null && stackedItem.getItem() != null &&
                     isSameChunk(chunk, stackedItem.getItem().getLocation())) {
+                stackedItems.add(stackedItem);
                 cfg.set("items." + stackedItem.getUniqueId(), stackedItem.getStackAmount());
             }
         }
@@ -115,7 +117,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
 
         if (remove) {
             stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
-            stackedEntities.forEach(stackedEntity -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+            stackedItems.forEach(stackedItem -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedItem.getUniqueId()));
             CACHED_SPAWNERS.remove(chunk);
             CACHED_BARRELS.remove(chunk);
         }
@@ -146,85 +148,98 @@ public final class FilesDataHandler extends AbstractDataHandler {
     }
 
     private void load(Chunk chunk, ChunkRegistry chunkRegistry){
-        File file = chunkRegistry.getFile();
+        Set<StackedEntity> stackedEntities = new HashSet<>();
+        Set<StackedItem> stackedItems = new HashSet<>();
 
-        if(!file.exists())
+        try {
+            File file = chunkRegistry.getFile();
+
+            if (!file.exists())
+                return;
+
+            YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+
+            CACHED_AMOUNT_ENTITIES.keySet().stream()
+                    .filter(uuid -> chunkRegistry.getLivingEntity(uuid) != null)
+                    .forEach(uuid -> cfg.set("entities." + uuid + ".amount", CACHED_AMOUNT_ENTITIES.get(uuid)));
+
+            CACHED_AMOUNT_ITEMS.keySet().stream()
+                    .filter(uuid -> chunkRegistry.getItem(uuid) != null)
+                    .forEach(uuid -> cfg.set("items." + uuid, CACHED_AMOUNT_ITEMS.get(uuid)));
+
+            CACHED_SPAWN_REASON_ENTITIES.keySet().stream()
+                    .filter(uuid -> chunkRegistry.getLivingEntity(uuid) != null)
+                    .forEach(uuid -> cfg.set("entities." + uuid + ".spawn-reason", CACHED_SPAWN_REASON_ENTITIES.get(uuid).name()));
+
+            if (cfg.contains("entities")) {
+                for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
+                    int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
+                    CreatureSpawnEvent.SpawnReason spawnReason =
+                            CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
+
+                    UUID _uuid = UUID.fromString(uuid);
+
+                    StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(_uuid), stackAmount, spawnReason);
+
+                    //Entities are moving. There's no point in storing them based on chunks.
+                    CACHED_ENTITIES.put(DEFAULT_CHUNK, _uuid, stackedEntity);
+                    stackedEntities.add(stackedEntity);
+
+                    if (CACHED_AMOUNT_ENTITIES.containsKey(_uuid))
+                        CACHED_AMOUNT_ENTITIES.remove(_uuid);
+
+                    if (CACHED_SPAWN_REASON_ENTITIES.containsKey(_uuid))
+                        CACHED_SPAWN_REASON_ENTITIES.remove(_uuid);
+                }
+            }
+
+            if (cfg.contains("items")) {
+                for (String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
+                    int stackAmount = cfg.getInt("items." + uuid, 1);
+                    UUID _uuid = UUID.fromString(uuid);
+
+                    StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(_uuid), stackAmount);
+
+                    CACHED_ITEMS.put(DEFAULT_CHUNK, _uuid, stackedItem);
+                    stackedItems.add(stackedItem);
+
+                    if (CACHED_AMOUNT_ITEMS.containsKey(_uuid))
+                        CACHED_AMOUNT_ITEMS.remove(_uuid);
+                }
+            }
+
+            if (cfg.contains("spawners")) {
+                for (String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
+                    String[] locationSections = location.split(",");
+                    int stackAmount = cfg.getInt("spawners." + location, 1);
+                    Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
+                            Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
+                    if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
+                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                        CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
+                    }
+                }
+            }
+
+            if (cfg.contains("barrels")) {
+                for (String location : cfg.getConfigurationSection("barrels").getKeys(false)) {
+                    String[] locationSections = location.split(",");
+                    int stackAmount = cfg.getInt("barrels." + location + ".amount", 1);
+                    Block barrelBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
+                            Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
+                    if (barrelBlock.getType() == Material.CAULDRON) {
+                        ItemStack barrelItem = cfg.getItemStack("barrels." + location + ".item");
+                        StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
+                        CACHED_BARRELS.put(chunk, stackedBarrel.getLocation(), stackedBarrel);
+                    }
+                }
+            }
+        }catch(IllegalStateException ex){
+            stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
+            stackedItems.forEach(stackedItem -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedItem.getUniqueId()));
+            CACHED_SPAWNERS.remove(chunk);
+            CACHED_BARRELS.remove(chunk);
             return;
-
-        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-
-        CACHED_AMOUNT_ENTITIES.keySet().stream()
-                .filter(uuid -> chunkRegistry.getLivingEntity(uuid) != null)
-                .forEach(uuid -> cfg.set("entities." + uuid  + ".amount", CACHED_AMOUNT_ENTITIES.get(uuid)));
-
-        CACHED_AMOUNT_ITEMS.keySet().stream()
-                .filter(uuid -> chunkRegistry.getItem(uuid) != null)
-                .forEach(uuid -> cfg.set("items." + uuid, CACHED_AMOUNT_ITEMS.get(uuid)));
-
-        CACHED_SPAWN_REASON_ENTITIES.keySet().stream()
-                .filter(uuid -> chunkRegistry.getLivingEntity(uuid) != null)
-                .forEach(uuid -> cfg.set("entities." + uuid  + ".spawn-reason", CACHED_SPAWN_REASON_ENTITIES.get(uuid).name()));
-
-        if(cfg.contains("entities")){
-            for(String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
-                int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
-                CreatureSpawnEvent.SpawnReason spawnReason =
-                        CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
-
-                UUID _uuid = UUID.fromString(uuid);
-
-                StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(_uuid), stackAmount, spawnReason);
-
-                //Entities are moving. There's no point in storing them based on chunks.
-                CACHED_ENTITIES.put(DEFAULT_CHUNK, _uuid, stackedEntity);
-
-                if(CACHED_AMOUNT_ENTITIES.containsKey(_uuid))
-                    CACHED_AMOUNT_ENTITIES.remove(_uuid);
-
-                if(CACHED_SPAWN_REASON_ENTITIES.containsKey(_uuid))
-                    CACHED_SPAWN_REASON_ENTITIES.remove(_uuid);
-            }
-        }
-
-        if (cfg.contains("items")) {
-            for(String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
-                int stackAmount = cfg.getInt("items." + uuid, 1);
-                UUID _uuid = UUID.fromString(uuid);
-
-                StackedItem stackedItem = new WStackedItem(chunkRegistry.getItem(_uuid), stackAmount);
-
-                CACHED_ITEMS.put(DEFAULT_CHUNK, _uuid, stackedItem);
-
-                if(CACHED_AMOUNT_ITEMS.containsKey(_uuid))
-                    CACHED_AMOUNT_ITEMS.remove(_uuid);
-            }
-        }
-
-        if(cfg.contains("spawners")){
-            for(String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
-                String[] locationSections = location.split(",");
-                int stackAmount = cfg.getInt("spawners." + location, 1);
-                Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
-                        Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                if(spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()){
-                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                    CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
-                }
-            }
-        }
-
-        if(cfg.contains("barrels")){
-            for(String location : cfg.getConfigurationSection("barrels").getKeys(false)) {
-                String[] locationSections = location.split(",");
-                int stackAmount = cfg.getInt("barrels." + location + ".amount", 1);
-                Block barrelBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
-                        Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                if(barrelBlock.getType() == Material.CAULDRON){
-                    ItemStack barrelItem = cfg.getItemStack("barrels." + location + ".item");
-                    StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                    CACHED_BARRELS.put(chunk, stackedBarrel.getLocation(), stackedBarrel);
-                }
-            }
         }
 
         Iterator<StackedSpawner> stackedSpawners = CACHED_SPAWNERS.iterator(chunk);
