@@ -12,7 +12,7 @@ import java.util.List;
 
 public class LootTableSheep extends LootTable {
 
-    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13");
+    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
 
     private LootTableSheep(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment){
         super(lootPairs, min, max, minExp, maxExp, dropEquipment);
