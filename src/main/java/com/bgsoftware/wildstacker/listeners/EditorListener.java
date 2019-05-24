@@ -576,9 +576,11 @@ public final class EditorListener implements Listener {
             }
         }
 
-        e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
-        lastInventories.remove(e.getPlayer().getUniqueId());
-        configValues.remove(e.getPlayer().getUniqueId());
+        Executor.sync(() -> {
+            e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+            lastInventories.remove(e.getPlayer().getUniqueId());
+            configValues.remove(e.getPlayer().getUniqueId());
+        });
     }
 
 }
