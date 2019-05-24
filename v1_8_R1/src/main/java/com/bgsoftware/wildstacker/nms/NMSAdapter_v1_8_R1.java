@@ -210,6 +210,12 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         return exp;
     }
 
+    @Override
+    public void setHealthDirectly(LivingEntity livingEntity, double health) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.setHealth((float) health);
+    }
+
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
 
         private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {

@@ -40,4 +40,6 @@ public interface NMSAdapter {
 
     int getEntityExp(LivingEntity livingEntity);
 
+    void setHealthDirectly(LivingEntity livingEntity, double health);
+
 }

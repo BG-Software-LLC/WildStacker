@@ -215,6 +215,12 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         return exp;
     }
 
+    @Override
+    public void setHealthDirectly(LivingEntity livingEntity, double health) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.setHealth((float) health);
+    }
+
     private boolean shouldNotDrop(ItemStack itemStack){
         try{
             return EnchantmentManager.c(itemStack);
