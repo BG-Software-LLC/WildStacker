@@ -43,7 +43,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable CreatureSpawnEvent.SpawnReason spawnReason){
         super(livingEntity, stackAmount);
-        this.spawnReason = spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
+        this.spawnReason = spawnReason;
     }
 
     /*
@@ -102,7 +102,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public boolean isBlacklisted() {
         return plugin.getSettings().blacklistedEntities.contains(getType().name()) ||
-                plugin.getSettings().blacklistedEntities.contains(getSpawnReason().name());
+                (spawnReason != null && plugin.getSettings().blacklistedEntities.contains(spawnReason.name()));
     }
 
     @Override
@@ -456,9 +456,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public CreatureSpawnEvent.SpawnReason getSpawnReason() {
-        if(spawnReason == null)
-            spawnReason = CreatureSpawnEvent.SpawnReason.CHUNK_GEN;
-        return spawnReason;
+        return spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
     }
 
     @Override
