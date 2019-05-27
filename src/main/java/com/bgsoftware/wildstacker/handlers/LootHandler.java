@@ -127,6 +127,7 @@ public final class LootHandler {
             FileUtil.saveResource("loottables/wandering_trader.json");
         FileUtil.saveResource("loottables/witch.json");
         FileUtil.saveResource("loottables/wither_skeleton.json");
+        FileUtil.saveResource("loottables/wither.json");
         FileUtil.saveResource("loottables/wolf.json");
         FileUtil.saveResource("loottables/zombie.json");
         FileUtil.saveResource("loottables/zombie_horse.json");
