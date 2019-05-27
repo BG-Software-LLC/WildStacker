@@ -40,7 +40,7 @@ public class LootPair {
 
     public void executeCommands(Player player, int lootBonusLevel){
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        double chance = random.nextDouble(101);
+        int chance = random.nextInt(100);
         double baseChance = 0;
 
         Collections.shuffle(lootCommands, random);
@@ -56,7 +56,7 @@ public class LootPair {
 
     private LootItem getLootItem(int lootBonusLevel){
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        double chance = random.nextDouble(101);
+        int chance = random.nextInt(100);
         double baseChance = 0;
 
         Collections.shuffle(lootItems, random);

@@ -120,6 +120,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     private List<LootPair> getLootPairs(StackedEntity stackedEntity){
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<LootPair> lootPairs = new ArrayList<>();
+
         Collections.shuffle(this.lootPairs, random);
 
         for(LootPair lootPair : this.lootPairs){
@@ -127,7 +128,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
                 break;
             if(!lootPair.getKiller().isEmpty() && !lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
                 continue;
-            if(random.nextDouble(101) < lootPair.getChance())
+            if(random.nextInt(100) < lootPair.getChance())
                 lootPairs.add(lootPair);
         }
 
