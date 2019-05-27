@@ -208,19 +208,6 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 }
             }
 
-            if (cfg.contains("spawners")) {
-                for (String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
-                    String[] locationSections = location.split(",");
-                    int stackAmount = cfg.getInt("spawners." + location, 1);
-                    Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
-                            Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                    if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                        CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
-                    }
-                }
-            }
-
             if (cfg.contains("barrels")) {
                 for (String location : cfg.getConfigurationSection("barrels").getKeys(false)) {
                     String[] locationSections = location.split(",");
@@ -234,6 +221,35 @@ public final class FilesDataHandler extends AbstractDataHandler {
                     }
                 }
             }
+
+            Executor.sync(() -> {
+                if (cfg.contains("spawners")) {
+                    for (String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
+                        String[] locationSections = location.split(",");
+                        int stackAmount = cfg.getInt("spawners." + location, 1);
+                        Block spawnerBlock = chunkRegistry.getBlock(Integer.valueOf(locationSections[0]),
+                                Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
+                        if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
+                            StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                            CACHED_SPAWNERS.put(chunk, spawnerBlock.getLocation(), stackedSpawner);
+                        }
+                    }
+                }
+
+                Iterator<StackedBarrel> stackedBarrels = CACHED_BARRELS.iterator(chunk);
+                Iterator<StackedSpawner> stackedSpawners = CACHED_SPAWNERS.iterator(chunk);
+
+                while(stackedSpawners.hasNext()) {
+                    stackedSpawners.next().updateName();
+                }
+
+                while(stackedBarrels.hasNext()){
+                    StackedBarrel stackedBarrel = stackedBarrels.next();
+                    stackedBarrel.updateName();
+                    stackedBarrel.createDisplayBlock();
+                }
+            });
+
         }catch(IllegalStateException ex){
             stackedEntities.forEach(stackedEntity -> CACHED_ENTITIES.remove(DEFAULT_CHUNK, stackedEntity.getUniqueId()));
             stackedItems.forEach(stackedItem -> CACHED_ITEMS.remove(DEFAULT_CHUNK, stackedItem.getUniqueId()));
@@ -241,21 +257,6 @@ public final class FilesDataHandler extends AbstractDataHandler {
             CACHED_BARRELS.remove(chunk);
             return;
         }
-
-        Iterator<StackedSpawner> stackedSpawners = CACHED_SPAWNERS.iterator(chunk);
-        Iterator<StackedBarrel> stackedBarrels = CACHED_BARRELS.iterator(chunk);
-
-        Executor.sync(() -> {
-            while(stackedSpawners.hasNext()) {
-                stackedSpawners.next().updateName();
-            }
-
-            while(stackedBarrels.hasNext()){
-                StackedBarrel stackedBarrel = stackedBarrels.next();
-                stackedBarrel.updateName();
-                stackedBarrel.createDisplayBlock();
-            }
-        });
     }
 
     /*
