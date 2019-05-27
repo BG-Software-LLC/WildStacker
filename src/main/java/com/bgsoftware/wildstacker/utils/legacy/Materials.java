@@ -61,7 +61,7 @@ public enum Materials {
         return bukkitData == 0 ? new ItemStack(toBukkitType(), amount) : new ItemStack(toBukkitType(), amount, bukkitData);
     }
 
-    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13");
+    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
 
     public static Material getSpawnEgg(EntityType entityType){
         return Material.matchMaterial((legacy ? "MONSTER_EGG" : EntityTypes.fromName(entityType.name()) + "_SPAWN_EGG"));
