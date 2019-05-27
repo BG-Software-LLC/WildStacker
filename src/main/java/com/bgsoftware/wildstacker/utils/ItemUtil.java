@@ -333,9 +333,17 @@ public final class ItemUtil {
     }
 
     public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
-        int slotItem = inventory.first(inHand);
-        if(slotItem != -1)
-            inventory.setItem(slotItem, itemStack);
+        int slot = -1;
+
+        if(inHand.equals(inventory.getItem(inventory.getHeldItemSlot())))
+            slot = inventory.getHeldItemSlot();
+
+        else try{
+            if(inHand.equals(inventory.getItem(40)))
+                slot = 40;
+        }catch(ArrayIndexOutOfBoundsException ignored){}
+
+        inventory.setItem(slot, itemStack);
     }
 
 }
