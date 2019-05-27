@@ -106,6 +106,10 @@ public final class ItemsListener implements Listener {
         if(stackedItem.getStackAmount() > 1 || e.getItem().getItemStack().getType().name().contains("BUCKET")) {
             e.setCancelled(true);
 
+            //Causes too many issues
+            if(e.getEntityType().name().equals("DOLPHIN"))
+                return;
+
             int stackAmount = stackedItem.getStackAmount();
 
             if(e.getInventory() != null) {
