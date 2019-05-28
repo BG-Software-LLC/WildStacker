@@ -27,8 +27,9 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
@@ -237,10 +238,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 MythicMobsHook.isMythicMob(targetEntity.getLivingEntity())))
             return false;
 
-        //noinspection all
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard") &&
-                !Collections.disjoint(plugin.getSettings().entitiesDisabledRegions, WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation())))
-            return false;
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
+            Set<String> regions = new HashSet<>();
+            regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
+            regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
+            if(regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
+                return false;
+        }
 
         return true;
     }
