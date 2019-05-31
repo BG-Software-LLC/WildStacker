@@ -15,6 +15,8 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemStackList;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -54,12 +56,13 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class EntitiesListener implements Listener {
 
     private WildStackerPlugin plugin;
@@ -78,6 +81,25 @@ public final class EntitiesListener implements Listener {
             e.getDrops().clear();
             e.setDroppedExp(0);
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onCustomEntityDeath(EntityDeathEvent e){
+        EntityDamageEvent lastDamageCause = e.getEntity().getLastDamageCause();
+
+        //Checks if the damage is null
+        if(lastDamageCause != null)
+            return;
+
+        //EntityDamageEvent is null - it was killed by 'CUSTOM'
+        //Calling the onEntityLastDamage function with default parameters.
+
+        //noinspection unchecked
+        EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
+                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+
+        onEntityLastDamage(entityDamageEvent);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
