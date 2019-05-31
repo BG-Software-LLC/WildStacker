@@ -31,6 +31,9 @@ public final class ItemStackList extends AbstractList<ItemStack> {
 
     @Override
     public boolean add(ItemStack itemStack) {
+        if(itemStack == null)
+            return false;
+        
         itemStack = itemStack.clone();
         int amount = itemStack.getAmount();
         itemStack.setAmount(1);
