@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Arconix;
@@ -75,8 +76,14 @@ public final class ProvidersHandler {
             else
                 claimsProviders.add(new ClaimsProvider_FactionsUUID());
         }
-        if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared"))
-            claimsProviders.add(new ClaimsProvider_PlotSquared());
+        if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
+            try {
+                Class.forName("com.intellectualcrafters.plot.api.PlotAPI");
+                claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
+            }catch(ClassNotFoundException ex){
+                claimsProviders.add(new ClaimsProvider_PlotSquared());
+            }
+        }
         if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
             claimsProviders.add(new ClaimsProvider_WorldGuard());
 
