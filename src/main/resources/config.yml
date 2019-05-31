@@ -88,9 +88,15 @@ items:
   # When buckets stacker is enabled, water & lava buckets will be stacked in your inventory
   # with a max-stack size of 16.
   buckets-stacker:
+    # Should buckets get stacked on the server?
     enabled: true
+
+    # A list of blacklisted bucket names.
     name-blacklist:
     - '&fGenbucket'
+
+    # The new max-stack size for buckets. Must be a number between 1 and 64.
+    max-stack: 16
 
   # Should items get removed when the kill all task is performed?
   # If you want to configure the task, check the entities section.

@@ -27,7 +27,8 @@ public final class EditorHandler {
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
             ITEMS_SLOT_5 = "items.limits", ITEMS_SLOT_6 = "items.disabled-worlds", ITEMS_SLOT_7 = "items.chunk-limit",
             ITEMS_SLOT_8 = "items.fix-stack", ITEMS_SLOT_9 = "items.item-display", ITEMS_SLOT_10 = "items.buckets-stacker.enabled",
-            ITEMS_SLOT_11 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_12 = "items.kill-all";
+            ITEMS_SLOT_11 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_12 = "items.buckets-stacker.max-stack",
+            ITEMS_SLOT_13 = "items.kill-all";
 
     public static String ENTITIES_SLOT_0 = "entities.enabled", ENTITIES_SLOT_1 = "entities.merge-radius",
             ENTITIES_SLOT_2 = "entities.custom-name", ENTITIES_SLOT_3 = "entities.blacklist",
@@ -141,7 +142,10 @@ public final class EditorHandler {
                 .withName("&6Buckets Name Blacklist").withLore("&7Value:", config.getStringList(ITEMS_SLOT_11)).build());
 
         editor.setItem(12, new ItemBuilder(Materials.CLOCK)
-                .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_12)).build());
+                .withName("&6Buckets Max Stack").withLore("&7Value: " + config.getInt(ITEMS_SLOT_12)).build());
+
+        editor.setItem(13, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_13)).build());
 
         return editor;
     }

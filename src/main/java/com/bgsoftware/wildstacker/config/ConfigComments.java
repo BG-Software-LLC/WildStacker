@@ -104,6 +104,17 @@ public final class ConfigComments {
     @Comment("with a max-stack size of 16.")
     public static String BUCKETS_STACKER = "items.buckets-stacker";
 
+    @Comment("Should buckets get stacked on the server?")
+    public static String BUCKETS_STACKER_ENABLED = "items.buckets-stacker.enabled";
+
+    @Comment("")
+    @Comment("A list of blacklisted bucket names.")
+    public static String BUCKETS_STACKER_NAME_BLACKLIST = "items.buckets-stacker.name-blacklist";
+
+    @Comment("")
+    @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
+    public static String BUCKETS_STACKER_MAX_STACK = "items.buckets-stacker.max-stack";
+
     @Comment("")
     @Comment("Should items get removed when the kill all task is performed?")
     @Comment("If you want to configure the task, check the entities section.")

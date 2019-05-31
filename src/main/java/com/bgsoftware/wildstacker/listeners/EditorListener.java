@@ -171,6 +171,9 @@ public final class EditorListener implements Listener {
                 case 12:
                     configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_12);
                     break;
+                case 13:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_13);
+                    break;
                 default:
                     return;
             }

@@ -221,6 +221,7 @@ public final class ItemUtil {
     public static boolean stackBucket(ItemStack bucket, Inventory inventory){
         if(plugin.getSettings().bucketsStackerEnabled) {
             int amountOfBuckets = 0;
+            int maxStack = plugin.getSettings().bucketsMaxStack;
 
             for (int slot = 0; slot < inventory.getSize(); slot++) {
                 ItemStack itemStack = inventory.getItem(slot);
@@ -233,13 +234,13 @@ public final class ItemUtil {
             updateInventory(inventory);
 
             ItemStack cloned = bucket.clone();
-            cloned.setAmount(16);
+            cloned.setAmount(maxStack);
 
-            for(int i = 0; i < amountOfBuckets / 16; i++)
+            for(int i = 0; i < amountOfBuckets / maxStack; i++)
                 inventory.addItem(cloned);
 
-            if(amountOfBuckets % 16 > 0){
-                cloned.setAmount(amountOfBuckets % 16);
+            if(amountOfBuckets % maxStack > 0){
+                cloned.setAmount(amountOfBuckets % maxStack);
                 inventory.addItem(cloned);
             }
 

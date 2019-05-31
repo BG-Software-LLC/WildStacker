@@ -35,7 +35,7 @@ public final class SettingsHandler {
             itemsUnstackedCustomName, itemsKillAll, itemsNamesToggleEnabled;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems, whitelistedItems;
-    public final int itemsCheckRange, itemsChunkLimit;
+    public final int itemsCheckRange, itemsChunkLimit, bucketsMaxStack;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final KeyMap<Integer> itemsLimits;
 
@@ -106,6 +106,7 @@ public final class SettingsHandler {
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
         bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
+        bucketsMaxStack = cfg.getInt("items.buckets-stacker.max-stack", 16);
         itemsKillAll = cfg.getBoolean("items.kill-all", true);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
