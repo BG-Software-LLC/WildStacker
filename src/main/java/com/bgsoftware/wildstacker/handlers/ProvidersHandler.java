@@ -44,7 +44,8 @@ public final class ProvidersHandler {
         WildStackerPlugin.log("Loading providers started...");
         long startTime = System.currentTimeMillis();
 
-        if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners"))
+        if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") &&
+                Bukkit.getPluginManager().getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx"))
             spawnersProvider = new SpawnersProvider_SilkSpawners();
         else spawnersProvider = new SpawnersProvider_Default();
 
