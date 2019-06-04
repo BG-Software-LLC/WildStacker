@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.AsyncEntityDeathEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
+import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
@@ -34,6 +35,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -75,11 +77,28 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
     }
 
+    @EventHandler
+    public void g(PlayerInteractEvent e){
+        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
+            for(Entity en : e.getPlayer().getNearbyEntities(5, 5, 5)){
+                if(en instanceof Zombie)
+                    ((Zombie) en).setCanPickupItems(true);
+            }
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
         if(e.getEntity().hasMetadata("corpse")){
             e.getDrops().clear();
             e.setDroppedExp(0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityPickup(EntityPickupItemEvent e){
+        if(e.getEntity().hasMetadata("corpse")){
+            e.setCancelled(true);
         }
     }
 
