@@ -61,6 +61,7 @@ public final class BucketsListener implements Listener {
             return;
 
         ItemStack cursor, clicked;
+        int maxStack = plugin.getSettings().bucketsMaxStack;
 
         switch (e.getClick()){
             case MIDDLE:
@@ -69,7 +70,7 @@ public final class BucketsListener implements Listener {
 
                 clicked = e.getCurrentItem().clone();
                 cursor = clicked.clone();
-                cursor.setAmount(16);
+                cursor.setAmount(maxStack);
                 e.getWhoClicked().getOpenInventory().setCursor(cursor);
                 break;
             case RIGHT:
@@ -80,10 +81,10 @@ public final class BucketsListener implements Listener {
 
                 e.setCancelled(true);
 
-                if(e.getCurrentItem().getAmount() >= 16)
+                if(e.getCurrentItem().getAmount() >= maxStack)
                     return;
 
-                int toAdd = 16 - e.getCurrentItem().getAmount();
+                int toAdd = maxStack - e.getCurrentItem().getAmount();
 
                 if(toAdd > e.getCursor().getAmount())
                     toAdd = e.getCursor().getAmount();
@@ -102,10 +103,10 @@ public final class BucketsListener implements Listener {
                 Inventory invToAddItem = e.getClickedInventory().equals(e.getWhoClicked().getOpenInventory().getTopInventory()) ?
                         e.getWhoClicked().getOpenInventory().getBottomInventory() : e.getWhoClicked().getOpenInventory().getTopInventory();
 
-                clicked = e.getCurrentItem();
+                clicked = e.getCurrentItem().clone();
 
-                Executor.sync(() -> ItemUtil.stackBucket(clicked, invToAddItem));
-                break;
+                Executor.sync(() -> ItemUtil.stackBucket(clicked, invToAddItem), 1L);
+                return;
             default:
                 return;
         }

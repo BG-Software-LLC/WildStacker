@@ -222,10 +222,13 @@ public final class ItemUtil {
         if(plugin.getSettings().bucketsStackerEnabled) {
             int amountOfBuckets = 0;
             int maxStack = plugin.getSettings().bucketsMaxStack;
+            int slotToSetFirstBucket = -1;
 
             for (int slot = 0; slot < inventory.getSize(); slot++) {
                 ItemStack itemStack = inventory.getItem(slot);
                 if (itemStack != null && itemStack.isSimilar(bucket)) {
+                    if(slotToSetFirstBucket == -1)
+                        slotToSetFirstBucket = slot;
                     amountOfBuckets += itemStack.getAmount();
                     inventory.setItem(slot, new ItemStack(Material.AIR));
                 }
@@ -236,12 +239,23 @@ public final class ItemUtil {
             ItemStack cloned = bucket.clone();
             cloned.setAmount(maxStack);
 
-            for(int i = 0; i < amountOfBuckets / maxStack; i++)
-                inventory.addItem(cloned);
+            for(int i = 0; i < amountOfBuckets / maxStack; i++) {
+                if(slotToSetFirstBucket != -1){
+                    inventory.setItem(slotToSetFirstBucket, cloned);
+                    slotToSetFirstBucket = -1;
+                }else {
+                    inventory.addItem(cloned);
+                }
+            }
 
             if(amountOfBuckets % maxStack > 0){
                 cloned.setAmount(amountOfBuckets % maxStack);
-                inventory.addItem(cloned);
+                if(slotToSetFirstBucket != -1){
+                    inventory.setItem(slotToSetFirstBucket, cloned);
+                }
+                else {
+                    inventory.addItem(cloned);
+                }
             }
 
             updateInventory(inventory);
