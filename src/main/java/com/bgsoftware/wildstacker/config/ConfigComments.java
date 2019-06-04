@@ -133,6 +133,21 @@ public final class ConfigComments {
     public static String ITEMS_NAMES_TOGGLE_COMMAND = "items.names-toggle.command";
 
     @Comment("")
+    @Comment("When enabled, a pickup sound will be played to the player.")
+    public static String ITEMS_PICKUP_SOUND = "items.pickup-sound";
+
+    @Comment("Should pickup-sound be enabled for stacked items?")
+    public static String ITEMS_PICKUP_SOUND_ENABLED = "items.pickup-sound.enabled";
+
+    @Comment("")
+    @Comment("The volume of the sound.")
+    public static String ITEMS_PICKUP_SOUND_VOLUME = "items.pickup-sound.volume";
+
+    @Comment("")
+    @Comment("The pitch of the volume.")
+    public static String ITEMS_PICKUP_SOUND_PITCH = "items.pickup-sound.pitch";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 

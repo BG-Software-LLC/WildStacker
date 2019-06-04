@@ -174,6 +174,21 @@ public final class EditorListener implements Listener {
                 case 13:
                     configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_13);
                     break;
+                case 14:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_14);
+                    break;
+                case 15:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_15);
+                    break;
+                case 16:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_16);
+                    break;
+                case 17:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_17);
+                    break;
+                case 18:
+                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_18);
+                    break;
                 default:
                     return;
             }
@@ -557,6 +572,15 @@ public final class EditorListener implements Listener {
                 if(plugin.getEditor().config.isInt(path)){
                     try{
                         value = Integer.valueOf(value.toString());
+                    }catch(IllegalArgumentException ex){
+                        e.getPlayer().sendMessage(ChatColor.RED + "Please specify a valid number");
+                        valid = false;
+                    }
+                }
+
+                else if(plugin.getEditor().config.isDouble(path)){
+                    try{
+                        value = Double.valueOf(value.toString());
                     }catch(IllegalArgumentException ex){
                         e.getPlayer().sendMessage(ChatColor.RED + "Please specify a valid number");
                         valid = false;

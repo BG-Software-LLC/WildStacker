@@ -32,12 +32,13 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
-            itemsUnstackedCustomName, itemsKillAll, itemsNamesToggleEnabled;
+            itemsUnstackedCustomName, itemsKillAll, itemsNamesToggleEnabled, itemsSoundEnabled;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems, whitelistedItems;
     public final int itemsCheckRange, itemsChunkLimit, bucketsMaxStack;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final KeyMap<Integer> itemsLimits;
+    public final float itemsSoundVolume, itemsSoundPitch;
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
@@ -110,6 +111,9 @@ public final class SettingsHandler {
         itemsKillAll = cfg.getBoolean("items.kill-all", true);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
+        itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
+        itemsSoundVolume = (float) cfg.getDouble("items.pickup-sound.volume");
+        itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);

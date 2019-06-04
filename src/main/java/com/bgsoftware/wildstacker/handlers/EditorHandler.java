@@ -28,7 +28,9 @@ public final class EditorHandler {
             ITEMS_SLOT_5 = "items.limits", ITEMS_SLOT_6 = "items.disabled-worlds", ITEMS_SLOT_7 = "items.chunk-limit",
             ITEMS_SLOT_8 = "items.fix-stack", ITEMS_SLOT_9 = "items.item-display", ITEMS_SLOT_10 = "items.buckets-stacker.enabled",
             ITEMS_SLOT_11 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_12 = "items.buckets-stacker.max-stack",
-            ITEMS_SLOT_13 = "items.kill-all";
+            ITEMS_SLOT_13 = "items.kill-all", ITEMS_SLOT_14 = "items.names-toggle.enabled",
+            ITEMS_SLOT_15 = "items.names-toggle.command", ITEMS_SLOT_16 = "items.pickup-sound.enabled",
+            ITEMS_SLOT_17 = "items.pickup-sound.volume", ITEMS_SLOT_18 = "items.pickup-sound.pitch";
 
     public static String ENTITIES_SLOT_0 = "entities.enabled", ENTITIES_SLOT_1 = "entities.merge-radius",
             ENTITIES_SLOT_2 = "entities.custom-name", ENTITIES_SLOT_3 = "entities.blacklist",
@@ -103,7 +105,7 @@ public final class EditorHandler {
     }
 
     public Inventory getItemsEditor(){
-        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
+        Inventory editor = Bukkit.createInventory(null, 27, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
 
         editor.setItem(0, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Enabled").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_0)).build());
@@ -146,6 +148,21 @@ public final class EditorHandler {
 
         editor.setItem(13, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Items Kill All").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_13)).build());
+
+        editor.setItem(14, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Names Toggle Enabled").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_14)).build());
+
+        editor.setItem(15, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Names Toggle Command").withLore("&7Value: " + config.getString(ITEMS_SLOT_15)).build());
+
+        editor.setItem(16, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Pickup Sound Enabled").withLore("&7Value: " + config.getBoolean(ITEMS_SLOT_16)).build());
+
+        editor.setItem(17, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Pickup Sound Volume").withLore("&7Value: " + config.getDouble(ITEMS_SLOT_17)).build());
+
+        editor.setItem(18, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Pickup Sound Pitch").withLore("&7Value: " + config.getDouble(ITEMS_SLOT_18)).build());
 
         return editor;
     }

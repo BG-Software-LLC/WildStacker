@@ -124,7 +124,7 @@ public final class ItemsListener implements Listener {
                 setItemInHand(e.getEntity(), itemStack);
             }
 
-            if(e.getPlayer() != null && stackAmount != stackedItem.getStackAmount()){
+            if(e.getPlayer() != null && stackAmount != stackedItem.getStackAmount() && plugin.getSettings().itemsSoundEnabled){
                 Sound pickUpItem;
 
                 //Different name on 1.12
@@ -133,7 +133,9 @@ public final class ItemsListener implements Listener {
                 } catch (IllegalArgumentException ex) {
                     pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
                 }
-                e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem, 1, 1);
+
+                e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
+                        plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
             }
 
             if (stackedItem.getStackAmount() <= 0) {
