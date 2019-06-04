@@ -13,6 +13,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 
@@ -89,12 +90,12 @@ public abstract class AbstractDataHandler {
         private Map<UUID, Item> itemMap = new HashMap<>();
         private Chunk chunk;
 
-        public ChunkRegistry(Chunk chunk){
+        public ChunkRegistry(Chunk chunk, Entity[] entities){
             this.chunk = chunk;
-            Arrays.stream(chunk.getEntities())
+            Arrays.stream(entities)
                     .filter(entity -> entity instanceof LivingEntity)
                     .forEach(entity -> livingEntityMap.put(entity.getUniqueId(), (LivingEntity) entity));
-            Arrays.stream(chunk.getEntities())
+            Arrays.stream(entities)
                     .filter(entity -> entity instanceof Item)
                     .forEach(entity -> itemMap.put(entity.getUniqueId(), (Item) entity));
         }

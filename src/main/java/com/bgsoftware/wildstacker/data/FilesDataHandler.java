@@ -50,7 +50,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
 
     @Override
     public void loadChunkData(Chunk chunk, boolean async){
-        ChunkRegistry chunkRegistry = new ChunkRegistry(chunk);
+        ChunkRegistry chunkRegistry = new ChunkRegistry(chunk, chunk.getEntities());
         if(async)
             Executor.async(() -> load(chunk, chunkRegistry));
         else
