@@ -171,7 +171,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
                     .filter(uuid -> chunkRegistry.getLivingEntity(uuid) != null)
                     .forEach(uuid -> cfg.set("entities." + uuid + ".spawn-reason", CACHED_SPAWN_REASON_ENTITIES.get(uuid).name()));
 
-            if (cfg.contains("entities")) {
+            if (cfg.contains("entities") && !CACHED_ENTITIES.contains(chunk)) {
                 for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
                     int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
                     CreatureSpawnEvent.SpawnReason spawnReason =
@@ -193,7 +193,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 }
             }
 
-            if (cfg.contains("items")) {
+            if (cfg.contains("items") && !CACHED_ITEMS.contains(chunk)) {
                 for (String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
                     int stackAmount = cfg.getInt("items." + uuid, 1);
                     UUID _uuid = UUID.fromString(uuid);
@@ -208,7 +208,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
                 }
             }
 
-            if (cfg.contains("barrels")) {
+            if (cfg.contains("barrels") && !CACHED_BARRELS.contains(chunk)) {
                 for (String location : cfg.getConfigurationSection("barrels").getKeys(false)) {
                     String[] locationSections = location.split(",");
                     int stackAmount = cfg.getInt("barrels." + location + ".amount", 1);
@@ -223,7 +223,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
             }
 
             Executor.sync(() -> {
-                if (cfg.contains("spawners")) {
+                if (cfg.contains("spawners") && !CACHED_SPAWNERS.contains(chunk)) {
                     for (String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
                         String[] locationSections = location.split(",");
                         int stackAmount = cfg.getInt("spawners." + location, 1);

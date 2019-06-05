@@ -195,7 +195,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
 
             try {
                 //Entities
-                if (doesTableExist(conn, "entities")) {
+                if (doesTableExist(conn, "entities") && !CACHED_ENTITIES.contains(chunk)) {
                     resultSet = conn.prepareStatement(
                             String.format("SELECT * FROM entities WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
                     while (resultSet.next()) {
@@ -212,7 +212,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
                 }
 
                 //Items
-                if (doesTableExist(conn, "items")) {
+                if (doesTableExist(conn, "items") && !CACHED_ITEMS.contains(chunk)) {
                     resultSet = conn.prepareStatement(
                             String.format("SELECT * FROM items WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
                     while (resultSet.next()) {
@@ -227,7 +227,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
                 }
 
                 //Spawners
-                if (doesTableExist(conn, "spawners")) {
+                if (doesTableExist(conn, "spawners") && !CACHED_SPAWNERS.contains(chunk)) {
                     resultSet = conn.prepareStatement(
                             String.format("SELECT * FROM spawners WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
                     while (resultSet.next()) {
@@ -243,7 +243,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
                 }
 
                 //Barrels
-                if (doesTableExist(conn, "barrels")) {
+                if (doesTableExist(conn, "barrels") && !CACHED_BARRELS.contains(chunk)) {
                     resultSet = conn.prepareStatement(
                             String.format("SELECT * FROM barrels WHERE chunk = '%s';", chunk.getX() + "," + chunk.getZ())).executeQuery();
                     while (resultSet.next()) {

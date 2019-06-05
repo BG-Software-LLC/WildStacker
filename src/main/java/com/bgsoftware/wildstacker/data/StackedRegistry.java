@@ -24,6 +24,10 @@ public final class StackedRegistry<K, V> implements Iterable<V>{
         return getMap(chunk).containsKey(key);
     }
 
+    public boolean contains(Chunk chunk){
+        return !getMap(chunk).isEmpty();
+    }
+
     public void remove(Chunk chunk, K key){
         getMap(chunk).remove(key);
     }
