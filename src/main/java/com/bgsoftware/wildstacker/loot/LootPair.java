@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
@@ -8,10 +9,12 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootPair {
+
+    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private List<LootItem> lootItems = new ArrayList<>();
     private List<LootCommand> lootCommands = new ArrayList<>();
@@ -29,7 +32,7 @@ public class LootPair {
     public List<ItemStack> getItems(StackedEntity stackedEntity, int lootBonusLevel){
         List<ItemStack> items = new ArrayList<>();
 
-        LootItem lootItem = getLootItem(lootBonusLevel);
+        LootItem lootItem = getLootItem(lootBonusLevel, plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld()));
 
         if(lootItem != null) {
             items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel));
@@ -39,7 +42,7 @@ public class LootPair {
     }
 
     public void executeCommands(Player player, int lootBonusLevel){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Random random = plugin.getNMSAdapter().getWorldRandom(player.getWorld());
         int chance = random.nextInt(100);
         double baseChance = 0;
 
@@ -54,8 +57,7 @@ public class LootPair {
         }
     }
 
-    private LootItem getLootItem(int lootBonusLevel){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+    private LootItem getLootItem(int lootBonusLevel, Random random){
         int chance = random.nextInt(100);
         double baseChance = 0;
 

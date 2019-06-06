@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("WeakerAccess")
@@ -102,7 +103,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Override
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
         int exp = 0;
 
         if(minExp >= 0 && maxExp >= 0){
@@ -118,7 +119,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     }
 
     private List<LootPair> getLootPairs(StackedEntity stackedEntity){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
         List<LootPair> lootPairs = new ArrayList<>();
 
         Collections.shuffle(this.lootPairs, random);

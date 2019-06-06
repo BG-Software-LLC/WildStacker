@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.google.common.base.Predicate;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -8,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Random;
 
 public interface NMSAdapter {
 
@@ -41,5 +43,7 @@ public interface NMSAdapter {
     int getEntityExp(LivingEntity livingEntity);
 
     void setHealthDirectly(LivingEntity livingEntity, double health);
+
+    Random getWorldRandom(World world);
 
 }

@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootItem {
@@ -43,7 +43,7 @@ public class LootItem {
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int lootBonusLevel){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
         ItemStack itemStack = LootTable.isBurning(stackedEntity) && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
 
         int itemAmount = random.nextInt(max - min + 1) + min;

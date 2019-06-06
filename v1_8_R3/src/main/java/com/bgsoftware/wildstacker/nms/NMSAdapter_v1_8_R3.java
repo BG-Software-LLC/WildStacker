@@ -14,6 +14,8 @@ import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -33,6 +35,7 @@ import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -223,6 +226,11 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     public void setHealthDirectly(LivingEntity livingEntity, double health) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.setHealth((float) health);
+    }
+
+    @Override
+    public Random getWorldRandom(World world) {
+        return ((CraftWorld) world).getHandle().random;
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{

@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
@@ -7,10 +8,12 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootCommand {
+
+    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private List<String> commands = new ArrayList<>();
     private double chance;
@@ -28,7 +31,7 @@ public class LootCommand {
     }
 
     public void executeCommands(Player player){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
+        Random random = plugin.getNMSAdapter().getWorldRandom(player.getWorld());
         List<String> commands = new ArrayList<>();
 
         for(String command : this.commands){
