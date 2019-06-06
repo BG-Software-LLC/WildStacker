@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.api.objects;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -135,14 +136,30 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     /**
      * Returns the spawn reason of this entity
      * @return spawn reason
+     * @deprecated see getSpawnCause
      */
+    @Deprecated
     CreatureSpawnEvent.SpawnReason getSpawnReason();
 
     /**
      * Set the spawn reason of the entity.
      * @param spawnReason The spawn reason
+     * @deprecated see setSpawnCause
      */
+    @Deprecated
     void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason);
+
+    /**
+     * Returns the spawn cause of this entity
+     * @return spawn cause
+     */
+    SpawnCause getSpawnCause();
+
+    /**
+     * Set the spawn cause of the entity.
+     * @param spawnCause The spawn cause
+     */
+    void setSpawnCause(SpawnCause spawnCause);
 
     /**
      * Checks if the entity is nerfed or not.

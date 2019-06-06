@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.api.handlers;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -132,8 +133,19 @@ public interface SystemManager {
      * @param type the entity class type
      * @param spawnReason the spawn reason to be set in the entity
      * @return The new entity object
+     * @deprecated see spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause)
      */
+    @Deprecated
     <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason);
+
+    /**
+     * Spawns a new entity without stacking it..
+     * @param location the location to spawn the entity at
+     * @param type the entity class type
+     * @param spawnCause the spawn cause to be set in the entity
+     * @return The new entity object
+     */
+    <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause);
 
     /**
      * Spawn a corpse for a stacked entity.

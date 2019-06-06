@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
@@ -210,7 +211,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setSpawnReason(e.getSpawnReason());
+        stackedEntity.setSpawnCause(SpawnCause.valueOf(e.getSpawnReason()));
 
         if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
             return;
@@ -258,7 +259,7 @@ public final class EntitiesListener implements Listener {
 
             StackedEntity stackedEntity = WStackedEntity.of(
                     plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass(),
-                            CreatureSpawnEvent.SpawnReason.SPAWNER_EGG));
+                            SpawnCause.SPAWNER_EGG));
 
             stackedEntity.setStackAmount(eggAmount - 1, true);
 
@@ -451,7 +452,7 @@ public final class EntitiesListener implements Listener {
         Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
         Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedEntity.getType().name()));
         Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
-        Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnReason().name());
+        Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnCause().name());
         Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
         Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
     }

@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.data;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
@@ -17,7 +18,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -110,7 +110,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
                         chunk.getX() + "," + chunk.getZ(),
                         stackedEntity.getUniqueId(),
                         stackedEntity.getStackAmount(),
-                        stackedEntity.getSpawnReason().name())
+                        stackedEntity.getSpawnCause().name())
                 );
             }
         }
@@ -201,7 +201,7 @@ public final class SQLDataHandler extends AbstractDataHandler {
                     while (resultSet.next()) {
                         UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                         int stackAmount = resultSet.getInt("amount");
-                        CreatureSpawnEvent.SpawnReason spawnReason = CreatureSpawnEvent.SpawnReason.valueOf(resultSet.getString("spawn_reason"));
+                        SpawnCause spawnReason = SpawnCause.valueOf(resultSet.getString("spawn_reason"));
 
                         StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(uuid), stackAmount, spawnReason);
 

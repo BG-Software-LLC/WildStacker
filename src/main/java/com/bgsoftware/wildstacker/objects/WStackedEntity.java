@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.events.DuplicateSpawnEvent;
 import com.bgsoftware.wildstacker.api.events.EntityStackEvent;
 import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
@@ -35,16 +36,16 @@ import java.util.UUID;
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
     private boolean ignoreDeathEvent = false;
-    private CreatureSpawnEvent.SpawnReason spawnReason;
+    private SpawnCause spawnCause;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
     }
 
-    public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable CreatureSpawnEvent.SpawnReason spawnReason){
+    public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable SpawnCause spawnCause){
         super(livingEntity, stackAmount);
-        this.spawnReason = spawnReason;
+        this.spawnCause = spawnCause;
     }
 
     /*
@@ -103,13 +104,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public boolean isBlacklisted() {
         return plugin.getSettings().blacklistedEntities.contains(getType().name()) ||
-                (spawnReason != null && plugin.getSettings().blacklistedEntities.contains(spawnReason.name()));
+                (spawnCause != null && plugin.getSettings().blacklistedEntities.contains(getSpawnCause().name()));
     }
 
     @Override
     public boolean isWhitelisted() {
         return plugin.getSettings().whitelistedEntities.isEmpty() ||
-                plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnReason().name());
+                plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnCause().name());
     }
 
     @Override
@@ -362,7 +363,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return duplicate;
         }
 
-        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass(), getSpawnReason()));
+        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass(), getSpawnCause()));
         duplicate.setStackAmount(amount, true);
 
         EntityData entityData = EntityData.of(this);
@@ -460,17 +461,31 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public CreatureSpawnEvent.SpawnReason getSpawnReason() {
-        return spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
+        try{
+            return CreatureSpawnEvent.SpawnReason.valueOf(spawnCause.name());
+        }catch(Exception ex){
+            return CreatureSpawnEvent.SpawnReason.CHUNK_GEN;
+        }
     }
 
     @Override
     public void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason) {
-        this.spawnReason = spawnReason == null ? CreatureSpawnEvent.SpawnReason.CHUNK_GEN : spawnReason;
+        setSpawnCause(spawnReason == null ? null : SpawnCause.valueOf(spawnReason.name()));
+    }
+
+    @Override
+    public SpawnCause getSpawnCause() {
+        return spawnCause;
+    }
+
+    @Override
+    public void setSpawnCause(SpawnCause spawnCause) {
+        this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
     }
 
     @Override
     public boolean isNerfed(){
-        return plugin.getSettings().nerfedSpawning.contains(getSpawnReason().name()) &&
+        return plugin.getSettings().nerfedSpawning.contains(getSpawnCause().name()) &&
                 plugin.getSettings().nerfedWorlds.contains(object.getWorld().getName());
     }
 

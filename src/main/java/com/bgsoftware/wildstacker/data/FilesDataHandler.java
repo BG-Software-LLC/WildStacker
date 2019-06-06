@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.data;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
@@ -71,7 +72,7 @@ public final class FilesDataHandler extends AbstractDataHandler {
                     isSameChunk(chunk, stackedEntity.getLivingEntity().getLocation())) {
                 stackedEntities.add(stackedEntity);
                 cfg.set("entities." + stackedEntity.getUniqueId() + ".amount", stackedEntity.getStackAmount());
-                cfg.set("entities." + stackedEntity.getUniqueId() + ".spawn-reason", stackedEntity.getSpawnReason().name());
+                cfg.set("entities." + stackedEntity.getUniqueId() + ".spawn-reason", stackedEntity.getSpawnCause().name());
             }
         }
 
@@ -174,12 +175,11 @@ public final class FilesDataHandler extends AbstractDataHandler {
             if (cfg.contains("entities") && !CACHED_ENTITIES.contains(chunk)) {
                 for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
                     int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
-                    CreatureSpawnEvent.SpawnReason spawnReason =
-                            CreatureSpawnEvent.SpawnReason.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
+                    SpawnCause spawnCause = SpawnCause.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
 
                     UUID _uuid = UUID.fromString(uuid);
 
-                    StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(_uuid), stackAmount, spawnReason);
+                    StackedEntity stackedEntity = new WStackedEntity(chunkRegistry.getLivingEntity(_uuid), stackAmount, spawnCause);
 
                     //Entities are moving. There's no point in storing them based on chunks.
                     CACHED_ENTITIES.put(DEFAULT_CHUNK, _uuid, stackedEntity);

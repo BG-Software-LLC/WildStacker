@@ -53,7 +53,7 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
-        nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnReason().name());
+        nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
         nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }

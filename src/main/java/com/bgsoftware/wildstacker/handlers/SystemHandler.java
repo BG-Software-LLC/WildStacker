@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
@@ -285,12 +286,17 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type){
-        return spawnEntityWithoutStacking(location, type, CreatureSpawnEvent.SpawnReason.SPAWNER);
+        return spawnEntityWithoutStacking(location, type, SpawnCause.SPAWNER);
+    }
+
+    @Override
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason) {
+        return spawnEntityWithoutStacking(location, type, SpawnCause.valueOf(spawnReason));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason) {
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause) {
         try{
             World world = location.getWorld();
 
@@ -305,7 +311,9 @@ public final class SystemHandler implements SystemManager {
 
             EntitiesListener.noStackEntities.add(bukkitEntity.getUniqueId());
 
-            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class).invoke(craftWorld, entity, spawnReason);
+            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class).invoke(craftWorld, entity, spawnCause.toSpawnReason());
+
+            WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
             return type.cast(bukkitEntity);
         }catch(Exception ex){
@@ -317,7 +325,7 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void spawnCorpse(StackedEntity stackedEntity) {
         LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(),
-                stackedEntity.getType().getEntityClass(), CreatureSpawnEvent.SpawnReason.CUSTOM);
+                stackedEntity.getType().getEntityClass(), SpawnCause.CUSTOM);
         if(livingEntity != null) {
             livingEntity.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
             if(stackedEntity.getLivingEntity() instanceof Slime){
