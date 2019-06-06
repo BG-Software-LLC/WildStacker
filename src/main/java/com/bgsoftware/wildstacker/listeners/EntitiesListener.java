@@ -35,7 +35,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -75,16 +74,6 @@ public final class EntitiesListener implements Listener {
         this.plugin = plugin;
         if(plugin.getServer().getBukkitVersion().contains("1.13"))
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
-    }
-
-    @EventHandler
-    public void g(PlayerInteractEvent e){
-        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
-            for(Entity en : e.getPlayer().getNearbyEntities(5, 5, 5)){
-                if(en instanceof Zombie)
-                    ((Zombie) en).setCanPickupItems(true);
-            }
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
