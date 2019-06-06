@@ -129,7 +129,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(EntityUtil.isNameBlacklisted(object.getCustomName()))
             return;
 
-        if(MythicMobsHook.isMythicMob(object) && object.getCustomName() != null){
+        if(getSpawnCause() == SpawnCause.MYTHIC_MOBS && object.getCustomName() != null){
             object.setCustomName(object.getCustomName().replace("{}", String.valueOf(stackAmount)));
             return;
         }
@@ -235,8 +235,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 return false;
         }
 
-        if (!plugin.getSettings().mythicMobsStackEnabled && (MythicMobsHook.isMythicMob(object) ||
-                MythicMobsHook.isMythicMob(targetEntity.getLivingEntity())))
+        if (!plugin.getSettings().mythicMobsStackEnabled && (getSpawnCause() == SpawnCause.MYTHIC_MOBS ||
+                targetEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS))
             return false;
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
@@ -475,7 +475,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public SpawnCause getSpawnCause() {
-        return spawnCause;
+        return spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
     }
 
     @Override

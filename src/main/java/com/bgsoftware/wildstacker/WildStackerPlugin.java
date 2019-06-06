@@ -31,6 +31,7 @@ import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
+import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
@@ -129,6 +130,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("CustomBosses"))
                 getServer().getPluginManager().registerEvents(new CustomBossesListener(), this);
+            if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
+                getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
 
 //            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
 //                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
