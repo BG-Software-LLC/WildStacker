@@ -294,9 +294,6 @@ entities:
   # If a stacked entity dies from fire, should the fire continue to the next entity?
   keep-fire: true
 
-  # If mythic mobs is enabled, will it's entities get stacked?
-  mythic-mobs-stack: false
-
   # If enabled, the placeholder '{}' will be replaced with the stack amount for mythic mobs.
   mythic-mobs-custom-name: true
 

@@ -42,7 +42,7 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
-            mythicMobsStackEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled,
+            mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled,
             asyncEvent;
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
@@ -138,7 +138,6 @@ public final class SettingsHandler {
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
         stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
-        mythicMobsStackEnabled = cfg.getBoolean("entities.mythic-mobs-stack", false);
         mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
         keepLowestHealth = cfg.getBoolean("entities.keep-lowest-health", false);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
@@ -268,9 +267,12 @@ public final class SettingsHandler {
             cfg.createSection("spawners.break-menu");
         if(cfg.isBoolean("buckets-stacker"))
             cfg.set("buckets-stacker.enabled", cfg.getBoolean("buckets-stacker"));
-        if(cfg.contains("entities.spawn-blacklist")){
+        if(cfg.contains("entities.spawn-blacklist") || !cfg.getBoolean("mythic-mobs-stack", true)){
             List<String> blacklisted = cfg.getStringList("entities.blacklist");
-            blacklisted.addAll(cfg.getStringList("entities.spawn-blacklist"));
+            if(cfg.contains("entities.spawn-blacklist"))
+                blacklisted.addAll(cfg.getStringList("entities.spawn-blacklist"));
+            if(!cfg.getBoolean("mythic-mobs-stack", true))
+                blacklisted.add("MYTHIC_MOBS");
             cfg.set("entities.blacklist", blacklisted);
         }
     }

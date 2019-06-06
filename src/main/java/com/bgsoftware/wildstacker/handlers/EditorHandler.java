@@ -44,7 +44,7 @@ public final class EditorHandler {
             ENTITIES_SLOT_18 = "entities.instant-kill", ENTITIES_SLOT_19 = "entities.nerfed-spawning",
             ENTITIES_SLOT_20 = "entities.nerfed-worlds", ENTITIES_SLOT_21 = "entities.stack-down.enabled",
             ENTITIES_SLOT_22 = "entities.stack-down.stack-down-types", ENTITIES_SLOT_23 = "entities.keep-fire",
-            ENTITIES_SLOT_24 = "entities.mythic-mobs-stack", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
+            ENTITIES_SLOT_24 = "entities.mythic-mobs-custom-name", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
             ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names";
 
     public static String SPAWNERS_SLOT_0 = "spawners.enabled", SPAWNERS_SLOT_1 = "spawners.merge-radius",
@@ -243,7 +243,7 @@ public final class EditorHandler {
                 .withName("&6Keep Fire").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_23)).build());
 
         editor.setItem(24, new ItemBuilder(Materials.CLOCK)
-                .withName("&6MythicMobs Stack").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_24)).build());
+                .withName("&6MythicMobs Custom Name").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_24)).build());
 
         editor.setItem(25, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Keep Lowest Health").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_25)).build());

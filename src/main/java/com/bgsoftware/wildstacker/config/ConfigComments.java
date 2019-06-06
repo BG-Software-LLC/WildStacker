@@ -292,10 +292,6 @@ public final class ConfigComments {
     public static String ENTITIES_KEEP_FIRE = "entities.keep-fire";
 
     @Comment("")
-    @Comment("If mythic mobs is enabled, will it's entities get stacked?")
-    public static String ENTITIES_MYTHIC_MOBS_STACK = "entities.mythic-mobs-stack";
-
-    @Comment("")
     @Comment("If enabled, the placeholder '{}' will be replaced with the stack amount for mythic mobs.")
     public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
 

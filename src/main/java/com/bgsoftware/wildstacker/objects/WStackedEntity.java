@@ -235,10 +235,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 return false;
         }
 
-        if (!plugin.getSettings().mythicMobsStackEnabled && (getSpawnCause() == SpawnCause.MYTHIC_MOBS ||
-                targetEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS))
-            return false;
-
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
             Set<String> regions = new HashSet<>();
             regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
