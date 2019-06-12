@@ -9,7 +9,6 @@ public final class ConfigComments {
     @Comment("##            Developed by Ome_R             ##")
     @Comment("##                                           ##")
     @Comment("###############################################")
-    @Comment("")
     public static String HEADER = "";
 
     @Comment("")
