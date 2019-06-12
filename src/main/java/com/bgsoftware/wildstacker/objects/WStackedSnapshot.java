@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public final class WStackedSnapshot implements StackedSnapshot {
@@ -21,12 +20,10 @@ public final class WStackedSnapshot implements StackedSnapshot {
     private final Map<Location, Map.Entry<Integer, Material>> stackedBarrels = new HashMap<>();
 
     public WStackedSnapshot(Chunk chunk, boolean loadData){
-        if(loadData)
-            plugin.getDataHandler().loadChunkData(chunk, false);
+//        if(loadData)
+//            plugin.getDataHandler().loadChunkData(chunk, false);
 
-        Iterator<StackedSpawner> stackedSpawnerIterator = plugin.getDataHandler().CACHED_SPAWNERS.iterator(chunk);
-        while(stackedSpawnerIterator.hasNext()){
-            StackedSpawner stackedSpawner = stackedSpawnerIterator.next();
+        for(StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners(chunk)){
             stackedSpawners.put(stackedSpawner.getLocation(), new Map.Entry<Integer, EntityType>() {
                 @Override
                 public Integer getKey() {
@@ -45,9 +42,7 @@ public final class WStackedSnapshot implements StackedSnapshot {
             });
         }
 
-        Iterator<StackedBarrel> stackedBarrelIterator = plugin.getDataHandler().CACHED_BARRELS.iterator(chunk);
-        while(stackedBarrelIterator.hasNext()){
-            StackedBarrel stackedBarrel = stackedBarrelIterator.next();
+        for(StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels(chunk)){
             stackedBarrels.put(stackedBarrel.getLocation(), new Map.Entry<Integer, Material>() {
                 @Override
                 public Integer getKey() {

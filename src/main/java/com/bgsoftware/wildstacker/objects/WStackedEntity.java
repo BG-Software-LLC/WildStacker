@@ -7,6 +7,8 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
@@ -46,6 +48,19 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable SpawnCause spawnCause){
         super(livingEntity, stackAmount);
         this.spawnCause = spawnCause;
+
+        SQLHelper.runIfConditionNotExist("SELECT * FROM entities WHERE uuid = '" + getUniqueId().toString() + "';", () ->
+                Query.ENTITY_INSERT.getStatementHolder()
+                        .setString(getUniqueId().toString())
+                        .setInt(getStackAmount())
+                        .setString(getSpawnCause().name())
+                        .execute(true)
+        );
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        super.setStackAmount(stackAmount, updateName);
     }
 
     /*
@@ -93,7 +108,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public Chunk getChunk() {
-        return plugin.getDataHandler().DEFAULT_CHUNK;
+        return object.getLocation().getChunk();
     }
 
     @Override
@@ -121,6 +136,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
+
+        Query.ENTITY_DELETE.getStatementHolder()
+                .setString(getUniqueId().toString())
+                .execute(true);
+
         object.remove();
     }
 
@@ -477,6 +497,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
+        Query.ENTITY_UPDATE_SPAWN_CAUSE.getStatementHolder()
+                .setString(getSpawnCause().name())
+                .setString(getUniqueId().toString())
+                .execute(true);
     }
 
     @Override

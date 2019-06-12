@@ -4,6 +4,8 @@ import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
@@ -28,6 +30,27 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
         super(creatureSpawner, stackAmount);
+
+        SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location = '" + getStringLocation() + "';", () ->
+                Query.SPAWNER_INSERT.getStatementHolder()
+                        .setLocation(getLocation())
+                        .setInt(getStackAmount())
+                        .execute(true)
+        );
+    }
+
+    private String getStringLocation(){
+        Location location = getLocation();
+        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        super.setStackAmount(stackAmount, updateName);
+        Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
+                .setInt(getStackAmount())
+                .setLocation(getLocation())
+                .execute(true);
     }
 
     @Override
@@ -80,6 +103,11 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
+
+        Query.SPAWNER_DELETE.getStatementHolder()
+                .setString(getStringLocation())
+                .execute(true);
+
         plugin.getProviders().deleteHologram(this);
     }
 

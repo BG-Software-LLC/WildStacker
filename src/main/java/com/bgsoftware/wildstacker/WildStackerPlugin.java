@@ -2,12 +2,9 @@ package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
-import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
-import com.bgsoftware.wildstacker.data.AbstractDataHandler;
-import com.bgsoftware.wildstacker.data.FilesDataHandler;
-import com.bgsoftware.wildstacker.data.SQLDataHandler;
 import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
+import com.bgsoftware.wildstacker.handlers.DataHandler;
 import com.bgsoftware.wildstacker.handlers.EditorHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
@@ -38,8 +35,6 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -54,7 +49,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private SettingsHandler settingsHandler;
     private SystemHandler systemManager;
-    private AbstractDataHandler dataHandler;
+    private DataHandler dataHandler;
     private ProvidersHandler providersHandler;
     private EditorHandler editorHandler;
     private BreakMenuHandler breakMenuHandler;
@@ -74,7 +69,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
        // dataHandler = new FilesDataHandler(this);
-        dataHandler = settingsHandler.dataHandler.equals("SQL") ? new SQLDataHandler(this) : new FilesDataHandler(this);
+        dataHandler = new DataHandler(this);
+        //dataHandler = settingsHandler.dataHandler.equals("SQL") ? new SQLDataHandler(this) : new FilesDataHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
@@ -142,18 +138,18 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 PluginHook_Novucs.register(this);
         });
 
-        Executor.sync(() -> {
-            for(World world : Bukkit.getWorlds()){
-                for(Chunk chunk : world.getLoadedChunks())
-                    dataHandler.loadChunkData(chunk);
-            }
-        }, 5L);
+//        Executor.sync(() -> {
+//            for(World world : Bukkit.getWorlds()){
+//                for(Chunk chunk : world.getLoadedChunks())
+//                    dataHandler.loadChunkData(chunk);
+//            }
+//        }, 5L);
     }
 
     @Override
     public void onDisable() {
         //We need to save the entire database
-        dataHandler.saveChunkData(true, false);
+//        dataHandler.saveChunkData(true, false);
         dataHandler.clearDatabase();
 
         try{
@@ -234,11 +230,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return providersHandler;
     }
 
-    public AbstractDataHandler getDataHandler(){
+    public DataHandler getDataHandler(){
         return dataHandler;
     }
 
-    public SystemManager getSystemManager(){
+    public SystemHandler getSystemManager(){
         return systemManager;
     }
 

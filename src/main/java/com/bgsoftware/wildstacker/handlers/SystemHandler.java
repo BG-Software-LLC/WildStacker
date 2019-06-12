@@ -11,12 +11,10 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.data.AbstractDataHandler;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
-import com.bgsoftware.wildstacker.objects.WStackedObject;
 import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
@@ -25,7 +23,6 @@ import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.google.common.collect.Iterators;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -42,17 +39,14 @@ import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
 
     private WildStackerPlugin plugin;
-    private AbstractDataHandler dataHandler;
+    private DataHandler dataHandler;
 
     public SystemHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -76,18 +70,18 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void removeStackObject(StackedObject stackedObject) {
         if(stackedObject instanceof StackedEntity)
-            dataHandler.CACHED_ENTITIES.remove(dataHandler.DEFAULT_CHUNK, ((StackedEntity) stackedObject).getUniqueId());
+            dataHandler.CACHED_OBJECTS.remove(((StackedEntity) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedItem)
-            dataHandler.CACHED_ITEMS.remove(dataHandler.DEFAULT_CHUNK, ((StackedItem) stackedObject).getUniqueId());
+            dataHandler.CACHED_OBJECTS.remove(((StackedItem) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedSpawner)
-            dataHandler.CACHED_SPAWNERS.remove(((WStackedObject) stackedObject).getChunk(), ((StackedSpawner) stackedObject).getLocation());
+            dataHandler.CACHED_OBJECTS.remove(((StackedSpawner) stackedObject).getLocation());
         else if(stackedObject instanceof StackedBarrel)
-            dataHandler.CACHED_BARRELS.remove(((WStackedObject) stackedObject).getChunk(), ((StackedBarrel) stackedObject).getLocation());
+            dataHandler.CACHED_OBJECTS.remove(((StackedBarrel) stackedObject).getLocation());
     }
 
     @Override
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
-        StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.get(dataHandler.DEFAULT_CHUNK, livingEntity.getUniqueId());
+        StackedEntity stackedEntity = (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
 
         if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
             return stackedEntity;
@@ -98,20 +92,30 @@ public final class SystemHandler implements SystemManager {
         //Checks if the entity still exists after a few ticks
         Executor.sync(() -> {
             if(livingEntity.isDead())
-                dataHandler.CACHED_ENTITIES.remove(dataHandler.DEFAULT_CHUNK, livingEntity.getUniqueId());
+                dataHandler.CACHED_OBJECTS.remove(livingEntity.getUniqueId());
         }, 10L);
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
                 plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled())
-            dataHandler.CACHED_ENTITIES.put(dataHandler.DEFAULT_CHUNK, stackedEntity.getUniqueId(), stackedEntity);
+            dataHandler.CACHED_OBJECTS.put(stackedEntity.getUniqueId(), stackedEntity);
+
+        if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())){
+            stackedEntity.setStackAmount(dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId()), true);
+            dataHandler.CACHED_AMOUNT_ENTITIES.remove(stackedEntity.getUniqueId());
+        }
+
+        if(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.containsKey(livingEntity.getUniqueId())){
+            stackedEntity.setSpawnCause(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.get(livingEntity.getUniqueId()));
+            dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(stackedEntity.getUniqueId());
+        }
 
         return stackedEntity;
     }
 
     @Override
     public StackedItem getStackedItem(Item item) {
-        StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(dataHandler.DEFAULT_CHUNK, item.getUniqueId());
+        StackedItem stackedItem = (StackedItem) dataHandler.CACHED_OBJECTS.get(item.getUniqueId());
 
         if(stackedItem != null && stackedItem.getItem() != null)
             return stackedItem;
@@ -122,12 +126,17 @@ public final class SystemHandler implements SystemManager {
         //Checks if the item still exists after a few ticks
         Executor.sync(() -> {
             if(item.isDead())
-                dataHandler.CACHED_ITEMS.remove(dataHandler.DEFAULT_CHUNK, item.getUniqueId());
+                dataHandler.CACHED_OBJECTS.remove(item.getUniqueId());
         }, 10L);
 
         //A new item was created. Let's see if we need to add him
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
-            dataHandler.CACHED_ITEMS.put(dataHandler.DEFAULT_CHUNK, stackedItem.getUniqueId(), stackedItem);
+            dataHandler.CACHED_OBJECTS.put(stackedItem.getUniqueId(), stackedItem);
+
+        if(dataHandler.CACHED_AMOUNT_ITEMS.containsKey(item.getUniqueId())){
+            stackedItem.setStackAmount(dataHandler.CACHED_AMOUNT_ITEMS.get(item.getUniqueId()), true);
+            dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
+        }
 
         return stackedItem;
     }
@@ -139,7 +148,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSpawner getStackedSpawner(Location location) {
-        StackedSpawner stackedSpawner = dataHandler.CACHED_SPAWNERS.get(location.getChunk(), location);
+        StackedSpawner stackedSpawner = (StackedSpawner) dataHandler.CACHED_OBJECTS.get(location);
 
         if(stackedSpawner != null)
             return stackedSpawner;
@@ -150,12 +159,12 @@ public final class SystemHandler implements SystemManager {
         //Checks if the spawner still exists after a few ticks
         Executor.sync(() -> {
             if(!isStackedSpawner(location.getBlock()))
-                dataHandler.CACHED_SPAWNERS.remove(location.getChunk(), location);
+                dataHandler.CACHED_OBJECTS.remove(location);
         }, 10L);
 
         //A new spawner was created. Let's see if we need to add him
         if(plugin.getSettings().spawnersStackingEnabled && stackedSpawner.isWhitelisted() && !stackedSpawner.isBlacklisted() && !stackedSpawner.isWorldDisabled())
-            dataHandler.CACHED_SPAWNERS.put(location.getChunk(), stackedSpawner.getLocation(), stackedSpawner);
+            dataHandler.CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
 
         return stackedSpawner;
     }
@@ -167,7 +176,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedBarrel getStackedBarrel(Location location) {
-        StackedBarrel stackedBarrel = dataHandler.CACHED_BARRELS.get(location.getChunk(), location);
+        StackedBarrel stackedBarrel = (StackedBarrel) dataHandler.CACHED_OBJECTS.get(location);
 
         if(stackedBarrel != null)
             return stackedBarrel;
@@ -184,87 +193,111 @@ public final class SystemHandler implements SystemManager {
         //Checks if the barrel still exists after a few ticks
         Executor.sync(() -> {
             if(!isStackedBarrel(location.getBlock()))
-                dataHandler.CACHED_BARRELS.remove(location.getChunk(), location);
+                dataHandler.CACHED_OBJECTS.remove(location);
         }, 10L);
 
         //A new barrel was created. Let's see if we need to add him
         if(plugin.getSettings().barrelsStackingEnabled && stackedBarrel.isWhitelisted() && !stackedBarrel.isBlacklisted() && !stackedBarrel.isWorldDisabled())
-            dataHandler.CACHED_BARRELS.put(location.getChunk(), stackedBarrel.getLocation(), stackedBarrel);
+            dataHandler.CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
 
         return stackedBarrel;
     }
 
     @Override
     public List<StackedEntity> getStackedEntities() {
-        List<StackedEntity> stackedEntities = Arrays.asList(Iterators.toArray(dataHandler.CACHED_ENTITIES.iterator(), StackedEntity.class));
-        return stackedEntities.stream().filter(stackedEntity -> stackedEntity.getLivingEntity() != null).collect(Collectors.toList());
+        return dataHandler.CACHED_OBJECTS.values().stream()
+                .filter(stackedObject -> stackedObject instanceof StackedEntity)
+                .map(stackedObject -> (StackedEntity) stackedObject)
+                .collect(Collectors.toList());
+    }
+
+    public List<StackedEntity> getStackedEntities(Chunk chunk) {
+        return getStackedEntities().stream()
+                .filter(stackedEntity -> ((WStackedEntity) stackedEntity).getChunk().equals(chunk))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<StackedItem> getStackedItems() {
-        List<StackedItem> stackedItems = Arrays.asList(Iterators.toArray(dataHandler.CACHED_ITEMS.iterator(), StackedItem.class));
-        return stackedItems.stream().filter(stackedItem -> stackedItem.getItem() != null).collect(Collectors.toList());
+        return dataHandler.CACHED_OBJECTS.values().stream()
+                .filter(stackedObject -> stackedObject instanceof StackedItem)
+                .map(stackedObject -> (StackedItem) stackedObject)
+                .collect(Collectors.toList());
+    }
+
+    public List<StackedItem> getStackedItems(Chunk chunk) {
+        return getStackedItems().stream()
+                .filter(stackedItem -> ((WStackedItem) stackedItem).getChunk().equals(chunk))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<StackedSpawner> getStackedSpawners(){
-        return Arrays.asList(Iterators.toArray(dataHandler.CACHED_SPAWNERS.iterator(), StackedSpawner.class));
+        return dataHandler.CACHED_OBJECTS.values().stream()
+                .filter(stackedObject -> stackedObject instanceof StackedSpawner)
+                .map(stackedObject -> (StackedSpawner) stackedObject)
+                .collect(Collectors.toList());
+    }
+
+    public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
+        return getStackedSpawners().stream()
+                .filter(stackedSpawner -> stackedSpawner.getLocation().getChunk().equals(chunk))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<StackedBarrel> getStackedBarrels(){
-        return Arrays.asList(Iterators.toArray(dataHandler.CACHED_BARRELS.iterator(), StackedBarrel.class));
+        return dataHandler.CACHED_OBJECTS.values().stream()
+                .filter(stackedObject -> stackedObject instanceof StackedBarrel)
+                .map(stackedObject -> (StackedBarrel) stackedObject)
+                .collect(Collectors.toList());
+    }
+
+    public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
+        return getStackedBarrels().stream()
+                .filter(stackedBarrel -> stackedBarrel.getLocation().getChunk().equals(chunk))
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean isStackedSpawner(Block block) {
-        return block != null && block.getType() == Materials.SPAWNER.toBukkitType() && dataHandler.CACHED_SPAWNERS.contains(block.getChunk(), block.getLocation());
+        return block != null && block.getType() == Materials.SPAWNER.toBukkitType() && dataHandler.CACHED_OBJECTS.containsKey(block.getLocation());
     }
 
     @Override
     public boolean isStackedBarrel(Block block) {
-        return block != null && block.getType() == Material.CAULDRON && dataHandler.CACHED_BARRELS.contains(block.getChunk(), block.getLocation());
+        return block != null && block.getType() == Material.CAULDRON && dataHandler.CACHED_OBJECTS.containsKey(block.getLocation());
     }
 
     @Override
     public void performCacheClear() {
-        dataHandler.CACHED_ENTITIES.getChunks().forEach(chunk -> {
-            Iterator<Map.Entry<UUID, StackedEntity>> stackedEntityIterator = dataHandler.CACHED_ENTITIES.entryIterator(chunk);
-            while (stackedEntityIterator.hasNext()){
-                Map.Entry<UUID, StackedEntity> entry = stackedEntityIterator.next();
-                if(entry.getValue().getLivingEntity() == null ||
-                        (isChunkLoaded(entry.getValue().getLivingEntity().getLocation()) && entry.getValue().getLivingEntity().isDead()))
-                    stackedEntityIterator.remove();
-            }
-        });
+        List<StackedObject> stackedObjects = new ArrayList<>(dataHandler.CACHED_OBJECTS.values());
 
-        dataHandler.CACHED_ITEMS.getChunks().forEach(chunk -> {
-            Iterator<Map.Entry<UUID, StackedItem>> stackedItemIterator = dataHandler.CACHED_ITEMS.entryIterator(chunk);
-            while (stackedItemIterator.hasNext()){
-                Map.Entry<UUID, StackedItem> entry = stackedItemIterator.next();
-                if(entry.getValue().getItem() == null ||
-                        (isChunkLoaded(entry.getValue().getItem().getLocation()) && entry.getValue().getItem().isDead()))
-                    stackedItemIterator.remove();
+        for(StackedObject stackedObject : stackedObjects){
+            if(stackedObject instanceof StackedItem){
+                StackedItem stackedItem = (StackedItem) stackedObject;
+                if(stackedItem.getItem() == null || (isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
+                    removeStackObject(stackedObject);
             }
-        });
 
-        dataHandler.CACHED_SPAWNERS.getChunks().forEach(chunk -> {
-            Iterator<Map.Entry<Location, StackedSpawner>> stackedSpawnerIterator = dataHandler.CACHED_SPAWNERS.entryIterator(chunk);
-            while (stackedSpawnerIterator.hasNext()){
-                Map.Entry<Location, StackedSpawner> entry = stackedSpawnerIterator.next();
-                if(isChunkLoaded(entry.getKey()) && !isStackedSpawner(entry.getValue().getSpawner().getBlock()))
-                    stackedSpawnerIterator.remove();
+            else if(stackedObject instanceof StackedEntity){
+                StackedEntity stackedEntity = (StackedEntity) stackedObject;
+                if(stackedEntity.getLivingEntity() == null || (isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
+                    removeStackObject(stackedObject);
             }
-        });
 
-        dataHandler.CACHED_BARRELS.getChunks().forEach(chunk -> {
-            Iterator<Map.Entry<Location, StackedBarrel>> stackedBarrelIterator = dataHandler.CACHED_BARRELS.entryIterator(chunk);
-            while (stackedBarrelIterator.hasNext()){
-                Map.Entry<Location, StackedBarrel> entry = stackedBarrelIterator.next();
-                if(isChunkLoaded(entry.getKey()) && !isStackedBarrel(entry.getValue().getBlock()))
-                    stackedBarrelIterator.remove();
+            else if(stackedObject instanceof StackedSpawner){
+                StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
+                if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock()))
+                    removeStackObject(stackedObject);
             }
-        });
+
+            else if(stackedObject instanceof StackedBarrel){
+                StackedBarrel stackedBarrel = (StackedBarrel) stackedObject;
+                if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock()))
+                    removeStackObject(stackedObject);
+            }
+        }
     }
 
     private boolean isChunkLoaded(Location location){

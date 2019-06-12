@@ -1,9 +1,7 @@
 package com.bgsoftware.wildstacker.tasks;
 
-import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class SaveTask extends BukkitRunnable {
@@ -25,12 +23,12 @@ public final class SaveTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if(Bukkit.getOnlinePlayers().size() > 0) {
-            plugin.getDataHandler().saveChunkData(false, true);
-            for (Player pl : Bukkit.getOnlinePlayers()) {
-                if (pl.isOp())
-                    Locale.AUTO_SAVE.send(pl);
-            }
-        }
+//        if(Bukkit.getOnlinePlayers().size() > 0) {
+//            plugin.getDataHandler().saveChunkData(false, true);
+//            for (Player pl : Bukkit.getOnlinePlayers()) {
+//                if (pl.isOp())
+//                    Locale.AUTO_SAVE.send(pl);
+//            }
+//        }
     }
 }

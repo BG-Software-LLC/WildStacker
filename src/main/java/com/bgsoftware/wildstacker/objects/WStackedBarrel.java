@@ -4,6 +4,8 @@ import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -27,6 +29,28 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
         super(block, stackAmount);
         this.barrelItem = itemStack;
+
+        SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + getStringLocation() + "';", () ->
+                Query.BARREL_INSERT.getStatementHolder()
+                        .setLocation(getLocation())
+                        .setInt(getStackAmount())
+                        .setItemStack(itemStack)
+                        .execute(true)
+        );
+    }
+
+    private String getStringLocation(){
+        Location location = getLocation();
+        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        super.setStackAmount(stackAmount, updateName);
+        Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
+                .setInt(getStackAmount())
+                .setLocation(getLocation())
+                .execute(true);
     }
 
     @Override
@@ -78,6 +102,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
+
+        Query.BARREL_DELETE.getStatementHolder()
+                .setString(getStringLocation())
+                .execute(true);
+
         plugin.getProviders().deleteHologram(this);
         removeDisplayBlock();
     }

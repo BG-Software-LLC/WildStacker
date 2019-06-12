@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
+import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
@@ -36,7 +37,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,12 +53,23 @@ public final class BarrelsListener implements Listener {
         this.barrelsToggleCommandPlayers = new HashSet<>();
     }
 
+    private boolean isBarrelBlock(Block block){
+        Key key = Key.of(block.getState().getData().toItemStack(1));
+        return (plugin.getSettings().whitelistedBarrels.isEmpty() ||
+                plugin.getSettings().whitelistedBarrels.contains(key)) &&
+                !plugin.getSettings().blacklistedBarrels.contains(key) &&
+                !plugin.getSettings().barrelsDisabledWorlds.contains(block.getWorld().getName());
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelPlace(BlockPlaceEvent e){
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
         if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
+            return;
+
+        if(!isBarrelBlock(e.getBlock()))
             return;
 
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
@@ -318,18 +329,9 @@ public final class BarrelsListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int barrelsInsideChunk = getStackedBarrels(chunk).size();
+        int barrelsInsideChunk = (int) plugin.getSystemManager().getStackedBarrels().stream()
+                .filter(stackedBarrel -> stackedBarrel.getLocation().getChunk().equals(chunk)).count();
         return barrelsInsideChunk > chunkLimit;
-    }
-
-    private List<StackedBarrel> getStackedBarrels(Chunk chunk){
-        List<StackedBarrel> stackedBarrels = new ArrayList<>();
-
-        Iterator<StackedBarrel> stackedBarrelIterator = plugin.getDataHandler().CACHED_BARRELS.iterator(chunk);
-        while (stackedBarrelIterator.hasNext())
-            stackedBarrels.add(stackedBarrelIterator.next());
-
-        return stackedBarrels;
     }
 
 }
