@@ -5,9 +5,6 @@
 ##                                           ##
 ###############################################
 
-# Only sent to ops
-AUTO_SAVE: '&7&o[WildStacker: Saved the data]'
-
 # Called when a player places / breaks a stacked-block
 BARREL_BREAK: '&6&lWildStacker &7You broke a barrel of x{0} {1}'
 BARREL_PLACE: '&6&lWildStacker &7You created a new barrel of {0}'

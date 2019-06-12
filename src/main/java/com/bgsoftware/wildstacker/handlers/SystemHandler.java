@@ -18,7 +18,6 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
-import com.bgsoftware.wildstacker.tasks.SaveTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
@@ -54,7 +53,6 @@ public final class SystemHandler implements SystemManager {
 
         //Start all required tasks
         Executor.sync(() -> {
-            SaveTask.start();
             KillTask.start();
             StackTask.start();
         }, 1L);

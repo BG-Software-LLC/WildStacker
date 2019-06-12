@@ -28,7 +28,7 @@ public final class StackTask extends BukkitRunnable {
     }
 
     public static void start(){
-        if(Bukkit.getScheduler().isCurrentlyRunning(taskID))
+        if(Bukkit.getScheduler().isCurrentlyRunning(taskID) || Bukkit.getScheduler().isQueued(taskID))
             Bukkit.getScheduler().cancelTask(taskID);
         new StackTask();
     }

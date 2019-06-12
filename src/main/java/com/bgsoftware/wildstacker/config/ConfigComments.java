@@ -12,10 +12,6 @@ public final class ConfigComments {
     @Comment("")
     public static String HEADER = "";
 
-    @Comment("How much time should be passed between saves? (in ticks)")
-    @Comment("Set 0 to disable (not recommended. saving is done async, and will not lag your server)")
-    public static String SAVE_INTERVAL = "save-interval";
-
     @Comment("")
     @Comment("How should the item that is given to players by the give command be called?")
     @Comment("{0} represents stack size")

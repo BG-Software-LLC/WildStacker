@@ -5,10 +5,6 @@
 ##                                           ##
 ###############################################
 
-# How much time should be passed between saves? (in ticks)
-# Set 0 to disable (not recommended. saving is done async, and will not lag your server)
-save-interval: 6000
-
 # How should the item that is given to players by the give command be called?
 # {0} represents stack size
 # {1} represents entity/block type

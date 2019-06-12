@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.tasks.KillTask;
-import com.bgsoftware.wildstacker.tasks.SaveTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.command.CommandSender;
@@ -53,7 +52,6 @@ public final class CommandReload implements ICommand {
             LootHandler.reload();
             Locale.reload();
             KillTask.start();
-            SaveTask.start();
             StackTask.start();
             plugin.getEditor().reloadConfiguration();
             Locale.RELOAD_SUCCESS.send(sender);

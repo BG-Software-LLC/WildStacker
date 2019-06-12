@@ -33,8 +33,6 @@ permissions:
     description: Gives access to kill all stacked-entities.
   wildstacker.reload:
     description: Gives access to reload all configuration files.
-  wildstacker.save:
-    description: Gives access to save cache to files.
   wildstacker.silktouch:
     description: Gives access to get spawners with silk-touch.
   wildstacker.nosilkdrop:

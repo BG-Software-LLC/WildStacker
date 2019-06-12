@@ -12,10 +12,6 @@ public final class LangComments {
     public static String HEADER = "";
 
     @Comment("")
-    @Comment("Only sent to ops")
-    public static String AUTO_SAVE = "AUTO_SAVE";
-
-    @Comment("")
     @Comment("Called when a player places / breaks a stacked-block")
     public static String BARREL_BREAK = "BARREL_BREAK";
 
