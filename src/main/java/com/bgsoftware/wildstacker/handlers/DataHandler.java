@@ -79,15 +79,19 @@ public final class DataHandler {
         File dataFile = new File(plugin.getDataFolder(), "data");
 
         if(dataFile.exists()) {
+            boolean save = false;
+
             for (File worldFolder : dataFile.listFiles()) {
                 if (worldFolder.isDirectory()) {
                     if (worldFolder.listFiles().length == 0) {
                         worldFolder.delete();
+                    }else{
+                        save = true;
                     }
                 }
             }
 
-            if (dataFile.listFiles().length != 0) {
+            if (save) {
                 WildStackerPlugin.log("Fetching old data files...");
                 plugin.getServer().getPluginManager().registerEvents(new Listener() {
 
