@@ -109,97 +109,99 @@ public final class DataHandler {
     private void loadOldSQL(){
         File dataFolder = new File(plugin.getDataFolder(), "data");
 
-        for(File databaseFile : dataFolder.listFiles()){
-            if(!databaseFile.isDirectory() && databaseFile.getName().endsWith(".db")){
-                World world = Bukkit.getWorld(databaseFile.getName().replace(".db", ""));
-                String sqlURL = "jdbc:sqlite:" + databaseFile.getAbsolutePath().replace("\\", "/");
-                boolean delete = false;
+        if(dataFolder.exists()) {
+            for (File databaseFile : dataFolder.listFiles()) {
+                if (!databaseFile.isDirectory() && databaseFile.getName().endsWith(".db")) {
+                    World world = Bukkit.getWorld(databaseFile.getName().replace(".db", ""));
+                    String sqlURL = "jdbc:sqlite:" + databaseFile.getAbsolutePath().replace("\\", "/");
+                    boolean delete = false;
 
-                try(Connection conn = DriverManager.getConnection(sqlURL)){
+                    try (Connection conn = DriverManager.getConnection(sqlURL)) {
 
-                    try(ResultSet resultSet = conn.prepareStatement("SELECT * FROM entities;").executeQuery()){
-                        while (resultSet.next()) {
-                            UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                            int stackAmount = resultSet.getInt("amount");
-                            SpawnCause spawnCause = SpawnCause.valueOf(resultSet.getString("spawn_reason"));
+                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM entities;").executeQuery()) {
+                            while (resultSet.next()) {
+                                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                                int stackAmount = resultSet.getInt("amount");
+                                SpawnCause spawnCause = SpawnCause.valueOf(resultSet.getString("spawn_reason"));
 
-                            CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
-                            CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
-                            if (!SQLHelper.doesConditionExist("SELECT * FROM entities WHERE uuid = '" + uuid.toString() + "';")) {
-                                Query.ENTITY_INSERT.getStatementHolder()
-                                        .setString(uuid.toString())
-                                        .setInt(stackAmount)
-                                        .setString(spawnCause.name())
-                                        .execute(true);
+                                CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
+                                CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
+                                if (!SQLHelper.doesConditionExist("SELECT * FROM entities WHERE uuid = '" + uuid.toString() + "';")) {
+                                    Query.ENTITY_INSERT.getStatementHolder()
+                                            .setString(uuid.toString())
+                                            .setInt(stackAmount)
+                                            .setString(spawnCause.name())
+                                            .execute(true);
+                                }
                             }
                         }
-                    }
 
-                    try(ResultSet resultSet = conn.prepareStatement("SELECT * FROM items;").executeQuery()){
-                        while (resultSet.next()) {
-                            UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                            int stackAmount = resultSet.getInt("amount");
+                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM items;").executeQuery()) {
+                            while (resultSet.next()) {
+                                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                                int stackAmount = resultSet.getInt("amount");
 
-                            CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
-                            if (!SQLHelper.doesConditionExist("SELECT * FROM items WHERE uuid = '" + uuid.toString() + "';")) {
-                                Query.ITEM_INSERT.getStatementHolder()
-                                        .setString(uuid.toString())
-                                        .setInt(stackAmount)
-                                        .execute(true);
+                                CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
+                                if (!SQLHelper.doesConditionExist("SELECT * FROM items WHERE uuid = '" + uuid.toString() + "';")) {
+                                    Query.ITEM_INSERT.getStatementHolder()
+                                            .setString(uuid.toString())
+                                            .setInt(stackAmount)
+                                            .execute(true);
+                                }
                             }
                         }
-                    }
 
-                    try(ResultSet resultSet = conn.prepareStatement("SELECT * FROM spawners;").executeQuery()){
-                        while (resultSet.next()) {
-                            String chunk = resultSet.getString("chunk");
-                            int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
+                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM spawners;").executeQuery()) {
+                            while (resultSet.next()) {
+                                String chunk = resultSet.getString("chunk");
+                                int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
 
-                            String[] locationSections = resultSet.getString("location").split(",");
-                            int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
-                                    z = Integer.valueOf(locationSections[2]);
-                            Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
+                                String[] locationSections = resultSet.getString("location").split(",");
+                                int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
+                                        z = Integer.valueOf(locationSections[2]);
+                                Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
 
-                            int stackAmount = resultSet.getInt("amount");
-                            Block spawnerBlock = blockLocation.getBlock();
+                                int stackAmount = resultSet.getInt("amount");
+                                Block spawnerBlock = blockLocation.getBlock();
 
-                            if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                                System.out.println(blockLocation + ": " + stackAmount);
-                                StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                                CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
+                                if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
+                                    System.out.println(blockLocation + ": " + stackAmount);
+                                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                                    CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
+                                }
                             }
                         }
-                    }
 
-                    try(ResultSet resultSet = conn.prepareStatement("SELECT * FROM barrels;").executeQuery()){
-                        while (resultSet.next()) {
-                            String chunk = resultSet.getString("chunk");
-                            int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
+                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM barrels;").executeQuery()) {
+                            while (resultSet.next()) {
+                                String chunk = resultSet.getString("chunk");
+                                int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
 
-                            String[] locationSections = resultSet.getString("location").split(",");
-                            int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
-                                    z = Integer.valueOf(locationSections[2]);
-                            Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
+                                String[] locationSections = resultSet.getString("location").split(",");
+                                int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
+                                        z = Integer.valueOf(locationSections[2]);
+                                Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
 
-                            int stackAmount = resultSet.getInt("amount");
-                            Block barrelBlock = blockLocation.getBlock();
+                                int stackAmount = resultSet.getInt("amount");
+                                Block barrelBlock = blockLocation.getBlock();
 
-                            if (barrelBlock.getType() == Material.CAULDRON) {
-                                ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                                StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                                CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                                if (barrelBlock.getType() == Material.CAULDRON) {
+                                    ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                                    StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
+                                    CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                                }
                             }
                         }
+
+                        delete = true;
+                    } catch (SQLException ex) {
+                        WildStackerPlugin.log("Couldn't load old db file " + databaseFile.getName());
+                        ex.printStackTrace();
                     }
 
-                    delete = true;
-                }catch(SQLException ex){
-                    WildStackerPlugin.log("Couldn't load old db file " + databaseFile.getName());
-                    ex.printStackTrace();
+                    if (delete)
+                        databaseFile.delete();
                 }
-
-                if(delete)
-                    databaseFile.delete();
             }
         }
     }
