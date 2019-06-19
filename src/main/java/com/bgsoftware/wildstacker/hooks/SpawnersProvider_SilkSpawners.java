@@ -22,7 +22,7 @@ import java.util.Random;
 public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     private WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static SpawnersProvider_SilkSpawners instance;
+    private static SpawnersProvider_SilkSpawners instance = null;
 
     private SilkSpawners ss;
     private SilkUtil silkUtil;
@@ -181,6 +181,10 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         }catch(Exception ex){
             throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
         }
+    }
+
+    public static boolean isRegisered(){
+        return instance != null;
     }
 
 }

@@ -121,7 +121,7 @@ public final class ItemUtil {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
-        if(Bukkit.getPluginManager().isPluginEnabled("SilkSpawners")){
+        if(Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && SpawnersProvider_SilkSpawners.isRegisered()){
             return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
         }
 
