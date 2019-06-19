@@ -78,24 +78,26 @@ public final class DataHandler {
     private void loadOldFiles(){
         File dataFile = new File(plugin.getDataFolder(), "data");
 
-        for(File worldFolder : dataFile.listFiles()){
-            if(worldFolder.isDirectory()) {
-                if(worldFolder.listFiles().length == 0) {
-                    worldFolder.delete();
+        if(dataFile.exists()) {
+            for (File worldFolder : dataFile.listFiles()) {
+                if (worldFolder.isDirectory()) {
+                    if (worldFolder.listFiles().length == 0) {
+                        worldFolder.delete();
+                    }
                 }
             }
-        }
 
-        if(dataFile.listFiles().length != 0){
-            WildStackerPlugin.log("Fetching old data files...");
-            plugin.getServer().getPluginManager().registerEvents(new Listener() {
+            if (dataFile.listFiles().length != 0) {
+                WildStackerPlugin.log("Fetching old data files...");
+                plugin.getServer().getPluginManager().registerEvents(new Listener() {
 
-                @EventHandler
-                public void onChunkLoad(ChunkLoadEvent e){
-                    loadOldChunkFile(e.getChunk());
-                }
+                    @EventHandler
+                    public void onChunkLoad(ChunkLoadEvent e) {
+                        loadOldChunkFile(e.getChunk());
+                    }
 
-            }, plugin);
+                }, plugin);
+            }
         }
 
     }
