@@ -2,6 +2,8 @@ package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
+import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
 import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
 import com.bgsoftware.wildstacker.handlers.DataHandler;
@@ -129,6 +131,17 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
                 getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
 
+            //Set all holograms of spawners
+            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
+                stackedSpawner.updateName();
+
+            //Set all holograms and block displays of barrlels
+            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
+                stackedBarrel.updateName();
+                stackedBarrel.getLocation().getChunk().load(true);
+                stackedBarrel.createDisplayBlock();
+            }
+
 //            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
 //                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
 
@@ -151,6 +164,14 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         //We need to save the entire database
 //        dataHandler.saveChunkData(true, false);
         dataHandler.clearDatabase();
+
+        for(StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
+            providersHandler.deleteHologram(stackedSpawner);
+        for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
+            providersHandler.deleteHologram(stackedBarrel);
+            stackedBarrel.getLocation().getChunk().load(true);
+            stackedBarrel.removeDisplayBlock();
+        }
 
         try{
             Bukkit.getScheduler().cancelAllTasks();
