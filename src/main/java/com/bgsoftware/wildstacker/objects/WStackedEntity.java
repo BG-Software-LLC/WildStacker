@@ -320,6 +320,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(stackAmount < 1){
             object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
             plugin.getNMSAdapter().setHealthDirectly(object, 0);
+
+            Query.ENTITY_DELETE.getStatementHolder()
+                    .setString(object.getUniqueId().toString())
+                    .execute(true);
+
             return true;
         }
 
