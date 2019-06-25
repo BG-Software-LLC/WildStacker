@@ -180,6 +180,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
             } catch (Exception ignored) { }
         }
+
+        WildStackerPlugin.log("Stopping all threads... (might take up to 10 minutes)");
+        Executor.stop();
+        WildStackerPlugin.log("All threads were stopped.");
     }
 
     private void loadAPI(){

@@ -4,7 +4,9 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class Executor {
 
@@ -27,6 +29,15 @@ public final class Executor {
             runnable.run();
         else
             executor.execute(runnable);
+    }
+
+    public static void stop(){
+        try{
+            ((ExecutorService) executor).shutdown();
+            ((ExecutorService) executor).awaitTermination(10, TimeUnit.MINUTES);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
 
 }
