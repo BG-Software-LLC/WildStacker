@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 public final class Executor {
 
-    private static final java.util.concurrent.Executor executor = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setNameFormat("WildStacker Thread ").build());
+    private static final java.util.concurrent.Executor executor = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setNameFormat("WildStacker Thread %d").build());
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static void sync(Runnable runnable){
