@@ -80,7 +80,7 @@ public final class ProvidersHandler {
             try {
                 Class.forName("com.intellectualcrafters.plot.api.PlotAPI");
                 claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
-            }catch(ClassNotFoundException ex){
+            }catch(Throwable ex){
                 claimsProviders.add(new ClaimsProvider_PlotSquared());
             }
         }
