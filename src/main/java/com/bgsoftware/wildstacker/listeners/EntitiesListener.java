@@ -74,13 +74,6 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
     }
 
-    @EventHandler
-    public void g(PlayerInteractEvent e){
-        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
-            Bukkit.broadcastMessage(plugin.getSystemManager().getStackedItems() + "");
-        }
-    }
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
         if(e.getEntity().hasMetadata("corpse")){
