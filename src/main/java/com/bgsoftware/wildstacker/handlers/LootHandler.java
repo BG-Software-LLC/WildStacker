@@ -3,6 +3,12 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
+import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
+import com.bgsoftware.wildstacker.loot.custom.LootTableCustomDrops;
+import com.bgsoftware.wildstacker.loot.custom.LootTableDropEdit;
+import com.bgsoftware.wildstacker.loot.custom.LootTableEditDrops;
+import com.bgsoftware.wildstacker.loot.custom.LootTableEpicSpawners;
+import com.bgsoftware.wildstacker.loot.custom.LootTableStackSpawners;
 import com.bgsoftware.wildstacker.utils.FileUtil;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.google.gson.Gson;
@@ -23,6 +29,7 @@ import java.util.Map;
 public final class LootHandler {
 
     private final Map<String, LootTable> lootTables = new HashMap<>();
+    private LootTableCustom lootTableCustom = null;
     private final Gson gson = new Gson();
 
     public LootHandler(WildStackerPlugin plugin){
@@ -135,6 +142,27 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/zombie_villager.json");
     }
 
+    @SuppressWarnings("WeakerAccess")
+    public void initLootTableCustom(ProvidersHandler.DropsProvider dropsProvider){
+        switch (dropsProvider){
+            case CUSTOM_DROPS:
+                lootTableCustom = new LootTableCustomDrops();
+                break;
+            case DROP_EDIT:
+                lootTableCustom = new LootTableDropEdit();
+                break;
+            case EDIT_DROPS:
+                lootTableCustom = new LootTableEditDrops();
+                break;
+            case EPIC_SPAWNERS:
+                lootTableCustom = new LootTableEpicSpawners();
+                break;
+            case STACK_SPAWNERS:
+                lootTableCustom = new LootTableStackSpawners();
+                break;
+        }
+    }
+
     private boolean containsEntity(String entity){
         try{
             EntityType.valueOf(entity);
@@ -153,6 +181,10 @@ public final class LootHandler {
             entityTypeName += "_BABY";
 
         return lootTables.getOrDefault(entityTypeName, lootTables.get("EMPTY"));
+    }
+
+    public LootTableCustom getLootTableCustom(){
+        return lootTableCustom;
     }
 
     public static void reload(){

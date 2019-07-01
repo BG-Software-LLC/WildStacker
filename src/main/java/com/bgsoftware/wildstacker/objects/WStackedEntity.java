@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
+import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.EntityData;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
@@ -421,7 +422,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         else{
             LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-            drops.addAll(lootTable.getDrops(this, lootBonusLevel, stackAmount));
+            LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
+            drops.addAll(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
+                    lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount));
         }
 
         return drops.toList();

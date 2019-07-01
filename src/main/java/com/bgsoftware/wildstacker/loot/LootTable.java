@@ -15,8 +15,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -42,15 +43,23 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount){
         List<ItemStack> drops = new ArrayList<>();
 
-        for(int i = 0; i < stackAmount; i++) {
-            List<LootPair> lootPairs = getLootPairs(stackedEntity);
+        Map<LootPair, Integer> lootPairs = getLootPairs(stackedEntity, stackAmount);
 
-            for(LootPair lootPair : lootPairs) {
-                drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
-                if(isKilledByPlayer(stackedEntity))
-                    lootPair.executeCommands(getKiller(stackedEntity), lootBonusLevel);
-            }
+        for(LootPair lootPair : lootPairs.keySet()) {
+            drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel, lootPairs.get(lootPair)));
+            if(isKilledByPlayer(stackedEntity))
+                lootPair.executeCommands(getKiller(stackedEntity), lootBonusLevel);
         }
+
+//        for(int i = 0; i < stackAmount; i++) {
+//            List<LootPair> lootPairs = getLootPairs(stackedEntity);
+//
+//            for(LootPair lootPair : lootPairs) {
+//                drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
+//                if(isKilledByPlayer(stackedEntity))
+//                    lootPair.executeCommands(getKiller(stackedEntity), lootBonusLevel);
+//            }
+//        }
 
         if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
@@ -118,25 +127,42 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return exp;
     }
 
-    private List<LootPair> getLootPairs(StackedEntity stackedEntity){
+    private Map<LootPair, Integer> getLootPairs(StackedEntity stackedEntity, int iterations){
         Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
-        List<LootPair> lootPairs = new ArrayList<>();
+        Map<LootPair, Integer> lootPairs = new HashMap<>();
 
-        Collections.shuffle(this.lootPairs, random);
+        //Collections.shuffle(this.lootPairs, random);
+
+        int sum = (max - min + 1) * (min + max) / 2;
+        int iteration = iterations / (max - min + 1) * sum;
+        if(max < 0 || min < 0)
+            iteration = iterations;
 
         for(LootPair lootPair : this.lootPairs){
-            if(max != -1 && lootPairs.size() >= max)
-                break;
-            if(!lootPair.getKiller().isEmpty() && !lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
-                continue;
-            if(random.nextInt(100) < lootPair.getChance())
-                lootPairs.add(lootPair);
+            lootPairs.put(lootPair, (int) ((lootPair.getChance() * iteration) / 100));
         }
 
-        if(min != -1 && lootPairs.size() < min)
-            lootPairs.addAll(getLootPairs(stackedEntity));
+//        for(LootPair lootPair : this.lootPairs){
+//            if(max != -1 && lootPairs.size() >= max)
+//                break;
+//            if(!lootPair.getKiller().isEmpty() && !lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
+//                continue;
+//            if(random.nextInt(100) < lootPair.getChance()) {
+//                lootPairs.put(lootPair, lootPairs.getOrDefault(lootPair, 0) + 1);
+//            }
+//        }
+//
+//        if(min != -1 && lootPairs.size() < min) {
+//            combineMaps(lootPairs, getLootPairs(stackedEntity));
+//        }
 
         return lootPairs;
+    }
+
+    static <T> void combineMaps(Map<T, Integer> original, Map<T, Integer> toAdd){
+        for(T object : toAdd.keySet()){
+            original.put(object, original.getOrDefault(object, 0) + toAdd.get(object));
+        }
     }
 
     static boolean isBurning(StackedEntity stackedEntity){

@@ -142,21 +142,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 stackedBarrel.createDisplayBlock();
             }
 
-//            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
-//                getServer().getPluginManager().registerEvents(new McMMOListener(), this);
-
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
                     getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
                 PluginHook_Novucs.register(this);
         });
-
-//        Executor.sync(() -> {
-//            for(World world : Bukkit.getWorlds()){
-//                for(Chunk chunk : world.getLoadedChunks())
-//                    dataHandler.loadChunkData(chunk);
-//            }
-//        }, 5L);
     }
 
     @Override
@@ -180,10 +170,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
             } catch (Exception ignored) { }
         }
-
-        WildStackerPlugin.log("Stopping all threads... (might take up to 10 minutes)");
-        Executor.stop();
-        WildStackerPlugin.log("All threads were stopped.");
     }
 
     private void loadAPI(){

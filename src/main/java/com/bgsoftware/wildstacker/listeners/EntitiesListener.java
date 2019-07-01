@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
-import com.bgsoftware.wildstacker.listeners.events.AsyncEntityDeathEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -55,7 +54,6 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -141,63 +139,28 @@ public final class EntitiesListener implements Listener {
             }
 
             Executor.async(() -> {
-                List<List<ItemStack>> entityDrops = new ArrayList<>();
-                List<Integer> entityExp = new ArrayList<>();
-
-                for(int i = 0; i < stackAmount; i++) {
-                    entityDrops.add(stackedEntity.getDrops(lootBonusLevel, 1));
-                    entityExp.add(stackedEntity.getExp(1, -1));
-                }
-
-                ItemStackList drops = new ItemStackList();
-                int expToDrop = 0;
-
-                if(plugin.getSettings().asyncEvent) {
-                    for (int i = 0; i < stackAmount; i++) {
-                        AsyncEntityDeathEvent asyncEntityDeathEvent = new AsyncEntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
-                        Bukkit.getPluginManager().callEvent(asyncEntityDeathEvent);
-                        drops.addAll(asyncEntityDeathEvent.getDrops());
-                        expToDrop += asyncEntityDeathEvent.getDroppedExp();
-                    }
-                }
-
-                final int EXP = expToDrop;
-
-                Executor.sync(() -> {
-                    int exp = 0;
-
-                    if(!plugin.getSettings().asyncEvent){
-                        for (int i = 0; i < stackAmount; i++) {
-                            EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, entityDrops.get(i), entityExp.get(i));
-                            Bukkit.getPluginManager().callEvent(entityDeathEvent);
-                            drops.addAll(entityDeathEvent.getDrops());
-                            exp += entityDeathEvent.getDroppedExp();
-                        }
-                    }else{
-                        exp = EXP;
-                    }
-
-                    drops.toList().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
-
-                    if(exp > 0){
-                        ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-                        experienceOrb.setExperience(exp);
-                    }
-
-                    stackedEntity.tryUnstack(stackAmount);
-
-                    if(plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
-                        livingEntity.setFireTicks(160);
-
-                    if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
-                        try {
-                            livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-                            livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-                        }catch(IllegalArgumentException ignored){}
-                    }
-                });
-
+                List<ItemStack> drops = new ItemStackList(stackedEntity.getDrops(lootBonusLevel, stackAmount)).toList();
+                Executor.sync(() -> drops.forEach(itemStack -> livingEntity.getWorld().dropItemNaturally(livingEntity.getLocation(), itemStack)));
             });
+
+            int exp = stackedEntity.getExp(stackAmount, -1);
+
+            if(exp > 0){
+                ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+                experienceOrb.setExperience(exp);
+            }
+
+            stackedEntity.tryUnstack(stackAmount);
+
+            if(plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+                livingEntity.setFireTicks(160);
+
+            if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
+                try {
+                    livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                    livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                }catch(IllegalArgumentException ignored){}
+            }
         }
     }
 
