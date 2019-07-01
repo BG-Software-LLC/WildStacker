@@ -112,6 +112,11 @@ public interface SystemManager {
     void performCacheClear();
 
     /**
+     * Performs a cache save.
+     */
+    void performCacheSave();
+
+    /**
      * Updates all spawners that the entity is linked into.
      * @param livingEntity the entity that is already linked
      * @param newLivingEntity a new entity to be replaced with the old one

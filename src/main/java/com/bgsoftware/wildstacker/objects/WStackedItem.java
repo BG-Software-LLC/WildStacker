@@ -3,8 +3,6 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -28,22 +26,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item, int stackAmount){
         super(item, stackAmount);
-
-        SQLHelper.runIfConditionNotExist("SELECT * FROM items WHERE uuid = '" + getUniqueId().toString() + "';", () ->
-                Query.ITEM_INSERT.getStatementHolder()
-                        .setString(getUniqueId().toString())
-                        .setInt(getStackAmount())
-                        .execute(true)
-        );
-    }
-
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        Query.ITEM_UPDATE_STACK_AMOUNT.getStatementHolder()
-                .setInt(getStackAmount())
-                .setString(getUniqueId().toString())
-                .execute(true);
     }
 
     /*
@@ -108,11 +90,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
-
-        Query.ITEM_DELETE.getStatementHolder()
-                .setString(getUniqueId().toString())
-                .execute(true);
-
         object.remove();
     }
 

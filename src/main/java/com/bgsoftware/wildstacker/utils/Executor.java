@@ -1,10 +1,16 @@
 package com.bgsoftware.wildstacker.utils;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class Executor {
 
+    private static final ExecutorService dataService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("WildStacker DB #%d").build());
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static void sync(Runnable runnable){
@@ -24,5 +30,19 @@ public final class Executor {
         else
             Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
+
+    public static void data(Runnable runnable){
+        dataService.execute(runnable);
+    }
+
+    public static void stop(){
+        try{
+            dataService.shutdown();
+            dataService.awaitTermination(1, TimeUnit.MINUTES);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
 
 }

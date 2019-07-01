@@ -11,6 +11,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -59,6 +61,8 @@ public final class SystemHandler implements SystemManager {
 
         //Start the auto-clear
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
+        //Start the auto-save
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> Executor.data(this::performCacheSave), 6000L, 6000L);
     }
 
     /*
@@ -209,23 +213,11 @@ public final class SystemHandler implements SystemManager {
                 .collect(Collectors.toList());
     }
 
-    public List<StackedEntity> getStackedEntities(Chunk chunk) {
-        return getStackedEntities().stream()
-                .filter(stackedEntity -> ((WStackedEntity) stackedEntity).getChunk().equals(chunk))
-                .collect(Collectors.toList());
-    }
-
     @Override
     public List<StackedItem> getStackedItems() {
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedItem)
                 .map(stackedObject -> (StackedItem) stackedObject)
-                .collect(Collectors.toList());
-    }
-
-    public List<StackedItem> getStackedItems(Chunk chunk) {
-        return getStackedItems().stream()
-                .filter(stackedItem -> ((WStackedItem) stackedItem).getChunk().equals(chunk))
                 .collect(Collectors.toList());
     }
 
@@ -296,6 +288,25 @@ public final class SystemHandler implements SystemManager {
                     removeStackObject(stackedObject);
             }
         }
+    }
+
+    @Override
+    public void performCacheSave() {
+        SQLHelper.executeUpdate("DELETE FROM entities;");
+        SQLHelper.executeUpdate("DELETE FROM items;");
+
+        getStackedEntities().forEach(stackedEntity ->
+            Query.ENTITY_INSERT.getStatementHolder()
+                    .setString(stackedEntity.getUniqueId().toString())
+                    .setInt(stackedEntity.getStackAmount())
+                    .setString(stackedEntity.getSpawnCause().name())
+                    .execute(false));
+
+        getStackedItems().forEach(stackedItem ->
+            Query.ITEM_INSERT.getStatementHolder()
+                    .setString(stackedItem.getUniqueId().toString())
+                    .setInt(stackedItem.getStackAmount())
+                    .execute(false));
     }
 
     private boolean isChunkLoaded(Location location){

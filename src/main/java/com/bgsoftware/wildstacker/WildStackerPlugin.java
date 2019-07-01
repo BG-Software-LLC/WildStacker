@@ -152,7 +152,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     @Override
     public void onDisable() {
         //We need to save the entire database
-//        dataHandler.saveChunkData(true, false);
+        systemManager.performCacheSave();
+
+        //We need to close the connection
         dataHandler.clearDatabase();
 
         for(StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
@@ -170,6 +172,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
             } catch (Exception ignored) { }
         }
+
+        log("Terminating all database threads...");
+        Executor.stop();
     }
 
     private void loadAPI(){
