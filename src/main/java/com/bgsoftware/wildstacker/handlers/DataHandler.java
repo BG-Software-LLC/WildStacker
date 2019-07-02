@@ -3,15 +3,10 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -101,6 +96,14 @@ public final class DataHandler {
                     }
 
                 }, plugin);
+
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    for(World world : Bukkit.getWorlds()){
+                        for(Chunk chunk : world.getLoadedChunks())
+                            loadOldChunkFile(chunk);
+                    }
+                }, 20L);
+
             }
         }
 
@@ -123,16 +126,8 @@ public final class DataHandler {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
                                 SpawnCause spawnCause = SpawnCause.valueOf(resultSet.getString("spawn_reason"));
-
                                 CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
                                 CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
-                                if (!SQLHelper.doesConditionExist("SELECT * FROM entities WHERE uuid = '" + uuid.toString() + "';")) {
-                                    Query.ENTITY_INSERT.getStatementHolder()
-                                            .setString(uuid.toString())
-                                            .setInt(stackAmount)
-                                            .setString(spawnCause.name())
-                                            .execute(true);
-                                }
                             }
                         }
 
@@ -140,14 +135,7 @@ public final class DataHandler {
                             while (resultSet.next()) {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
-
                                 CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
-                                if (!SQLHelper.doesConditionExist("SELECT * FROM items WHERE uuid = '" + uuid.toString() + "';")) {
-                                    Query.ITEM_INSERT.getStatementHolder()
-                                            .setString(uuid.toString())
-                                            .setInt(stackAmount)
-                                            .execute(true);
-                                }
                             }
                         }
 
@@ -285,8 +273,8 @@ public final class DataHandler {
                 .filter(item -> item instanceof Item)
                 .map(item -> (Item) item);
 
-        Set<StackedSpawner> stackedSpawners = new HashSet<>();
-        Set<StackedBarrel> stackedBarrels = new HashSet<>();
+        Set<RawStackedSpawner> stackedSpawners = new HashSet<>();
+        Set<RawStackedBarrel> stackedBarrels = new HashSet<>();
 
         Executor.async(() -> {
             try {
@@ -301,28 +289,9 @@ public final class DataHandler {
                     for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
                         int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
                         SpawnCause spawnCause = SpawnCause.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
-
                         UUID _uuid = UUID.fromString(uuid);
-
-                        if(CACHED_AMOUNT_ENTITIES.containsKey(_uuid)){
-                            stackAmount = CACHED_AMOUNT_ENTITIES.get(_uuid);
-                            CACHED_AMOUNT_ENTITIES.remove(_uuid);
-                        }
-
-                        if(CACHED_SPAWN_CAUSE_ENTITIES.containsKey(_uuid)){
-                            spawnCause = CACHED_SPAWN_CAUSE_ENTITIES.get(_uuid);
-                            CACHED_SPAWN_CAUSE_ENTITIES.remove(_uuid);
-                        }
-
-                        try {
-                            StackedEntity stackedEntity = new WStackedEntity(livingEntityList
-                                    .filter(livingEntity -> livingEntity.equals(_uuid)).findFirst().get(),
-                                    stackAmount,
-                                    spawnCause
-                            );
-
-                            CACHED_OBJECTS.put(_uuid, stackedEntity);
-                        }catch(Exception ignored){}
+                        CACHED_AMOUNT_ENTITIES.put(_uuid, stackAmount);
+                        CACHED_SPAWN_CAUSE_ENTITIES.put(_uuid, spawnCause);
                     }
                 }
 
@@ -330,18 +299,7 @@ public final class DataHandler {
                     for (String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
                         int stackAmount = cfg.getInt("items." + uuid, 1);
                         UUID _uuid = UUID.fromString(uuid);
-
-                        if (CACHED_AMOUNT_ITEMS.containsKey(_uuid)){
-                            stackAmount = CACHED_AMOUNT_ITEMS.get(_uuid);
-                            CACHED_AMOUNT_ITEMS.remove(_uuid);
-                        }
-
-                        try {
-                            StackedItem stackedItem = new WStackedItem(
-                                    itemList.filter(item -> item.getUniqueId().equals(_uuid)).findFirst().get(), stackAmount);
-
-                            CACHED_OBJECTS.put(_uuid, stackedItem);
-                        }catch(Exception ignored){}
+                        CACHED_AMOUNT_ITEMS.put(_uuid, stackAmount);
                     }
                 }
 
@@ -352,9 +310,7 @@ public final class DataHandler {
                         Block spawnerBlock = chunk.getBlock(Integer.valueOf(locationSections[0]),
                                 Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
                         if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                            StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                            CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
-                            stackedSpawners.add(stackedSpawner);
+                            stackedSpawners.add(new RawStackedSpawner(spawnerBlock, stackAmount));
                         }
                     }
                 }
@@ -367,9 +323,7 @@ public final class DataHandler {
                                 Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
                         if (barrelBlock.getType() == Material.CAULDRON) {
                             ItemStack barrelItem = cfg.getItemStack("barrels." + location + ".item");
-                            StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                            CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
-                            stackedBarrels.add(stackedBarrel);
+                            stackedBarrels.add(new RawStackedBarrel(barrelBlock, barrelItem, stackAmount));
                         }
                     }
                 }
@@ -377,22 +331,61 @@ public final class DataHandler {
                 file.delete();
 
                 Executor.sync(() -> {
-                    Iterator<StackedBarrel> stackedBarrelsIterator = stackedBarrels.iterator();
-                    Iterator<StackedSpawner> stackedSpawnersIterator = stackedSpawners.iterator();
+                    Iterator<RawStackedBarrel> stackedBarrelsIterator = stackedBarrels.iterator();
+                    Iterator<RawStackedSpawner> stackedSpawnersIterator = stackedSpawners.iterator();
 
                     while(stackedSpawnersIterator.hasNext()) {
-                        stackedSpawnersIterator.next().updateName();
+                        StackedSpawner stackedSpawner = stackedSpawnersIterator.next().create();
+                        CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
+                        stackedSpawner.updateName();
                     }
 
                     while(stackedBarrelsIterator.hasNext()){
-                        StackedBarrel stackedBarrel = stackedBarrelsIterator.next();
+                        StackedBarrel stackedBarrel = stackedBarrelsIterator.next().create();
+                        CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
                         stackedBarrel.updateName();
                         stackedBarrel.createDisplayBlock();
                     }
                 });
 
-            }catch(IllegalStateException ignored){ }
+            }catch(IllegalStateException ex){
+                ex.printStackTrace();
+            }
         });
+
+    }
+
+    private class RawStackedSpawner{
+
+        private int stackAmount;
+        private Block block;
+
+        RawStackedSpawner(Block block, int stackAmount){
+            this.block = block;
+            this.stackAmount = stackAmount;
+        }
+
+        StackedSpawner create(){
+            return new WStackedSpawner((CreatureSpawner) block.getState(), stackAmount);
+        }
+
+    }
+
+    private class RawStackedBarrel{
+
+        private int stackAmount;
+        private Block block;
+        private ItemStack barrelItem;
+
+        RawStackedBarrel(Block block, ItemStack barrelItem, int stackAmount){
+            this.block = block;
+            this.barrelItem = barrelItem;
+            this.stackAmount = stackAmount;
+        }
+
+        StackedBarrel create(){
+            return new WStackedBarrel(block, barrelItem, stackAmount);
+        }
 
     }
 
