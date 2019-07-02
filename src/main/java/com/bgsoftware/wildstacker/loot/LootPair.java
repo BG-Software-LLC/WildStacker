@@ -8,9 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
@@ -31,13 +29,14 @@ public class LootPair {
         this.lootingChance = lootingChance;
     }
 
-    public List<ItemStack> getItems(StackedEntity stackedEntity, int lootBonusLevel, int iterations){
+    public List<ItemStack> getItems(StackedEntity stackedEntity, int lootBonusLevel){
         List<ItemStack> items = new ArrayList<>();
 
-        Map<LootItem, Integer> lootItems = getLootItems(lootBonusLevel, iterations, plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld()));
+        LootItem lootItem = getLootItem(lootBonusLevel, plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld()));
 
-        for(LootItem lootItem : lootItems.keySet())
-            items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel, lootItems.get(lootItem)));
+        if(lootItem != null) {
+            items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel));
+        }
 
         return items;
     }
@@ -58,27 +57,21 @@ public class LootPair {
         }
     }
 
-    private Map<LootItem, Integer> getLootItems(int lootBonusLevel, int iterations, Random random){
-        Map<LootItem, Integer> lootItems = new HashMap<>();
+    private LootItem getLootItem(int lootBonusLevel, Random random){
+        int chance = random.nextInt(100);
+        double baseChance = 0;
 
-        //Collections.shuffle(this.lootItems, random);
+        Collections.shuffle(lootItems, random);
 
-        for(LootItem lootItem : this.lootItems){
-            lootItems.put(lootItem, (int) ((lootItem.getChance(lootBonusLevel, lootingChance) * iterations) / 100));
+        for(LootItem lootItem : lootItems){
+            if(chance < baseChance + lootItem.getChance(lootBonusLevel, lootingChance)) {
+                return lootItem;
+            }else{
+                baseChance += lootItem.getChance(lootBonusLevel, 0);
+            }
         }
 
-//        int chance = random.nextInt(100);
-////        double baseChance = 0;
-////
-////        for(LootItem lootItem : lootItems){
-////            if(chance < baseChance + lootItem.getChance(lootBonusLevel, lootingChance)) {
-////                return lootItem;
-////            }else{
-////                baseChance += lootItem.getChance(lootBonusLevel, 0);
-////            }
-////        }
-
-        return lootItems;
+        return null;
     }
 
     public List<String> getKiller(){

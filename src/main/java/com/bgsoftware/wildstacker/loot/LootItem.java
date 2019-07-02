@@ -42,32 +42,20 @@ public class LootItem {
         return chance + (lootBonusLevel * lootMultiplier);
     }
 
-    public ItemStack getItemStack(StackedEntity stackedEntity, int lootBonusLevel, int iterations){
+    public ItemStack getItemStack(StackedEntity stackedEntity, int lootBonusLevel){
         Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
         ItemStack itemStack = LootTable.isBurning(stackedEntity) && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
 
-        int fortuneBonus = looting && lootBonusLevel > 0 ? lootBonusLevel + 1 : 0;
+        int itemAmount = random.nextInt(max - min + 1) + min;
 
-        int itemAmount = calcAmount(random, (min + fortuneBonus) * iterations, (max + fortuneBonus) * iterations);
-
-        //int itemAmount = random.nextInt(max - min + 1) + min;
-
-//        if (looting && lootBonusLevel > 0) {
-//            itemAmount += random.nextInt(lootBonusLevel + 1);
-//        }
+        if (looting && lootBonusLevel > 0) {
+            itemAmount += random.nextInt(lootBonusLevel + 1);
+        }
 
         if(itemAmount > 0)
             itemStack.setAmount(itemAmount);
 
         return itemStack;
-    }
-
-    private static int calcAmount(Random random, int min, int max){
-        double guassian = random.nextGaussian();
-        int avg = (max + min) / 2;
-        int sd = (max - avg) / 3;
-        int result = (int) Math.round(guassian * sd + avg);
-        return Math.min(max, Math.max(0, result));
     }
 
     public static LootItem fromJson(JsonObject jsonObject){

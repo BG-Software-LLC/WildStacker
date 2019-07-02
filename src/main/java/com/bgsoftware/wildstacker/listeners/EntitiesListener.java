@@ -139,7 +139,7 @@ public final class EntitiesListener implements Listener {
 
             Executor.async(() -> {
                 List<ItemStack> drops = new ItemStackList(stackedEntity.getDrops(lootBonusLevel, stackAmount)).toList();
-                Executor.sync(() -> drops.forEach(itemStack -> livingEntity.getWorld().dropItemNaturally(livingEntity.getLocation(), itemStack)));
+                Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));
             });
 
             int exp = stackedEntity.getExp(stackAmount, -1);
