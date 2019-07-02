@@ -30,7 +30,7 @@ public final class LootTableCustomDrops extends LootTableCustom {
         if (CustomDropsAPI.getNaturalDrops(stackedEntity.getType()))
             drops.addAll(lootTable.getDrops(stackedEntity, lootBonusLevel, stackAmount));
 
-        for(int i = 0; i < stackAmount - 1; i++) {
+        for(int i = 0; i < stackAmount; i++) {
             drops.addAll(getCustomDrops(stackedEntity.getType()).stream()
                     .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
                     .collect(Collectors.toList()));
