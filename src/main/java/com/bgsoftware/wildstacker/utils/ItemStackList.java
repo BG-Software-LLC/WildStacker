@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.AbstractList;
@@ -33,6 +34,10 @@ public final class ItemStackList extends AbstractList<ItemStack> {
     public boolean add(ItemStack itemStack) {
         if(itemStack == null)
             return false;
+
+        //If the item is AIR, we don't add it but we're considering it as a "successful" operation.
+        if(itemStack.getType() == Material.AIR)
+            return true;
         
         itemStack = itemStack.clone();
         int amount = itemStack.getAmount();
