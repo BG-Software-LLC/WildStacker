@@ -30,7 +30,7 @@ public class Key {
     }
 
     public static Key of(String key){
-        return new Key(key);
+        return new Key(key.replace("LEGACY_", ""));
     }
 
 }
