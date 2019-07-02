@@ -30,6 +30,7 @@ import java.util.List;
 public final class ItemUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static boolean legacy = !Bukkit.getVersion().contains("1.13") && !Bukkit.getVersion().contains("1.14");
 
     public static int getFreeSpace(Inventory inventory, ItemStack itemStack){
         int freeSpace = 0, invSize = inventory.getType() == InventoryType.PLAYER ? 36 : inventory.getSize();
@@ -158,7 +159,7 @@ public final class ItemUtil {
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(!Bukkit.getVersion().contains("1.13")) {
+        if(legacy) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
                 return spawnEggMeta.getSpawnedType() == null ? EntityType.PIG : spawnEggMeta.getSpawnedType();
@@ -175,7 +176,7 @@ public final class ItemUtil {
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(!Bukkit.getVersion().contains("1.13")) {
+        if(legacy) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
                 spawnEggMeta.setSpawnedType(entityType);
