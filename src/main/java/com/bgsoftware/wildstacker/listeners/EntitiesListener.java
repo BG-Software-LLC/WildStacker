@@ -23,7 +23,6 @@ import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
@@ -205,27 +204,30 @@ public final class EntitiesListener implements Listener {
         }, 2L);
     }
 
+    private int nextEntityStackAmount = -1;
+    private EntityType nextEntityType = null;
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
         if(!plugin.getSettings().entitiesStackingEnabled || e.getItem() == null || e.getAction() != Action.RIGHT_CLICK_BLOCK ||
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") || !Materials.isValidAndSpawnEgg(e.getItem()))
             return;
 
-        int eggAmount = ItemUtil.getSpawnerItemAmount(e.getItem());
+        nextEntityStackAmount = ItemUtil.getSpawnerItemAmount(e.getItem());
+        nextEntityType = ItemUtil.getEntityType(e.getItem());
+    }
 
-        if(eggAmount > 1){
-            EntityType entityType = ItemUtil.getEntityType(e.getItem());
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
+        if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount < 0 ||
+                !e.getEntityType().equals(nextEntityType))
+            return;
 
-            Block spawnBlock = e.getClickedBlock().getRelative(e.getBlockFace());
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+        stackedEntity.setStackAmount(nextEntityStackAmount, true);
 
-            StackedEntity stackedEntity = WStackedEntity.of(
-                    plugin.getSystemManager().spawnEntityWithoutStacking(spawnBlock.getLocation().add(0.5, 1, 0.5), entityType.getEntityClass(),
-                            SpawnCause.SPAWNER_EGG));
-
-            stackedEntity.setStackAmount(eggAmount - 1, true);
-
-            Executor.sync(stackedEntity::tryStack, 5L);
-        }
+        nextEntityStackAmount = -1;
+        nextEntityType = null;
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
