@@ -45,7 +45,8 @@ public final class EditorHandler {
             ENTITIES_SLOT_20 = "entities.nerfed-worlds", ENTITIES_SLOT_21 = "entities.stack-down.enabled",
             ENTITIES_SLOT_22 = "entities.stack-down.stack-down-types", ENTITIES_SLOT_23 = "entities.keep-fire",
             ENTITIES_SLOT_24 = "entities.mythic-mobs-custom-name", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
-            ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names";
+            ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names",
+            ENTITIES_SLOT_28 = "entities.next-stack-knockback";
 
     public static String SPAWNERS_SLOT_0 = "spawners.enabled", SPAWNERS_SLOT_1 = "spawners.merge-radius",
             SPAWNERS_SLOT_2 = "spawners.custom-name", SPAWNERS_SLOT_3 = "spawners.blacklist",
@@ -253,6 +254,9 @@ public final class EditorHandler {
 
         editor.setItem(27, new ItemBuilder(Materials.CLOCK)
                 .withName("&6Hide Names").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_27)).build());
+
+        editor.setItem(28, new ItemBuilder(Materials.CLOCK)
+                .withName("&6Next Stack Knockback").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_28)).build());
 
         return editor;
     }

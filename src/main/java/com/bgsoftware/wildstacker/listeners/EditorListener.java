@@ -292,6 +292,9 @@ public final class EditorListener implements Listener {
                 case 27:
                     configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_27);
                     break;
+                case 28:
+                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_28);
+                    break;
                 default:
                     return;
             }
