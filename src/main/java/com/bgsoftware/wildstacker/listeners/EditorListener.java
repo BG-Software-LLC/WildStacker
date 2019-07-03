@@ -75,6 +75,8 @@ public final class EditorListener implements Listener {
 
         Player player = (Player) e.getWhoClicked();
 
+        String slotPrefix = "";
+
         if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
             e.setCancelled(true);
 
@@ -110,370 +112,37 @@ public final class EditorListener implements Listener {
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings")){
             e.setCancelled(true);
-
-            switch (e.getRawSlot()){
-                case 0:
-                    configValues.put(player.getUniqueId(), EditorHandler.GENERAL_SLOT_0);
-                    break;
-                case 1:
-                    configValues.put(player.getUniqueId(), EditorHandler.GENERAL_SLOT_1);
-                    break;
-                default:
-                    return;
-            }
-
+            slotPrefix = "GENERAL_SLOT_";
             lastInventories.put(player.getUniqueId(), "generalEditor");
-
-            player.closeInventory();
-            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
         }
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings")){
             e.setCancelled(true);
-
-            switch (e.getRawSlot()){
-                case 0:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_0);
-                    break;
-                case 1:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_1);
-                    break;
-                case 2:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_2);
-                    break;
-                case 3:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_3);
-                    break;
-                case 4:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_4);
-                    break;
-                case 5:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_5);
-                    break;
-                case 6:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_6);
-                    break;
-                case 7:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_7);
-                    break;
-                case 8:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_8);
-                    break;
-                case 9:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_9);
-                    break;
-                case 10:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_10);
-                    break;
-                case 11:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_11);
-                    break;
-                case 12:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_12);
-                    break;
-                case 13:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_13);
-                    break;
-                case 14:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_14);
-                    break;
-                case 15:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_15);
-                    break;
-                case 16:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_16);
-                    break;
-                case 17:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_17);
-                    break;
-                case 18:
-                    configValues.put(player.getUniqueId(), EditorHandler.ITEMS_SLOT_18);
-                    break;
-                default:
-                    return;
-            }
-
+            slotPrefix = "ITEMS_SLOT_";
             lastInventories.put(player.getUniqueId(), "itemsEditor");
-
-            player.closeInventory();
-            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
-
-            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
-                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
-                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
-            }
         }
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings")){
             e.setCancelled(true);
-
-            switch (e.getRawSlot()){
-                case 0:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_0);
-                    break;
-                case 1:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_1);
-                    break;
-                case 2:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_2);
-                    break;
-                case 3:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_3);
-                    break;
-                case 4:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_4);
-                    break;
-                case 5:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_5);
-                    break;
-                case 6:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_6);
-                    break;
-                case 7:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_7);
-                    break;
-                case 8:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_8);
-                    break;
-                case 9:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_9);
-                    break;
-                case 10:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_10);
-                    break;
-                case 11:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_11);
-                    break;
-                case 12:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_12);
-                    break;
-                case 13:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_13);
-                    break;
-                case 14:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_14);
-                    break;
-                case 15:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_15);
-                    break;
-                case 16:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_16);
-                    break;
-                case 17:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_17);
-                    break;
-                case 18:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_18);
-                    break;
-                case 19:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_19);
-                    break;
-                case 20:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_20);
-                    break;
-                case 21:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_21);
-                    break;
-                case 22:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_22);
-                    break;
-                case 23:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_23);
-                    break;
-                case 24:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_24);
-                    break;
-                case 25:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_25);
-                    break;
-                case 26:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_26);
-                    break;
-                case 27:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_27);
-                    break;
-                case 28:
-                    configValues.put(player.getUniqueId(), EditorHandler.ENTITIES_SLOT_28);
-                    break;
-                default:
-                    return;
-            }
-
+            slotPrefix = "ENTITIES_SLOT_";
             lastInventories.put(player.getUniqueId(), "entitiesEditor");
-
-            player.closeInventory();
-            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
-
-            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
-                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
-                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
-            }
         }
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
             e.setCancelled(true);
-
-            switch (e.getRawSlot()){
-                case 0:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_0);
-                    break;
-                case 1:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_1);
-                    break;
-                case 2:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_2);
-                    break;
-                case 3:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_3);
-                    break;
-                case 4:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_4);
-                    break;
-                case 5:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_5);
-                    break;
-                case 6:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_6);
-                    break;
-                case 7:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_7);
-                    break;
-                case 8:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_8);
-                    break;
-                case 9:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_9);
-                    break;
-                case 10:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_10);
-                    break;
-                case 11:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_11);
-                    break;
-                case 12:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_12);
-                    break;
-                case 13:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_13);
-                    break;
-                case 14:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_14);
-                    break;
-                case 15:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_15);
-                    break;
-                case 16:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_16);
-                    break;
-                case 17:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_17);
-                    break;
-                case 18:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_18);
-                    break;
-                case 19:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_19);
-                    break;
-                case 20:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_20);
-                    break;
-                case 21:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_21);
-                    break;
-                case 22:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_22);
-                    break;
-                case 23:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_23);
-                    break;
-                case 24:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_24);
-                    break;
-                case 25:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_25);
-                    break;
-                case 26:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_26);
-                    break;
-                case 27:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_27);
-                    break;
-                case 28:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_28);
-                    break;
-                case 29:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_29);
-                    break;
-                case 30:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_30);
-                    break;
-                case 31:
-                    configValues.put(player.getUniqueId(), EditorHandler.SPAWNERS_SLOT_31);
-                    break;
-                default:
-                    return;
-            }
-
+            slotPrefix = "SPAWNERS_SLOT_";
             lastInventories.put(player.getUniqueId(), "spawnersEditor");
-
-            player.closeInventory();
-            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
-
-            if(plugin.getEditor().config.isList(configValues.get(player.getUniqueId())) ||
-                    plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
-                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
-            }
         }
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
             e.setCancelled(true);
-
-            switch (e.getRawSlot()){
-                case 0:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_0);
-                    break;
-                case 1:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_1);
-                    break;
-                case 2:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_2);
-                    break;
-                case 3:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_3);
-                    break;
-                case 4:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_4);
-                    break;
-                case 5:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_5);
-                    break;
-                case 6:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_6);
-                    break;
-                case 7:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_7);
-                    break;
-                case 8:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_8);
-                    break;
-                case 9:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_9);
-                    break;
-                case 10:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_10);
-                    break;
-                case 11:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_11);
-                    break;
-                case 12:
-                    configValues.put(player.getUniqueId(), EditorHandler.BARRELS_SLOT_12);
-                    break;
-                default:
-                    return;
-            }
-
+            slotPrefix = "BARRELS_SLOT_";
             lastInventories.put(player.getUniqueId(), "barrelsEditor");
+        }
 
+        try{
+            String value = (String) EditorHandler.class.getField(slotPrefix + e.getRawSlot()).get(null);
+            configValues.put(player.getUniqueId(), value);
             player.closeInventory();
             player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
 
@@ -481,8 +150,7 @@ public final class EditorListener implements Listener {
                     plugin.getEditor().config.isConfigurationSection(configValues.get(player.getUniqueId()))){
                 player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
             }
-        }
-
+        }catch(Exception ignored){}
     }
 
     @EventHandler

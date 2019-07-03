@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 
+@SuppressWarnings("WeakerAccess")
 public final class EditorHandler {
 
     private WildStackerPlugin plugin;
