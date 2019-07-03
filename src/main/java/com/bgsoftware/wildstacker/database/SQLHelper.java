@@ -53,7 +53,7 @@ public class SQLHelper {
     }
 
     public static void runIfConditionNotExist(String statement, Runnable runnable){
-        Executor.async(() -> {
+        Executor.data(() -> {
             if(!doesConditionExist(statement))
                 runnable.run();
         });
