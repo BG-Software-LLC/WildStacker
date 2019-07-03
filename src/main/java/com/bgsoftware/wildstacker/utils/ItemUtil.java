@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -262,6 +263,13 @@ public final class ItemUtil {
             updateInventory(inventory);
         }
         return false;
+    }
+
+    public static ItemStack getFromBlock(Block block){
+        if(legacy)
+            return block.getState().getData().toItemStack(1);
+        else
+            return new ItemStack(block.getType());
     }
 
     private static void updateInventory(Inventory inventory){

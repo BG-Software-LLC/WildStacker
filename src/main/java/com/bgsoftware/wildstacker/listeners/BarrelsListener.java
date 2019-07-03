@@ -54,7 +54,7 @@ public final class BarrelsListener implements Listener {
     }
 
     private boolean isBarrelBlock(Block block){
-        Key key = Key.of(block.getState().getData().toItemStack(1));
+        Key key = Key.of(ItemUtil.getFromBlock(block));
         return (plugin.getSettings().whitelistedBarrels.isEmpty() ||
                 plugin.getSettings().whitelistedBarrels.contains(key)) &&
                 !plugin.getSettings().blacklistedBarrels.contains(key) &&

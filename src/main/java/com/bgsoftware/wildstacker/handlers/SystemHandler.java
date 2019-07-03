@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
@@ -184,7 +185,7 @@ public final class SystemHandler implements SystemManager {
             return stackedBarrel;
 
         //Barrel wasn't found, creating a new object
-        stackedBarrel = new WStackedBarrel(location.getBlock(), location.getBlock().getState().getData().toItemStack(1));
+        stackedBarrel = new WStackedBarrel(location.getBlock(), ItemUtil.getFromBlock(location.getBlock()));
 
         //Checks if the barrel still exists after a few ticks
         Executor.sync(() -> {
