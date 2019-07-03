@@ -247,11 +247,13 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         removeDisplayBlock();
 
-        blockDisplay = location.getWorld().spawn(location.add(0.5, 0, 0.5), ArmorStand.class);
-        blockDisplay.setVisible(false);
-        blockDisplay.setSmall(true);
-        blockDisplay.setGravity(false);
-        blockDisplay.setHelmet(barrelItem);
+        if(location.getBlock().getType() == Material.CAULDRON) {
+            blockDisplay = location.getWorld().spawn(location.add(0.5, 0, 0.5), ArmorStand.class);
+            blockDisplay.setVisible(false);
+            blockDisplay.setSmall(true);
+            blockDisplay.setGravity(false);
+            blockDisplay.setHelmet(barrelItem);
+        }
     }
 
     @Override
