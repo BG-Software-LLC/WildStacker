@@ -319,7 +319,7 @@ public final class BarrelsListener implements Listener {
         try{
             return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
         }catch(Throwable ex){
-            return true;
+            return false;
         }
     }
 
