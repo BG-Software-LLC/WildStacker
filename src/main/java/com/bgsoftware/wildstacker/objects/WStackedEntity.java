@@ -299,8 +299,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         setStackAmount(stackAmount, true);
 
         if(stackAmount < 1){
-            object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
-            plugin.getNMSAdapter().setHealthDirectly(object, 0);
+            Executor.sync(() -> {
+                object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
+                plugin.getNMSAdapter().setHealthDirectly(object, 0);
+            }, 1L);
             return true;
         }
 

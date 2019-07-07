@@ -51,7 +51,6 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -133,36 +132,36 @@ public final class EntitiesListener implements Listener {
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
-            livingEntity.setMetadata("unstack-amount", new FixedMetadataValue(plugin, stackAmount));
 
-            if(e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player){
-                EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
-            }else{
-                EntityUtil.setKiller(livingEntity, null);
-            }
+            if(stackedEntity.tryUnstack(stackAmount)) {
+                if (e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
+                    EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+                } else {
+                    EntityUtil.setKiller(livingEntity, null);
+                }
 
-            Executor.async(() -> {
-                List<ItemStack> drops = new ItemStackList(stackedEntity.getDrops(lootBonusLevel, stackAmount)).toList();
-                Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));
-            });
+                Executor.async(() -> {
+                    List<ItemStack> drops = new ItemStackList(stackedEntity.getDrops(lootBonusLevel, stackAmount)).toList();
+                    Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));
+                });
 
-            int exp = stackedEntity.getExp(stackAmount, -1);
+                int exp = stackedEntity.getExp(stackAmount, -1);
 
-            if(exp > 0){
-                ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-                experienceOrb.setExperience(exp);
-            }
+                if (exp > 0) {
+                    ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+                    experienceOrb.setExperience(exp);
+                }
 
-            stackedEntity.tryUnstack(stackAmount);
+                if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+                    livingEntity.setFireTicks(160);
 
-            if(plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
-                livingEntity.setFireTicks(160);
-
-            if(livingEntity.getKiller() != null && stackAmount - 1 > 0) {
-                try {
-                    livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-                    livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-                }catch(IllegalArgumentException ignored){}
+                if (livingEntity.getKiller() != null && stackAmount - 1 > 0) {
+                    try {
+                        livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                        livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                }
             }
         }
     }

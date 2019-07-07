@@ -54,16 +54,18 @@ public final class DataHandler {
     public DataHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
 
-        try {
-            SQLHelper.init(new File(plugin.getDataFolder(), "database.db"));
-            loadDatabase();
-            loadOldFiles();
-            loadOldSQL();
-        }catch(Exception ex){
-            ex.printStackTrace();
-            Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
-            return;
-        }
+        Executor.sync(() -> {
+            try {
+                SQLHelper.init(new File(plugin.getDataFolder(), "database.db"));
+                loadDatabase();
+                loadOldFiles();
+                loadOldSQL();
+            }catch(Exception ex){
+                ex.printStackTrace();
+                Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
+                return;
+            }
+        },1L);
     }
 
     public void clearDatabase(){
