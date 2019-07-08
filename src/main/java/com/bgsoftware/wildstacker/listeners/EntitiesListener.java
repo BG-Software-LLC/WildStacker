@@ -122,7 +122,8 @@ public final class EntitiesListener implements Listener {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int lootBonusLevel = getFortuneLevel(livingEntity);
             int stackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ||
-                    plugin.getSettings().entitiesInstantKills.contains(e.getEntityType().name()) ? stackedEntity.getStackAmount() : 1;
+                    plugin.getSettings().entitiesInstantKills.contains(e.getEntityType().name()) ||
+                    ((LivingEntity) e.getEntity()).getHealth() <= 0 ? stackedEntity.getStackAmount() : 1;
 
             if(plugin.getSettings().nextStackKnockback)
                 e.setDamage(0);
