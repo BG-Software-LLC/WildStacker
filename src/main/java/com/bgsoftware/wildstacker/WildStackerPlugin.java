@@ -70,9 +70,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
-       // dataHandler = new FilesDataHandler(this);
         dataHandler = new DataHandler(this);
-        //dataHandler = settingsHandler.dataHandler.equals("SQL") ? new SQLDataHandler(this) : new FilesDataHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
@@ -130,17 +128,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new CustomBossesListener(), this);
             if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
                 getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
-
-            //Set all holograms of spawners
-            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-                stackedSpawner.updateName();
-
-            //Set all holograms and block displays of barrlels
-            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-                stackedBarrel.updateName();
-                stackedBarrel.getLocation().getChunk().load(true);
-                stackedBarrel.createDisplayBlock();
-            }
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&

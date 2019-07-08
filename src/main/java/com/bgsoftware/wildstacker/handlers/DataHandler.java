@@ -60,6 +60,17 @@ public final class DataHandler {
                 loadDatabase();
                 loadOldFiles();
                 loadOldSQL();
+
+                //Set all holograms of spawners
+                for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners())
+                    stackedSpawner.updateName();
+
+                //Set all holograms and block displays of barrlels
+                for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels()) {
+                    stackedBarrel.updateName();
+                    stackedBarrel.getLocation().getChunk().load(true);
+                    stackedBarrel.createDisplayBlock();
+                }
             }catch(Exception ex){
                 ex.printStackTrace();
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
