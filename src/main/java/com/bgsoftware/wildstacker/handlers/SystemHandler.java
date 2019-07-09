@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -64,7 +63,7 @@ public final class SystemHandler implements SystemManager {
         }, 1L);
 
         //Start the auto-clear
-        //Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
         //Start the auto-save
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> Executor.data(this::performCacheSave), 6000L, 6000L);
     }
@@ -342,20 +341,19 @@ public final class SystemHandler implements SystemManager {
             }
         });
 
+        StringBuilder entityStatement = new StringBuilder("INSERT INTO entities VALUES ");
         entityAmounts.forEach((uuid, stackAmount) -> {
             SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-            Query.ENTITY_INSERT.getStatementHolder()
-                    .setString(uuid.toString())
-                    .setInt(stackAmount)
-                    .setString(spawnCause.name())
-                    .execute(false);
+            entityStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append(", '").append(spawnCause.name()).append("'),");
         });
+        entityStatement.setCharAt(entityStatement.length() - 1, ';');
+        SQLHelper.executeUpdate(entityStatement.toString());
 
+        StringBuilder itemStatement = new StringBuilder("INSERT INTO items VALUES ");
         itemAmounts.forEach((uuid, stackAmount) ->
-            Query.ITEM_INSERT.getStatementHolder()
-                    .setString(uuid.toString())
-                    .setInt(stackAmount)
-                    .execute(false));
+                itemStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append("),"));
+        itemStatement.setCharAt(itemStatement.length() - 1, ';');
+        SQLHelper.executeUpdate(itemStatement.toString());
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){
