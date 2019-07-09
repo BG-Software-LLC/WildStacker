@@ -16,7 +16,6 @@ public final class Locale {
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static Map<String, Locale> localeMap = new HashMap<>();
 
-    public static Locale AUTO_SAVE = new Locale("AUTO_SAVE");
     public static Locale BARREL_BREAK = new Locale("BARREL_BREAK");
     public static Locale BARREL_PLACE = new Locale("BARREL_PLACE");
     public static Locale BARREL_UPDATE = new Locale("BARREL_UPDATE");

@@ -42,7 +42,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
@@ -61,7 +64,7 @@ public final class SystemHandler implements SystemManager {
         }, 1L);
 
         //Start the auto-clear
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
+        //Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
         //Start the auto-save
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> Executor.data(this::performCacheSave), 6000L, 6000L);
     }
@@ -293,21 +296,70 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
+        Map<UUID, Integer> entityAmounts = new HashMap<>(), itemAmounts = new HashMap<>();
+        Map<UUID, SpawnCause> entitySpawnCauses = new HashMap<>();
+
         SQLHelper.executeUpdate("DELETE FROM entities;");
         SQLHelper.executeUpdate("DELETE FROM items;");
 
-        getStackedEntities().forEach(stackedEntity ->
-            Query.ENTITY_INSERT.getStatementHolder()
-                    .setString(stackedEntity.getUniqueId().toString())
-                    .setInt(stackedEntity.getStackAmount())
-                    .setString(stackedEntity.getSpawnCause().name())
-                    .execute(false));
+        getStackedEntities().forEach(stackedEntity -> {
+            if(stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())){
+                entityAmounts.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
+                entitySpawnCauses.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+            }else{
+                removeStackObject(stackedEntity);
+            }
+        });
 
-        getStackedItems().forEach(stackedItem ->
+        new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).keySet().forEach(uuid ->{
+            int stackAmount = dataHandler.CACHED_AMOUNT_ENTITIES.get(uuid);
+            SpawnCause spawnCause = dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
+            if(stackAmount > 1 || hasValidSpawnCause(spawnCause)) {
+                entityAmounts.put(uuid, Math.max(entityAmounts.getOrDefault(uuid, 1), stackAmount));
+                entitySpawnCauses.put(uuid, spawnCause);
+            }else{
+                dataHandler.CACHED_AMOUNT_ENTITIES.remove(uuid);
+                dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(uuid);
+            }
+        });
+
+        getStackedItems().forEach(stackedItem -> {
+          if(stackedItem.getStackAmount() > 1){
+              itemAmounts.put(stackedItem.getUniqueId(), stackedItem.getStackAmount());
+          }
+          else{
+              removeStackObject(stackedItem);
+          }
+        });
+
+        new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).keySet().forEach(uuid -> {
+            int stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.get(uuid);
+            if(stackAmount > 1){
+                itemAmounts.put(uuid, stackAmount);
+            }
+            else{
+                dataHandler.CACHED_AMOUNT_ITEMS.remove(uuid);
+            }
+        });
+
+        entityAmounts.forEach((uuid, stackAmount) -> {
+            SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
+            Query.ENTITY_INSERT.getStatementHolder()
+                    .setString(uuid.toString())
+                    .setInt(stackAmount)
+                    .setString(spawnCause.name())
+                    .execute(false);
+        });
+
+        itemAmounts.forEach((uuid, stackAmount) ->
             Query.ITEM_INSERT.getStatementHolder()
-                    .setString(stackedItem.getUniqueId().toString())
-                    .setInt(stackedItem.getStackAmount())
+                    .setString(uuid.toString())
+                    .setInt(stackAmount)
                     .execute(false));
+    }
+
+    private boolean hasValidSpawnCause(SpawnCause spawnCause){
+        return spawnCause != SpawnCause.CHUNK_GEN && spawnCause != SpawnCause.NATURAL;
     }
 
     private boolean isChunkLoaded(Location location){
