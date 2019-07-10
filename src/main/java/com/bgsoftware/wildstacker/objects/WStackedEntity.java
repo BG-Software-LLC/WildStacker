@@ -392,6 +392,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         ItemStackList drops = new ItemStackList();
 
+        if(spawnCause == SpawnCause.MYTHIC_MOBS && tempLootTable == null)
+            tempLootTable = MythicMobsHook.getLootTable();
+
         if(tempLootTable != null){
             drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
             tempLootTable = null;
