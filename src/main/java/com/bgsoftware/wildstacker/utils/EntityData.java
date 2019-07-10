@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.utils;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackCheck;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.MetadataValue;
 
@@ -150,21 +149,18 @@ public final class EntityData {
         return super.equals(obj);
     }
 
-    private static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-    private static boolean asIntField = version.equals("v1_13_R2") || version.equals("v1_14_R1");
-    private static boolean dField = version.contains("v1_9") || version.contains("v1_8");
-
     private int getInteger(Object object){
-        if(object == null)
-            return 0;
-
-        try{
-            String fieldName = asIntField ? "asInt" : dField ? "d" : "e";
-            return (int) object.getClass().getMethod(fieldName).invoke(object);
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return 0;
-        }
+        return object == null ? 0 : plugin.getNMSAdapter().getNBTInteger(object);
+//        if(object == null)
+//            return 0;
+//
+//        try{
+//            String fieldName = asIntField ? "asInt" : dField ? "d" : "e";
+//            return (int) object.getClass().getMethod(fieldName).invoke(object);
+//        }catch(Exception ex){
+//            ex.printStackTrace();
+//            return 0;
+//        }
     }
 
     public static EntityData of(StackedEntity stackedEntity){

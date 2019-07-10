@@ -15,6 +15,7 @@ import net.minecraft.server.v1_13_R2.EnumItemSlot;
 import net.minecraft.server.v1_13_R2.ItemStack;
 import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
+import net.minecraft.server.v1_13_R2.NBTTagInt;
 import net.minecraft.server.v1_13_R2.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -232,6 +233,21 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public Random getWorldRandom(World world) {
         return ((CraftWorld) world).getHandle().random;
+    }
+
+    @Override
+    public int getNBTInteger(Object nbtTag) {
+        try {
+            return ((NBTTagInt) nbtTag).asInt();
+        }catch(Throwable ex){
+            try{
+                //noinspection JavaReflectionMemberAccess
+                return (int) NBTTagInt.class.getMethod("e").invoke(nbtTag);
+            }catch(Exception ex1){
+                ex1.printStackTrace();
+                return 0;
+            }
+        }
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed {

@@ -46,4 +46,6 @@ public interface NMSAdapter {
 
     Random getWorldRandom(World world);
 
+    int getNBTInteger(Object nbtTag);
+
 }
