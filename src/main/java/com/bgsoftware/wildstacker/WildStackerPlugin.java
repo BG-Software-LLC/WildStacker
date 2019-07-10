@@ -115,7 +115,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         if(getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
             ProtocolLibHook.register();
 
-        Executor.sync(() -> {
+        Bukkit.getScheduler().runTask(this, () -> {
             providersHandler = new ProvidersHandler(this);
 
             if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
