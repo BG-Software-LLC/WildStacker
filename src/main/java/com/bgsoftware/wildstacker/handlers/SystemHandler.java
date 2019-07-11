@@ -100,19 +100,22 @@ public final class SystemHandler implements SystemManager {
                 dataHandler.CACHED_OBJECTS.remove(livingEntity.getUniqueId());
         }, 10L);
 
+        boolean shouldBeCached = plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled();
+
         //A new entity was created. Let's see if we need to add him
-        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) &&
-                plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled())
+        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && shouldBeCached)
             dataHandler.CACHED_OBJECTS.put(stackedEntity.getUniqueId(), stackedEntity);
 
         if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())){
             stackedEntity.setStackAmount(dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId()), true);
-            dataHandler.CACHED_AMOUNT_ENTITIES.remove(stackedEntity.getUniqueId());
+            if(shouldBeCached)
+                dataHandler.CACHED_AMOUNT_ENTITIES.remove(stackedEntity.getUniqueId());
         }
 
         if(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.containsKey(livingEntity.getUniqueId())){
             stackedEntity.setSpawnCause(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.get(livingEntity.getUniqueId()));
-            dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(stackedEntity.getUniqueId());
+            if(shouldBeCached)
+                dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(stackedEntity.getUniqueId());
         }
 
         return stackedEntity;

@@ -123,11 +123,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
                 getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
-                getServer().getPluginManager().registerEvents(new EpicSpawnersListener(), this);
+                getServer().getPluginManager().registerEvents(new EpicSpawnersListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("CustomBosses"))
-                getServer().getPluginManager().registerEvents(new CustomBossesListener(), this);
+                getServer().getPluginManager().registerEvents(new CustomBossesListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
-                getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
+                getServer().getPluginManager().registerEvents(new MythicMobsListener(this), this);
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
