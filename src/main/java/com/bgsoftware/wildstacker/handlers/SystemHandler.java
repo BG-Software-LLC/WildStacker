@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("WeakerAccess")
 public final class SystemHandler implements SystemManager {
 
     private WildStackerPlugin plugin;
@@ -211,7 +212,6 @@ public final class SystemHandler implements SystemManager {
         return stackedBarrel;
     }
 
-    @Override
     public List<StackedEntity> getStackedEntities() {
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedEntity)
@@ -219,7 +219,6 @@ public final class SystemHandler implements SystemManager {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<StackedItem> getStackedItems() {
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedItem)
@@ -227,7 +226,6 @@ public final class SystemHandler implements SystemManager {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<StackedSpawner> getStackedSpawners(){
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedSpawner)
@@ -241,7 +239,6 @@ public final class SystemHandler implements SystemManager {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<StackedBarrel> getStackedBarrels(){
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedBarrel)
