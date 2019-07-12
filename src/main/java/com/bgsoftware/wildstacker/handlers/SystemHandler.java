@@ -377,19 +377,23 @@ public final class SystemHandler implements SystemManager {
             }
         });
 
-        StringBuilder entityStatement = new StringBuilder("INSERT INTO entities VALUES ");
-        entityAmounts.forEach((uuid, stackAmount) -> {
-            SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-            entityStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append(", '").append(spawnCause.name()).append("'),");
-        });
-        entityStatement.setCharAt(entityStatement.length() - 1, ';');
-        SQLHelper.executeUpdate(entityStatement.toString());
+        if(entityAmounts.size() > 0) {
+            StringBuilder entityStatement = new StringBuilder("INSERT INTO entities VALUES ");
+            entityAmounts.forEach((uuid, stackAmount) -> {
+                SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
+                entityStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append(", '").append(spawnCause.name()).append("'),");
+            });
+            entityStatement.setCharAt(entityStatement.length() - 1, ';');
+            SQLHelper.executeUpdate(entityStatement.toString());
+        }
 
-        StringBuilder itemStatement = new StringBuilder("INSERT INTO items VALUES ");
-        itemAmounts.forEach((uuid, stackAmount) ->
-                itemStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append("),"));
-        itemStatement.setCharAt(itemStatement.length() - 1, ';');
-        SQLHelper.executeUpdate(itemStatement.toString());
+        if(itemAmounts.size() > 0) {
+            StringBuilder itemStatement = new StringBuilder("INSERT INTO items VALUES ");
+            itemAmounts.forEach((uuid, stackAmount) ->
+                    itemStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append("),"));
+            itemStatement.setCharAt(itemStatement.length() - 1, ';');
+            SQLHelper.executeUpdate(itemStatement.toString());
+        }
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){

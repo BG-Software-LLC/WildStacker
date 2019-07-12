@@ -33,7 +33,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
         SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location = '" + getStringLocation() + "';", () ->
                 Query.SPAWNER_INSERT.getStatementHolder()
-                        .setLocation(getLocation())
+                        .setString(getStringLocation())
                         .setInt(getStackAmount())
                         .execute(true)
         );
@@ -49,7 +49,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         super.setStackAmount(stackAmount, updateName);
         Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())
-                .setLocation(getLocation())
+                .setString(getStringLocation())
                 .execute(true);
     }
 

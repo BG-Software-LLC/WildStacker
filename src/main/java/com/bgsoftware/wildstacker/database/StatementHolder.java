@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.Executor;
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.PreparedStatement;
@@ -54,11 +53,6 @@ public class StatementHolder {
 
     public StatementHolder setBoolean(boolean value){
         values.put(currentIndex++, value);
-        return this;
-    }
-
-    public StatementHolder setLocation(Location loc){
-        values.put(currentIndex++, loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
         return this;
     }
 

@@ -36,6 +36,7 @@ public class SQLHelper {
         try(PreparedStatement preparedStatement = conn.prepareStatement(statement)){
             preparedStatement.executeUpdate();
         }catch(SQLException ex){
+            System.out.println(statement);
             ex.printStackTrace();
         }
     }

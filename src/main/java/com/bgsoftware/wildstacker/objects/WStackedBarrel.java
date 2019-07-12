@@ -32,7 +32,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + getStringLocation() + "';", () ->
                 Query.BARREL_INSERT.getStatementHolder()
-                        .setLocation(getLocation())
+                        .setString(getStringLocation())
                         .setInt(getStackAmount())
                         .setItemStack(itemStack)
                         .execute(true)
@@ -49,7 +49,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         super.setStackAmount(stackAmount, updateName);
         Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())
-                .setLocation(getLocation())
+                .setString(getStringLocation())
                 .execute(true);
     }
 
