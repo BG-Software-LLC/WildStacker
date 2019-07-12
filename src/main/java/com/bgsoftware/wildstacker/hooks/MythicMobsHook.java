@@ -14,7 +14,6 @@ import io.lumine.xikage.mythicmobs.drops.IItemDrop;
 import io.lumine.xikage.mythicmobs.drops.LootBag;
 import io.lumine.xikage.mythicmobs.drops.droppables.ExperienceDrop;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
@@ -31,10 +30,6 @@ public final class MythicMobsHook {
         }
 
         return null;
-    }
-
-    public static boolean isEnabled(){
-        return Bukkit.getPluginManager().isPluginEnabled("MythicMobs");
     }
 
     public static LootTable getLootTable(){

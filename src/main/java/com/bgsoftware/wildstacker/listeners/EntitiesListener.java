@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
@@ -196,7 +195,8 @@ public final class EntitiesListener implements Listener {
 
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
-                e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN || MythicMobsHook.isEnabled())
+                e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
+                Bukkit.getPluginManager().isPluginEnabled("MythicMobs"))
             Executor.sync(stackedEntity::tryStack, 1L);
         else
             stackedEntity.tryStack();
