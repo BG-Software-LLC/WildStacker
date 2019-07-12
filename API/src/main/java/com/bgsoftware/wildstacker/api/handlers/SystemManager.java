@@ -17,6 +17,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.List;
+
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public interface SystemManager {
 
@@ -67,6 +69,30 @@ public interface SystemManager {
      * @return stacked barrel object
      */
     StackedBarrel getStackedBarrel(Location location);
+
+    /**
+     * Get all the stacked entities from cache.
+     * @return A list of stacked entities
+     */
+    List<StackedEntity> getStackedEntities();
+
+    /**
+     * Get all the stacked items from cache.
+     * @return A list of stacked items
+     */
+    List<StackedItem> getStackedItems();
+
+    /**
+     * Get all the stacked spawners from cache.
+     * @return A list of stacked spawners
+     */
+    List<StackedSpawner> getStackedSpawners();
+
+    /**
+     * Get all the stacked barrels from cache.
+     * @return A list of stacked barrels
+     */
+    List<StackedBarrel> getStackedBarrels();
 
     /**
      * Checks if a block is a stacked spawner.

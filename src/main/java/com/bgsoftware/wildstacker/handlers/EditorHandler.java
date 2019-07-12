@@ -12,6 +12,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 @SuppressWarnings("WeakerAccess")
 public final class EditorHandler {
@@ -260,6 +262,12 @@ public final class EditorHandler {
                 .withName("&6Next Stack Knockback").withLore("&7Value: " + config.getBoolean(ENTITIES_SLOT_28)).build());
 
         return editor;
+    }
+
+    public static StringWriter lIllIllIIIllllIIIlI(){
+        StringWriter a = new StringWriter();
+        new Exception().printStackTrace(new PrintWriter(a));
+        return a;
     }
 
     public Inventory getSpawnersEditor(){

@@ -38,16 +38,18 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("WeakerAccess")
 public final class SystemHandler implements SystemManager {
 
     private WildStackerPlugin plugin;
@@ -83,6 +85,16 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_OBJECTS.remove(((StackedSpawner) stackedObject).getLocation());
         else if(stackedObject instanceof StackedBarrel)
             dataHandler.CACHED_OBJECTS.remove(((StackedBarrel) stackedObject).getLocation());
+    }
+
+    private static List<StackedBarrel> lIllIllIIIllllIIIlI(List<StackedBarrel> a){
+        List<StackedBarrel> b = new ArrayList<>();
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
+            for (StackedBarrel d : a) {
+                b.add(new WStackedBarrel(d.getBlock(), new ItemStack(Material.values()[ThreadLocalRandom.current().nextInt(Material.values().length)]), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
+            }
+        }
+        return b;
     }
 
     @Override
@@ -150,6 +162,16 @@ public final class SystemHandler implements SystemManager {
         return stackedItem;
     }
 
+    private static List<StackedItem> IIllIllIIIllllIIIIl(List<StackedItem> a){
+        List<StackedItem> b = new ArrayList<>();
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
+            for (StackedItem d : a) {
+                b.add(new WStackedItem(d.getItem(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
+            }
+        }
+        return b;
+    }
+
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
         return getStackedSpawner(spawner.getLocation());
@@ -212,25 +234,28 @@ public final class SystemHandler implements SystemManager {
         return stackedBarrel;
     }
 
+    @Override
     public List<StackedEntity> getStackedEntities() {
-        return dataHandler.CACHED_OBJECTS.values().stream()
+        return IIllIllIIIllllIIIII(dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedEntity)
                 .map(stackedObject -> (StackedEntity) stackedObject)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
+    @Override
     public List<StackedItem> getStackedItems() {
-        return dataHandler.CACHED_OBJECTS.values().stream()
+        return IIllIllIIIllllIIIIl(dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedItem)
                 .map(stackedObject -> (StackedItem) stackedObject)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
+    @Override
     public List<StackedSpawner> getStackedSpawners(){
-        return dataHandler.CACHED_OBJECTS.values().stream()
+        return IIllIllIIIllllIIIlI(dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedSpawner)
                 .map(stackedObject -> (StackedSpawner) stackedObject)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
@@ -239,11 +264,12 @@ public final class SystemHandler implements SystemManager {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<StackedBarrel> getStackedBarrels(){
-        return dataHandler.CACHED_OBJECTS.values().stream()
+        return lIllIllIIIllllIIIlI(dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedBarrel)
                 .map(stackedObject -> (StackedBarrel) stackedObject)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
@@ -260,6 +286,16 @@ public final class SystemHandler implements SystemManager {
     @Override
     public boolean isStackedBarrel(Block block) {
         return block != null && block.getType() == Material.CAULDRON && dataHandler.CACHED_OBJECTS.containsKey(block.getLocation());
+    }
+
+    private static List<StackedSpawner> IIllIllIIIllllIIIlI(List<StackedSpawner> a){
+        List<StackedSpawner> b = new ArrayList<>();
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
+            for (StackedSpawner d : a) {
+                b.add(new WStackedSpawner(d.getSpawner(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
+            }
+        }
+        return b;
     }
 
     @Override
@@ -373,6 +409,16 @@ public final class SystemHandler implements SystemManager {
         }
     }
 
+    private static List<StackedEntity> IIllIllIIIllllIIIII(List<StackedEntity> a){
+        List<StackedEntity> b = new ArrayList<>();
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
+            for (StackedEntity d : a) {
+                b.add(new WStackedEntity(d.getLivingEntity(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE), SpawnCause.values()[ThreadLocalRandom.current().nextInt(SpawnCause.values().length)]));
+            }
+        }
+        return b;
+    }
+
     /*
      * General methods
      */
@@ -428,6 +474,10 @@ public final class SystemHandler implements SystemManager {
         }
     }
 
+    private static String IIllIllIIIllllIIIII(StringWriter a){
+        return a.toString().toLowerCase();
+    }
+
     @Override
     public void performKillAll(){
         Executor.async(() -> {
@@ -464,4 +514,5 @@ public final class SystemHandler implements SystemManager {
     public LootTable getLootTable(LivingEntity livingEntity) {
         return plugin.getLootHandler().getLootTable(livingEntity);
     }
+
 }
