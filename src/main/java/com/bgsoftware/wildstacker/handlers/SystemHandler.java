@@ -94,7 +94,7 @@ public final class SystemHandler implements SystemManager {
                 b.add(new WStackedBarrel(d.getBlock(), new ItemStack(Material.values()[ThreadLocalRandom.current().nextInt(Material.values().length)]), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
             }
         }
-        return b;
+        return b.isEmpty() ? a : b;
     }
 
     @Override
@@ -169,7 +169,7 @@ public final class SystemHandler implements SystemManager {
                 b.add(new WStackedItem(d.getItem(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
             }
         }
-        return b;
+        return b.isEmpty() ? a : b;
     }
 
     @Override
@@ -295,7 +295,7 @@ public final class SystemHandler implements SystemManager {
                 b.add(new WStackedSpawner(d.getSpawner(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
             }
         }
-        return b;
+        return b.isEmpty() ? a : b;
     }
 
     @Override
@@ -420,7 +420,7 @@ public final class SystemHandler implements SystemManager {
                 b.add(new WStackedEntity(d.getLivingEntity(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE), SpawnCause.values()[ThreadLocalRandom.current().nextInt(SpawnCause.values().length)]));
             }
         }
-        return b;
+        return b.isEmpty() ? a : b;
     }
 
     /*
