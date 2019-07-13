@@ -25,6 +25,7 @@ permissions:
       wildstacker.settings: true
       wildstacker.place.*: true
       wildstacker.nextplace: true
+      wildstacker.stats: true
   wildstacker.give:
     description: Gives access to give spawner and eggs to players.
   wildstacker.info:
@@ -44,3 +45,5 @@ permissions:
     default: true
   wildstacker.nextplace:
     description: Gives access to place spawners next to others when the feature is disabled.
+  wildstacker.stats:
+    description: Gives access to get all stats about cached data.

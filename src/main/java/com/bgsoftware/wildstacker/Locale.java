@@ -118,4 +118,8 @@ public final class Locale {
         WildStackerPlugin.log("Loading messages done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
+    public static void sendMessage(CommandSender sender, String message){
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    }
+
 }
