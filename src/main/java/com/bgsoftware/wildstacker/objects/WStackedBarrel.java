@@ -30,13 +30,14 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         super(block, stackAmount);
         this.barrelItem = itemStack;
 
-        SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + getStringLocation() + "';", () ->
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
+            SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + getStringLocation() + "';", () ->
                 Query.BARREL_INSERT.getStatementHolder()
                         .setString(getStringLocation())
                         .setInt(getStackAmount())
                         .setItemStack(itemStack)
                         .execute(true)
-        );
+            ), 1L);
     }
 
     private String getStringLocation(){
