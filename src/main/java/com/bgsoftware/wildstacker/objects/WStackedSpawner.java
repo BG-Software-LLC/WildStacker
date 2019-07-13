@@ -32,13 +32,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         super(creatureSpawner, stackAmount);
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-            SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location = '" + getStringLocation() + "';", () -> {
-                Bukkit.broadcastMessage(getStackAmount() + "");
+            SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location = '" + getStringLocation() + "';", () ->
                 Query.SPAWNER_INSERT.getStatementHolder()
                         .setString(getStringLocation())
                         .setInt(getStackAmount())
-                        .execute(true);
-            }), 1L);
+                        .execute(true)
+            ), 1L);
     }
 
     private String getStringLocation(){
