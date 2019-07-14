@@ -17,6 +17,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("RedundantIfStatement")
@@ -252,27 +253,42 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
         int range = plugin.getSettings().spawnersCheckRange;
 
-        Location location = getLocation();
+        List<Chunk> chunksToScan = new ArrayList<>();
 
+        Location location = getLocation();
         int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
         int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
 
-        if(chunkMerge) {
-            minX = 0; maxX = 16;
-            minZ = 0; maxZ = 16;
+        if(chunkMerge){
+            chunksToScan.add(location.getChunk());
+            minX = location.getChunk().getX() * 16;
+            maxX = location.getChunk().getX() * 16 + 15;
+            minZ = location.getChunk().getZ() * 16;
+            maxZ = location.getChunk().getZ() * 16 + 15;
         }
-
-        for (int y = maxY; y >= minY; y--) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = chunkMerge ? location.getChunk().getBlock(x, y, z) : location.getWorld().getBlockAt(x, y, z);
-                    if (block.getState() instanceof CreatureSpawner && !block.getLocation().equals(location)) {
-                        StackedSpawner stackedSpawner = WStackedSpawner.of(block);
-                        if (canStackIntoNoLimit(stackedSpawner))
-                            stackedSpawners.add(stackedSpawner);
-                    }
+        else{
+            Location minLocation = new Location(location.getWorld(), minX, 0, minZ);
+            Location maxLocation = new Location(location.getWorld(), maxX, 0, maxZ);
+            for(int x = minLocation.getChunk().getX(); x <= maxLocation.getChunk().getX(); x++){
+                for(int z = minLocation.getChunk().getZ(); z <= maxLocation.getChunk().getZ(); z++){
+                    chunksToScan.add(location.getWorld().getChunkAt(x, z));
                 }
             }
+        }
+
+        final int MAX_X = maxX, MIN_X = minX, MAX_Z = maxZ, MIN_Z = minZ;
+
+        for(Chunk chunk : chunksToScan){
+            Arrays.stream(chunk.getTileEntities())
+                    .filter(blockState -> blockState instanceof CreatureSpawner &&
+                            blockState.getX() >= MIN_X && blockState.getX() <= MAX_X &&
+                            blockState.getY() >= minY && blockState.getY() <= maxY &&
+                            blockState.getZ() >= MIN_Z && blockState.getZ() <= MAX_Z)
+                    .forEach(blockState -> {
+                        StackedSpawner stackedSpawner = WStackedSpawner.of(blockState.getBlock());
+                        if (canStackIntoNoLimit(stackedSpawner))
+                            stackedSpawners.add(stackedSpawner);
+                    });
         }
 
         return stackedSpawners;
