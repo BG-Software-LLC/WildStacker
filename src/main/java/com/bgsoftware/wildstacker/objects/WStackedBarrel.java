@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -30,19 +29,15 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         super(block, stackAmount);
         this.barrelItem = itemStack;
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-            SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + getStringLocation() + "';", () ->
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if(getLocation().getBlock().getType() == Material.CAULDRON){
                 Query.BARREL_INSERT.getStatementHolder()
-                        .setString(getStringLocation())
+                        .setLocation(getLocation())
                         .setInt(getStackAmount())
                         .setItemStack(itemStack)
-                        .execute(true)
-            ), 1L);
-    }
-
-    private String getStringLocation(){
-        Location location = getLocation();
-        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+                        .execute(true);
+            }
+        }, 1L);
     }
 
     @Override
@@ -50,7 +45,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         super.setStackAmount(stackAmount, updateName);
         Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())
-                .setString(getStringLocation())
+                .setLocation(getLocation())
                 .execute(true);
     }
 
@@ -105,7 +100,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         plugin.getSystemManager().removeStackObject(this);
 
         Query.BARREL_DELETE.getStatementHolder()
-                .setString(getStringLocation())
+                .setLocation(getLocation())
                 .execute(true);
 
         plugin.getProviders().deleteHologram(this);

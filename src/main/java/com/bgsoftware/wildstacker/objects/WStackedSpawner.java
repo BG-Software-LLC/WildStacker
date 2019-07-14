@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
@@ -32,18 +31,14 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
         super(creatureSpawner, stackAmount);
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-            SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location = '" + getStringLocation() + "';", () ->
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if(getLocation().getBlock().getState() instanceof CreatureSpawner){
                 Query.SPAWNER_INSERT.getStatementHolder()
-                        .setString(getStringLocation())
+                        .setLocation(getLocation())
                         .setInt(getStackAmount())
-                        .execute(true)
-            ), 1L);
-    }
-
-    private String getStringLocation(){
-        Location location = getLocation();
-        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+                        .execute(true);
+            }
+        }, 1L);
     }
 
     @Override
@@ -51,7 +46,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         super.setStackAmount(stackAmount, updateName);
         Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())
-                .setString(getStringLocation())
+                .setLocation(getLocation())
                 .execute(true);
     }
 
@@ -107,7 +102,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         plugin.getSystemManager().removeStackObject(this);
 
         Query.SPAWNER_DELETE.getStatementHolder()
-                .setString(getStringLocation())
+                .setLocation(getLocation())
                 .execute(true);
 
         plugin.getProviders().deleteHologram(this);

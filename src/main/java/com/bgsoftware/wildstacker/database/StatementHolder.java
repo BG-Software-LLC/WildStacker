@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.Executor;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.PreparedStatement;
@@ -58,6 +59,11 @@ public class StatementHolder {
 
     public StatementHolder setItemStack(ItemStack itemStack){
         values.put(currentIndex++, plugin.getNMSAdapter().serialize(itemStack));
+        return this;
+    }
+
+    public StatementHolder setLocation(Location loc){
+        values.put(currentIndex++, loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
         return this;
     }
 
