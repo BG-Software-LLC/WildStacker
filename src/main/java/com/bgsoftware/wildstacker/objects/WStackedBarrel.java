@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -31,11 +32,13 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(getLocation().getBlock().getType() == Material.CAULDRON){
-                Query.BARREL_INSERT.getStatementHolder()
+                SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(getLocation()) + "';", () ->
+                    Query.BARREL_INSERT.getStatementHolder()
                         .setLocation(getLocation())
                         .setInt(getStackAmount())
                         .setItemStack(itemStack)
-                        .execute(true);
+                        .execute(true)
+                );
             }
         }, 1L);
     }

@@ -11,7 +11,9 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
+import com.bgsoftware.wildstacker.database.StatementHolder;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -378,21 +380,19 @@ public final class SystemHandler implements SystemManager {
         });
 
         if(entityAmounts.size() > 0) {
-            StringBuilder entityStatement = new StringBuilder("INSERT INTO entities VALUES ");
+            StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
             entityAmounts.forEach((uuid, stackAmount) -> {
                 SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-                entityStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append(", '").append(spawnCause.name()).append("'),");
+                entityHolder.setString(uuid.toString()).setInt(stackAmount).setString(spawnCause.name()).addBatch();
             });
-            entityStatement.setCharAt(entityStatement.length() - 1, ';');
-            SQLHelper.executeUpdate(entityStatement.toString());
+            entityHolder.execute(false);
         }
 
         if(itemAmounts.size() > 0) {
-            StringBuilder itemStatement = new StringBuilder("INSERT INTO items VALUES ");
+            StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
             itemAmounts.forEach((uuid, stackAmount) ->
-                    itemStatement.append("('").append(uuid.toString()).append("', ").append(stackAmount).append("),"));
-            itemStatement.setCharAt(itemStatement.length() - 1, ';');
-            SQLHelper.executeUpdate(itemStatement.toString());
+                    itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch());
+            itemHolder.execute(false);
         }
     }
 

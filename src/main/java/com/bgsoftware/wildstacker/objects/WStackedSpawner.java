@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
@@ -33,10 +34,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if(getLocation().getBlock().getState() instanceof CreatureSpawner){
-                Query.SPAWNER_INSERT.getStatementHolder()
+                SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location ='" + SQLHelper.getLocation(getLocation()) + "';", () ->
+                    Query.SPAWNER_INSERT.getStatementHolder()
                         .setLocation(getLocation())
                         .setInt(getStackAmount())
-                        .execute(true);
+                        .execute(true)
+                );
             }
         }, 1L);
     }

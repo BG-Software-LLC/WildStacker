@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.utils.Executor;
+import org.bukkit.Location;
 
 import java.io.File;
 import java.sql.Connection;
@@ -58,6 +59,26 @@ public class SQLHelper {
             if(!doesConditionExist(statement))
                 runnable.run();
         });
+    }
+
+    public static String getLocation(Location loc){
+        return loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+    }
+
+    public static void setAutoCommit(boolean autoCommit){
+        try {
+            conn.setAutoCommit(autoCommit);
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void commit(){
+        try {
+            conn.commit();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
     }
 
     public static void executeQuery(String statement, QueryCallback callback){

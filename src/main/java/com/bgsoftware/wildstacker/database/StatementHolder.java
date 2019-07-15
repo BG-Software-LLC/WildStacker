@@ -7,12 +7,16 @@ import org.bukkit.inventory.ItemStack;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StatementHolder {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private final List<Map<Integer, Object>> batches = new ArrayList<>();
 
     private final String query;
     private final Map<Integer, Object> values = new HashMap<>();
@@ -63,8 +67,16 @@ public class StatementHolder {
     }
 
     public StatementHolder setLocation(Location loc){
-        values.put(currentIndex++, loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
+        values.put(currentIndex++, SQLHelper.getLocation(loc));
         return this;
+    }
+
+    public void addBatch(){
+        if(batches.isEmpty())
+            SQLHelper.setAutoCommit(false);
+        batches.add(new HashMap<>(values));
+        values.clear();
+        currentIndex = 1;
     }
 
     public void execute(boolean async) {
@@ -75,12 +87,25 @@ public class StatementHolder {
 
         String errorQuery = query;
         try(PreparedStatement preparedStatement = SQLHelper.buildStatement(query)){
-            for(Map.Entry<Integer, Object> entry : values.entrySet()) {
-                preparedStatement.setObject(entry.getKey(), entry.getValue());
-                errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
+            if(!batches.isEmpty()){
+                for (Map<Integer, Object> values : batches) {
+                    for (Map.Entry<Integer, Object> entry : values.entrySet()) {
+                        preparedStatement.setObject(entry.getKey(), entry.getValue());
+                        errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
+                    }
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+                SQLHelper.commit();
+                SQLHelper.setAutoCommit(true);
             }
-
-            preparedStatement.executeUpdate();
+            else {
+                for (Map.Entry<Integer, Object> entry : values.entrySet()) {
+                    preparedStatement.setObject(entry.getKey(), entry.getValue());
+                    errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
+                }
+                preparedStatement.executeUpdate();
+            }
         }catch(SQLException ex){
             WildStackerPlugin.log("Failed to execute query " + errorQuery);
             ex.printStackTrace();
