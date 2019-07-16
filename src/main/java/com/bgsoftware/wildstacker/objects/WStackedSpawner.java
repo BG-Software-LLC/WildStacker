@@ -32,16 +32,18 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
         super(creatureSpawner, stackAmount);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if(getLocation().getBlock().getState() instanceof CreatureSpawner){
-                SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location ='" + SQLHelper.getLocation(getLocation()) + "';", () ->
-                    Query.SPAWNER_INSERT.getStatementHolder()
-                        .setLocation(getLocation())
-                        .setInt(getStackAmount())
-                        .execute(true)
-                );
-            }
-        }, 1L);
+        if(plugin.getSettings().spawnersStackingEnabled) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (getLocation().getBlock().getState() instanceof CreatureSpawner) {
+                    SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location ='" + SQLHelper.getLocation(getLocation()) + "';", () ->
+                            Query.SPAWNER_INSERT.getStatementHolder()
+                                    .setLocation(getLocation())
+                                    .setInt(getStackAmount())
+                                    .execute(true)
+                    );
+                }
+            }, 1L);
+        }
     }
 
     @Override

@@ -30,17 +30,19 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         super(block, stackAmount);
         this.barrelItem = itemStack;
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if(getLocation().getBlock().getType() == Material.CAULDRON){
-                SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(getLocation()) + "';", () ->
-                    Query.BARREL_INSERT.getStatementHolder()
-                        .setLocation(getLocation())
-                        .setInt(getStackAmount())
-                        .setItemStack(itemStack)
-                        .execute(true)
-                );
-            }
-        }, 1L);
+        if(plugin.getSettings().barrelsStackingEnabled) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (getLocation().getBlock().getType() == Material.CAULDRON) {
+                    SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(getLocation()) + "';", () ->
+                            Query.BARREL_INSERT.getStatementHolder()
+                                    .setLocation(getLocation())
+                                    .setInt(getStackAmount())
+                                    .setItemStack(itemStack)
+                                    .execute(true)
+                    );
+                }
+            }, 1L);
+        }
     }
 
     @Override
