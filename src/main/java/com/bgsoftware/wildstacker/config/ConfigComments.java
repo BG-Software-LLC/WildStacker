@@ -25,12 +25,6 @@ public final class ConfigComments {
     public static String INSPECT_TOOL = "inspect-tool";
 
     @Comment("")
-    @Comment("What data handler should be used?")
-    @Comment("Use the followings: SQL, FILE")
-    @Comment("Warning: You can't move change data handlers, or data will be deleted.")
-    public static String DATA_HANDLER = "data-handler";
-
-    @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";
 
