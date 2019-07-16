@@ -88,13 +88,10 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
-        EntityDamageEvent lastDamageCause = e.getEntity().getLastDamageCause();
-
-        //Checks if the damage is null
-        if(lastDamageCause != null)
+        //Checks if the entity is not a corpse.
+        if(e.getEntity().hasMetadata("corpse"))
             return;
 
-        //EntityDamageEvent is null - it was killed by 'CUSTOM'
         //Calling the onEntityLastDamage function with default parameters.
 
         //noinspection unchecked
