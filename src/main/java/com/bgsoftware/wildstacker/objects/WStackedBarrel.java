@@ -41,7 +41,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                                     .execute(true)
                     );
                 }
-            }, 1L);
+            }, 2L);
         }
     }
 

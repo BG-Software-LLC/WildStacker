@@ -15,7 +15,7 @@ public enum Query {
     SPAWNER_INSERT("INSERT INTO spawners VALUES(?, ?);"),
     SPAWNER_DELETE("DELETE FROM spawners WHERE location=?;"),
 
-    BARREL_UPDATE_STACK_AMOUNT("UPDATE spawners SET stackAmount=? WHERE location=?;"),
+    BARREL_UPDATE_STACK_AMOUNT("UPDATE barrels SET stackAmount=? WHERE location=?;"),
     BARREL_INSERT("INSERT INTO barrels VALUES(?, ?, ?);"),
     BARREL_DELETE("DELETE FROM barrels WHERE location=?;");
 
