@@ -356,7 +356,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         LivingEntity _duplicate;
 
-        if((_duplicate = MythicMobsHook.tryDuplicate(object)) != null) {
+        if(getSpawnCause() == SpawnCause.MYTHIC_MOBS && (_duplicate = MythicMobsHook.tryDuplicate(object)) != null) {
             StackedEntity duplicate = WStackedEntity.of(_duplicate);
             duplicate.setStackAmount(amount, true);
             return duplicate;
