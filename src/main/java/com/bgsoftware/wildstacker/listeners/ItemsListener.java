@@ -2,9 +2,12 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.listeners.events.EggLayEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.Executor;
 import org.bukkit.Bukkit;
@@ -69,6 +72,14 @@ public final class ItemsListener implements Listener {
             if(isChunkLimit(e.getLocation().getChunk()))
                 stackedItem.remove();
         }, 2L);
+    }
+
+    @EventHandler
+    public void onEggLay(EggLayEvent e){
+        StackedEntity stackedEntity = WStackedEntity.of(e.getChicken());
+        ItemStack eggItem = e.getEgg().getItemStack();
+        eggItem.setAmount(stackedEntity.getStackAmount());
+        e.getEgg().setItemStack(eggItem);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -21,11 +21,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Chicken;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
@@ -248,6 +250,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
                 return 0;
             }
         }
+    }
+
+    @Override
+    public int getEggLayTime(Chicken chicken) {
+        return ((CraftChicken) chicken).getHandle().bI;
     }
 
     private class EventablePathfinderGoalBreed extends PathfinderGoalBreed {

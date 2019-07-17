@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms;
 
 import com.google.common.base.Predicate;
 import org.bukkit.World;
+import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -47,5 +48,7 @@ public interface NMSAdapter {
     Random getWorldRandom(World world);
 
     int getNBTInteger(Object nbtTag);
+
+    int getEggLayTime(Chicken chicken);
 
 }
