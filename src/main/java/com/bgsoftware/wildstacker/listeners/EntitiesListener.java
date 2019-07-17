@@ -291,7 +291,7 @@ public final class EntitiesListener implements Listener {
                 }else{
                     stackedEntity.tryStack();
                 }
-            });
+            }, 0L);
         }
     }
 
