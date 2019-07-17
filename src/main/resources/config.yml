@@ -9,7 +9,7 @@
 # {0} represents stack size
 # {1} represents entity/block type
 # {2} represents item type (Egg / Spawner / Barrel)
-give-item-name: '&6&lx{0} &7&l{1} {2}'
+give-item-name: '&6x{0} &f&o{1} {2}'
 
 # The inspect tool of the plugin.
 # When clicking an item, entity, barrel or spawner, all the information
@@ -33,7 +33,7 @@ items:
   # {0} represents stack amount
   # {1} represents display name
   # {2} represents display name in upper case
-  custom-name: '&6&lx{0} &7&l{1}'
+  custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted items are items that won't get stacked.
   # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
@@ -126,7 +126,7 @@ entities:
   # {0} represents stack amount
   # {1} represents entity type
   # {2} represents entity type in upper case
-  custom-name: '&6&lx{0} &7&l{1}'
+  custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted entities are entities that won't get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
@@ -323,7 +323,7 @@ spawners:
   # {0} represents stack amount
   # {1} represents entity type
   # {2} represents entity type in upper case
-  custom-name: '&6&lx{0} &7&l{1}'
+  custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted spawners are spawners that won't get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
@@ -431,15 +431,15 @@ spawners:
     break-slots:
       '11':
         type: MOB_SPAWNER
-        name: '&6&lx64 Spawners'
+        name: '&6x64 &f&oSpawners'
         amount: 64
       '13':
         type: MOB_SPAWNER
-        name: '&6&lx128 Spawners'
+        name: '&6x128 &f&oSpawners'
         amount: 128
       '15':
         type: MOB_SPAWNER
-        name: '&6&lx256 Spawners'
+        name: '&6x256 &f&oSpawners'
         amount: 256
 
   # When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there
@@ -491,7 +491,7 @@ barrels:
   # {0} represents stack amount
   # {1} represents barrel type
   # {2} represents barrel type in upper case
-  custom-name: '&6&lx{0} &7&l{1}'
+  custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted barrels are barrels that won't get stacked.
   # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
