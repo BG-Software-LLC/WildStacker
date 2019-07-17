@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.ItemStackList;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.google.common.base.Functions;
@@ -138,7 +137,7 @@ public final class EntitiesListener implements Listener {
                 }
 
                 Executor.async(() -> {
-                    List<ItemStack> drops = new ItemStackList(stackedEntity.getDrops(lootBonusLevel, stackAmount)).toList();
+                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));
                 });
 
