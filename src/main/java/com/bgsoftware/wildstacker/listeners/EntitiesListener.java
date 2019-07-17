@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class EntitiesListener implements Listener {
@@ -162,6 +163,8 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    private int mooshroomFlag = -1;
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e){
         if(!plugin.getSettings().entitiesStackingEnabled)
@@ -172,6 +175,11 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setSpawnCause(SpawnCause.valueOf(e.getSpawnReason()));
+
+        if(mooshroomFlag != -1){
+            stackedEntity.setStackAmount(mooshroomFlag, true);
+            mooshroomFlag = -1;
+        }
 
         if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
             return;
@@ -266,32 +274,42 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getSettings().entitiesStackingEnabled || !(e.getEntity() instanceof LivingEntity))
             return;
 
-        if(!StackSplit.MUSHROOM_SHEAR.isEnabled() && e.getEntity() instanceof MushroomCow)
-            return;
-
-        if(!StackSplit.SHEEP_SHEAR.isEnabled() && e.getEntity() instanceof Sheep)
-            return;
-
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         if(e.getEntity() instanceof MushroomCow){
-            stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
-            stackedEntity.remove();
+            if(StackSplit.MUSHROOM_SHEAR.isEnabled()) {
+                stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
+                stackedEntity.remove();
+            }
+            else{
+                int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
+                ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
+                ItemUtil.dropItem(mushroomItem, e.getEntity().getLocation());
+                mooshroomFlag = stackedEntity.getStackAmount();
+            }
         }
 
         else if(e.getEntity() instanceof Sheep){
-            int amount = stackedEntity.getStackAmount();
-            Executor.sync(() -> {
-                if(amount > 1) {
-                    ((Sheep) e.getEntity()).setSheared(false);
-                    stackedEntity.setStackAmount(amount - 1, true);
-                    StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
-                    ((Sheep) duplicate.getLivingEntity()).setSheared(true);
-                    duplicate.tryStack();
-                }else{
-                    stackedEntity.tryStack();
-                }
-            }, 0L);
+            int stackAmount = stackedEntity.getStackAmount();
+            if(StackSplit.SHEEP_SHEAR.isEnabled()) {
+                Executor.sync(() -> {
+                    if (stackAmount > 1) {
+                        ((Sheep) e.getEntity()).setSheared(false);
+                        stackedEntity.setStackAmount(stackAmount - 1, true);
+                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                        ((Sheep) duplicate.getLivingEntity()).setSheared(true);
+                        duplicate.tryStack();
+                    } else {
+                        stackedEntity.tryStack();
+                    }
+                }, 0L);
+            }
+            else{
+                int woolAmount = ThreadLocalRandom.current().nextInt(2 * (stackAmount - 1)) + stackAmount - 1;
+                ItemStack woolItem = Materials.getWool((((Sheep) e.getEntity()).getColor()));
+                woolItem.setAmount(woolAmount);
+                ItemUtil.dropItem(woolItem, e.getEntity().getLocation());
+            }
         }
     }
 

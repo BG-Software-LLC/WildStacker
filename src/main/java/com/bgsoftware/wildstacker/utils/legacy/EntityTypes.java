@@ -38,7 +38,7 @@ public enum  EntityTypes {
     LLAMA,
     MAGMA_CUBE,
     MULE("HORSE"),
-    MUSHROOM_COW,
+    MOOSHROOM("MUSHROOM_COW"),
     OCELOT,
     PANDA,
     PARROT,
