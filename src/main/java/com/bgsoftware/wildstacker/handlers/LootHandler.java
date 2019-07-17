@@ -193,6 +193,7 @@ public final class LootHandler {
             Field field = WildStackerPlugin.class.getDeclaredField("lootHandler");
             field.setAccessible(true);
             field.set(plugin, new LootHandler(plugin));
+            plugin.getLootHandler().initLootTableCustom(plugin.getProviders().getDropsProvider());
         }catch(NoSuchFieldException | IllegalAccessException ex){
             ex.printStackTrace();
         }
