@@ -381,7 +381,7 @@ spawners:
     # If you don't want a custom name, use "custom-name: ''"
     # {0} represents stack amount
     # {1} represents entity type
-    custom-name: '&fx{0} &e{1} &fSpawners'
+    custom-name: '&6x{0} &f&o{1} Spawners'
 
     # Should explosions act like silk-touch and drop the spawner?
     explosions-drop-spawner: true
