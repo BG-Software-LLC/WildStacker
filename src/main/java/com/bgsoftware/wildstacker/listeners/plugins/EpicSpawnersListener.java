@@ -31,7 +31,7 @@ public final class EpicSpawnersListener implements Listener {
         boolean canBeStacked = plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled();
 
         if(!canBeStacked) {
-            plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), SpawnCause.MYTHIC_MOBS);
+            plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), SpawnCause.EPIC_SPAWNERS);
         }
 
         else{
