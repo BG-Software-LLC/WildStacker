@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CustomBossesHook;
+import com.bgsoftware.wildstacker.hooks.EpicBossesHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
@@ -398,6 +399,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         if(spawnCause == SpawnCause.CUSTOM_BOSSES && tempLootTable == null)
             tempLootTable = CustomBossesHook.getLootTable();
+
+        if(spawnCause == SpawnCause.EPIC_BOSSES && tempLootTable == null)
+            tempLootTable = EpicBossesHook.getLootTable();
 
         if(tempLootTable != null){
             drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
