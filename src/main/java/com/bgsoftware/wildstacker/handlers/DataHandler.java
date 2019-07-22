@@ -271,7 +271,8 @@ public final class DataHandler {
                 int stackAmount = resultSet.getInt("stackAmount");
                 Block barrelBlock = blockLocation.getBlock();
 
-                ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
+                        plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
                 StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
                 CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
             }
