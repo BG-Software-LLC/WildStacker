@@ -37,7 +37,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                             Query.BARREL_INSERT.getStatementHolder()
                                     .setLocation(getLocation())
                                     .setInt(getStackAmount())
-                                    .setItemStack(itemStack)
+                                    .setItemStack(getBarrelItem(1))
                                     .execute(true)
                     );
                 }
