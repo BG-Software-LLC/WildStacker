@@ -38,6 +38,7 @@ public enum SpawnCause {
     MYTHIC_MOBS,
     CUSTOM_BOSSES,
     EPIC_BOSSES,
+    EPIC_BOSSES_MINION,
     EPIC_SPAWNERS;
 
     public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason){

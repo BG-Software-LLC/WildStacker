@@ -200,7 +200,7 @@ public final class EntitiesListener implements Listener {
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
                 e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
-                Bukkit.getPluginManager().isPluginEnabled("MythicMobs"))
+                Bukkit.getPluginManager().isPluginEnabled("MythicMobs") || Bukkit.getPluginManager().isPluginEnabled("EpicBosses"))
             Executor.sync(stackedEntity::tryStack, 1L);
         else
             stackedEntity.tryStack();
