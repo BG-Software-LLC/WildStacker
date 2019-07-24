@@ -1,15 +1,11 @@
 package com.bgsoftware.wildstacker.loot.custom;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.loot.LootTable;
-import com.bgsoftware.wildstacker.utils.ItemUtil;
 import net.aminecraftdev.customdrops.CustomDropsAPI;
 import net.aminecraftdev.customdrops.manager.CustomDropsManager;
 import net.aminecraftdev.customdrops.utils.AbstractHolder;
 import net.aminecraftdev.customdrops.utils.itemstack.ItemStackUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -35,11 +31,6 @@ public final class LootTableCustomDrops extends LootTableCustom {
                     .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
                     .collect(Collectors.toList()));
         }
-
-        //CustomDrops doesn't take items from the event, we need to drop the items.
-        Location entityLocation = stackedEntity.getLivingEntity().getLocation();
-        Bukkit.getScheduler().runTask(WildStackerPlugin.getPlugin(), () ->
-                drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, entityLocation)));
 
         return drops;
     }
