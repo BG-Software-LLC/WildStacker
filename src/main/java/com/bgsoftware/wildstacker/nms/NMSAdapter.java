@@ -41,7 +41,11 @@ public interface NMSAdapter {
 
     ItemStack setTag(ItemStack itemStack, String key, Object value);
 
+    <T> T getTag(ItemStack itemStack, String key, Class<T> valueType);
+
     int getEntityExp(LivingEntity livingEntity);
+
+    void updateLastDamageTime(LivingEntity livingEntity);
 
     void setHealthDirectly(LivingEntity livingEntity, double health);
 

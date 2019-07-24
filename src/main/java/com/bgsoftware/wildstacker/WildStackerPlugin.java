@@ -36,7 +36,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.ReflectionUtil;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,6 +64,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     public void onEnable() {
         plugin = this;
         new Metrics(this);
+        ReflectionUtil.init();
 
         log("******** ENABLE START ********");
 

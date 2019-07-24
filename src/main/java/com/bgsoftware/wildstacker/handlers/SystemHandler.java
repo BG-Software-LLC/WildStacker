@@ -24,8 +24,8 @@ import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
-import com.bgsoftware.wildstacker.utils.ReflectionUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -440,29 +440,18 @@ public final class SystemHandler implements SystemManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause) {
-        try{
-            World world = location.getWorld();
+        World world = location.getWorld();
 
-            Class craftWorldClass = ReflectionUtil.getBukkitClass("CraftWorld");
-            Object craftWorld = craftWorldClass.cast(world);
+        Object entity = Methods.WORLD_CREATE_ENTITY.invoke(world, location, type);
+        Entity bukkitEntity = (Entity) Methods.ENTITY_GET_BUKKIT_ENTITY.invoke(entity);
 
-            Class entityClass = ReflectionUtil.getNMSClass("Entity");
+        EntitiesListener.noStackEntities.add(bukkitEntity.getUniqueId());
 
-            Object entity = craftWorldClass.getMethod("createEntity", Location.class, Class.class).invoke(craftWorld, location, type);
+        Methods.WORLD_ADD_ENTITY.invoke(world, entity, spawnCause.toSpawnReason());
 
-            Entity bukkitEntity = (Entity) entity.getClass().getMethod("getBukkitEntity").invoke(entity);
+        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
-            EntitiesListener.noStackEntities.add(bukkitEntity.getUniqueId());
-
-            craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class).invoke(craftWorld, entity, spawnCause.toSpawnReason());
-
-            WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
-
-            return type.cast(bukkitEntity);
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return null;
-        }
+        return type.cast(bukkitEntity);
     }
 
     @Override

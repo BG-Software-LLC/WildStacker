@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.google.common.base.Predicate;
 import net.minecraft.server.v1_11_R1.EnchantmentManager;
 import net.minecraft.server.v1_11_R1.Entity;
@@ -37,7 +38,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,22 +203,48 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     }
 
     @Override
-    public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        int exp = 0;
+    public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType) {
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        try{
-            Field expField = EntityInsentient.class.getDeclaredField("b_");
-            expField.setAccessible(true);
-            int defaultEntityExp = (int) expField.get(entityLiving);
-            exp = entityLiving.getExpReward();
-            expField.set(entityLiving, defaultEntityExp);
-            expField.setAccessible(false);
-        }catch(Exception ex){
-            ex.printStackTrace();
+        if(tagCompound != null) {
+            if (valueType.equals(Boolean.class))
+                return valueType.cast(tagCompound.getBoolean(key));
+            else if (valueType.equals(Integer.class))
+                return valueType.cast(tagCompound.getInt(key));
+            else if (valueType.equals(String.class))
+                return valueType.cast(tagCompound.getString(key));
+            else if (valueType.equals(Double.class))
+                return valueType.cast(tagCompound.getDouble(key));
+            else if (valueType.equals(Short.class))
+                return valueType.cast(tagCompound.getShort(key));
+            else if (valueType.equals(Byte.class))
+                return valueType.cast(tagCompound.getByte(key));
+            else if (valueType.equals(Float.class))
+                return valueType.cast(tagCompound.getFloat(key));
+            else if (valueType.equals(Long.class))
+                return valueType.cast(tagCompound.getLong(key));
         }
 
+        throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
+    }
+
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+
+        int exp = entityLiving.getExpReward();
+        int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
+
+        Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
+
         return exp;
+    }
+
+    @Override
+    public void updateLastDamageTime(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
     }
 
     @Override
@@ -266,28 +292,14 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         @Override
         public void e() {
             super.e();
-            try {
-                Field bField = PathfinderGoalBreed.class.getDeclaredField("b");
-                bField.setAccessible(true);
-                int b = (int) bField.get(this);
-                bField.setAccessible(false);
 
-                Field animalField = PathfinderGoalBreed.class.getDeclaredField("animal");
-                animalField.setAccessible(true);
-                EntityAnimal animal = (EntityAnimal) animalField.get(this);
-                animalField.setAccessible(false);
+            int b = Fields.PATHFINDER_GOAL_BREED_B.get(this, Integer.class);
+            EntityAnimal animal = Fields.PATHFINDER_GOAL_BREED_ANIMAL.get(this, EntityAnimal.class);
+            EntityAnimal partner = Fields.PATHFINDER_GOAL_BREED_PARTNER.get(this, EntityAnimal.class);
 
-                Field partnerField = PathfinderGoalBreed.class.getDeclaredField("partner");
-                partnerField.setAccessible(true);
-                EntityAnimal partner = (EntityAnimal) partnerField.get(this);
-                partnerField.setAccessible(false);
-
-                if (b >= 60 && animal.h(partner) < 9.0D){
-                    EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
-                    Bukkit.getPluginManager().callEvent(event);
-                }
-            }catch(Exception ex){
-                ex.printStackTrace();
+            if (b >= 60 && animal.h(partner) < 9.0D){
+                EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
+                Bukkit.getPluginManager().callEvent(event);
             }
         }
     }

@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.google.common.base.Predicate;
 import net.minecraft.server.v1_13_R1.ChatMessage;
 import net.minecraft.server.v1_13_R1.EnchantmentManager;
@@ -37,7 +38,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,22 +203,48 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     }
 
     @Override
-    public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        int exp = 0;
+    public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType) {
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        try{
-            Field expField = EntityInsentient.class.getDeclaredField("b_");
-            expField.setAccessible(true);
-            int defaultEntityExp = (int) expField.get(entityLiving);
-            exp = entityLiving.getExpReward();
-            expField.set(entityLiving, defaultEntityExp);
-            expField.setAccessible(false);
-        }catch(Exception ex){
-            ex.printStackTrace();
+        if(tagCompound != null) {
+            if (valueType.equals(Boolean.class))
+                return valueType.cast(tagCompound.getBoolean(key));
+            else if (valueType.equals(Integer.class))
+                return valueType.cast(tagCompound.getInt(key));
+            else if (valueType.equals(String.class))
+                return valueType.cast(tagCompound.getString(key));
+            else if (valueType.equals(Double.class))
+                return valueType.cast(tagCompound.getDouble(key));
+            else if (valueType.equals(Short.class))
+                return valueType.cast(tagCompound.getShort(key));
+            else if (valueType.equals(Byte.class))
+                return valueType.cast(tagCompound.getByte(key));
+            else if (valueType.equals(Float.class))
+                return valueType.cast(tagCompound.getFloat(key));
+            else if (valueType.equals(Long.class))
+                return valueType.cast(tagCompound.getLong(key));
         }
 
+        throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
+    }
+
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+
+        int exp = entityLiving.getExpReward();
+        int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
+
+        Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
+
         return exp;
+    }
+
+    @Override
+    public void updateLastDamageTime(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
     }
 
     @Override

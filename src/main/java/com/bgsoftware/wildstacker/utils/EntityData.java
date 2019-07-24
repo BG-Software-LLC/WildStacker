@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackCheck;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.MetadataValue;
 
@@ -39,16 +40,9 @@ public final class EntityData {
     public boolean equals(Object obj) {
         if(obj instanceof EntityData){
             EntityData other = (EntityData) obj;
-            Map map, otherMap;
 
-            try {
-                Class nbtTagClass = ReflectionUtil.getNMSClass("NBTTagCompound");
-                map = (Map) ReflectionUtil.getField("map", nbtTagClass).get(nbtTagCompound);
-                otherMap = (Map) ReflectionUtil.getField("map", nbtTagClass).get(other.nbtTagCompound);
-            }catch(Exception ex){
-                ex.printStackTrace();
-                return false;
-            }
+            Map map = Fields.NBT_TAG_MAP.get(nbtTagCompound, Map.class);
+            Map otherMap = Fields.NBT_TAG_MAP.get(other.nbtTagCompound, Map.class);
 
             if(StackCheck.AGE.isEnabled()){
                 if(map.containsKey("Age") != otherMap.containsKey("Age"))

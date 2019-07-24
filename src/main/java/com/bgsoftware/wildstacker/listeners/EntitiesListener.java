@@ -145,6 +145,8 @@ public final class EntitiesListener implements Listener {
                     EntityUtil.setKiller(livingEntity, null);
                 }
 
+                plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
+
                 Executor.async(() -> {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));

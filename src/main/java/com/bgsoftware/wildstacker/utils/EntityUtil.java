@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.utils;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
@@ -64,30 +66,10 @@ public final class EntityUtil {
         return false;
     }
 
-    public static int getEntityExp(LivingEntity livingEntity){
-        int exp = 0;
-
-        try{
-            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
-            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
-            //noinspection unchecked
-            exp = (int) entityLivingClass.getMethod("getExpReward").invoke(entityLiving);
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-
-        return exp;
-    }
-
     public static void setKiller(LivingEntity livingEntity, Player killer){
-        try{
-            Class entityLivingClass = ReflectionUtil.getNMSClass("EntityLiving");
-            Object entityLiving = livingEntity.getClass().getMethod("getHandle").invoke(livingEntity);
-            Object entityHuman = killer == null ? null : killer.getClass().getMethod("getHandle").invoke(killer);
-            entityLivingClass.getField("killer").set(entityLiving, entityHuman);
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
+        Object entityLiving = Methods.ENTITY_GET_HANDLE.invoke(livingEntity);
+        Object entityHuman = Methods.ENTITY_GET_HANDLE.invoke(killer);
+        Fields.ENTITY_KILLER.set(entityLiving, entityHuman);
     }
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})

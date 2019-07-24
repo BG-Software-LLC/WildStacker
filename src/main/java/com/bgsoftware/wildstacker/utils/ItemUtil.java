@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
 public final class ItemUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -80,46 +80,11 @@ public final class ItemUtil {
     }
 
     public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount){
-        try{
-            Class craftItemStack = ReflectionUtil.getBukkitClass("inventory.CraftItemStack");
-
-
-            Object nmsStack = craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, itemStack);
-            Object tag = ReflectionUtil.getNMSClass("NBTTagCompound").newInstance();
-
-            if((boolean) nmsStack.getClass().getMethod("hasTag").invoke(nmsStack)){
-                tag = nmsStack.getClass().getMethod("getTag").invoke(nmsStack);
-            }
-
-            tag.getClass().getMethod("setInt", String.class, int.class).invoke(tag, "spawners-amount", amount);
-
-            nmsStack.getClass().getMethod("setTag", tag.getClass()).invoke(nmsStack, tag);
-
-            return (ItemStack) craftItemStack.getMethod("asBukkitCopy", nmsStack.getClass()).invoke(null, nmsStack);
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-        return itemStack;
+        return plugin.getNMSAdapter().setTag(itemStack, "spawners-amount", amount);
     }
 
     public static int getSpawnerItemAmount(ItemStack itemStack){
-        try{
-            Class craftItemStack = ReflectionUtil.getBukkitClass("inventory.CraftItemStack");
-
-            Object nmsStack = craftItemStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, itemStack);
-            Object tag = ReflectionUtil.getNMSClass("NBTTagCompound").newInstance();
-
-            if((boolean) nmsStack.getClass().getMethod("hasTag").invoke(nmsStack)){
-                tag = nmsStack.getClass().getMethod("getTag").invoke(nmsStack);
-            }
-
-            if((boolean) tag.getClass().getMethod("hasKey", String.class).invoke(tag, "spawners-amount"))
-                return (int) tag.getClass().getMethod("getInt", String.class).invoke(tag, "spawners-amount");
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-
-        return 1;
+        return plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class);
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
@@ -200,24 +165,17 @@ public final class ItemUtil {
 
     @SuppressWarnings("deprecation")
     public static Object getBlockData(Material type, byte data){
-        try{
-            Class craftBlockDataClass = ReflectionUtil.getBukkitClass("block.data.CraftBlockData");
-            Class blockDataClass = ReflectionUtil.getNMSClass("IBlockData");
-            Object iBlockData;
+        Object iBlockData;
 
-            try{
-                int combined = type.getId() + (data << 12);
-                iBlockData = ReflectionUtil.getNMSClass("Block").getMethod("getByCombinedId", int.class).invoke(null, combined);
-            }catch(Exception ex){
-                iBlockData = ReflectionUtil.getBukkitClass("util.CraftMagicNumbers")
-                        .getMethod("getBlock", Material.class, byte.class).invoke(null, type, data);
-            }
-
-            return craftBlockDataClass.getMethod("fromData", blockDataClass).invoke(null, iBlockData);
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return null;
+        if(Methods.BLOCK_GET_BY_COMBINED_ID.exists()){
+            int combined = type.getId() + (data << 12);
+            iBlockData = Methods.BLOCK_GET_BY_COMBINED_ID.invoke(null, combined);
         }
+        else{
+            iBlockData = Methods.MAGIC_GET_BLOCK.invoke(null, type, data);
+        }
+
+        return Methods.BLOCK_DATA_FROM_DATA.invoke(null, iBlockData);
     }
 
     public static boolean stackBucket(ItemStack bucket, Inventory inventory){
