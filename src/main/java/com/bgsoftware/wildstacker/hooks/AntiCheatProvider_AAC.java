@@ -33,7 +33,7 @@ public final class AntiCheatProvider_AAC implements AntiCheatProvider, Listener 
 
     @EventHandler
     public void onPlayerViolation(PlayerViolationEvent e) {
-        if(bypassPlayers.contains(e.getPlayer().getUniqueId()))
+        if(e.getPlayer() != null && bypassPlayers.contains(e.getPlayer().getUniqueId()))
             e.setCancelled(true);
     }
 
