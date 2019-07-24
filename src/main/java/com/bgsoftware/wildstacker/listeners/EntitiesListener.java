@@ -50,6 +50,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -86,11 +87,18 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    private Set<UUID> deadEntities = new HashSet<>();
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
         //Checks if the entity is not a corpse.
         if(e.getEntity().hasMetadata("corpse"))
             return;
+
+        if(deadEntities.contains(e.getEntity().getUniqueId())){
+            deadEntities.remove(e.getEntity().getUniqueId());
+            return;
+        }
 
         //Calling the onEntityLastDamage function with default parameters.
 
@@ -159,6 +167,10 @@ public final class EntitiesListener implements Listener {
                     } catch (IllegalArgumentException ignored) {
                     }
                 }
+
+                deadEntities.add(livingEntity.getUniqueId());
+                EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>());
+                Bukkit.getPluginManager().callEvent(entityDeathEvent);
             }
         }
     }
