@@ -43,18 +43,17 @@ public final class LootTableDropEdit extends LootTableCustom {
 
             Player killer = stackedEntity.getLivingEntity().getKiller();
 
-            if(killer != null) {
-                for (int i = 0; i < stackAmount; i++) {
-                    DropContainer dropContainer = main.getDrops(KeyGetter.getKey(stackedEntity.getType()), stackedEntity.getLivingEntity());
-                    if (dropContainer != null) {
-                        getDrops(dropContainer).stream()
-                                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
-                                .forEach(itemStack -> {
-                                    itemStack.setAmount(Main.getDropMultiplier(killer));
-                                    drops.add(itemStack);
-                                });
+            for (int i = 0; i < stackAmount; i++) {
+                DropContainer dropContainer = main.getDrops(KeyGetter.getKey(stackedEntity.getType()), stackedEntity.getLivingEntity());
+                if (dropContainer != null) {
+                    getDrops(dropContainer).stream()
+                            .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
+                            .forEach(itemStack -> {
+                                itemStack.setAmount(itemStack.getAmount() * (killer == null ? 1 : Main.getDropMultiplier(killer)));
+                                drops.add(itemStack);
+                            });
+                    if(killer != null)
                         getCommands(dropContainer).forEach(cmd -> Main.processCommandTag(cmd, killer));
-                    }
                 }
             }
         }
