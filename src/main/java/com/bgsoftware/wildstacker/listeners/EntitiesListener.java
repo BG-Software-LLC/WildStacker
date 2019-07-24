@@ -149,7 +149,12 @@ public final class EntitiesListener implements Listener {
 
                 Executor.async(() -> {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
-                    Executor.sync(() -> drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation())));
+                    Executor.sync(() -> {
+                        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+                        deadEntities.add(livingEntity.getUniqueId());
+                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>());
+                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                    });
                 });
 
                 int exp = stackedEntity.getExp(stackAmount, -1);
@@ -169,10 +174,6 @@ public final class EntitiesListener implements Listener {
                     } catch (IllegalArgumentException ignored) {
                     }
                 }
-
-                deadEntities.add(livingEntity.getUniqueId());
-                EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>());
-                Bukkit.getPluginManager().callEvent(entityDeathEvent);
             }
         }
     }
