@@ -24,8 +24,6 @@ public interface NMSAdapter {
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
-    void addCustomPathfinderGoalBreed(LivingEntity livingEntity);
-
     @SuppressWarnings("all")
     List<Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super Entity> predicate);
 

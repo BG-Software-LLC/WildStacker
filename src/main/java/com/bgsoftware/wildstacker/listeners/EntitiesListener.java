@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
-import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
@@ -404,24 +403,15 @@ public final class EntitiesListener implements Listener {
         }, 1L);
     }
 
-    @EventHandler
-    public void onEntityBreed(EntityBreedEvent e){
-        if(plugin.getSettings().stackAfterBreed) {
-            StackedEntity motherEntity = WStackedEntity.of(e.getMother());
-            StackedEntity fatherEntity = WStackedEntity.of(e.getFather());
-            if(fatherEntity.tryStackInto(motherEntity)){
-                ((Animals) motherEntity.getLivingEntity()).setBreed(false);
-                motherEntity.tryStack();
-            }
-        }
-    }
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onCreatureSpawn(CreatureSpawnEvent e){
-        if(e.getEntity() instanceof Animals)
-            try{
-                plugin.getNMSAdapter().addCustomPathfinderGoalBreed(e.getEntity());
-            }catch(UnsupportedOperationException ignored){}
+    public void onEntityBreed(CreatureSpawnEvent e){
+        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
+            e.getEntity().getNearbyEntities(5, 5, 5).stream()
+                .filter(entity -> entity instanceof LivingEntity && !(entity instanceof Player))
+                .forEach(entity -> {
+                        if(entity.isValid()) WStackedEntity.of(entity).tryStack();
+                });
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

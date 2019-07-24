@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.listeners.events.EntityBreedEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.google.common.base.Predicate;
@@ -15,17 +14,13 @@ import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagInt;
 import net.minecraft.server.v1_8_R3.NBTTagShort;
-import net.minecraft.server.v1_8_R3.PathfinderGoalBreed;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -125,14 +120,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         }
 
         return equipment;
-    }
-
-    @Override
-    public void addCustomPathfinderGoalBreed(LivingEntity livingEntity) {
-        if(livingEntity instanceof Animals) {
-            EntityAnimal entityLiving = ((CraftAnimals) livingEntity).getHandle();
-            entityLiving.goalSelector.a(2, new EventablePathfinderGoalBreed(entityLiving, 1.0D));
-        }
     }
 
     @Override
@@ -269,27 +256,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     @Override
     public int getEggLayTime(Chicken chicken) {
         return ((CraftChicken) chicken).getHandle().bs;
-    }
-
-    private class EventablePathfinderGoalBreed extends PathfinderGoalBreed{
-
-        private EventablePathfinderGoalBreed(EntityAnimal entityanimal, double d0) {
-            super(entityanimal, d0);
-        }
-
-        @Override
-        public void e() {
-            super.e();
-
-            int b = Fields.PATHFINDER_GOAL_BREED_B.get(this, Integer.class);
-            EntityAnimal animal = Fields.PATHFINDER_GOAL_BREED_ANIMAL.get(this, EntityAnimal.class);
-            EntityAnimal partner = Fields.PATHFINDER_GOAL_BREED_PARTNER.get(this, EntityAnimal.class);
-
-            if (b >= 60 && animal.h(partner) < 9.0D){
-                EntityBreedEvent event = new EntityBreedEvent((LivingEntity) animal.getBukkitEntity(), (LivingEntity) partner.getBukkitEntity());
-                Bukkit.getPluginManager().callEvent(event);
-            }
-        }
     }
 
 }
