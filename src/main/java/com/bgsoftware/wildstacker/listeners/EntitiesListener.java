@@ -242,7 +242,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
-        if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount < 0 ||
+        if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
                 !e.getEntityType().equals(nextEntityType))
             return;
 
