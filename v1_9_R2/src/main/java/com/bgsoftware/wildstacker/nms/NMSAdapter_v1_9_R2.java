@@ -16,6 +16,7 @@ import net.minecraft.server.v1_9_R2.ItemStack;
 import net.minecraft.server.v1_9_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_9_R2.NBTTagCompound;
 import net.minecraft.server.v1_9_R2.NBTTagInt;
+import net.minecraft.server.v1_9_R2.NBTTagShort;
 import net.minecraft.server.v1_9_R2.PathfinderGoalBreed;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -269,7 +270,7 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
 
     @Override
     public int getNBTInteger(Object nbtTag) {
-        return ((NBTTagInt) nbtTag).d();
+        return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).d() : ((NBTTagInt) nbtTag).d();
     }
 
     @Override
