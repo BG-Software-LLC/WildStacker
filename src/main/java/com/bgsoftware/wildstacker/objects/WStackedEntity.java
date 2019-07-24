@@ -234,8 +234,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return false;
 
         if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {
-            if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY())
+            if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
+                targetEntity.tryStackInto(this);
                 return false;
+            }
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
