@@ -30,9 +30,6 @@ public final class ReflectionUtil {
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(version.contains("1_14") ? "f" : "b_"));
-            fieldMap.put(Fields.PATHFINDER_GOAL_BREED_B, pathfinderClass.getDeclaredField("b"));
-            fieldMap.put(Fields.PATHFINDER_GOAL_BREED_ANIMAL, pathfinderClass.getDeclaredField("animal"));
-            fieldMap.put(Fields.PATHFINDER_GOAL_BREED_PARTNER, pathfinderClass.getDeclaredField("partner"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 

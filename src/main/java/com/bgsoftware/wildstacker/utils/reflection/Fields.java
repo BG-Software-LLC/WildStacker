@@ -8,10 +8,6 @@ public enum Fields {
     ENTITY_EXP,
     ENTITY_KILLER,
 
-    PATHFINDER_GOAL_BREED_B,
-    PATHFINDER_GOAL_BREED_ANIMAL,
-    PATHFINDER_GOAL_BREED_PARTNER,
-
     NBT_TAG_MAP;
 
     public <T> T get(Object object, Class<T> clazz){
