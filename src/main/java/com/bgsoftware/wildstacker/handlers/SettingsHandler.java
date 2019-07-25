@@ -9,7 +9,6 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
 import com.bgsoftware.wildstacker.utils.ItemBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -144,8 +143,7 @@ public final class SettingsHandler {
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
 
-        boolean stackingEnable = !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners") && !Bukkit.getPluginManager().isPluginEnabled("MergedSpawner");
-        spawnersStackingEnabled = stackingEnable && cfg.getBoolean("spawners.enabled", true);
+        spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         spawnersDisabledWorlds = cfg.getStringList("spawners.disabled-worlds");
         spawnersCheckRange = cfg.getInt("spawners.merge-radius", 1);
         chunkMergeSpawners = cfg.getBoolean("spawners.chunk-merge", false);
