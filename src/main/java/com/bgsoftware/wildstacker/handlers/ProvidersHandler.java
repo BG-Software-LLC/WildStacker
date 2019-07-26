@@ -66,7 +66,7 @@ public final class ProvidersHandler {
             dropsProvider = DropsProvider.DEFAULT;
         }
 
-        plugin.getLootHandler().initLootTableCustom(dropsProvider);
+        //plugin.getLootHandler().initLootTableCustom(dropsProvider);
 
         if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") &&
                 Bukkit.getPluginManager().getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx"))

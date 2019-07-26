@@ -306,7 +306,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             Executor.sync(() -> {
                 object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
-            }, 1L);
+            }, 2L);
             return true;
         }
 

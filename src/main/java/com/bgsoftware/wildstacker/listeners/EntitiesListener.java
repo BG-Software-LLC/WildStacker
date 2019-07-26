@@ -149,19 +149,22 @@ public final class EntitiesListener implements Listener {
                 Executor.async(() -> {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     Executor.sync(() -> {
-                        drops.forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
                         deadEntities.add(livingEntity.getUniqueId());
-                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>());
+                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
                         Bukkit.getPluginManager().callEvent(entityDeathEvent);
+
+                        //Multiply items that weren't added in the first place
+                        subtract(drops, entityDeathEvent.getDrops()).forEach(itemStack ->
+                                itemStack.setAmount(itemStack.getAmount() * stackAmount));
+
+                        entityDeathEvent.getDrops().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+
+                        if (entityDeathEvent.getDroppedExp() > 0) {
+                            ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
+                            experienceOrb.setExperience(entityDeathEvent.getDroppedExp());
+                        }
                     });
                 });
-
-                int exp = stackedEntity.getExp(stackAmount, -1);
-
-                if (exp > 0) {
-                    ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-                    experienceOrb.setExperience(exp);
-                }
 
                 if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
                     livingEntity.setFireTicks(160);
@@ -175,6 +178,12 @@ public final class EntitiesListener implements Listener {
                 }
             }
         }
+    }
+
+    private List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2){
+        List<ItemStack> toReturn = new ArrayList<>(list2);
+        toReturn.removeAll(list1);
+        return toReturn;
     }
 
     private int mooshroomFlag = -1;
