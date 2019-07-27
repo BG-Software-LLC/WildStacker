@@ -21,7 +21,7 @@ public final class CommandStats implements ICommand {
 
     @Override
     public String getPermission() {
-        return "stacker.stats";
+        return "wildstacker.stats";
     }
 
     @Override
