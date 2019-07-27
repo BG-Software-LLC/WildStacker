@@ -226,8 +226,8 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     public int getEntityExp(LivingEntity livingEntity) {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
 
-        int exp = entityLiving.getExpReward();
         int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
+        int exp = entityLiving.getExpReward();
 
         Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
 
