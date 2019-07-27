@@ -167,11 +167,10 @@ public final class ItemUtil {
     public static Object getBlockData(Material type, byte data){
         Object iBlockData;
 
-        if(Methods.BLOCK_GET_BY_COMBINED_ID.exists()){
+        try{
             int combined = type.getId() + (data << 12);
             iBlockData = Methods.BLOCK_GET_BY_COMBINED_ID.invoke(null, combined);
-        }
-        else{
+        }catch(Exception ex){
             iBlockData = Methods.MAGIC_GET_BLOCK.invoke(null, type, data);
         }
 
