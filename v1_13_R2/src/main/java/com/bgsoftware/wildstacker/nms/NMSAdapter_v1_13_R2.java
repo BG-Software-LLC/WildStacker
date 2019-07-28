@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
-import com.google.common.base.Predicate;
 import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EnchantmentManager;
 import net.minecraft.server.v1_13_R2.Entity;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -121,11 +121,10 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
-    @SuppressWarnings("all")
     public List<org.bukkit.entity.Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super org.bukkit.entity.Entity> predicate) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Predicate<? super Entity> wrapper = entity -> predicate.apply(entity.getBukkitEntity());
-        return ((List<Entity>) entityLiving.world.getEntities(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper))
+        Predicate<? super Entity> wrapper = entity -> predicate.test(entity.getBukkitEntity());
+        return entityLiving.world.getEntities(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper)
                 .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 

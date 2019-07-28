@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
-import com.google.common.base.Predicate;
 import net.minecraft.server.v1_8_R2.Entity;
 import net.minecraft.server.v1_8_R2.EntityAnimal;
 import net.minecraft.server.v1_8_R2.EntityInsentient;
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -130,8 +130,8 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     @SuppressWarnings("all")
     public List<org.bukkit.entity.Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super org.bukkit.entity.Entity> predicate) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Predicate<? super Entity> wrapper = entity -> predicate.apply(entity.getBukkitEntity());
-        return ((List<Entity>) entityLiving.world.a(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper))
+        com.google.common.base.Predicate<? super Entity> wrapper = entity -> predicate.test(entity.getBukkitEntity());
+        return entityLiving.world.a(entityLiving, entityLiving.getBoundingBox().grow(range, range, range), wrapper)
                 .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 
@@ -263,7 +263,7 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
+    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, Predicate<BlockState> condition) {
         return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
                 .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
                 .filter(condition);

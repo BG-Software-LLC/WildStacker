@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.nms;
 
-import com.google.common.base.Predicate;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
@@ -13,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface NMSAdapter {
@@ -27,7 +27,6 @@ public interface NMSAdapter {
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
-    @SuppressWarnings("all")
     List<Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super Entity> predicate);
 
     @Nullable
@@ -56,6 +55,6 @@ public interface NMSAdapter {
 
     int getEggLayTime(Chicken chicken);
 
-    Stream<BlockState> getTileEntities(Chunk chunk, java.util.function.Predicate<BlockState> condition);
+    Stream<BlockState> getTileEntities(Chunk chunk, Predicate<BlockState> condition);
 
 }
