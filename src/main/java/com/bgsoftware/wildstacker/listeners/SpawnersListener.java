@@ -39,7 +39,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -475,7 +474,8 @@ public final class SpawnersListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int spawnersInsideChunk = (int) Arrays.stream(chunk.getTileEntities()).filter(blockState -> blockState instanceof CreatureSpawner).count();
+        int spawnersInsideChunk = (int) plugin.getNMSAdapter().getTileEntities(chunk, blockState -> blockState instanceof CreatureSpawner).count();
+
         return spawnersInsideChunk >= chunkLimit;
     }
 

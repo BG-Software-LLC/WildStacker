@@ -17,7 +17,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("RedundantIfStatement")
@@ -279,8 +278,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         final int MAX_X = maxX, MIN_X = minX, MAX_Z = maxZ, MIN_Z = minZ;
 
         for(Chunk chunk : chunksToScan){
-            Arrays.stream(chunk.getTileEntities())
-                    .filter(blockState -> blockState instanceof CreatureSpawner &&
+            plugin.getNMSAdapter().getTileEntities(chunk, blockState ->
+                    blockState instanceof CreatureSpawner &&
                             blockState.getX() >= MIN_X && blockState.getX() <= MAX_X &&
                             blockState.getY() >= minY && blockState.getY() <= maxY &&
                             blockState.getZ() >= MIN_Z && blockState.getZ() <= MAX_Z)

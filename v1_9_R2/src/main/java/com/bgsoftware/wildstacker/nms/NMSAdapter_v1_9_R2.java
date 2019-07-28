@@ -17,6 +17,8 @@ import net.minecraft.server.v1_9_R2.NBTTagCompound;
 import net.minecraft.server.v1_9_R2.NBTTagInt;
 import net.minecraft.server.v1_9_R2.NBTTagShort;
 import org.bukkit.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_9_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_9_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftEntity;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
@@ -263,6 +266,13 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
     @Override
     public int getEggLayTime(Chicken chicken) {
         return ((CraftChicken) chicken).getHandle().bC;
+    }
+
+    @Override
+    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
+        return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
+                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
+                .filter(condition);
     }
 
 }

@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.google.common.base.Predicate;
+import net.minecraft.server.v1_8_R1.BlockPosition;
 import net.minecraft.server.v1_8_R1.Entity;
 import net.minecraft.server.v1_8_R1.EntityAnimal;
 import net.minecraft.server.v1_8_R1.EntityInsentient;
@@ -15,6 +16,8 @@ import net.minecraft.server.v1_8_R1.NBTTagCompound;
 import net.minecraft.server.v1_8_R1.NBTTagInt;
 import net.minecraft.server.v1_8_R1.NBTTagShort;
 import org.bukkit.World;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_8_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R1.entity.CraftEntity;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
@@ -249,4 +253,11 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         return ((CraftChicken) chicken).getHandle().bq;
     }
 
+    @Override
+    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
+        //noinspection unchecked
+        return ((Stream<BlockPosition>) ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream())
+                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
+                .filter(condition);
+    }
 }
