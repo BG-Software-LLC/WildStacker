@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class EntitiesListener implements Listener {
@@ -153,9 +154,14 @@ public final class EntitiesListener implements Listener {
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
                         Bukkit.getPluginManager().callEvent(entityDeathEvent);
 
+                        List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
+                        entityDeathEvent.getDrops().clear();
+                        entityDeathEvent.getDrops().addAll(eventDrops.stream()
+                                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR).collect(Collectors.toList()));
+
                         //Multiply items that weren't added in the first place
-                        subtract(drops, entityDeathEvent.getDrops()).forEach(itemStack ->
-                                itemStack.setAmount(itemStack.getAmount() * stackAmount));
+                        subtract(drops, entityDeathEvent.getDrops())
+                                .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
 
                         entityDeathEvent.getDrops().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
 
