@@ -51,7 +51,7 @@ public class LootItem {
             lootingBonus = Random.nextInt(lootBonusLevel + 1);
         }
 
-        int itemAmount = amountOfItems < 10 ? Random.nextInt((max * amountOfItems) - (min * amountOfItems) + 1) + (min * amountOfItems) :
+        int itemAmount = amountOfItems < 10 ? Random.nextInt(((max + lootingBonus) * amountOfItems) - ((min + lootingBonus) * amountOfItems) + 1) + ((min + lootingBonus) * amountOfItems) :
                 Random.nextInt((min + lootingBonus) * amountOfItems, (max + lootingBonus) * amountOfItems);
 
         itemStack.setAmount(Math.max(1, itemAmount));
