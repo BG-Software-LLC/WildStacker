@@ -1,19 +1,14 @@
 package com.bgsoftware.wildstacker.loot;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.google.gson.JsonObject;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootCommand {
-
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private List<String> commands = new ArrayList<>();
     private double chance;
@@ -30,16 +25,17 @@ public class LootCommand {
         return chance + (lootBonusLevel * lootMultiplier);
     }
 
-    public void executeCommands(Player player){
-        Random random = plugin.getNMSAdapter().getWorldRandom(player.getWorld());
+    public List<String> getCommands(Player player, int amountOfCommands){
         List<String> commands = new ArrayList<>();
 
-        for(String command : this.commands){
-            int randomNumber = min == null || max == null ? 0 : random.nextInt(max - min + 1) + min;
-            commands.add(command.replace("{player-name}", player.getName()).replace("{number}", String.valueOf(randomNumber)));
-        }
+        this.commands.forEach(command -> {
+            for(int i = 0; i < amountOfCommands; i++) {
+                int randomNumber = min == null || max == null ? 0 : Random.nextInt(max - min + 1) + min;
+                commands.add(command.replace("{player-name}", player.getName()).replace("{number}", String.valueOf(randomNumber)));
+            }
+        });
 
-        Executor.sync(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
+        return commands;
     }
 
     public static LootCommand fromJson(JsonObject jsonObject){
