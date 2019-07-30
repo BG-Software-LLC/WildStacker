@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.hooks.HologramsProvider_Holograms;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_HolographicDisplays;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
+import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -71,6 +72,8 @@ public final class ProvidersHandler {
         if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") &&
                 Bukkit.getPluginManager().getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx"))
             spawnersProvider = new SpawnersProvider_SilkSpawners();
+        else if(Bukkit.getPluginManager().isPluginEnabled("MineableSpawners"))
+            spawnersProvider = new SpawnersProvider_MineableSpawners();
         else spawnersProvider = new SpawnersProvider_Default();
 
         if(Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays"))
