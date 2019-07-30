@@ -12,7 +12,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
@@ -57,6 +60,25 @@ public final class NoClaimConflictListener implements Listener {
                 return;
             if(!plugin.getProviders().hasClaimAccess(placer, e.getBarrel().getLocation()))
                 e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    @SuppressWarnings("all")
+    public void onInventoryOpen(InventoryOpenEvent e){
+        if(e.getInventory().getHolder().getClass().getName().contains("AbstractGUI")){
+            try{
+                Class holderClass = e.getInventory().getHolder().getClass();
+                Method guiMethod = holderClass.getMethod("getGUI");
+                Object gui = guiMethod.invoke(e.getInventory().getHolder());
+                Class guiClass = gui.getClass().getSuperclass();
+                Field clickableFields = guiClass.getDeclaredField("clickables");
+                clickableFields.setAccessible(true);
+                ((Map) clickableFields.get(gui)).clear();
+                clickableFields.setAccessible(false);
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
         }
     }
 
