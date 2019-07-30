@@ -1,10 +1,12 @@
 package com.bgsoftware.wildstacker.nms;
 
+import org.bukkit.Achievement;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -56,5 +58,15 @@ public interface NMSAdapter {
     int getEggLayTime(Chicken chicken);
 
     Stream<BlockState> getTileEntities(Chunk chunk, Predicate<BlockState> condition);
+
+    default void grandAchievement(Player player, EntityType victim, String name){
+        grandAchievement(player, "", name);
+    }
+
+    default void grandAchievement(Player player, String criteria, String name){
+        Achievement achievement = Achievement.valueOf(name);
+        if(!player.hasAchievement(achievement))
+            player.awardAchievement(achievement);
+    }
 
 }

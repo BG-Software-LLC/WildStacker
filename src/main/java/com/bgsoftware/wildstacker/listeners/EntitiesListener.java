@@ -29,6 +29,7 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -139,8 +140,15 @@ public final class EntitiesListener implements Listener {
             livingEntity.setLastDamageCause(e);
 
             if(stackedEntity.tryUnstack(stackAmount)) {
-                if (e instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
-                    EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+                if (e instanceof EntityDamageByEntityEvent) {
+                    if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
+                        EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+                    }
+                    else if(((EntityDamageByEntityEvent) e).getDamager() instanceof Projectile){
+                        Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) e).getDamager();
+                        if(projectile.getShooter() instanceof Player)
+                            EntityUtil.setKiller(livingEntity, (Player) projectile.getShooter());
+                    }
                 } else {
                     EntityUtil.setKiller(livingEntity, null);
                 }
@@ -175,15 +183,44 @@ public final class EntitiesListener implements Listener {
                 if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
                     livingEntity.setFireTicks(160);
 
-                if (livingEntity.getKiller() != null && stackAmount - 1 > 0) {
-                    try {
-                        livingEntity.getKiller().incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-                        livingEntity.getKiller().incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-                    } catch (IllegalArgumentException ignored) {
+                if (livingEntity.getKiller() != null) {
+                    Player killer = livingEntity.getKiller();
+                    if(stackAmount - 1 > 0) {
+                        try {
+                            killer.incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                            killer.incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                        } catch (IllegalArgumentException ignored) { }
                     }
+
+                    //Achievements
+                    EntityType victimType = livingEntity.getType();
+
+                    //Monster Hunter
+                    grandAchievement(killer, victimType, "KILL_ENEMY");
+                    grandAchievement(killer, victimType, "adventure/kill_a_mob");
+                    //Monsters Hunted
+                    grandAchievement(killer, victimType, "adventure/kill_all_mobs");
+                    //Sniper Duel
+                    if(killer.getLocation().distanceSquared(livingEntity.getLocation()) >= 50*50){
+                        grandAchievement(killer, "", "SNIPE_SKELETON");
+                        grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
+                    }
+
                 }
             }
         }
+    }
+
+    private void grandAchievement(Player killer, EntityType entityType, String name){
+        try{
+            plugin.getNMSAdapter().grandAchievement(killer, entityType, name);
+        }catch(Throwable ignored){}
+    }
+
+    private void grandAchievement(Player killer, String criteria, String name){
+        try{
+            plugin.getNMSAdapter().grandAchievement(killer, criteria, name);
+        }catch(Throwable ignored){}
     }
 
     private List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2){

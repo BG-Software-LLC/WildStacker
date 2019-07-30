@@ -15,7 +15,11 @@ import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagInt;
 import net.minecraft.server.v1_12_R1.NBTTagShort;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
@@ -25,6 +29,7 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
@@ -263,6 +268,26 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
                 .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
                 .filter(condition);
+    }
+
+    @Override
+    public void grandAchievement(Player player, EntityType victim, String name) {
+        //noinspection deprecation
+        grandAchievement(player, NamespacedKey.minecraft(victim.getName()).toString(), name);
+    }
+
+    @Override
+    public void grandAchievement(Player player, String criteria, String name) {
+        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft(name));
+
+        if(advancement == null)
+            throw new NullPointerException("Invalid advancement " + name);
+
+        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
+
+        if(!advancementProgress.isDone()){
+            advancementProgress.awardCriteria(criteria);
+        }
     }
 
 }
