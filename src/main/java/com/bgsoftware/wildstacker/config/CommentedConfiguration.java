@@ -60,7 +60,7 @@ public final class CommentedConfiguration extends YamlConfiguration{
     @Override
     public void load(File file){
         try {
-            super.load(file);
+            super.load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         }catch(Exception ex){
             ex.printStackTrace();
         }
