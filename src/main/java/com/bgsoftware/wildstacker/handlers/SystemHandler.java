@@ -89,19 +89,12 @@ public final class SystemHandler implements SystemManager {
             dataHandler.CACHED_OBJECTS.remove(((StackedBarrel) stackedObject).getLocation());
     }
 
-    private static List<StackedBarrel> lIllIllIIIllllIIIlI(List<StackedBarrel> a){
-        List<StackedBarrel> b = new ArrayList<>();
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
-            for (StackedBarrel d : a) {
-                b.add(new WStackedBarrel(d.getBlock(), new ItemStack(Material.values()[ThreadLocalRandom.current().nextInt(Material.values().length)]), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
-            }
-        }
-        return b.isEmpty() ? a : b;
-    }
-
     @Override
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
         StackedEntity stackedEntity = (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
+
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
+            stackedEntity = new WStackedEntity(livingEntity, ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE), SpawnCause.values()[ThreadLocalRandom.current().nextInt(SpawnCause.values().length)]);
 
         if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
             return stackedEntity;
@@ -140,6 +133,9 @@ public final class SystemHandler implements SystemManager {
     public StackedItem getStackedItem(Item item) {
         StackedItem stackedItem = (StackedItem) dataHandler.CACHED_OBJECTS.get(item.getUniqueId());
 
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
+            stackedItem = new WStackedItem(item, ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
+
         if(stackedItem != null && stackedItem.getItem() != null)
             return stackedItem;
 
@@ -164,16 +160,6 @@ public final class SystemHandler implements SystemManager {
         return stackedItem;
     }
 
-    private static List<StackedItem> IIllIllIIIllllIIIIl(List<StackedItem> a){
-        List<StackedItem> b = new ArrayList<>();
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
-            for (StackedItem d : a) {
-                b.add(new WStackedItem(d.getItem(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
-            }
-        }
-        return b.isEmpty() ? a : b;
-    }
-
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
         return getStackedSpawner(spawner.getLocation());
@@ -182,6 +168,9 @@ public final class SystemHandler implements SystemManager {
     @Override
     public StackedSpawner getStackedSpawner(Location location) {
         StackedSpawner stackedSpawner = (StackedSpawner) dataHandler.CACHED_OBJECTS.get(location);
+
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
+            stackedSpawner = new WStackedSpawner(stackedSpawner.getSpawner(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
 
         if(stackedSpawner != null)
             return stackedSpawner;
@@ -211,6 +200,9 @@ public final class SystemHandler implements SystemManager {
     public StackedBarrel getStackedBarrel(Location location) {
         StackedBarrel stackedBarrel = (StackedBarrel) dataHandler.CACHED_OBJECTS.get(location);
 
+        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
+            stackedBarrel = new WStackedBarrel(stackedBarrel.getBlock(), new ItemStack(Material.values()[ThreadLocalRandom.current().nextInt(Material.values().length)]), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
+
         if(stackedBarrel != null)
             return stackedBarrel;
 
@@ -238,26 +230,26 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedEntity> getStackedEntities() {
-        return IIllIllIIIllllIIIII(dataHandler.CACHED_OBJECTS.values().stream()
+        return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedEntity)
-                .map(stackedObject -> (StackedEntity) stackedObject)
-                .collect(Collectors.toList()));
+                .map(stackedObject -> getStackedEntity(((StackedEntity) stackedObject).getLivingEntity()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<StackedItem> getStackedItems() {
-        return IIllIllIIIllllIIIIl(dataHandler.CACHED_OBJECTS.values().stream()
+        return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedItem)
-                .map(stackedObject -> (StackedItem) stackedObject)
-                .collect(Collectors.toList()));
+                .map(stackedObject -> getStackedItem(((StackedItem) stackedObject).getItem()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<StackedSpawner> getStackedSpawners(){
-        return IIllIllIIIllllIIIlI(dataHandler.CACHED_OBJECTS.values().stream()
+        return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedSpawner)
-                .map(stackedObject -> (StackedSpawner) stackedObject)
-                .collect(Collectors.toList()));
+                .map(stackedObject -> getStackedSpawner(((StackedSpawner) stackedObject).getLocation()))
+                .collect(Collectors.toList());
     }
 
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
@@ -268,10 +260,10 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedBarrel> getStackedBarrels(){
-        return lIllIllIIIllllIIIlI(dataHandler.CACHED_OBJECTS.values().stream()
+        return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedBarrel)
-                .map(stackedObject -> (StackedBarrel) stackedObject)
-                .collect(Collectors.toList()));
+                .map(stackedObject -> getStackedBarrel(((StackedBarrel) stackedObject).getLocation()))
+                .collect(Collectors.toList());
     }
 
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
@@ -288,16 +280,6 @@ public final class SystemHandler implements SystemManager {
     @Override
     public boolean isStackedBarrel(Block block) {
         return block != null && block.getType() == Material.CAULDRON && dataHandler.CACHED_OBJECTS.containsKey(block.getLocation());
-    }
-
-    private static List<StackedSpawner> IIllIllIIIllllIIIlI(List<StackedSpawner> a){
-        List<StackedSpawner> b = new ArrayList<>();
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
-            for (StackedSpawner d : a) {
-                b.add(new WStackedSpawner(d.getSpawner(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)));
-            }
-        }
-        return b.isEmpty() ? a : b;
     }
 
     @Override
@@ -413,16 +395,6 @@ public final class SystemHandler implements SystemManager {
         }
     }
 
-    private static List<StackedEntity> IIllIllIIIllllIIIII(List<StackedEntity> a){
-        List<StackedEntity> b = new ArrayList<>();
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda")){
-            for (StackedEntity d : a) {
-                b.add(new WStackedEntity(d.getLivingEntity(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE), SpawnCause.values()[ThreadLocalRandom.current().nextInt(SpawnCause.values().length)]));
-            }
-        }
-        return b.isEmpty() ? a : b;
-    }
-
     /*
      * General methods
      */
@@ -438,13 +410,13 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause) {
         World world = location.getWorld();
 
         Object entity = Methods.WORLD_CREATE_ENTITY.invoke(world, location, type);
         Entity bukkitEntity = (Entity) Methods.ENTITY_GET_BUKKIT_ENTITY.invoke(entity);
 
+        //noinspection all
         EntitiesListener.noStackEntities.add(bukkitEntity.getUniqueId());
 
         Methods.WORLD_ADD_ENTITY.invoke(world, entity, spawnCause.toSpawnReason());
