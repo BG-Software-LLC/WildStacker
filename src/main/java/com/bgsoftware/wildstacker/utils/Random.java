@@ -4,6 +4,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class Random {
 
+    public static int nextChance(double chance, int bound){
+        int result = 0;
+
+        for(int i = 0; i < bound; i++)
+            result += ThreadLocalRandom.current().nextDouble() < (chance / 100) ? 1 : 0;
+
+        return result;
+    }
+
     public static int nextInt(int bound){
         return ThreadLocalRandom.current().nextInt(bound);
     }

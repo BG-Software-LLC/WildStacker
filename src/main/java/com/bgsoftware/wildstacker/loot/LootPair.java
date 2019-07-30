@@ -31,7 +31,9 @@ public class LootPair {
 
         for(LootItem lootItem : lootItems){
             int amountOfItems = (int) Math.round(lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
-            items.add(lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel));
+            ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
+            if(itemStack != null)
+                items.add(itemStack);
         }
 
         return items;

@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
@@ -41,15 +42,34 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount){
         List<ItemStack> drops = new ArrayList<>();
 
-        lootPairs.stream()
-            .filter(lootPair ->
+        List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
                 lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
-            .forEach(lootPair -> {
-                int amountOfPairs = (int) Math.round(lootPair.getChance() * stackAmount / 100);
+                .collect(Collectors.toList());
+
+        int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : stackAmount < 10 ?
+                Random.nextInt((max * stackAmount) - (min * stackAmount) + 1) + (min * stackAmount) :
+                Random.nextInt(min * stackAmount, max * stackAmount);
+        int chosenPairs = 0;
+
+        do{
+            for (LootPair lootPair : filteredPairs) {
+                if(chosenPairs == amountOfDifferentPairs)
+                    break;
+
+                int amountOfPairs = (int) lootPair.getChance() * stackAmount / 100;
+
+                if (amountOfPairs == 0) {
+                    amountOfPairs = Random.nextChance(lootPair.getChance(), stackAmount);
+                }
+
+                if (amountOfPairs > 0)
+                    chosenPairs++;
+
                 drops.addAll(lootPair.getItems(stackedEntity, amountOfPairs, lootBonusLevel));
-                if(isKilledByPlayer(stackedEntity))
+                if (isKilledByPlayer(stackedEntity))
                     lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
-            });
+            }
+        }while(chosenPairs != amountOfDifferentPairs && amountOfDifferentPairs != -1);
 
         if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
