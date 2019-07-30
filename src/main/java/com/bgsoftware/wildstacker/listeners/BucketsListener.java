@@ -28,16 +28,16 @@ public final class BucketsListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketFillEvent e){
-        if(plugin.getSettings().bucketsStackerEnabled) {
+        if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTask(plugin, () -> ItemUtil.stackBucket(e.getItemStack(), e.getPlayer().getInventory()));
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
-        if(plugin.getSettings().bucketsStackerEnabled) {
+        if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             ItemStack inHand = e.getPlayer().getItemInHand().clone();
             inHand.setAmount(inHand.getAmount() - 1);
 
