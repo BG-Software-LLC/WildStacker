@@ -248,12 +248,17 @@ public final class DataHandler {
                         Integer.valueOf(locationSections[3])
                 );
 
-                int stackAmount = resultSet.getInt("stackAmount");
-                Block spawnerBlock = blockLocation.getBlock();
+                try {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    Block spawnerBlock = blockLocation.getBlock();
 
-                if(spawnerBlock.getState() instanceof CreatureSpawner) {
-                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                    CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                    if (spawnerBlock.getState() instanceof CreatureSpawner) {
+                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                        CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                    }
+                }catch(Exception ex){
+                    WildStackerPlugin.log("Couldn't load spawner: " + resultSet.getString("location"));
+                    ex.printStackTrace();
                 }
             }
         });
@@ -268,13 +273,18 @@ public final class DataHandler {
                         Integer.valueOf(locationSections[3])
                 );
 
-                int stackAmount = resultSet.getInt("stackAmount");
-                Block barrelBlock = blockLocation.getBlock();
+                try {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    Block barrelBlock = blockLocation.getBlock();
 
-                ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
-                        plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                    ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
+                            plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                    StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
+                    CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                }catch(Exception ex){
+                    WildStackerPlugin.log("Couldn't load barrel: " + resultSet.getString("location"));
+                    ex.printStackTrace();
+                }
             }
         });
     }
