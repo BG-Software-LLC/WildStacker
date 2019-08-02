@@ -56,7 +56,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
                 if(chosenPairs == amountOfDifferentPairs)
                     break;
 
-                int amountOfPairs = (int) lootPair.getChance() * stackAmount / 100;
+                int amountOfPairs = (int) (lootPair.getChance() * stackAmount / 100);
 
                 if (amountOfPairs == 0) {
                     amountOfPairs = Random.nextChance(lootPair.getChance(), stackAmount);

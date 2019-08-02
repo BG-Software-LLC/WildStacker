@@ -30,7 +30,7 @@ public class LootPair {
         List<ItemStack> items = new ArrayList<>();
 
         for(LootItem lootItem : lootItems){
-            int amountOfItems = (int) Math.round(lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+            int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
             ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
             if(itemStack != null)
                 items.add(itemStack);
