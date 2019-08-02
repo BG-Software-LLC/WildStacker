@@ -1,20 +1,17 @@
 package com.bgsoftware.wildstacker.loot;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootPair {
-
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private List<LootItem> lootItems = new ArrayList<>();
     private List<LootCommand> lootCommands = new ArrayList<>();
@@ -29,49 +26,28 @@ public class LootPair {
         this.lootingChance = lootingChance;
     }
 
-    public List<ItemStack> getItems(StackedEntity stackedEntity, int lootBonusLevel){
+    public List<ItemStack> getItems(StackedEntity stackedEntity, int amountOfPairs, int lootBonusLevel){
         List<ItemStack> items = new ArrayList<>();
 
-        LootItem lootItem = getLootItem(lootBonusLevel, plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld()));
-
-        if(lootItem != null) {
-            items.add(lootItem.getItemStack(stackedEntity, lootBonusLevel));
+        for(LootItem lootItem : lootItems){
+            int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+            ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
+            if(itemStack != null)
+                items.add(itemStack);
         }
 
         return items;
     }
 
-    public void executeCommands(Player player, int lootBonusLevel){
-        Random random = plugin.getNMSAdapter().getWorldRandom(player.getWorld());
-        int chance = random.nextInt(100);
-        double baseChance = 0;
+    public void executeCommands(Player player, int amountOfPairs, int lootBonusLevel){
+        List<String> commands = new ArrayList<>();
 
-        Collections.shuffle(lootCommands, random);
-
-        for(LootCommand lootCommand: lootCommands){
-            if(chance < baseChance + lootCommand.getChance(lootBonusLevel, lootingChance)) {
-                lootCommand.executeCommands(player);
-            }else{
-                baseChance += lootCommand.getChance(lootBonusLevel, 0);
-            }
-        }
-    }
-
-    private LootItem getLootItem(int lootBonusLevel, Random random){
-        int chance = random.nextInt(100);
-        double baseChance = 0;
-
-        Collections.shuffle(lootItems, random);
-
-        for(LootItem lootItem : lootItems){
-            if(chance < baseChance + lootItem.getChance(lootBonusLevel, lootingChance)) {
-                return lootItem;
-            }else{
-                baseChance += lootItem.getChance(lootBonusLevel, 0);
-            }
+        for(LootCommand lootCommand : lootCommands){
+            int amountOfCommands = (int) Math.round(lootCommand.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+            commands.addAll(lootCommand.getCommands(player, amountOfCommands));
         }
 
-        return null;
+        Executor.sync(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
     }
 
     public List<String> getKiller(){
@@ -80,6 +56,11 @@ public class LootPair {
 
     public double getChance() {
         return chance;
+    }
+
+    @Override
+    public String toString() {
+        return "LootPair{items=" + lootItems + "}";
     }
 
     public static LootPair fromJson(JsonObject jsonObject){

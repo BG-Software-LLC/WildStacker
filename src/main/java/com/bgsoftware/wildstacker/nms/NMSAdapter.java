@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.nms;
 
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
-import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
@@ -13,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -51,7 +49,7 @@ public interface NMSAdapter {
 
     void setHealthDirectly(LivingEntity livingEntity, double health);
 
-    Random getWorldRandom(World world);
+    //Random getWorldRandom(World world);
 
     int getNBTInteger(Object nbtTag);
 

@@ -125,7 +125,6 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
-            int lootBonusLevel = getFortuneLevel(livingEntity);
             int stackAmount = plugin.getSettings().entitiesInstantKills.contains(lastDamageCause.name()) ||
                     plugin.getSettings().entitiesInstantKills.contains(e.getEntityType().name()) ||
                     ((LivingEntity) e.getEntity()).getHealth() <= 0 ? stackedEntity.getStackAmount() : 1;
@@ -152,6 +151,8 @@ public final class EntitiesListener implements Listener {
                 } else {
                     EntityUtil.setKiller(livingEntity, null);
                 }
+
+                int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
 

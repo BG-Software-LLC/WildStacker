@@ -13,10 +13,8 @@ import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagInt;
 import net.minecraft.server.v1_8_R3.NBTTagShort;
-import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -35,7 +33,6 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -244,11 +241,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     public void setHealthDirectly(LivingEntity livingEntity, double health) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.setHealth((float) health);
-    }
-
-    @Override
-    public Random getWorldRandom(World world) {
-        return ((CraftWorld) world).getHandle().random;
     }
 
     @Override

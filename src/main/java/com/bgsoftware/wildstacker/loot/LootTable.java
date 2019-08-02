@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,10 +16,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
@@ -42,15 +42,34 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount){
         List<ItemStack> drops = new ArrayList<>();
 
-        for(int i = 0; i < stackAmount; i++) {
-            List<LootPair> lootPairs = getLootPairs(stackedEntity);
+        List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
+                lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
+                .collect(Collectors.toList());
 
-            for(LootPair lootPair : lootPairs) {
-                drops.addAll(lootPair.getItems(stackedEntity, lootBonusLevel));
-                if(isKilledByPlayer(stackedEntity))
-                    lootPair.executeCommands(getKiller(stackedEntity), lootBonusLevel);
+        int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : stackAmount < 10 ?
+                Random.nextInt((max * stackAmount) - (min * stackAmount) + 1) + (min * stackAmount) :
+                Random.nextInt(min * stackAmount, max * stackAmount);
+        int chosenPairs = 0;
+
+        do{
+            for (LootPair lootPair : filteredPairs) {
+                if(chosenPairs == amountOfDifferentPairs)
+                    break;
+
+                int amountOfPairs = (int) (lootPair.getChance() * stackAmount / 100);
+
+                if (amountOfPairs == 0) {
+                    amountOfPairs = Random.nextChance(lootPair.getChance(), stackAmount);
+                }
+
+                if (amountOfPairs > 0)
+                    chosenPairs++;
+
+                drops.addAll(lootPair.getItems(stackedEntity, amountOfPairs, lootBonusLevel));
+                if (isKilledByPlayer(stackedEntity))
+                    lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
             }
-        }
+        }while(chosenPairs != amountOfDifferentPairs && amountOfDifferentPairs != -1);
 
         if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
@@ -103,12 +122,11 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Override
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
-        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
         int exp = 0;
 
         if(minExp >= 0 && maxExp >= 0){
             for(int i = 0; i < stackAmount; i++)
-                exp += random.nextInt(maxExp - minExp + 1) + minExp;
+                exp += Random.nextInt(maxExp - minExp + 1) + minExp;
         }
         else{
             for(int i = 0; i < stackAmount; i++)
@@ -118,25 +136,9 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return exp;
     }
 
-    private List<LootPair> getLootPairs(StackedEntity stackedEntity){
-        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
-        List<LootPair> lootPairs = new ArrayList<>();
-
-        Collections.shuffle(this.lootPairs, random);
-
-        for(LootPair lootPair : this.lootPairs){
-            if(max != -1 && lootPairs.size() >= max)
-                break;
-            if(!lootPair.getKiller().isEmpty() && !lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
-                continue;
-            if(random.nextInt(100) < lootPair.getChance())
-                lootPairs.add(lootPair);
-        }
-
-        if(min != -1 && lootPairs.size() < min)
-            lootPairs.addAll(getLootPairs(stackedEntity));
-
-        return lootPairs;
+    @Override
+    public String toString() {
+        return "LootTable{pairs=" + lootPairs + "}";
     }
 
     static boolean isBurning(StackedEntity stackedEntity){

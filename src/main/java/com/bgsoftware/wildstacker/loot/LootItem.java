@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,7 +18,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @SuppressWarnings("WeakerAccess")
 public class LootItem {
@@ -42,20 +42,29 @@ public class LootItem {
         return chance + (lootBonusLevel * lootMultiplier);
     }
 
-    public ItemStack getItemStack(StackedEntity stackedEntity, int lootBonusLevel){
-        Random random = plugin.getNMSAdapter().getWorldRandom(stackedEntity.getLivingEntity().getWorld());
+    public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel){
         ItemStack itemStack = LootTable.isBurning(stackedEntity) && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
 
-        int itemAmount = random.nextInt(max - min + 1) + min;
+        int lootingBonus = 0;
 
         if (looting && lootBonusLevel > 0) {
-            itemAmount += random.nextInt(lootBonusLevel + 1);
+            lootingBonus = Random.nextInt(lootBonusLevel + 1);
         }
 
-        if(itemAmount > 0)
-            itemStack.setAmount(itemAmount);
+        int itemAmount = amountOfItems < 10 ? Random.nextInt(((max + lootingBonus) * amountOfItems) - ((min + lootingBonus) * amountOfItems) + 1) + ((min + lootingBonus) * amountOfItems) :
+                Random.nextInt((min + lootingBonus) * amountOfItems, (max + lootingBonus) * amountOfItems);
+
+        if(itemAmount <= 0)
+            return null;
+
+        itemStack.setAmount(itemAmount);
 
         return itemStack;
+    }
+
+    @Override
+    public String toString() {
+        return "LootItem{item=" + itemStack + ",burnable=" + burnableItem + "}";
     }
 
     public static LootItem fromJson(JsonObject jsonObject){
