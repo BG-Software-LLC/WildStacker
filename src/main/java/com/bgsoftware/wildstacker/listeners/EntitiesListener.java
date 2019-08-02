@@ -154,8 +154,6 @@ public final class EntitiesListener implements Listener {
 
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
-                plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
-
                 Executor.async(() -> {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     Executor.sync(() -> {
