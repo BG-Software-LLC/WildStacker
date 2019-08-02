@@ -70,7 +70,6 @@ public final class EntityUtil {
         Object entityLiving = Methods.ENTITY_GET_HANDLE.invoke(livingEntity);
         Object entityHuman = Methods.ENTITY_GET_HANDLE.invoke(killer);
         Fields.ENTITY_KILLER.set(entityLiving, entityHuman);
-        plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
     }
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
