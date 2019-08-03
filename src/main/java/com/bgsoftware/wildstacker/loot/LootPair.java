@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -31,6 +32,11 @@ public class LootPair {
 
         for(LootItem lootItem : lootItems){
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+
+            if (amountOfItems == 0) {
+                amountOfItems = Random.nextChance(lootItem.getChance(lootBonusLevel, lootingChance), amountOfPairs);
+            }
+
             ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
             if(itemStack != null)
                 items.add(itemStack);
