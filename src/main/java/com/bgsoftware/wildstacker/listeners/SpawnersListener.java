@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
+import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
@@ -53,6 +54,11 @@ public final class SpawnersListener implements Listener {
 
     public SpawnersListener(WildStackerPlugin plugin){
         this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onStack(SpawnerStackEvent e){
+        Bukkit.broadcastMessage("onStack");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -126,14 +132,6 @@ public final class SpawnersListener implements Listener {
                 return;
             }
 
-            SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner);
-            Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
-
-            if(spawnerPlaceEvent.isCancelled()) {
-                e.setCancelled(true);
-                return;
-            }
-
             if(plugin.getSettings().onlyOneSpawner){
                 for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
                     if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()){
@@ -142,6 +140,14 @@ public final class SpawnersListener implements Listener {
                         return;
                     }
                 }
+            }
+
+            SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner);
+            Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
+
+            if(spawnerPlaceEvent.isCancelled()) {
+                e.setCancelled(true);
+                return;
             }
         }
 
