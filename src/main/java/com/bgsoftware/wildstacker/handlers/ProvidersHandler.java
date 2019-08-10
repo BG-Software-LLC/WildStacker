@@ -97,10 +97,10 @@ public final class ProvidersHandler {
 
         claimsProviders = new ArrayList<>();
         if(Bukkit.getPluginManager().isPluginEnabled("Factions")){
-            if(Bukkit.getPluginManager().isPluginEnabled("MassiveCore"))
-                claimsProviders.add(new ClaimsProvider_MassiveFactions());
-            else
+            if(Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock"))
                 claimsProviders.add(new ClaimsProvider_FactionsUUID());
+            else
+                claimsProviders.add(new ClaimsProvider_MassiveFactions());
         }
         if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
             try {
