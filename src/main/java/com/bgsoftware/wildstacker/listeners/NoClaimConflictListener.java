@@ -67,7 +67,7 @@ public final class NoClaimConflictListener implements Listener {
     @SuppressWarnings("all")
     public void onInventoryOpen(InventoryOpenEvent e){
         if(e.getInventory().getHolder() != null &&
-                e.getInventory().getHolder().getClass().getName().contains("AbstractGUI")){
+                e.getInventory().getHolder().getClass().toString().contains("ultimatestacker")){
             try{
                 Class holderClass = e.getInventory().getHolder().getClass();
                 Method guiMethod = holderClass.getMethod("getGUI");
