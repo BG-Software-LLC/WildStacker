@@ -49,6 +49,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,6 +239,7 @@ public final class EntitiesListener implements Listener {
         if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER || e.getEntity().hasMetadata("corpse"))
             return;
 
+        e.getEntity().setMetadata("spawn-cause", new FixedMetadataValue(plugin, SpawnCause.valueOf(e.getSpawnReason())));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setSpawnCause(SpawnCause.valueOf(e.getSpawnReason()));
 

@@ -94,7 +94,10 @@ public final class SystemHandler implements SystemManager {
             return stackedEntity;
 
         //Entity wasn't found, creating a new object
-        stackedEntity = new WStackedEntity(livingEntity);
+        if(livingEntity.hasMetadata("spawn-cause"))
+            stackedEntity = new WStackedEntity(livingEntity, 1, (SpawnCause) livingEntity.getMetadata("spawn-cause").get(0).value());
+        else
+            stackedEntity = new WStackedEntity(livingEntity);
 
         //Checks if the entity still exists after a few ticks
         Executor.sync(() -> {
