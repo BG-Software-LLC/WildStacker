@@ -7,6 +7,7 @@ public enum Fields {
     ENTITY_LAST_DAMAGE_BY_PLAYER_TIME,
     ENTITY_EXP,
     ENTITY_KILLER,
+    ENTITY_DEAD,
 
     NBT_TAG_MAP;
 

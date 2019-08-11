@@ -31,6 +31,7 @@ public final class ReflectionUtil {
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(version.contains("1_14") ? "f" : "b_"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
+            fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
             methodMap.put(Methods.WORLD_CREATE_ENTITY, craftWorldClass.getMethod("createEntity", Location.class, Class.class));
