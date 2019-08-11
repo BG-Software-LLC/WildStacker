@@ -63,6 +63,10 @@ public final class ItemUtil {
     }
 
     public static void dropItem(ItemStack itemStack, Location location){
+        if(!Bukkit.isPrimaryThread()){
+            Bukkit.getScheduler().runTask(plugin, () -> dropItem(itemStack, location));
+            return;
+        }
         if(itemStack.getType() == Material.AIR) return;
         int amount = itemStack.getAmount();
 
