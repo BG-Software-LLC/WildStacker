@@ -49,7 +49,8 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         }
         
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtil.getSpawnerItemAmount(itemStack) + ""));
+        if(itemMeta.hasDisplayName())
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtil.getSpawnerItemAmount(itemStack) + ""));
 
         itemStack.setItemMeta(itemMeta);
 
