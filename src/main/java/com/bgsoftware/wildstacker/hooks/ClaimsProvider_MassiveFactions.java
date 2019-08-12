@@ -4,6 +4,7 @@ import com.massivecraft.factions.entity.BoardColl;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
 import com.massivecraft.massivecore.ps.PS;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -24,6 +25,6 @@ public final class ClaimsProvider_MassiveFactions implements ClaimsProvider {
 
         Faction faction = BoardColl.get().getFactionAt(PS.valueOf(location));
 
-        return faction == null || overriding || (mPlayer.hasFaction() && mPlayer.getFaction().equals(faction));
+        return faction == null || faction.getName().equals(ChatColor.DARK_GREEN + "Wilderness") || overriding || (mPlayer.hasFaction() && mPlayer.getFaction().equals(faction));
     }
 }
