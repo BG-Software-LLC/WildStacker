@@ -251,6 +251,12 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
+    public void setEntityDead(LivingEntity livingEntity, boolean dead) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Fields.ENTITY_DEAD.set(entityLiving, dead);
+    }
+
+    @Override
     public int getNBTInteger(Object nbtTag) {
         try {
             return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).asInt() : ((NBTTagInt) nbtTag).asInt();

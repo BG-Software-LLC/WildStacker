@@ -12,7 +12,6 @@ import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;
@@ -21,7 +20,6 @@ import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
@@ -162,12 +160,12 @@ public final class EntitiesListener implements Listener {
                     Executor.sync(() -> {
                         deadEntities.add(livingEntity.getUniqueId());
 
-                        Fields.ENTITY_DEAD.set(((CraftLivingEntity) livingEntity).getHandle(), true);
+                        plugin.getNMSAdapter().setEntityDead(livingEntity, true);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
                         Bukkit.getPluginManager().callEvent(entityDeathEvent);
 
-                        Fields.ENTITY_DEAD.set(((CraftLivingEntity) livingEntity).getHandle(), false);
+                        plugin.getNMSAdapter().setEntityDead(livingEntity, false);
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
                         entityDeathEvent.getDrops().clear();

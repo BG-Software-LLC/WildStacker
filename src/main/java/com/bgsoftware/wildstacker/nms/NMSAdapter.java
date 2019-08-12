@@ -49,7 +49,7 @@ public interface NMSAdapter {
 
     void setHealthDirectly(LivingEntity livingEntity, double health);
 
-    //Random getWorldRandom(World world);
+    void setEntityDead(LivingEntity livingEntity, boolean dead);
 
     int getNBTInteger(Object nbtTag);
 
