@@ -242,7 +242,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
         return getStackedSpawners().stream()
-                .filter(stackedSpawner -> stackedSpawner.getLocation().getChunk().equals(chunk))
+                .filter(stackedSpawner -> isSameChunk(stackedSpawner.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -256,7 +256,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
         return getStackedBarrels().stream()
-                .filter(stackedBarrel -> stackedBarrel.getLocation().getChunk().equals(chunk))
+                .filter(stackedBarrel -> isSameChunk(stackedBarrel.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -462,6 +462,10 @@ public final class SystemHandler implements SystemManager {
     @Override
     public LootTable getLootTable(LivingEntity livingEntity) {
         return plugin.getLootHandler().getLootTable(livingEntity);
+    }
+
+    private boolean isSameChunk(Location location, Chunk chunk){
+        return chunk.getX() == location.getBlockX() >> 4 && chunk.getZ() == location.getBlockZ() >> 4;
     }
 
 }

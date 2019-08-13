@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.events.SpawnerAmountChangeEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
@@ -47,6 +48,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
+        SpawnerAmountChangeEvent spawnerAmountChangeEvent = new SpawnerAmountChangeEvent(this, stackAmount);
+        Bukkit.getPluginManager().callEvent(spawnerAmountChangeEvent);
         super.setStackAmount(stackAmount, updateName);
         Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())

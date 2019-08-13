@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.events.ItemAmountChangeEvent;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
@@ -26,6 +27,13 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item, int stackAmount){
         super(item, stackAmount);
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        ItemAmountChangeEvent itemAmountChangeEvent = new ItemAmountChangeEvent(this, stackAmount);
+        Bukkit.getPluginManager().callEvent(itemAmountChangeEvent);
+        super.setStackAmount(stackAmount, updateName);
     }
 
     /*
@@ -225,7 +233,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         int freeSpace = ItemUtil.getFreeSpace(inventory, itemStack);
         int startAmount = itemStack.getAmount();
-        int giveAmount = itemStack.getAmount() >= freeSpace ? freeSpace : itemStack.getAmount();
+        int giveAmount = Math.min(itemStack.getAmount(), freeSpace);
 
         if(giveAmount <= 0)
             return;
