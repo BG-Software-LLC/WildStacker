@@ -25,6 +25,16 @@ public final class ConfigComments {
     public static String INSPECT_TOOL = "inspect-tool";
 
     @Comment("")
+    @Comment("Settings related to database.")
+    public static String DATABASE = "database";
+
+    @Comment("Should data of worlds that no longer exist be deleted?")
+    public static String DATABASE_INVALID_WORLDS = "database.delete-invalid-worlds";
+
+    @Comment("Should data of blocks that no longer exist be deleted?")
+    public static String DATABASE_INVALID_BLOCKS = "database.delete-invalid-blocks";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";
 

@@ -20,6 +20,13 @@ inspect-tool:
   lore:
     - '&7Click on an object to get more details about it.'
 
+# Settings related to database.
+database:
+  # Should data of worlds that no longer exist be deleted?
+  delete-invalid-worlds: false
+  # Should data of blocks that no longer exist be deleted?
+  delete-invalid-blocks: false
+
 # Here you can configurable all features related to stacked items.
 items:
   # Should items get stacked on the server?

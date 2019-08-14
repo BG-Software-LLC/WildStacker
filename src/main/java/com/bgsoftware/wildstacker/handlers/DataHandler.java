@@ -240,14 +240,15 @@ public final class DataHandler {
 
         SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
             while (resultSet.next()) {
-                String[] locationSections = resultSet.getString("location").split(",");
+                String location = resultSet.getString("location");
+                String[] locationSections = location.split(",");
                 World blockWorld = Bukkit.getWorld(locationSections[0]);
 
                 String exceptionReason = "Null world.";
 
                 if(blockWorld != null) {
                     Location blockLocation = new Location(
-                            Bukkit.getWorld(locationSections[0]),
+                            blockWorld,
                             Integer.valueOf(locationSections[1]),
                             Integer.valueOf(locationSections[2]),
                             Integer.valueOf(locationSections[3])
@@ -270,21 +271,28 @@ public final class DataHandler {
                     }
                 }
 
-                WildStackerPlugin.log("Couldn't load spawner: " + resultSet.getString("location"));
+                WildStackerPlugin.log("Couldn't load spawner: " + location);
                 WildStackerPlugin.log(exceptionReason);
+
+                if((exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) ||
+                        (exceptionReason.contains("Block") && plugin.getSettings().deleteInvalidBlocks)) {
+                    SQLHelper.executeUpdate("DELETE FROM spawners WHERE location = '" + location + "';");
+                    WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
+                }
             }
         });
 
         SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
             while (resultSet.next()) {
-                String[] locationSections = resultSet.getString("location").split(",");
+                String location = resultSet.getString("location");
+                String[] locationSections = location.split(",");
                 World blockWorld = Bukkit.getWorld(locationSections[0]);
 
                 String exceptionReason = "Null world.";
 
                 if(blockWorld != null) {
                     Location blockLocation = new Location(
-                            Bukkit.getWorld(locationSections[0]),
+                            blockWorld,
                             Integer.valueOf(locationSections[1]),
                             Integer.valueOf(locationSections[2]),
                             Integer.valueOf(locationSections[3])
@@ -308,8 +316,14 @@ public final class DataHandler {
                     }
                 }
 
-                WildStackerPlugin.log("Couldn't load barrel: " + resultSet.getString("location"));
+                WildStackerPlugin.log("Couldn't load barrel: " + location);
                 WildStackerPlugin.log(exceptionReason);
+
+                if((exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) ||
+                        (exceptionReason.contains("Block") && plugin.getSettings().deleteInvalidBlocks)) {
+                    SQLHelper.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
+                    WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
+                }
             }
         });
     }

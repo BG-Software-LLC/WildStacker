@@ -26,6 +26,7 @@ public final class SettingsHandler {
     public final long saveInterval;
     public final String giveItemName;
     public final ItemStack inspectTool;
+    public final boolean deleteInvalidWorlds, deleteInvalidBlocks;
     public final KeyMap<String> customNames;
 
     //Items settings
@@ -89,6 +90,8 @@ public final class SettingsHandler {
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
                 .withName(cfg.getString("inspect-tool.name"))
                 .withLore(cfg.getStringList("inspect-tool.lore")).build();
+        deleteInvalidWorlds = cfg.getBoolean("database.delete-invalid-worlds", false);
+        deleteInvalidBlocks = cfg.getBoolean("database.delete-invalid-blocks", false);
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 
