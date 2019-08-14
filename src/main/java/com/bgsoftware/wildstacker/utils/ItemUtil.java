@@ -125,19 +125,19 @@ public final class ItemUtil {
     }
 
     @SuppressWarnings("deprecation")
-    public static EntityType getEntityType(ItemStack itemStack){
+    public static EntityTypes getEntityType(ItemStack itemStack){
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
         if(legacy) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
-                return spawnEggMeta.getSpawnedType() == null ? EntityType.PIG : spawnEggMeta.getSpawnedType();
+                return spawnEggMeta.getSpawnedType() == null ? EntityTypes.PIG : EntityTypes.fromName(spawnEggMeta.getSpawnedType().name());
             } catch (NoClassDefFoundError error) {
-                return EntityType.fromId(itemStack.getDurability());
+                return EntityTypes.fromName(EntityType.fromId(itemStack.getDurability()).name());
             }
         }else{
-            return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", "")).toBukkit();
+            return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
         }
     }
 

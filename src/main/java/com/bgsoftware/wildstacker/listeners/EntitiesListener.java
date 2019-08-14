@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
@@ -285,7 +286,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private int nextEntityStackAmount = -1;
-    private EntityType nextEntityType = null;
+    private EntityTypes nextEntityType = null;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
@@ -300,7 +301,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
         if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
-                !e.getEntityType().equals(nextEntityType))
+                EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());

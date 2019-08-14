@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -283,7 +284,7 @@ public final class SpawnersListener implements Listener {
 
         if(!plugin.getSettings().changeUsingEggs || (plugin.getSettings().eggsStackMultiply &&
                 stackedSpawner.getStackAmount() > ItemUtil.countItem(e.getPlayer().getInventory(), e.getItem())) ||
-                stackedSpawner.getSpawnedType() == ItemUtil.getEntityType(e.getItem())) {
+                EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtil.getEntityType(e.getItem())) {
             e.setCancelled(true);
             return;
         }
