@@ -65,7 +65,7 @@ public final class SystemHandler implements SystemManager {
         }, 1L);
 
         //Start the auto-clear
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 300L, 300L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 100L, 100L);
         //Start the auto-save
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> Executor.data(this::performCacheSave), 6000L, 6000L);
     }
@@ -289,14 +289,19 @@ public final class SystemHandler implements SystemManager {
 
             else if(stackedObject instanceof StackedSpawner){
                 StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
-                if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock()))
+                if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
                     removeStackObject(stackedObject);
+                    plugin.getProviders().deleteHologram(stackedSpawner);
+                }
             }
 
             else if(stackedObject instanceof StackedBarrel){
                 StackedBarrel stackedBarrel = (StackedBarrel) stackedObject;
-                if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock()))
+                if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
                     removeStackObject(stackedObject);
+                    stackedBarrel.removeDisplayBlock();
+                    plugin.getProviders().deleteHologram(stackedBarrel);
+                }
             }
         }
     }
