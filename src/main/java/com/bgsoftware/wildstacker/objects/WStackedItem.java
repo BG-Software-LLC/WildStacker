@@ -36,7 +36,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         super.setStackAmount(stackAmount, updateName);
         if(stackAmount > 0) {
             ItemStack itemStack = object.getItemStack().clone();
-            itemStack.setAmount(Math.max(itemStack.getMaxStackSize(), stackAmount));
+            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), stackAmount));
             object.setItemStack(itemStack);
         }
     }
