@@ -18,7 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("RedundantIfStatement")
+@SuppressWarnings({"RedundantIfStatement", "WeakerAccess"})
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
@@ -34,6 +34,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         ItemAmountChangeEvent itemAmountChangeEvent = new ItemAmountChangeEvent(this, stackAmount);
         Bukkit.getPluginManager().callEvent(itemAmountChangeEvent);
         super.setStackAmount(stackAmount, updateName);
+        if(stackAmount > 0) {
+            ItemStack itemStack = object.getItemStack().clone();
+            itemStack.setAmount(stackAmount);
+            object.setItemStack(itemStack);
+        }
     }
 
     /*

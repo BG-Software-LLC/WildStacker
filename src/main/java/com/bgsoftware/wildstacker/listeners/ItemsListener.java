@@ -60,12 +60,7 @@ public final class ItemsListener implements Listener {
             spawnedItem.setPickupDelay(40);
         }
 
-        if(stackedItem.tryStack() == null){
-            //Set the amount of item-stack to 1
-            ItemStack is = stackedItem.getItemStack();
-            is.setAmount(1);
-            stackedItem.setItemStack(is);
-        }
+        stackedItem.tryStack();
 
         //Chunk Limit
         Executor.sync(() -> {
