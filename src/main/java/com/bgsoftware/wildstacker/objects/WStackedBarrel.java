@@ -257,6 +257,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
             blockDisplay.setSmall(true);
             blockDisplay.setGravity(false);
             blockDisplay.setHelmet(barrelItem);
+            blockDisplay.setCustomName("BlockDisplay");
+            blockDisplay.setCustomNameVisible(false);
         }
     }
 
