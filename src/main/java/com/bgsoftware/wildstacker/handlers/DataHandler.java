@@ -241,50 +241,75 @@ public final class DataHandler {
         SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
             while (resultSet.next()) {
                 String[] locationSections = resultSet.getString("location").split(",");
-                Location blockLocation = new Location(
-                        Bukkit.getWorld(locationSections[0]),
-                        Integer.valueOf(locationSections[1]),
-                        Integer.valueOf(locationSections[2]),
-                        Integer.valueOf(locationSections[3])
-                );
+                World blockWorld = Bukkit.getWorld(locationSections[0]);
 
-                try {
-                    int stackAmount = resultSet.getInt("stackAmount");
-                    Block spawnerBlock = blockLocation.getBlock();
+                String exceptionReason = "Null world.";
 
-                    if (spawnerBlock.getState() instanceof CreatureSpawner) {
-                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                        CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                if(blockWorld != null) {
+                    Location blockLocation = new Location(
+                            Bukkit.getWorld(locationSections[0]),
+                            Integer.valueOf(locationSections[1]),
+                            Integer.valueOf(locationSections[2]),
+                            Integer.valueOf(locationSections[3])
+                    );
+
+                    try {
+                        int stackAmount = resultSet.getInt("stackAmount");
+                        Block spawnerBlock = blockLocation.getBlock();
+
+                        if (spawnerBlock.getState() instanceof CreatureSpawner) {
+                            StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                            CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                            continue;
+                        }
+                        else{
+                            exceptionReason = "Block doesn't exist anymore.";
+                        }
+                    }catch(Exception ex){
+                        exceptionReason = "Exception was thrown.";
                     }
-                }catch(Exception ex){
-                    WildStackerPlugin.log("Couldn't load spawner: " + resultSet.getString("location"));
-                    ex.printStackTrace();
                 }
+
+                WildStackerPlugin.log("Couldn't load spawner: " + resultSet.getString("location"));
+                WildStackerPlugin.log(exceptionReason);
             }
         });
 
         SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
             while (resultSet.next()) {
                 String[] locationSections = resultSet.getString("location").split(",");
-                Location blockLocation = new Location(
-                        Bukkit.getWorld(locationSections[0]),
-                        Integer.valueOf(locationSections[1]),
-                        Integer.valueOf(locationSections[2]),
-                        Integer.valueOf(locationSections[3])
-                );
+                World blockWorld = Bukkit.getWorld(locationSections[0]);
 
-                try {
-                    int stackAmount = resultSet.getInt("stackAmount");
-                    Block barrelBlock = blockLocation.getBlock();
+                String exceptionReason = "Null world.";
 
-                    ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
-                            plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                    StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                    CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
-                }catch(Exception ex){
-                    WildStackerPlugin.log("Couldn't load barrel: " + resultSet.getString("location"));
-                    ex.printStackTrace();
+                if(blockWorld != null) {
+                    Location blockLocation = new Location(
+                            Bukkit.getWorld(locationSections[0]),
+                            Integer.valueOf(locationSections[1]),
+                            Integer.valueOf(locationSections[2]),
+                            Integer.valueOf(locationSections[3])
+                    );
+
+                    try {
+                        int stackAmount = resultSet.getInt("stackAmount");
+                        Block barrelBlock = blockLocation.getBlock();
+                        if (barrelBlock.getType() == Material.CAULDRON) {
+                            ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
+                                    plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                            StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
+                            CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                            continue;
+                        }
+                        else{
+                            exceptionReason = "Block doesn't exist anymore.";
+                        }
+                    } catch (Exception ex) {
+                        exceptionReason = "Exception was thrown.";
+                    }
                 }
+
+                WildStackerPlugin.log("Couldn't load barrel: " + resultSet.getString("location"));
+                WildStackerPlugin.log(exceptionReason);
             }
         });
     }
