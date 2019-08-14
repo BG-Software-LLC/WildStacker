@@ -149,6 +149,9 @@ public final class ItemsListener implements Listener {
                         plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
             }
 
+            //Pick up animation
+            plugin.getNMSAdapter().playPickupAnimation(e.getPlayer(), e.getItem());
+
             if (stackedItem.getStackAmount() <= 0) {
                 e.getItem().remove();
                 stackedItem.remove();

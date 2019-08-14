@@ -6,6 +6,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -66,5 +67,7 @@ public interface NMSAdapter {
         if(!player.hasAchievement(achievement))
             player.awardAchievement(achievement);
     }
+
+    void playPickupAnimation(Player player, Item item);
 
 }
