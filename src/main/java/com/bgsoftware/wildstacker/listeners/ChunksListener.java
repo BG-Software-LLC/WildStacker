@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -51,7 +50,6 @@ public final class ChunksListener implements Listener {
                         entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()))
                 .forEach(entity -> {
                     Block block = entity.getLocation().getBlock();
-                    Bukkit.broadcastMessage(block.getType() + "");
                     if (block.getType() == Material.CAULDRON)
                         block.setType(Material.AIR);
                     entity.remove();
