@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.events.DuplicateSpawnEvent;
-import com.bgsoftware.wildstacker.api.events.EntityAmountChangeEvent;
 import com.bgsoftware.wildstacker.api.events.EntityStackEvent;
 import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -48,13 +47,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable SpawnCause spawnCause){
         super(livingEntity, stackAmount);
         this.spawnCause = spawnCause;
-    }
-
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        EntityAmountChangeEvent entityAmountChangeEvent = new EntityAmountChangeEvent(this, stackAmount);
-        Bukkit.getPluginManager().callEvent(entityAmountChangeEvent);
-        super.setStackAmount(stackAmount, updateName);
     }
 
     /*

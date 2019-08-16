@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.objects;
 
-import com.bgsoftware.wildstacker.api.events.BarrelAmountChangeEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
@@ -48,8 +47,6 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
-        BarrelAmountChangeEvent barrelAmountChangeEvent = new BarrelAmountChangeEvent(this, stackAmount);
-        Bukkit.getPluginManager().callEvent(barrelAmountChangeEvent);
         super.setStackAmount(stackAmount, updateName);
         Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
                 .setInt(getStackAmount())

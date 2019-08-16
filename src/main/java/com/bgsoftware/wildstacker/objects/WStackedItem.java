@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.objects;
 
-import com.bgsoftware.wildstacker.api.events.ItemAmountChangeEvent;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
@@ -31,8 +30,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
-        ItemAmountChangeEvent itemAmountChangeEvent = new ItemAmountChangeEvent(this, stackAmount);
-        Bukkit.getPluginManager().callEvent(itemAmountChangeEvent);
         super.setStackAmount(stackAmount, updateName);
         if(stackAmount > 0) {
             ItemStack itemStack = object.getItemStack().clone();
