@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
+import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
@@ -17,6 +18,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -208,17 +210,22 @@ public final class BarrelsListener implements Listener {
 
             if(amount != 0) {
                 int limit = stackedBarrel.getStackLimit();
+                int newStackAmount = stackedBarrel.getStackAmount() + amount;
 
                 if(stackedBarrel.getStackAmount() + amount > limit){
                     ItemStack toAdd = barrelItem.clone();
                     toAdd.setAmount(stackedBarrel.getStackAmount() + amount - limit);
                     ItemUtil.addItem(toAdd, e.getPlayer().getInventory(), stackedBarrel.getLocation());
-                    stackedBarrel.setStackAmount(limit, true);
-                }else{
-                    stackedBarrel.setStackAmount(stackedBarrel.getStackAmount() + amount, true);
+                    newStackAmount = limit;
                 }
 
-                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtil.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
+                BarrelPlaceInventoryEvent barrelPlaceInventoryEvent = new BarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, newStackAmount - stackedBarrel.getStackAmount());
+                Bukkit.getPluginManager().callEvent(barrelPlaceInventoryEvent);
+
+                if(!barrelPlaceInventoryEvent.isCancelled()) {
+                    stackedBarrel.setStackAmount(newStackAmount, true);
+                    Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtil.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
+                }
             }
 
             barrelPlaceInventory.remove(e.getPlayer().getUniqueId());
