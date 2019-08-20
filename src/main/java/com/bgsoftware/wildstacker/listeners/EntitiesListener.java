@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;
@@ -73,6 +74,8 @@ public final class EntitiesListener implements Listener {
         this.plugin = plugin;
         if(plugin.getServer().getBukkitVersion().contains("1.13"))
             plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
+        if(ReflectionUtil.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
+            plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -567,6 +570,25 @@ public final class EntitiesListener implements Listener {
         }
 
         return fortuneLevel;
+    }
+
+    class EntityKillListener implements Listener {
+
+        @EventHandler
+        public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent e){
+            if(e.getEntity().hasMetadata("corpse"))
+                return;
+
+            e.setCancelled(true);
+
+            //noinspection unchecked
+            EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
+                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+
+            onEntityLastDamage(entityDamageEvent);
+        }
+
     }
 
     class EntitiesListener1_13 implements Listener {
