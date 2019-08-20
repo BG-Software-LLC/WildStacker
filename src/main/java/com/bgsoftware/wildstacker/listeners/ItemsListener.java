@@ -144,7 +144,7 @@ public final class ItemsListener implements Listener {
                     e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
                             plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
                 }
-                
+
                 //Pick up animation
                 plugin.getNMSAdapter().playPickupAnimation(e.getPlayer(), e.getItem());
             }
