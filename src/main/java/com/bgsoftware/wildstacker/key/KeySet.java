@@ -52,7 +52,7 @@ public class KeySet extends AbstractSet<Key> implements Set<Key> {
                 return true;
             else if(key.contains(";") && set.contains(key.split(";")[0]))
                 return true;
-            else if(set.contains("all"))
+            else if(set.contains("all") || set.contains("ALL"))
                 return true;
         }
         return super.contains(o);
