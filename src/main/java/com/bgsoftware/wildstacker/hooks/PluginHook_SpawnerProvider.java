@@ -2,9 +2,10 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import net.brcdev.shopgui.ShopGuiPlugin;
-import net.brcdev.shopgui.provider.spawner.SpawnerProvider;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
+import net.brcdev.shopgui.ShopGuiPlusApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.CreatureSpawner;
@@ -12,65 +13,111 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-public final class PluginHook_SpawnerProvider extends SpawnerProvider {
+public final class PluginHook_SpawnerProvider {
 
-    @Override
-    public SpawnerProvider hook(Plugin plugin) {
-        return this;
+    public static void register(){
+        if (!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
+                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
+            if(ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
+                    new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
+                WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
+            }
+        }
     }
 
-    @Override
-    public ItemStack getSpawnerItem(String entityId, String customName) {
-        ItemStack itemStack = Materials.SPAWNER.toBukkitItem();
+    static class NewSpawnerProvider implements net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider{
 
-        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-        CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
+        @Override
+        public String getName() {
+            return "WildStacker-Spawners";
+        }
 
-        creatureSpawner.setSpawnedType(EntityType.valueOf(entityId.toUpperCase()));
+        @Override
+        public ItemStack getSpawnerItem(EntityType entityType) {
+            return ItemUtil.getSpawnerItem(entityType, 1);
+        }
 
-        blockStateMeta.setBlockState(creatureSpawner);
+        @Override
+        public EntityType getSpawnerEntityType(ItemStack itemStack) {
+            try {
+                return ItemUtil.getEntityType(itemStack).toBukkit();
+            }catch(Exception ex){
+                ex.printStackTrace();
+                return EntityType.UNKNOWN;
+            }
+        }
 
-        if(!customName.isEmpty())
-            blockStateMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', customName));
+        boolean register(){
+            WildStackerPlugin.log("New Spawners Provider");
+            try {
+                //noinspection JavaReflectionMemberAccess
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
+                method.invoke(null, this);
+                return true;
+            } catch (InvocationTargetException ex) {
+                ex.getTargetException().printStackTrace();
+            } catch(Exception ex){
+                ex.printStackTrace();
+            }
+            return false;
+        }
 
-        itemStack.setItemMeta(blockStateMeta);
-
-        return itemStack;
     }
 
-    @Override
-    public String getSpawnerEntityId(ItemStack itemStack) {
-        String entityId = EntityType.PIG.name();
+    static class OldSpawnerProvider extends net.brcdev.shopgui.provider.spawner.SpawnerProvider{
 
-        if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
+        @Override
+        public net.brcdev.shopgui.provider.spawner.SpawnerProvider hook(Plugin plugin) {
+            return this;
+        }
+
+        @Override
+        public ItemStack getSpawnerItem(String entityId, String customName) {
+            ItemStack itemStack = Materials.SPAWNER.toBukkitItem();
+
             BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
             CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
 
-            entityId = creatureSpawner.getSpawnedType().name();
+            creatureSpawner.setSpawnedType(EntityType.valueOf(entityId.toUpperCase()));
+
+            blockStateMeta.setBlockState(creatureSpawner);
+
+            if(!customName.isEmpty())
+                blockStateMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', customName));
+
+            itemStack.setItemMeta(blockStateMeta);
+
+            return itemStack;
         }
 
-        return entityId;
-    }
+        @Override
+        public String getSpawnerEntityId(ItemStack itemStack) {
+            String entityId = EntityType.PIG.name();
 
-    @Override
-    public String getSpawnerEntityName(ItemStack itemStack) {
-        return EntityUtil.getFormattedType(getSpawnerEntityId(itemStack));
-    }
+            if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
+                BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
+                CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
 
-    public static void register() throws Throwable{
-        ShopGuiPlugin plugin = JavaPlugin.getPlugin(ShopGuiPlugin.class);
-        Field field = ShopGuiPlugin.class.getDeclaredField("spawnerProvider");
-        field.setAccessible(true);
-        if(!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
-                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-            WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
-            field.set(plugin, new PluginHook_SpawnerProvider());
+                entityId = creatureSpawner.getSpawnedType().name();
+            }
+
+            return entityId;
         }
-        field.setAccessible(false);
+
+        @Override
+        public String getSpawnerEntityName(ItemStack itemStack) {
+            return EntityUtil.getFormattedType(getSpawnerEntityId(itemStack));
+        }
+
+        boolean register(){
+            ShopGuiPlusApi.registerSpawnerProvider(this);
+            return true;
+        }
+
     }
 
 }

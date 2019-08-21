@@ -107,11 +107,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("******** ENABLE DONE ********");
 
-        //Set WildStacker as SpawnersProvider with ShopGUIPlus
-        try {
-            if (ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
-                PluginHook_SpawnerProvider.register();
-        }catch(Throwable ignored){}
         //Enable economy hook
         if(EconomyHook.isVaultEnabled())
             EconomyHook.register();
@@ -138,6 +133,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
                     getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
                 PluginHook_Novucs.register(this);
+
+            //Set WildStacker as SpawnersProvider with ShopGUIPlus
+            if (ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
+                PluginHook_SpawnerProvider.register();
         });
     }
 

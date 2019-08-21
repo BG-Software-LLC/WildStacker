@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -85,6 +86,18 @@ public enum  EntityTypes {
     }
 
     private String bukkitEntityType;
+
+    public EntityType toBukkit(){
+        try {
+            try {
+                return EntityType.valueOf(bukkitEntityType);
+            } catch (IllegalArgumentException ex) {
+                return EntityType.valueOf(name());
+            }
+        }catch(Exception ex){
+            throw new IllegalArgumentException("Couldn't cast " + name() + " into a bukkit enum. Contact Ome_R!");
+        }
+    }
 
     public static EntityTypes fromName(String name){
         try{
