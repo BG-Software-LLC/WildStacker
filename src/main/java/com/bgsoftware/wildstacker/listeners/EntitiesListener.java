@@ -21,6 +21,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
@@ -299,6 +300,16 @@ public final class EntitiesListener implements Listener {
 
         nextEntityStackAmount = ItemUtil.getSpawnerItemAmount(e.getItem());
         nextEntityType = ItemUtil.getEntityType(e.getItem());
+
+        EntityType nmsEntityType = ItemUtil.getNMSEntityType(e.getItem());
+        if(nmsEntityType != null){
+            e.setCancelled(true);
+            nextEntityType = EntityTypes.fromName(nmsEntityType.name());
+            Location toSpawn = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(0.5, 0, 0.5);
+            if(toSpawn.getBlock().getType() != Material.AIR)
+                toSpawn = toSpawn.add(0, 1, 0);
+            plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

@@ -160,6 +160,16 @@ public final class ItemUtil {
         }
     }
 
+    public static ItemStack getItemNMSEntityType(EntityType entityType){
+        ItemStack itemStack = new ItemStack(Materials.getSpawnEgg(EntityType.GHAST));
+        return plugin.getNMSAdapter().setTag(itemStack, "entity-type", entityType.name());
+    }
+
+    public static EntityType getNMSEntityType(ItemStack itemStack){
+        String entityType = plugin.getNMSAdapter().getTag(itemStack, "entity-type", String.class);
+        return entityType.isEmpty() ? null : EntityType.valueOf(entityType);
+    }
+
     public static String getFormattedType(ItemStack itemStack){
         String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 

@@ -84,8 +84,14 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = new ItemStack(Materials.getSpawnEgg(entityType));
-            ItemUtil.setEntityType(itemStack, entityType);
+            Material eggType = Materials.getSpawnEgg(entityType);
+            if(eggType == null){
+                itemStack = ItemUtil.getItemNMSEntityType(entityType);
+            }
+            else{
+                itemStack = new ItemStack(Materials.getSpawnEgg(entityType));
+                ItemUtil.setEntityType(itemStack, entityType);
+            }
             itemStack = ItemUtil.setSpawnerItemAmount(itemStack, stackSize);
         }
 
