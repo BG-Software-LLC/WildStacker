@@ -42,7 +42,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -72,8 +71,8 @@ public final class EntitiesListener implements Listener {
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
-        if(plugin.getServer().getBukkitVersion().contains("1.13"))
-            plugin.getServer().getPluginManager().registerEvents(new EntitiesListener1_13(), plugin);
+        if(ReflectionUtil.isPluginEnabled("org.bukkit.event.entity.EntityTransformEvent"))
+            plugin.getServer().getPluginManager().registerEvents(new TransformListener(), plugin);
         if(ReflectionUtil.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
@@ -591,10 +590,10 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    class EntitiesListener1_13 implements Listener {
+    static class TransformListener implements Listener {
 
         @EventHandler
-        public void onEntityTransform(EntityTransformEvent e){
+        public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
             if(stackedEntity.getStackAmount() > 1){
