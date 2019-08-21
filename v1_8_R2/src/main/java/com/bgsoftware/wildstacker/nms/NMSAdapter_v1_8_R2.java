@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import net.minecraft.server.v1_8_R2.Entity;
 import net.minecraft.server.v1_8_R2.EntityAnimal;
-import net.minecraft.server.v1_8_R2.EntityHuman;
 import net.minecraft.server.v1_8_R2.EntityInsentient;
 import net.minecraft.server.v1_8_R2.EntityItem;
 import net.minecraft.server.v1_8_R2.EntityLiving;
@@ -275,14 +274,14 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
-    public void playPickupAnimation(Player player, Item item) {
-        EntityHuman entityHuman = ((CraftPlayer) player).getHandle();
+    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        ((WorldServer) entityHuman.world).getTracker().a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityHuman.getId()));
+        ((WorldServer) entityLiving.world).getTracker().a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId()));
     }
 
     @Override
-    public void playDeathSound(org.bukkit.entity.LivingEntity livingEntity) {
+    public void playDeathSound(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         Object soundEffect = Methods.ENTITY_SOUND_DEATH.invoke(entityLiving);
         if (soundEffect != null) {

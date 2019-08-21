@@ -68,7 +68,7 @@ public interface NMSAdapter {
             player.awardAchievement(achievement);
     }
 
-    void playPickupAnimation(Player player, Item item);
+    void playPickupAnimation(LivingEntity livingEntity, Item item);
 
     void playDeathSound(LivingEntity entity);
 
