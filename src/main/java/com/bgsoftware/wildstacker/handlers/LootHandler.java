@@ -84,7 +84,11 @@ public final class LootHandler {
         FileUtil.saveResource("loottables/horse.json");
         if(containsEntity("HUSK"))
             FileUtil.saveResource("loottables/husk.json");
+        if(containsEntity("ILLUSIONER"))
+            FileUtil.saveResource("loottables/illusioner.json");
         FileUtil.saveResource("loottables/iron_golem.json");
+        if(containsEntity("LLAMA"))
+            FileUtil.saveResource("loottables/llama.json");
         FileUtil.saveResource("loottables/magma_cube.json");
         FileUtil.saveResource("loottables/mule.json");
         FileUtil.saveResource("loottables/mooshroom.json");
