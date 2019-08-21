@@ -31,10 +31,43 @@ public final class ReflectionUtil {
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
-            methodMap.put(Methods.WORLD_CREATE_ENTITY, craftWorldClass.getMethod("createEntity", Location.class, Class.class));
-            methodMap.put(Methods.ENTITY_GET_BUKKIT_ENTITY, entityClass.getMethod("getBukkitEntity"));
-            methodMap.put(Methods.WORLD_ADD_ENTITY, craftWorldClass.getMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class));
-            methodMap.put(Methods.ENTITY_GET_HANDLE, craftEntityClass.getMethod("getHandle"));
+            methodMap.put(Methods.WORLD_CREATE_ENTITY, craftWorldClass.getDeclaredMethod("createEntity", Location.class, Class.class));
+            methodMap.put(Methods.ENTITY_GET_BUKKIT_ENTITY, entityClass.getDeclaredMethod("getBukkitEntity"));
+            methodMap.put(Methods.WORLD_ADD_ENTITY, craftWorldClass.getDeclaredMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class));
+            methodMap.put(Methods.ENTITY_GET_HANDLE, craftEntityClass.getDeclaredMethod("getHandle"));
+            methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundDeath" :
+                    ServerVersion.isEquals(ServerVersion.v1_13) ? "cs" :
+                    ServerVersion.isEquals(ServerVersion.v1_12) ? "cf" :
+                    ServerVersion.isEquals(ServerVersion.v1_11) ? "bX" :
+                    ServerVersion.isEquals(ServerVersion.v1_10) ? "bW" :
+                    ServerVersion.isEquals(ServerVersion.v1_9) ?
+                            ServerVersion.getBukkitVersion().contains("2") ? "bT" : "bS" :
+                            //1.8 Version
+                            ServerVersion.getBukkitVersion().contains("1") ? "bo" : "bp"
+            ));
+            methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundVolume" :
+                    ServerVersion.isEquals(ServerVersion.v1_13) ? "cD" :
+                    ServerVersion.isEquals(ServerVersion.v1_12) ? "cq" :
+                    ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
+                    ServerVersion.isEquals(ServerVersion.v1_10) ? "ch" :
+                    ServerVersion.isEquals(ServerVersion.v1_9) ?
+                            ServerVersion.getBukkitVersion().contains("2") ? "ce" : "cd" :
+                            //1.8 Version
+                            ServerVersion.getBukkitVersion().contains("1") ? "bA" : "bB"
+            ));
+            methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_14) ? "cU" :
+                    ServerVersion.isEquals(ServerVersion.v1_13) ? "cE" :
+                    ServerVersion.isEquals(ServerVersion.v1_12) ? "cr" :
+                    ServerVersion.isEquals(ServerVersion.v1_11) ? "cj" :
+                    ServerVersion.isEquals(ServerVersion.v1_10) ? "ci" :
+                    ServerVersion.isEquals(ServerVersion.v1_9) ?
+                            ServerVersion.getBukkitVersion().contains("2") ? "cf" : "ce" :
+                            //1.8 Version
+                            ServerVersion.getBukkitVersion().contains("1") ? "bB" : "bC"
+            ));
 
             try{
                 methodMap.put(Methods.BLOCK_GET_BY_COMBINED_ID, getNMSClass("Block").getMethod("getByCombinedId", int.class));

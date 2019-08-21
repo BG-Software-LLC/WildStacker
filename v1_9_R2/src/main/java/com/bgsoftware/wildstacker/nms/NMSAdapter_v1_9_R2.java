@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import net.minecraft.server.v1_9_R2.Entity;
 import net.minecraft.server.v1_9_R2.EntityAnimal;
 import net.minecraft.server.v1_9_R2.EntityHuman;
@@ -17,6 +18,7 @@ import net.minecraft.server.v1_9_R2.NBTTagCompound;
 import net.minecraft.server.v1_9_R2.NBTTagInt;
 import net.minecraft.server.v1_9_R2.NBTTagShort;
 import net.minecraft.server.v1_9_R2.PacketPlayOutCollect;
+import net.minecraft.server.v1_9_R2.SoundEffect;
 import net.minecraft.server.v1_9_R2.WorldServer;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_9_R2.CraftChunk;
@@ -283,6 +285,17 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
         EntityHuman entityHuman = ((CraftPlayer) player).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
         ((WorldServer) entityHuman.world).getTracker().a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityHuman.getId()));
+    }
+
+    @Override
+    public void playDeathSound(org.bukkit.entity.LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Object soundEffect = Methods.ENTITY_SOUND_DEATH.invoke(entityLiving);
+        if (soundEffect != null) {
+            float soundVolume = (float) Methods.ENTITY_SOUND_VOLUME.invoke(entityLiving);
+            float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
+            entityLiving.a((SoundEffect) soundEffect, soundVolume, soundPitch);
+        }
     }
 
 }

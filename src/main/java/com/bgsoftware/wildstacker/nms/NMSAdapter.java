@@ -70,4 +70,6 @@ public interface NMSAdapter {
 
     void playPickupAnimation(Player player, Item item);
 
+    void playDeathSound(LivingEntity entity);
+
 }

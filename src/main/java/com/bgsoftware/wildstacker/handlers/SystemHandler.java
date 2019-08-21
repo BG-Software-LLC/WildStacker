@@ -428,6 +428,7 @@ public final class SystemHandler implements SystemManager {
             if(stackedEntity.getLivingEntity() instanceof Slime){
                 ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
             }
+            plugin.getNMSAdapter().playDeathSound(livingEntity);
             livingEntity.setHealth(0);
         }
     }

@@ -12,9 +12,9 @@ import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
-import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -307,6 +307,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             Executor.sync(() -> {
                 object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
+                plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);
             return true;
         }
