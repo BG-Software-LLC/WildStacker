@@ -1,7 +1,8 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;

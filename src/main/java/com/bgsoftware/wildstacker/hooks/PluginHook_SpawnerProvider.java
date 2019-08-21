@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.EntityUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import net.brcdev.shopgui.ShopGuiPlugin;
 import net.brcdev.shopgui.provider.spawner.SpawnerProvider;

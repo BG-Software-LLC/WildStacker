@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.items;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

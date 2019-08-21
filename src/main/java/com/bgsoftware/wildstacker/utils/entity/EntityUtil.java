@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;

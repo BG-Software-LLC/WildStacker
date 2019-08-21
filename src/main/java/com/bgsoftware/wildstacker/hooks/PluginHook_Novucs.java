@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import net.novucs.ftop.FactionsTopPlugin;
 import net.novucs.ftop.hook.SpawnerStackerHook;
 import net.novucs.ftop.hook.event.SpawnerMultiplierChangeEvent;

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
