@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -86,10 +86,6 @@ public enum  EntityTypes {
 
     private String bukkitEntityType;
 
-    private static boolean v1_8 = Bukkit.getBukkitVersion().contains("1.8");
-    private static boolean v1_9 = Bukkit.getBukkitVersion().contains("1.9");
-    private static boolean v1_10 = Bukkit.getBukkitVersion().contains("1.10");
-
     public static EntityTypes fromName(String name){
         try{
             return EntityTypes.valueOf(name);
@@ -104,7 +100,7 @@ public enum  EntityTypes {
     }
 
     public static EntityTypes fromEntity(LivingEntity livingEntity){
-        if(v1_8 || v1_9 || v1_10) {
+        if(ServerVersion.isLessThan(ServerVersion.v1_11)) {
             if (livingEntity instanceof Horse) {
                 Horse horse = (Horse) livingEntity;
                 if (horse.getVariant() == Horse.Variant.DONKEY)

@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -32,7 +33,6 @@ import java.util.List;
 public final class ItemUtil {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static boolean legacy = !Bukkit.getVersion().contains("1.13") && !Bukkit.getVersion().contains("1.14");
 
     public static int getFreeSpace(Inventory inventory, ItemStack itemStack){
         int freeSpace = 0, invSize = inventory.getType() == InventoryType.PLAYER ? 36 : inventory.getSize();
@@ -130,7 +130,7 @@ public final class ItemUtil {
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(legacy) {
+        if(ServerVersion.isLegacy()) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
                 return spawnEggMeta.getSpawnedType() == null ? EntityTypes.PIG : EntityTypes.fromName(spawnEggMeta.getSpawnedType().name());
@@ -147,7 +147,7 @@ public final class ItemUtil {
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(legacy) {
+        if(ServerVersion.isLegacy()) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
                 spawnEggMeta.setSpawnedType(entityType);
@@ -228,7 +228,7 @@ public final class ItemUtil {
     }
 
     public static ItemStack getFromBlock(Block block){
-        if(legacy)
+        if(ServerVersion.isLegacy())
             return block.getState().getData().toItemStack(1);
         else
             return new ItemStack(block.getType());

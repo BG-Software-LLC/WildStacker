@@ -1,9 +1,9 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.google.gson.JsonObject;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
 
@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LootTableSheep extends LootTable {
-
-    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
 
     private LootTableSheep(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment){
         super(lootPairs, min, max, minExp, maxExp, dropEquipment);
@@ -27,7 +25,7 @@ public class LootTableSheep extends LootTable {
             ItemStack wool = Materials.getWool(sheep.getColor());
             for (ItemStack itemStack : drops) {
                 if (itemStack.getType().name().contains("WOOL")) {
-                    if (legacy) {
+                    if (ServerVersion.isLegacy()) {
                         //noinspection deprecation
                         itemStack.setDurability(wool.getData().getData());
                     } else {

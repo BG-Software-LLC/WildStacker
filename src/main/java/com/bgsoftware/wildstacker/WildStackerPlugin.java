@@ -36,6 +36,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -181,11 +182,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     }
 
     private void loadNMSAdapter(){
-        String version = getServer().getClass().getPackage().getName().split("\\.")[3];
+        String bukkitVersion = ServerVersion.getBukkitVersion();
         try{
-            nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + version).newInstance();
+            nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
         }catch(Exception ex){
-            log("WildStacker doesn't support " + version + " - shutting down...");
+            log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             Executor.sync(() -> getServer().getPluginManager().disablePlugin(this));
         }
     }

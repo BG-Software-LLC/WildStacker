@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -10,7 +11,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -26,7 +26,6 @@ import java.util.UUID;
 public final class ProtocolLibHook {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static final boolean isLegacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
 
     public static Set<UUID> itemsDisabledNames = new HashSet<>();
     public static Set<UUID> entitiesDisabledNames = new HashSet<>();
@@ -78,11 +77,11 @@ public final class ProtocolLibHook {
     }
 
     private static Object getCustomName(String customName){
-        return isLegacy ? customName : customName.isEmpty() ? Optional.empty() : Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
+        return ServerVersion.isLegacy() ? customName : customName.isEmpty() ? Optional.empty() : Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
     }
 
     private static WrappedDataWatcher.Serializer getNameSerializer(){
-        return isLegacy ? WrappedDataWatcher.Registry.get(String.class) : WrappedDataWatcher.Registry.getChatComponentSerializer(true);
+        return ServerVersion.isLegacy() ? WrappedDataWatcher.Registry.get(String.class) : WrappedDataWatcher.Registry.getChatComponentSerializer(true);
     }
 
 }

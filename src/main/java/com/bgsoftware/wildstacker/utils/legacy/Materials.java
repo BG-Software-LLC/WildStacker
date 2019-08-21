@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -61,18 +61,16 @@ public enum Materials {
         return bukkitData == 0 ? new ItemStack(toBukkitType(), amount) : new ItemStack(toBukkitType(), amount, bukkitData);
     }
 
-    private static boolean legacy = !Bukkit.getBukkitVersion().contains("1.13") && !Bukkit.getBukkitVersion().contains("1.14");
-
     public static Material getSpawnEgg(EntityType entityType){
-        return Material.matchMaterial((legacy ? "MONSTER_EGG" : EntityTypes.fromName(entityType.name())  + "_SPAWN_EGG"));
+        return Material.matchMaterial((ServerVersion.isLegacy() ? "MONSTER_EGG" : EntityTypes.fromName(entityType.name())  + "_SPAWN_EGG"));
     }
 
     public static boolean isValidAndSpawnEgg(ItemStack itemStack){
-        return !itemStack.getType().isBlock() && itemStack.getType().name().contains(legacy ? "MONSTER_EGG" : "SPAWN_EGG");
+        return !itemStack.getType().isBlock() && itemStack.getType().name().contains(ServerVersion.isLegacy() ? "MONSTER_EGG" : "SPAWN_EGG");
     }
 
     public static ItemStack getWool(DyeColor dyeColor){
-        return legacy ? new ItemStack(Material.matchMaterial("WOOL"), 1, dyeColor.getWoolData()) : new ItemStack(Material.matchMaterial(dyeColor.name() + "_WOOL"));
+        return ServerVersion.isLegacy() ? new ItemStack(Material.matchMaterial("WOOL"), 1, dyeColor.getWoolData()) : new ItemStack(Material.matchMaterial(dyeColor.name() + "_WOOL"));
     }
 
 }

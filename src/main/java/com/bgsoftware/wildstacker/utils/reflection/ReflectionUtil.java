@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -12,8 +12,6 @@ import java.util.Map;
 
 public final class ReflectionUtil {
 
-    private static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-
     static Map<Fields, Field> fieldMap = new HashMap<>();
     static Map<Methods, Method> methodMap = new HashMap<>();
 
@@ -21,7 +19,6 @@ public final class ReflectionUtil {
     public static void init(){
         try{
             Class entityLivingClass = getNMSClass("EntityLiving"),
-                    pathfinderClass = getNMSClass("PathfinderGoalBreed"),
                     craftWorldClass = getBukkitClass("CraftWorld"),
                     entityClass = getNMSClass("Entity"),
                     craftEntityClass = getBukkitClass("entity.CraftEntity"),
@@ -29,7 +26,7 @@ public final class ReflectionUtil {
                     entityInsentientClass = getNMSClass("EntityInsentient");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
-            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(version.contains("1_14") ? "f" : "b_"));
+            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isEquals(ServerVersion.v1_14) ? "f" : "b_"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
@@ -66,7 +63,7 @@ public final class ReflectionUtil {
 
     private static Class getNMSClass(String className){
         try{
-            return Class.forName("net.minecraft.server." + version + "." + className);
+            return Class.forName("net.minecraft.server." + ServerVersion.getBukkitVersion() + "." + className);
         }catch(ClassNotFoundException ex){
             throw new NullPointerException(ex.getMessage());
         }
@@ -74,7 +71,7 @@ public final class ReflectionUtil {
 
     private static Class getBukkitClass(String className){
         try{
-            return Class.forName("org.bukkit.craftbukkit." + version + "." + className);
+            return Class.forName("org.bukkit.craftbukkit." + ServerVersion.getBukkitVersion() + "." + className);
         }catch(ClassNotFoundException ex){
             throw new NullPointerException(ex.getMessage());
         }

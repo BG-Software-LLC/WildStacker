@@ -3,8 +3,8 @@ package com.bgsoftware.wildstacker.loot;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.google.gson.JsonObject;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -81,7 +81,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @SuppressWarnings("JavaReflectionMemberAccess")
     private void clearEquipment(EntityEquipment entityEquipment){
-        if(Bukkit.getBukkitVersion().contains("1.8")) {
+        if(ServerVersion.isEquals(ServerVersion.v1_8)) {
             if (entityEquipment.getItemInHandDropChance() >= 2.0F)
                 entityEquipment.setItemInHand(new ItemStack(Material.AIR));
         }else{
