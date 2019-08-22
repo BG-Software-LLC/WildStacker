@@ -42,9 +42,9 @@ public final class ReflectionUtil {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "bX" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "bW" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("2") ? "bT" : "bS" :
+                            ServerVersion.getBukkitVersion().contains("R2") ? "bT" : "bS" :
                             //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("1") ? "bo" : "bp"
+                            ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp"
             ));
             methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundVolume" :
@@ -53,9 +53,9 @@ public final class ReflectionUtil {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "ch" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("2") ? "ce" : "cd" :
+                            ServerVersion.getBukkitVersion().contains("R2") ? "ce" : "cd" :
                             //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("1") ? "bA" : "bB"
+                            ServerVersion.getBukkitVersion().contains("R1") ? "bA" : "bB"
             ));
             methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isEquals(ServerVersion.v1_14) ? "cU" :
@@ -64,9 +64,9 @@ public final class ReflectionUtil {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "cj" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "ci" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("2") ? "cf" : "ce" :
+                            ServerVersion.getBukkitVersion().contains("R2") ? "cf" : "ce" :
                             //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("1") ? "bB" : "bC"
+                            ServerVersion.getBukkitVersion().contains("R1") ? "bB" : "bC"
             ));
 
             try{
