@@ -64,7 +64,7 @@ public final class SettingsHandler {
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, chunkMergeBarrels, explosionsBreakBarrelStack, barrelsToggleCommand,
-            barrelsPlaceInventory;
+            barrelsPlaceInventory, forceCauldron;
     public final int barrelsCheckRange, barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax;
     public final List<String> barrelsDisabledWorlds;
@@ -191,6 +191,7 @@ public final class SettingsHandler {
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);
         barrelsToggleCommandSyntax = cfg.getString("barrels.toggle-command.command", "stacker toggle");
         barrelsPlaceInventory = cfg.getBoolean("barrels.place-inventory", true);
+        forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
 
         for(StackCheck check : StackCheck.values()) {
             check.setEnabled(cfg.getBoolean("entities.stack-checks." + check.name(), false));

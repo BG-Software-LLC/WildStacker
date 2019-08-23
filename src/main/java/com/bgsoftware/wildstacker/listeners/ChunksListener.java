@@ -24,6 +24,8 @@ public final class ChunksListener implements Listener {
 
     private WildStackerPlugin plugin;
 
+    public static boolean loadedData = false;
+
     public ChunksListener(WildStackerPlugin plugin){
         this.plugin = plugin;
     }
@@ -44,16 +46,18 @@ public final class ChunksListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e){
-        //Trying to remove all the corrupted stacked blocks
-        Arrays.stream(e.getChunk().getEntities())
-                .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
-                        entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()))
-                .forEach(entity -> {
-                    Block block = entity.getLocation().getBlock();
-                    if (block.getType() == Material.CAULDRON)
-                        block.setType(Material.AIR);
-                    entity.remove();
-                });
+        if(loadedData) {
+            //Trying to remove all the corrupted stacked blocks
+            Arrays.stream(e.getChunk().getEntities())
+                    .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
+                            entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()))
+                    .forEach(entity -> {
+                        Block block = entity.getLocation().getBlock();
+                        if (block.getType() == Material.CAULDRON)
+                            block.setType(Material.AIR);
+                        entity.remove();
+                    });
+        }
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){

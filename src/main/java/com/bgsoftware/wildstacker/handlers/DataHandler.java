@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.SQLHelper;
+import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Executor;
@@ -301,6 +302,8 @@ public final class DataHandler {
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
                         Block barrelBlock = blockLocation.getBlock();
+                        if(barrelBlock.getType() != Material.CAULDRON && plugin.getSettings().forceCauldron)
+                            barrelBlock.setType(Material.CAULDRON);
                         if (barrelBlock.getType() == Material.CAULDRON) {
                             ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
                                     plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
@@ -326,6 +329,8 @@ public final class DataHandler {
                 }
             }
         });
+
+        ChunksListener.loadedData = true;
     }
 
     private void loadOldChunkFile(Chunk chunk){

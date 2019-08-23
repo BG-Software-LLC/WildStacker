@@ -573,4 +573,9 @@ public final class ConfigComments {
     @Comment("he can put blocks to add to the barrel.")
     public static String BARRELS_PLACE_INVENTORY = "barrels.place-inventory";
 
+    @Comment("")
+    @Comment("This should not be set to true unless being told by the dev")
+    @Comment("When enabled, the plugin sets the barrel types to cauldron if they aren't already.")
+    public static String BARRELS_FORCE_CAULDRON = "barrels.force-cauldron";
+
 }

@@ -547,3 +547,7 @@ barrels:
   # When enabled and player is clicking a barrel while sneaking, an inventory will be opened, there
   # he can put blocks to add to the barrel.
   place-inventory: true
+
+  # This should not be set to true unless being told by the dev.
+  # When enabled, the plugin sets the barrel types to cauldron if they aren't already.
+  force-cauldron: false
