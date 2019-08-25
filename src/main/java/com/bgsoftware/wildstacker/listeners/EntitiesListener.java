@@ -449,7 +449,7 @@ public final class EntitiesListener implements Listener {
             }else{
                 stackedEntity.tryStack();
             }
-        });
+        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
