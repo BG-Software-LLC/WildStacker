@@ -195,12 +195,11 @@ public final class EntitiesListener implements Listener {
 
                 if (livingEntity.getKiller() != null) {
                     Player killer = livingEntity.getKiller();
-                    if(stackAmount - 1 > 0) {
-                        try {
-                            killer.incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-                            killer.incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-                        } catch (IllegalArgumentException ignored) { }
-                    }
+
+                    try {
+                        killer.incrementStatistic(Statistic.MOB_KILLS, stackAmount);
+                        killer.incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                    } catch (IllegalArgumentException ignored) { }
 
                     //Achievements
                     EntityType victimType = livingEntity.getType();
