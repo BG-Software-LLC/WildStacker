@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import org.bukkit.Bukkit;
@@ -54,6 +55,8 @@ public final class BarrelsListener implements Listener {
     public BarrelsListener(WildStackerPlugin plugin){
         this.plugin = plugin;
         this.barrelsToggleCommandPlayers = new HashSet<>();
+        if(ServerVersion.isAtLeast(ServerVersion.v1_9))
+            plugin.getServer().getPluginManager().registerEvents(new CauldronChangeListener(), plugin);
     }
 
     private boolean isBarrelBlock(Block block){
@@ -323,14 +326,6 @@ public final class BarrelsListener implements Listener {
         Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onCauldronFill(CauldronLevelChangeEvent e){
-        if(plugin.getSystemManager().isStackedBarrel(e.getBlock())) {
-            e.setCancelled(true);
-            e.setNewLevel(0);
-        }
-    }
-
     private boolean isOffHand(PlayerInteractEvent event){
         try{
             return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
@@ -348,6 +343,18 @@ public final class BarrelsListener implements Listener {
         int barrelsInsideChunk = (int) plugin.getSystemManager().getStackedBarrels().stream()
                 .filter(stackedBarrel -> stackedBarrel.getLocation().getChunk().equals(chunk)).count();
         return barrelsInsideChunk > chunkLimit;
+    }
+
+    private class CauldronChangeListener implements Listener{
+
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onCauldronFill(CauldronLevelChangeEvent e){
+            if(plugin.getSystemManager().isStackedBarrel(e.getBlock())) {
+                e.setCancelled(true);
+                e.setNewLevel(0);
+            }
+        }
+
     }
 
 }
