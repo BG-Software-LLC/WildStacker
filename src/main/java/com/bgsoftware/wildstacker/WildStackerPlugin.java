@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
+import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
@@ -128,6 +129,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new MythicMobsListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
                 EpicSpawnersListener.register(this);
+            if(getServer().getPluginManager().isPluginEnabled("CrazyEnchantments"))
+                CrazyEnchantmentsHook.register();
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
