@@ -10,8 +10,8 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -175,6 +175,7 @@ public final class SpawnersListener implements Listener {
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlock());
+        CreatureSpawner creatureSpawner = (CreatureSpawner) e.getBlock().getState();
 
         e.setCancelled(true);
 
@@ -193,7 +194,7 @@ public final class SpawnersListener implements Listener {
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
-            plugin.getProviders().dropOrGiveItem(e.getPlayer(), stackedSpawner.getSpawner(), stackAmount);
+            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
@@ -218,6 +219,7 @@ public final class SpawnersListener implements Listener {
                 continue;
 
             StackedSpawner stackedSpawner = WStackedSpawner.of(block);
+            CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
 
             int amount;
 
@@ -231,7 +233,7 @@ public final class SpawnersListener implements Listener {
             }
 
             if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance) {
-                plugin.getProviders().dropOrGiveItem(e.getEntity(), stackedSpawner.getSpawner(), amount);
+                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount);
             }
 
             if(stackedSpawner.getStackAmount() <= 0)
