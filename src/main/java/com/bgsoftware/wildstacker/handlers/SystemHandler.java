@@ -105,7 +105,7 @@ public final class SystemHandler implements SystemManager {
                 dataHandler.CACHED_OBJECTS.remove(livingEntity.getUniqueId());
         }, 10L);
 
-        boolean shouldBeCached = plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled();
+        boolean shouldBeCached = ((WStackedEntity) stackedEntity).isCached();
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && shouldBeCached)

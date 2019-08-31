@@ -49,6 +49,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         this.spawnCause = spawnCause;
     }
 
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        super.setStackAmount(stackAmount, updateName);
+        if(!isCached())
+            plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(object.getUniqueId(), stackAmount);
+    }
+
     /*
      * LivingEntity's methods
      */
@@ -497,6 +504,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
+        if(!isCached())
+            plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(object.getUniqueId(), this.spawnCause);
     }
 
     @Override
@@ -508,6 +517,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public boolean isNameBlacklisted() {
         return EntityUtil.isNameBlacklisted(object.getCustomName());
+    }
+
+    public boolean isCached(){
+        return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
     }
 
     public static StackedEntity of(Entity entity){
