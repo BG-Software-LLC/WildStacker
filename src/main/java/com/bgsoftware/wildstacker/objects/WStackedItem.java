@@ -142,12 +142,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     public Item tryStack() {
         int range = plugin.getSettings().itemsCheckRange;
 
-        List<Entity> nearbyEntities = object.getNearbyEntities(range, range, range);
+        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
+                entity -> entity instanceof Item && entity.isValid() && tryStackInto(WStackedItem.of(entity)));
 
-        for (Entity nearby : nearbyEntities) {
-            if (nearby instanceof Item && nearby.isValid() && tryStackInto(WStackedItem.of(nearby)))
-                return (Item) nearby;
-        }
+        if(nearbyEntities.size() > 0)
+            return (Item) nearbyEntities.get(0);
 
         updateName();
         return null;

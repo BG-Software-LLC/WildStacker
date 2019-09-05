@@ -27,7 +27,6 @@ import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
@@ -478,11 +477,8 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            e.getEntity().getNearbyEntities(5, 5, 5).stream()
-                .filter(entity -> entity instanceof LivingEntity && !(entity instanceof Player))
-                .forEach(entity -> {
-                        if(entity.isValid()) WStackedEntity.of(entity).tryStack();
-                });
+            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> entity instanceof LivingEntity && !(entity instanceof Player) && entity.isValid())
+                    .forEach(entity -> WStackedEntity.of(entity).tryStack());
         }
     }
 
@@ -542,11 +538,9 @@ public final class EntitiesListener implements Listener {
         }
 
         //Refresh item names
-        for(Entity entity : e.getPlayer().getNearbyEntities(50, 256, 50)){
-            if(entity instanceof LivingEntity && entity.isCustomNameVisible()){
-                ProtocolLibHook.updateName(e.getPlayer(), entity);
-            }
-        }
+        plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
+                entity -> entity instanceof LivingEntity && entity.isCustomNameVisible())
+                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
     private boolean isOffHand(PlayerInteractAtEntityEvent event){

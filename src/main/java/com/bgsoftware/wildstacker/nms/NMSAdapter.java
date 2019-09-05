@@ -28,7 +28,11 @@ public interface NMSAdapter {
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
-    List<Entity> getNearbyEntities(LivingEntity livingEntity, int range, Predicate<? super Entity> predicate);
+    default List<Entity> getNearbyEntities(Entity entity, int range, Predicate<? super Entity> predicate){
+        return getNearbyEntities(entity, range, range, range, predicate);
+    }
+
+    List<Entity> getNearbyEntities(Entity entity, int xRange, int yRange, int zRange, Predicate<? super Entity> predicate);
 
     @Nullable
     String serialize(ItemStack itemStack);

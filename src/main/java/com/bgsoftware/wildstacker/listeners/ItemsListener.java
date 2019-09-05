@@ -15,7 +15,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -197,11 +196,9 @@ public final class ItemsListener implements Listener {
         }
 
         //Refresh item names
-        for(Entity entity : e.getPlayer().getNearbyEntities(50, 256, 50)){
-            if(entity instanceof Item && entity.isCustomNameVisible()){
-                ProtocolLibHook.updateName(e.getPlayer(), entity);
-            }
-        }
+        plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
+                entity -> entity instanceof Item && entity.isCustomNameVisible())
+                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
     private boolean isChunkLimit(Chunk chunk){

@@ -11,6 +11,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 public final class EventsListener {
 
@@ -63,14 +65,13 @@ public final class EventsListener {
 
             Item egg = e.getEntity();
 
-            for(Entity entity : e.getEntity().getNearbyEntities(2, 2, 2)){
-                if(entity instanceof Chicken){
-                    if(plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0){
-                        EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) entity);
-                        Bukkit.getPluginManager().callEvent(eggLayEvent);
-                        break;
-                    }
-                }
+            List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 2,
+                    entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0);
+
+            for(Entity entity : nearbyEntities){
+                EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) entity);
+                Bukkit.getPluginManager().callEvent(eggLayEvent);
+                break;
             }
         }
 
