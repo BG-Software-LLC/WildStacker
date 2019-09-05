@@ -125,6 +125,7 @@ public final class SpawnersListener implements Listener {
         if(targetSpawner == null){
             if(isChunkLimit(e.getBlock().getChunk())){
                 e.setCancelled(true);
+                stackedSpawner.remove();
                 return;
             }
 

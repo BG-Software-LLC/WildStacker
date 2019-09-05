@@ -96,8 +96,10 @@ public final class BarrelsListener implements Listener {
         e.setCancelled(true);
 
         if(targetBarrel == null) {
-            if(isChunkLimit(e.getBlock().getChunk()))
+            if(isChunkLimit(e.getBlock().getChunk())) {
+                stackedBarrel.remove();
                 return;
+            }
 
             BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel);
             Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
