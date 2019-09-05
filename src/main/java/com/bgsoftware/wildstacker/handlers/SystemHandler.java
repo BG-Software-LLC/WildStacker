@@ -304,6 +304,8 @@ public final class SystemHandler implements SystemManager {
                 }
             }
         }
+
+        plugin.getProviders().clearHolograms();
     }
 
     @Override
