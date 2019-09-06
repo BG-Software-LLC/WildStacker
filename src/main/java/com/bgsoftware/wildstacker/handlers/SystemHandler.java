@@ -460,7 +460,12 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData) {
-        return new WStackedSnapshot(chunk, loadData);
+        return getStackedSnapshot(chunk);
+    }
+
+    @Override
+    public StackedSnapshot getStackedSnapshot(Chunk chunk) {
+        return new WStackedSnapshot(chunk);
     }
 
     /*

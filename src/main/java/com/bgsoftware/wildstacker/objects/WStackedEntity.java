@@ -28,7 +28,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
@@ -380,6 +379,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    public LivingEntity trySpawnerStack(StackedSpawner stackedSpawner){
+        new UnsupportedOperationException("trySpawnerStack method is no longer supported.").printStackTrace();
+        runSpawnerStackAsync(stackedSpawner, null);
+        return null;
+    }
+
+    @Override
     public StackedEntity spawnDuplicate(int amount) {
         if (amount <= 0)
             return null;
@@ -443,7 +449,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public void setTempLootTable(List<ItemStack> itemStacks) {
+    public void setDrops(List<ItemStack> itemStacks) {
         this.tempLootTable = new LootTableTemp() {
             @Override
             public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
@@ -463,7 +469,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public void setLootMultiplier(int multiplier) {
+    @Deprecated
+    public void setTempLootTable(List<ItemStack> itemStacks) {
+        setDrops(itemStacks);
+    }
+
+    @Override
+    public void setDropsMultiplier(int multiplier) {
         this.tempLootTable = new LootTableTemp() {
             @Override
             public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
@@ -476,8 +488,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     @Deprecated
-    public int getExp(int defaultExp) {
-        return getExp(stackAmount, defaultExp);
+    public void setLootMultiplier(int multiplier) {
+        setDropsMultiplier(multiplier);
     }
 
     @Override
@@ -486,27 +498,15 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    @Deprecated
     public void ignoreDeathEvent() {
         ignoreDeathEvent = true;
     }
 
     @Override
+    @Deprecated
     public boolean isIgnoreDeathEvent() {
         return ignoreDeathEvent;
-    }
-
-    @Override
-    public CreatureSpawnEvent.SpawnReason getSpawnReason() {
-        try{
-            return CreatureSpawnEvent.SpawnReason.valueOf(spawnCause.name());
-        }catch(Exception ex){
-            return CreatureSpawnEvent.SpawnReason.CHUNK_GEN;
-        }
-    }
-
-    @Override
-    public void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason) {
-        setSpawnCause(spawnReason == null ? null : SpawnCause.valueOf(spawnReason.name()));
     }
 
     @Override

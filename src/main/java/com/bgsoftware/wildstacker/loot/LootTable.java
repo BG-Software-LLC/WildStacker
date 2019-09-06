@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
@@ -102,22 +101,6 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             entityEquipment.setLeggings(new ItemStack(Material.AIR));
         if(entityEquipment.getBootsDropChance() >= 2.0F)
             entityEquipment.setBoots(new ItemStack(Material.AIR));
-    }
-
-    @Override
-    @Deprecated
-    public int getExp(int stackAmount, int defaultExp){
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        int exp = defaultExp * stackAmount;
-
-        if(minExp >= 0 && maxExp >= 0){
-            exp = 0;
-            for(int i = 0; i < stackAmount; i++){
-                exp += random.nextInt(maxExp - minExp + 1) + minExp;
-            }
-        }
-
-        return exp;
     }
 
     @Override

@@ -18,17 +18,6 @@ public interface LootTable {
 
     /**
      * Get the vanilla exp of a the entity using a stack size.
-     * @param stackAmount the stack size
-     * @param defaultExp the default exp to return if no exp was found
-     * @return The exp of the entity
-     *
-     * @deprecated See getExp(StackedEntity, int)
-     */
-    @Deprecated
-    int getExp(int stackAmount, int defaultExp);
-
-    /**
-     * Get the vanilla exp of a the entity using a stack size.
      * @param stackedEntity The stacked entity object
      * @param stackAmount the stack size
      * @return The exp of the entity

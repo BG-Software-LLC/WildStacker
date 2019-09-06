@@ -63,8 +63,12 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     @Override
     public abstract void runStackAsync(Consumer<Optional<T>> result);
 
-//    @Override
-//    public abstract T tryStack();
+    @Override
+    public T tryStack(){
+        new UnsupportedOperationException("tryStack method is no longer supported.").printStackTrace();
+        runStackAsync(null);
+        return null;
+    }
 
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
@@ -78,15 +82,21 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     @Override
     public abstract StackResult runStack(StackedObject stackedObject);
 
-//    @Override
-//    public abstract boolean tryStackInto(StackedObject stackedObject);
+    @Override
+    public boolean tryStackInto(StackedObject stackedObject){
+        new UnsupportedOperationException("tryStackInto method is no longer supported.").printStackTrace();
+        return runStack(stackedObject) == StackResult.SUCCESS;
+    }
 
 
     @Override
     public abstract UnstackResult runUnstack(int amount);
 
-//    @Override
-//    public abstract boolean tryUnstack(int amount);
+    @Override
+    public boolean tryUnstack(int amount){
+        new UnsupportedOperationException("tryUnstack method is no longer supported.").printStackTrace();
+        return runUnstack(amount) == UnstackResult.SUCCESS;
+    }
 
     @Override
     public abstract boolean isSimilar(StackedObject stackedObject);

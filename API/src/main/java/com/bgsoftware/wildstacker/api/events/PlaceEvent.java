@@ -6,7 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-@SuppressWarnings("WeakerAccess")
+/**
+ * PlaceEvent is a base event for all the placement events.
+ */
 public abstract class PlaceEvent extends Event implements Cancellable {
 
     private boolean cancelled;
@@ -14,6 +16,11 @@ public abstract class PlaceEvent extends Event implements Cancellable {
     protected final StackedObject object;
     protected final Player player;
 
+    /**
+     * The constructor for the event.
+     * @param player The player who placed the object.
+     * @param object The stacked object that was placed.
+     */
     public PlaceEvent(Player player, StackedObject object){
         super(!Bukkit.isPrimaryThread());
         this.player = player;

@@ -56,12 +56,6 @@ public interface StackedObject<T> {
     void updateName();
 
     /**
-     * Try to stack this object into other objects around it.
-     * If succeed to stack, the object it got stacked to will be returned.
-     * If failed, null will be returned.
-     */
-
-    /**
      * Checks if this object can stack into another object.
      * @param stackedObject other object to check
      *
@@ -69,19 +63,62 @@ public interface StackedObject<T> {
      */
     boolean canStackInto(StackedObject stackedObject);
 
+    /**
+     * Stack this object into other objects around it.
+     * @param result The object that this object was stacked into.
+     */
     void runStackAsync(Consumer<Optional<T>> result);
 
-    //T tryStack();
+    /**
+     * Stack this object into other objects around it.
+     * @return The object that this object was stacked into (nullable)
+     *
+     * @deprecated See runStackAsync(Consumer)
+     */
+    @Deprecated
+    T tryStack();
 
+    /**
+     * Stack this object into another object.
+     * @param stackedObject another object to stack into
+     * @param stackResult The result for the stacking operation.
+     */
     void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult);
 
+    /**
+     * Stack this object into another object.
+     * !Usage of this method can cause issues!
+     * @param stackedObject another object to stack into
+     * @return The result for the stacking operation.
+     */
     StackResult runStack(StackedObject stackedObject);
 
-    //boolean tryStackInto(StackedObject stackedObject);
+    /**
+     * Stack this object into another object.
+     * @param stackedObject another object to stack into
+     * @return True if success, otherwise false.
+     *
+     * @deprecated See runStackAsync(StackedObject, Consumer)
+     */
+    @Deprecated
+    boolean tryStackInto(StackedObject stackedObject);
 
+    /**
+     * Unstack this object.
+     * @param amount unstack by this amount
+     * @return The result for the unstacking operation.
+     */
     UnstackResult runUnstack(int amount);
 
-    //boolean tryUnstack(int amount);
+    /**
+     * Unstack this object.
+     * @param amount unstack by this amount
+     * @return True if success, otherwise false.
+     *
+     * @deprecated See runUnstack
+     */
+    @Deprecated
+    boolean tryUnstack(int amount);
 
     /**
      * Checks if this object is similar to another object.

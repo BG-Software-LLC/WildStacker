@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.api.objects;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -16,19 +15,16 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
 
     /**
      * Get the living-entity object of bukkit.
-     * @return living-entity
      */
     LivingEntity getLivingEntity();
 
     /**
      * Get the uuid of the living-entity.
-     * @return uuid
      */
     UUID getUniqueId();
 
     /**
      * Get the entity-type of the living-entity.
-     * @return entity-type
      */
     EntityType getType();
 
@@ -40,7 +36,6 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
 
     /**
      * Get the health of the living-entity.
-     * @return health
      */
     double getHealth();
 
@@ -58,12 +53,20 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
 
     /**
      * Try to stack the living-entity the same as if it was spawned by a spawner.
+     * @param stackedSpawner The spawner that spawned the entity.
+     * @param result The entity that this entity was stacked into.
+     */
+    void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result);
+
+    /**
+     * Try to stack the living-entity the same as if it was spawned by a spawner.
      * @param stackedSpawner the spawner
      * @return the entity it got stacked into. If none, null will be returned.
+     *
+     * @deprecated Should not be used. See runSpawnerStackAsync
      */
-    //LivingEntity trySpawnerStack(StackedSpawner stackedSpawner);
-
-    void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result);
+    @Deprecated
+    LivingEntity trySpawnerStack(StackedSpawner stackedSpawner);
 
     /**
      * Spawn a duplicate entity with a specific stack amount.
@@ -81,7 +84,6 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * Get the drops of this entity with a specific fortune level.
      * SHOULD BE USED ASYNC OR MAY CAUSE LAG WITH LARGE STACK SIZES!!!
      * @param lootBonusLevel the fortune level
-     * @return The drops of the entity
      */
     List<ItemStack> getDrops(int lootBonusLevel);
 
@@ -90,7 +92,6 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * SHOULD BE USED ASYNC OR MAY CAUSE LAG WITH LARGE STACK SIZES!!!
      * @param lootBonusLevel the fortune level
      * @param stackAmount the stack size
-     * @return The drops of the entity
      */
     List<ItemStack> getDrops(int lootBonusLevel, int stackAmount);
 
@@ -99,63 +100,60 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * This loot table can be used one, and getDrops method will remove the temp loot-table.
      * @param itemStacks The loot to set
      */
+    void setDrops(List<ItemStack> itemStacks);
+
+    /**
+     * Set a temporary loot-table for this entity.
+     * This loot table can be used one, and getDrops method will remove the temp loot-table.
+     * @param itemStacks The loot to set
+     *
+     * @deprecated see setDrops
+     */
+    @Deprecated
     void setTempLootTable(List<ItemStack> itemStacks);
 
     /**
      * Set a multiplier for loot. It will multiply all the drops by the given multiplier.
      * @param multiplier The multiplier
      */
-    void setLootMultiplier(int multiplier);
+    void setDropsMultiplier(int multiplier);
 
     /**
-     * Get the exp of this entity.
-     * @param defaultExp the default exp to return if not found
-     * @return The amount of exp to drop.
+     * Set a multiplier for loot. It will multiply all the drops by the given multiplier.
+     * @param multiplier The multiplier
      *
-     * @deprecated Will be swiched with getExp(int stackSize) in the next updates
+     * @deprecated See setDropsMultiplier
      */
     @Deprecated
-    int getExp(int defaultExp);
+    void setLootMultiplier(int multiplier);
 
     /**
      * Get the exp of this entity with a stack size.
      * @param stackAmount the stack size
      * @param defaultExp the default exp to return if not found
-     * @return The amount of exp to drop.
      */
     int getExp(int stackAmount, int defaultExp);
 
     /**
      * Ignore the death event of this entity.
      * Should be used if you want to override the behaviour of the entity.
+     *
+     * @deprecated No longer supported.
      */
+    @Deprecated
     void ignoreDeathEvent();
 
     /**
      * Check if the entity should ignore the death event upon death.
      * @return True if death event is ignored, otherwise false
+     *
+     * @deprecated No longer supported.
      */
+    @Deprecated
     boolean isIgnoreDeathEvent();
 
     /**
-     * Returns the spawn reason of this entity
-     * @return spawn reason
-     * @deprecated see getSpawnCause
-     */
-    @Deprecated
-    CreatureSpawnEvent.SpawnReason getSpawnReason();
-
-    /**
-     * Set the spawn reason of the entity.
-     * @param spawnReason The spawn reason
-     * @deprecated see setSpawnCause
-     */
-    @Deprecated
-    void setSpawnReason(CreatureSpawnEvent.SpawnReason spawnReason);
-
-    /**
      * Returns the spawn cause of this entity
-     * @return spawn cause
      */
     SpawnCause getSpawnCause();
 

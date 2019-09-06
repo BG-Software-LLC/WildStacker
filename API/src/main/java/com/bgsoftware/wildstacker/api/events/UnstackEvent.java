@@ -5,7 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-@SuppressWarnings("WeakerAccess")
+/**
+ * UnstackEvent is a base event for all the unstack events.
+ */
 public abstract class UnstackEvent extends Event implements Cancellable {
 
     private boolean cancelled;
@@ -13,6 +15,11 @@ public abstract class UnstackEvent extends Event implements Cancellable {
     protected final StackedObject object;
     protected final int unstackAmount;
 
+    /**
+     * The constructor for the event.
+     * @param object The original stacked object.
+     * @param unstackAmount The amount the object is unstacked by.
+     */
     public UnstackEvent(StackedObject object, int unstackAmount){
         super(!Bukkit.isPrimaryThread());
         this.object = object;

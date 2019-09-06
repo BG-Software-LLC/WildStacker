@@ -175,7 +175,17 @@ public interface SystemManager {
      * @param chunk The chunk
      * @param loadData Should data be loaded if isn't already?
      * @return StackedSnapshot object
+     *
+     * @deprecated see getStackedSnapshot(Chunk chunk)
      */
+    @Deprecated
     StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData);
+
+    /**
+     * Get a stacked snapshot of a chunk.
+     * @param chunk The chunk
+     * @return StackedSnapshot object
+     */
+    StackedSnapshot getStackedSnapshot(Chunk chunk);
 
 }
