@@ -150,7 +150,7 @@ public final class CommandGive implements ICommand {
 
         Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
         if(!target.equals(sender))
-            Locale.STACK_RECEIVE.send(target, stackSize, args[2], sender.getName());
+            Locale.STACK_RECEIVE.send(target, stackSize, typeName + " " + args[2], sender.getName());
     }
 
     @Override
