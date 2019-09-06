@@ -180,8 +180,7 @@ entities:
   # Blacklisted names is a list of names that when an entity has this name, it won't get stacked.
   # Color codes are supported, as well as regex.
   # If you wish to enable stacking of all entities based on their name, use "name-blacklist: []"
-  name-blacklist:
-  - '&f(.*)'
+  name-blacklist: []
 
   # How much time should be passed between auto-stacking? (in ticks)
   # Use it on your own risk. Every run, the plugin will go over *all* the entities
