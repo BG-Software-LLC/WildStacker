@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.events;
 
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
@@ -12,6 +13,7 @@ public abstract class StackEvent extends Event implements Cancellable {
     protected final StackedObject object, target;
 
     public StackEvent(StackedObject object, StackedObject target){
+        super(!Bukkit.isPrimaryThread());
         this.object = object;
         this.target = target;
         cancelled = false;

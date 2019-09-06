@@ -1,11 +1,14 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -15,7 +18,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantIfStatement", "WeakerAccess"})
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
@@ -105,6 +111,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public void updateName() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::updateName);
+            return;
+        }
+
         if(!plugin.getSettings().itemsStackingEnabled)
             return;
 
@@ -139,20 +150,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     @Override
-    public Item tryStack() {
-        int range = plugin.getSettings().itemsCheckRange;
-
-        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
-                entity -> entity instanceof Item && entity.isValid() && tryStackInto(WStackedItem.of(entity)));
-
-        if(nearbyEntities.size() > 0)
-            return (Item) nearbyEntities.get(0);
-
-        updateName();
-        return null;
-    }
-
-    @Override
     public boolean canStackInto(StackedObject stackedObject) {
         if (!plugin.getSettings().itemsStackingEnabled)
             return false;
@@ -180,9 +177,41 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     @Override
-    public boolean tryStackInto(StackedObject stackedObject) {
+    public void runStackAsync(Consumer<Optional<Item>> result) {
+        int range = plugin.getSettings().itemsCheckRange;
+
+        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
+
+        StackService.execute(() -> {
+            Stream<StackedItem> itemStream = nearbyEntities.stream().map(WStackedItem::of).filter(this::canStackInto);
+            Optional<StackedItem> itemOptional = itemStream.findFirst();
+
+            if(itemOptional.isPresent()){
+                StackedItem targetItem = itemOptional.get();
+
+                StackResult stackResult = runStack(targetItem);
+
+                if(stackResult == StackResult.SUCCESS) {
+                    if(result != null)
+                        result.accept(itemOptional.map(StackedItem::getItem));
+                    return;
+                }
+            }
+
+            updateName();
+
+            if(result != null)
+                result.accept(Optional.empty());
+        });
+    }
+
+    @Override
+    public StackResult runStack(StackedObject stackedObject) {
+        if(!StackService.canStackFromThread())
+            return StackResult.THREAD_CATCHER;
+
         if (!canStackInto(stackedObject))
-            return false;
+            return StackResult.NOT_SIMILAR;
 
         StackedItem targetItem = (StackedItem) stackedObject;
 
@@ -190,7 +219,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         Bukkit.getPluginManager().callEvent(itemStackEvent);
 
         if (itemStackEvent.isCancelled())
-            return false;
+            return StackResult.EVENT_CANCELLED;
 
         targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
 
@@ -201,12 +230,12 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         this.remove();
 
-        return true;
+        return StackResult.SUCCESS;
     }
 
     @Override
-    public boolean tryUnstack(int amount) {
-        throw new UnsupportedOperationException("You cannot unstack stacked item.");
+    public UnstackResult runUnstack(int amount) {
+        throw new UnsupportedOperationException("Cannot unstack stacked items. Use giveItemStack() method.");
     }
 
     @Override

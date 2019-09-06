@@ -1,8 +1,14 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Chunk;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class WStackedObject<T> implements StackedObject<T> {
@@ -52,16 +58,35 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract void updateName();
 
     @Override
-    public abstract T tryStack();
-
-    @Override
     public abstract boolean canStackInto(StackedObject stackedObject);
 
     @Override
-    public abstract boolean tryStackInto(StackedObject stackedObject);
+    public abstract void runStackAsync(Consumer<Optional<T>> result);
+
+//    @Override
+//    public abstract T tryStack();
 
     @Override
-    public abstract boolean tryUnstack(int amount);
+    public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
+        StackService.execute(() -> {
+            StackResult _stackResult = runStack(stackedObject);
+            if(stackResult != null)
+                stackResult.accept(_stackResult);
+        });
+    }
+
+    @Override
+    public abstract StackResult runStack(StackedObject stackedObject);
+
+//    @Override
+//    public abstract boolean tryStackInto(StackedObject stackedObject);
+
+
+    @Override
+    public abstract UnstackResult runUnstack(int amount);
+
+//    @Override
+//    public abstract boolean tryUnstack(int amount);
 
     @Override
     public abstract boolean isSimilar(StackedObject stackedObject);

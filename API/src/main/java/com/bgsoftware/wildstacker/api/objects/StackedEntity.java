@@ -7,7 +7,9 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface StackedEntity extends StackedObject<LivingEntity> {
@@ -59,7 +61,9 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      * @param stackedSpawner the spawner
      * @return the entity it got stacked into. If none, null will be returned.
      */
-    LivingEntity trySpawnerStack(StackedSpawner stackedSpawner);
+    //LivingEntity trySpawnerStack(StackedSpawner stackedSpawner);
+
+    void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result);
 
     /**
      * Spawn a duplicate entity with a specific stack amount.

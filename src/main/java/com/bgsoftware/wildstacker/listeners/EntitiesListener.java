@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
@@ -143,7 +144,7 @@ public final class EntitiesListener implements Listener {
 
             livingEntity.setLastDamageCause(e);
 
-            if(stackedEntity.tryUnstack(stackAmount)) {
+            if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
                 if (e instanceof EntityDamageByEntityEvent) {
                     if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
                         EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
@@ -276,9 +277,9 @@ public final class EntitiesListener implements Listener {
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
                 e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
                 Bukkit.getPluginManager().isPluginEnabled("MythicMobs") || Bukkit.getPluginManager().isPluginEnabled("EpicBosses"))
-            Executor.sync(stackedEntity::tryStack, 1L);
+            Executor.sync(() -> stackedEntity.runStackAsync(null), 1L);
         else
-            stackedEntity.tryStack();
+            stackedEntity.runStackAsync(null);
 
         //Chunk Limit
         Executor.sync(() -> {
@@ -346,9 +347,9 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicate.getLivingEntity()).setColor(e.getColor());
-                duplicate.tryStack();
+                duplicate.runStackAsync(null);
             }else{
-                stackedEntity.tryStack();
+                stackedEntity.runStackAsync(null);
             }
         }, 1L);
     }
@@ -383,9 +384,9 @@ public final class EntitiesListener implements Listener {
                         stackedEntity.setStackAmount(stackAmount - 1, true);
                         StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                         ((Sheep) duplicate.getLivingEntity()).setSheared(true);
-                        duplicate.tryStack();
+                        duplicate.runStackAsync(null);
                     } else {
-                        stackedEntity.tryStack();
+                        stackedEntity.runStackAsync(null);
                     }
                 }, 0L);
             }
@@ -416,9 +417,9 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicated.getLivingEntity()).setSheared(false);
-                duplicated.tryStack();
+                duplicated.runStackAsync(null);
             }else{
-                stackedEntity.tryStack();
+                stackedEntity.runStackAsync(null);
             }
         });
     }
@@ -443,9 +444,9 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
-                duplicated.tryStack();
+                duplicated.runStackAsync(null);
             }else{
-                stackedEntity.tryStack();
+                stackedEntity.runStackAsync(null);
             }
         }, 2L);
     }
@@ -478,7 +479,7 @@ public final class EntitiesListener implements Listener {
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
             plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> entity instanceof LivingEntity && !(entity instanceof Player) && entity.isValid())
-                    .forEach(entity -> WStackedEntity.of(entity).tryStack());
+                    .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
         }
     }
 

@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.DuplicateSpawnEvent;
 import com.bgsoftware.wildstacker.api.events.EntityStackEvent;
 import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
@@ -16,13 +18,16 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -31,8 +36,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
@@ -134,6 +143,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void updateName() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::updateName);
+            return;
+        }
+
         if(EntityUtil.isNameBlacklisted(object.getCustomName()))
             return;
 
@@ -166,57 +180,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public LivingEntity tryStack() {
-        int range = plugin.getSettings().entitiesCheckRange;
-
-        //Making sure it's not armor-stand or player
-        if (object.getType() == EntityType.ARMOR_STAND || object.getType() == EntityType.PLAYER) {
-            remove();
-            return null;
-        }
-
-        int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
-
-        //Checks if minimmum stack size is enabled
-        if(minimumStackSize > 1){
-            List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
-                    entity -> entity instanceof LivingEntity && WStackedEntity.of(entity).canStackInto(this));
-            List<StackedEntity> entitiesToStack = new ArrayList<>();
-            StackedEntity toStackInto = null;
-            int totalStackSize = getStackAmount();
-
-            for(Entity nearby : nearbyEntities){
-                StackedEntity stackedNearby = WStackedEntity.of(nearby);
-                if(canStackInto(stackedNearby)) {
-                    entitiesToStack.add(stackedNearby);
-                    totalStackSize += stackedNearby.getStackAmount();
-                    if(toStackInto == null)
-                        toStackInto = stackedNearby;
-                }
-            }
-
-            if(toStackInto != null && totalStackSize >= minimumStackSize){
-                for(StackedEntity stackedEntity : entitiesToStack){
-                    stackedEntity.tryStackInto(toStackInto);
-                }
-                tryStackInto(toStackInto);
-                return toStackInto.getLivingEntity();
-            }
-        }
-        else{
-            List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof LivingEntity);
-            for (Entity nearby : nearbyEntities) {
-                if (nearby.isValid() && tryStackInto(WStackedEntity.of(nearby))) {
-                    return (LivingEntity) nearby;
-                }
-            }
-        }
-
-        updateName();
-        return null;
-    }
-
-    @Override
     public boolean canStackInto(StackedObject stackedObject) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return false;
@@ -241,13 +204,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if (getStackLimit() < newStackAmount)
             return false;
 
-        if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {
-            if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
-                targetEntity.tryStackInto(this);
-                return false;
-            }
-        }
-
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
             Set<String> regions = new HashSet<>();
             regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
@@ -256,26 +212,79 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 return false;
         }
 
+        if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {
+            if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
+                targetEntity.runStackAsync(this, null);
+                return false;
+            }
+        }
+
         return true;
     }
 
     @Override
-    public boolean tryStackInto(StackedObject stackedObject) {
-        if (!canStackInto(stackedObject) /*|| latestStacked.contains(getUniqueId())*/)
-            return false;
+    public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
+        int range = plugin.getSettings().entitiesCheckRange;
 
-        if(!Bukkit.isPrimaryThread())
-            object.setMetadata("async-stacked", new FixedMetadataValue(plugin, "1"));
+        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
+                entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player));
+
+        StackService.execute(() -> {
+            int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+            Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of).filter(this::canStackInto).collect(Collectors.toSet());
+            Stream<StackedEntity> entityStream = filteredEntities.stream();
+            Optional<StackedEntity> entityOptional = entityStream.findFirst();
+
+            if(entityOptional.isPresent()) {
+                StackedEntity targetEntity = entityOptional.get();
+
+                if (minimumStackSize > 1) {
+                    int totalStackSize = getStackAmount();
+
+                    for(StackedEntity stackedEntity : filteredEntities)
+                        totalStackSize += stackedEntity.getStackAmount();
+
+                    if (totalStackSize < minimumStackSize) {
+                        updateName();
+                        if(result != null)
+                            result.accept(Optional.empty());
+                        return;
+                    }
+
+                    entityStream.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
+                }
+
+                StackResult stackResult = runStack(targetEntity);
+
+                if(stackResult != StackResult.SUCCESS) {
+                    updateName();
+                    if(result != null)
+                        result.accept(Optional.empty());
+                    return;
+                }
+
+            }
+
+            if(result != null)
+                result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+        });
+    }
+
+    @Override
+    public StackResult runStack(StackedObject stackedObject) {
+        if(!StackService.canStackFromThread())
+            return StackResult.THREAD_CATCHER;
+
+        if (!canStackInto(stackedObject))
+            return StackResult.NOT_SIMILAR;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
 
         EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
         Bukkit.getPluginManager().callEvent(entityStackEvent);
 
-        if (entityStackEvent.isCancelled()) {
-            object.removeMetadata("async-stacked", plugin);
-            return false;
-        }
+        if (entityStackEvent.isCancelled())
+            return StackResult.EVENT_CANCELLED;
 
         double health = plugin.getSettings().keepLowestHealth ? Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
         int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
@@ -291,37 +300,38 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
         if(object.getType().name().equals("PARROT"))
-            EntityUtil.removeParrotIfShoulder((Parrot) object);
+            Executor.sync(() -> EntityUtil.removeParrotIfShoulder((Parrot) object));
 
         this.remove();
 
-        return true;
+        return StackResult.SUCCESS;
     }
 
     @Override
-    public boolean tryUnstack(int amount) {
-        EntityUnstackEvent event = new EntityUnstackEvent(this, amount);
-        Bukkit.getPluginManager().callEvent(event);
+    public UnstackResult runUnstack(int amount) {
+        EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(this, amount);
+        Bukkit.getPluginManager().callEvent(entityUnstackEvent);
 
-        if(event.isCancelled())
-            return false;
+        if(entityUnstackEvent.isCancelled())
+            return UnstackResult.EVENT_CANCELLED;
 
         int stackAmount = this.stackAmount - amount;
 
         setStackAmount(stackAmount, true);
 
-        if(stackAmount < 1){
+        if(stackAmount >= 1){
+            spawnCorpse();
+        }
+
+        else {
             Executor.sync(() -> {
                 object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
                 plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);
-            return true;
         }
 
-        spawnCorpse();
-
-        return true;
+        return UnstackResult.SUCCESS;
     }
 
     @Override
@@ -344,22 +354,29 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
      */
 
     @Override
-    public LivingEntity trySpawnerStack(StackedSpawner stackedSpawner) {
-        if (!plugin.getSettings().linkedEntitiesEnabled)
-            tryStack();
-
-        LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
-
-        if (linkedEntity == null || !tryStackInto(WStackedEntity.of(linkedEntity))) {
-            linkedEntity = tryStack();
-
-            if (linkedEntity == null)
-                linkedEntity = object;
+    public void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result) {
+        if (!plugin.getSettings().linkedEntitiesEnabled) {
+            runStackAsync(result);
+            return;
         }
 
-        stackedSpawner.setLinkedEntity(linkedEntity);
+        StackService.execute(() -> {
+            LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
-        return linkedEntity;
+            if(linkedEntity != null && runStack(WStackedEntity.of(linkedEntity)) == StackResult.SUCCESS){
+                if(result != null)
+                    result.accept(Optional.of(linkedEntity));
+                return;
+            }
+
+
+            runStackAsync(entityOptional -> {
+                LivingEntity targetEntity = entityOptional.orElse(object);
+                stackedSpawner.setLinkedEntity(targetEntity);
+                if(result != null)
+                    result.accept(Optional.of(targetEntity));
+            });
+        });
     }
 
     @Override
@@ -393,6 +410,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void spawnCorpse() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::spawnCorpse);
+            return;
+        }
+
         plugin.getSystemManager().spawnCorpse(this);
     }
 
@@ -404,15 +426,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         ItemStackList drops = new ItemStackList();
-
-//        if(spawnCause == SpawnCause.MYTHIC_MOBS && tempLootTable == null)
-//            tempLootTable = MythicMobsHook.getLootTable();
-//
-//        if(spawnCause == SpawnCause.CUSTOM_BOSSES && tempLootTable == null)
-//            tempLootTable = CustomBossesHook.getLootTable();
-//
-//        if(spawnCause == SpawnCause.EPIC_BOSSES && tempLootTable == null)
-//            tempLootTable = EpicBossesHook.getLootTable();
 
         if(tempLootTable != null){
             drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));

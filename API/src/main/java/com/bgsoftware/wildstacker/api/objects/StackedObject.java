@@ -1,5 +1,11 @@
 package com.bgsoftware.wildstacker.api.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+
+import java.util.Optional;
+import java.util.function.Consumer;
+
 public interface StackedObject<T> {
 
     /**
@@ -54,7 +60,6 @@ public interface StackedObject<T> {
      * If succeed to stack, the object it got stacked to will be returned.
      * If failed, null will be returned.
      */
-    T tryStack();
 
     /**
      * Checks if this object can stack into another object.
@@ -64,19 +69,19 @@ public interface StackedObject<T> {
      */
     boolean canStackInto(StackedObject stackedObject);
 
-    /**
-     * Try to stack this object into another object.
-     * @param stackedObject another object to stack into
-     * @return True if succeed to stack, otherwise false
-     */
-    boolean tryStackInto(StackedObject stackedObject);
+    void runStackAsync(Consumer<Optional<T>> result);
 
-    /**
-     * Try to unstack this object.
-     * @param amount unstack by this amount
-     * @return True if succeed to unstack, otherwise false
-     */
-    boolean tryUnstack(int amount);
+    //T tryStack();
+
+    void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult);
+
+    StackResult runStack(StackedObject stackedObject);
+
+    //boolean tryStackInto(StackedObject stackedObject);
+
+    UnstackResult runUnstack(int amount);
+
+    //boolean tryUnstack(int amount);
 
     /**
      * Checks if this object is similar to another object.

@@ -59,7 +59,7 @@ public final class ItemsListener implements Listener {
             spawnedItem.setPickupDelay(40);
         }
 
-        stackedItem.tryStack();
+        stackedItem.runStackAsync(null);
 
         //Chunk Limit
         Executor.sync(() -> {
@@ -92,7 +92,7 @@ public final class ItemsListener implements Listener {
         Executor.sync(() -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
                 StackedItem targetItem = WStackedItem.of(e.getTarget());
-                stackedItem.tryStackInto(targetItem);
+                stackedItem.runStackAsync(targetItem, null);
             }
         }, 5L);
     }

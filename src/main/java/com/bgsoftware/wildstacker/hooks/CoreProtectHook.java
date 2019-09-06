@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtil;
 import net.coreprotect.CoreProtect;
 import org.bukkit.Bukkit;
@@ -18,10 +19,20 @@ public final class CoreProtectHook {
     }
 
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Block block, boolean place) {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> recordBlockChange(offlinePlayer, block, place));
+            return;
+        }
+
         recordBlockChange(offlinePlayer, block.getLocation(), block.getType(), block.getData(), place);
     }
 
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Location location, Material type, byte data, boolean place) {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> recordBlockChange(offlinePlayer, location, type, data, place));
+            return;
+        }
+
         if(coreProtect.getAPI().APIVersion() == 5) {
             if(!place)
                 coreProtect.getAPI().logRemoval(offlinePlayer.getName(), location, type, data);
