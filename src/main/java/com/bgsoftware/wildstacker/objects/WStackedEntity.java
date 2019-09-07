@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -33,6 +34,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +42,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
@@ -230,9 +231,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         StackService.execute(() -> {
             int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+            Location entityLocation = getLivingEntity().getLocation();
+
             Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of).filter(this::canStackInto).collect(Collectors.toSet());
-            Stream<StackedEntity> entityStream = filteredEntities.stream();
-            Optional<StackedEntity> entityOptional = entityStream.findFirst();
+            Optional<StackedEntity> entityOptional = filteredEntities.stream()
+                    .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distance(entityLocation)));
 
             if(entityOptional.isPresent()) {
                 StackedEntity targetEntity = entityOptional.get();
@@ -250,7 +253,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                         return;
                     }
 
-                    entityStream.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
+                    filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
                 }
 
                 StackResult stackResult = runStack(targetEntity);

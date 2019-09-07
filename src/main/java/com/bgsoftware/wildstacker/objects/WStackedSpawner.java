@@ -19,6 +19,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -187,6 +188,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
         StackService.execute(() -> {
             boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+            Location blockLocation = getLocation();
 
             Stream<StackedSpawner> spawnerStream;
 
@@ -210,9 +212,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                         });
             }
 
-            spawnerStream = spawnerStream.filter(this::canStackInto);
-
-            Optional<StackedSpawner> spawnerOptional = spawnerStream.findFirst();
+            Optional<StackedSpawner> spawnerOptional = spawnerStream.filter(this::canStackInto)
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
 
             if(spawnerOptional.isPresent()){
                 StackedSpawner targetSpawner = spawnerOptional.get();

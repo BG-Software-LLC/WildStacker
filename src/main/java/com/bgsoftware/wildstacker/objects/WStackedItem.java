@@ -11,17 +11,18 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantIfStatement", "WeakerAccess"})
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
@@ -183,8 +184,10 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
         StackService.execute(() -> {
-            Stream<StackedItem> itemStream = nearbyEntities.stream().map(WStackedItem::of).filter(this::canStackInto);
-            Optional<StackedItem> itemOptional = itemStream.findFirst();
+            Location itemLocation = getItem().getLocation();
+
+            Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of).filter(this::canStackInto)
+                    .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distance(itemLocation)));
 
             if(itemOptional.isPresent()){
                 StackedItem targetItem = itemOptional.get();

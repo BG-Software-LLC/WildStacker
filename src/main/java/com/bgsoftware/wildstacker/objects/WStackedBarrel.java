@@ -20,6 +20,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -181,6 +182,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         StackService.execute(() -> {
             boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+            Location blockLocation = getLocation();
 
             Stream<StackedBarrel> barrelStream;
 
@@ -204,8 +206,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                         });
             }
 
-            barrelStream = barrelStream.filter(this::canStackInto);
-            Optional<StackedBarrel> barrelOptional = barrelStream.findFirst();
+            Optional<StackedBarrel> barrelOptional = barrelStream.filter(this::canStackInto)
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
 
             if(barrelOptional.isPresent()){
                 StackedBarrel targetBarrel = barrelOptional.get();
