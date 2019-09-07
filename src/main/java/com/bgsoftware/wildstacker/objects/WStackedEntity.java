@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
@@ -120,14 +121,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedEntities.contains(getType().name()) ||
-                (spawnCause != null && plugin.getSettings().blacklistedEntities.contains(getSpawnCause().name()));
+        return GeneralUtils.contains(plugin.getSettings().blacklistedEntities, this);
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedEntities.isEmpty() ||
-                plugin.getSettings().whitelistedEntities.contains(getType().name()) || plugin.getSettings().whitelistedEntities.contains(getSpawnCause().name());
+        return plugin.getSettings().whitelistedEntities.isEmpty() || GeneralUtils.contains(plugin.getSettings().whitelistedEntities, this);
     }
 
     @Override
@@ -526,7 +525,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isNerfed(){
-        return plugin.getSettings().nerfedSpawning.contains(getSpawnCause().name()) &&
+        return GeneralUtils.contains(plugin.getSettings().nerfedSpawning, this) &&
                 plugin.getSettings().nerfedWorlds.contains(object.getWorld().getName());
     }
 
