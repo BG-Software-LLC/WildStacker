@@ -285,6 +285,8 @@ public final class SystemHandler implements SystemManager {
                 StackedEntity stackedEntity = (StackedEntity) stackedObject;
                 if(stackedEntity.getLivingEntity() == null || (isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
                     removeStackObject(stackedObject);
+                else
+                    stackedEntity.updateNerfed();
             }
 
             else if(stackedObject instanceof StackedSpawner){
