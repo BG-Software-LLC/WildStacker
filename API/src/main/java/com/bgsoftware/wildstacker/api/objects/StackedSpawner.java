@@ -39,6 +39,6 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
     /**
      * Get all the nearby stacked-spawners that the spawner can stack into in the merge range.
      */
-    List<StackedSpawner> getNearbyfSpawners();
+    List<StackedSpawner> getNearbySpawners();
 
 }
