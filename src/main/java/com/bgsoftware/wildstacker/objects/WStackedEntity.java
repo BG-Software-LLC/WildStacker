@@ -30,6 +30,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +50,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     private boolean ignoreDeathEvent = false;
     private SpawnCause spawnCause;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
+    private EntityDamageEvent lastDamageCause;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -435,6 +437,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         ItemStackList drops = new ItemStackList();
 
+        if(lastDamageCause != null)
+            object.setLastDamageCause(lastDamageCause);
+
         if(tempLootTable != null){
             drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
             tempLootTable = null;
@@ -546,6 +551,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     public boolean isCached(){
         return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
+    }
+
+    public void setLastDamageCause(EntityDamageEvent lastDamageCause){
+        this.lastDamageCause = lastDamageCause;
     }
 
     public static StackedEntity of(Entity entity){

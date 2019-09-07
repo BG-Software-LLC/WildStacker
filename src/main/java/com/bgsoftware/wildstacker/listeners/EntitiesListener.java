@@ -159,7 +159,9 @@ public final class EntitiesListener implements Listener {
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 Executor.async(() -> {
+                    ((WStackedEntity) stackedEntity).setLastDamageCause(e);
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
+                    ((WStackedEntity) stackedEntity).setLastDamageCause(null);
                     Executor.sync(() -> {
                         deadEntities.add(livingEntity.getUniqueId());
 
