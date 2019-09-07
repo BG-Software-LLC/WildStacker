@@ -21,6 +21,9 @@ import net.minecraft.server.v1_11_R1.NBTTagShort;
 import net.minecraft.server.v1_11_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_11_R1.SoundEffect;
 import net.minecraft.server.v1_11_R1.WorldServer;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_11_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftChicken;
@@ -292,6 +295,17 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.fromMobSpawner = nerfed;
+    }
+
+    @Override
+    public void playParticle(Location location) {
+        World world = location.getWorld();
+        if(world != null) {
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -4, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -5, 0, 0.1);
+        }
     }
 
     private boolean shouldNotDrop(ItemStack itemStack){

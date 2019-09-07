@@ -22,7 +22,10 @@ import net.minecraft.server.v1_13_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_13_R2.SoundEffect;
 import net.minecraft.server.v1_13_R2.WorldServer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.BlockState;
@@ -331,4 +334,16 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.fromMobSpawner = nerfed;
     }
+
+    @Override
+    public void playParticle(Location location) {
+        World world = location.getWorld();
+        if(world != null) {
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -4, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -5, 0, 0.1);
+        }
+    }
+
 }

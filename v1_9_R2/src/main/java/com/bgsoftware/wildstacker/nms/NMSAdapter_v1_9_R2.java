@@ -20,6 +20,9 @@ import net.minecraft.server.v1_9_R2.NBTTagShort;
 import net.minecraft.server.v1_9_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_9_R2.SoundEffect;
 import net.minecraft.server.v1_9_R2.WorldServer;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_9_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftChicken;
@@ -301,6 +304,17 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.fromMobSpawner = nerfed;
+    }
+
+    @Override
+    public void playParticle(Location location) {
+        World world = location.getWorld();
+        if(world != null) {
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -4, 0, 0.1);
+            world.spawnParticle(Particle.LAVA, location, 10, 0, -5, 0, 0.1);
+        }
     }
 
 }

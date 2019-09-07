@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms;
 
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
@@ -77,5 +78,7 @@ public interface NMSAdapter {
     void playDeathSound(LivingEntity entity);
 
     void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
+
+    void playParticle(Location location);
 
 }

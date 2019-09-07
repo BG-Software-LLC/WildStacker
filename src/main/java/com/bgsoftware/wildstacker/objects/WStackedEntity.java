@@ -307,6 +307,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         this.remove();
 
+
+        plugin.getNMSAdapter().playParticle(getLivingEntity().getLocation());
+
         return StackResult.SUCCESS;
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.server.v1_8_R2.EntityInsentient;
 import net.minecraft.server.v1_8_R2.EntityItem;
 import net.minecraft.server.v1_8_R2.EntityLiving;
 import net.minecraft.server.v1_8_R2.EntityPlayer;
+import net.minecraft.server.v1_8_R2.EnumParticle;
 import net.minecraft.server.v1_8_R2.ItemStack;
 import net.minecraft.server.v1_8_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R2.NBTTagCompound;
@@ -17,8 +18,10 @@ import net.minecraft.server.v1_8_R2.NBTTagInt;
 import net.minecraft.server.v1_8_R2.NBTTagShort;
 import net.minecraft.server.v1_8_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_8_R2.WorldServer;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_8_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftItem;
@@ -294,6 +297,20 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.fromMobSpawner = nerfed;
+    }
+
+    @Override
+    public void playParticle(Location location) {
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
+        spawnParticle(world, location, 20, -3);
+        spawnParticle(world, location, 20, -3);
+        spawnParticle(world, location, 10, -4);
+        spawnParticle(world, location, 10, -4);
+    }
+
+    private void spawnParticle(WorldServer world, Location location, int count, int offsetY){
+        world.sendParticles(null, EnumParticle.LAVA, true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, 0, offsetY, 0, 0.1);
     }
 
 }
