@@ -23,6 +23,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -43,6 +44,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -439,18 +441,23 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
-        Executor.async(() -> {
-            for(StackedEntity stackedEntity : getStackedEntities()) {
-                if (stackedEntity.getStackAmount() > 1)
-                    stackedEntity.remove();
+        List<Entity> entityList = new ArrayList<>();
+
+        for(World world : Bukkit.getWorlds()){
+            for(Chunk chunk : world.getLoadedChunks()){
+                entityList.addAll(Arrays.asList(chunk.getEntities()));
             }
+        }
+
+        Executor.async(() -> {
+            entityList.stream()
+                    .filter(entity -> EntityUtils.isStackable(entity) && WStackedEntity.of(entity).getStackAmount() > 1)
+                    .forEach(entity -> WStackedEntity.of(entity).remove());
 
             if(plugin.getSettings().itemsKillAll) {
-                for (StackedItem stackedItem : getStackedItems()) {
-                    if (stackedItem.getStackAmount() > 1) {
-                        stackedItem.remove();
-                    }
-                }
+                entityList.stream()
+                        .filter(entity -> entity instanceof Item && WStackedItem.of(entity).getStackAmount() > 1)
+                        .forEach(entity -> WStackedItem.of(entity).remove());
             }
 
             for(Player pl : Bukkit.getOnlinePlayers()) {
