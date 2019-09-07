@@ -17,6 +17,7 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -45,10 +46,11 @@ public final class ChunksListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e){
+        List<Entity> chunkEntities = Arrays.asList(e.getChunk().getEntities());
         if(loadedData) {
             //Trying to remove all the corrupted stacked blocks
             Executor.async(() -> {
-                Stream<Entity> entityStream = Arrays.stream(e.getChunk().getEntities())
+                Stream<Entity> entityStream = chunkEntities.stream()
                         .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
                                 entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()));
                 Executor.sync(() -> entityStream.forEach(entity -> {
@@ -61,7 +63,7 @@ public final class ChunksListener implements Listener {
         }
 
         //Update all nerf status to all entities
-        Executor.async(() -> Arrays.stream(e.getChunk().getEntities()).filter(EntityUtil::isStackable)
+        Executor.async(() -> chunkEntities.stream().filter(EntityUtil::isStackable)
                 .forEach(entity -> WStackedEntity.of(entity).updateNerfed()));
     }
 
