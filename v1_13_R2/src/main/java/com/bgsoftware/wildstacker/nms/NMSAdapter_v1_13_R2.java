@@ -65,7 +65,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         entityLiving.b(nbtTagCompound);
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
         nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
-        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 
@@ -327,4 +326,9 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         }
     }
 
+    @Override
+    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.fromMobSpawner = nerfed;
+    }
 }

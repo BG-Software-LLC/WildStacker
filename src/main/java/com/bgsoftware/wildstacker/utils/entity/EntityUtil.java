@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -90,6 +91,10 @@ public final class EntityUtil {
                 }
             }
         }catch(Exception ignored){}
+    }
+
+    public static boolean isStackable(Entity entity){
+        return entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player);
     }
 
 }

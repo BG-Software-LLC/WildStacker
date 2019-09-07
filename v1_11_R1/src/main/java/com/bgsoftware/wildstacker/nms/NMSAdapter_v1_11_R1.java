@@ -60,7 +60,6 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         entityLiving.b(nbtTagCompound);
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
         nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
-        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 
@@ -287,6 +286,12 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
             entityLiving.a((SoundEffect) soundEffect, soundVolume, soundPitch);
         }
+    }
+
+    @Override
+    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.fromMobSpawner = nerfed;
     }
 
     private boolean shouldNotDrop(ItemStack itemStack){

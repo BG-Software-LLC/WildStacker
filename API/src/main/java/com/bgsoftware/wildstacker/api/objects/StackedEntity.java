@@ -170,6 +170,16 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
     boolean isNerfed();
 
     /**
+     * Set whether the entity should be nerfed or not.
+     */
+    void setNerfed(boolean nerfed);
+
+    /**
+     * Set whether the entity should be nerfed or not using the isNerfed flag.
+     */
+    void updateNerfed();
+
+    /**
      * Checks if the name of the entity is blacklisted.
      * @return True if the name is blacklisted, otherwise false.
      */

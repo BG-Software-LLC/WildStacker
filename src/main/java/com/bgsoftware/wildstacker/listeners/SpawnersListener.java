@@ -286,7 +286,10 @@ public final class SpawnersListener implements Listener {
 
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
 
-            stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
+            stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
+                if(!entityOptional.isPresent())
+                    stackedEntity.updateNerfed();
+            });
         }
     }
 

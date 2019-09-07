@@ -76,4 +76,6 @@ public interface NMSAdapter {
 
     void playDeathSound(LivingEntity entity);
 
+    void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
+
 }

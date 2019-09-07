@@ -531,6 +531,16 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    public void setNerfed(boolean nerfed) {
+        plugin.getNMSAdapter().setNerfedEntity(object, nerfed);
+    }
+
+    @Override
+    public void updateNerfed() {
+        setNerfed(isNerfed());
+    }
+
+    @Override
     public boolean isNameBlacklisted() {
         return EntityUtil.isNameBlacklisted(object.getCustomName());
     }
@@ -540,9 +550,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     public static StackedEntity of(Entity entity){
-        if(entity instanceof LivingEntity)
+        if(EntityUtil.isStackable(entity))
             return of((LivingEntity) entity);
-        throw new IllegalArgumentException("Only living-entities can be applied to StackedEntity object");
+        throw new IllegalArgumentException("The entity-type " + entity.getType() + " is not a stackable entity.");
     }
 
     public static StackedEntity of(LivingEntity livingEntity){

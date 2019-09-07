@@ -43,7 +43,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -59,9 +58,11 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -120,10 +121,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
-        if(!(e.getEntity() instanceof LivingEntity) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
-            return;
-
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER)
+        if(!EntityUtil.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -273,13 +271,18 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
+        Consumer<Optional<LivingEntity>> nerfEntityConsumer = entityOptional -> {
+            if(!entityOptional.isPresent())
+                stackedEntity.updateNerfed();
+        };
+
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
                 e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
                 Bukkit.getPluginManager().isPluginEnabled("MythicMobs") || Bukkit.getPluginManager().isPluginEnabled("EpicBosses"))
-            Executor.sync(() -> stackedEntity.runStackAsync(null), 1L);
+            Executor.sync(() -> stackedEntity.runStackAsync(nerfEntityConsumer), 1L);
         else
-            stackedEntity.runStackAsync(null);
+            stackedEntity.runStackAsync(nerfEntityConsumer);
 
         //Chunk Limit
         Executor.sync(() -> {
@@ -357,7 +360,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerShear(PlayerShearEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !(e.getEntity() instanceof LivingEntity))
+        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtil.isStackable(e.getEntity()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -426,7 +429,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityNameTag(PlayerInteractAtEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !(e.getRightClicked() instanceof LivingEntity) || !StackSplit.NAME_TAG.isEnabled())
+        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtil.isStackable(e.getRightClicked()) || !StackSplit.NAME_TAG.isEnabled())
             return;
 
         ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
@@ -478,25 +481,15 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> entity instanceof LivingEntity && !(entity instanceof Player) && entity.isValid())
+            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> EntityUtil.isStackable(e.getEntity()) && entity.isValid())
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityTarget(EntityTargetLivingEntityEvent e){
-        if(e.getEntity() instanceof LivingEntity) {
-            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-            if (stackedEntity.isNerfed()) {
-                e.setCancelled(true);
-            }
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityInspect(PlayerInteractAtEntityEvent e){
         if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
-                !(e.getRightClicked() instanceof LivingEntity))
+                !EntityUtil.isStackable(e.getRightClicked()))
             return;
 
         e.setCancelled(true);
@@ -540,7 +533,7 @@ public final class EntitiesListener implements Listener {
 
         //Refresh item names
         plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
-                entity -> entity instanceof LivingEntity && entity.isCustomNameVisible())
+                entity -> EntityUtil.isStackable(entity) && entity.isCustomNameVisible())
                 .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
@@ -562,7 +555,7 @@ public final class EntitiesListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof LivingEntity).count();
+        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(EntityUtil::isStackable).count();
         return entitiesInsideChunk > chunkLimit;
     }
 
