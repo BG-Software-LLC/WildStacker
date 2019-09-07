@@ -5,7 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -34,7 +34,7 @@ public final class ChunksListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent e){
         Stream<StackedEntity> entityStream = Arrays.stream(e.getChunk().getEntities())
-                .filter(EntityUtil::isStackable).map(WStackedEntity::of);
+                .filter(EntityUtils::isStackable).map(WStackedEntity::of);
 
         Executor.async(() -> entityStream.filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
                 .forEach(stackedEntity -> {
@@ -63,7 +63,7 @@ public final class ChunksListener implements Listener {
         }
 
         //Update all nerf status to all entities
-        Executor.async(() -> chunkEntities.stream().filter(EntityUtil::isStackable)
+        Executor.async(() -> chunkEntities.stream().filter(EntityUtils::isStackable)
                 .forEach(entity -> WStackedEntity.of(entity).updateNerfed()));
     }
 

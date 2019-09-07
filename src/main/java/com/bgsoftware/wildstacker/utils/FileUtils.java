@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 
 import java.io.File;
 
-public final class FileUtil {
+public final class FileUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 

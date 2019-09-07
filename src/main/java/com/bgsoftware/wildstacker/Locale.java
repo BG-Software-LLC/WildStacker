@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.config.LangComments;
-import com.bgsoftware.wildstacker.utils.FileUtil;
+import com.bgsoftware.wildstacker.utils.FileUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -103,7 +103,7 @@ public final class Locale {
         File file = new File(plugin.getDataFolder(), "lang.yml");
 
         if(!file.exists())
-            FileUtil.saveResource("lang.yml");
+            FileUtils.saveResource("lang.yml");
 
         CommentedConfiguration cfg = new CommentedConfiguration(LangComments.class, file);
 

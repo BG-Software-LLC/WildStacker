@@ -11,11 +11,11 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.Bukkit;
@@ -76,7 +76,7 @@ public final class EntitiesListener implements Listener {
         this.plugin = plugin;
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(), plugin);
-        if(ReflectionUtil.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
+        if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
 
@@ -121,7 +121,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
-        if(!EntityUtil.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
+        if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -145,15 +145,15 @@ public final class EntitiesListener implements Listener {
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
                 if (e instanceof EntityDamageByEntityEvent) {
                     if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
-                        EntityUtil.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
+                        EntityUtils.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
                     }
                     else if(((EntityDamageByEntityEvent) e).getDamager() instanceof Projectile){
                         Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) e).getDamager();
                         if(projectile.getShooter() instanceof Player)
-                            EntityUtil.setKiller(livingEntity, (Player) projectile.getShooter());
+                            EntityUtils.setKiller(livingEntity, (Player) projectile.getShooter());
                     }
                 } else {
-                    EntityUtil.setKiller(livingEntity, null);
+                    EntityUtils.setKiller(livingEntity, null);
                 }
 
                 int lootBonusLevel = getFortuneLevel(livingEntity);
@@ -179,7 +179,7 @@ public final class EntitiesListener implements Listener {
                         subtract(drops, entityDeathEvent.getDrops())
                                 .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
 
-                        entityDeathEvent.getDrops().forEach(itemStack -> ItemUtil.dropItem(itemStack, livingEntity.getLocation()));
+                        entityDeathEvent.getDrops().forEach(itemStack -> ItemUtils.dropItem(itemStack, livingEntity.getLocation()));
 
                         if (entityDeathEvent.getDroppedExp() > 0) {
                             ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
@@ -300,10 +300,10 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") || !Materials.isValidAndSpawnEgg(e.getItem()))
             return;
 
-        nextEntityStackAmount = ItemUtil.getSpawnerItemAmount(e.getItem());
-        nextEntityType = ItemUtil.getEntityType(e.getItem());
+        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(e.getItem());
+        nextEntityType = ItemUtils.getEntityType(e.getItem());
 
-        EntityType nmsEntityType = ItemUtil.getNMSEntityType(e.getItem());
+        EntityType nmsEntityType = ItemUtils.getNMSEntityType(e.getItem());
         if(nmsEntityType != null){
             e.setCancelled(true);
             nextEntityType = EntityTypes.fromName(nmsEntityType.name());
@@ -360,7 +360,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerShear(PlayerShearEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtil.isStackable(e.getEntity()))
+        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(e.getEntity()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -373,7 +373,7 @@ public final class EntitiesListener implements Listener {
             else{
                 int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
                 ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
-                ItemUtil.dropItem(mushroomItem, e.getEntity().getLocation());
+                ItemUtils.dropItem(mushroomItem, e.getEntity().getLocation());
                 mooshroomFlag = stackedEntity.getStackAmount();
             }
         }
@@ -397,7 +397,7 @@ public final class EntitiesListener implements Listener {
                 int woolAmount = ThreadLocalRandom.current().nextInt(2 * (stackAmount - 1)) + stackAmount - 1;
                 ItemStack woolItem = Materials.getWool((((Sheep) e.getEntity()).getColor()));
                 woolItem.setAmount(woolAmount);
-                ItemUtil.dropItem(woolItem, e.getEntity().getLocation());
+                ItemUtils.dropItem(woolItem, e.getEntity().getLocation());
             }
         }
     }
@@ -429,7 +429,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityNameTag(PlayerInteractAtEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtil.isStackable(e.getRightClicked()) || !StackSplit.NAME_TAG.isEnabled())
+        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(e.getRightClicked()) || !StackSplit.NAME_TAG.isEnabled())
             return;
 
         ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
@@ -481,7 +481,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> EntityUtil.isStackable(e.getEntity()) && entity.isValid())
+            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity -> EntityUtils.isStackable(e.getEntity()) && entity.isValid())
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
         }
     }
@@ -489,7 +489,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityInspect(PlayerInteractAtEntityEvent e){
         if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
-                !EntityUtil.isStackable(e.getRightClicked()))
+                !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
         e.setCancelled(true);
@@ -498,7 +498,7 @@ public final class EntitiesListener implements Listener {
 
         Locale.ENTITY_INFO_HEADER.send(e.getPlayer());
         Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
-        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedEntity.getType().name()));
+        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedEntity.getType().name()));
         Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
         Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnCause().name());
         Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
@@ -533,7 +533,7 @@ public final class EntitiesListener implements Listener {
 
         //Refresh item names
         plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
-                entity -> EntityUtil.isStackable(entity) && entity.isCustomNameVisible())
+                entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
                 .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
@@ -555,7 +555,7 @@ public final class EntitiesListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(EntityUtil::isStackable).count();
+        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count();
         return entitiesInsideChunk > chunkLimit;
     }
 

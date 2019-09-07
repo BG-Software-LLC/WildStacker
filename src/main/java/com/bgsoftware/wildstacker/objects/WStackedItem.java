@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -131,7 +131,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         boolean updateName = plugin.getSettings().itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
-            String itemType = ItemUtil.getFormattedType(itemStack);
+            String itemType = ItemUtils.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemType;
 
             if(plugin.getSettings().itemsDisplayEnabled)
@@ -264,7 +264,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     public void giveItemStack(Inventory inventory) {
         ItemStack itemStack = getItemStack();
 
-        int freeSpace = ItemUtil.getFreeSpace(inventory, itemStack);
+        int freeSpace = ItemUtils.getFreeSpace(inventory, itemStack);
         int startAmount = itemStack.getAmount();
         int giveAmount = Math.min(itemStack.getAmount(), freeSpace);
 
@@ -300,7 +300,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     private void giveItem(Inventory inventory, ItemStack itemStack){
-        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtil.stackBucket(itemStack, inventory))
+        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtils.stackBucket(itemStack, inventory))
             inventory.addItem(itemStack);
     }
 

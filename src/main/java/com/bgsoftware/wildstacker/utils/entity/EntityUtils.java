@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnusedReturnValue")
-public final class EntityUtil {
+public final class EntityUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 

@@ -38,7 +38,7 @@ import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -67,7 +67,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     public void onEnable() {
         plugin = this;
         new Metrics(this);
-        ReflectionUtil.init();
+        ReflectionUtils.init();
 
         log("******** ENABLE START ********");
 
@@ -139,7 +139,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 PluginHook_Novucs.register(this);
 
             //Set WildStacker as SpawnersProvider with ShopGUIPlus
-            if (ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
+            if (ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
                 PluginHook_SpawnerProvider.register();
         });
     }

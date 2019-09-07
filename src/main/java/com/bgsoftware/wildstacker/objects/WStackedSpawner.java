@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -145,8 +145,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
         customName = customName
                 .replace("{0}", Integer.toString(amount))
-                .replace("{1}", EntityUtil.getFormattedType(getSpawnedType().name()))
-                .replace("{2}", EntityUtil.getFormattedType(getSpawnedType().name()).toUpperCase());
+                .replace("{1}", EntityUtils.getFormattedType(getSpawnedType().name()))
+                .replace("{2}", EntityUtils.getFormattedType(getSpawnedType().name()).toUpperCase());
         plugin.getProviders().changeLine(this, customName, !plugin.getSettings().floatingSpawnerNames);
     }
 

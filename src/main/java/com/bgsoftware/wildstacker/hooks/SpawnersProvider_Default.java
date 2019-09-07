@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildtools.api.WildToolsAPI;
 import com.bgsoftware.wildtools.api.objects.tools.Tool;
 import org.bukkit.Bukkit;
@@ -30,7 +30,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     public ItemStack getSpawnerItem(CreatureSpawner spawner, int amount) {
         //In order to make sure the creature spawner is updated, I just get a new instance of it.
         CreatureSpawner updatedSpawner = (CreatureSpawner) spawner.getBlock().getState();
-        return ItemUtil.getSpawnerItem(updatedSpawner.getSpawnedType(), amount);
+        return ItemUtils.getSpawnerItem(updatedSpawner.getSpawnedType(), amount);
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         //If player is null, it broke by an explosion.
         if(player == null){
-            ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+            ItemUtils.dropItem(spawnerItem, spawner.getLocation());
             return;
         }
 
@@ -65,9 +65,9 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             if ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
                     (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
                 if (plugin.getSettings().dropToInventory) {
-                    ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+                    ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
                 } else {
-                    ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+                    ItemUtils.dropItem(spawnerItem, spawner.getLocation());
                 }
             }
         }
@@ -83,7 +83,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(spawner);
 
-        int spawnerItemAmount = Math.max(ItemUtil.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
+        int spawnerItemAmount = Math.max(ItemUtils.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
 
         stackedSpawner.setStackAmount(spawnerItemAmount, updateName);
     }

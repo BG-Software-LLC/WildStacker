@@ -28,7 +28,7 @@ public enum Fields {
     }
 
     private Field getField(){
-        return ReflectionUtil.fieldMap.get(this);
+        return ReflectionUtils.fieldMap.get(this);
     }
 
 }

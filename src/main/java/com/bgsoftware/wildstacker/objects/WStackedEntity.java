@@ -17,7 +17,7 @@ import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -147,7 +147,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        if(EntityUtil.isNameBlacklisted(object.getCustomName()))
+        if(EntityUtils.isNameBlacklisted(object.getCustomName()))
             return;
 
         if(isBlacklisted() || !isWhitelisted() || isWorldDisabled())
@@ -169,8 +169,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(stackAmount > 1) {
             newName = customName
                     .replace("{0}", Integer.toString(stackAmount))
-                    .replace("{1}", EntityUtil.getFormattedType(getType().name()))
-                    .replace("{2}", EntityUtil.getFormattedType(getType().name()).toUpperCase());
+                    .replace("{1}", EntityUtils.getFormattedType(getType().name()))
+                    .replace("{2}", EntityUtils.getFormattedType(getType().name()).toUpperCase());
             newNameVisible = !plugin.getSettings().entitiesHideNames;
         }
 
@@ -301,7 +301,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
         if(object.getType().name().equals("PARROT"))
-            Executor.sync(() -> EntityUtil.removeParrotIfShoulder((Parrot) object));
+            Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
 
         this.remove();
 
@@ -337,7 +337,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        return stackedObject instanceof StackedEntity && EntityUtil.areEquals(this, (StackedEntity) stackedObject);
+        return stackedObject instanceof StackedEntity && EntityUtils.areEquals(this, (StackedEntity) stackedObject);
     }
 
     @Override
@@ -541,7 +541,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isNameBlacklisted() {
-        return EntityUtil.isNameBlacklisted(object.getCustomName());
+        return EntityUtils.isNameBlacklisted(object.getCustomName());
     }
 
     public boolean isCached(){
@@ -549,7 +549,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     public static StackedEntity of(Entity entity){
-        if(EntityUtil.isStackable(entity))
+        if(EntityUtils.isStackable(entity))
             return of((LivingEntity) entity);
         throw new IllegalArgumentException("The entity-type " + entity.getType() + " is not a stackable entity.");
     }

@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -147,8 +147,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         customName = customName
                 .replace("{0}", Integer.toString(amount))
-                .replace("{1}", ItemUtil.getFormattedType(barrelItem))
-                .replace("{2}", ItemUtil.getFormattedType(barrelItem).toUpperCase());
+                .replace("{1}", ItemUtils.getFormattedType(barrelItem))
+                .replace("{2}", ItemUtils.getFormattedType(barrelItem).toUpperCase());
         plugin.getProviders().changeLine(this, customName, true);
     }
 

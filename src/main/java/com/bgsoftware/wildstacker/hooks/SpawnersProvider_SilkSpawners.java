@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
 import org.bukkit.block.Block;
@@ -45,12 +45,12 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
         if(plugin.getSettings().getStackedItem) {
             itemStack.setAmount(1);
-            itemStack = ItemUtil.setSpawnerItemAmount(itemStack, amount);
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
         }
         
         ItemMeta itemMeta = itemStack.getItemMeta();
         if(itemMeta.hasDisplayName())
-            itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtil.getSpawnerItemAmount(itemStack) + ""));
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtils.getSpawnerItemAmount(itemStack) + ""));
 
         itemStack.setItemMeta(itemMeta);
 
@@ -90,7 +90,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
                 dropChance = ss.config.getInt("explosionDropChance", 100);
             }
             if (randomNumber < dropChance)
-                ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+                ItemUtils.dropItem(spawnerItem, spawner.getLocation());
             return;
         }
 
@@ -104,9 +104,9 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
             if (randomNumber < dropChance) {
                 if (ss.config.getBoolean("dropSpawnerToInventory", false)) {
-                    ItemUtil.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+                    ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
                 } else {
-                    ItemUtil.dropItem(spawnerItem, spawner.getLocation());
+                    ItemUtils.dropItem(spawnerItem, spawner.getLocation());
                 }
             }
         }
@@ -115,7 +115,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     @Override
     public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName) {
         setSpawnerEntityID(spawner.getBlock(), getStoredSpawnerItemEntityID(itemStack));
-        WStackedSpawner.of(spawner).setStackAmount(ItemUtil.getSpawnerItemAmount(itemStack), updateName);
+        WStackedSpawner.of(spawner).setStackAmount(ItemUtils.getSpawnerItemAmount(itemStack), updateName);
     }
 
     @Override

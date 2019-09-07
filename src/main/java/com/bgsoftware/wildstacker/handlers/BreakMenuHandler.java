@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.handlers;
 
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -37,7 +37,7 @@ public final class BreakMenuHandler {
 
         if(section.contains("fill-items")){
             for(String key : section.getConfigurationSection("fill-items").getKeys(false)){
-                ItemStack itemStack = ItemUtil.getFromConfig(section.getConfigurationSection("fill-items." + key));
+                ItemStack itemStack = ItemUtils.getFromConfig(section.getConfigurationSection("fill-items." + key));
                 for(String slot : section.getString("fill-items." + key + ".slots").split(",")){
                     inventory.setItem(Integer.valueOf(slot), itemStack);
                 }
@@ -46,7 +46,7 @@ public final class BreakMenuHandler {
 
         if(section.contains("break-slots")){
             for(String slot : section.getConfigurationSection("break-slots").getKeys(false)){
-                ItemStack itemStack = ItemUtil.getFromConfig(section.getConfigurationSection("break-slots." + slot));
+                ItemStack itemStack = ItemUtils.getFromConfig(section.getConfigurationSection("break-slots." + slot));
                 inventory.setItem(Integer.valueOf(slot), itemStack);
                 breakSlots.put(Integer.valueOf(slot), section.getInt("break-slots." + slot + ".amount"));
             }

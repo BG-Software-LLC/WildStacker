@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import net.coreprotect.CoreProtect;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,10 +42,10 @@ public final class CoreProtectHook {
         else if(coreProtect.getAPI().APIVersion() == 6) {
             if(!place)
                 coreProtect.getAPI().logRemoval(offlinePlayer.getName(), location, type,
-                        (org.bukkit.block.data.BlockData) ItemUtil.getBlockData(type, data));
+                        (org.bukkit.block.data.BlockData) ItemUtils.getBlockData(type, data));
             else
                 coreProtect.getAPI().logPlacement(offlinePlayer.getName(), location, type,
-                        (org.bukkit.block.data.BlockData) ItemUtil.getBlockData(type, data));
+                        (org.bukkit.block.data.BlockData) ItemUtils.getBlockData(type, data));
         }
     }
 
