@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
@@ -30,7 +32,7 @@ public final class SettingsHandler {
     public final KeyMap<String> customNames;
 
     //Items settings
-    public final boolean itemsStackingEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
+    public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
             itemsUnstackedCustomName, itemsKillAll, itemsNamesToggleEnabled, itemsSoundEnabled;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems, whitelistedItems;
@@ -38,11 +40,12 @@ public final class SettingsHandler {
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final KeyMap<Integer> itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
+    public final List<ParticleWrapper> itemsParticles;
 
     //Entities settings
-    public final boolean entitiesStackingEnabled, linkedEntitiesEnabled, clearLaggHookEnabled, stackDownEnabled, keepFireEnabled,
-            mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames, entitiesNamesToggleEnabled,
-            nextStackKnockback;
+    public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, clearLaggHookEnabled,
+            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed,
+            entitiesHideNames, entitiesNamesToggleEnabled, nextStackKnockback;
     public final long entitiesStackInterval, entitiesKillAllInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
@@ -50,26 +53,30 @@ public final class SettingsHandler {
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
             noAiSpawning, noAiWorlds, stackDownTypes;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
+    public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
-    public final boolean spawnersStackingEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack, silkTouchSpawners,
-            explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem, dropSpawnerWithoutSilk,
-            floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission, spawnersShiftPlaceStack,
-            breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
+    public final boolean spawnersStackingEnabled, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
+            silkTouchSpawners, explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
+            dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
+            spawnersShiftPlaceStack, breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply,
+            nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners;
     public final String hologramCustomName, silkCustomName;
     public final KeyMap<Integer> spawnersLimits;
+    public final List<ParticleWrapper> spawnersParticles;
 
     //Barrels settings
-    public final boolean barrelsStackingEnabled, chunkMergeBarrels, explosionsBreakBarrelStack, barrelsToggleCommand,
-            barrelsPlaceInventory, forceCauldron;
+    public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
+            barrelsToggleCommand, barrelsPlaceInventory, forceCauldron;
     public final int barrelsCheckRange, barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax;
     public final List<String> barrelsDisabledWorlds;
     public final KeySet blacklistedBarrels, whitelistedBarrels;
     public final KeyMap<Integer> barrelsLimits;
+    public final List<ParticleWrapper> barrelsParticles;
 
     public SettingsHandler(WildStackerPlugin plugin){
         WildStackerPlugin.log("Loading configuration started...");
@@ -96,6 +103,8 @@ public final class SettingsHandler {
         loadCustomNames(plugin);
 
         itemsStackingEnabled = cfg.getBoolean("items.enabled", true);
+        itemsParticlesEnabled = cfg.getBoolean("items.particles", true);
+        itemsParticles = getParticles(plugin, "items");
         itemsDisabledWorlds = cfg.getStringList("items.disabled-worlds");
         itemsUnstackedCustomName = cfg.getBoolean("items.unstacked-custom-name", false);
         itemsFixStackEnabled = cfg.getBoolean("items.fix-stack", false);
@@ -116,6 +125,8 @@ public final class SettingsHandler {
         itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
+        entitiesParticlesEnabled = cfg.getBoolean("entities.particles", true);
+        entitiesParticles = getParticles(plugin, "entities");
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
@@ -147,6 +158,8 @@ public final class SettingsHandler {
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
+        spawnersParticlesEnabled = cfg.getBoolean("spawners.particles", true);
+        spawnersParticles = getParticles(plugin, "spawners");
         spawnersDisabledWorlds = cfg.getStringList("spawners.disabled-worlds");
         spawnersCheckRange = cfg.getInt("spawners.merge-radius", 1);
         chunkMergeSpawners = cfg.getBoolean("spawners.chunk-merge", false);
@@ -180,6 +193,8 @@ public final class SettingsHandler {
         onlyOneSpawner = cfg.getBoolean("spawners.only-one-spawner", true);
 
         barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
+        barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);
+        barrelsParticles = getParticles(plugin, "barrels");
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
         barrelsCheckRange = cfg.getInt("barrels.merge-radius", 1);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
@@ -244,6 +259,42 @@ public final class SettingsHandler {
 
         if(!cfg.getBoolean("enabled", true))
             customNames.clear();
+    }
+
+    private YamlConfiguration particlesYaml = null;
+
+    private List<ParticleWrapper> getParticles(WildStackerPlugin plugin, String sectionPath){
+        if(particlesYaml == null){
+            File file = new File(plugin.getDataFolder(), "particles.yml");
+
+            if(!file.exists())
+                plugin.saveResource("particles.yml", false);
+
+            particlesYaml = YamlConfiguration.loadConfiguration(file);
+        }
+
+        List<ParticleWrapper> particleWrappers = new ArrayList<>();
+        ConfigurationSection section = particlesYaml.getConfigurationSection(sectionPath);
+
+        if(section != null){
+            for(String key : section.getKeys(false)){
+                ConfigurationSection particleSection = section.getConfigurationSection(key);
+                try {
+                    particleWrappers.add(new ParticleWrapper(
+                            particleSection.getString("type"),
+                            particleSection.getInt("count", 0),
+                            particleSection.getInt("offsetX", 0),
+                            particleSection.getInt("offsetY", 0),
+                            particleSection.getInt("offsetZ", 0),
+                            particleSection.getDouble("extra", 0.0)
+                    ));
+                }catch(IllegalArgumentException ex){
+                    WildStackerPlugin.log("Particle " + sectionPath + "." + key + " is missing 'type'.");
+                }
+            }
+        }
+
+        return particleWrappers;
     }
 
     private void dataConvertor(YamlConfiguration cfg){

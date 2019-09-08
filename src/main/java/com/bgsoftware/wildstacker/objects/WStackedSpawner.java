@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -254,6 +255,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         targetSpawner.setStackAmount(newStackAmount, true);
 
         this.remove();
+
+        if(plugin.getSettings().spawnersParticlesEnabled) {
+            Location location = getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
+                particleWrapper.spawnParticle(location);
+        }
 
         return StackResult.SUCCESS;
     }

@@ -12,6 +12,7 @@ import net.minecraft.server.v1_12_R1.EntityItem;
 import net.minecraft.server.v1_12_R1.EntityLiving;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import net.minecraft.server.v1_12_R1.EnumItemSlot;
+import net.minecraft.server.v1_12_R1.EnumParticle;
 import net.minecraft.server.v1_12_R1.ItemStack;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
@@ -21,10 +22,9 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_12_R1.SoundEffect;
 import net.minecraft.server.v1_12_R1.WorldServer;
 import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftItem;
@@ -297,14 +297,10 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
     }
 
     @Override
-    public void playParticle(Location location) {
-        World world = location.getWorld();
-        if(world != null) {
-            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 10, 0, -4, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 10, 0, -5, 0, 0.1);
-        }
+    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
+        world.sendParticles(null, EnumParticle.valueOf(particle), true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, offsetX, offsetY, offsetZ, extra);
     }
 
 }

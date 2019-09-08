@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -232,6 +233,12 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         }, 2L);
 
         this.remove();
+
+        if(plugin.getSettings().itemsParticlesEnabled) {
+            Location location = getItem().getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().itemsParticles)
+                particleWrapper.spawnParticle(location);
+        }
 
         return StackResult.SUCCESS;
     }

@@ -25,11 +25,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.World;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_13_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_13_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_13_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftItem;
@@ -327,14 +328,10 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     }
 
     @Override
-    public void playParticle(Location location) {
-        World world = location.getWorld();
-        if(world != null) {
-            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 20, 0, -3, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 10, 0, -4, 0, 0.1);
-            world.spawnParticle(Particle.LAVA, location, 10, 0, -5, 0, 0.1);
-        }
+    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
+        world.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, offsetX, offsetY, offsetZ, extra);
     }
 
 }

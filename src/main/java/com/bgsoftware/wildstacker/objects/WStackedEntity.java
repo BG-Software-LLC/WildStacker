@@ -19,6 +19,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -307,8 +308,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         this.remove();
 
-
-        plugin.getNMSAdapter().playParticle(getLivingEntity().getLocation());
+        if(plugin.getSettings().entitiesParticlesEnabled) {
+            Location location = getLivingEntity().getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
+                particleWrapper.spawnParticle(location);
+        }
 
         return StackResult.SUCCESS;
     }

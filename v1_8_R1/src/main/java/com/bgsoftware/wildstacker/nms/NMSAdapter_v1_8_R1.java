@@ -292,17 +292,10 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
     }
 
     @Override
-    public void playParticle(Location location) {
+    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
         WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
-        spawnParticle(world, location, 20, -3);
-        spawnParticle(world, location, 20, -3);
-        spawnParticle(world, location, 10, -4);
-        spawnParticle(world, location, 10, -4);
-    }
-
-    private void spawnParticle(WorldServer world, Location location, int count, int offsetY){
-        world.sendParticles(null, EnumParticle.LAVA, true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                count, 0, offsetY, 0, 0.1);
+        world.sendParticles(null, EnumParticle.valueOf(particle), true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, offsetX, offsetY, offsetZ, extra);
     }
 
 }

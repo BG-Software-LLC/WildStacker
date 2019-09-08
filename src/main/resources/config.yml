@@ -71,6 +71,10 @@ items:
   # If you want to disable the feature, set it to 0.
   chunk-limit: 0
 
+  # Should particles be spawned when an entity gets stacked?
+  # If you want to edit the particles, check the particles file.
+  particles: true
+
   # When enabled, all items will have a custom name (even if not stacked)
   unstacked-custom-name: false
 
@@ -172,6 +176,10 @@ entities:
   # Set a maximum amount of entity objects in a chunk.
   # If you want to disable the feature, set it to 0.
   chunk-limit: 0
+
+  # Should particles be spawned when an entity gets stacked?
+  # If you want to edit the particles, check the particles file.
+  particles: true
 
   # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
   disabled-regions:
@@ -358,6 +366,10 @@ spawners:
   # If you want to disable the feature, set it to 0.
   chunk-limit: 0
 
+  # Should particles be spawned when an entity gets stacked?
+  # If you want to edit the particles, check the particles file.
+  particles: true
+
   # When enabled, the plugin will try to find a spawner in the whole chunk instead
   # of only in the provided radius. merge-radius will be overridden, and will be used
   # as a y-level range only.
@@ -526,6 +538,10 @@ barrels:
   # Set a maximum amount of barrel objects in a chunk.
   # If you want to disable the feature, set it to 0.
   chunk-limit: 0
+
+  # Should particles be spawned when an entity gets stacked?
+  # If you want to edit the particles, check the particles file.
+  particles: true
 
   # When enabled, the plugin will try to find a block in the whole chunk instead
   # of only in the provided radius. merge-radius will be overridden, and will be used

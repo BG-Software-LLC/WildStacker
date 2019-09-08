@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -248,6 +249,12 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         targetBarrel.setStackAmount(newStackAmount, true);
 
         this.remove();
+
+        if(plugin.getSettings().barrelsParticlesEnabled) {
+            Location location = getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().barrelsParticles)
+                particleWrapper.spawnParticle(location);
+        }
 
         return StackResult.SUCCESS;
     }

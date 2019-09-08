@@ -79,6 +79,6 @@ public interface NMSAdapter {
 
     void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
 
-    void playParticle(Location location);
+    void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
 
 }
