@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
@@ -27,7 +28,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("RedundantIfStatement")
 public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
 
     private LivingEntity linkedEntity = null;
@@ -152,35 +152,16 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     }
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject) {
-        if(!canStackIntoNoLimit(stackedObject))
-            return false;
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
+        if(!plugin.getSettings().spawnersStackingEnabled)
+            return StackCheckResult.NOT_ENABLED;
 
-        StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
-
-        if(getStackLimit() < newStackAmount)
-            return false;
-
-        return true;
+        return super.runStackCheck(stackedObject);
     }
 
     private boolean canStackIntoNoLimit(StackedObject stackedObject){
-        if(!plugin.getSettings().spawnersStackingEnabled)
-            return false;
-
-        if(equals(stackedObject) || !(stackedObject instanceof StackedSpawner) || !isSimilar(stackedObject))
-            return false;
-
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
-            return false;
-
-        StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-
-        if(!targetSpawner.isWhitelisted() || targetSpawner.isBlacklisted() || targetSpawner.isWorldDisabled())
-            return false;
-
-        return true;
+        StackCheckResult stackCheckResult = runStackCheck(stackedObject);
+        return stackCheckResult == StackCheckResult.SUCCESS || stackCheckResult == StackCheckResult.LIMIT_EXCEEDED;
     }
 
     @Override
@@ -213,7 +194,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                         });
             }
 
-            Optional<StackedSpawner> spawnerOptional = spawnerStream.filter(this::canStackInto)
+            Optional<StackedSpawner> spawnerOptional = spawnerStream
+                    .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS)
                     .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
 
             if(spawnerOptional.isPresent()){
@@ -240,7 +222,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         if(!StackService.canStackFromThread())
             return StackResult.THREAD_CATCHER;
 
-        if(!canStackInto(stackedObject))
+        if(runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
             return StackResult.NOT_SIMILAR;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;

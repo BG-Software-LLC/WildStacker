@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
@@ -25,7 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-@SuppressWarnings({"RedundantIfStatement", "WeakerAccess"})
+@SuppressWarnings("WeakerAccess")
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
@@ -152,30 +153,24 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject) {
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
         if (!plugin.getSettings().itemsStackingEnabled)
-            return false;
+            return StackCheckResult.NOT_ENABLED;
 
-        if (equals(stackedObject) || !(stackedObject instanceof StackedItem) || !isSimilar(stackedObject))
-            return false;
+        StackCheckResult superResult = super.runStackCheck(stackedObject);
 
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
-            return false;
+        if(superResult != StackCheckResult.SUCCESS)
+            return superResult;
+
+        if(getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+            return StackCheckResult.INSIDE_PORTAL;
 
         StackedItem targetItem = (StackedItem) stackedObject;
 
-        if(!targetItem.isWhitelisted() || targetItem.isBlacklisted() || targetItem.isWorldDisabled())
-            return false;
-
         if(targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-            return false;
+            return StackCheckResult.TARGET_INSIDE_PORTAL;
 
-        int newStackAmount = this.getStackAmount() + targetItem.getStackAmount();
-
-        if (getStackLimit() < newStackAmount)
-            return false;
-
-        return true;
+        return StackCheckResult.SUCCESS;
     }
 
     @Override
@@ -187,7 +182,8 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         StackService.execute(() -> {
             Location itemLocation = getItem().getLocation();
 
-            Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of).filter(this::canStackInto)
+            Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
+                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
                     .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distance(itemLocation)));
 
             if(itemOptional.isPresent()){
@@ -214,7 +210,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         if(!StackService.canStackFromThread())
             return StackResult.THREAD_CATCHER;
 
-        if (!canStackInto(stackedObject))
+        if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
             return StackResult.NOT_SIMILAR;
 
         StackedItem targetItem = (StackedItem) stackedObject;

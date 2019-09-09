@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.DuplicateSpawnEvent;
@@ -182,46 +183,48 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject) {
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
         if (!plugin.getSettings().entitiesStackingEnabled)
-            return false;
+            return StackCheckResult.NOT_ENABLED;
 
-        if (equals(stackedObject) || !(stackedObject instanceof StackedEntity) || !isSimilar(stackedObject))
-            return false;
+        StackCheckResult superResult = super.runStackCheck(stackedObject);
 
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled() || isNameBlacklisted() || object.isDead())
-            return false;
+        if(superResult != StackCheckResult.SUCCESS)
+            return superResult;
+
+        if(isNameBlacklisted())
+            return StackCheckResult.BLACKLISTED_NAME;
+
+        if(object.isDead())
+            return StackCheckResult.ALREADY_DEAD;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
 
-        if(!targetEntity.isWhitelisted() || targetEntity.isBlacklisted() || targetEntity.isWorldDisabled() ||
-                targetEntity.isNameBlacklisted() || targetEntity.getLivingEntity().isDead())
-            return false;
+        if(targetEntity.isNameBlacklisted())
+            return StackCheckResult.TARGET_BLACKLISTD_NAME;
 
-        int newStackAmount = this.getStackAmount() + targetEntity.getStackAmount();
+        if(targetEntity.getLivingEntity().isDead())
+            return StackCheckResult.TARGET_ALREADY_DEAD;
 
-        if(targetEntity.getLivingEntity().hasMetadata("async-stacked") || targetEntity.getLivingEntity().hasMetadata("corpse"))
-            return false;
-
-        if (getStackLimit() < newStackAmount)
-            return false;
+        if(targetEntity.getLivingEntity().hasMetadata("corpse"))
+            return StackCheckResult.CORPSE;
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
             Set<String> regions = new HashSet<>();
             regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
             regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
             if(regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
-                return false;
+                return StackCheckResult.DISABLED_REGION;
         }
 
-        if (plugin.getSettings().stackDownEnabled && plugin.getSettings().stackDownTypes.contains(object.getType().name())) {
+        if (plugin.getSettings().stackDownEnabled && GeneralUtils.contains(plugin.getSettings().stackDownTypes, this)) {
             if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
                 targetEntity.runStackAsync(this, null);
-                return false;
+                return StackCheckResult.NOT_BELOW;
             }
         }
 
-        return true;
+        return StackCheckResult.SUCCESS;
     }
 
     @Override
@@ -235,7 +238,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
             Location entityLocation = getLivingEntity().getLocation();
 
-            Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of).filter(this::canStackInto).collect(Collectors.toSet());
+            Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
+                    .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
+                    .collect(Collectors.toSet());
             Optional<StackedEntity> entityOptional = filteredEntities.stream()
                     .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distance(entityLocation)));
 
@@ -279,7 +284,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(!StackService.canStackFromThread())
             return StackResult.THREAD_CATCHER;
 
-        if (!canStackInto(stackedObject))
+        if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
             return StackResult.NOT_SIMILAR;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
@@ -554,6 +559,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public boolean isNameBlacklisted() {
         return EntityUtils.isNameBlacklisted(object.getCustomName());
+    }
+
+    @Override
+    public boolean isInstantKill(EntityDamageEvent.DamageCause damageCause) {
+        return GeneralUtils.contains(plugin.getSettings().entitiesInstantKills, this) ||
+                (damageCause != null && (plugin.getSettings().entitiesInstantKills.contains(damageCause.name()) ||
+                        plugin.getSettings().entitiesInstantKills.contains(getType().name() + ":" + damageCause.name()))) ||
+                getLivingEntity().getHealth() <= 0;
     }
 
     public boolean isCached(){

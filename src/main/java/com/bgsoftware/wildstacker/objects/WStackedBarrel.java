@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
@@ -26,7 +27,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-@SuppressWarnings("RedundantIfStatement")
 public class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
 
     private ItemStack barrelItem;
@@ -154,27 +154,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     }
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject) {
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
         if(!plugin.getSettings().barrelsStackingEnabled)
-            return false;
+            return StackCheckResult.NOT_ENABLED;
 
-        if(equals(stackedObject) || !(stackedObject instanceof StackedBarrel) || !isSimilar(stackedObject))
-            return false;
-
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
-            return false;
-
-        StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
-
-        if(!targetBarrel.isWhitelisted() || targetBarrel.isBlacklisted() || targetBarrel.isWorldDisabled())
-            return false;
-
-        int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
-
-        if(getStackLimit() < newStackAmount)
-            return false;
-
-        return true;
+        return super.runStackCheck(stackedObject);
     }
 
     @Override
@@ -207,7 +191,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                         });
             }
 
-            Optional<StackedBarrel> barrelOptional = barrelStream.filter(this::canStackInto)
+            Optional<StackedBarrel> barrelOptional = barrelStream
+                    .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
                     .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
 
             if(barrelOptional.isPresent()){
@@ -234,7 +219,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         if(!StackService.canStackFromThread())
             return StackResult.THREAD_CATCHER;
 
-        if(!canStackInto(stackedObject))
+        if(runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
             return StackResult.NOT_SIMILAR;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;

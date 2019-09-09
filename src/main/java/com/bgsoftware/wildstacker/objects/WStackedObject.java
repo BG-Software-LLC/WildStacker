@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
@@ -58,7 +59,41 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract void updateName();
 
     @Override
-    public abstract boolean canStackInto(StackedObject stackedObject);
+    public boolean canStackInto(StackedObject stackedObject){
+        new UnsupportedOperationException("canStackInto method is no longer supported.").printStackTrace();
+        return runStackCheck(stackedObject) == StackCheckResult.SUCCESS;
+    }
+
+    @Override
+    public StackCheckResult runStackCheck(StackedObject stackedObject){
+        if(equals(stackedObject) || !isSimilar(stackedObject))
+            return StackCheckResult.NOT_SIMILAR;
+
+        if(!isWhitelisted())
+            return StackCheckResult.NOT_WHITELISTED;
+
+        if(isBlacklisted())
+            return StackCheckResult.BLACKLISTED;
+
+        if(isWorldDisabled())
+            return StackCheckResult.DISABLED_WORLD;
+
+        if(!stackedObject.isWhitelisted())
+            return StackCheckResult.TARGET_NOT_WHITELISTED;
+
+        if(stackedObject.isBlacklisted())
+            return StackCheckResult.TARGET_BLACKLISTED;
+
+        if(stackedObject.isWorldDisabled())
+            return StackCheckResult.TARGET_DISABLED_WORLD;
+
+        int newStackAmount = this.getStackAmount() + stackedObject.getStackAmount();
+
+        if(getStackLimit() < newStackAmount)
+            return StackCheckResult.LIMIT_EXCEEDED;
+
+        return StackCheckResult.SUCCESS;
+    }
 
     @Override
     public abstract void runStackAsync(Consumer<Optional<T>> result);
