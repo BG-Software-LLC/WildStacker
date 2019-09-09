@@ -29,7 +29,8 @@ public final class EditorHandler {
 
     public CommentedConfiguration config;
 
-    public final static String GENERAL_SLOT_0 = "save-interval", GENERAL_SLOT_1 = "give-item-name";
+    public final static String GENERAL_SLOT_0 = "give-item-name", GENERAL_SLOT_1 = "database.delete-invalid-worlds",
+            GENERAL_SLOT_2 = "database.delete-invalid-blocks";
 
     public final static String ITEMS_SLOT_0 = "items.enabled", ITEMS_SLOT_1 = "items.merge-radius",
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
