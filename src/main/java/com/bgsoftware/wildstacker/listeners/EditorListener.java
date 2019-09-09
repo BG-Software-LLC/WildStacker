@@ -83,23 +83,23 @@ public final class EditorListener implements Listener {
             switch (e.getRawSlot()){
                 case 20:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getGeneralEditor());
+                    plugin.getEditor().openGeneralEditor(player);
                     break;
                 case 22:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getItemsEditor());
+                    plugin.getEditor().openItemsEditor(player);
                     break;
                 case 24:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getEntitiesEditor());
+                    plugin.getEditor().openEntitiesEditor(player);
                     break;
                 case 30:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getSpawnersEditor());
+                    plugin.getEditor().openSpawnersEditor(player);
                     break;
                 case 32:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getBarrelsEditor());
+                    plugin.getEditor().openBarrelsEditor(player);
                     break;
                 case 49:
                     Executor.async(() -> {
@@ -275,7 +275,7 @@ public final class EditorListener implements Listener {
         }
 
         Executor.sync(() -> {
-            e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+            plugin.getEditor().openEditor(e.getPlayer(), lastInventories.get(e.getPlayer().getUniqueId()));
             lastInventories.remove(e.getPlayer().getUniqueId());
             configValues.remove(e.getPlayer().getUniqueId());
         });
