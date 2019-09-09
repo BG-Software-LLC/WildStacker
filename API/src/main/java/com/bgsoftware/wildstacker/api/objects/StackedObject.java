@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.api.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 
@@ -59,9 +60,17 @@ public interface StackedObject<T> {
      * Checks if this object can stack into another object.
      * @param stackedObject other object to check
      *
-     * @return True if can stack into, otherwise false
+     * @deprecated See runStackCheck
      */
+    @Deprecated
     boolean canStackInto(StackedObject stackedObject);
+
+    /**
+     * Checks if this object can stack into another object.
+     * @param stackedObject other object to check
+     * @return The result for the operation.
+     */
+    StackCheckResult runStackCheck(StackedObject stackedObject);
 
     /**
      * Stack this object into other objects around it.

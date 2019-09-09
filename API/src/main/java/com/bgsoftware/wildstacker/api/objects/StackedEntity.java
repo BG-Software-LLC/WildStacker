@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.api.objects;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -181,8 +182,13 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
 
     /**
      * Checks if the name of the entity is blacklisted.
-     * @return True if the name is blacklisted, otherwise false.
      */
     boolean isNameBlacklisted();
+
+    /**
+     * Checks if the entity should be instant-killed or not.
+     * @param damageCause The damage to check (can be null)
+     */
+    boolean isInstantKill(EntityDamageEvent.DamageCause damageCause);
 
 }

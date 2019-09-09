@@ -47,7 +47,7 @@ items:
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable blacklisted items, use "blacklist: []"
   blacklist:
-  - EGG
+    - EXAMPLE_ITEM
 
   # Whitelisted items are items that will get stacked.
   # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
@@ -65,7 +65,7 @@ items:
 
   # A list of worlds items won't get stacked inside them (case-sensitive)
   disabled-worlds:
-  - disabled_world
+    - disabled_world
 
   # Set a maximum amount of item objects in a chunk.
   # If you want to disable the feature, set it to 0.
@@ -95,7 +95,7 @@ items:
 
     # A list of blacklisted bucket names.
     name-blacklist:
-    - '&fGenbucket'
+      - '&fGenbucket'
 
     # The new max-stack size for buckets. Must be a number between 1 and 64.
     max-stack: 16
@@ -142,14 +142,15 @@ entities:
   # Blacklisted entities are entities that won't get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you wish to disable blacklisted entities, use "blacklist: []"
   blacklist:
-  - PLAYER
-  - BLAZE
+    - EXAMPLE_MOB
 
   # Whitelisted entities are entities that will get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you wish to disable whitelisted entities, use "whitelist: []"
   whitelist: []
 
@@ -171,7 +172,7 @@ entities:
 
   # A list of worlds entities won't get stacked inside them (case-sensitive)
   disabled-worlds:
-  - disabled_world
+    - disabled_world
 
   # Set a maximum amount of entity objects in a chunk.
   # If you want to disable the feature, set it to 0.
@@ -183,12 +184,14 @@ entities:
 
   # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
   disabled-regions:
-  - spawn
+    - spawn
 
   # Blacklisted names is a list of names that when an entity has this name, it won't get stacked.
   # Color codes are supported, as well as regex.
   # If you wish to enable stacking of all entities based on their name, use "name-blacklist: []"
-  name-blacklist: []
+  name-blacklist:
+    - '&fEXAMPLE_NAME'
+    - '^[0-9]*$'
 
   # How much time should be passed between auto-stacking? (in ticks)
   # Use it on your own risk. Every run, the plugin will go over *all* the entities
@@ -270,17 +273,20 @@ entities:
 
   # Instant-kill will kill the entire stack instead of unstack it by one.
   # When an entire stack dies, their drops are getting multiplied.
-  # DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+  # You can combine both filters using "ENTITY_TYPE:DAMAGE_CAUSE" or "ENTITY_TYPE:SPAWN_REASON"
   # If you don't want instant-kill, use "instant-kill: []"
   instant-kill:
-  - FALL
+    - FALL
 
   # Nerfed entities are entities that cannot attack / target other entities and players.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you don't want nerfed entities, use "nerfed-spawning: []"
   nerfed-spawning:
-  - SPAWNER
+    - SPAWNER
 
   # A list of worlds that entities can get nerfed in.
   nerfed-worlds:
@@ -292,9 +298,10 @@ entities:
     # Should the stack-down feature be enabled on the server?
     enabled: true
     # A list of entities that will be forced to only stack down.
+    # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
     stack-down-types:
-    - BLAZE
-    - GHAST
+      - BLAZE
+      - GHAST
 
   # If a stacked entity dies from fire, should the fire continue to the next entity?
   keep-fire: true
@@ -343,7 +350,7 @@ spawners:
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # If you wish to disable blacklisted spawners, use "blacklist: []"
   blacklist:
-  - BLAZE
+    - BLAZE
 
   # Whitelisted spawners are spawners that will get stacked.
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
@@ -360,7 +367,7 @@ spawners:
 
   # A list of worlds spawners won't get stacked inside them (case-sensitive)
   disabled-worlds:
-  - disabled_world
+    - disabled_world
 
   # Set a maximum amount of spawner objects in a chunk.
   # If you want to disable the feature, set it to 0.
@@ -522,7 +529,7 @@ barrels:
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable whitelisted spawners, use "whitelist: []"
   whitelist:
-  - DIAMOND_BLOCK
+    - DIAMOND_BLOCK
 
   # Set a maximum stack for a specific barrel.
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
@@ -533,7 +540,7 @@ barrels:
 
   # A list of worlds barrels won't get stacked inside them (case-sensitive)
   disabled-worlds:
-  - disabled_world
+    - disabled_world
 
   # Set a maximum amount of barrel objects in a chunk.
   # If you want to disable the feature, set it to 0.

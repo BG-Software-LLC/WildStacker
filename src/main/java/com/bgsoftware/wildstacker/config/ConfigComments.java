@@ -169,6 +169,7 @@ public final class ConfigComments {
     @Comment("Blacklisted entities are entities that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
     public static String ENTITIES_BLACKLIST = "entities.blacklist";
 
@@ -176,6 +177,7 @@ public final class ConfigComments {
     @Comment("Whitelisted entities are entities that will get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you wish to disable whitelisted entities, use \"whitelist: []\"")
     public static String ENTITIES_WHITELIST = "entities.whitelist";
 
@@ -260,14 +262,17 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Instant-kill will kill the entire stack instead of unstack it by one.")
     @Comment("When an entire stack dies, their drops are getting multiplied.")
-    @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:DAMAGE_CAUSE\" or \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you don't want instant-kill, use \"instant-kill: []\"")
     public static String ENTITIES_INSTANT_KILL = "entities.instant-kill";
 
     @Comment("")
     @Comment("Nerfed entities are entities that cannot attack / target other entities and players.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you don't want nerfed entities, use \"nerfed-spawning: []\"")
     public static String ENTITIES_NERFED_SPAWNING = "entities.nerfed-spawning";
 
@@ -284,6 +289,7 @@ public final class ConfigComments {
     public static String ENTITIES_STACK_DOWN_ENABLED = "entities.stack-down.enabled";
 
     @Comment("A list of entities that will be forced to only stack down.")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_STACK_DOWN_TYPES = "entities.stack-down.stack-down-types";
 
     @Comment("")
