@@ -308,21 +308,6 @@ public final class BarrelsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBarrelInspect(PlayerInteractEvent e){
-        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
-            return;
-
-        e.setCancelled(true);
-
-        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
-
-        Locale.BARREL_INFO_HEADER.send(e.getPlayer());
-        Locale.BARREL_INFO_TYPE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
-        Locale.BARREL_INFO_AMOUNT.send(e.getPlayer(), stackedBarrel.getStackAmount());
-        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
-    }
-
     private boolean isOffHand(PlayerInteractEvent event){
         try{
             return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");

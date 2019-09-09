@@ -486,25 +486,6 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntityInspect(PlayerInteractAtEntityEvent e){
-        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
-                !EntityUtils.isStackable(e.getRightClicked()))
-            return;
-
-        e.setCancelled(true);
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-
-        Locale.ENTITY_INFO_HEADER.send(e.getPlayer());
-        Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
-        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedEntity.getType().name()));
-        Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
-        Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnCause().name());
-        Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
-        Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
-    }
-
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
         if(!plugin.getSettings().entitiesNamesToggleEnabled)
@@ -535,14 +516,6 @@ public final class EntitiesListener implements Listener {
         plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
                 entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
                 .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
-    }
-
-    private boolean isOffHand(PlayerInteractAtEntityEvent event){
-        try{
-            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        }catch(Throwable ex){
-            return false;
-        }
     }
 
     private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){

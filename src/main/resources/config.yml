@@ -20,6 +20,14 @@ inspect-tool:
   lore:
     - '&7Click on an object to get more details about it.'
 
+# The simulate tool of the plugin.
+# You can check if two objects can stack together using this tool.
+simulate-tool:
+  type: STICK
+  name: '&6Simulate Tool'
+  lore:
+    - '&7Click on two objects to check if they can stack together.'
+
 # Settings related to database.
 database:
   # Should data of worlds that no longer exist be deleted?

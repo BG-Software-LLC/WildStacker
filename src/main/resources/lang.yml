@@ -37,6 +37,10 @@ INVALID_TYPE: '&6&lWildStacker &7Please specify if you want to give an egg or a 
 INSPECT_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} inspect tool(s).'
 INSPECT_RECEIVE: '&6&lWildStacker &7You received x{0} inspect tool(s) from {1}.'
 
+# Called when a player successfully runs a simulate command.
+SIMULATE_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} simulate tool(s).'
+SIMULATE_RECEIVE: '&6&lWildStacker &7You received x{0} simulate tool(s) from {1}.'
+
 # Called when a player runs the item names toggle command.
 ITEM_NAMES_TOGGLE_ON: '&6&lWildStacker &7Item names are now enabled.'
 ITEM_NAMES_TOGGLE_OFF: '&6&lWildStacker &7Item names are now disabled.'
@@ -84,3 +88,8 @@ ENTITY_INFO_AMOUNT: '&6 Stack-Amount&7: &f{0}'
 ENTITY_INFO_SPAWN_REASON: '&6 Spawn Reason&7: &f{0}'
 ENTITY_INFO_NERFED: '&6 Nerfed&7: &f{0}'
 ENTITY_INFO_FOOTER: '&8&m---------------&6&l WildStacker &8&m---------------'
+
+# Called when simulating stacking of two objects
+OBJECT_SIMULATE_CHOOSE_SECOND: '&6&lWildStacker &7Please click another object.'
+OBJECT_SIMULATE_SUCCESS_RESULT: '&6&lWildStacker &7Result: &aSUCCESS&7. They can stack together.'
+OBJECT_SIMULATE_FAIL_RESULT: '&6&lWildStacker &7Result: &c{0}&7. They cannot stack together.'

@@ -25,9 +25,8 @@ import java.util.List;
 public final class SettingsHandler {
 
     //Global settings
-    public final long saveInterval;
     public final String giveItemName;
-    public final ItemStack inspectTool;
+    public final ItemStack inspectTool, simulateTool;
     public final boolean deleteInvalidWorlds, deleteInvalidBlocks;
     public final KeyMap<String> customNames;
 
@@ -92,11 +91,13 @@ public final class SettingsHandler {
 
         cfg.resetYamlFile(plugin, "config.yml");
 
-        saveInterval = cfg.getLong("save-interval", 6000);
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&e{0} &f{1} x{2}"));
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
                 .withName(cfg.getString("inspect-tool.name"))
                 .withLore(cfg.getStringList("inspect-tool.lore")).build();
+        simulateTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
+                .withName(cfg.getString("simulate-tool.name"))
+                .withLore(cfg.getStringList("simulate-tool.lore")).build();
         deleteInvalidWorlds = cfg.getBoolean("database.delete-invalid-worlds", false);
         deleteInvalidBlocks = cfg.getBoolean("database.delete-invalid-blocks", false);
         customNames = new KeyMap<>();

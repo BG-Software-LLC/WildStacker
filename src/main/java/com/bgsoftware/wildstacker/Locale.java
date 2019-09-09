@@ -34,6 +34,8 @@ public final class Locale {
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
     public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
     public static Locale INSPECT_RECEIVE = new Locale("INSPECT_RECEIVE");
+    public static Locale SIMULATE_GIVE_PLAYER = new Locale("SIMULATE_GIVE_PLAYER");
+    public static Locale SIMULATE_RECEIVE = new Locale("SIMULATE_RECEIVE");
     public static Locale ITEM_NAMES_TOGGLE_ON = new Locale("ITEM_NAMES_TOGGLE_ON");
     public static Locale ITEM_NAMES_TOGGLE_OFF = new Locale("ITEM_NAMES_TOGGLE_OFF");
     public static Locale KILL_ALL_ANNOUNCEMENT = new Locale("KILL_ALL_ANNOUNCEMENT");
@@ -66,6 +68,9 @@ public final class Locale {
     public static Locale ENTITY_INFO_SPAWN_REASON = new Locale("ENTITY_INFO_SPAWN_REASON");
     public static Locale ENTITY_INFO_NERFED = new Locale("ENTITY_INFO_NERFED");
     public static Locale ENTITY_INFO_FOOTER = new Locale("ENTITY_INFO_FOOTER");
+    public static Locale OBJECT_SIMULATE_CHOOSE_SECOND = new Locale("OBJECT_SIMULATE_CHOOSE_SECOND");
+    public static Locale OBJECT_SIMULATE_SUCCESS_RESULT = new Locale("OBJECT_SIMULATE_SUCCESS_RESULT");
+    public static Locale OBJECT_SIMULATE_FAIL_RESULT = new Locale("OBJECT_SIMULATE_FAIL_RESULT");
 
     private Locale(String identifier){
         localeMap.put(identifier, this);

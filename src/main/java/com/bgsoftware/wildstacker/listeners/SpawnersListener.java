@@ -479,21 +479,6 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onSpawnerInspect(PlayerInteractEvent e){
-        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
-            return;
-
-        e.setCancelled(true);
-
-        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
-
-        Locale.SPAWNER_INFO_HEADER.send(e.getPlayer());
-        Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
-        Locale.SPAWNER_INFO_AMOUNT.send(e.getPlayer(), stackedSpawner.getStackAmount());
-        Locale.SPAWNER_INFO_FOOTER.send(e.getPlayer());
-    }
-
     private boolean isChunkLimit(Chunk chunk){
         int chunkLimit = plugin.getSettings().spawnersChunkLimit;
 
