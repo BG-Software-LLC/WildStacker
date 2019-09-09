@@ -498,6 +498,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         this.tempLootTable = new LootTableTemp() {
             @Override
             public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
+                tempLootTable = null;
                 List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                 drops.forEach(itemStack -> itemStack.setAmount((itemStack.getAmount() * multiplier)));
                 return drops;
