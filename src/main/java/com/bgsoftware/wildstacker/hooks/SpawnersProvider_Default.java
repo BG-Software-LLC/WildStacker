@@ -58,7 +58,8 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             return;
         }
 
-        if(!plugin.getSettings().silkTouchSpawners)
+        if(!plugin.getSettings().silkTouchSpawners ||
+                (!plugin.getSettings().silkWorlds.isEmpty() && !plugin.getSettings().silkWorlds.contains(spawner.getWorld().getName())))
             return;
 
         if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) {

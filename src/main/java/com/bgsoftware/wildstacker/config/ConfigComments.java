@@ -338,6 +338,11 @@ public final class ConfigComments {
     public static String ENTITIES_NEXT_STACK_KNOCKBACK = "entities.next-stack-knockback";
 
     @Comment("")
+    @Comment("The default amount entities should get unstacked by.")
+    @Comment("Use the \"ENTITY_TYPE:AMOUNT\" or \"ENTITY_TYPE:SPAWN_CAUSE:AMOUNT\"")
+    public static String ENTITIES_DEFAULT_UNSTACK = "entities.default-unstack";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 
@@ -438,6 +443,11 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Should the spawner item go straight into the player's inventory instead of dropping on ground?")
     public static String SPAWNERS_SILK_SPAWNERS_DROP_TO_INVENTORY = "spawners.silk-spawners.drop-to-inventory";
+
+    @Comment("")
+    @Comment("A list of worlds that silk touch will work in.")
+    @Comment("If you want silk touch to work inside all the worlds, use \"worlds: []\"")
+    public static String SPAWNERS_SILK_SPAWNERS_WORLDS = "spawners.silk-spawners.worlds";
 
     @Comment("")
     @Comment("Should sneaking while mining break the entire stack instead of reducing it by one?")

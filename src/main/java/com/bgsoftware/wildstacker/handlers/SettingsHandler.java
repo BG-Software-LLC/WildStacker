@@ -65,7 +65,7 @@ public final class SettingsHandler {
             nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
     public final String hologramCustomName, silkCustomName;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
@@ -182,6 +182,7 @@ public final class SettingsHandler {
                 ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         explosionsDropSpawner = cfg.getBoolean("spawners.silk-spawners.explosions-drop-spawner", true);
         dropToInventory = cfg.getBoolean("spawners.silk-spawners.drop-to-inventory", true);
+        silkWorlds = cfg.getStringList("spawners.silk-spawners.worlds");
         shiftGetWholeSpawnerStack = cfg.getBoolean("spawners.shift-get-whole-stack", true);
         getStackedItem = cfg.getBoolean("spawners.get-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);

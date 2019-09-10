@@ -68,14 +68,15 @@ public final class EditorHandler {
             SPAWNERS_SLOT_12 = "spawners.silk-touch-break-chance", SPAWNERS_SLOT_13 = "spawners.drop-without-silk",
             SPAWNERS_SLOT_14 = "spawners.silk-spawners.enabled", SPAWNERS_SLOT_15 = "spawners.silk-spawners.custom-name",
             SPAWNERS_SLOT_16 = "spawners.silk-spawners.custom-lore", SPAWNERS_SLOT_17 = "spawners.silk-spawners.explosions-drop-spawner",
-            SPAWNERS_SLOT_18 = "spawners.silk-spawners.drop-to-inventory", SPAWNERS_SLOT_19 = "spawners.shift-get-whole-stack",
-            SPAWNERS_SLOT_20 = "spawners.get-stacked-item", SPAWNERS_SLOT_21 = "spawners.floating-names",
-            SPAWNERS_SLOT_22 = "spawners.break-menu.enabled", SPAWNERS_SLOT_23 = "spawners.place-inventory",
-            SPAWNERS_SLOT_24 = "spawners.placement-permission", SPAWNERS_SLOT_25 = "spawners.shift-place-stack",
-            SPAWNERS_SLOT_26 = "spawners.break-charge.amount", SPAWNERS_SLOT_27 = "spawners.break-charge.multiply-stack-amount",
-            SPAWNERS_SLOT_28 = "spawners.place-charge.amount", SPAWNERS_SLOT_29 = "spawners.place-charge.multiply-stack-amount",
-            SPAWNERS_SLOT_30 = "spawners.change-using-eggs", SPAWNERS_SLOT_31 = "spawners.eggs-stack-multiply",
-            SPAWNERS_SLOT_32 = "spawners.next-spawner-placement", SPAWNERS_SLOT_33 = "spawners.only-one-spawner";
+            SPAWNERS_SLOT_18 = "spawners.silk-spawners.drop-to-inventory", SPAWNERS_SLOT_19 = "spawners.silk-spawners.worlds",
+            SPAWNERS_SLOT_20 = "spawners.shift-get-whole-stack", SPAWNERS_SLOT_21 = "spawners.get-stacked-item",
+            SPAWNERS_SLOT_22 = "spawners.floating-names", SPAWNERS_SLOT_23 = "spawners.break-menu.enabled",
+            SPAWNERS_SLOT_24 = "spawners.place-inventory", SPAWNERS_SLOT_25 = "spawners.placement-permission",
+            SPAWNERS_SLOT_26 = "spawners.shift-place-stack", SPAWNERS_SLOT_27 = "spawners.break-charge.amount",
+            SPAWNERS_SLOT_28 = "spawners.break-charge.multiply-stack-amount", SPAWNERS_SLOT_29 = "spawners.place-charge.amount",
+            SPAWNERS_SLOT_30 = "spawners.place-charge.multiply-stack-amount", SPAWNERS_SLOT_31 = "spawners.change-using-eggs",
+            SPAWNERS_SLOT_32 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_33 = "spawners.next-spawner-placement",
+            SPAWNERS_SLOT_34 = "spawners.only-one-spawner";
 
     public final static String BARRELS_SLOT_0 = "barrels.enabled", BARRELS_SLOT_1 = "barrels.merge-radius",
             BARRELS_SLOT_2 = "barrels.custom-name", BARRELS_SLOT_3 = "barrels.blacklist", BARRELS_SLOT_4 = "barrels.whitelist",
