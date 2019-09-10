@@ -295,7 +295,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if (entityStackEvent.isCancelled())
             return StackResult.EVENT_CANCELLED;
 
-        double health = plugin.getSettings().keepLowestHealth ? Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
+        double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
+                Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
         int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
         targetEntity.setStackAmount(newStackAmount, false);

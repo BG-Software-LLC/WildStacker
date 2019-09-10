@@ -318,8 +318,11 @@ entities:
   # If enabled, the placeholder '{}' will be replaced with the stack amount for mythic mobs.
   mythic-mobs-custom-name: true
 
-  # When enabled, the stack will keep the lowest health between the two entities that are stacked.
-  keep-lowest-health: false
+  # A list of entities that should keep the lowest health when stacking.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
+  keep-lowest-health: []
 
   # When enabled, parents of the entity will get stacked together after breeding.
   stack-after-breed: true

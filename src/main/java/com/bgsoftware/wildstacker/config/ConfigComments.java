@@ -310,7 +310,10 @@ public final class ConfigComments {
     public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
 
     @Comment("")
-    @Comment("When enabled, the stack will keep the lowest health between the two entities that are stacked.")
+    @Comment("A list of entities that should keep the lowest health when stacking.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_KEEP_LOWEST_HEALTH = "entities.keep-lowest-health";
 
     @Comment("")

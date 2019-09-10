@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,14 +47,14 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, stackDownEnabled,
-            keepFireEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames,
+            keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
             entitiesNamesToggleEnabled, nextStackKnockback;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
-            stackDownTypes;
+            stackDownTypes, keepLowestHealth;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
@@ -155,7 +156,7 @@ public final class SettingsHandler {
         stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
         mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
-        keepLowestHealth = cfg.getBoolean("entities.keep-lowest-health", false);
+        keepLowestHealth = cfg.getStringList("entities.keep-lowest-health");
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
@@ -323,6 +324,12 @@ public final class SettingsHandler {
             cfg.set("kill-task.interval", cfg.getLong("entities.kill-all.interval"));
         if(cfg.contains("entities.kill-all.clear-lagg"))
             cfg.set("kill-task.sync-clear-lagg", cfg.getBoolean("entities.kill-all.clear-lagg"));
+        if(cfg.isBoolean("entities.keep-lowest-health")){
+            if(cfg.getBoolean("entities.keep-lowest-health"))
+                cfg.set("entities.keep-lowest-health", Collections.singletonList("all"));
+            else
+                cfg.set("entities.keep-lowest-health", new ArrayList<>());
+        }
         if(cfg.contains("spawners.holograms.custom-name"))
             cfg.set("spawners.custom-name", cfg.getString("spawners.holograms.custom-name"));
         if(cfg.contains("spawners.holograms.enabled") && !cfg.getBoolean("spawners.holograms.enabled"))
