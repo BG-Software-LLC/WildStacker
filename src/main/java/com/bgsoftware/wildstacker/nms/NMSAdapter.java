@@ -81,4 +81,8 @@ public interface NMSAdapter {
 
     void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
 
+    boolean getEntityAI(LivingEntity livingEntity);
+
+    void setEntityAI(LivingEntity livingEntity, boolean ai);
+
 }

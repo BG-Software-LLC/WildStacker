@@ -281,6 +281,21 @@ public final class ConfigComments {
     public static String ENTITIES_NERFED_WORLDS = "entities.nerfed-worlds";
 
     @Comment("")
+    @Comment("All settings related to ai of mobs.")
+    public static String ENTITIES_NO_AI = "entities.no-ai";
+
+    @Comment("A list of entities that won't have AI.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
+    @Comment("If you want AI to all entities, use \"whitelist: []\"")
+    public static String ENTITIES_NO_AI_WHITELIST = "entities.no-ai.whitelist";
+
+    @Comment("")
+    @Comment("A list of worlds that entities can get nerfed in.")
+    public static String ENTITIES_NO_AI_WORLDS = "entities.no-ai.worlds";
+
+    @Comment("")
     @Comment("Stack-down is a feature that will force entities to stack to other entities that are below their y level.")
     @Comment("This feature is great for flying entities, like blazes and ghasts.")
     public static String ENTITIES_STACK_DOWN = "entities.stack-down";

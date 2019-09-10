@@ -312,4 +312,14 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
                 count, offsetX, offsetY, offsetZ, extra);
     }
 
+    @Override
+    public boolean getEntityAI(LivingEntity livingEntity) {
+        return livingEntity.hasAI();
+    }
+
+    @Override
+    public void setEntityAI(LivingEntity livingEntity, boolean ai) {
+        livingEntity.setAI(ai);
+    }
+
 }

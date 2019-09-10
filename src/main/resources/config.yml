@@ -300,6 +300,20 @@ entities:
   nerfed-worlds:
     - 'world'
 
+  # All settings related to ai of mobs.
+  no-ai:
+    # A list of entities that won't have AI.
+    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+    # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
+    # If you want AI to all entities, use "whitelist: []"
+    whitelist:
+      - EXAMPLE_MOB
+
+    # A list of worlds that entities won't have AI in.
+    worlds:
+      - 'world'
+
   # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
   # This feature is great for flying entities, like blazes and ghasts.
   stack-down:

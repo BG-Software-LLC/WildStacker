@@ -298,4 +298,16 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
                 count, offsetX, offsetY, offsetZ, extra);
     }
 
+    @Override
+    public boolean getEntityAI(LivingEntity livingEntity) {
+        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        return entityInsentient.getDataWatcher().getByte(15) == 0;
+    }
+
+    @Override
+    public void setEntityAI(LivingEntity livingEntity, boolean ai) {
+        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        entityInsentient.getDataWatcher().watch(15, (byte)(ai ? 0 : 1));
+    }
+
 }

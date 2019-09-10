@@ -570,6 +570,22 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 getLivingEntity().getHealth() <= 0;
     }
 
+    @Override
+    public boolean hasAI() {
+        return plugin.getNMSAdapter().getEntityAI(object);
+    }
+
+    @Override
+    public void setAI(boolean ai) {
+        plugin.getNMSAdapter().setEntityAI(object, ai);
+    }
+
+    @Override
+    public void updateAI() {
+        setAI(!GeneralUtils.contains(plugin.getSettings().noAiWhitelist, this) ||
+                !plugin.getSettings().noAiWorlds.contains(getLivingEntity().getWorld().getName()));
+    }
+
     public boolean isCached(){
         return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
     }

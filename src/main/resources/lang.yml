@@ -87,6 +87,7 @@ ENTITY_INFO_TYPE: '&6 Type&7: &f{0}'
 ENTITY_INFO_AMOUNT: '&6 Stack-Amount&7: &f{0}'
 ENTITY_INFO_SPAWN_REASON: '&6 Spawn Reason&7: &f{0}'
 ENTITY_INFO_NERFED: '&6 Nerfed&7: &f{0}'
+ENTITY_INFO_NO_AI: '&6 No-AI&7: &f{0}'
 ENTITY_INFO_FOOTER: '&8&m---------------&6&l WildStacker &8&m---------------'
 
 # Called when simulating stacking of two objects

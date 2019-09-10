@@ -271,18 +271,20 @@ public final class EntitiesListener implements Listener {
                 plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
-        Consumer<Optional<LivingEntity>> nerfEntityConsumer = entityOptional -> {
-            if(!entityOptional.isPresent())
+        Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
+            if(!entityOptional.isPresent()) {
                 stackedEntity.updateNerfed();
+                stackedEntity.updateAI();
+            }
         };
 
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
                 e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
                 Bukkit.getPluginManager().isPluginEnabled("MythicMobs") || Bukkit.getPluginManager().isPluginEnabled("EpicBosses"))
-            Executor.sync(() -> stackedEntity.runStackAsync(nerfEntityConsumer), 1L);
+            Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
-            stackedEntity.runStackAsync(nerfEntityConsumer);
+            stackedEntity.runStackAsync(entityConsumer);
 
         //Chunk Limit
         Executor.sync(() -> {
