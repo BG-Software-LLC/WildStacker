@@ -71,19 +71,19 @@ public final class EditorHandler {
             SPAWNERS_SLOT_18 = "spawners.silk-spawners.drop-to-inventory", SPAWNERS_SLOT_19 = "spawners.silk-spawners.worlds",
             SPAWNERS_SLOT_20 = "spawners.shift-get-whole-stack", SPAWNERS_SLOT_21 = "spawners.get-stacked-item",
             SPAWNERS_SLOT_22 = "spawners.floating-names", SPAWNERS_SLOT_23 = "spawners.break-menu.enabled",
-            SPAWNERS_SLOT_24 = "spawners.place-inventory", SPAWNERS_SLOT_25 = "spawners.placement-permission",
-            SPAWNERS_SLOT_26 = "spawners.shift-place-stack", SPAWNERS_SLOT_27 = "spawners.break-charge.amount",
-            SPAWNERS_SLOT_28 = "spawners.break-charge.multiply-stack-amount", SPAWNERS_SLOT_29 = "spawners.place-charge.amount",
-            SPAWNERS_SLOT_30 = "spawners.place-charge.multiply-stack-amount", SPAWNERS_SLOT_31 = "spawners.change-using-eggs",
-            SPAWNERS_SLOT_32 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_33 = "spawners.next-spawner-placement",
-            SPAWNERS_SLOT_34 = "spawners.only-one-spawner";
+            SPAWNERS_SLOT_24 = "spawners.place-inventory.enabled", SPAWNERS_SLOT_25 = "spawners.place-inventory.title",
+            SPAWNERS_SLOT_26 = "spawners.placement-permission", SPAWNERS_SLOT_27 = "spawners.shift-place-stack",
+            SPAWNERS_SLOT_28 = "spawners.break-charge.amount", SPAWNERS_SLOT_29 = "spawners.break-charge.multiply-stack-amount",
+            SPAWNERS_SLOT_30 = "spawners.place-charge.amount", SPAWNERS_SLOT_31 = "spawners.place-charge.multiply-stack-amount",
+            SPAWNERS_SLOT_32 = "spawners.change-using-eggs", SPAWNERS_SLOT_33 = "spawners.eggs-stack-multiply",
+            SPAWNERS_SLOT_34 = "spawners.next-spawner-placement", SPAWNERS_SLOT_35 = "spawners.only-one-spawner";
 
     public final static String BARRELS_SLOT_0 = "barrels.enabled", BARRELS_SLOT_1 = "barrels.merge-radius",
             BARRELS_SLOT_2 = "barrels.custom-name", BARRELS_SLOT_3 = "barrels.blacklist", BARRELS_SLOT_4 = "barrels.whitelist",
             BARRELS_SLOT_5 = "barrels.limits", BARRELS_SLOT_6 = "barrels.disabled-worlds", BARRELS_SLOT_7 = "barrels.chunk-limit",
             BARRELS_SLOT_8 = "barrels.particles", BARRELS_SLOT_9 = "barrels.chunk-merge", BARRELS_SLOT_10 = "barrels.explosions-break-stack",
             BARRELS_SLOT_11 = "barrels.toggle-command.enabled", BARRELS_SLOT_12 = "barrels.toggle-command.command",
-            BARRELS_SLOT_13 = "barrels.place-inventory";
+            BARRELS_SLOT_13 = "barrels.place-inventory.enabled", BARRELS_SLOT_14 = "barrels.place-inventory.title";
 
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -167,7 +167,7 @@ public final class EditorHandler {
             return;
         }
 
-        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 5, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
         buildInventory(editor, spawnersFields, "spawners.");
 
         Executor.sync(() -> player.openInventory(editor));

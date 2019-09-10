@@ -67,7 +67,7 @@ public final class SettingsHandler {
     public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
-    public final String hologramCustomName, silkCustomName;
+    public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
 
@@ -75,7 +75,7 @@ public final class SettingsHandler {
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
             barrelsToggleCommand, barrelsPlaceInventory, forceCauldron;
     public final int barrelsCheckRange, barrelsChunkLimit;
-    public final String barrelsCustomName, barrelsToggleCommandSyntax;
+    public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle;
     public final List<String> barrelsDisabledWorlds;
     public final KeySet blacklistedBarrels, whitelistedBarrels;
     public final KeyMap<Integer> barrelsLimits;
@@ -188,7 +188,9 @@ public final class SettingsHandler {
         getStackedItem = cfg.getBoolean("spawners.get-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
         spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
-        spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory", false);
+        spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory.enabled", false);
+        spawnersPlaceMenuTitle = ChatColor.translateAlternateColorCodes('&',
+                cfg.getString("spawners.place-inventory.title", "Add items here ({0})"));
         plugin.getBreakMenuHandler().loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
@@ -214,7 +216,9 @@ public final class SettingsHandler {
         explosionsBreakBarrelStack = cfg.getBoolean("barrels.explosions-break-stack", true);
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);
         barrelsToggleCommandSyntax = cfg.getString("barrels.toggle-command.command", "stacker toggle");
-        barrelsPlaceInventory = cfg.getBoolean("barrels.place-inventory", true);
+        barrelsPlaceInventory = cfg.getBoolean("barrels.place-inventory.enabled", true);
+        barrelsPlaceInventoryTitle = ChatColor.translateAlternateColorCodes('&',
+                cfg.getString("barrels.place-inventory.title", "Add items here ({0})"));
         forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
 
         for(StackCheck check : StackCheck.values()) {
@@ -338,6 +342,8 @@ public final class SettingsHandler {
             cfg.set("items.custom-display", null);
         if(cfg.getConfigurationSection("spawners.break-menu") == null)
             cfg.createSection("spawners.break-menu");
+        if(cfg.isBoolean("spawners.place-inventory"))
+            cfg.set("spawners.place-inventory.enabled", cfg.getBoolean("spawners.place-inventory"));
         if(cfg.isBoolean("buckets-stacker"))
             cfg.set("buckets-stacker.enabled", cfg.getBoolean("buckets-stacker"));
         if(cfg.contains("entities.spawn-blacklist") || !cfg.getBoolean("mythic-mobs-stack", true)){
@@ -348,6 +354,8 @@ public final class SettingsHandler {
                 blacklisted.add("MYTHIC_MOBS");
             cfg.set("entities.blacklist", blacklisted);
         }
+        if(cfg.isBoolean("barrels.place-inventory"))
+            cfg.set("barrels.place-inventory.enabled", cfg.getBoolean("barrels.place-inventory"));
     }
 
     public static void reload(){

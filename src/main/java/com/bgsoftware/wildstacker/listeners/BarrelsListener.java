@@ -166,7 +166,8 @@ public final class BarrelsListener implements Listener {
 
         if(e.getPlayer().isSneaking() && plugin.getSettings().barrelsPlaceInventory){
             barrelPlaceInventory.put(e.getPlayer().getUniqueId(), stackedBarrel.getLocation());
-            e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4, "Add items here (" + EntityUtils.getFormattedType(stackedBarrel.getType().name()) + ")"));
+            e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4,
+                    plugin.getSettings().barrelsPlaceInventoryTitle.replace("{0}", EntityUtils.getFormattedType(stackedBarrel.getType().name()))));
         }
 
         else {

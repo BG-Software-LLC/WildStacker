@@ -477,6 +477,10 @@ public final class ConfigComments {
 
     @Comment("")
     @Comment("How many rows should the gui have?")
+    public static String SPAWNERS_BREAK_MENU_SIZE = "spawners.break-menu.size";
+
+    @Comment("")
+    @Comment("How many rows should the gui have?")
     public static String SPAWNERS_BREAK_MENU_ROWS = "spawners.break-menu.rows";
 
     @Comment("")

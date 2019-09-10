@@ -497,7 +497,9 @@ spawners:
 
   # When enabled and player is clicking a spawner while sneaking, an inventory will be opened, there
   # he can put spawner items to add to the spawner. Make sure break-menu is disabled!
-  place-inventory: false
+  place-inventory:
+    enabled: false
+    title: 'Add items here ({0})'
 
   # When enabled, you must have the permission wildstacker.place.<entity> to place an entity.
   # You can give a player the ability to place all spawners with wildstacker.place.*
@@ -596,7 +598,9 @@ barrels:
 
   # When enabled and player is clicking a barrel while sneaking, an inventory will be opened, there
   # he can put blocks to add to the barrel.
-  place-inventory: true
+  place-inventory:
+    enabled: true
+    title: 'Add items here ({0})'
 
   # This should not be set to true unless being told by the dev.
   # When enabled, the plugin sets the barrel types to cauldron if they aren't already.
