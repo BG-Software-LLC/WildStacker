@@ -417,6 +417,12 @@ spawners:
     # {1} represents entity type
     custom-name: '&6x{0} &f&o{1} Spawners'
 
+    # Custom lore for the item.
+    # If you don't want a custom lore, use "custom-lore: []"
+    # {0} represents stack amount
+    # {1} represents entity type
+    custom-lore: []
+
     # Should explosions act like silk-touch and drop the spawner?
     explosions-drop-spawner: true
 

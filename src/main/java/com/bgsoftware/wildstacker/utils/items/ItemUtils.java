@@ -120,6 +120,16 @@ public final class ItemUtils {
             blockStateMeta.setDisplayName(customName.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
 
+        List<String> customLore = plugin.getSettings().silkCustomLore;
+
+        if(!customLore.isEmpty()){
+            List<String> lore = new ArrayList<>();
+            for(String line : customLore)
+                lore.add(line.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
+                        .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
+            blockStateMeta.setLore(lore);
+        }
+
         itemStack.setItemMeta(blockStateMeta);
 
         return itemStack;

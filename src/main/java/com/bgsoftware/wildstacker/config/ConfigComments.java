@@ -425,6 +425,13 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_NAME = "spawners.silk-spawners.custom-name";
 
     @Comment("")
+    @Comment("Custom lore for the item.")
+    @Comment("If you don't want a custom lore, use \"custom-lore: []\"")
+    @Comment("{0} represents stack amount")
+    @Comment("{1} represents entity type")
+    public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_LORE = "spawners.silk-spawners.custom-lore";
+
+    @Comment("")
     @Comment("Should explosions act like silk-touch and drop the spawner?")
     public static String SPAWNERS_SILK_SPAWNERS_EXPLOSIONS_DROP_SPAWNER = "spawners.silk-spawners.explosions-drop-spawner";
 

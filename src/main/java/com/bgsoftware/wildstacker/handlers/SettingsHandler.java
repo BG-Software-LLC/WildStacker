@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
@@ -64,7 +65,7 @@ public final class SettingsHandler {
             nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore;
     public final String hologramCustomName, silkCustomName;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
@@ -177,6 +178,8 @@ public final class SettingsHandler {
         dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
         silkTouchSpawners = cfg.getBoolean("spawners.silk-spawners.enabled", true);
         silkCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.silk-spawners.custom-name", "&e{0} &fSpawner"));
+        silkCustomLore = cfg.getStringList("spawners.silk-spawners.custom-lore").stream().map(line ->
+                ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         explosionsDropSpawner = cfg.getBoolean("spawners.silk-spawners.explosions-drop-spawner", true);
         dropToInventory = cfg.getBoolean("spawners.silk-spawners.drop-to-inventory", true);
         shiftGetWholeSpawnerStack = cfg.getBoolean("spawners.shift-get-whole-stack", true);
