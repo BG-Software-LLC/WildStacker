@@ -54,7 +54,7 @@ public final class SettingsHandler {
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
             stackDownTypes;
-    public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit;
+    public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
@@ -229,6 +229,7 @@ public final class SettingsHandler {
         loadLimits((minimumEntitiesLimit = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-limits"));
         loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
         loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
+        loadLimits((defaultUnstack = new KeyMap<>()), cfg.getConfigurationSection("entities.default-unstack"));
 
         WildStackerPlugin.log(" - Stacking drops is " + getBoolean(itemsStackingEnabled));
         WildStackerPlugin.log(" - Stacking entities is " + getBoolean(entitiesStackingEnabled));

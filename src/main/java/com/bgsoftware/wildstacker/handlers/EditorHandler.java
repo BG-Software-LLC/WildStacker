@@ -56,7 +56,8 @@ public final class EditorHandler {
             ENTITIES_SLOT_22 = "entities.stack-down.enabled", ENTITIES_SLOT_23 = "entities.stack-down.stack-down-types",
             ENTITIES_SLOT_24 = "entities.keep-fire", ENTITIES_SLOT_25 = "entities.mythic-mobs-custom-name",
             ENTITIES_SLOT_26 = "entities.keep-lowest-health", ENTITIES_SLOT_27 = "entities.stack-after-breed",
-            ENTITIES_SLOT_28 = "entities.hide-names", ENTITIES_SLOT_29 = "entities.next-stack-knockback";
+            ENTITIES_SLOT_28 = "entities.hide-names", ENTITIES_SLOT_29 = "entities.next-stack-knockback",
+            ENTITIES_SLOT_30 = "entities.default-unstack";
 
     public final static String SPAWNERS_SLOT_0 = "spawners.enabled", SPAWNERS_SLOT_1 = "spawners.merge-radius",
             SPAWNERS_SLOT_2 = "spawners.custom-name", SPAWNERS_SLOT_3 = "spawners.blacklist",

@@ -191,4 +191,9 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      */
     boolean isInstantKill(EntityDamageEvent.DamageCause damageCause);
 
+    /**
+     * Gets the default unstack amount for this entity.
+     */
+    int getDefaultUnstack();
+
 }

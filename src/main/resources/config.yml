@@ -339,6 +339,11 @@ entities:
   # Should entities get knockback after they are killed?
   next-stack-knockback: true
 
+  # The default amount entities should get unstacked by.
+  # Use the "ENTITY_TYPE:AMOUNT" or "ENTITY_TYPE:SPAWN_CAUSE:AMOUNT"
+  default-unstack:
+    all: 1
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

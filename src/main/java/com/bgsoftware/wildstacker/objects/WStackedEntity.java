@@ -120,7 +120,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public int getStackLimit() {
-        return plugin.getSettings().entitiesLimits.getOrDefault(getType().name(), Integer.MAX_VALUE);
+        return GeneralUtils.get(plugin.getSettings().entitiesLimits, this, Integer.MAX_VALUE);
     }
 
     @Override
@@ -568,6 +568,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 (damageCause != null && (plugin.getSettings().entitiesInstantKills.contains(damageCause.name()) ||
                         plugin.getSettings().entitiesInstantKills.contains(getType().name() + ":" + damageCause.name()))) ||
                 getLivingEntity().getHealth() <= 0;
+    }
+
+    @Override
+    public int getDefaultUnstack() {
+        return GeneralUtils.get(plugin.getSettings().defaultUnstack, this, 1);
     }
 
     public boolean isCached(){

@@ -121,7 +121,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
-        if(!EntityUtils.isStackable(e.getEntity()))
+        if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -129,7 +129,8 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
-            int stackAmount = stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : 1;
+            int stackAmount = Math.min(stackedEntity.getStackAmount(),
+                    stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
 
             if(plugin.getSettings().nextStackKnockback)
                 e.setDamage(0);
