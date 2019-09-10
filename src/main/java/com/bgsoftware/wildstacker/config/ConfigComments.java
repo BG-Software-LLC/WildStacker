@@ -25,6 +25,11 @@ public final class ConfigComments {
     public static String INSPECT_TOOL = "inspect-tool";
 
     @Comment("")
+    @Comment("The simulate tool of the plugin.")
+    @Comment("You can check if two objects can stack together using this tool.")
+    public static String SIMULATE_TOOL = "simulate-tool";
+
+    @Comment("")
     @Comment("Settings related to database.")
     public static String DATABASE = "database";
 
@@ -33,6 +38,30 @@ public final class ConfigComments {
 
     @Comment("Should data of blocks that no longer exist be deleted?")
     public static String DATABASE_INVALID_BLOCKS = "database.delete-invalid-blocks";
+
+    @Comment("")
+    @Comment("Settings related to the automatic kill all")
+    public static String KILL_TASK = "kill-task";
+
+    @Comment("How much time should be passed between auto-killing? (in ticks)")
+    @Comment("If you wish to disable the auto-killing task, set the interval to 0.")
+    public static String KILL_TASK_INTERVAL = "kill-task.interval";
+
+    @Comment("Should the kill task remove stacked entities?")
+    public static String KILL_TASK_STACKED_ENTITIES = "kill-task.stacked-entities";
+
+    @Comment("Should the kill task remove unstacked entities?")
+    public static String KILL_TASK_UNSTACKED_ENTITIES = "kill-task.unstacked-entities";
+
+    @Comment("Should the kill task remove stacked items?")
+    public static String KILL_TASK_STACKED_ITEMS = "kill-task.stacked-items";
+
+    @Comment("Should the kill task remove unstacked items?")
+    public static String KILL_TASK_UNSTACKED_ITEMS = "kill-task.unstacked-items";
+
+    @Comment("When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.")
+    @Comment("This feature will work if the interval is set to 0 - these are two different features!")
+    public static String KILL_TASK_SYNC_CLEAR_LAGG = "kill-task.sync-clear-lagg";
 
     @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
@@ -113,11 +142,6 @@ public final class ConfigComments {
     @Comment("")
     @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
     public static String BUCKETS_STACKER_MAX_STACK = "items.buckets-stacker.max-stack";
-
-    @Comment("")
-    @Comment("Should items get removed when the kill all task is performed?")
-    @Comment("If you want to configure the task, check the entities section.")
-    public static String ITEMS_KILL_ALL = "items.kill-all";
 
     @Comment("")
     @Comment("Should players be able to disable item names for themselves?")
@@ -221,21 +245,6 @@ public final class ConfigComments {
     @Comment("I recommend setting it to at least 10 seconds (200 ticks)")
     @Comment("If you wish to disable the auto-stacking task, set the stack-interval to 0.")
     public static String ENTITIES_STACK_INTERVAL = "entities.stack-interval";
-
-    @Comment("")
-    @Comment("Here you can configurable all features related to the kill-all task.")
-    @Comment("Every run, the plugin will remove all the stacked entities from your server.")
-    @Comment("No drops will be drops, and it won't lag your server at all.")
-    public static String ENTITIES_KILL_ALL = "entities.kill-all";
-
-    @Comment("How much time should be passed between auto-killing? (in ticks)")
-    @Comment("If you wish to disable the auto-killing task, set the interval to 0.")
-    public static String ENTITIES_KILL_ALL_INTERVAL = "entities.kill-all.interval";
-
-    @Comment("")
-    @Comment("When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.")
-    @Comment("This feature will work if the interval is set to 0 - these are two different features!")
-    public static String ENTITIES_KILL_ALL_CLEAR_LAGG = "entities.kill-all.clear-lagg";
 
     @Comment("")
     @Comment("A list of all checks that the plugin does before trying to stack two entities together.")

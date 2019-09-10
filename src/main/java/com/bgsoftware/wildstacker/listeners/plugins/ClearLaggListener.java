@@ -18,7 +18,7 @@ public final class ClearLaggListener implements Listener {
 
     @EventHandler
     public void onClearLaggTask(EntityRemoveEvent e){
-        if (instance.getSettings().clearLaggHookEnabled && System.currentTimeMillis() - lastTime > 1000) {
+        if (instance.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {
             lastTime = System.currentTimeMillis();
             instance.getSystemManager().performKillAll();
         }

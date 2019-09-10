@@ -27,12 +27,14 @@ public final class SettingsHandler {
     //Global settings
     public final String giveItemName;
     public final ItemStack inspectTool, simulateTool;
-    public final boolean deleteInvalidWorlds, deleteInvalidBlocks;
+    public final boolean deleteInvalidWorlds, deleteInvalidBlocks, killTaskStackedEntities, killTaskUnstackedEntities,
+            killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
     public final KeyMap<String> customNames;
+    public final long killTaskInterval;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
-            itemsUnstackedCustomName, itemsKillAll, itemsNamesToggleEnabled, itemsSoundEnabled;
+            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems, whitelistedItems;
     public final int itemsCheckRange, itemsChunkLimit, bucketsMaxStack;
@@ -42,10 +44,10 @@ public final class SettingsHandler {
     public final List<ParticleWrapper> itemsParticles;
 
     //Entities settings
-    public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, clearLaggHookEnabled,
-            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed,
-            entitiesHideNames, entitiesNamesToggleEnabled, nextStackKnockback;
-    public final long entitiesStackInterval, entitiesKillAllInterval;
+    public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, stackDownEnabled,
+            keepFireEnabled, mythicMobsCustomNameEnabled, keepLowestHealth, stackAfterBreed, entitiesHideNames,
+            entitiesNamesToggleEnabled, nextStackKnockback;
+    public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
@@ -100,6 +102,12 @@ public final class SettingsHandler {
                 .withLore(cfg.getStringList("simulate-tool.lore")).build();
         deleteInvalidWorlds = cfg.getBoolean("database.delete-invalid-worlds", false);
         deleteInvalidBlocks = cfg.getBoolean("database.delete-invalid-blocks", false);
+        killTaskInterval = cfg.getLong("kill-task.interval", 300);
+        killTaskStackedEntities = cfg.getBoolean("kill-task.stacked-entities", true);
+        killTaskUnstackedEntities = cfg.getBoolean("kill-task.unstacked-entities", true);
+        killTaskStackedItems = cfg.getBoolean("kill-task.stacked-items", true);
+        killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
+        killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 
@@ -118,7 +126,6 @@ public final class SettingsHandler {
         bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
         bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
         bucketsMaxStack = cfg.getInt("items.buckets-stacker.max-stack", 16);
-        itemsKillAll = cfg.getBoolean("items.kill-all", true);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
         itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
@@ -141,8 +148,6 @@ public final class SettingsHandler {
         blacklistedEntitiesSpawnReasons = cfg.getStringList("entities.spawn-blacklist");
         blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist");
         entitiesInstantKills = cfg.getStringList("entities.instant-kill");
-        entitiesKillAllInterval = cfg.getLong("entities.kill-all.interval", 6000);
-        clearLaggHookEnabled = cfg.getBoolean("entities.kill-all.clear-lagg", true);
         nerfedSpawning = cfg.getStringList("entities.nerfed-spawning");
         nerfedWorlds = cfg.getStringList("entities.nerfed-worlds");
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
@@ -297,6 +302,8 @@ public final class SettingsHandler {
     }
 
     private void dataConvertor(YamlConfiguration cfg){
+        if(cfg.contains("items.kill-all"))
+            cfg.set("kill-task.stacked-items", cfg.getBoolean("items.kill-all"));
         if(cfg.contains("items.check-range"))
             cfg.set("items.merge-radius", cfg.getLong("items.check-range"));
         if(cfg.contains("items.save-interval"))
@@ -307,6 +314,10 @@ public final class SettingsHandler {
             cfg.set("entities.merge-radius", cfg.getLong("entities.check-range"));
         if(cfg.contains("entities.reason-blacklist"))
             cfg.set("entities.spawn-blacklist", cfg.getStringList("entities.reason-blacklist"));
+        if(cfg.contains("entities.kill-all.interval"))
+            cfg.set("kill-task.interval", cfg.getLong("entities.kill-all.interval"));
+        if(cfg.contains("entities.kill-all.clear-lagg"))
+            cfg.set("kill-task.sync-clear-lagg", cfg.getBoolean("entities.kill-all.clear-lagg"));
         if(cfg.contains("spawners.holograms.custom-name"))
             cfg.set("spawners.custom-name", cfg.getString("spawners.holograms.custom-name"));
         if(cfg.contains("spawners.holograms.enabled") && !cfg.getBoolean("spawners.holograms.enabled"))

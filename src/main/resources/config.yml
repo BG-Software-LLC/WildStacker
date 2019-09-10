@@ -35,6 +35,23 @@ database:
   # Should data of blocks that no longer exist be deleted?
   delete-invalid-blocks: false
 
+# Settings related to the automatic kill all
+kill-task:
+  # How much time should be passed between auto-killing? (in ticks)
+  # If you wish to disable the auto-killing task, set the interval to 0.
+  interval: 300
+  # Should the kill task remove stacked entities?
+  stacked-entities: true
+  # Should the kill task remove unstacked entities?
+  unstacked-entities: true
+  # Should the kill task remove stacked items?
+  stacked-items: true
+  # Should the kill task remove unstacked items?
+  unstacked-items: true
+  # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
+  # This feature will work if the interval is set to 0 - these are two different features!
+  sync-clear-lagg: true
+
 # Here you can configurable all features related to stacked items.
 items:
   # Should items get stacked on the server?
@@ -107,10 +124,6 @@ items:
 
     # The new max-stack size for buckets. Must be a number between 1 and 64.
     max-stack: 16
-
-  # Should items get removed when the kill all task is performed?
-  # If you want to configure the task, check the entities section.
-  kill-all: true
 
   # Should players be able to disable item names for themselves?
   # In order to work, ProtocolLib should be installed.
@@ -207,18 +220,6 @@ entities:
   # I recommend setting it to at least 10 seconds (200 ticks)
   # If you wish to disable the auto-stacking task, set the stack-interval to 0.
   stack-interval: 0
-
-  # Here you can configurable all features related to the kill-all task.
-  # Every run, the plugin will remove all the stacked entities from your server.
-  # No drops will be drops, and it won't lag your server at all.
-  kill-all:
-    # How much time should be passed between auto-killing? (in ticks)
-    # If you wish to disable the auto-killing task, set the interval to 0.
-    interval: 300
-
-    # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
-    # This feature will work if the interval is set to 0 - these are two different features!
-    clear-lagg: false
 
   # A list of all checks that the plugin does before trying to stack two entities together.
   stack-checks:

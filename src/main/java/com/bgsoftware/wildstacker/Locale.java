@@ -31,6 +31,7 @@ public final class Locale {
     public static Locale INVALID_ENTITY = new Locale("INVALID_ENTITY");
     public static Locale INVALID_NUMBER = new Locale("INVALID_NUMBER");
     public static Locale INVALID_PLAYER = new Locale("INVALID_PLAYER");
+    public static Locale INVALID_SPAWN_CAUSE = new Locale("INVALID_SPAWN_CAUSE");
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
     public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
     public static Locale INSPECT_RECEIVE = new Locale("INSPECT_RECEIVE");

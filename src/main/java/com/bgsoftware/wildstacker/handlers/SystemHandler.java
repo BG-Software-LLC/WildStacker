@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
@@ -441,6 +442,16 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
+        performKillAll(entity -> true, item -> true);
+    }
+
+    @Override
+    public void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate) {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> performKillAll(entityPredicate, itemPredicate));
+            return;
+        }
+
         List<Entity> entityList = new ArrayList<>();
 
         for(World world : Bukkit.getWorlds()){
@@ -451,13 +462,23 @@ public final class SystemHandler implements SystemManager {
 
         Executor.async(() -> {
             entityList.stream()
-                    .filter(entity -> EntityUtils.isStackable(entity) && WStackedEntity.of(entity).getStackAmount() > 1)
-                    .forEach(entity -> WStackedEntity.of(entity).remove());
+                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity))
+                    .forEach(entity -> {
+                        StackedEntity stackedEntity = WStackedEntity.of(entity);
+                        if((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
+                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1))
+                            stackedEntity.remove();
+                    });
 
-            if(plugin.getSettings().itemsKillAll) {
+            if(plugin.getSettings().killTaskStackedItems) {
                 entityList.stream()
-                        .filter(entity -> entity instanceof Item && WStackedItem.of(entity).getStackAmount() > 1)
-                        .forEach(entity -> WStackedItem.of(entity).remove());
+                        .filter(entity -> entity instanceof Item && itemPredicate.test((Item) entity))
+                        .forEach(entity -> {
+                            StackedItem stackedItem = WStackedItem.of(entity);
+                            if((plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||
+                                    (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= 1))
+                                stackedItem.remove();
+                        });
             }
 
             for(Player pl : Bukkit.getOnlinePlayers()) {

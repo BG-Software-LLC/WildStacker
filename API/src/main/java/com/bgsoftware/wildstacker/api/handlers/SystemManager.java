@@ -18,8 +18,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.List;
+import java.util.function.Predicate;
 
-@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public interface SystemManager {
 
     /**
@@ -162,6 +162,11 @@ public interface SystemManager {
      * Perform a kill all.
      */
     void performKillAll();
+
+    /**
+     * Perform a kill all.
+     */
+    void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate);
 
     /**
      * Get a loot-table from a living-entity.
