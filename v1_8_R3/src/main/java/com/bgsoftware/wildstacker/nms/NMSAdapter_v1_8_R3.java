@@ -305,16 +305,4 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
                 count, offsetX, offsetY, offsetZ, extra);
     }
 
-    @Override
-    public boolean getEntityAI(LivingEntity livingEntity) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        return !entityInsentient.ce();
-    }
-
-    @Override
-    public void setEntityAI(LivingEntity livingEntity, boolean ai) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityInsentient.k(!ai);
-    }
-
 }

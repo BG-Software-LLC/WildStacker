@@ -121,7 +121,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
-        if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
+        if(!EntityUtils.isStackable(e.getEntity()))
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -272,10 +272,8 @@ public final class EntitiesListener implements Listener {
             return;
 
         Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
-            if(!entityOptional.isPresent()) {
+            if(!entityOptional.isPresent())
                 stackedEntity.updateNerfed();
-                stackedEntity.updateAI();
-            }
         };
 
         //Need to add a delay so eggs will get removed from inventory

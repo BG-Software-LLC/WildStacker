@@ -64,11 +64,7 @@ public final class ChunksListener implements Listener {
 
         //Update all nerf status to all entities
         Executor.async(() -> chunkEntities.stream().filter(EntityUtils::isStackable)
-                .forEach(entity -> {
-                    StackedEntity stackedEntity = WStackedEntity.of(entity);
-                    stackedEntity.updateNerfed();
-                    stackedEntity.updateAI();
-                }));
+                .forEach(entity -> WStackedEntity.of(entity).updateNerfed()));
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){

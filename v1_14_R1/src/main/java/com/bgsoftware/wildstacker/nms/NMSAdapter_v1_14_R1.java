@@ -331,14 +331,4 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         world.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                 count, offsetX, offsetY, offsetZ, extra, false);
     }
-
-    @Override
-    public boolean getEntityAI(LivingEntity livingEntity) {
-        return livingEntity.hasAI();
-    }
-
-    @Override
-    public void setEntityAI(LivingEntity livingEntity, boolean ai) {
-        livingEntity.setAI(ai);
-    }
 }

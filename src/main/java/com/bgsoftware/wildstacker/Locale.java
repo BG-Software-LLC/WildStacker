@@ -67,7 +67,6 @@ public final class Locale {
     public static Locale ENTITY_INFO_AMOUNT = new Locale("ENTITY_INFO_AMOUNT");
     public static Locale ENTITY_INFO_SPAWN_REASON = new Locale("ENTITY_INFO_SPAWN_REASON");
     public static Locale ENTITY_INFO_NERFED = new Locale("ENTITY_INFO_NERFED");
-    public static Locale ENTITY_INFO_NO_AI = new Locale("ENTITY_INFO_NO_AI");
     public static Locale ENTITY_INFO_FOOTER = new Locale("ENTITY_INFO_FOOTER");
     public static Locale OBJECT_SIMULATE_CHOOSE_SECOND = new Locale("OBJECT_SIMULATE_CHOOSE_SECOND");
     public static Locale OBJECT_SIMULATE_SUCCESS_RESULT = new Locale("OBJECT_SIMULATE_SUCCESS_RESULT");

@@ -191,20 +191,4 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      */
     boolean isInstantKill(EntityDamageEvent.DamageCause damageCause);
 
-    /**
-     * Checks if the entity has AI or not.
-     * @return True if has AI, otherwise false.
-     */
-    boolean hasAI();
-
-    /**
-     * Set whether the entity should have AI or not.
-     */
-    void setAI(boolean ai);
-
-    /**
-     * Set whether the entity should have AI or not using the hasAI flag.
-     */
-    void updateAI();
-
 }

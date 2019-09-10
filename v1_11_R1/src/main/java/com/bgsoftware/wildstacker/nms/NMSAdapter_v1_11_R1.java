@@ -304,16 +304,6 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
                 count, offsetX, offsetY, offsetZ, extra);
     }
 
-    @Override
-    public boolean getEntityAI(LivingEntity livingEntity) {
-        return livingEntity.hasAI();
-    }
-
-    @Override
-    public void setEntityAI(LivingEntity livingEntity, boolean ai) {
-        livingEntity.setAI(ai);
-    }
-
     private boolean shouldNotDrop(ItemStack itemStack){
         try{
             return EnchantmentManager.c(itemStack);
