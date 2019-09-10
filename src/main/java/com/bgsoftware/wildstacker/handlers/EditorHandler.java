@@ -269,7 +269,7 @@ public final class EditorHandler {
             }
 
             int slot = Integer.parseInt(field.getName().split("_")[2]);
-            ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" +  (path.replaceFirst(pathPrefix, "")));
+            ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" + getFormattedName(path.replaceFirst(pathPrefix, "")));
 
             if(config.isBoolean(path))
                 itemBuilder.withLore("&7Value: " + config.getBoolean(path));
