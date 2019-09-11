@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildtools.api.WildToolsAPI;
 import com.bgsoftware.wildtools.api.objects.tools.Tool;
@@ -54,7 +55,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         //If player is null, it broke by an explosion.
         if(player == null){
-            ItemUtils.dropItem(spawnerItem, spawner.getLocation());
+            Executor.sync(() -> ItemUtils.dropItem(spawnerItem, spawner.getLocation()), 5L);
             return;
         }
 
