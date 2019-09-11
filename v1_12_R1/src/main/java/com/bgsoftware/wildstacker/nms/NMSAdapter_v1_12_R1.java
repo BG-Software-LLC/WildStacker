@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
@@ -17,6 +18,7 @@ import net.minecraft.server.v1_12_R1.ItemStack;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagInt;
+import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.NBTTagShort;
 import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_12_R1.SoundEffect;
@@ -47,6 +49,7 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -348,6 +351,33 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
                 return false;
             }
         };
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack getPlayerSkull(String texture) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(Materials.PLAYER_HEAD.toBukkitItem());
+        NBTTagCompound nbtTagCompound = itemStack.getTag() != null ? itemStack.getTag() : new NBTTagCompound();
+
+        NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
+
+        skullOwner.setString("Id", new UUID(texture.hashCode(), texture.hashCode()).toString());
+
+        NBTTagCompound properties = new NBTTagCompound();
+
+        NBTTagList textures = new NBTTagList();
+        NBTTagCompound signature = new NBTTagCompound();
+        signature.setString("Value", texture);
+        textures.add(signature);
+
+        properties.set("textures", textures);
+
+        skullOwner.set("Properties", properties);
+
+        nbtTagCompound.set("SkullOwner", skullOwner);
+
+        itemStack.setTag(nbtTagCompound);
+
+        return CraftItemStack.asBukkitCopy(itemStack);
     }
 
 }

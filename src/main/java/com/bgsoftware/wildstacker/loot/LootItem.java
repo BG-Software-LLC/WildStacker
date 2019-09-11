@@ -100,6 +100,10 @@ public class LootItem {
         short data = jsonObject.has("data") ? jsonObject.get("data").getAsShort() : 0;
 
         ItemStack itemStack = new ItemStack(type, 1, data);
+
+        if(jsonObject.has("skull"))
+            itemStack = plugin.getNMSAdapter().getPlayerSkull(jsonObject.get("skull").getAsString());
+
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         if(jsonObject.has("name"))

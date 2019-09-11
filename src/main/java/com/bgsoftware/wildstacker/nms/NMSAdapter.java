@@ -84,4 +84,6 @@ public interface NMSAdapter {
 
     Enchantment getGlowEnchant();
 
+    ItemStack getPlayerSkull(String texture);
+
 }

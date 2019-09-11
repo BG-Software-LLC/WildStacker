@@ -27,7 +27,8 @@ public enum Materials {
     SNOWBALL("SNOW_BALL"),
     POPPY("RED_ROSE"),
     WET_SPONGE("SPONGE", 1),
-    NETHER_PORTAL("PORTAL");
+    NETHER_PORTAL("PORTAL"),
+    PLAYER_HEAD("SKULL_ITEM", 3);
 
     Materials(String bukkitType){
         this(bukkitType, 0);
