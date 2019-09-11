@@ -404,6 +404,10 @@ public final class ConfigComments {
     public static String SPAWNERS_CHUNK_LIMIT = "spawners.chunk-limit";
 
     @Comment("")
+    @Comment("Should the chunk limit be per spawner or not?")
+    public static String SPAWNERS_PER_SPAWNER_LIMIT = "spawners.per-spawner-limit";
+
+    @Comment("")
     @Comment("Should particles be spawned when an entity gets stacked?")
     @Comment("If you want to edit the particles, check the particles file.")
     public static String SPAWNERS_PARTICLES = "spawners.particles";
@@ -421,6 +425,10 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Chance of spawners to be dropped after an explosion.")
     public static String SPAWNERS_EXPLOSIONS_BREAK_CHANCE = "spawners.explosions-break-chance";
+
+    @Comment("")
+    @Comment("Set the percentage amount that will be dropped from explosions.")
+    public static String SPAWNERS_EXPLOSIONS_AMOUNT_PERCENTAGE = "spawners.explosions-amount-percentage";
 
     @Comment("")
     @Comment("Chance of spawners to be dropped after break of silk touch.")
