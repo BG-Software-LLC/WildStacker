@@ -25,6 +25,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -130,7 +131,7 @@ public final class SpawnersListener implements Listener {
             int stackAmount = stackedSpawner.getStackAmount();
 
             if(!spawnerOptional.isPresent()){
-                if(isChunkLimit(chunk)){
+                if(isChunkLimit(chunk, stackedSpawner.getSpawnedType())){
                     cancelEvent(stackedSpawner, e);
                     return;
                 }
@@ -483,13 +484,14 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    private boolean isChunkLimit(Chunk chunk){
+    private boolean isChunkLimit(Chunk chunk, EntityType entityType){
         int chunkLimit = plugin.getSettings().spawnersChunkLimit;
 
         if(chunkLimit <= 0)
             return false;
 
-        return plugin.getSystemManager().getStackedSpawners(chunk).size() >= chunkLimit;
+        return plugin.getSystemManager().getStackedSpawners(chunk).stream()
+                .filter(stackedSpawner -> !plugin.getSettings().perSpawnerLimit || stackedSpawner.getSpawnedType() == entityType).count() > chunkLimit;
     }
 
 }

@@ -529,8 +529,7 @@ public final class EntitiesListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int entitiesInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count();
-        return entitiesInsideChunk > chunkLimit;
+        return (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count() > chunkLimit;
     }
 
     private int getFortuneLevel(LivingEntity livingEntity){

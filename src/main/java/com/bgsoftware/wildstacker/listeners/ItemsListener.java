@@ -207,8 +207,7 @@ public final class ItemsListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int itemsInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count();
-        return itemsInsideChunk >= chunkLimit;
+        return (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count() > chunkLimit;
     }
 
     private void setItemInHand(LivingEntity entity, ItemStack itemStack){

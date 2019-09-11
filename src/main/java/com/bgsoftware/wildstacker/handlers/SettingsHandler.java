@@ -59,7 +59,7 @@ public final class SettingsHandler {
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
-    public final boolean spawnersStackingEnabled, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
+    public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
             silkTouchSpawners, explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
             spawnersShiftPlaceStack, breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply,
@@ -165,6 +165,7 @@ public final class SettingsHandler {
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
+        perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);
         spawnersParticlesEnabled = cfg.getBoolean("spawners.particles", true);
         spawnersParticles = getParticles(plugin, "spawners");
         spawnersDisabledWorlds = cfg.getStringList("spawners.disabled-worlds");

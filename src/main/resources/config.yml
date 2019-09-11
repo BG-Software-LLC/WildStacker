@@ -390,6 +390,9 @@ spawners:
   # If you want to disable the feature, set it to 0.
   chunk-limit: 0
 
+  # Should the chunk limit be per spawner or not?
+  per-spawner-limit: false
+
   # Should particles be spawned when an entity gets stacked?
   # If you want to edit the particles, check the particles file.
   particles: true
