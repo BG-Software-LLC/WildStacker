@@ -431,6 +431,10 @@ public final class ConfigComments {
     public static String SPAWNERS_EXPLOSIONS_AMOUNT_PERCENTAGE = "spawners.explosions-amount-percentage";
 
     @Comment("")
+    @Comment("Should exploded spawners get dropped to inventory.")
+    public static String SPAWNERS_EXPLOSIONS_DROP_TO_INVENTORY = "spawners.explosions-drop-to-inventory";
+
+    @Comment("")
     @Comment("Chance of spawners to be dropped after break of silk touch.")
     public static String SPAWNERS_SILK_TOUCH_BREAK_CHANCE = "spawners.silk-touch-break-chance";
 
