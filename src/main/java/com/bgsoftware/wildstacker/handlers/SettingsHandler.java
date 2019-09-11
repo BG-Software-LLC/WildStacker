@@ -66,7 +66,8 @@ public final class SettingsHandler {
             nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds,
+            breakChargeWhitelist, placeChargeWhitelist;
     public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
@@ -196,8 +197,10 @@ public final class SettingsHandler {
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
         breakChargeAmount = cfg.getDouble("spawners.break-charge.amount", 0);
         breakChargeMultiply = cfg.getBoolean("spawners.break-charge.multiply-stack-amount", false);
+        breakChargeWhitelist = cfg.getStringList("spawners.break-charge.whitelist");
         placeChargeAmount = cfg.getDouble("spawners.place-charge.amount", 0);
         placeChargeMultiply = cfg.getBoolean("spawners.place-charge.multiply-stack-amount", false);
+        placeChargeWhitelist = cfg.getStringList("spawners.place-charge.whitelist");
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
         eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
         nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);

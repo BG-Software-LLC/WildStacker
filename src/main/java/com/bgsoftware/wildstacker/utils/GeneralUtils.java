@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.key.KeyMap;
 
 import java.util.List;
@@ -11,6 +12,10 @@ public final class GeneralUtils {
         return list.contains(stackedEntity.getType().name()) ||  list.contains(stackedEntity.getSpawnCause().name()) ||
                 list.contains(stackedEntity.getType().name() + ":" + stackedEntity.getSpawnCause().name()) ||
                 list.contains("all") || list.contains("ALL");
+    }
+
+    public static boolean contains(List<String> list, StackedSpawner stackedSpawner){
+        return list.contains(stackedSpawner.getSpawnedType().name()) || list.contains("all") || list.contains("ALL");
     }
 
     public static int get(KeyMap<Integer> map, StackedEntity stackedEntity, int def){

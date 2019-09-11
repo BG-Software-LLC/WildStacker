@@ -513,11 +513,13 @@ spawners:
   break-charge:
     amount: 0
     multiply-stack-amount: false
+    whitelist: []
 
   # Set a charge amount for placing spawners.
   place-charge:
     amount: 0
     multiply-stack-amount: false
+    whitelist: []
 
   # When enabled, players will be able to change spawners by clicking them with spawn eggs.
   change-using-eggs: true

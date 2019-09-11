@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -168,7 +169,8 @@ public final class SpawnersListener implements Listener {
                 ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), is);
             }
 
-            EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
+            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().placeChargeWhitelist, stackedSpawner))
+                EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
         });
@@ -213,7 +215,8 @@ public final class SpawnersListener implements Listener {
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
 
-            EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
+            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
+                EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
         }
