@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SpawnersProvider_MineableSpawners implements SpawnersProvider {
@@ -63,12 +64,12 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     }
 
     @Override
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource) {
         //There's no official support for explosions in MineableSpawners.
     }
 
     @Override
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
         if (blacklistedWorlds.contains(spawner.getWorld().getName())) {
             return;
         }

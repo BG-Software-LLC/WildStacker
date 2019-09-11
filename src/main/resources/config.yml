@@ -411,6 +411,9 @@ spawners:
   # Set the percentage amount that will be dropped from explosions.
   explosions-amount-percentage: 100
 
+  # Should exploded spawners get dropped to inventory.
+  explosions-drop-to-inventory: false
+
   # Chance of spawners to be dropped after break of silk touch.
   silk-touch-break-chance: 100
 

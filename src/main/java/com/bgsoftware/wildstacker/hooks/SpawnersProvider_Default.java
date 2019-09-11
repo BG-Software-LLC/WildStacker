@@ -17,6 +17,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class SpawnersProvider_Default implements SpawnersProvider {
@@ -35,7 +36,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     }
 
     @Override
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource) {
         boolean drop = true;
         if (plugin.getSettings().explosionsDropSpawner && entity instanceof TNTPrimed) {
             Entity igniter = ((TNTPrimed) entity).getSource();
@@ -46,11 +47,11 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         }
 
         if(drop)
-            dropOrGiveItem(null, spawner, amount);
+            dropOrGiveItem(explodeSource == null ? null : Bukkit.getPlayer(explodeSource), spawner, amount, explodeSource != null);
     }
 
     @Override
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
         ItemStack spawnerItem = getSpawnerItem(spawner, amount);
 
         //If player is null, it broke by an explosion.
@@ -59,14 +60,14 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             return;
         }
 
-        if(!plugin.getSettings().silkTouchSpawners ||
-                (!plugin.getSettings().silkWorlds.isEmpty() && !plugin.getSettings().silkWorlds.contains(spawner.getWorld().getName())))
+        if(!isExplodeSource && (!plugin.getSettings().silkTouchSpawners ||
+                (!plugin.getSettings().silkWorlds.isEmpty() && !plugin.getSettings().silkWorlds.contains(spawner.getWorld().getName()))))
             return;
 
-        if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) {
-            if ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
+        if(isExplodeSource || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) {
+            if (isExplodeSource || (plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
                     (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
-                if (plugin.getSettings().dropToInventory) {
+                if (isExplodeSource || plugin.getSettings().dropToInventory) {
                     ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
                 } else {
                     ItemUtils.dropItem(spawnerItem, spawner.getLocation());

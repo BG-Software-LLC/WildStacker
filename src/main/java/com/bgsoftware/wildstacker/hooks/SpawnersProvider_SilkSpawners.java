@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -17,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Random;
+import java.util.UUID;
 
 @SuppressWarnings("SameParameterValue")
 public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
@@ -59,7 +61,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     //Called when was broken by an explosion
     @Override
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource) {
         boolean drop = true;
         if (ss.config.getBoolean("permissionExplode", false) && entity instanceof TNTPrimed) {
             Entity igniter = ((TNTPrimed) entity).getSource();
@@ -70,12 +72,12 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         }
 
         if(drop)
-            dropOrGiveItem(null, spawner, amount);
+            dropOrGiveItem(explodeSource == null ? null : Bukkit.getPlayer(explodeSource), spawner, amount, explodeSource != null);
     }
 
     //Code was taken from SilkSpawners's code.
     @Override
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount) {
+    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
         Object entityId = getSpawnerEntityID(spawner);
         String mobName = getCreatureName(entityId).toLowerCase().replace(" ", "");
         int randomNumber = rnd.nextInt(100), dropChance;

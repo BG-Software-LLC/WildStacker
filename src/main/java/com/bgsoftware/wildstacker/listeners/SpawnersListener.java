@@ -25,9 +25,12 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,11 +38,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -211,7 +216,7 @@ public final class SpawnersListener implements Listener {
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
-            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount);
+            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount, false);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
@@ -222,6 +227,8 @@ public final class SpawnersListener implements Listener {
             Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
         }
     }
+
+    private Map<Entity, UUID> explodableSources = new HashMap<>();
 
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
@@ -252,7 +259,7 @@ public final class SpawnersListener implements Listener {
 
             if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance) {
                 amount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * amount);
-                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount);
+                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount, explodableSources.get(e.getEntity()));
             }
 
             if(stackedSpawner.getStackAmount() <= 0)
@@ -260,6 +267,39 @@ public final class SpawnersListener implements Listener {
 
             //If the amount of the spawner is more than 1, we don't need to destroy it
             e.blockList().remove(block);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityExplodeMonitor(EntityExplodeEvent e){
+        explodableSources.remove(e.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(PlayerInteractAtEntityEvent e){
+        if(plugin.getSettings().explosionsDropToInventory && e.getRightClicked() instanceof Creeper &&
+                e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.FLINT_AND_STEEL)
+            explodableSources.put(e.getRightClicked(), e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(PlayerInteractEvent e){
+        if(plugin.getSettings().explosionsDropToInventory && e.getClickedBlock() != null &&
+                e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)){
+            Location location = e.getClickedBlock().getLocation();
+            Executor.sync(() -> location.getWorld().getNearbyEntities(location, 1, 1, 1).stream()
+                    .filter(entity -> entity instanceof TNTPrimed).findFirst()
+                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())), 2L);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(EntityTargetEvent e){
+        if(e.getEntity() instanceof Creeper){
+            if(e.getTarget() instanceof Player)
+                explodableSources.put(e.getEntity(), e.getTarget().getUniqueId());
+            else
+                explodableSources.remove(e.getEntity());
         }
     }
 
@@ -418,7 +458,7 @@ public final class SpawnersListener implements Listener {
             EconomyHook.withdrawMoney(player, amountToCharge);
 
             //noinspection all
-            plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount);
+            plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount, false);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 spawnerBlock.setType(Material.AIR);

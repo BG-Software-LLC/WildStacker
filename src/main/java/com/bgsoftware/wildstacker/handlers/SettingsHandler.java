@@ -60,7 +60,7 @@ public final class SettingsHandler {
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
-            silkTouchSpawners, explosionsDropSpawner, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
+            silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
             spawnersShiftPlaceStack, breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply,
             nextSpawnerPlacement, onlyOneSpawner;
@@ -179,6 +179,7 @@ public final class SettingsHandler {
         explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
         explosionsBreakChance = cfg.getInt("spawners.explosions-break-chance", 100);
         explosionsAmountPercentage = cfg.getInt("spawners.explosions-amount-percentage", 100);
+        explosionsDropToInventory = cfg.getBoolean("spawners.explosions-drop-to-inventory", false);
         silkTouchBreakChance = cfg.getInt("spawners.silk-touch-break-chance", 100);
         dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
         silkTouchSpawners = cfg.getBoolean("spawners.silk-spawners.enabled", true);
