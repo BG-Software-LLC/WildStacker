@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.loot;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -105,6 +106,10 @@ public class LootItem {
                     itemMeta.addEnchant(Enchantment.getByName(entry.getKey()), entry.getValue().getAsInt(), true);
                 }catch(Exception ignored){}
             }
+        }
+
+        if(jsonObject.has("glow") && jsonObject.get("glow").getAsBoolean()){
+            itemMeta.addEnchant(GlowEnchantment.getGlowEnchant(), 1, true);
         }
 
         itemStack.setItemMeta(itemMeta);

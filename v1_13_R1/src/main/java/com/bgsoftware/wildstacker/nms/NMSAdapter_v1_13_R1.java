@@ -37,6 +37,8 @@ import org.bukkit.craftbukkit.v1_13_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -332,6 +334,51 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
         world.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                 count, offsetX, offsetY, offsetZ, extra);
+    }
+
+    @Override
+    public Enchantment getGlowEnchant() {
+        return new Enchantment(NamespacedKey.minecraft("glowing_enchant")) {
+            @Override
+            public String getName() {
+                return "WildStackerGlow";
+            }
+
+            @Override
+            public int getMaxLevel() {
+                return 1;
+            }
+
+            @Override
+            public int getStartLevel() {
+                return 0;
+            }
+
+            @Override
+            public EnchantmentTarget getItemTarget() {
+                return null;
+            }
+
+            @Override
+            public boolean conflictsWith(Enchantment enchantment) {
+                return false;
+            }
+
+            @Override
+            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
+                return true;
+            }
+
+            @Override
+            public boolean isTreasure() {
+                return false;
+            }
+
+            @Override
+            public boolean isCursed() {
+                return false;
+            }
+        };
     }
 
 }
