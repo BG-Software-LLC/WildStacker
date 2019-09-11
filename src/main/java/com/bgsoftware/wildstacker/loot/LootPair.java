@@ -18,19 +18,25 @@ public class LootPair {
     private List<LootCommand> lootCommands = new ArrayList<>();
     private List<String> killer = new ArrayList<>();
     private double chance, lootingChance;
+    private String requiredPermission;
 
-    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance){
+    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance, String requiredPermission){
         this.lootItems.addAll(lootItems);
         this.lootCommands.addAll(lootCommands);
         this.killer.addAll(killer);
         this.chance = chance;
         this.lootingChance = lootingChance;
+        this.requiredPermission = requiredPermission;
     }
 
     public List<ItemStack> getItems(StackedEntity stackedEntity, int amountOfPairs, int lootBonusLevel){
         List<ItemStack> items = new ArrayList<>();
 
         for(LootItem lootItem : lootItems){
+            if(!lootItem.getRequiredPermission().isEmpty() && LootTable.isKilledByPlayer(stackedEntity) &&
+                    !LootTable.getKiller(stackedEntity).hasPermission(lootItem.getRequiredPermission()))
+                continue;
+
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
 
             if (amountOfItems == 0) {
@@ -64,6 +70,10 @@ public class LootPair {
         return chance;
     }
 
+    public String getRequiredPermission() {
+        return requiredPermission;
+    }
+
     @Override
     public String toString() {
         return "LootPair{items=" + lootItems + "}";
@@ -72,6 +82,7 @@ public class LootPair {
     public static LootPair fromJson(JsonObject jsonObject){
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
         double lootingChance = jsonObject.has("lootingChance") ? jsonObject.get("lootingChance").getAsDouble() : 0;
+        String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
         List<String> killer = new ArrayList<>();
@@ -91,7 +102,7 @@ public class LootPair {
                 killer.add(jsonObject.get("killer").getAsString().toUpperCase());
             }
         }
-        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance);
+        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission);
     }
 
 }

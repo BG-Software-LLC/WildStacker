@@ -29,18 +29,24 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
+    private final String requiredPermission;
 
-    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting){
+    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting, String requiredPermission){
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
         this.max = max;
         this.chance = chance;
         this.looting = looting;
+        this.requiredPermission = requiredPermission;
     }
 
     public double getChance(int lootBonusLevel, double lootMultiplier) {
         return chance + (lootBonusLevel * lootMultiplier);
+    }
+
+    public String getRequiredPermission() {
+        return requiredPermission;
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel){
@@ -74,12 +80,13 @@ public class LootItem {
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : 1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
         boolean looting = jsonObject.has("looting") && jsonObject.get("looting").getAsBoolean();
+        String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
 
         if(jsonObject.has("burnable")){
             burnableItem = buildItemStack(jsonObject.get("burnable").getAsJsonObject());
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting);
+        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission);
     }
 
     private static ItemStack buildItemStack(JsonObject jsonObject){

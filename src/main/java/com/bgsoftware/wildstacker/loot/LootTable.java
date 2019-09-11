@@ -42,7 +42,9 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new ArrayList<>();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name()))
+                (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name())) &&
+                        (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) ||
+                                getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) )
                 .collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : stackAmount < 10 ?
@@ -148,11 +150,11 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return returnType;
     }
 
-    private static boolean isKilledByPlayer(StackedEntity stackedEntity){
+    static boolean isKilledByPlayer(StackedEntity stackedEntity){
         return getKiller(stackedEntity) != null;
     }
 
-    private static Player getKiller(StackedEntity stackedEntity){
+    static Player getKiller(StackedEntity stackedEntity){
         return stackedEntity.getLivingEntity().getKiller();
     }
 
