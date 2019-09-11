@@ -113,6 +113,11 @@ public final class ConfigComments {
     public static String ITEMS_CHUNK_LIMIT = "items.chunk-limit";
 
     @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String ITEMS_PARTICLES = "items.particles";
+
+    @Comment("")
     @Comment("When enabled, all items will have a custom name (even if not stacked)")
     public static String ITEMS_UNSTACKED_CUSTOM_NAME = "items.unstacked-custom-name";
 
@@ -227,6 +232,11 @@ public final class ConfigComments {
     @Comment("Set a maximum amount of entity objects in a chunk.")
     @Comment("If you want to disable the feature, set it to 0.")
     public static String ENTITIES_CHUNK_LIMIT = "entities.chunk-limit";
+
+    @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String ENTITIES_PARTICLES = "entities.particles";
 
     @Comment("")
     @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
@@ -392,6 +402,11 @@ public final class ConfigComments {
     @Comment("Set a maximum amount of spawner objects in a chunk.")
     @Comment("If you want to disable the feature, set it to 0.")
     public static String SPAWNERS_CHUNK_LIMIT = "spawners.chunk-limit";
+
+    @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String SPAWNERS_PARTICLES = "spawners.particles";
 
     @Comment("")
     @Comment("When enabled, the plugin will try to find a spawner in the whole chunk instead")
@@ -585,6 +600,11 @@ public final class ConfigComments {
     @Comment("Set a maximum amount of barrel objects in a chunk.")
     @Comment("If you want to disable the feature, set it to 0.")
     public static String BARRELS_CHUNK_LIMIT = "barrels.chunk-limit";
+
+    @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String BARRELS_PARTICLES = "barrels.particles";
 
     @Comment("")
     @Comment("When enabled, the plugin will try to find a block in the whole chunk instead")
