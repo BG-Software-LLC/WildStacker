@@ -251,6 +251,7 @@ public final class SpawnersListener implements Listener {
             }
 
             if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance) {
+                amount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * amount);
                 plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount);
             }
 

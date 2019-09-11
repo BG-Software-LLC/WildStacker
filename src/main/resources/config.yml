@@ -408,6 +408,9 @@ spawners:
   # Chance of spawners to be dropped after an explosion.
   explosions-break-chance: 100
 
+  # Set the percentage amount that will be dropped from explosions.
+  explosions-amount-percentage: 100
+
   # Chance of spawners to be dropped after break of silk touch.
   silk-touch-break-chance: 100
 

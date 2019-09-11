@@ -64,7 +64,8 @@ public final class SettingsHandler {
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
             spawnersShiftPlaceStack, breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply,
             nextSpawnerPlacement, onlyOneSpawner;
-    public final int spawnersCheckRange, explosionsBreakChance, silkTouchBreakChance, spawnersChunkLimit;
+    public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
+            silkTouchBreakChance, spawnersChunkLimit;
     public final double breakChargeAmount, placeChargeAmount;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds,
             breakChargeWhitelist, placeChargeWhitelist;
@@ -177,6 +178,7 @@ public final class SettingsHandler {
         hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
         explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
         explosionsBreakChance = cfg.getInt("spawners.explosions-break-chance", 100);
+        explosionsAmountPercentage = cfg.getInt("spawners.explosions-amount-percentage", 100);
         silkTouchBreakChance = cfg.getInt("spawners.silk-touch-break-chance", 100);
         dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
         silkTouchSpawners = cfg.getBoolean("spawners.silk-spawners.enabled", true);
