@@ -29,9 +29,9 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
-    private final String requiredPermission;
+    private final String requiredPermission, spawnCauseFilter;
 
-    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting, String requiredPermission){
+    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting, String requiredPermission, String spawnCauseFilter){
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
@@ -39,6 +39,7 @@ public class LootItem {
         this.chance = chance;
         this.looting = looting;
         this.requiredPermission = requiredPermission;
+        this.spawnCauseFilter = spawnCauseFilter;
     }
 
     public double getChance(int lootBonusLevel, double lootMultiplier) {
@@ -47,6 +48,10 @@ public class LootItem {
 
     public String getRequiredPermission() {
         return requiredPermission;
+    }
+
+    public String getSpawnCauseFilter() {
+        return spawnCauseFilter;
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel){
@@ -81,12 +86,13 @@ public class LootItem {
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
         boolean looting = jsonObject.has("looting") && jsonObject.get("looting").getAsBoolean();
         String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
+        String spawnCauseFilter = jsonObject.has("spawn-cause") ? jsonObject.get("spawn-cause").getAsString() : "";
 
         if(jsonObject.has("burnable")){
             burnableItem = buildItemStack(jsonObject.get("burnable").getAsJsonObject());
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission);
+        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter);
     }
 
     private static ItemStack buildItemStack(JsonObject jsonObject){

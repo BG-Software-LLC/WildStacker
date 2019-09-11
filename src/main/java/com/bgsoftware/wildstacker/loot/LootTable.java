@@ -42,10 +42,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new ArrayList<>();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name())) &&
-                        (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) ||
-                                getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) )
-                .collect(Collectors.toList());
+            (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name())) &&
+            (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
+            (lootPair.getSpawnCauseFilter().isEmpty() || stackedEntity.getSpawnCause().name().equals(lootPair.getSpawnCauseFilter()))
+        ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : stackAmount < 10 ?
                 Random.nextInt((max * stackAmount) - (min * stackAmount) + 1) + (min * stackAmount) :
