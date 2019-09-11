@@ -21,6 +21,7 @@ public final class Locale {
     public static Locale BARREL_UPDATE = new Locale("BARREL_UPDATE");
     public static Locale BARREL_TOGGLE_ON = new Locale("BARREL_TOGGLE_ON");
     public static Locale BARREL_TOGGLE_OFF = new Locale("BARREL_TOGGLE_OFF");
+    public static Locale BARREL_NO_PERMISSION = new Locale("BARREL_NO_PERMISSION");
     public static Locale COMMAND_USAGE = new Locale("COMMAND_USAGE");
     public static Locale ENTITY_NAMES_TOGGLE_ON = new Locale("ENTITY_NAMES_TOGGLE_ON");
     public static Locale ENTITY_NAMES_TOGGLE_OFF = new Locale("ENTITY_NAMES_TOGGLE_OFF");

@@ -605,3 +605,7 @@ barrels:
   # This should not be set to true unless being told by the dev.
   # When enabled, the plugin sets the barrel types to cauldron if they aren't already.
   force-cauldron: false
+
+  # Set a required permission for barrels.
+  # If you want to disable it, use "required-permission: ''"
+  required-permission: ''

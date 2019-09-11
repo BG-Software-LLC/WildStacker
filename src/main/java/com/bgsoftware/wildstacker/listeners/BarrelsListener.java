@@ -79,6 +79,13 @@ public final class BarrelsListener implements Listener {
         if(!isBarrelBlock(e.getBlock()))
             return;
 
+        if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+            e.setCancelled(true);
+            Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
+            return;
+        }
+
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
         if(stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled())
@@ -188,6 +195,13 @@ public final class BarrelsListener implements Listener {
         if(!barrelPlaceInventory.containsKey(e.getWhoClicked().getUniqueId()))
             return;
 
+        if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+            e.setCancelled(true);
+            Locale.BARREL_NO_PERMISSION.send(e.getWhoClicked());
+            return;
+        }
+
         StackedBarrel stackedBarrel = WStackedBarrel.of(barrelPlaceInventory.get(e.getWhoClicked().getUniqueId()).getBlock());
 
         if(e.getCurrentItem() != null && e.getCurrentItem().getType() != Material.AIR && !e.getCurrentItem().isSimilar(stackedBarrel.getBarrelItem(1)))
@@ -202,9 +216,16 @@ public final class BarrelsListener implements Listener {
             StackedBarrel stackedBarrel = WStackedBarrel.of(barrelPlaceInventory.get(e.getPlayer().getUniqueId()).getBlock());
             ItemStack barrelItem = stackedBarrel.getBarrelItem(1);
             int amount = 0;
+            boolean dropAll = false;
+
+            if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                    !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+                Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
+                dropAll = true;
+            }
 
             for(ItemStack itemStack : e.getInventory().getContents()){
-                if(barrelItem.isSimilar(itemStack))
+                if(barrelItem.isSimilar(itemStack) && !dropAll)
                     amount += itemStack.getAmount();
                 else if(itemStack != null && itemStack.getType() != Material.AIR)
                     ItemUtils.addItem(itemStack, e.getPlayer().getInventory(), stackedBarrel.getLocation());

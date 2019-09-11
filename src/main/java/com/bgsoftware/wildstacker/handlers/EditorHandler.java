@@ -83,7 +83,8 @@ public final class EditorHandler {
             BARRELS_SLOT_5 = "barrels.limits", BARRELS_SLOT_6 = "barrels.disabled-worlds", BARRELS_SLOT_7 = "barrels.chunk-limit",
             BARRELS_SLOT_8 = "barrels.particles", BARRELS_SLOT_9 = "barrels.chunk-merge", BARRELS_SLOT_10 = "barrels.explosions-break-stack",
             BARRELS_SLOT_11 = "barrels.toggle-command.enabled", BARRELS_SLOT_12 = "barrels.toggle-command.command",
-            BARRELS_SLOT_13 = "barrels.place-inventory.enabled", BARRELS_SLOT_14 = "barrels.place-inventory.title";
+            BARRELS_SLOT_13 = "barrels.place-inventory.enabled", BARRELS_SLOT_14 = "barrels.place-inventory.title",
+            BARRELS_SLOT_15 = "barrels.required-permission";
 
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;

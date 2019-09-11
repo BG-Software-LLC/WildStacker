@@ -75,7 +75,7 @@ public final class SettingsHandler {
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
             barrelsToggleCommand, barrelsPlaceInventory, forceCauldron;
     public final int barrelsCheckRange, barrelsChunkLimit;
-    public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle;
+    public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle, barrelsRequiredPermission;
     public final List<String> barrelsDisabledWorlds;
     public final KeySet blacklistedBarrels, whitelistedBarrels;
     public final KeyMap<Integer> barrelsLimits;
@@ -220,6 +220,7 @@ public final class SettingsHandler {
         barrelsPlaceInventoryTitle = ChatColor.translateAlternateColorCodes('&',
                 cfg.getString("barrels.place-inventory.title", "Add items here ({0})"));
         forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
+        barrelsRequiredPermission = cfg.getString("barrels.required-permission", "");
 
         for(StackCheck check : StackCheck.values()) {
             check.setEnabled(cfg.getBoolean("entities.stack-checks." + check.name(), false));

@@ -14,6 +14,9 @@ BARREL_UPDATE: '&6&lWildStacker &7You put a(n) {0} in the barrel (x{1})'
 BARREL_TOGGLE_ON: '&6&lWildStacker &7Barrels placement has been enabled.'
 BARREL_TOGGLE_OFF: '&6&lWildStacker &7Barrels placement has been disabled.'
 
+# Called when player places a barrel but has no permission.
+BARREL_NO_PERMISSION: '&6&lWildStacker &7You don''t have permission to use barrels.'
+
 # Called when a player runs a command not in the required usage
 COMMAND_USAGE: '&6&lWildStacker &7Usage: /{0}'
 

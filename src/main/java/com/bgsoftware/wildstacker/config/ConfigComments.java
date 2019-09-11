@@ -617,4 +617,9 @@ public final class ConfigComments {
     @Comment("When enabled, the plugin sets the barrel types to cauldron if they aren't already.")
     public static String BARRELS_FORCE_CAULDRON = "barrels.force-cauldron";
 
+    @Comment("")
+    @Comment("Set a required permission for barrels.")
+    @Comment("If you want to disable it, use \"required-permission: ''\"")
+    public static String BARRELS_REQUIRED_PERMISSION = "barrels.required-permission";
+
 }
