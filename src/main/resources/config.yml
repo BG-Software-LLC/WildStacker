@@ -623,3 +623,11 @@ barrels:
   # Set a required permission for barrels.
   # If you want to disable it, use "required-permission: ''"
   required-permission: ''
+
+# Here you can configurable all features related to stacked stews
+stews:
+  # Should stews get stacked on the server?
+  enabled: true
+
+  # The new max-stack size for stews. Must be a number between 1 and 64.
+  max-stack: 16

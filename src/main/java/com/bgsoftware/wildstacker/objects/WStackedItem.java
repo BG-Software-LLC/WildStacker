@@ -303,8 +303,12 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     private void giveItem(Inventory inventory, ItemStack itemStack){
-        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtils.stackBucket(itemStack, inventory))
-            inventory.addItem(itemStack);
+        inventory.addItem(itemStack);
+
+        if(itemStack.getType().name().contains("BUCKET"))
+            ItemUtils.stackBucket(itemStack, inventory);
+        if(itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
+            ItemUtils.stackStew(itemStack, inventory);
     }
 
     public static StackedItem of(Entity entity){

@@ -658,4 +658,15 @@ public final class ConfigComments {
     @Comment("If you want to disable it, use \"required-permission: ''\"")
     public static String BARRELS_REQUIRED_PERMISSION = "barrels.required-permission";
 
+    @Comment("")
+    @Comment("Here you can configurable all features related to stacked stews")
+    public static String STEWS = "stews";
+
+    @Comment("Should stews get stacked on the server?")
+    public static String STEWS_ENABLED = "stews.enabled";
+
+    @Comment("")
+    @Comment("The new max-stack size for stews. Must be a number between 1 and 64.")
+    public static String STEWS_MAX_STACK = "stews.max-stack";
+
 }

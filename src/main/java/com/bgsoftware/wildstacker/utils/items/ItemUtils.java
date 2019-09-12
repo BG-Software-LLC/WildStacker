@@ -54,12 +54,16 @@ public final class ItemUtils {
     }
 
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
-        if(!itemStack.getType().name().contains("BUCKET") || !ItemUtils.stackBucket(itemStack, inventory)) {
-            HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
-            if (location != null && !additionalItems.isEmpty()) {
-                for (ItemStack additional : additionalItems.values())
-                    dropItem(additional, location);
-            }
+        HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
+
+        if(itemStack.getType().name().contains("BUCKET"))
+            stackBucket(itemStack, inventory);
+        if(itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
+            stackStew(itemStack, inventory);
+
+        if (location != null && !additionalItems.isEmpty()) {
+            for (ItemStack additional : additionalItems.values())
+                dropItem(additional, location);
         }
     }
 
@@ -202,49 +206,55 @@ public final class ItemUtils {
         return Methods.BLOCK_DATA_FROM_DATA.invoke(null, iBlockData);
     }
 
-    public static boolean stackBucket(ItemStack bucket, Inventory inventory){
-        if(plugin.getSettings().bucketsStackerEnabled) {
-            int amountOfBuckets = 0;
-            int maxStack = plugin.getSettings().bucketsMaxStack;
-            int slotToSetFirstBucket = -1;
+    public static void stackBucket(ItemStack bucket, Inventory inventory){
+        if(plugin.getSettings().bucketsStackerEnabled)
+            stackItems(bucket, inventory, plugin.getSettings().bucketsMaxStack);
+    }
 
-            for (int slot = 0; slot < inventory.getSize(); slot++) {
-                ItemStack itemStack = inventory.getItem(slot);
-                if (itemStack != null && itemStack.isSimilar(bucket)) {
-                    if(slotToSetFirstBucket == -1)
-                        slotToSetFirstBucket = slot;
-                    amountOfBuckets += itemStack.getAmount();
-                    inventory.setItem(slot, new ItemStack(Material.AIR));
-                }
+    public static void stackStew(ItemStack stew, Inventory inventory){
+        if(plugin.getSettings().stewsStackingEnabled)
+            stackItems(stew, inventory, plugin.getSettings().stewsMaxStack);
+    }
+
+    private static void stackItems(ItemStack item, Inventory inventory, int maxStack){
+        int amountOfItems = 0;
+        int slotToSetFirstItem = -1;
+
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack itemStack = inventory.getItem(slot);
+            if (itemStack != null && itemStack.isSimilar(item)) {
+                if(slotToSetFirstItem == -1)
+                    slotToSetFirstItem = slot;
+                amountOfItems += itemStack.getAmount();
+                inventory.setItem(slot, new ItemStack(Material.AIR));
             }
-
-            updateInventory(inventory);
-
-            ItemStack cloned = bucket.clone();
-            cloned.setAmount(maxStack);
-
-            for(int i = 0; i < amountOfBuckets / maxStack; i++) {
-                if(slotToSetFirstBucket != -1){
-                    inventory.setItem(slotToSetFirstBucket, cloned);
-                    slotToSetFirstBucket = -1;
-                }else {
-                    inventory.addItem(cloned);
-                }
-            }
-
-            if(amountOfBuckets % maxStack > 0){
-                cloned.setAmount(amountOfBuckets % maxStack);
-                if(slotToSetFirstBucket != -1){
-                    inventory.setItem(slotToSetFirstBucket, cloned);
-                }
-                else {
-                    inventory.addItem(cloned);
-                }
-            }
-
-            updateInventory(inventory);
         }
-        return false;
+
+        updateInventory(inventory);
+
+        ItemStack cloned = item.clone();
+        cloned.setAmount(maxStack);
+
+        for(int i = 0; i < amountOfItems / maxStack; i++) {
+            if(slotToSetFirstItem != -1){
+                inventory.setItem(slotToSetFirstItem, cloned);
+                slotToSetFirstItem = -1;
+            }else {
+                inventory.addItem(cloned);
+            }
+        }
+
+        if(amountOfItems % maxStack > 0){
+            cloned.setAmount(amountOfItems % maxStack);
+            if(slotToSetFirstItem != -1){
+                inventory.setItem(slotToSetFirstItem, cloned);
+            }
+            else {
+                inventory.addItem(cloned);
+            }
+        }
+
+        updateInventory(inventory);
     }
 
     public static ItemStack getFromBlock(Block block){

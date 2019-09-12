@@ -83,6 +83,10 @@ public final class SettingsHandler {
     public final KeyMap<Integer> barrelsLimits;
     public final List<ParticleWrapper> barrelsParticles;
 
+    //Stews settings
+    public final boolean stewsStackingEnabled;
+    public final int stewsMaxStack;
+
     public SettingsHandler(WildStackerPlugin plugin){
         WildStackerPlugin.log("Loading configuration started...");
         long startTime = System.currentTimeMillis();
@@ -229,6 +233,9 @@ public final class SettingsHandler {
                 cfg.getString("barrels.place-inventory.title", "Add items here ({0})"));
         forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
         barrelsRequiredPermission = cfg.getString("barrels.required-permission", "");
+
+        stewsStackingEnabled = cfg.getBoolean("stews.enabled", true);
+        stewsMaxStack = cfg.getInt("stews.max-stack", 16);
 
         for(StackCheck check : StackCheck.values()) {
             check.setEnabled(cfg.getBoolean("entities.stack-checks." + check.name(), false));
