@@ -116,7 +116,10 @@ public final class BarrelsListener implements Listener {
                 if(barrelPlaceEvent.isCancelled())
                     return;
 
-                Executor.sync(() -> e.getBlockPlaced().setType(Material.CAULDRON), 1L);
+                Executor.sync(() -> {
+                    e.getBlockPlaced().setType(Material.CAULDRON);
+                    stackedBarrel.createDisplayBlock();
+                }, 1L);
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             }
             else {
