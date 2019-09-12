@@ -356,6 +356,10 @@ public final class ConfigComments {
     public static String ENTITIES_DEFAULT_UNSTACK = "entities.default-unstack";
 
     @Comment("")
+    @Comment("Should exp get added directly to killer instead of dropped to ground?")
+    public static String ENTITIES_AUTO_EXP_PICKUP = "entities.auto-exp-pickup";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 

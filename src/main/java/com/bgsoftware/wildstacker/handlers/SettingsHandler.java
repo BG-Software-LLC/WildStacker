@@ -54,7 +54,7 @@ public final class SettingsHandler {
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
-            stackDownTypes, keepLowestHealth;
+            stackDownTypes, keepLowestHealth, entitiesAutoExpPickup;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
@@ -164,6 +164,7 @@ public final class SettingsHandler {
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
+        entitiesAutoExpPickup = cfg.getStringList("entities.auto-exp-pickup");
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);
