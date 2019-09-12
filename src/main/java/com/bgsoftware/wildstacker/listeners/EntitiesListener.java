@@ -130,6 +130,7 @@ public final class EntitiesListener implements Listener {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
+            int currentStackAmount = stackedEntity.getStackAmount();
 
             if(plugin.getSettings().nextStackKnockback)
                 e.setDamage(0);
@@ -164,11 +165,13 @@ public final class EntitiesListener implements Listener {
                         deadEntities.add(livingEntity.getUniqueId());
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
+                        stackedEntity.setStackAmount(stackAmount, false);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
                         Bukkit.getPluginManager().callEvent(entityDeathEvent);
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
+                        stackedEntity.setStackAmount(currentStackAmount - stackAmount, false);
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
                         entityDeathEvent.getDrops().clear();
