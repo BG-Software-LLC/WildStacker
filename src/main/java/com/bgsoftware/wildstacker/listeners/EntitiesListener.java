@@ -29,7 +29,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
@@ -183,8 +182,7 @@ public final class EntitiesListener implements Listener {
                         entityDeathEvent.getDrops().forEach(itemStack -> ItemUtils.dropItem(itemStack, livingEntity.getLocation()));
 
                         if (entityDeathEvent.getDroppedExp() > 0) {
-                            ExperienceOrb experienceOrb = livingEntity.getWorld().spawn(livingEntity.getLocation(), ExperienceOrb.class);
-                            experienceOrb.setExperience(entityDeathEvent.getDroppedExp());
+                            EntityUtils.spawnExp(livingEntity.getLocation(), entityDeathEvent.getDroppedExp());
                         }
                     });
                 });

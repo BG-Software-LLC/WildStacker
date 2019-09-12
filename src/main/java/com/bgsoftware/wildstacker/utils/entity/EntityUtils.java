@@ -6,14 +6,17 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -95,6 +98,22 @@ public final class EntityUtils {
 
     public static boolean isStackable(Entity entity){
         return entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player);
+    }
+
+    public static void spawnExp(Location location, int amount){
+        Optional<Entity> closestOrb = location.getWorld().getNearbyEntities(location, 2, 2 ,2)
+                .stream().filter(entity -> entity instanceof ExperienceOrb).findFirst();
+
+        ExperienceOrb experienceOrb;
+
+        if(closestOrb.isPresent()){
+            experienceOrb = (ExperienceOrb) closestOrb.get();
+            experienceOrb.setExperience(experienceOrb.getExperience() + amount);
+        }
+        else{
+            experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+            experienceOrb.setExperience(amount);
+        }
     }
 
 }
