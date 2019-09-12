@@ -28,7 +28,8 @@ public enum Materials {
     POPPY("RED_ROSE"),
     WET_SPONGE("SPONGE", 1),
     NETHER_PORTAL("PORTAL"),
-    PLAYER_HEAD("SKULL_ITEM", 3);
+    PLAYER_HEAD("SKULL_ITEM", 3),
+    MUSHROOM_STEW("MUSHROOM_SOUP");
 
     Materials(String bukkitType){
         this(bukkitType, 0);

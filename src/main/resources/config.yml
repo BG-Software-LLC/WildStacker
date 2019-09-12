@@ -112,19 +112,6 @@ items:
   # This will take place on all items, and can only be overridden by custom-display section.
   item-display: false
 
-  # When buckets stacker is enabled, water & lava buckets will be stacked in your inventory
-  # with a max-stack size of 16.
-  buckets-stacker:
-    # Should buckets get stacked on the server?
-    enabled: true
-
-    # A list of blacklisted bucket names.
-    name-blacklist:
-      - '&fGenbucket'
-
-    # The new max-stack size for buckets. Must be a number between 1 and 64.
-    max-stack: 16
-
   # Should players be able to disable item names for themselves?
   # In order to work, ProtocolLib should be installed.
   names-toggle:
@@ -623,6 +610,18 @@ barrels:
   # Set a required permission for barrels.
   # If you want to disable it, use "required-permission: ''"
   required-permission: ''
+
+# Here you can configurable all features related to stacked buckets
+buckets:
+  # Should buckets get stacked on the server?
+  enabled: true
+
+  # A list of blacklisted bucket names.
+  name-blacklist:
+    - '&fGenbucket'
+
+  # The new max-stack size for buckets. Must be a number between 1 and 64.
+  max-stack: 16
 
 # Here you can configurable all features related to stacked stews
 stews:

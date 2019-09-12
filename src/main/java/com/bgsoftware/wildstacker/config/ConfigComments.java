@@ -133,22 +133,6 @@ public final class ConfigComments {
     public static String ITEMS_ITEM_DISPLAY = "items.item-display";
 
     @Comment("")
-    @Comment("When buckets stacker is enabled, water & lava buckets will be stacked in your inventory")
-    @Comment("with a max-stack size of 16.")
-    public static String BUCKETS_STACKER = "items.buckets-stacker";
-
-    @Comment("Should buckets get stacked on the server?")
-    public static String BUCKETS_STACKER_ENABLED = "items.buckets-stacker.enabled";
-
-    @Comment("")
-    @Comment("A list of blacklisted bucket names.")
-    public static String BUCKETS_STACKER_NAME_BLACKLIST = "items.buckets-stacker.name-blacklist";
-
-    @Comment("")
-    @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
-    public static String BUCKETS_STACKER_MAX_STACK = "items.buckets-stacker.max-stack";
-
-    @Comment("")
     @Comment("Should players be able to disable item names for themselves?")
     @Comment("In order to work, ProtocolLib should be installed.")
     public static String ITEMS_NAMES_TOGGLE = "items.names-toggle";
@@ -657,6 +641,21 @@ public final class ConfigComments {
     @Comment("Set a required permission for barrels.")
     @Comment("If you want to disable it, use \"required-permission: ''\"")
     public static String BARRELS_REQUIRED_PERMISSION = "barrels.required-permission";
+
+    @Comment("")
+    @Comment("Here you can configurable all features related to stacked buckets")
+    public static String BUCKETS = "buckets";
+
+    @Comment("Should buckets get stacked on the server?")
+    public static String BUCKETS_ENABLED = "buckets.enabled";
+
+    @Comment("")
+    @Comment("A list of blacklisted bucket names.")
+    public static String BUCKETS_NAME_BLACKLIST = "buckets.name-blacklist";
+
+    @Comment("")
+    @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
+    public static String BUCKETS_MAX_STACK = "buckets.max-stack";
 
     @Comment("")
     @Comment("Here you can configurable all features related to stacked stews")

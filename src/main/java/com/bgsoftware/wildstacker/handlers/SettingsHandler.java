@@ -131,9 +131,9 @@ public final class SettingsHandler {
         itemsChunkLimit = cfg.getInt("items.chunk-limit", 0);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
-        bucketsStackerEnabled = cfg.getBoolean("items.buckets-stacker.enabled", true);
-        bucketsBlacklistedNames = cfg.getStringList("items.buckets-stacker.name-blacklist");
-        bucketsMaxStack = cfg.getInt("items.buckets-stacker.max-stack", 16);
+        bucketsStackerEnabled = cfg.getBoolean("buckets.enabled", true);
+        bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist");
+        bucketsMaxStack = cfg.getInt("buckets.max-stack", 16);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
         itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
@@ -372,6 +372,12 @@ public final class SettingsHandler {
         }
         if(cfg.isBoolean("barrels.place-inventory"))
             cfg.set("barrels.place-inventory.enabled", cfg.getBoolean("barrels.place-inventory"));
+        if(cfg.contains("items.buckets-stacker.enabled"))
+            cfg.set("buckets.enabled", cfg.getBoolean("items.buckets-stacker.enabled"));
+        if(cfg.contains("items.buckets-stacker.name-blacklist"))
+            cfg.set("buckets.name-blacklist", cfg.getStringList("items.buckets-stacker.name-blacklist"));
+        if(cfg.contains("items.buckets-stacker.max-stack"))
+            cfg.set("buckets.max-stack", cfg.getInt("items.buckets-stacker.max-stack"));
     }
 
     public static void reload(){

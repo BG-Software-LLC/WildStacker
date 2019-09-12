@@ -22,7 +22,7 @@ import java.util.Set;
 public final class EditorHandler {
 
     private final Set<Field> generalFields = new HashSet<>(), itemsFields = new HashSet<>(), entitiesFields = new HashSet<>(),
-            spawnersFields = new HashSet<>(), barrelsFields = new HashSet<>();
+            bucketsFields = new HashSet<>(), spawnersFields = new HashSet<>(), barrelsFields = new HashSet<>(), stewsFields = new HashSet<>();
 
     private WildStackerPlugin plugin;
     private ItemStack[] settingsEditor;
@@ -39,11 +39,10 @@ public final class EditorHandler {
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
             ITEMS_SLOT_5 = "items.limits", ITEMS_SLOT_6 = "items.disabled-worlds", ITEMS_SLOT_7 = "items.chunk-limit",
             ITEMS_SLOT_8 = "items.particles", ITEMS_SLOT_9 = "items.unstacked-custom-name",
-            ITEMS_SLOT_10 = "items.fix-stack", ITEMS_SLOT_11 = "items.item-display", ITEMS_SLOT_12 = "items.buckets-stacker.enabled",
-            ITEMS_SLOT_13 = "items.buckets-stacker.name-blacklist", ITEMS_SLOT_14 = "items.buckets-stacker.max-stack",
-            ITEMS_SLOT_15 = "items.kill-all", ITEMS_SLOT_16 = "items.names-toggle.enabled",
-            ITEMS_SLOT_17 = "items.names-toggle.command", ITEMS_SLOT_18 = "items.pickup-sound.enabled",
-            ITEMS_SLOT_19 = "items.pickup-sound.volume", ITEMS_SLOT_20 = "items.pickup-sound.pitch";
+            ITEMS_SLOT_10 = "items.fix-stack", ITEMS_SLOT_11 = "items.item-display",
+            ITEMS_SLOT_12 = "items.names-toggle.enabled", ITEMS_SLOT_13 = "items.names-toggle.command",
+            ITEMS_SLOT_14 = "items.pickup-sound.enabled", ITEMS_SLOT_15 = "items.pickup-sound.volume",
+            ITEMS_SLOT_16 = "items.pickup-sound.pitch";
 
     public final static String ENTITIES_SLOT_0 = "entities.enabled", ENTITIES_SLOT_1 = "entities.merge-radius",
             ENTITIES_SLOT_2 = "entities.custom-name", ENTITIES_SLOT_3 = "entities.blacklist",
@@ -51,16 +50,18 @@ public final class EditorHandler {
             ENTITIES_SLOT_6 = "entities.minimum-limits", ENTITIES_SLOT_7 = "entities.disabled-worlds",
             ENTITIES_SLOT_8 = "entities.chunk-limit", ENTITIES_SLOT_9 = "entities.particles",
             ENTITIES_SLOT_10 = "entities.disabled-regions", ENTITIES_SLOT_11 = "entities.name-blacklist",
-            ENTITIES_SLOT_12 = "entities.stack-interval", ENTITIES_SLOT_13 = "entities.kill-all.interval",
-            ENTITIES_SLOT_14 = "entities.kill-all.clear-lagg", ENTITIES_SLOT_15 = "entities.stack-checks",
-            ENTITIES_SLOT_16 = "entities.stack-split", ENTITIES_SLOT_17 = "entities.linked-entities.enabled",
-            ENTITIES_SLOT_18 = "entities.linked-entities.max-distance", ENTITIES_SLOT_19 = "entities.instant-kill",
-            ENTITIES_SLOT_20 = "entities.nerfed-spawning", ENTITIES_SLOT_21 = "entities.nerfed-worlds",
-            ENTITIES_SLOT_22 = "entities.stack-down.enabled", ENTITIES_SLOT_23 = "entities.stack-down.stack-down-types",
-            ENTITIES_SLOT_24 = "entities.keep-fire", ENTITIES_SLOT_25 = "entities.mythic-mobs-custom-name",
-            ENTITIES_SLOT_26 = "entities.keep-lowest-health", ENTITIES_SLOT_27 = "entities.stack-after-breed",
-            ENTITIES_SLOT_28 = "entities.hide-names", ENTITIES_SLOT_29 = "entities.next-stack-knockback",
-            ENTITIES_SLOT_30 = "entities.default-unstack", ENTITIES_SLOT_31 = "entities.auto-exp-pickup";
+            ENTITIES_SLOT_12 = "entities.stack-interval", ENTITIES_SLOT_13 = "entities.stack-checks",
+            ENTITIES_SLOT_14 = "entities.stack-split", ENTITIES_SLOT_15 = "entities.linked-entities.enabled",
+            ENTITIES_SLOT_16 = "entities.linked-entities.max-distance", ENTITIES_SLOT_17 = "entities.instant-kill",
+            ENTITIES_SLOT_18 = "entities.nerfed-spawning", ENTITIES_SLOT_19 = "entities.nerfed-worlds",
+            ENTITIES_SLOT_20 = "entities.stack-down.enabled", ENTITIES_SLOT_21 = "entities.stack-down.stack-down-types",
+            ENTITIES_SLOT_22 = "entities.keep-fire", ENTITIES_SLOT_23 = "entities.mythic-mobs-custom-name",
+            ENTITIES_SLOT_24 = "entities.keep-lowest-health", ENTITIES_SLOT_25 = "entities.stack-after-breed",
+            ENTITIES_SLOT_26 = "entities.hide-names", ENTITIES_SLOT_27 = "entities.next-stack-knockback",
+            ENTITIES_SLOT_28 = "entities.default-unstack", ENTITIES_SLOT_29 = "entities.auto-exp-pickup";
+
+    public final static String BUCKETS_SLOT_0 = "buckets.enabled", BUCKETS_SLOT_1 = "buckets.name-blacklist",
+            BUCKETS_SLOT_2 = "buckets.max-stack";
 
     public final static String SPAWNERS_SLOT_0 = "spawners.enabled", SPAWNERS_SLOT_1 = "spawners.merge-radius",
             SPAWNERS_SLOT_2 = "spawners.custom-name", SPAWNERS_SLOT_3 = "spawners.blacklist",
@@ -91,6 +92,8 @@ public final class EditorHandler {
             BARRELS_SLOT_13 = "barrels.place-inventory.enabled", BARRELS_SLOT_14 = "barrels.place-inventory.title",
             BARRELS_SLOT_15 = "barrels.required-permission";
 
+    public final static String STEWS_SLOT_0 = "stews.enabled", STEWS_SLOT_1 = "stews.max-stack";
+
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
         this.config = new CommentedConfiguration(ConfigComments.class, new File(plugin.getDataFolder(), "config.yml"));
@@ -105,11 +108,17 @@ public final class EditorHandler {
             else if(field.getName().startsWith("ENTITIES")){
                 entitiesFields.add(field);
             }
+            else if(field.getName().startsWith("BUCKETS")){
+                bucketsFields.add(field);
+            }
             else if(field.getName().startsWith("SPAWNERS")){
                 spawnersFields.add(field);
             }
             else if(field.getName().startsWith("BARRELS")){
                 barrelsFields.add(field);
+            }
+            else if(field.getName().startsWith("STEWS")){
+                stewsFields.add(field);
             }
         }
 
@@ -149,7 +158,7 @@ public final class EditorHandler {
             return;
         }
 
-        Inventory editor = Bukkit.createInventory(null, 27, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
+        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
         buildInventory(editor, itemsFields, "items.");
 
         Executor.sync(() -> player.openInventory(editor));
@@ -163,6 +172,18 @@ public final class EditorHandler {
 
         Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings");
         buildInventory(editor, entitiesFields, "entities.");
+
+        Executor.sync(() -> player.openInventory(editor));
+    }
+
+    public void openBucketsEditor(Player player){
+        if(Bukkit.isPrimaryThread()){
+            Executor.async(() -> openBucketsEditor(player));
+            return;
+        }
+
+        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings");
+        buildInventory(editor, bucketsFields, "buckets.");
 
         Executor.sync(() -> player.openInventory(editor));
     }
@@ -191,6 +212,18 @@ public final class EditorHandler {
         Executor.sync(() -> player.openInventory(editor));
     }
 
+    public void openStewsEditor(Player player){
+        if(Bukkit.isPrimaryThread()){
+            Executor.async(() -> openStewsEditor(player));
+            return;
+        }
+
+        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings");
+        buildInventory(editor, stewsFields, "stews.");
+
+        Executor.sync(() -> player.openInventory(editor));
+    }
+
     public void openEditor(Player player, String editor){
         switch (editor){
             case "generalEditor":
@@ -202,11 +235,17 @@ public final class EditorHandler {
             case "entitiesEditor":
                 openEntitiesEditor(player);
                 break;
+            case "bucketsEditor":
+                openBucketsEditor(player);
+                break;
             case "spawnersEditor":
                 openSpawnersEditor(player);
                 break;
             case "barrelsEditor":
                 openBarrelsEditor(player);
+                break;
+            case "stewsEditor":
+                openStewsEditor(player);
         }
     }
 
@@ -230,20 +269,26 @@ public final class EditorHandler {
         editor.setItem(36, glassPane);
         editor.setItem(44, glassPane);
 
-        editor.setItem(20, new ItemBuilder(Materials.MAP)
+        editor.setItem(19, new ItemBuilder(Materials.MAP)
                 .withName("&6General Settings").withLore("&7Click to edit general settings.").build());
 
-        editor.setItem(22, new ItemBuilder(Material.GOLD_INGOT)
+        editor.setItem(21, new ItemBuilder(Material.GOLD_INGOT)
                 .withName("&6Items Settings").withLore("&7Click to edit items settings.").build());
 
-        editor.setItem(24, new ItemBuilder(Material.ROTTEN_FLESH)
+        editor.setItem(23, new ItemBuilder(Material.ROTTEN_FLESH)
                 .withName("&6Entities Settings").withLore("&7Click to edit entities settings.").build());
 
-        editor.setItem(30, new ItemBuilder(Materials.SPAWNER)
+        editor.setItem(25, new ItemBuilder(Material.BUCKET)
+                .withName("&6Buckets Settings").withLore("&7Click to edit buckets settings.").build());
+
+        editor.setItem(29, new ItemBuilder(Materials.SPAWNER)
                 .withName("&6Spawner Settings").withLore("&7Click to edit spawners settings.").build());
 
-        editor.setItem(32, new ItemBuilder(Materials.CAULDRON)
+        editor.setItem(31, new ItemBuilder(Materials.CAULDRON)
                 .withName("&6Barrels Settings").withLore("&7Click to edit barrels settings.").build());
+
+        editor.setItem(33, new ItemBuilder(Materials.MUSHROOM_STEW)
+                .withName("&6Stews Settings").withLore("&7Click to edit stews settings.").build());
 
         editor.setItem(49, new ItemBuilder(Material.EMERALD)
                 .withName("&aSave Changes").withLore("&7Click to save all changes.").build());
