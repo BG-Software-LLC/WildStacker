@@ -97,6 +97,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private Set<UUID> deadEntities = new HashSet<>();
+    private Set<UUID> noDeathEvent = new HashSet<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
@@ -116,13 +117,16 @@ public final class EntitiesListener implements Listener {
                 new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
                 new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
+        noDeathEvent.add(e.getEntity().getUniqueId());
+
         onEntityLastDamage(entityDamageEvent);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         //Checks that it's the last hit of the entity
-        if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
+        if(deadEntities.contains(e.getEntity().getUniqueId()) || !EntityUtils.isStackable(e.getEntity()) ||
+                ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -170,7 +174,11 @@ public final class EntitiesListener implements Listener {
                         stackedEntity.setStackAmount(stackAmount, false);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
-                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
+
+                        if(!noDeathEvent.contains(e.getEntity().getUniqueId()))
+                            Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                        else
+                            noDeathEvent.remove(e.getEntity().getUniqueId());
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
                         stackedEntity.setStackAmount(currentStackAmount - stackAmount, false);
@@ -196,6 +204,8 @@ public final class EntitiesListener implements Listener {
                                 EntityUtils.spawnExp(livingEntity.getLocation(), entityDeathEvent.getDroppedExp());
                             }
                         }
+
+                        deadEntities.remove(e.getEntity().getUniqueId());
                     });
                 });
 
@@ -225,6 +235,8 @@ public final class EntitiesListener implements Listener {
                     }
 
                 }
+
+                deadEntities.add(e.getEntity().getUniqueId());
             }
         }
     }
