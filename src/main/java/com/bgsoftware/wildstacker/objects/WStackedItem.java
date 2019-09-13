@@ -29,6 +29,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("WeakerAccess")
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
+    private final static int MAX_PICKUP_DELAY = 32767;
+
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
     }
@@ -162,10 +164,16 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         if(superResult != StackCheckResult.SUCCESS)
             return superResult;
 
+        StackedItem targetItem = (StackedItem) stackedObject;
+
+        if(!plugin.getSettings().itemsMaxPickupDelay && getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+            return StackCheckResult.PICKUP_DELAY_EXCEEDED;
+
+        if(!plugin.getSettings().itemsMaxPickupDelay && targetItem.getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+            return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
+
         if(getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
             return StackCheckResult.INSIDE_PORTAL;
-
-        StackedItem targetItem = (StackedItem) stackedObject;
 
         if(targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
             return StackCheckResult.TARGET_INSIDE_PORTAL;

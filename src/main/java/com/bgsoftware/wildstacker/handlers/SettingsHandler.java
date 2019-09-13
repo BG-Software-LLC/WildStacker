@@ -36,7 +36,7 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
-            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled;
+            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay;
     public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
     public final KeySet blacklistedItems, whitelistedItems;
     public final int itemsCheckRange, itemsChunkLimit, bucketsMaxStack;
@@ -139,6 +139,7 @@ public final class SettingsHandler {
         itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
         itemsSoundVolume = (float) cfg.getDouble("items.pickup-sound.volume");
         itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
+        itemsMaxPickupDelay = cfg.getBoolean("items.max-pickup-delay", false);
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesParticlesEnabled = cfg.getBoolean("entities.particles", true);

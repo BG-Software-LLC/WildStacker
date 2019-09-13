@@ -160,6 +160,10 @@ public final class ConfigComments {
     public static String ITEMS_PICKUP_SOUND_PITCH = "items.pickup-sound.pitch";
 
     @Comment("")
+    @Comment("Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)")
+    public static String ITEMS_MAX_PICKUP_DELAY = "items.max-pickup-delay";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 

@@ -132,6 +132,9 @@ items:
     # The pitch of the volume.
     pitch: 1.0
 
+  # Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)
+  max-pickup-delay: false
+
 # Here you can configurable all features related to stacked entities.
 entities:
   # Should entities get stacked on the server?
