@@ -35,11 +35,11 @@ public final class SettingsHandler {
     public final long killTaskInterval;
 
     //Items settings
-    public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled, bucketsStackerEnabled,
+    public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
             itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay;
-    public final List<String> itemsDisabledWorlds, bucketsBlacklistedNames;
+    public final List<String> itemsDisabledWorlds;
     public final KeySet blacklistedItems, whitelistedItems;
-    public final int itemsCheckRange, itemsChunkLimit, bucketsMaxStack;
+    public final int itemsCheckRange, itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final KeyMap<Integer> itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
@@ -82,6 +82,11 @@ public final class SettingsHandler {
     public final KeySet blacklistedBarrels, whitelistedBarrels;
     public final KeyMap<Integer> barrelsLimits;
     public final List<ParticleWrapper> barrelsParticles;
+
+    //Buckets settings
+    public final boolean bucketsStackerEnabled;
+    public final List<String> bucketsBlacklistedNames;
+    public final int bucketsMaxStack;
 
     //Stews settings
     public final boolean stewsStackingEnabled;
@@ -131,9 +136,6 @@ public final class SettingsHandler {
         itemsChunkLimit = cfg.getInt("items.chunk-limit", 0);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
-        bucketsStackerEnabled = cfg.getBoolean("buckets.enabled", true);
-        bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist");
-        bucketsMaxStack = cfg.getInt("buckets.max-stack", 16);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
         itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
@@ -234,6 +236,10 @@ public final class SettingsHandler {
                 cfg.getString("barrels.place-inventory.title", "Add items here ({0})"));
         forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
         barrelsRequiredPermission = cfg.getString("barrels.required-permission", "");
+
+        bucketsStackerEnabled = cfg.getBoolean("buckets.enabled", true);
+        bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist");
+        bucketsMaxStack = cfg.getInt("buckets.max-stack", 16);
 
         stewsStackingEnabled = cfg.getBoolean("stews.enabled", true);
         stewsMaxStack = cfg.getInt("stews.max-stack", 16);
