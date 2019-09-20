@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.utils;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.key.KeyMap;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 
 import java.util.List;
 
@@ -28,6 +30,14 @@ public final class GeneralUtils {
         if(map.containsKey("all"))
             return map.get("all");
         return def;
+    }
+
+    public static boolean isSameChunk(Location location, Chunk chunk){
+        return chunk.getX() == location.getBlockX() >> 4 && chunk.getZ() == location.getBlockZ() >> 4;
+    }
+
+    public static boolean isChunkLoaded(Location location){
+        return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
 }

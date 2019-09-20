@@ -23,6 +23,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -245,7 +246,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
         return getStackedSpawners().stream()
-                .filter(stackedSpawner -> isSameChunk(stackedSpawner.getLocation(), chunk))
+                .filter(stackedSpawner -> GeneralUtils.isSameChunk(stackedSpawner.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -259,7 +260,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
         return getStackedBarrels().stream()
-                .filter(stackedBarrel -> isSameChunk(stackedBarrel.getLocation(), chunk))
+                .filter(stackedBarrel -> GeneralUtils.isSameChunk(stackedBarrel.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -280,13 +281,13 @@ public final class SystemHandler implements SystemManager {
         for(StackedObject stackedObject : stackedObjects){
             if(stackedObject instanceof StackedItem){
                 StackedItem stackedItem = (StackedItem) stackedObject;
-                if(stackedItem.getItem() == null || (isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
+                if(stackedItem.getItem() == null || (GeneralUtils.isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
                     removeStackObject(stackedObject);
             }
 
             else if(stackedObject instanceof StackedEntity){
                 StackedEntity stackedEntity = (StackedEntity) stackedObject;
-                if(stackedEntity.getLivingEntity() == null || (isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
+                if(stackedEntity.getLivingEntity() == null || (GeneralUtils.isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
                     removeStackObject(stackedObject);
                 else
                     stackedEntity.updateNerfed();
@@ -294,7 +295,7 @@ public final class SystemHandler implements SystemManager {
 
             else if(stackedObject instanceof StackedSpawner){
                 StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
-                if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
+                if(GeneralUtils.isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
                     removeStackObject(stackedObject);
                     plugin.getProviders().deleteHologram(stackedSpawner);
                 }
@@ -302,7 +303,7 @@ public final class SystemHandler implements SystemManager {
 
             else if(stackedObject instanceof StackedBarrel){
                 StackedBarrel stackedBarrel = (StackedBarrel) stackedObject;
-                if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
+                if(GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
                     removeStackObject(stackedObject);
                     stackedBarrel.removeDisplayBlock();
                     plugin.getProviders().deleteHologram(stackedBarrel);
@@ -380,10 +381,6 @@ public final class SystemHandler implements SystemManager {
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){
         return spawnCause != SpawnCause.CHUNK_GEN && spawnCause != SpawnCause.NATURAL;
-    }
-
-    private boolean isChunkLoaded(Location location){
-        return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
     @Override
@@ -505,10 +502,6 @@ public final class SystemHandler implements SystemManager {
     @Override
     public LootTable getLootTable(LivingEntity livingEntity) {
         return plugin.getLootHandler().getLootTable(livingEntity);
-    }
-
-    private boolean isSameChunk(Location location, Chunk chunk){
-        return chunk.getX() == location.getBlockX() >> 4 && chunk.getZ() == location.getBlockZ() >> 4;
     }
 
 }

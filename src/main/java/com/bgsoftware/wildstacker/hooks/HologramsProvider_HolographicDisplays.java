@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import org.bukkit.Location;
@@ -94,10 +95,12 @@ public final class HologramsProvider_HolographicDisplays implements HologramsPro
     @Override
     public void clearHolograms() {
         for(Hologram hologram : HologramsAPI.getHolograms(plugin)){
-            Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
-            if(!plugin.getSystemManager().isStackedBarrel(underBlock) && !plugin.getSystemManager().isStackedSpawner(underBlock)) {
-                hologram.delete();
-                break;
+            if(GeneralUtils.isChunkLoaded(hologram.getLocation())) {
+                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
+                if (!plugin.getSystemManager().isStackedBarrel(underBlock) && !plugin.getSystemManager().isStackedSpawner(underBlock)) {
+                    hologram.delete();
+                    break;
+                }
             }
         }
     }

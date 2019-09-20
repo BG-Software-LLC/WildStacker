@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -107,10 +108,12 @@ public final class HologramsProvider_CMI implements HologramsProvider {
     @Override
     public void clearHolograms() {
         for(CMIHologram hologram : hologramManager.getHolograms().values()){
-            Block underBlock = hologram.getLoc().getBlock().getRelative(BlockFace.DOWN);
-            if(!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
-                hologramManager.removeHolo(hologram);
-                break;
+            if(GeneralUtils.isChunkLoaded(hologram.getLoc())) {
+                Block underBlock = hologram.getLoc().getBlock().getRelative(BlockFace.DOWN);
+                if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
+                    hologramManager.removeHolo(hologram);
+                    break;
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.songoda.arconix.api.ArconixAPI;
 import com.songoda.arconix.plugin.Arconix;
 import org.bukkit.Bukkit;
@@ -98,10 +99,12 @@ public final class HologramsProvider_Arconix implements HologramsProvider, Liste
     public void clearHolograms() {
         ArrayList<Location> hologramsLocations = arconixAPI.packetLibrary.getHologramManager().getLocations();
         for(Location location : hologramsLocations){
-            Block underBlock = location.getBlock().getRelative(BlockFace.DOWN);
-            if (savedLocations.contains(location) &&
-                    (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock))) {
-                deleteHologram(location);
+            if(GeneralUtils.isChunkLoaded(location)) {
+                Block underBlock = location.getBlock().getRelative(BlockFace.DOWN);
+                if (savedLocations.contains(location) &&
+                        (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock))) {
+                    deleteHologram(location);
+                }
             }
         }
     }
