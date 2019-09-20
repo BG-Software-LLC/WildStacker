@@ -49,12 +49,13 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             itemStack.setAmount(1);
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
         }
-        
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if(itemMeta.hasDisplayName())
-            itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtils.getSpawnerItemAmount(itemStack) + ""));
 
-        itemStack.setItemMeta(itemMeta);
+        if(itemStack.hasItemMeta()) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta.hasDisplayName())
+                itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtils.getSpawnerItemAmount(itemStack) + ""));
+            itemStack.setItemMeta(itemMeta);
+        }
 
         return itemStack;
     }
