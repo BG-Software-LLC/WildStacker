@@ -2,9 +2,6 @@ package com.bgsoftware.wildstacker.api.enums;
 
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-/**
- * SpawnCause is used as a wrapper to bukkit's SpawnReason enum.
- */
 public enum SpawnCause {
 
     NATURAL,
@@ -37,6 +34,8 @@ public enum SpawnCause {
     CUSTOM,
     DEFAULT,
     BED,
+    EXPLOSION,
+    PATROL,
 
     MYTHIC_MOBS,
     CUSTOM_BOSSES,
