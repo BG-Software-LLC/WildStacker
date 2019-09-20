@@ -39,7 +39,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void createHologram(Location location, String line) {
-        CMIHologram hologram = new CMIHologram("WS-" + location.toString(), location);
+        CMIHologram hologram = new CMIHologram("WS-" + getLocation(location), location);
         hologramManager.addHologram(hologram);
         hologram.setLines(Collections.singletonList(line));
         hologramManager.resetHoloForAllPlayers(hologram);
@@ -121,7 +121,11 @@ public final class HologramsProvider_CMI implements HologramsProvider {
     }
 
     private CMIHologram getHologram(Location location){
-        return hologramManager.getByName("WS-" + location.toString());
+        return hologramManager.getByName("WS-" + getLocation(location));
+    }
+
+    private String getLocation(Location location){
+        return location.getWorld().getName() + "," + location.getX() + "," + location.getY() + "," + location.getZ();
     }
 
 }
