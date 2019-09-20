@@ -148,6 +148,8 @@ public final class EntitiesListener implements Listener {
             livingEntity.setLastDamageCause(e);
 
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
+                deadEntities.add(livingEntity.getUniqueId());
+
                 if (e instanceof EntityDamageByEntityEvent) {
                     if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
                         EntityUtils.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
@@ -168,8 +170,6 @@ public final class EntitiesListener implements Listener {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(null);
                     Executor.sync(() -> {
-                        deadEntities.add(livingEntity.getUniqueId());
-
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
                         stackedEntity.setStackAmount(stackAmount, false);
 
