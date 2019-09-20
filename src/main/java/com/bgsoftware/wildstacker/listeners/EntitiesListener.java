@@ -144,7 +144,7 @@ public final class EntitiesListener implements Listener {
             else
                 e.setCancelled(true);
 
-            if(alreadyDead.contains(e.getEntity().getUniqueId()))
+            if(alreadyDead.contains(livingEntity.getUniqueId()))
                 return;
 
             livingEntity.setHealth(livingEntity.getMaxHealth());
@@ -211,8 +211,8 @@ public final class EntitiesListener implements Listener {
                             }
                         }
 
-                        alreadyDead.remove(e.getEntity().getUniqueId());
-                        deadEntities.remove(e.getEntity().getUniqueId());
+                        alreadyDead.remove(livingEntity.getUniqueId());
+                        deadEntities.remove(livingEntity.getUniqueId());
                     });
                 });
 
