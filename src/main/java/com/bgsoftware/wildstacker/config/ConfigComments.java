@@ -25,6 +25,11 @@ public final class ConfigComments {
     public static String INSPECT_TOOL = "inspect-tool";
 
     @Comment("")
+    @Comment("The simulate tool of the plugin.")
+    @Comment("You can check if two objects can stack together using this tool.")
+    public static String SIMULATE_TOOL = "simulate-tool";
+
+    @Comment("")
     @Comment("Settings related to database.")
     public static String DATABASE = "database";
 
@@ -33,6 +38,30 @@ public final class ConfigComments {
 
     @Comment("Should data of blocks that no longer exist be deleted?")
     public static String DATABASE_INVALID_BLOCKS = "database.delete-invalid-blocks";
+
+    @Comment("")
+    @Comment("Settings related to the automatic kill all")
+    public static String KILL_TASK = "kill-task";
+
+    @Comment("How much time should be passed between auto-killing? (in ticks)")
+    @Comment("If you wish to disable the auto-killing task, set the interval to 0.")
+    public static String KILL_TASK_INTERVAL = "kill-task.interval";
+
+    @Comment("Should the kill task remove stacked entities?")
+    public static String KILL_TASK_STACKED_ENTITIES = "kill-task.stacked-entities";
+
+    @Comment("Should the kill task remove unstacked entities?")
+    public static String KILL_TASK_UNSTACKED_ENTITIES = "kill-task.unstacked-entities";
+
+    @Comment("Should the kill task remove stacked items?")
+    public static String KILL_TASK_STACKED_ITEMS = "kill-task.stacked-items";
+
+    @Comment("Should the kill task remove unstacked items?")
+    public static String KILL_TASK_UNSTACKED_ITEMS = "kill-task.unstacked-items";
+
+    @Comment("When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.")
+    @Comment("This feature will work if the interval is set to 0 - these are two different features!")
+    public static String KILL_TASK_SYNC_CLEAR_LAGG = "kill-task.sync-clear-lagg";
 
     @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
@@ -84,6 +113,11 @@ public final class ConfigComments {
     public static String ITEMS_CHUNK_LIMIT = "items.chunk-limit";
 
     @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String ITEMS_PARTICLES = "items.particles";
+
+    @Comment("")
     @Comment("When enabled, all items will have a custom name (even if not stacked)")
     public static String ITEMS_UNSTACKED_CUSTOM_NAME = "items.unstacked-custom-name";
 
@@ -97,27 +131,6 @@ public final class ConfigComments {
     @Comment("When item-display is enabled, the item's name will be displayed instead of it's type")
     @Comment("This will take place on all items, and can only be overridden by custom-display section.")
     public static String ITEMS_ITEM_DISPLAY = "items.item-display";
-
-    @Comment("")
-    @Comment("When buckets stacker is enabled, water & lava buckets will be stacked in your inventory")
-    @Comment("with a max-stack size of 16.")
-    public static String BUCKETS_STACKER = "items.buckets-stacker";
-
-    @Comment("Should buckets get stacked on the server?")
-    public static String BUCKETS_STACKER_ENABLED = "items.buckets-stacker.enabled";
-
-    @Comment("")
-    @Comment("A list of blacklisted bucket names.")
-    public static String BUCKETS_STACKER_NAME_BLACKLIST = "items.buckets-stacker.name-blacklist";
-
-    @Comment("")
-    @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
-    public static String BUCKETS_STACKER_MAX_STACK = "items.buckets-stacker.max-stack";
-
-    @Comment("")
-    @Comment("Should items get removed when the kill all task is performed?")
-    @Comment("If you want to configure the task, check the entities section.")
-    public static String ITEMS_KILL_ALL = "items.kill-all";
 
     @Comment("")
     @Comment("Should players be able to disable item names for themselves?")
@@ -147,6 +160,10 @@ public final class ConfigComments {
     public static String ITEMS_PICKUP_SOUND_PITCH = "items.pickup-sound.pitch";
 
     @Comment("")
+    @Comment("Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)")
+    public static String ITEMS_MAX_PICKUP_DELAY = "items.max-pickup-delay";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked entities.")
     public static String ENTITIES = "entities";
 
@@ -169,6 +186,7 @@ public final class ConfigComments {
     @Comment("Blacklisted entities are entities that won't get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
     public static String ENTITIES_BLACKLIST = "entities.blacklist";
 
@@ -176,6 +194,7 @@ public final class ConfigComments {
     @Comment("Whitelisted entities are entities that will get stacked.")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you wish to disable whitelisted entities, use \"whitelist: []\"")
     public static String ENTITIES_WHITELIST = "entities.whitelist";
 
@@ -203,6 +222,11 @@ public final class ConfigComments {
     public static String ENTITIES_CHUNK_LIMIT = "entities.chunk-limit";
 
     @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String ENTITIES_PARTICLES = "entities.particles";
+
+    @Comment("")
     @Comment("A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)")
     public static String ENTITIES_DISABLED_REGIONS = "entities.disabled-regions";
 
@@ -219,21 +243,6 @@ public final class ConfigComments {
     @Comment("I recommend setting it to at least 10 seconds (200 ticks)")
     @Comment("If you wish to disable the auto-stacking task, set the stack-interval to 0.")
     public static String ENTITIES_STACK_INTERVAL = "entities.stack-interval";
-
-    @Comment("")
-    @Comment("Here you can configurable all features related to the kill-all task.")
-    @Comment("Every run, the plugin will remove all the stacked entities from your server.")
-    @Comment("No drops will be drops, and it won't lag your server at all.")
-    public static String ENTITIES_KILL_ALL = "entities.kill-all";
-
-    @Comment("How much time should be passed between auto-killing? (in ticks)")
-    @Comment("If you wish to disable the auto-killing task, set the interval to 0.")
-    public static String ENTITIES_KILL_ALL_INTERVAL = "entities.kill-all.interval";
-
-    @Comment("")
-    @Comment("When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.")
-    @Comment("This feature will work if the interval is set to 0 - these are two different features!")
-    public static String ENTITIES_KILL_ALL_CLEAR_LAGG = "entities.kill-all.clear-lagg";
 
     @Comment("")
     @Comment("A list of all checks that the plugin does before trying to stack two entities together.")
@@ -260,14 +269,17 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Instant-kill will kill the entire stack instead of unstack it by one.")
     @Comment("When an entire stack dies, their drops are getting multiplied.")
-    @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
     @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:DAMAGE_CAUSE\" or \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you don't want instant-kill, use \"instant-kill: []\"")
     public static String ENTITIES_INSTANT_KILL = "entities.instant-kill";
 
     @Comment("")
     @Comment("Nerfed entities are entities that cannot attack / target other entities and players.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
     @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     @Comment("If you don't want nerfed entities, use \"nerfed-spawning: []\"")
     public static String ENTITIES_NERFED_SPAWNING = "entities.nerfed-spawning";
 
@@ -284,6 +296,7 @@ public final class ConfigComments {
     public static String ENTITIES_STACK_DOWN_ENABLED = "entities.stack-down.enabled";
 
     @Comment("A list of entities that will be forced to only stack down.")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_STACK_DOWN_TYPES = "entities.stack-down.stack-down-types";
 
     @Comment("")
@@ -295,7 +308,10 @@ public final class ConfigComments {
     public static String ENTITIES_MYTHIC_MOBS_CUSTOM_NAME = "entities.mythic-mobs-custom-name";
 
     @Comment("")
-    @Comment("When enabled, the stack will keep the lowest health between the two entities that are stacked.")
+    @Comment("A list of entities that should keep the lowest health when stacking.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_KEEP_LOWEST_HEALTH = "entities.keep-lowest-health";
 
     @Comment("")
@@ -321,6 +337,15 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Should entities get knockback after they are killed?")
     public static String ENTITIES_NEXT_STACK_KNOCKBACK = "entities.next-stack-knockback";
+
+    @Comment("")
+    @Comment("The default amount entities should get unstacked by.")
+    @Comment("Use the \"ENTITY_TYPE:AMOUNT\" or \"ENTITY_TYPE:SPAWN_CAUSE:AMOUNT\"")
+    public static String ENTITIES_DEFAULT_UNSTACK = "entities.default-unstack";
+
+    @Comment("")
+    @Comment("Should exp get added directly to killer instead of dropped to ground?")
+    public static String ENTITIES_AUTO_EXP_PICKUP = "entities.auto-exp-pickup";
 
     @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
@@ -371,6 +396,15 @@ public final class ConfigComments {
     public static String SPAWNERS_CHUNK_LIMIT = "spawners.chunk-limit";
 
     @Comment("")
+    @Comment("Should the chunk limit be per spawner or not?")
+    public static String SPAWNERS_PER_SPAWNER_LIMIT = "spawners.per-spawner-limit";
+
+    @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String SPAWNERS_PARTICLES = "spawners.particles";
+
+    @Comment("")
     @Comment("When enabled, the plugin will try to find a spawner in the whole chunk instead")
     @Comment("of only in the provided radius. merge-radius will be overridden, and will be used")
     @Comment("as a y-level range only.")
@@ -383,6 +417,14 @@ public final class ConfigComments {
     @Comment("")
     @Comment("Chance of spawners to be dropped after an explosion.")
     public static String SPAWNERS_EXPLOSIONS_BREAK_CHANCE = "spawners.explosions-break-chance";
+
+    @Comment("")
+    @Comment("Set the percentage amount that will be dropped from explosions.")
+    public static String SPAWNERS_EXPLOSIONS_AMOUNT_PERCENTAGE = "spawners.explosions-amount-percentage";
+
+    @Comment("")
+    @Comment("Should exploded spawners get dropped to inventory.")
+    public static String SPAWNERS_EXPLOSIONS_DROP_TO_INVENTORY = "spawners.explosions-drop-to-inventory";
 
     @Comment("")
     @Comment("Chance of spawners to be dropped after break of silk touch.")
@@ -410,12 +452,24 @@ public final class ConfigComments {
     public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_NAME = "spawners.silk-spawners.custom-name";
 
     @Comment("")
+    @Comment("Custom lore for the item.")
+    @Comment("If you don't want a custom lore, use \"custom-lore: []\"")
+    @Comment("{0} represents stack amount")
+    @Comment("{1} represents entity type")
+    public static String SPAWNERS_SILK_SPAWNERS_CUSTOM_LORE = "spawners.silk-spawners.custom-lore";
+
+    @Comment("")
     @Comment("Should explosions act like silk-touch and drop the spawner?")
     public static String SPAWNERS_SILK_SPAWNERS_EXPLOSIONS_DROP_SPAWNER = "spawners.silk-spawners.explosions-drop-spawner";
 
     @Comment("")
     @Comment("Should the spawner item go straight into the player's inventory instead of dropping on ground?")
     public static String SPAWNERS_SILK_SPAWNERS_DROP_TO_INVENTORY = "spawners.silk-spawners.drop-to-inventory";
+
+    @Comment("")
+    @Comment("A list of worlds that silk touch will work in.")
+    @Comment("If you want silk touch to work inside all the worlds, use \"worlds: []\"")
+    public static String SPAWNERS_SILK_SPAWNERS_WORLDS = "spawners.silk-spawners.worlds";
 
     @Comment("")
     @Comment("Should sneaking while mining break the entire stack instead of reducing it by one?")
@@ -439,6 +493,10 @@ public final class ConfigComments {
     @Comment("When enabled and shift right-clicking a spawner, a \"break-menu\" will be opened.")
     @Comment("You can select there how many spawners you want to remove from the stack.")
     public static String SPAWNERS_BREAK_MENU_ENABLED = "spawners.break-menu.enabled";
+
+    @Comment("")
+    @Comment("How many rows should the gui have?")
+    public static String SPAWNERS_BREAK_MENU_SIZE = "spawners.break-menu.size";
 
     @Comment("")
     @Comment("How many rows should the gui have?")
@@ -548,6 +606,11 @@ public final class ConfigComments {
     public static String BARRELS_CHUNK_LIMIT = "barrels.chunk-limit";
 
     @Comment("")
+    @Comment("Should particles be spawned when an entity gets stacked?")
+    @Comment("If you want to edit the particles, check the particles file.")
+    public static String BARRELS_PARTICLES = "barrels.particles";
+
+    @Comment("")
     @Comment("When enabled, the plugin will try to find a block in the whole chunk instead")
     @Comment("of only in the provided radius. merge-radius will be overridden, and will be used")
     @Comment("as a y-level range only.")
@@ -577,5 +640,36 @@ public final class ConfigComments {
     @Comment("This should not be set to true unless being told by the dev")
     @Comment("When enabled, the plugin sets the barrel types to cauldron if they aren't already.")
     public static String BARRELS_FORCE_CAULDRON = "barrels.force-cauldron";
+
+    @Comment("")
+    @Comment("Set a required permission for barrels.")
+    @Comment("If you want to disable it, use \"required-permission: ''\"")
+    public static String BARRELS_REQUIRED_PERMISSION = "barrels.required-permission";
+
+    @Comment("")
+    @Comment("Here you can configurable all features related to stacked buckets")
+    public static String BUCKETS = "buckets";
+
+    @Comment("Should buckets get stacked on the server?")
+    public static String BUCKETS_ENABLED = "buckets.enabled";
+
+    @Comment("")
+    @Comment("A list of blacklisted bucket names.")
+    public static String BUCKETS_NAME_BLACKLIST = "buckets.name-blacklist";
+
+    @Comment("")
+    @Comment("The new max-stack size for buckets. Must be a number between 1 and 64.")
+    public static String BUCKETS_MAX_STACK = "buckets.max-stack";
+
+    @Comment("")
+    @Comment("Here you can configurable all features related to stacked stews")
+    public static String STEWS = "stews";
+
+    @Comment("Should stews get stacked on the server?")
+    public static String STEWS_ENABLED = "stews.enabled";
+
+    @Comment("")
+    @Comment("The new max-stack size for stews. Must be a number between 1 and 64.")
+    public static String STEWS_MAX_STACK = "stews.max-stack";
 
 }

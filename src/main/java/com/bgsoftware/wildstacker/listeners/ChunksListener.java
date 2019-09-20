@@ -5,10 +5,11 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,7 +18,7 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public final class ChunksListener implements Listener {
@@ -32,11 +33,10 @@ public final class ChunksListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent e){
-        List<StackedEntity> stackedEntities = Arrays.stream(e.getChunk().getEntities())
-                .filter(entity -> entity instanceof LivingEntity).map(WStackedEntity::of).collect(Collectors.toList());
+        Stream<StackedEntity> entityStream = Arrays.stream(e.getChunk().getEntities())
+                .filter(EntityUtils::isStackable).map(WStackedEntity::of);
 
-        Executor.async(() -> stackedEntities.stream()
-                .filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
+        Executor.async(() -> entityStream.filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
                 .forEach(stackedEntity -> {
                     plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
                     plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
@@ -46,18 +46,25 @@ public final class ChunksListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e){
+        List<Entity> chunkEntities = Arrays.asList(e.getChunk().getEntities());
         if(loadedData) {
             //Trying to remove all the corrupted stacked blocks
-            Arrays.stream(e.getChunk().getEntities())
-                    .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
-                            entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()))
-                    .forEach(entity -> {
-                        Block block = entity.getLocation().getBlock();
-                        if (block.getType() == Material.CAULDRON)
-                            block.setType(Material.AIR);
-                        entity.remove();
-                    });
+            Executor.async(() -> {
+                Stream<Entity> entityStream = chunkEntities.stream()
+                        .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
+                                entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()));
+                Executor.sync(() -> entityStream.forEach(entity -> {
+                    Block block = entity.getLocation().getBlock();
+                    if (block.getType() == Material.CAULDRON)
+                        block.setType(Material.AIR);
+                    entity.remove();
+                }));
+            });
         }
+
+        //Update all nerf status to all entities
+        Executor.async(() -> chunkEntities.stream().filter(EntityUtils::isStackable)
+                .forEach(entity -> WStackedEntity.of(entity).updateNerfed()));
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){

@@ -10,14 +10,12 @@ public interface StackedItem extends StackedObject<Item> {
 
     /**
      * Get the item object of bukkit.
-     * @return item
      */
     Item getItem();
 
 
     /**
      * Get the uuid of the item.
-     * @return uuid
      */
     UUID getUniqueId();
 
@@ -31,7 +29,6 @@ public interface StackedItem extends StackedObject<Item> {
     /**
      * Get the item stack of the item.
      * A duplicated item stack with the stacked object's amount.
-     * @return item stack
      */
     ItemStack getItemStack();
 

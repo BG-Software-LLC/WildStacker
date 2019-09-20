@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.sainttx.holograms.HologramPlugin;
 import com.sainttx.holograms.api.Hologram;
 import com.sainttx.holograms.api.HologramManager;
@@ -105,10 +106,12 @@ public final class HologramsProvider_Holograms implements HologramsProvider {
     @Override
     public void clearHolograms() {
         for(Hologram hologram : hologramManager.getActiveHolograms().values()){
-            Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
-            if(!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
-                hologramManager.deleteHologram(hologram);
-                break;
+            if(GeneralUtils.isChunkLoaded(hologram.getLocation())) {
+                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
+                if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
+                    hologramManager.deleteHologram(hologram);
+                    break;
+                }
             }
         }
     }

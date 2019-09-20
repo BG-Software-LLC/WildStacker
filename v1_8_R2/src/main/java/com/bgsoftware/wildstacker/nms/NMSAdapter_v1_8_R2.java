@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import net.minecraft.server.v1_8_R2.Entity;
@@ -10,21 +11,27 @@ import net.minecraft.server.v1_8_R2.EntityInsentient;
 import net.minecraft.server.v1_8_R2.EntityItem;
 import net.minecraft.server.v1_8_R2.EntityLiving;
 import net.minecraft.server.v1_8_R2.EntityPlayer;
+import net.minecraft.server.v1_8_R2.EnumParticle;
 import net.minecraft.server.v1_8_R2.ItemStack;
 import net.minecraft.server.v1_8_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R2.NBTTagCompound;
 import net.minecraft.server.v1_8_R2.NBTTagInt;
+import net.minecraft.server.v1_8_R2.NBTTagList;
 import net.minecraft.server.v1_8_R2.NBTTagShort;
 import net.minecraft.server.v1_8_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_8_R2.WorldServer;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_8_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -39,6 +46,7 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -56,7 +64,6 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
         entityLiving.b(nbtTagCompound);
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
         nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
-        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 
@@ -289,6 +296,81 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
             float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
             entityLiving.makeSound((String) soundEffect, soundVolume, soundPitch);
         }
+    }
+
+    @Override
+    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.fromMobSpawner = nerfed;
+    }
+
+    @Override
+    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
+        world.sendParticles(null, EnumParticle.valueOf(particle), true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, offsetX, offsetY, offsetZ, extra);
+    }
+
+    @Override
+    public Enchantment getGlowEnchant() {
+        return new Enchantment(101) {
+            @Override
+            public String getName() {
+                return "WildStackerGlow";
+            }
+
+            @Override
+            public int getMaxLevel() {
+                return 1;
+            }
+
+            @Override
+            public int getStartLevel() {
+                return 0;
+            }
+
+            @Override
+            public EnchantmentTarget getItemTarget() {
+                return null;
+            }
+
+            @Override
+            public boolean conflictsWith(Enchantment enchantment) {
+                return false;
+            }
+
+            @Override
+            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
+                return true;
+            }
+        };
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack getPlayerSkull(String texture) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(Materials.PLAYER_HEAD.toBukkitItem());
+        NBTTagCompound nbtTagCompound = itemStack.getTag() != null ? itemStack.getTag() : new NBTTagCompound();
+
+        NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
+
+        skullOwner.setString("Id", new UUID(texture.hashCode(), texture.hashCode()).toString());
+
+        NBTTagCompound properties = new NBTTagCompound();
+
+        NBTTagList textures = new NBTTagList();
+        NBTTagCompound signature = new NBTTagCompound();
+        signature.setString("Value", texture);
+        textures.add(signature);
+
+        properties.set("textures", textures);
+
+        skullOwner.set("Properties", properties);
+
+        nbtTagCompound.set("SkullOwner", skullOwner);
+
+        itemStack.setTag(nbtTagCompound);
+
+        return CraftItemStack.asBukkitCopy(itemStack);
     }
 
 }

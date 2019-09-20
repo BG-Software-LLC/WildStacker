@@ -23,7 +23,9 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.Bukkit;
@@ -43,10 +45,12 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
@@ -95,7 +99,7 @@ public final class SystemHandler implements SystemManager {
 
         //Entity wasn't found, creating a new object
         if(livingEntity.hasMetadata("spawn-cause"))
-            stackedEntity = new WStackedEntity(livingEntity, 1, (SpawnCause) livingEntity.getMetadata("spawn-cause").get(0).value());
+            stackedEntity = new WStackedEntity(livingEntity, 1, SpawnCause.valueOf(livingEntity.getMetadata("spawn-cause").get(0).value().toString()));
         else
             stackedEntity = new WStackedEntity(livingEntity);
 
@@ -195,7 +199,7 @@ public final class SystemHandler implements SystemManager {
             return stackedBarrel;
 
         //Barrel wasn't found, creating a new object
-        stackedBarrel = new WStackedBarrel(location.getBlock(), ItemUtil.getFromBlock(location.getBlock()));
+        stackedBarrel = new WStackedBarrel(location.getBlock(), ItemUtils.getFromBlock(location.getBlock()));
 
         //Checks if the barrel still exists after a few ticks
         Executor.sync(() -> {
@@ -242,7 +246,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
         return getStackedSpawners().stream()
-                .filter(stackedSpawner -> isSameChunk(stackedSpawner.getLocation(), chunk))
+                .filter(stackedSpawner -> GeneralUtils.isSameChunk(stackedSpawner.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -256,7 +260,7 @@ public final class SystemHandler implements SystemManager {
 
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
         return getStackedBarrels().stream()
-                .filter(stackedBarrel -> isSameChunk(stackedBarrel.getLocation(), chunk))
+                .filter(stackedBarrel -> GeneralUtils.isSameChunk(stackedBarrel.getLocation(), chunk))
                 .collect(Collectors.toList());
     }
 
@@ -277,19 +281,21 @@ public final class SystemHandler implements SystemManager {
         for(StackedObject stackedObject : stackedObjects){
             if(stackedObject instanceof StackedItem){
                 StackedItem stackedItem = (StackedItem) stackedObject;
-                if(stackedItem.getItem() == null || (isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
+                if(stackedItem.getItem() == null || (GeneralUtils.isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
                     removeStackObject(stackedObject);
             }
 
             else if(stackedObject instanceof StackedEntity){
                 StackedEntity stackedEntity = (StackedEntity) stackedObject;
-                if(stackedEntity.getLivingEntity() == null || (isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
+                if(stackedEntity.getLivingEntity() == null || (GeneralUtils.isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) && stackedEntity.getLivingEntity().isDead()))
                     removeStackObject(stackedObject);
+                else
+                    stackedEntity.updateNerfed();
             }
 
             else if(stackedObject instanceof StackedSpawner){
                 StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
-                if(isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
+                if(GeneralUtils.isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
                     removeStackObject(stackedObject);
                     plugin.getProviders().deleteHologram(stackedSpawner);
                 }
@@ -297,7 +303,7 @@ public final class SystemHandler implements SystemManager {
 
             else if(stackedObject instanceof StackedBarrel){
                 StackedBarrel stackedBarrel = (StackedBarrel) stackedObject;
-                if(isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
+                if(GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
                     removeStackObject(stackedObject);
                     stackedBarrel.removeDisplayBlock();
                     plugin.getProviders().deleteHologram(stackedBarrel);
@@ -377,10 +383,6 @@ public final class SystemHandler implements SystemManager {
         return spawnCause != SpawnCause.CHUNK_GEN && spawnCause != SpawnCause.NATURAL;
     }
 
-    private boolean isChunkLoaded(Location location){
-        return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
-    }
-
     @Override
     public void updateLinkedEntity(LivingEntity livingEntity, LivingEntity newLivingEntity) {
         for(StackedSpawner stackedSpawner : getStackedSpawners()){
@@ -437,18 +439,43 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
-        Executor.async(() -> {
-            for(StackedEntity stackedEntity : getStackedEntities()) {
-                if (stackedEntity.getStackAmount() > 1)
-                    stackedEntity.remove();
-            }
+        performKillAll(entity -> true, item -> true);
+    }
 
-            if(plugin.getSettings().itemsKillAll) {
-                for (StackedItem stackedItem : getStackedItems()) {
-                    if (stackedItem.getStackAmount() > 1) {
-                        stackedItem.remove();
-                    }
-                }
+    @Override
+    public void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate) {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> performKillAll(entityPredicate, itemPredicate));
+            return;
+        }
+
+        List<Entity> entityList = new ArrayList<>();
+
+        for(World world : Bukkit.getWorlds()){
+            for(Chunk chunk : world.getLoadedChunks()){
+                entityList.addAll(Arrays.asList(chunk.getEntities()));
+            }
+        }
+
+        Executor.async(() -> {
+            entityList.stream()
+                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity))
+                    .forEach(entity -> {
+                        StackedEntity stackedEntity = WStackedEntity.of(entity);
+                        if((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
+                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1))
+                            stackedEntity.remove();
+                    });
+
+            if(plugin.getSettings().killTaskStackedItems) {
+                entityList.stream()
+                        .filter(entity -> entity instanceof Item && itemPredicate.test((Item) entity))
+                        .forEach(entity -> {
+                            StackedItem stackedItem = WStackedItem.of(entity);
+                            if((plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||
+                                    (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= 1))
+                                stackedItem.remove();
+                        });
             }
 
             for(Player pl : Bukkit.getOnlinePlayers()) {
@@ -460,7 +487,12 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData) {
-        return new WStackedSnapshot(chunk, loadData);
+        return getStackedSnapshot(chunk);
+    }
+
+    @Override
+    public StackedSnapshot getStackedSnapshot(Chunk chunk) {
+        return new WStackedSnapshot(chunk);
     }
 
     /*
@@ -470,10 +502,6 @@ public final class SystemHandler implements SystemManager {
     @Override
     public LootTable getLootTable(LivingEntity livingEntity) {
         return plugin.getLootHandler().getLootTable(livingEntity);
-    }
-
-    private boolean isSameChunk(Location location, Chunk chunk){
-        return chunk.getX() == location.getBlockX() >> 4 && chunk.getZ() == location.getBlockZ() >> 4;
     }
 
 }

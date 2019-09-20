@@ -59,7 +59,7 @@ public final class ItemsListener implements Listener {
             spawnedItem.setPickupDelay(40);
         }
 
-        stackedItem.tryStack();
+        stackedItem.runStackAsync(null);
 
         //Chunk Limit
         Executor.sync(() -> {
@@ -92,7 +92,7 @@ public final class ItemsListener implements Listener {
         Executor.sync(() -> {
             if(e.getEntity().isValid() && e.getTarget().isValid()){
                 StackedItem targetItem = WStackedItem.of(e.getTarget());
-                stackedItem.tryStackInto(targetItem);
+                stackedItem.runStackAsync(targetItem, null);
             }
         }, 5L);
     }
@@ -207,8 +207,7 @@ public final class ItemsListener implements Listener {
         if(chunkLimit <= 0)
             return false;
 
-        int itemsInsideChunk = (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count();
-        return itemsInsideChunk >= chunkLimit;
+        return (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count() > chunkLimit;
     }
 
     private void setItemInHand(LivingEntity entity, ItemStack itemStack){

@@ -11,27 +11,22 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
 
     /**
      * Get the creature-spawner object of bukkit.
-     * @return creature-spawner
      */
     CreatureSpawner getSpawner();
 
     /**
      * Get the spawned-type of the creature-spawner.
-     * @return enity-type
      */
     EntityType getSpawnedType();
 
     /**
      * Get the location of the creature-spawner
-     * @return location
      */
     Location getLocation();
 
     /**
      * Get the entity that is linked into this spawner.
      * May be null if there is no linked entity or it's too far away.
-     *
-     * @return linked-entity
      */
     LivingEntity getLinkedEntity();
 
@@ -43,7 +38,6 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
 
     /**
      * Get all the nearby stacked-spawners that the spawner can stack into in the merge range.
-     * @return List of stacked-spawners
      */
     List<StackedSpawner> getNearbySpawners();
 

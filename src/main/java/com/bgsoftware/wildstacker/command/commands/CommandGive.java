@@ -3,8 +3,8 @@ package com.bgsoftware.wildstacker.command.commands;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -78,7 +78,7 @@ public final class CommandGive implements ICommand {
 
             try{
                 entityType = EntityType.valueOf(args[3].toUpperCase());
-                typeName = EntityUtil.getFormattedType(entityType.name());
+                typeName = EntityUtils.getFormattedType(entityType.name());
             }catch(IllegalArgumentException ex){
                 Locale.INVALID_ENTITY.send(sender, args[3]);
                 return;
@@ -86,13 +86,13 @@ public final class CommandGive implements ICommand {
 
             Material eggType = Materials.getSpawnEgg(entityType);
             if(eggType == null){
-                itemStack = ItemUtil.getItemNMSEntityType(entityType);
+                itemStack = ItemUtils.getItemNMSEntityType(entityType);
             }
             else{
                 itemStack = new ItemStack(Materials.getSpawnEgg(entityType));
-                ItemUtil.setEntityType(itemStack, entityType);
+                ItemUtils.setEntityType(itemStack, entityType);
             }
-            itemStack = ItemUtil.setSpawnerItemAmount(itemStack, stackSize);
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
         }
 
         else if(args[2].equalsIgnoreCase("spawner")){
@@ -100,13 +100,13 @@ public final class CommandGive implements ICommand {
 
             try {
                 entityType = EntityType.valueOf(args[3].toUpperCase());
-                typeName = EntityUtil.getFormattedType(entityType.name());
+                typeName = EntityUtils.getFormattedType(entityType.name());
             }catch(IllegalArgumentException ex){
                 Locale.INVALID_ENTITY.send(sender, args[3]);
                 return;
             }
 
-            itemStack = ItemUtil.getSpawnerItem(entityType, stackSize);
+            itemStack = ItemUtils.getSpawnerItem(entityType, stackSize);
             if(itemStack.getAmount() != 1)
                 stackSize = 1;
         }
@@ -116,7 +116,7 @@ public final class CommandGive implements ICommand {
 
             try {
                 barrelType = Material.getMaterial(args[3].toUpperCase());
-                typeName = ItemUtil.getFormattedType(new ItemStack(barrelType));
+                typeName = ItemUtils.getFormattedType(new ItemStack(barrelType));
             }catch(IllegalArgumentException | NullPointerException ex){
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
@@ -128,7 +128,7 @@ public final class CommandGive implements ICommand {
             }
 
             itemStack = new ItemStack(barrelType);
-            itemStack = ItemUtil.setSpawnerItemAmount(itemStack, stackSize);
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
         }
 
         else{
@@ -146,7 +146,7 @@ public final class CommandGive implements ICommand {
         );
         itemStack.setItemMeta(itemMeta);
 
-        ItemUtil.addItem(itemStack, target.getInventory(), target.getLocation());
+        ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());
 
         Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
         if(!target.equals(sender))

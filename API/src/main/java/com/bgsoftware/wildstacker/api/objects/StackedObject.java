@@ -1,5 +1,12 @@
 package com.bgsoftware.wildstacker.api.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+
+import java.util.Optional;
+import java.util.function.Consumer;
+
 public interface StackedObject<T> {
 
     /**
@@ -50,32 +57,76 @@ public interface StackedObject<T> {
     void updateName();
 
     /**
-     * Try to stack this object into other objects around it.
-     * If succeed to stack, the object it got stacked to will be returned.
-     * If failed, null will be returned.
+     * Checks if this object can stack into another object.
+     * @param stackedObject other object to check
+     *
+     * @deprecated See runStackCheck
      */
-    T tryStack();
+    @Deprecated
+    boolean canStackInto(StackedObject stackedObject);
 
     /**
      * Checks if this object can stack into another object.
      * @param stackedObject other object to check
-     *
-     * @return True if can stack into, otherwise false
+     * @return The result for the operation.
      */
-    boolean canStackInto(StackedObject stackedObject);
+    StackCheckResult runStackCheck(StackedObject stackedObject);
 
     /**
-     * Try to stack this object into another object.
-     * @param stackedObject another object to stack into
-     * @return True if succeed to stack, otherwise false
+     * Stack this object into other objects around it.
+     * @param result The object that this object was stacked into.
      */
+    void runStackAsync(Consumer<Optional<T>> result);
+
+    /**
+     * Stack this object into other objects around it.
+     * @return The object that this object was stacked into (nullable)
+     *
+     * @deprecated See runStackAsync(Consumer)
+     */
+    @Deprecated
+    T tryStack();
+
+    /**
+     * Stack this object into another object.
+     * @param stackedObject another object to stack into
+     * @param stackResult The result for the stacking operation.
+     */
+    void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult);
+
+    /**
+     * Stack this object into another object.
+     * !Usage of this method can cause issues!
+     * @param stackedObject another object to stack into
+     * @return The result for the stacking operation.
+     */
+    StackResult runStack(StackedObject stackedObject);
+
+    /**
+     * Stack this object into another object.
+     * @param stackedObject another object to stack into
+     * @return True if success, otherwise false.
+     *
+     * @deprecated See runStackAsync(StackedObject, Consumer)
+     */
+    @Deprecated
     boolean tryStackInto(StackedObject stackedObject);
 
     /**
-     * Try to unstack this object.
+     * Unstack this object.
      * @param amount unstack by this amount
-     * @return True if succeed to unstack, otherwise false
+     * @return The result for the unstacking operation.
      */
+    UnstackResult runUnstack(int amount);
+
+    /**
+     * Unstack this object.
+     * @param amount unstack by this amount
+     * @return True if success, otherwise false.
+     *
+     * @deprecated See runUnstack
+     */
+    @Deprecated
     boolean tryUnstack(int amount);
 
     /**

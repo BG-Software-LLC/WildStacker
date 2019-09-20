@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.loot;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,18 +29,29 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
+    private final String requiredPermission, spawnCauseFilter;
 
-    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting){
+    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting, String requiredPermission, String spawnCauseFilter){
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
         this.max = max;
         this.chance = chance;
         this.looting = looting;
+        this.requiredPermission = requiredPermission;
+        this.spawnCauseFilter = spawnCauseFilter;
     }
 
     public double getChance(int lootBonusLevel, double lootMultiplier) {
         return chance + (lootBonusLevel * lootMultiplier);
+    }
+
+    public String getRequiredPermission() {
+        return requiredPermission;
+    }
+
+    public String getSpawnCauseFilter() {
+        return spawnCauseFilter;
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel){
@@ -73,12 +85,14 @@ public class LootItem {
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : 1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
         boolean looting = jsonObject.has("looting") && jsonObject.get("looting").getAsBoolean();
+        String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
+        String spawnCauseFilter = jsonObject.has("spawn-cause") ? jsonObject.get("spawn-cause").getAsString() : "";
 
         if(jsonObject.has("burnable")){
             burnableItem = buildItemStack(jsonObject.get("burnable").getAsJsonObject());
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting);
+        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter);
     }
 
     private static ItemStack buildItemStack(JsonObject jsonObject){
@@ -86,6 +100,10 @@ public class LootItem {
         short data = jsonObject.has("data") ? jsonObject.get("data").getAsShort() : 0;
 
         ItemStack itemStack = new ItemStack(type, 1, data);
+
+        if(jsonObject.has("skull"))
+            itemStack = plugin.getNMSAdapter().getPlayerSkull(jsonObject.get("skull").getAsString());
+
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         if(jsonObject.has("name"))
@@ -105,6 +123,10 @@ public class LootItem {
                     itemMeta.addEnchant(Enchantment.getByName(entry.getKey()), entry.getValue().getAsInt(), true);
                 }catch(Exception ignored){}
             }
+        }
+
+        if(jsonObject.has("glow") && jsonObject.get("glow").getAsBoolean()){
+            itemMeta.addEnchant(GlowEnchantment.getGlowEnchant(), 1, true);
         }
 
         itemStack.setItemMeta(itemMeta);

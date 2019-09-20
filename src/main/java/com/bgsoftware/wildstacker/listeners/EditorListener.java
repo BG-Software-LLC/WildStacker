@@ -81,25 +81,33 @@ public final class EditorListener implements Listener {
             e.setCancelled(true);
 
             switch (e.getRawSlot()){
-                case 20:
+                case 19:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getGeneralEditor());
+                    plugin.getEditor().openGeneralEditor(player);
                     break;
-                case 22:
+                case 21:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getItemsEditor());
+                    plugin.getEditor().openItemsEditor(player);
                     break;
-                case 24:
+                case 23:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getEntitiesEditor());
+                    plugin.getEditor().openEntitiesEditor(player);
                     break;
-                case 30:
+                case 25:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getSpawnersEditor());
+                    plugin.getEditor().openBucketsEditor(player);
                     break;
-                case 32:
+                case 29:
                     noResetClose.add(player.getUniqueId());
-                    player.openInventory(plugin.getEditor().getBarrelsEditor());
+                    plugin.getEditor().openSpawnersEditor(player);
+                    break;
+                case 31:
+                    noResetClose.add(player.getUniqueId());
+                    plugin.getEditor().openBarrelsEditor(player);
+                    break;
+                case 33:
+                    noResetClose.add(player.getUniqueId());
+                    plugin.getEditor().openStewsEditor(player);
                     break;
                 case 49:
                     Executor.async(() -> {
@@ -128,16 +136,22 @@ public final class EditorListener implements Listener {
             lastInventories.put(player.getUniqueId(), "entitiesEditor");
         }
 
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings")){
+            e.setCancelled(true);
+            slotPrefix = "BUCKETS_SLOT_";
+            lastInventories.put(player.getUniqueId(), "bucketsEditor");
+        }
+
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
             e.setCancelled(true);
             slotPrefix = "SPAWNERS_SLOT_";
             lastInventories.put(player.getUniqueId(), "spawnersEditor");
         }
 
-        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings")){
             e.setCancelled(true);
-            slotPrefix = "BARRELS_SLOT_";
-            lastInventories.put(player.getUniqueId(), "barrelsEditor");
+            slotPrefix = "STEWS_SLOT_";
+            lastInventories.put(player.getUniqueId(), "stewsEditor");
         }
 
         try{
@@ -176,8 +190,10 @@ public final class EditorListener implements Listener {
             else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings") ||
                     e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings") ||
                     e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings") ||
                     e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings") ||
-                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings") ||
+                    e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings")){
                 noResetClose.remove(player.getUniqueId());
                 player.openInventory(plugin.getEditor().getSettingsEditor());
             }
@@ -275,7 +291,7 @@ public final class EditorListener implements Listener {
         }
 
         Executor.sync(() -> {
-            e.getPlayer().openInventory(plugin.getEditor().getEditor(lastInventories.get(e.getPlayer().getUniqueId())));
+            plugin.getEditor().openEditor(e.getPlayer(), lastInventories.get(e.getPlayer().getUniqueId()));
             lastInventories.remove(e.getPlayer().getUniqueId());
             configValues.remove(e.getPlayer().getUniqueId());
         });

@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ReflectionUtil {
+public final class ReflectionUtils {
 
     static Map<Fields, Field> fieldMap = new HashMap<>();
     static Map<Methods, Method> methodMap = new HashMap<>();

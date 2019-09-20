@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.api.enums;
+package com.bgsoftware.wildstacker.utils.entity;
 
 public enum StackCheck {
 

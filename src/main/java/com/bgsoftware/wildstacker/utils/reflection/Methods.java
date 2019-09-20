@@ -20,12 +20,12 @@ public enum Methods {
 
 
     public boolean exists(){
-        return ReflectionUtil.methodMap.get(this) != null;
+        return ReflectionUtils.methodMap.get(this) != null;
     }
 
     public Object invoke(Object object, Object... args) {
         try {
-            return object == null ? null : ReflectionUtil.methodMap.get(this).invoke(object, args);
+            return object == null ? null : ReflectionUtils.methodMap.get(this).invoke(object, args);
         }catch(Exception ex){
             throw new RuntimeException(ex);
         }

@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -11,8 +12,9 @@ import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Executor;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
@@ -23,8 +25,12 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,11 +38,13 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -69,7 +77,7 @@ public final class SpawnersListener implements Listener {
 
         //Try and set a custom entity type
         plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), e.getItemInHand(), false);
-        int spawnerItemAmount = ItemUtil.getSpawnerItemAmount(e.getItemInHand());
+        int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(e.getItemInHand());
 
         if(plugin.getSettings().spawnersPlacementPermission && !e.getPlayer().hasPermission("wildstacker.place.*") &&
                 !e.getPlayer().hasPermission("wildstacker.place." + stackedSpawner.getSpawnedType().name().toLowerCase())) {
@@ -82,8 +90,8 @@ public final class SpawnersListener implements Listener {
         if(!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
             for (BlockFace blockFace : blockFaces) {
                 if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()){
-                    Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
                     e.setCancelled(true);
+                    Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
                     return;
                 }
             }
@@ -105,7 +113,7 @@ public final class SpawnersListener implements Listener {
                 spawnerItemAmount = limit;
                 Executor.sync(() -> {
                     if (!e.isCancelled())
-                        ItemUtil.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
+                        ItemUtils.addItem(spawnerItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
                 }, 1L);
             }
         }
@@ -120,53 +128,66 @@ public final class SpawnersListener implements Listener {
 
         //Stacking spawner
         stackedSpawner.setStackAmount(spawnerItemAmount, false);
-        CreatureSpawner targetSpawner = stackedSpawner.tryStack();
 
-        if(targetSpawner == null){
-            if(isChunkLimit(e.getBlock().getChunk())){
-                e.setCancelled(true);
-                stackedSpawner.remove();
-                return;
-            }
+        final int SPAWNERS_TO_PLACE = toPlace;
+        Chunk chunk = e.getBlock().getChunk();
 
-            if(plugin.getSettings().onlyOneSpawner){
-                for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
-                    if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()){
-                        e.setCancelled(true);
-                        stackedSpawner.remove();
-                        return;
+        stackedSpawner.runStackAsync(spawnerOptional -> {
+            int stackAmount = stackedSpawner.getStackAmount();
+
+            if(!spawnerOptional.isPresent()){
+                if(isChunkLimit(chunk, stackedSpawner.getSpawnedType())){
+                    cancelEvent(stackedSpawner, e);
+                    return;
+                }
+
+                if(plugin.getSettings().onlyOneSpawner){
+                    for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
+                        if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()){
+                            cancelEvent(stackedSpawner, e);
+                            return;
+                        }
                     }
                 }
+
+                SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner);
+                Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
+
+                if(spawnerPlaceEvent.isCancelled()) {
+                    cancelEvent(stackedSpawner, e);
+                    return;
+                }
+            }
+            else{
+                cancelEvent(stackedSpawner, e);
+                StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
+
+                if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
+                    CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getLocation(), Materials.SPAWNER.toBukkitType(), (byte) 0, true);
+
+                stackAmount = targetSpawner.getStackAmount();
             }
 
-            SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner);
-            Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
-
-            if(spawnerPlaceEvent.isCancelled()) {
-                e.setCancelled(true);
-                return;
+            //Removing item from player's inventory
+            if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                ItemStack is = e.getItemInHand().clone();
+                is.setAmount(Math.max(0, is.getAmount() - SPAWNERS_TO_PLACE));
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), is);
             }
-        }
 
-        else{
-            e.setCancelled(true);
+            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().placeChargeWhitelist, stackedSpawner))
+                EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
-            if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getBlock(), true);
+            Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
+        });
+    }
 
-            stackedSpawner = WStackedSpawner.of(targetSpawner);
-        }
-
-        //Removing item from player's inventory
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack is = e.getItemInHand().clone();
-            is.setAmount(Math.max(0, is.getAmount() - toPlace));
-            ItemUtil.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), is);
-        }
-
-        EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
-
-        Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()), stackedSpawner.getStackAmount(), amountToCharge);
+    private void cancelEvent(StackedSpawner stackedSpawner, BlockPlaceEvent e){
+        e.setCancelled(true);
+        Executor.sync(() -> {
+            e.getBlock().setType(Material.AIR);
+            stackedSpawner.remove();
+        });
     }
 
     //Priority is high so it can be fired before SilkSpawners
@@ -191,20 +212,23 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if(stackedSpawner.tryUnstack(stackAmount)){
+        if(stackedSpawner.runUnstack(stackAmount) == UnstackResult.SUCCESS){
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
-            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount);
+            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount, false);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
 
-            EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
+            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
+                EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
-            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
+            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
         }
     }
+
+    private Map<Entity, UUID> explodableSources = new HashMap<>();
 
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
@@ -227,14 +251,15 @@ public final class SpawnersListener implements Listener {
             //Explosions can break the whole stack
             if (plugin.getSettings().explosionsBreakSpawnerStack) {
                 amount = stackedSpawner.getStackAmount();
-                stackedSpawner.tryUnstack(stackedSpawner.getStackAmount());
+                stackedSpawner.runUnstack(stackedSpawner.getStackAmount());
             } else {
                 amount = 1;
-                stackedSpawner.tryUnstack(1);
+                stackedSpawner.runUnstack(1);
             }
 
             if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance) {
-                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount);
+                amount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * amount);
+                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount, explodableSources.get(e.getEntity()));
             }
 
             if(stackedSpawner.getStackAmount() <= 0)
@@ -242,6 +267,39 @@ public final class SpawnersListener implements Listener {
 
             //If the amount of the spawner is more than 1, we don't need to destroy it
             e.blockList().remove(block);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityExplodeMonitor(EntityExplodeEvent e){
+        explodableSources.remove(e.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(PlayerInteractAtEntityEvent e){
+        if(plugin.getSettings().explosionsDropToInventory && e.getRightClicked() instanceof Creeper &&
+                e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.FLINT_AND_STEEL)
+            explodableSources.put(e.getRightClicked(), e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(PlayerInteractEvent e){
+        if(plugin.getSettings().explosionsDropToInventory && e.getClickedBlock() != null &&
+                e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)){
+            Location location = e.getClickedBlock().getLocation();
+            Executor.sync(() -> location.getWorld().getNearbyEntities(location, 1, 1, 1).stream()
+                    .filter(entity -> entity instanceof TNTPrimed).findFirst()
+                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())), 2L);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExplodableLight(EntityTargetEvent e){
+        if(e.getEntity() instanceof Creeper){
+            if(e.getTarget() instanceof Player)
+                explodableSources.put(e.getEntity(), e.getTarget().getUniqueId());
+            else
+                explodableSources.remove(e.getEntity());
         }
     }
 
@@ -273,7 +331,10 @@ public final class SpawnersListener implements Listener {
 
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
 
-            stackedEntity.trySpawnerStack(stackedSpawner);
+            stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
+                if(!entityOptional.isPresent())
+                    stackedEntity.updateNerfed();
+            });
         }
     }
 
@@ -287,8 +348,8 @@ public final class SpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
         if(!plugin.getSettings().changeUsingEggs || (plugin.getSettings().eggsStackMultiply &&
-                stackedSpawner.getStackAmount() > ItemUtil.countItem(e.getPlayer().getInventory(), e.getItem())) ||
-                EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtil.getEntityType(e.getItem())) {
+                stackedSpawner.getStackAmount() > ItemUtils.countItem(e.getPlayer().getInventory(), e.getItem())) ||
+                EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtils.getEntityType(e.getItem())) {
             e.setCancelled(true);
             return;
         }
@@ -296,7 +357,7 @@ public final class SpawnersListener implements Listener {
         Executor.sync(() -> {
             stackedSpawner.updateName();
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
-                ItemUtil.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+                ItemUtils.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
 
@@ -319,7 +380,8 @@ public final class SpawnersListener implements Listener {
                 e.setCancelled(true);
             }else if(plugin.getSettings().spawnersPlaceMenu){
                 clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
-                e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4, "Add items here (" + EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()) + ")"));
+                e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4,
+                        plugin.getSettings().spawnersPlaceMenuTitle.replace("{0}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()))));
                 e.setCancelled(true);
             }
         }
@@ -337,8 +399,8 @@ public final class SpawnersListener implements Listener {
 
             customName = customName
                     .replace("{0}", Integer.toString(amount))
-                    .replace("{1}", EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()))
-                    .replace("{2}", EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()).toUpperCase());
+                    .replace("{1}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()))
+                    .replace("{2}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()).toUpperCase());
             plugin.getProviders().changeLine(stackedSpawner, customName, true);
 
             Executor.sync(() -> plugin.getProviders().deleteHologram(stackedSpawner), 60L);
@@ -389,19 +451,19 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if(stackedSpawner.tryUnstack(removeAmount)){
+        if(stackedSpawner.runUnstack(removeAmount) == UnstackResult.SUCCESS){
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(player, spawnerBlock, false);
 
             EconomyHook.withdrawMoney(player, amountToCharge);
 
             //noinspection all
-            plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount);
+            plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount, false);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 spawnerBlock.setType(Material.AIR);
             if(spawnerBlock.getType() == Materials.SPAWNER.toBukkitType())
-                Locale.SPAWNER_BREAK.send(player, EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()), stackedSpawner.getStackAmount(), amountToCharge);
+                Locale.SPAWNER_BREAK.send(player, EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackedSpawner.getStackAmount(), amountToCharge);
             player.closeInventory();
         }
 
@@ -433,9 +495,9 @@ public final class SpawnersListener implements Listener {
                     if(itemStack != null) {
                         if (itemStack.getType() == Materials.SPAWNER.toBukkitType() &&
                                 plugin.getProviders().getSpawnerType(itemStack) == stackedSpawner.getSpawnedType())
-                            amount += ItemUtil.getSpawnerItemAmount(itemStack);
+                            amount += ItemUtils.getSpawnerItemAmount(itemStack);
                         else if (itemStack.getType() != Material.AIR)
-                            ItemUtil.addItem(itemStack, e.getPlayer().getInventory(), stackedSpawner.getLocation());
+                            ItemUtils.addItem(itemStack, e.getPlayer().getInventory(), stackedSpawner.getLocation());
                     }
                 }
 
@@ -445,7 +507,7 @@ public final class SpawnersListener implements Listener {
 
                     if(stackedSpawner.getStackAmount() + amount > limit){
                         ItemStack toAdd = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(),stackedSpawner.getStackAmount() + amount - limit);
-                        ItemUtil.addItem(toAdd, e.getPlayer().getInventory(), stackedSpawner.getLocation());
+                        ItemUtils.addItem(toAdd, e.getPlayer().getInventory(), stackedSpawner.getLocation());
                         newStackAmount = limit;
                     }
 
@@ -463,30 +525,14 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onSpawnerInspect(PlayerInteractEvent e){
-        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
-            return;
-
-        e.setCancelled(true);
-
-        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
-
-        Locale.SPAWNER_INFO_HEADER.send(e.getPlayer());
-        Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), EntityUtil.getFormattedType(stackedSpawner.getSpawnedType().name()));
-        Locale.SPAWNER_INFO_AMOUNT.send(e.getPlayer(), stackedSpawner.getStackAmount());
-        Locale.SPAWNER_INFO_FOOTER.send(e.getPlayer());
-    }
-
-    private boolean isChunkLimit(Chunk chunk){
+    private boolean isChunkLimit(Chunk chunk, EntityType entityType){
         int chunkLimit = plugin.getSettings().spawnersChunkLimit;
 
         if(chunkLimit <= 0)
             return false;
 
-        int spawnersInsideChunk = (int) plugin.getNMSAdapter().getTileEntities(chunk, blockState -> blockState instanceof CreatureSpawner).count();
-
-        return spawnersInsideChunk >= chunkLimit;
+        return plugin.getSystemManager().getStackedSpawners(chunk).stream()
+                .filter(stackedSpawner -> !plugin.getSettings().perSpawnerLimit || stackedSpawner.getSpawnedType() == entityType).count() > chunkLimit;
     }
 
 }

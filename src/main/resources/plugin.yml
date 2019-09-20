@@ -10,6 +10,8 @@ loadbefore: [ShopGUIPlus]
 commands:
   stacker:
     description: Main command for the plugin
+  test:
+    description: Test
 permissions:
   wildstacker.*:
     description: Gives access to all the command.

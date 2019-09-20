@@ -33,6 +33,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public final class ProvidersHandler {
@@ -132,12 +133,12 @@ public final class ProvidersHandler {
         return spawnersProvider.getSpawnerItem(spawner, amount);
     }
 
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount){
-        spawnersProvider.dropOrGiveItem(entity, spawner, amount);
+    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource){
+        spawnersProvider.dropOrGiveItem(entity, spawner, amount, explodeSource);
     }
 
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount){
-        spawnersProvider.dropOrGiveItem(player, spawner, amount);
+    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource){
+        spawnersProvider.dropOrGiveItem(player, spawner, amount, isExplodeSource);
     }
 
     public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName){

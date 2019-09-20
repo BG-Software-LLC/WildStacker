@@ -1,12 +1,18 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
+import com.bgsoftware.wildstacker.api.enums.StackResult;
+import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -16,7 +22,11 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-@SuppressWarnings("RedundantIfStatement")
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 public class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
 
     private ItemStack barrelItem;
@@ -102,6 +112,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
     @Override
     public void remove() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::remove);
+            return;
+        }
+
         plugin.getSystemManager().removeStackObject(this);
 
         Query.BARREL_DELETE.getStatementHolder()
@@ -114,6 +129,11 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
     @Override
     public void updateName() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::updateName);
+            return;
+        }
+
         String customName = plugin.getSettings().barrelsCustomName;
 
         if (customName.isEmpty())
@@ -128,71 +148,79 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         customName = customName
                 .replace("{0}", Integer.toString(amount))
-                .replace("{1}", ItemUtil.getFormattedType(barrelItem))
-                .replace("{2}", ItemUtil.getFormattedType(barrelItem).toUpperCase());
+                .replace("{1}", ItemUtils.getFormattedType(barrelItem))
+                .replace("{2}", ItemUtils.getFormattedType(barrelItem).toUpperCase());
         plugin.getProviders().changeLine(this, customName, true);
     }
 
     @Override
-    public Block tryStack() {
-        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
-        int range = plugin.getSettings().spawnersCheckRange;
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
+        if(!plugin.getSettings().barrelsStackingEnabled)
+            return StackCheckResult.NOT_ENABLED;
 
-        Location location = getLocation();
+        return super.runStackCheck(stackedObject);
+    }
 
-        int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-        int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+    @Override
+    public void runStackAsync(Consumer<Optional<Block>> result) {
+        Chunk chunk = getChunk();
 
-        if(chunkMerge) {
-            minX = 0; maxX = 16;
-            minZ = 0; maxZ = 16;
-        }
+        StackService.execute(() -> {
+            boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+            Location blockLocation = getLocation();
 
-        for (int y = maxY; y >= minY; y--) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = chunkMerge ? location.getChunk().getBlock(x, y, z) : location.getWorld().getBlockAt(x, y, z);
-                    if (plugin.getSystemManager().isStackedBarrel(block) && !block.getLocation().equals(location)) {
-                        StackedBarrel targetBarrel = of(block);
-                        if (tryStackInto(targetBarrel))
-                            return targetBarrel.getBlock();
-                    }
+            Stream<StackedBarrel> barrelStream;
+
+            if(chunkMerge){
+                barrelStream = plugin.getSystemManager().getStackedBarrels(chunk).stream();
+            }
+
+            else{
+                int range = plugin.getSettings().barrelsCheckRange;
+                Location location = getLocation();
+
+                int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
+                int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+
+                barrelStream = plugin.getSystemManager().getStackedBarrels().stream()
+                        .filter(stackedBarrel -> {
+                            Location loc = stackedBarrel.getLocation();
+                            return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
+                                    loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
+                                    loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
+                        });
+            }
+
+            Optional<StackedBarrel> barrelOptional = barrelStream
+                    .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
+
+            if(barrelOptional.isPresent()){
+                StackedBarrel targetBarrel = barrelOptional.get();
+
+                StackResult stackResult = runStack(targetBarrel);
+
+                if(stackResult == StackResult.SUCCESS) {
+                    if(result != null)
+                        result.accept(barrelOptional.map(StackedBarrel::getBlock));
+                    return;
                 }
             }
-        }
 
-        updateName();
-        return null;
+            updateName();
+
+            if(result != null)
+                result.accept(Optional.empty());
+        });
     }
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject) {
-        if(!plugin.getSettings().barrelsStackingEnabled)
-            return false;
+    public StackResult runStack(StackedObject stackedObject) {
+        if(!StackService.canStackFromThread())
+            return StackResult.THREAD_CATCHER;
 
-        if(equals(stackedObject) || !(stackedObject instanceof StackedBarrel) || !isSimilar(stackedObject))
-            return false;
-
-        if(!isWhitelisted() || isBlacklisted() || isWorldDisabled())
-            return false;
-
-        StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
-
-        if(!targetBarrel.isWhitelisted() || targetBarrel.isBlacklisted() || targetBarrel.isWorldDisabled())
-            return false;
-
-        int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
-
-        if(getStackLimit() < newStackAmount)
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public boolean tryStackInto(StackedObject stackedObject) {
-        if(!canStackInto(stackedObject))
-            return false;
+        if(runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
+            return StackResult.NOT_SIMILAR;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
         int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
@@ -201,29 +229,37 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         Bukkit.getPluginManager().callEvent(barrelStackEvent);
 
         if(barrelStackEvent.isCancelled())
-            return false;
+            return StackResult.EVENT_CANCELLED;
 
         targetBarrel.setStackAmount(newStackAmount, true);
 
         this.remove();
 
-        return true;
+        if(plugin.getSettings().barrelsParticlesEnabled) {
+            Location location = getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().barrelsParticles)
+                particleWrapper.spawnParticle(location);
+        }
+
+        return StackResult.SUCCESS;
     }
 
     @Override
-    public boolean tryUnstack(int amount) {
+    public UnstackResult runUnstack(int amount) {
         BarrelUnstackEvent barrelUnstackEvent = new BarrelUnstackEvent(this, amount);
         Bukkit.getPluginManager().callEvent(barrelUnstackEvent);
 
         if(barrelUnstackEvent.isCancelled())
-            return false;
+            return UnstackResult.EVENT_CANCELLED;
 
-        setStackAmount(stackAmount - amount, true);
+        int stackAmount = this.stackAmount - amount;
+
+        setStackAmount(stackAmount, true);
 
         if(stackAmount < 1)
             remove();
 
-        return true;
+        return UnstackResult.SUCCESS;
     }
 
     @Override

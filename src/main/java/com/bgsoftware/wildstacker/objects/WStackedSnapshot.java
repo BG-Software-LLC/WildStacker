@@ -19,10 +19,7 @@ public final class WStackedSnapshot implements StackedSnapshot {
     private final Map<Location, Map.Entry<Integer, EntityType>> stackedSpawners = new HashMap<>();
     private final Map<Location, Map.Entry<Integer, Material>> stackedBarrels = new HashMap<>();
 
-    public WStackedSnapshot(Chunk chunk, boolean loadData){
-//        if(loadData)
-//            plugin.getDataHandler().loadChunkData(chunk, false);
-
+    public WStackedSnapshot(Chunk chunk){
         for(StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners(chunk)){
             stackedSpawners.put(stackedSpawner.getLocation(), new Map.Entry<Integer, EntityType>() {
                 @Override

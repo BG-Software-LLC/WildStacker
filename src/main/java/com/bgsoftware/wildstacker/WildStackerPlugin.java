@@ -27,6 +27,8 @@ import com.bgsoftware.wildstacker.listeners.ItemsListener;
 import com.bgsoftware.wildstacker.listeners.NoClaimConflictListener;
 import com.bgsoftware.wildstacker.listeners.PlayersListener;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
+import com.bgsoftware.wildstacker.listeners.StewListener;
+import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
@@ -38,7 +40,9 @@ import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
+import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -66,11 +70,12 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     public void onEnable() {
         plugin = this;
         new Metrics(this);
-        ReflectionUtil.init();
+        ReflectionUtils.init();
 
         log("******** ENABLE START ********");
 
         loadNMSAdapter();
+        GlowEnchantment.registerEnchantment();
 
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
@@ -91,6 +96,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
         getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
+        getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
+        getServer().getPluginManager().registerEvents(new StewListener(this), this);
         EventsListener.register(this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
@@ -138,7 +145,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 PluginHook_Novucs.register(this);
 
             //Set WildStacker as SpawnersProvider with ShopGUIPlus
-            if (ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
+            if (ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
                 PluginHook_SpawnerProvider.register();
         });
     }
@@ -169,6 +176,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("Terminating all database threads...");
         Executor.stop();
+        StackService.stop();
     }
 
     private void loadAPI(){

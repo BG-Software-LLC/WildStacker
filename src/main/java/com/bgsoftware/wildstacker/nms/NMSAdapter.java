@@ -2,7 +2,9 @@ package com.bgsoftware.wildstacker.nms;
 
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.block.BlockState;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -75,5 +77,13 @@ public interface NMSAdapter {
     void playPickupAnimation(LivingEntity livingEntity, Item item);
 
     void playDeathSound(LivingEntity entity);
+
+    void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
+
+    void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
+
+    Enchantment getGlowEnchant();
+
+    ItemStack getPlayerSkull(String texture);
 
 }

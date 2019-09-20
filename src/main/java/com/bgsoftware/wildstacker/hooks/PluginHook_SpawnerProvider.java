@@ -1,10 +1,10 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtil;
-import com.bgsoftware.wildstacker.utils.items.ItemUtil;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtil;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,7 +22,7 @@ public final class PluginHook_SpawnerProvider {
     public static void register(){
         if (!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
                 !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
-            if(ReflectionUtil.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
+            if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
                     new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
                 WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
             }
@@ -38,17 +38,20 @@ public final class PluginHook_SpawnerProvider {
 
         @Override
         public ItemStack getSpawnerItem(EntityType entityType) {
-            return ItemUtil.getSpawnerItem(entityType, 1);
+            return ItemUtils.getSpawnerItem(entityType, 1);
         }
 
         @Override
         public EntityType getSpawnerEntityType(ItemStack itemStack) {
-            try {
-                return ItemUtil.getEntityType(itemStack).toBukkit();
-            }catch(Exception ex){
-                ex.printStackTrace();
-                return EntityType.UNKNOWN;
+            EntityType entityType = EntityType.UNKNOWN;
+
+            if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
+                BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
+                CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
+                entityType = creatureSpawner.getSpawnedType();
             }
+
+            return entityType;
         }
 
         boolean register(){
@@ -110,7 +113,7 @@ public final class PluginHook_SpawnerProvider {
 
         @Override
         public String getSpawnerEntityName(ItemStack itemStack) {
-            return EntityUtil.getFormattedType(getSpawnerEntityId(itemStack));
+            return EntityUtils.getFormattedType(getSpawnerEntityId(itemStack));
         }
 
         boolean register(){

@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.enums.StackCheck;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.entity.LivingEntity;

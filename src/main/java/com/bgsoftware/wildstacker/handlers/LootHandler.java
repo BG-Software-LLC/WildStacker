@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.loot.custom.LootTableDropEdit;
 import com.bgsoftware.wildstacker.loot.custom.LootTableEditDrops;
 import com.bgsoftware.wildstacker.loot.custom.LootTableEpicSpawners;
 import com.bgsoftware.wildstacker.loot.custom.LootTableStackSpawners;
-import com.bgsoftware.wildstacker.utils.FileUtil;
+import com.bgsoftware.wildstacker.utils.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -55,95 +55,95 @@ public final class LootHandler {
     }
 
     private void initAllLootTables(){
-        FileUtil.saveResource("loottables/bat.json");
-        FileUtil.saveResource("loottables/blaze.json");
+        FileUtils.saveResource("loottables/bat.json");
+        FileUtils.saveResource("loottables/blaze.json");
         if(containsEntity("CAT"))
-            FileUtil.saveResource("loottables/cat.json");
-        FileUtil.saveResource("loottables/cave_spider.json");
-        FileUtil.saveResource("loottables/chicken.json");
+            FileUtils.saveResource("loottables/cat.json");
+        FileUtils.saveResource("loottables/cave_spider.json");
+        FileUtils.saveResource("loottables/chicken.json");
         if(containsEntity("COD"))
-            FileUtil.saveResource("loottables/cod.json");
-        FileUtil.saveResource("loottables/cow.json");
-        FileUtil.saveResource("loottables/creeper.json");
+            FileUtils.saveResource("loottables/cod.json");
+        FileUtils.saveResource("loottables/cow.json");
+        FileUtils.saveResource("loottables/creeper.json");
         if(containsEntity("DOLPHIN"))
-            FileUtil.saveResource("loottables/dolphin.json");
-        FileUtil.saveResource("loottables/donkey.json");
+            FileUtils.saveResource("loottables/dolphin.json");
+        FileUtils.saveResource("loottables/donkey.json");
         if(containsEntity("DROWNED"))
-            FileUtil.saveResource("loottables/drowned.json");
-        FileUtil.saveResource("loottables/elder_guardian.json");
-        FileUtil.saveResource("loottables/ender_dragon.json");
-        FileUtil.saveResource("loottables/enderman.json");
-        FileUtil.saveResource("loottables/endermite.json");
+            FileUtils.saveResource("loottables/drowned.json");
+        FileUtils.saveResource("loottables/elder_guardian.json");
+        FileUtils.saveResource("loottables/ender_dragon.json");
+        FileUtils.saveResource("loottables/enderman.json");
+        FileUtils.saveResource("loottables/endermite.json");
         if(containsEntity("EVOKER"))
-            FileUtil.saveResource("loottables/evoker.json");
+            FileUtils.saveResource("loottables/evoker.json");
         if(containsEntity("FOX"))
-            FileUtil.saveResource("loottables/fox.json");
-        FileUtil.saveResource("loottables/ghast.json");
-        FileUtil.saveResource("loottables/giant.json");
-        FileUtil.saveResource("loottables/guardian.json");
-        FileUtil.saveResource("loottables/horse.json");
+            FileUtils.saveResource("loottables/fox.json");
+        FileUtils.saveResource("loottables/ghast.json");
+        FileUtils.saveResource("loottables/giant.json");
+        FileUtils.saveResource("loottables/guardian.json");
+        FileUtils.saveResource("loottables/horse.json");
         if(containsEntity("HUSK"))
-            FileUtil.saveResource("loottables/husk.json");
+            FileUtils.saveResource("loottables/husk.json");
         if(containsEntity("ILLUSIONER"))
-            FileUtil.saveResource("loottables/illusioner.json");
-        FileUtil.saveResource("loottables/iron_golem.json");
+            FileUtils.saveResource("loottables/illusioner.json");
+        FileUtils.saveResource("loottables/iron_golem.json");
         if(containsEntity("LLAMA"))
-            FileUtil.saveResource("loottables/llama.json");
-        FileUtil.saveResource("loottables/magma_cube.json");
-        FileUtil.saveResource("loottables/mule.json");
-        FileUtil.saveResource("loottables/mooshroom.json");
-        FileUtil.saveResource("loottables/ocelot.json");
+            FileUtils.saveResource("loottables/llama.json");
+        FileUtils.saveResource("loottables/magma_cube.json");
+        FileUtils.saveResource("loottables/mule.json");
+        FileUtils.saveResource("loottables/mooshroom.json");
+        FileUtils.saveResource("loottables/ocelot.json");
         if(containsEntity("PANDA"))
-            FileUtil.saveResource("loottables/panda.json");
+            FileUtils.saveResource("loottables/panda.json");
         if(containsEntity("PARROT"))
-            FileUtil.saveResource("loottables/parrot.json");
+            FileUtils.saveResource("loottables/parrot.json");
         if(containsEntity("PHANTOM"))
-            FileUtil.saveResource("loottables/phantom.json");
-        FileUtil.saveResource("loottables/pig.json");
+            FileUtils.saveResource("loottables/phantom.json");
+        FileUtils.saveResource("loottables/pig.json");
         if(containsEntity("PILLAGER"))
-            FileUtil.saveResource("loottables/pillager.json");
+            FileUtils.saveResource("loottables/pillager.json");
         if(containsEntity("POLAR_BEAR"))
-            FileUtil.saveResource("loottables/polar_bear.json");
+            FileUtils.saveResource("loottables/polar_bear.json");
         if(containsEntity("PUFFERFISH"))
-            FileUtil.saveResource("loottables/pufferfish.json");
-        FileUtil.saveResource("loottables/rabbit.json");
+            FileUtils.saveResource("loottables/pufferfish.json");
+        FileUtils.saveResource("loottables/rabbit.json");
         if(containsEntity("RAVAGER"))
-            FileUtil.saveResource("loottables/ravager.json");
+            FileUtils.saveResource("loottables/ravager.json");
         if(containsEntity("SALMON"))
-            FileUtil.saveResource("loottables/salmon.json");
-        FileUtil.saveResource("loottables/sheep.json");
+            FileUtils.saveResource("loottables/salmon.json");
+        FileUtils.saveResource("loottables/sheep.json");
         if(containsEntity("SHULKER"))
-            FileUtil.saveResource("loottables/shulker.json");
-        FileUtil.saveResource("loottables/silverfish.json");
-        FileUtil.saveResource("loottables/skeleton.json");
-        FileUtil.saveResource("loottables/skeleton_horse.json");
-        FileUtil.saveResource("loottables/slime.json");
-        FileUtil.saveResource("loottables/snowman.json");
-        FileUtil.saveResource("loottables/spider.json");
-        FileUtil.saveResource("loottables/squid.json");
+            FileUtils.saveResource("loottables/shulker.json");
+        FileUtils.saveResource("loottables/silverfish.json");
+        FileUtils.saveResource("loottables/skeleton.json");
+        FileUtils.saveResource("loottables/skeleton_horse.json");
+        FileUtils.saveResource("loottables/slime.json");
+        FileUtils.saveResource("loottables/snowman.json");
+        FileUtils.saveResource("loottables/spider.json");
+        FileUtils.saveResource("loottables/squid.json");
         if(containsEntity("STRAY"))
-            FileUtil.saveResource("loottables/stray.json");
+            FileUtils.saveResource("loottables/stray.json");
         if(containsEntity("TRADER_LLAMA"))
-            FileUtil.saveResource("loottables/trader_llama.json");
+            FileUtils.saveResource("loottables/trader_llama.json");
         if(containsEntity("TROPICAL_FISH"))
-            FileUtil.saveResource("loottables/tropical_fish.json");
+            FileUtils.saveResource("loottables/tropical_fish.json");
         if(containsEntity("TURTLE"))
-            FileUtil.saveResource("loottables/turtle.json");
+            FileUtils.saveResource("loottables/turtle.json");
         if(containsEntity("VEX"))
-            FileUtil.saveResource("loottables/vex.json");
-        FileUtil.saveResource("loottables/villager.json");
+            FileUtils.saveResource("loottables/vex.json");
+        FileUtils.saveResource("loottables/villager.json");
         if(containsEntity("VINDICATOR"))
-            FileUtil.saveResource("loottables/vindicator.json");
+            FileUtils.saveResource("loottables/vindicator.json");
         if(containsEntity("WANDERING_TRADER"))
-            FileUtil.saveResource("loottables/wandering_trader.json");
-        FileUtil.saveResource("loottables/witch.json");
-        FileUtil.saveResource("loottables/wither_skeleton.json");
-        FileUtil.saveResource("loottables/wither.json");
-        FileUtil.saveResource("loottables/wolf.json");
-        FileUtil.saveResource("loottables/zombie.json");
-        FileUtil.saveResource("loottables/zombie_horse.json");
-        FileUtil.saveResource("loottables/zombie_pigman.json");
-        FileUtil.saveResource("loottables/zombie_villager.json");
+            FileUtils.saveResource("loottables/wandering_trader.json");
+        FileUtils.saveResource("loottables/witch.json");
+        FileUtils.saveResource("loottables/wither_skeleton.json");
+        FileUtils.saveResource("loottables/wither.json");
+        FileUtils.saveResource("loottables/wolf.json");
+        FileUtils.saveResource("loottables/zombie.json");
+        FileUtils.saveResource("loottables/zombie_horse.json");
+        FileUtils.saveResource("loottables/zombie_pigman.json");
+        FileUtils.saveResource("loottables/zombie_villager.json");
     }
 
     @SuppressWarnings("WeakerAccess")
