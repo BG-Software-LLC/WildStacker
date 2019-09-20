@@ -238,9 +238,6 @@ public final class ConfigComments {
 
     @Comment("")
     @Comment("How much time should be passed between auto-stacking? (in ticks)")
-    @Comment("Use it on your own risk. Every run, the plugin will go over *all* the entities")
-    @Comment("on your server and will try to stack *each* one of them. It may cause lag with incorrect value.")
-    @Comment("I recommend setting it to at least 10 seconds (200 ticks)")
     @Comment("If you wish to disable the auto-stacking task, set the stack-interval to 0.")
     public static String ENTITIES_STACK_INTERVAL = "entities.stack-interval";
 

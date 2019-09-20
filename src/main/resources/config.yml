@@ -205,9 +205,6 @@ entities:
     - '^[0-9]*$'
 
   # How much time should be passed between auto-stacking? (in ticks)
-  # Use it on your own risk. Every run, the plugin will go over *all* the entities
-  # on your server and will try to stack *each* one of them. It may cause lag with incorrect value.
-  # I recommend setting it to at least 10 seconds (200 ticks)
   # If you wish to disable the auto-stacking task, set the stack-interval to 0.
   stack-interval: 0
 
