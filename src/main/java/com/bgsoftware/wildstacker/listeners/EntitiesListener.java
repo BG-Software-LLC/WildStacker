@@ -98,6 +98,7 @@ public final class EntitiesListener implements Listener {
 
     private Set<UUID> deadEntities = new HashSet<>();
     private Set<UUID> noDeathEvent = new HashSet<>();
+    private Set<UUID> alreadyDead = new HashSet<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
@@ -143,12 +144,15 @@ public final class EntitiesListener implements Listener {
             else
                 e.setCancelled(true);
 
+            if(alreadyDead.contains(e.getEntity().getUniqueId()))
+                return;
+
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
 
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
-                deadEntities.add(livingEntity.getUniqueId());
+                alreadyDead.add(livingEntity.getUniqueId());
 
                 if (e instanceof EntityDamageByEntityEvent) {
                     if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
@@ -170,6 +174,8 @@ public final class EntitiesListener implements Listener {
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(null);
                     Executor.sync(() -> {
+                        deadEntities.add(livingEntity.getUniqueId());
+
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
                         stackedEntity.setStackAmount(stackAmount, false);
 
@@ -205,6 +211,7 @@ public final class EntitiesListener implements Listener {
                             }
                         }
 
+                        alreadyDead.remove(e.getEntity().getUniqueId());
                         deadEntities.remove(e.getEntity().getUniqueId());
                     });
                 });
