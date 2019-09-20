@@ -43,12 +43,15 @@ public final class PluginHook_SpawnerProvider {
 
         @Override
         public EntityType getSpawnerEntityType(ItemStack itemStack) {
-            try {
-                return ItemUtils.getEntityType(itemStack).toBukkit();
-            }catch(Exception ex){
-                ex.printStackTrace();
-                return EntityType.UNKNOWN;
+            EntityType entityType = EntityType.UNKNOWN;
+
+            if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
+                BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
+                CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
+                entityType = creatureSpawner.getSpawnedType();
             }
+
+            return entityType;
         }
 
         boolean register(){
