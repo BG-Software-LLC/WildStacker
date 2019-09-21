@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import io.lumine.xikage.mythicmobs.api.bukkit.events.MythicMobSpawnEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,7 +19,11 @@ public final class MythicMobsListener implements Listener {
 
     @EventHandler
     public void onMythicMobSpawn(MythicMobSpawnEvent e){
+        if(!EntityUtils.isStackable(e.getEntity()))
+            return;
+
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
         if(plugin.getSettings().entitiesStackingEnabled && stackedEntity.isWhitelisted() && !stackedEntity.isBlacklisted() && !stackedEntity.isWorldDisabled()) {
             stackedEntity.setSpawnCause(SpawnCause.MYTHIC_MOBS);
         }else {
