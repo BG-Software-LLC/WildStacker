@@ -28,6 +28,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -85,9 +86,9 @@ public final class SystemHandler implements SystemManager {
         else if(stackedObject instanceof StackedItem)
             dataHandler.CACHED_OBJECTS.remove(((StackedItem) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedSpawner)
-            dataHandler.CACHED_OBJECTS.remove(((StackedSpawner) stackedObject).getLocation());
+            dataHandler.CACHED_OBJECTS.remove(stackedObject.getLocation());
         else if(stackedObject instanceof StackedBarrel)
-            dataHandler.CACHED_OBJECTS.remove(((StackedBarrel) stackedObject).getLocation());
+            dataHandler.CACHED_OBJECTS.remove(stackedObject.getLocation());
     }
 
     @Override
@@ -240,7 +241,7 @@ public final class SystemHandler implements SystemManager {
     public List<StackedSpawner> getStackedSpawners(){
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedSpawner)
-                .map(stackedObject -> getStackedSpawner(((StackedSpawner) stackedObject).getLocation()))
+                .map(stackedObject -> getStackedSpawner(stackedObject.getLocation()))
                 .collect(Collectors.toList());
     }
 
@@ -254,7 +255,7 @@ public final class SystemHandler implements SystemManager {
     public List<StackedBarrel> getStackedBarrels(){
         return dataHandler.CACHED_OBJECTS.values().stream()
                 .filter(stackedObject -> stackedObject instanceof StackedBarrel)
-                .map(stackedObject -> getStackedBarrel(((StackedBarrel) stackedObject).getLocation()))
+                .map(stackedObject -> getStackedBarrel(stackedObject.getLocation()))
                 .collect(Collectors.toList());
     }
 
@@ -310,6 +311,8 @@ public final class SystemHandler implements SystemManager {
                 }
             }
         }
+
+        StackService.clearCache();
 
         plugin.getProviders().clearHolograms();
     }

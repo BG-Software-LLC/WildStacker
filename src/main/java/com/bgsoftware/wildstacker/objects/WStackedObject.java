@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -37,6 +38,9 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         if(updateName)
             updateName();
     }
+
+    @Override
+    public abstract Location getLocation();
 
     public abstract Chunk getChunk();
 
@@ -107,7 +111,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
-        StackService.execute(() -> {
+        StackService.execute(this, () -> {
             StackResult _stackResult = runStack(stackedObject);
             if(stackResult != null)
                 stackResult.accept(_stackResult);

@@ -40,6 +40,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     @Override
+    public Location getLocation() {
+        return object.getLocation();
+    }
+
+    @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
         if(stackAmount > 0) {
@@ -164,13 +169,19 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         if(superResult != StackCheckResult.SUCCESS)
             return superResult;
 
-        StackedItem targetItem = (StackedItem) stackedObject;
-
         if(!plugin.getSettings().itemsMaxPickupDelay && getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
             return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
+        if(object.isDead())
+            return StackCheckResult.ALREADY_DEAD;
+
+        StackedItem targetItem = (StackedItem) stackedObject;
+
         if(!plugin.getSettings().itemsMaxPickupDelay && targetItem.getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
             return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
+
+        if(targetItem.getItem().isDead())
+            return StackCheckResult.TARGET_ALREADY_DEAD;
 
         if(getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
             return StackCheckResult.INSIDE_PORTAL;
@@ -187,7 +198,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
-        StackService.execute(() -> {
+        StackService.execute(this, () -> {
             Location itemLocation = getItem().getLocation();
 
             Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)

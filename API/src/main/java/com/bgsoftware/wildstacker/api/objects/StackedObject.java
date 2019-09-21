@@ -3,11 +3,17 @@ package com.bgsoftware.wildstacker.api.objects;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+import org.bukkit.Location;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public interface StackedObject<T> {
+
+    /**
+     * Get the location of the object.
+     */
+    Location getLocation();
 
     /**
      * Get the stack amount

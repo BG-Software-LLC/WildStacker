@@ -75,6 +75,27 @@ public final class ItemUtils {
         if(itemStack.getType() == Material.AIR) return;
         int amount = itemStack.getAmount();
 
+//        if(plugin.getSettings().itemsStackingEnabled){
+//            ItemStack cloned = itemStack.clone();
+//            cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+//            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
+//            stackedItem.setStackAmount(amount, true);
+//        }
+//
+//        else {
+//            for (int i = 0; i < amount / 64; i++) {
+//                ItemStack cloned = itemStack.clone();
+//                cloned.setAmount(64);
+//                location.getWorld().dropItemNaturally(location, cloned);
+//            }
+//
+//            if (amount % 64 > 0) {
+//                ItemStack cloned = itemStack.clone();
+//                cloned.setAmount(amount % 64);
+//                location.getWorld().dropItemNaturally(location, cloned);
+//            }
+//        }
+
         for (int i = 0; i < amount / 64; i++) {
             ItemStack cloned = itemStack.clone();
             cloned.setAmount(64);
@@ -86,6 +107,7 @@ public final class ItemUtils {
             cloned.setAmount(amount % 64);
             location.getWorld().dropItemNaturally(location, cloned);
         }
+
     }
 
     public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount){

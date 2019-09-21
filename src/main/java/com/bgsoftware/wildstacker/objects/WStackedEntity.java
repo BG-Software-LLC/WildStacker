@@ -64,6 +64,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     @Override
+    public Location getLocation() {
+        return object.getLocation();
+    }
+
+    @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
         if(!isCached())
@@ -234,7 +239,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
                 entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player));
 
-        StackService.execute(() -> {
+        StackService.execute(this, () -> {
             int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
             Location entityLocation = getLivingEntity().getLocation();
 
@@ -376,7 +381,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        StackService.execute(() -> {
+        StackService.execute(this, () -> {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
             if(linkedEntity != null && runStack(WStackedEntity.of(linkedEntity)) == StackResult.SUCCESS){

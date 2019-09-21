@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.api.objects;
 
-import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -18,11 +17,6 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
      * Get the spawned-type of the creature-spawner.
      */
     EntityType getSpawnedType();
-
-    /**
-     * Get the location of the creature-spawner
-     */
-    Location getLocation();
 
     /**
      * Get the entity that is linked into this spawner.

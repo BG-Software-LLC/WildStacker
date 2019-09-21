@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.api.objects;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -22,11 +21,6 @@ public interface StackedBarrel extends StackedObject<Block> {
      * Get the data value of the block that is inside the barrel..
      */
     short getData();
-
-    /**
-     * Get the location of the barrel.
-     */
-    Location getLocation();
 
     /**
      * Display the block armor-stand inside the cauldron.
