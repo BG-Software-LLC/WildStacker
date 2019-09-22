@@ -18,6 +18,7 @@ import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -34,7 +35,6 @@ import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -211,7 +211,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(targetEntity.getLivingEntity().isDead() || !targetEntity.getLivingEntity().isValid())
             return StackCheckResult.TARGET_ALREADY_DEAD;
 
-        if(targetEntity.getLivingEntity().hasMetadata("corpse"))
+        if(EntityStorage.hasMetadata(targetEntity.getLivingEntity(), "corpse"))
             return StackCheckResult.CORPSE;
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
@@ -351,7 +351,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         else {
             Executor.sync(() -> {
-                object.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
+                EntityStorage.setMetadata(object, "corpse", null);
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
                 plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);

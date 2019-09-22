@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -52,7 +53,6 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +83,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
-        if(e.getEntity().hasMetadata("corpse")){
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse")){
             e.getDrops().clear();
             e.setDroppedExp(0);
         }
@@ -91,7 +91,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityPickup(EntityPickupItemEvent e){
-        if(e.getEntity().hasMetadata("corpse")){
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse")){
             e.setCancelled(true);
         }
     }
@@ -103,7 +103,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
         //Checks if the entity is not a corpse.
-        if(e.getEntity().hasMetadata("corpse"))
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse"))
             return;
 
         if(deadEntities.contains(e.getEntity().getUniqueId())){
@@ -273,10 +273,11 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getSettings().entitiesStackingEnabled)
             return;
 
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER || e.getEntity().hasMetadata("corpse"))
+        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER ||
+                EntityStorage.hasMetadata(e.getEntity(), "corpse"))
             return;
 
-        e.getEntity().setMetadata("spawn-cause", new FixedMetadataValue(plugin, SpawnCause.valueOf(e.getSpawnReason())));
+        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setSpawnCause(SpawnCause.valueOf(e.getSpawnReason()));
 
@@ -576,7 +577,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler
         public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent e){
-            if(e.getEntity().hasMetadata("corpse"))
+            if(EntityStorage.hasMetadata(e.getEntity(), "corpse"))
                 return;
 
             e.setCancelled(true);

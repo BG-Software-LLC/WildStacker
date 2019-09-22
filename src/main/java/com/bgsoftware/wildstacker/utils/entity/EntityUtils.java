@@ -29,7 +29,8 @@ public final class EntityUtils {
             return false;
 
         //EpicSpawners drops data
-        if(en1.getLivingEntity().hasMetadata("ES") != en2.getLivingEntity().hasMetadata("ES"))
+        if(EntityStorage.hasMetadata(en1.getLivingEntity(), "ES") !=
+                EntityStorage.hasMetadata(en2.getLivingEntity(), "ES"))
             return false;
 
         return EntityData.of(en1).equals(EntityData.of(en2));

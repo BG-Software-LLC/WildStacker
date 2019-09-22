@@ -40,6 +40,7 @@ import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -173,6 +174,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
             } catch (Exception ignored) { }
         }
+
+        EntityStorage.clearCache();
 
         log("Terminating all database threads...");
         Executor.stop();

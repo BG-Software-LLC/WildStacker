@@ -24,6 +24,7 @@ import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -43,7 +44,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,8 +99,8 @@ public final class SystemHandler implements SystemManager {
             return stackedEntity;
 
         //Entity wasn't found, creating a new object
-        if(livingEntity.hasMetadata("spawn-cause"))
-            stackedEntity = new WStackedEntity(livingEntity, 1, SpawnCause.valueOf(livingEntity.getMetadata("spawn-cause").get(0).value().toString()));
+        if(EntityStorage.hasMetadata(livingEntity, "spawn-cause"))
+            stackedEntity = new WStackedEntity(livingEntity, 1, EntityStorage.getMetadata(livingEntity, "spawn-cause", SpawnCause.class));
         else
             stackedEntity = new WStackedEntity(livingEntity);
 
@@ -431,7 +431,7 @@ public final class SystemHandler implements SystemManager {
         LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(),
                 stackedEntity.getType().getEntityClass(), SpawnCause.CUSTOM);
         if(livingEntity != null) {
-            livingEntity.setMetadata("corpse", new FixedMetadataValue(plugin, ""));
+            EntityStorage.setMetadata(livingEntity, "corpse", null);
             if(stackedEntity.getLivingEntity() instanceof Slime){
                 ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
             }

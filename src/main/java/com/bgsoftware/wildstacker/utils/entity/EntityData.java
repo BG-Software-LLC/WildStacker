@@ -4,9 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.metadata.MetadataValue;
 
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
@@ -14,25 +12,24 @@ public final class EntityData {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private Object nbtTagCompound;
-    private List<MetadataValue> epicSpawners;
+    private Object nbtTagCompound = null;
+    private Object epicSpawners = null;
 
     private EntityData(){
-        nbtTagCompound = null;
-        epicSpawners = null;
     }
 
     public void loadEntityData(LivingEntity livingEntity){
         nbtTagCompound = plugin.getNMSAdapter().getNBTTagCompound(livingEntity);
-        if(livingEntity.hasMetadata("ES"))
-            epicSpawners = livingEntity.getMetadata("ES");
+        if(EntityStorage.hasMetadata(livingEntity, "ES"))
+            epicSpawners = EntityStorage.getMetadata(livingEntity, "ES", Object.class);
+
     }
 
     public void applyEntityData(LivingEntity livingEntity){
         if(nbtTagCompound != null)
             plugin.getNMSAdapter().setNBTTagCompound(livingEntity, nbtTagCompound);
         if(epicSpawners != null)
-            epicSpawners.forEach(value -> livingEntity.setMetadata("ES", value));
+            EntityStorage.setMetadata(livingEntity, "ES", epicSpawners);
     }
 
     @Override

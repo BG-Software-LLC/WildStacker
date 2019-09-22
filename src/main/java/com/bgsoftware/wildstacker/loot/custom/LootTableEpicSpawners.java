@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot.custom;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.loot.LootTable;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.songoda.epicspawners.EpicSpawners;
 import com.songoda.epicspawners.spawners.spawner.SpawnerData;
 import org.bukkit.entity.LivingEntity;
@@ -18,8 +19,9 @@ public final class LootTableEpicSpawners extends LootTableCustom {
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
-        if(livingEntity.hasMetadata("ES") && livingEntity.getMetadata("ES").size() > 0) {
-            SpawnerData spawnerData = EpicSpawners.getInstance().getSpawnerManager().getSpawnerData((livingEntity.getMetadata("ES").get(0)).asString());
+        if(EntityStorage.hasMetadata(livingEntity, "ES")){
+            SpawnerData spawnerData = EpicSpawners.getInstance().getSpawnerManager().getSpawnerData(
+                    EntityStorage.getMetadata(livingEntity, "ES", Object.class).toString());
             if(spawnerData != null) {
                 drops.addAll(spawnerData.getEntityDroppedItems());
 
