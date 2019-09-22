@@ -43,7 +43,7 @@ public final class EditorListener implements Listener {
 
     private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
     private List<String> inventoryTitles = Arrays.asList("Add items here", "WildStacker", "General Settings", "Items Settings",
-            "Entities Settings", "Spawners Settings", "Barrels Settings");
+            "Entities Settings", "Spawners Settings", "Barrels Settings", "Buckets Settings", "Stews Settings");
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClickMonitor(InventoryClickEvent e){
@@ -136,16 +136,22 @@ public final class EditorListener implements Listener {
             lastInventories.put(player.getUniqueId(), "entitiesEditor");
         }
 
-        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings")){
-            e.setCancelled(true);
-            slotPrefix = "BUCKETS_SLOT_";
-            lastInventories.put(player.getUniqueId(), "bucketsEditor");
-        }
-
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings")){
             e.setCancelled(true);
             slotPrefix = "SPAWNERS_SLOT_";
             lastInventories.put(player.getUniqueId(), "spawnersEditor");
+        }
+
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings")){
+            e.setCancelled(true);
+            slotPrefix = "BARRELS_SLOT_";
+            lastInventories.put(player.getUniqueId(), "barrelsEditor");
+        }
+
+        else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings")){
+            e.setCancelled(true);
+            slotPrefix = "BUCKETS_SLOT_";
+            lastInventories.put(player.getUniqueId(), "bucketsEditor");
         }
 
         else if(e.getView().getTitle().equals("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings")){
