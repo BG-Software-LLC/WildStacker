@@ -1,7 +1,9 @@
 package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
+import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -75,39 +77,26 @@ public final class ItemUtils {
         if(itemStack.getType() == Material.AIR) return;
         int amount = itemStack.getAmount();
 
-//        if(plugin.getSettings().itemsStackingEnabled){
-//            ItemStack cloned = itemStack.clone();
-//            cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
-//            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
-//            stackedItem.setStackAmount(amount, true);
-//        }
-//
-//        else {
-//            for (int i = 0; i < amount / 64; i++) {
-//                ItemStack cloned = itemStack.clone();
-//                cloned.setAmount(64);
-//                location.getWorld().dropItemNaturally(location, cloned);
-//            }
-//
-//            if (amount % 64 > 0) {
-//                ItemStack cloned = itemStack.clone();
-//                cloned.setAmount(amount % 64);
-//                location.getWorld().dropItemNaturally(location, cloned);
-//            }
-//        }
-
-        for (int i = 0; i < amount / 64; i++) {
+        if(plugin.getSettings().itemsStackingEnabled){
             ItemStack cloned = itemStack.clone();
-            cloned.setAmount(64);
-            location.getWorld().dropItemNaturally(location, cloned);
+            cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
+            stackedItem.setStackAmount(amount, true);
         }
 
-        if (amount % 64 > 0) {
-            ItemStack cloned = itemStack.clone();
-            cloned.setAmount(amount % 64);
-            location.getWorld().dropItemNaturally(location, cloned);
-        }
+        else {
+            for (int i = 0; i < amount / 64; i++) {
+                ItemStack cloned = itemStack.clone();
+                cloned.setAmount(64);
+                location.getWorld().dropItemNaturally(location, cloned);
+            }
 
+            if (amount % 64 > 0) {
+                ItemStack cloned = itemStack.clone();
+                cloned.setAmount(amount % 64);
+                location.getWorld().dropItemNaturally(location, cloned);
+            }
+        }
     }
 
     public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount){
@@ -380,6 +369,10 @@ public final class ItemUtils {
             if(inHand.equals(inventory.getItem(40)))
                 slot = 40;
         }catch(ArrayIndexOutOfBoundsException ignored){}
+
+        //Player probably ran out of items...
+        if(slot == -1)
+            return;
 
         inventory.setItem(slot, itemStack);
     }

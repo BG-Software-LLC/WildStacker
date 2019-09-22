@@ -203,7 +203,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
             Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
                     .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distance(itemLocation)));
+                    .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 
             if(itemOptional.isPresent()){
                 StackedItem targetItem = itemOptional.get();

@@ -196,7 +196,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
             Optional<StackedSpawner> spawnerOptional = spawnerStream
                     .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
             if(spawnerOptional.isPresent()){
                 StackedSpawner targetSpawner = spawnerOptional.get();
@@ -286,7 +286,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public LivingEntity getLinkedEntity(){
-        if (linkedEntity != null && (!linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
+        if (linkedEntity != null && (linkedEntity.isDead() || !linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
             linkedEntity = null;
         return linkedEntity;
     }

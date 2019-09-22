@@ -193,7 +193,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
             Optional<StackedBarrel> barrelOptional = barrelStream
                     .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getLocation().distance(blockLocation)));
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
             if(barrelOptional.isPresent()){
                 StackedBarrel targetBarrel = barrelOptional.get();

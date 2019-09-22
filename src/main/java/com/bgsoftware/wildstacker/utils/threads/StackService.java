@@ -20,13 +20,19 @@ public final class StackService {
 
     private static final Map<Location, ServiceElement> services = new ConcurrentHashMap<>();
     private static int threadId = 1;
+    private static final Object mutex = new Object();
 
     public static void execute(StackedObject stackedObject, Runnable runnable){
-        getOrCreateService(stackedObject).execute(() -> {
-            synchronized (getOrCreateMutex(stackedObject)){
-                runnable.run();
-            }
-        });
+        if(isStackThread()) {
+            runnable.run();
+        }
+        else {
+            getOrCreateService(stackedObject).execute(() -> {
+                synchronized (mutex) {
+                    runnable.run();
+                }
+            });
+        }
     }
 
     public static ExecutorService getOrCreateService(StackedObject stackedObject){

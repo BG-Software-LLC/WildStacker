@@ -200,7 +200,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(isNameBlacklisted())
             return StackCheckResult.BLACKLISTED_NAME;
 
-        if(object.isDead())
+        if(object.isDead() || !object.isValid())
             return StackCheckResult.ALREADY_DEAD;
 
         StackedEntity targetEntity = (StackedEntity) stackedObject;
@@ -208,7 +208,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(targetEntity.isNameBlacklisted())
             return StackCheckResult.TARGET_BLACKLISTD_NAME;
 
-        if(targetEntity.getLivingEntity().isDead())
+        if(targetEntity.getLivingEntity().isDead() || !targetEntity.getLivingEntity().isValid())
             return StackCheckResult.TARGET_ALREADY_DEAD;
 
         if(targetEntity.getLivingEntity().hasMetadata("corpse"))
@@ -234,6 +234,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> runStackAsync(result));
+            return;
+        }
+
         int range = plugin.getSettings().entitiesCheckRange;
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
@@ -247,7 +252,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                     .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                     .collect(Collectors.toSet());
             Optional<StackedEntity> entityOptional = filteredEntities.stream()
-                    .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distance(entityLocation)));
+                    .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
 
             if(entityOptional.isPresent()) {
                 StackedEntity targetEntity = entityOptional.get();
@@ -384,12 +389,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         StackService.execute(this, () -> {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
-            if(linkedEntity != null && runStack(WStackedEntity.of(linkedEntity)) == StackResult.SUCCESS){
-                if(result != null)
-                    result.accept(Optional.of(linkedEntity));
-                return;
+            if(linkedEntity != null){
+                StackResult stackResult = runStack(WStackedEntity.of(linkedEntity));
+                if(stackResult == StackResult.SUCCESS) {
+                    if (result != null)
+                        result.accept(Optional.of(linkedEntity));
+                    return;
+                }
             }
-
 
             runStackAsync(entityOptional -> {
                 LivingEntity targetEntity = entityOptional.orElse(object);

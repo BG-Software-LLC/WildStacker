@@ -96,7 +96,8 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        stackedBarrel.setStackAmount(ItemUtils.getSpawnerItemAmount(e.getItemInHand()), false);
+        int toPlace = ItemUtils.getSpawnerItemAmount(e.getItemInHand());
+        stackedBarrel.setStackAmount(toPlace, false);
 
         Chunk chunk = e.getBlock().getChunk();
 
@@ -113,13 +114,16 @@ public final class BarrelsListener implements Listener {
                 BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel);
                 Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
-                if(barrelPlaceEvent.isCancelled())
+                if(barrelPlaceEvent.isCancelled()) {
+                    stackedBarrel.remove();
                     return;
+                }
 
                 Executor.sync(() -> {
                     e.getBlockPlaced().setType(Material.CAULDRON);
                     stackedBarrel.createDisplayBlock();
                 }, 1L);
+
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             }
             else {
@@ -130,6 +134,13 @@ public final class BarrelsListener implements Listener {
 
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
+
+            //Removing item from player's inventory
+            if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                ItemStack is = e.getItemInHand().clone();
+                is.setAmount(Math.max(0, is.getAmount() - 1));
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), is);
+            }
         });
     }
 
