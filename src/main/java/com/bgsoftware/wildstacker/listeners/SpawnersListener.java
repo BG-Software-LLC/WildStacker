@@ -160,6 +160,7 @@ public final class SpawnersListener implements Listener {
                     CreatureSpawner creatureSpawner = (CreatureSpawner) e.getBlockPlaced().getState();
                     creatureSpawner.setSpawnedType(entityType);
                     creatureSpawner.update();
+                    stackedSpawner.updateName();
                 }, 1L);
             }
             else{
