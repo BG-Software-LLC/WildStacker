@@ -31,6 +31,10 @@ public final class Executor {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
 
+    public static void async(Runnable runnable, long delay){
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, runnable, delay);
+    }
+
     public static void data(Runnable runnable){
         dataService.execute(runnable);
     }

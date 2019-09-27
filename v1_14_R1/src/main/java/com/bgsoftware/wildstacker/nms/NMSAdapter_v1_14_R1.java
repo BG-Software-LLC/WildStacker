@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import net.minecraft.server.v1_14_R1.ChatMessage;
+import net.minecraft.server.v1_14_R1.ChunkProviderServer;
 import net.minecraft.server.v1_14_R1.EnchantmentManager;
 import net.minecraft.server.v1_14_R1.Entity;
 import net.minecraft.server.v1_14_R1.EntityAnimal;
@@ -14,6 +15,7 @@ import net.minecraft.server.v1_14_R1.EntityItem;
 import net.minecraft.server.v1_14_R1.EntityLiving;
 import net.minecraft.server.v1_14_R1.EntityPlayer;
 import net.minecraft.server.v1_14_R1.EnumItemSlot;
+import net.minecraft.server.v1_14_R1.GameRules;
 import net.minecraft.server.v1_14_R1.ItemStack;
 import net.minecraft.server.v1_14_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_14_R1.NBTTagCompound;
@@ -21,6 +23,8 @@ import net.minecraft.server.v1_14_R1.NBTTagInt;
 import net.minecraft.server.v1_14_R1.NBTTagList;
 import net.minecraft.server.v1_14_R1.NBTTagShort;
 import net.minecraft.server.v1_14_R1.PacketPlayOutCollect;
+import net.minecraft.server.v1_14_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_14_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_14_R1.SoundEffect;
 import net.minecraft.server.v1_14_R1.WorldServer;
 import org.bukkit.Bukkit;
@@ -253,6 +257,15 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     }
 
     @Override
+    public boolean canDropExp(LivingEntity livingEntity){
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
+        boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
+        boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
+        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
+    }
+
+    @Override
     public void updateLastDamageTime(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
@@ -310,7 +323,11 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        ((WorldServer) entityLiving.world).getChunkProvider().broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
+        ChunkProviderServer chunkProvider = ((WorldServer) entityLiving.world).getChunkProvider();
+        chunkProvider.broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
+        //Makes sure the entity is still there.
+        chunkProvider.broadcast(entityItem, new PacketPlayOutSpawnEntity(entityItem));
+        chunkProvider.broadcast(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override

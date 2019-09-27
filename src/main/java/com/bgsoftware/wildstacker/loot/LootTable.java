@@ -26,15 +26,16 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     private final List<LootPair> lootPairs = new ArrayList<>();
     private final int min, max, minExp, maxExp;
-    private final boolean dropEquipment;
+    private final boolean dropEquipment, alwaysDropsExp;
 
-    public LootTable(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment){
+    public LootTable(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment, boolean alwaysDropsExp){
         this.lootPairs.addAll(lootPairs);
         this.min = min;
         this.max = max;
         this.minExp = minExp;
         this.maxExp = maxExp;
         this.dropEquipment = dropEquipment;
+        this.alwaysDropsExp = alwaysDropsExp;
     }
 
     @Override
@@ -110,8 +111,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         int exp = 0;
 
         if(minExp >= 0 && maxExp >= 0){
-            for(int i = 0; i < stackAmount; i++)
-                exp += Random.nextInt(maxExp - minExp + 1) + minExp;
+            if(alwaysDropsExp || plugin.getNMSAdapter().canDropExp(stackedEntity.getLivingEntity())) {
+                for (int i = 0; i < stackAmount; i++)
+                    exp += Random.nextInt(maxExp - minExp + 1) + minExp;
+            }
         }
         else{
             for(int i = 0; i < stackAmount; i++)
@@ -160,6 +163,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     public static LootTable fromJson(JsonObject jsonObject){
         boolean dropEquipment = !jsonObject.has("dropEquipment") || jsonObject.get("dropEquipment").getAsBoolean();
+        boolean alwaysDropsExp = false;
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
         int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : -1;
         int minExp = -1, maxExp = -1;
@@ -168,6 +172,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             JsonObject expObject = jsonObject.getAsJsonObject("exp");
             minExp = expObject.get("min").getAsInt();
             maxExp = expObject.get("max").getAsInt();
+            alwaysDropsExp = expObject.has("always-drop") && expObject.get("always-drop").getAsBoolean();
         }
 
         List<LootPair> lootPairs = new ArrayList<>();
@@ -175,7 +180,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject())));
         }
 
-        return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment);
+        return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);
     }
 
 }

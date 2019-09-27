@@ -246,6 +246,15 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
+    public boolean canDropExp(LivingEntity livingEntity){
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
+        boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
+        boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
+        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean("doMobLoot");
+    }
+
+    @Override
     public void updateLastDamageTime(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);

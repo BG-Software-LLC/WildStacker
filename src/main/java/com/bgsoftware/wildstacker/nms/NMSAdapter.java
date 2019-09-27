@@ -52,6 +52,8 @@ public interface NMSAdapter {
 
     int getEntityExp(LivingEntity livingEntity);
 
+    boolean canDropExp(LivingEntity livingEntity);
+
     void updateLastDamageTime(LivingEntity livingEntity);
 
     void setHealthDirectly(LivingEntity livingEntity, double health);

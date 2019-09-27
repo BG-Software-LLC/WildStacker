@@ -68,6 +68,10 @@ public final class ReflectionUtils {
                             //1.8 Version
                             ServerVersion.getBukkitVersion().contains("R1") ? "bB" : "bC"
             ));
+            methodMap.put(Methods.ENTITY_ALWAYS_GIVES_EXP, entityLivingClass.getDeclaredMethod("alwaysGivesExp"));
+            methodMap.put(Methods.ENTITY_IS_DROP_EXPERIENCE, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_8) ? ServerVersion.getBukkitVersion().contains("R1") ? "aZ" : "ba" : "isDropExperience"
+            ));
 
             try{
                 methodMap.put(Methods.BLOCK_GET_BY_COMBINED_ID, getNMSClass("Block").getMethod("getByCombinedId", int.class));
