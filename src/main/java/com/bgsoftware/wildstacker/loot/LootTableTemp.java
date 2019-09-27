@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class LootTableTemp extends LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
     public LootTableTemp(){
-        super(new ArrayList<>(), -1, -1, -1, -1, false);
+        super(new ArrayList<>(), -1, -1, -1, -1, false, false);
     }
 
 }
