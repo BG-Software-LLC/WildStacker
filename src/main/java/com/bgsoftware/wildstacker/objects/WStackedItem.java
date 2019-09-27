@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -286,9 +287,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     public void giveItemStack(Inventory inventory) {
         ItemStack itemStack = getItemStack();
 
-        int freeSpace = ItemUtils.getFreeSpace(inventory, itemStack);
-        int startAmount = itemStack.getAmount();
-        int giveAmount = Math.min(itemStack.getAmount(), freeSpace);
+        int giveAmount = getStackAmount();
 
         if(giveAmount <= 0)
             return;
@@ -298,36 +297,38 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
          * (If it will, the leftovers will get stacked again - infinite loop)
          */
 
-        if (itemStack.getMaxStackSize() != 64 &&
-                (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX"))) {
-            int amountOfStacks = giveAmount / itemStack.getMaxStackSize();
-            int leftOvers = giveAmount % itemStack.getMaxStackSize();
+        int amountLeft = 0;
+        int maxStackAmount = itemStack.getMaxStackSize();
 
-            itemStack.setAmount(itemStack.getMaxStackSize());
+        if (maxStackAmount != 64 &&
+                (plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")))
+            maxStackAmount = 64;
 
-            for(int i = 0; i < amountOfStacks; i++)
-                giveItem(inventory, itemStack);
+        int amountOfStacks = giveAmount / maxStackAmount;
+        int leftOvers = giveAmount % maxStackAmount;
 
-            if(leftOvers > 0) {
-                itemStack.setAmount(leftOvers);
-                giveItem(inventory, itemStack);
-            }
+        itemStack.setAmount(maxStackAmount);
+
+        for(int i = 0; i < amountOfStacks; i++)
+            amountLeft += giveItem(inventory, itemStack);
+
+        if(leftOvers > 0) {
+            itemStack.setAmount(leftOvers);
+            amountLeft += giveItem(inventory, itemStack);
         }
-        else {
-            itemStack.setAmount(giveAmount);
-            giveItem(inventory, itemStack);
-        }
 
-        setStackAmount(startAmount - giveAmount, true);
+        setStackAmount(amountLeft, true);
     }
 
-    private void giveItem(Inventory inventory, ItemStack itemStack){
-        inventory.addItem(itemStack);
+    private int giveItem(Inventory inventory, ItemStack itemStack){
+        Map<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
 
         if(itemStack.getType().name().contains("BUCKET"))
             ItemUtils.stackBucket(itemStack, inventory);
         if(itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
             ItemUtils.stackStew(itemStack, inventory);
+
+        return additionalItems.values().stream().findFirst().orElse(new ItemStack(Material.STONE, 0)).getAmount();
     }
 
     public static StackedItem of(Entity entity){

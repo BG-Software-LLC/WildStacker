@@ -16,7 +16,6 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -33,25 +32,6 @@ import java.util.List;
 public final class ItemUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-
-    public static int getFreeSpace(Inventory inventory, ItemStack itemStack){
-        int freeSpace = 0, invSize = inventory.getType() == InventoryType.PLAYER ? 36 : inventory.getSize();
-
-        for(int slot = 0; slot < invSize; slot++){
-            ItemStack currentItem = inventory.getItem(slot);
-            if(currentItem == null || currentItem.getType() == Material.AIR)
-                freeSpace += plugin.getSettings().itemsFixStackEnabled ? itemStack.getMaxStackSize() : 64;
-            else if(itemStack.isSimilar(currentItem)) {
-                int amount = currentItem.getAmount(), maxStack = currentItem.getMaxStackSize();
-                if(maxStack < amount)
-                   maxStack = 64;
-
-                freeSpace += maxStack - amount;
-            }
-        }
-
-        return freeSpace;
-    }
 
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
