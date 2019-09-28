@@ -53,8 +53,8 @@ public final class SettingsHandler {
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
-            blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, nerfedSpawning, nerfedWorlds,
-            stackDownTypes, keepLowestHealth, entitiesAutoExpPickup;
+            blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
+            entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
@@ -159,8 +159,9 @@ public final class SettingsHandler {
         blacklistedEntitiesSpawnReasons = cfg.getStringList("entities.spawn-blacklist");
         blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist");
         entitiesInstantKills = cfg.getStringList("entities.instant-kill");
-        nerfedSpawning = cfg.getStringList("entities.nerfed-spawning");
-        nerfedWorlds = cfg.getStringList("entities.nerfed-worlds");
+        entitiesNerfedWhitelist = cfg.getStringList("entities.nerfed-entities.whitelist");
+        entitiesNerfedBlacklist = cfg.getStringList("entities.nerfed-entities.blacklist");
+        entitiesNerfedWorlds = cfg.getStringList("entities.nerfed-entities.worlds");
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
         stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
@@ -385,6 +386,10 @@ public final class SettingsHandler {
             cfg.set("buckets.name-blacklist", cfg.getStringList("items.buckets-stacker.name-blacklist"));
         if(cfg.contains("items.buckets-stacker.max-stack"))
             cfg.set("buckets.max-stack", cfg.getInt("items.buckets-stacker.max-stack"));
+        if(cfg.contains("entities.nerfed-spawning"))
+            cfg.set("entities.nerfed-entities.whitelist", cfg.getStringList("entities.nerfed-spawning"));
+        if(cfg.contains("entities.nerfed-worlds"))
+            cfg.set("entities.nerfed-entities.worlds", cfg.getStringList("entities.nerfed-worlds"));
     }
 
     public static void reload(){

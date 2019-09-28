@@ -281,8 +281,22 @@ public final class ConfigComments {
     public static String ENTITIES_NERFED_SPAWNING = "entities.nerfed-spawning";
 
     @Comment("")
-    @Comment("A list of worlds that entities can get nerfed in.")
-    public static String ENTITIES_NERFED_WORLDS = "entities.nerfed-worlds";
+    @Comment("Nerfed entities are entities that cannot attack / target other entities and players.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine filters using \"ENTITY_TYPE:SPAWN_REASON\"")
+    public static String ENTITIES_NERFED_ENTITIES = "entities.nerfed-entities";
+
+    @Comment("A list of entities that will be nerfed.")
+    @Comment("If you want all entities to be nerfed, set this to [].")
+    public static String ENTITIES_NERFED_ENTITIES_WHITELIST = "entities.nerfed-entities.whitelist";
+
+    @Comment("A list of entities that won't be nerfed.")
+    public static String ENTITIES_NERFED_ENTITIES_BLACKLIST = "entities.nerfed-entities.blacklist";
+
+    @Comment("A list of worlds that entities can be nerfed in.")
+    @Comment("If you want entities to be nerfed inside all worlds, set this to [].")
+    public static String ENTITIES_NERFED_ENTITIES_WORLDS = "entities.nerfed-entities.worlds";
 
     @Comment("")
     @Comment("Stack-down is a feature that will force entities to stack to other entities that are below their y level.")

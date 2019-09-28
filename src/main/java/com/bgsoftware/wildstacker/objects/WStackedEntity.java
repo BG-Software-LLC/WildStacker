@@ -135,7 +135,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedEntities.isEmpty() || GeneralUtils.contains(plugin.getSettings().whitelistedEntities, this);
+        return GeneralUtils.containsOrEmpty(plugin.getSettings().whitelistedEntities, this);
     }
 
     @Override
@@ -568,8 +568,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isNerfed(){
-        return GeneralUtils.contains(plugin.getSettings().nerfedSpawning, this) &&
-                plugin.getSettings().nerfedWorlds.contains(object.getWorld().getName());
+        return GeneralUtils.containsOrEmpty(plugin.getSettings().entitiesNerfedWhitelist, this) &&
+                !GeneralUtils.contains(plugin.getSettings().entitiesNerfedBlacklist, this) &&
+                plugin.getSettings().entitiesNerfedWhitelist.contains(object.getWorld().getName());
     }
 
     @Override

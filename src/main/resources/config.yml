@@ -280,13 +280,15 @@ entities:
   # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
-  # If you don't want nerfed entities, use "nerfed-spawning: []"
-  nerfed-spawning:
-    - SPAWNER
-
-  # A list of worlds that entities can get nerfed in.
-  nerfed-worlds:
-    - 'world'
+  nerfed-entities:
+    # A list of entities that will be nerfed.
+    # If you want all entities to be nerfed, set this to [].
+    whitelist: []
+    # A list of entities that won't be nerfed.
+    blacklist: []
+    # A list of worlds that entities can be nerfed in.
+    # If you want entities to be nerfed inside all worlds, set this to [].
+    worlds: []
 
   # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
   # This feature is great for flying entities, like blazes and ghasts.

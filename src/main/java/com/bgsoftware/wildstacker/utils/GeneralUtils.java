@@ -16,6 +16,10 @@ public final class GeneralUtils {
                 list.contains("all") || list.contains("ALL");
     }
 
+    public static boolean containsOrEmpty(List<String> list, StackedEntity stackedEntity){
+        return list.isEmpty() || contains(list, stackedEntity);
+    }
+
     public static boolean contains(List<String> list, StackedSpawner stackedSpawner){
         return list.contains(stackedSpawner.getSpawnedType().name()) || list.contains("all") || list.contains("ALL");
     }
