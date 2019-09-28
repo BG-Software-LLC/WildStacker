@@ -19,6 +19,7 @@ import net.minecraft.server.v1_8_R3.NBTTagInt;
 import net.minecraft.server.v1_8_R3.NBTTagList;
 import net.minecraft.server.v1_8_R3.NBTTagShort;
 import net.minecraft.server.v1_8_R3.PacketPlayOutCollect;
+import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -379,6 +380,14 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         itemStack.setTag(nbtTagCompound);
 
         return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    @Override
+    public Object[] createItemEntity(Location location, org.bukkit.inventory.ItemStack itemStack) {
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        EntityItem entityItem = new EntityItem(world, location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
+        CraftItem craftItem = new CraftItem(world.getServer(), entityItem);
+        return new Object[] { entityItem, craftItem };
     }
 
 }

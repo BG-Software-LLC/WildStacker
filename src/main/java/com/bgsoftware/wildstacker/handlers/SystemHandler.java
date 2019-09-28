@@ -28,6 +28,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -44,6 +45,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -424,6 +427,35 @@ public final class SystemHandler implements SystemManager {
         WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
         return type.cast(bukkitEntity);
+    }
+
+    @Override
+    public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack) {
+        return spawnItemWithAmount(location, itemStack, itemStack.getAmount());
+    }
+
+    @Override
+    public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        location = location.clone();
+        itemStack = itemStack.clone();
+
+        location.setX(location.getX() + (random.nextFloat() * 0.5F) + 0.25D);
+        location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
+        location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
+
+        itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+
+        Object[] entityObjects = plugin.getNMSAdapter().createItemEntity(location, itemStack);
+
+        Fields.ITEM_PICKUP_DELAY.set(entityObjects[0], 10);
+
+        StackedItem stackedItem = WStackedItem.of((Item) entityObjects[1]);
+        stackedItem.setStackAmount(amount, true);
+
+        Methods.WORLD_ADD_ENTITY.invoke(location.getWorld(), entityObjects[0], CreatureSpawnEvent.SpawnReason.CUSTOM);
+
+        return stackedItem;
     }
 
     @Override

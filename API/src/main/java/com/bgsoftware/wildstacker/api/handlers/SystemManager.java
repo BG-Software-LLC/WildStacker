@@ -16,6 +16,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -144,13 +145,30 @@ public interface SystemManager {
     <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, CreatureSpawnEvent.SpawnReason spawnReason);
 
     /**
-     * Spawns a new entity without stacking it..
+     * Spawns a new entity without stacking it.
      * @param location the location to spawn the entity at
      * @param type the entity class type
      * @param spawnCause the spawn cause to be set in the entity
      * @return The new entity object
      */
     <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause);
+
+    /**
+     * Drops an item with the amount of the item stack.
+     * @param location the location to spawn the item at
+     * @param itemStack the item to drop.
+     * @return The new item object
+     */
+    StackedItem spawnItemWithAmount(Location location, ItemStack itemStack);
+
+    /**
+     * Drops an item with a specific amount for the stack.
+     * @param location the location to spawn the item at
+     * @param itemStack the item to drop.
+     * @param amount the amount of the item to drop.
+     * @return The new item object
+     */
+    StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount);
 
     /**
      * Spawn a corpse for a stacked entity.

@@ -9,6 +9,8 @@ public enum Fields {
     ENTITY_KILLER,
     ENTITY_DEAD,
 
+    ITEM_PICKUP_DELAY,
+
     NBT_TAG_MAP;
 
     public <T> T get(Object object, Class<T> clazz){

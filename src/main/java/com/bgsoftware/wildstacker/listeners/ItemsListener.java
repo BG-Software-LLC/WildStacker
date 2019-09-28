@@ -55,8 +55,8 @@ public final class ItemsListener implements Listener {
             ItemStack cloned = stackedItem.getItemStack().clone();
             cloned.setAmount(cloned.getAmount() - limit);
             stackedItem.setStackAmount(limit, true);
-            Item spawnedItem = e.getEntity().getWorld().dropItemNaturally(e.getEntity().getLocation(), cloned);
-            spawnedItem.setPickupDelay(40);
+            StackedItem spawnedItem = plugin.getSystemManager().spawnItemWithAmount(e.getEntity().getLocation(), cloned);
+            spawnedItem.getItem().setPickupDelay(40);
         }
 
         stackedItem.runStackAsync(null);

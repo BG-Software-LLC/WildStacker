@@ -21,7 +21,7 @@ public final class EntityStorage {
 
     public static boolean hasMetadata(Entity entity, String key){
         UUID uuid = entity.getUniqueId();
-        return entityStorage.getOrDefault(uuid, new HashMap<>()).containsKey(key);
+        return entityStorage.containsKey(uuid) && entityStorage.get(uuid).containsKey(key);
     }
 
     public static <T> T getMetadata(Entity entity, String key, Class<T> type){

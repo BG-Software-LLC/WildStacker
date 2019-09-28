@@ -1,9 +1,7 @@
 package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
-import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -63,21 +61,20 @@ public final class ItemUtils {
         if(plugin.getSettings().itemsStackingEnabled){
             ItemStack cloned = itemStack.clone();
             cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
-            StackedItem stackedItem = WStackedItem.of(location.getWorld().dropItemNaturally(location, cloned));
-            stackedItem.setStackAmount(amount, true);
+            plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
         }
 
         else {
             for (int i = 0; i < amount / 64; i++) {
                 ItemStack cloned = itemStack.clone();
                 cloned.setAmount(64);
-                location.getWorld().dropItemNaturally(location, cloned);
+                plugin.getSystemManager().spawnItemWithAmount(location, cloned, 64);
             }
 
             if (amount % 64 > 0) {
                 ItemStack cloned = itemStack.clone();
                 cloned.setAmount(amount % 64);
-                location.getWorld().dropItemNaturally(location, cloned);
+                plugin.getSystemManager().spawnItemWithAmount(location, cloned);
             }
         }
     }

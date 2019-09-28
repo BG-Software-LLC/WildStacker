@@ -21,6 +21,7 @@ public final class ReflectionUtils {
             Class entityLivingClass = getNMSClass("EntityLiving"),
                     craftWorldClass = getBukkitClass("CraftWorld"),
                     entityClass = getNMSClass("Entity"),
+                    entityItemClass = getNMSClass("EntityItem"),
                     craftEntityClass = getBukkitClass("entity.CraftEntity"),
                     nmsTagClass = getNMSClass("NBTTagCompound"),
                     entityInsentientClass = getNMSClass("EntityInsentient");
@@ -29,6 +30,7 @@ public final class ReflectionUtils {
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isEquals(ServerVersion.v1_14) ? "f" : "b_"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
+            fieldMap.put(Fields.ITEM_PICKUP_DELAY, entityItemClass.getDeclaredField("pickupDelay"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
             methodMap.put(Methods.WORLD_CREATE_ENTITY, craftWorldClass.getDeclaredMethod("createEntity", Location.class, Class.class));

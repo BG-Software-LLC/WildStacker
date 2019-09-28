@@ -88,4 +88,6 @@ public interface NMSAdapter {
 
     ItemStack getPlayerSkull(String texture);
 
+    Object[] createItemEntity(Location location, ItemStack itemStack);
+
 }

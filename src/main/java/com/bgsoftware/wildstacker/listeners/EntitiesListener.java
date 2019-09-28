@@ -84,8 +84,13 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
         if(EntityStorage.hasMetadata(e.getEntity(), "corpse")){
-            e.getDrops().clear();
-            e.setDroppedExp(0);
+            try {
+                e.getDrops().clear();
+                e.setDroppedExp(0);
+            }catch(Throwable ex){
+                WildStackerPlugin.log("Seems like the array of EntityDeathEvent is not an ArrayList, but a " + e.getDrops().getClass());
+                ex.printStackTrace();
+            }
         }
     }
 
