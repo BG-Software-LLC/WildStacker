@@ -194,19 +194,25 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                         });
             }
 
-            Optional<StackedSpawner> spawnerOptional = spawnerStream
-                    .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
-            if(spawnerOptional.isPresent()){
-                StackedSpawner targetSpawner = spawnerOptional.get();
+            synchronized (mutex) {
+                Optional<StackedSpawner> spawnerOptional = spawnerStream
+                        .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS)
+                        .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
-                StackResult stackResult = runStack(targetSpawner);
+                if (spawnerOptional.isPresent()) {
+                    StackedSpawner targetSpawner = spawnerOptional.get();
+                    StackResult stackResult;
 
-                if(stackResult == StackResult.SUCCESS) {
-                    if(result != null)
-                        result.accept(spawnerOptional.map(StackedSpawner::getSpawner));
-                    return;
+                    synchronized (((WStackedSpawner) targetSpawner).mutex){
+                        stackResult = runStack(targetSpawner);
+                    }
+
+                    if (stackResult == StackResult.SUCCESS) {
+                        if (result != null)
+                            result.accept(spawnerOptional.map(StackedSpawner::getSpawner));
+                        return;
+                    }
                 }
             }
 

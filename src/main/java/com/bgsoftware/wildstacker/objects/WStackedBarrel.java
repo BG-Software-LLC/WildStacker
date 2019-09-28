@@ -171,11 +171,9 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
             Stream<StackedBarrel> barrelStream;
 
-            if(chunkMerge){
+            if (chunkMerge) {
                 barrelStream = plugin.getSystemManager().getStackedBarrels(chunk).stream();
-            }
-
-            else{
+            } else {
                 int range = plugin.getSettings().barrelsCheckRange;
                 Location location = getLocation();
 
@@ -191,25 +189,30 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                         });
             }
 
-            Optional<StackedBarrel> barrelOptional = barrelStream
-                    .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
+            synchronized (mutex) {
+                Optional<StackedBarrel> barrelOptional = barrelStream
+                        .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
+                        .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
-            if(barrelOptional.isPresent()){
-                StackedBarrel targetBarrel = barrelOptional.get();
+                if (barrelOptional.isPresent()) {
+                    StackedBarrel targetBarrel = barrelOptional.get();
+                    StackResult stackResult;
 
-                StackResult stackResult = runStack(targetBarrel);
+                    synchronized (((WStackedBarrel) targetBarrel).mutex) {
+                        stackResult = runStack(targetBarrel);
+                    }
 
-                if(stackResult == StackResult.SUCCESS) {
-                    if(result != null)
-                        result.accept(barrelOptional.map(StackedBarrel::getBlock));
-                    return;
+                    if (stackResult == StackResult.SUCCESS) {
+                        if (result != null)
+                            result.accept(barrelOptional.map(StackedBarrel::getBlock));
+                        return;
+                    }
                 }
             }
 
             updateName();
 
-            if(result != null)
+            if (result != null)
                 result.accept(Optional.empty());
         });
     }

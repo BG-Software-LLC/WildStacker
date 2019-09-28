@@ -19,10 +19,12 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     protected final T object;
     protected int stackAmount;
+    protected final Object mutex;
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
         this.stackAmount = stackAmount;
+        this.mutex = new Object();
     }
 
     @Override
@@ -112,7 +114,12 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
         StackService.execute(this, () -> {
-            StackResult _stackResult = runStack(stackedObject);
+            StackResult _stackResult;
+
+            synchronized (((WStackedObject) stackedObject).mutex){
+                _stackResult = runStack(stackedObject);
+            }
+
             if(stackResult != null)
                 stackResult.accept(_stackResult);
         });

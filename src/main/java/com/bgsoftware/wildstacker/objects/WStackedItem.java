@@ -202,19 +202,24 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
         StackService.execute(this, () -> {
             Location itemLocation = getItem().getLocation();
 
-            Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
-                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
+            synchronized (mutex) {
+                Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
+                        .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+                        .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 
-            if(itemOptional.isPresent()){
-                StackedItem targetItem = itemOptional.get();
+                if (itemOptional.isPresent()) {
+                    StackedItem targetItem = itemOptional.get();
+                    StackResult stackResult;
 
-                StackResult stackResult = runStack(targetItem);
+                    synchronized (((WStackedItem) targetItem).mutex){
+                        stackResult = runStack(targetItem);
+                    }
 
-                if(stackResult == StackResult.SUCCESS) {
-                    if(result != null)
-                        result.accept(itemOptional.map(StackedItem::getItem));
-                    return;
+                    if (stackResult == StackResult.SUCCESS) {
+                        if (result != null)
+                            result.accept(itemOptional.map(StackedItem::getItem));
+                        return;
+                    }
                 }
             }
 
