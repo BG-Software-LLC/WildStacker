@@ -9,7 +9,11 @@ import org.bukkit.inventory.ItemStack;
 public final class EventUtils {
 
     public static void cancelEventAsync(StackedObject stackedObject, BlockPlaceEvent e, boolean giveItem){
-        ItemStack inHand = e.getItemInHand().clone();
+        cancelEventAsync(stackedObject, e, e.getItemInHand(), giveItem);
+    }
+
+    public static void cancelEventAsync(StackedObject stackedObject, BlockPlaceEvent e, ItemStack _inHand, boolean giveItem){
+        ItemStack inHand = _inHand.clone();
         inHand.setAmount(1);
         stackedObject.remove();
         Executor.sync(() -> {
