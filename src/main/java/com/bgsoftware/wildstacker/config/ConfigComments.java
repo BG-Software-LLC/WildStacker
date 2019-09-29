@@ -63,6 +63,13 @@ public final class ConfigComments {
     @Comment("This feature will work if the interval is set to 0 - these are two different features!")
     public static String KILL_TASK_SYNC_CLEAR_LAGG = "kill-task.sync-clear-lagg";
 
+    @Comment("A list of entities that will be cleared.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
+    @Comment("If you want all entities to be killed, set this to []")
+    public static String KILL_TASK_WHITELIST = "kill-task.whitelist";
+
     @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";

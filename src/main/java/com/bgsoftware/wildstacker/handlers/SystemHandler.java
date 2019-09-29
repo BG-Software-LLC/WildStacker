@@ -474,11 +474,21 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performKillAll(){
-        performKillAll(entity -> true, item -> true);
+        performKillAll(false);
+    }
+
+    @Override
+    public void performKillAll(boolean applyTaskFilter) {
+        performKillAll(entity -> true, item -> true, applyTaskFilter);
     }
 
     @Override
     public void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate) {
+        performKillAll(entityPredicate, itemPredicate, false);
+    }
+
+    @Override
+    public void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate, boolean applyTaskFilter) {
         if(!Bukkit.isPrimaryThread()){
             Executor.sync(() -> performKillAll(entityPredicate, itemPredicate));
             return;
@@ -494,7 +504,8 @@ public final class SystemHandler implements SystemManager {
 
         Executor.async(() -> {
             entityList.stream()
-                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity))
+                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity) &&
+                            (!applyTaskFilter || GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
                         if((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||

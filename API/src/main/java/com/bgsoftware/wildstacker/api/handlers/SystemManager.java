@@ -184,7 +184,17 @@ public interface SystemManager {
     /**
      * Perform a kill all.
      */
+    void performKillAll(boolean applyTaskFilter);
+
+    /**
+     * Perform a kill all.
+     */
     void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate);
+
+    /**
+     * Perform a kill all.
+     */
+    void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate, boolean applyTaskFilter);
 
     /**
      * Get a loot-table from a living-entity.

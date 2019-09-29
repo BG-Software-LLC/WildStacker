@@ -29,7 +29,7 @@ public final class KillTask extends BukkitRunnable {
         if (plugin.getSettings().killTaskInterval > 0) {
             if (timeLeft == 0) {
                 if (Bukkit.getOnlinePlayers().size() > 0) {
-                    plugin.getSystemManager().performKillAll();
+                    plugin.getSystemManager().performKillAll(true);
                     for(Player player : Bukkit.getOnlinePlayers())
                         Locale.KILL_ALL_ANNOUNCEMENT.send(player);
                 }

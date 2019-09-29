@@ -33,7 +33,7 @@ public final class EditorHandler {
             GENERAL_SLOT_2 = "database.delete-invalid-blocks", GENERAL_SLOT_3 = "kill-task.interval",
             GENERAL_SLOT_4 = "kill-task.stacked-entities", GENERAL_SLOT_5 = "kill-task.unstacked-entities",
             GENERAL_SLOT_6 = "kill-task.stacked-items", GENERAL_SLOT_7 = "kill-task.unstacked-items",
-            GENERAL_SLOT_8 = "kill-task.sync-clear-lagg";
+            GENERAL_SLOT_8 = "kill-task.sync-clear-lagg", GENERAL_SLOT_9 = "kill-task.whitelist";
 
     public final static String ITEMS_SLOT_0 = "items.enabled", ITEMS_SLOT_1 = "items.merge-radius",
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
@@ -147,7 +147,7 @@ public final class EditorHandler {
             return;
         }
 
-        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings");
+        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings");
         buildInventory(editor, generalFields, "");
 
         Executor.sync(() -> player.openInventory(editor));
