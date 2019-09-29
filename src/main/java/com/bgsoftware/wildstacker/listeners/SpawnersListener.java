@@ -71,7 +71,7 @@ public final class SpawnersListener implements Listener {
         if(!plugin.getSettings().spawnersStackingEnabled || e.getBlockPlaced().getType() != Materials.SPAWNER.toBukkitType())
             return;
 
-        if(e.getPlayer().getLocation().getBlock().getLocation().equals(e.getBlock().getLocation()))
+        if(e.getBlock().getLocation().equals(GeneralUtils.floor(e.getPlayer().getLocation())))
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());

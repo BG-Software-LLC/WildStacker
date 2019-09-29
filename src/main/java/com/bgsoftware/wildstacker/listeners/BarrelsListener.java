@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.EventUtils;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -75,7 +76,7 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(e.getPlayer().getLocation().getBlock().getLocation().equals(e.getBlock().getLocation()))
+        if(e.getBlock().getLocation().equals(GeneralUtils.floor(e.getPlayer().getLocation())))
             return;
 
         if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))

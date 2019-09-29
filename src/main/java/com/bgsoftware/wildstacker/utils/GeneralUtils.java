@@ -44,4 +44,13 @@ public final class GeneralUtils {
         return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
+    public static Location floor(Location location){
+        return new Location(location.getWorld(), roundToBlock(location.getX()), location.getBlockY(), roundToBlock(location.getZ()));
+    }
+
+    private static int roundToBlock(double d){
+        int fullNumber = (int) d;
+        return d >= fullNumber + 0.7D ? fullNumber + 1 : d <= fullNumber + 0.3D ? fullNumber - 1 : fullNumber;
+    }
+
 }
