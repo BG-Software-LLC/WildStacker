@@ -75,6 +75,9 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
+        if(e.getPlayer().getLocation().getBlock().getLocation().equals(e.getBlock().getLocation()))
+            return;
+
         if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
             return;
 
