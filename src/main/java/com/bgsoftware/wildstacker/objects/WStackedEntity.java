@@ -570,7 +570,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public boolean isNerfed(){
         return GeneralUtils.containsOrEmpty(plugin.getSettings().entitiesNerfedWhitelist, this) &&
                 !GeneralUtils.contains(plugin.getSettings().entitiesNerfedBlacklist, this) &&
-                plugin.getSettings().entitiesNerfedWhitelist.contains(object.getWorld().getName());
+                (plugin.getSettings().entitiesNerfedWorlds.isEmpty() || plugin.getSettings().entitiesNerfedWorlds.contains(object.getWorld().getName()));
     }
 
     @Override
