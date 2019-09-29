@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 import java.util.List;
 
@@ -42,6 +43,14 @@ public final class GeneralUtils {
 
     public static boolean isChunkLoaded(Location location){
         return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
+    }
+
+    public static boolean nearBlock(Block block, Location location){
+        double minX = block.getX() - 1.3D, maxX = block.getX() + 2.3D;
+        double minY = block.getY() - 2, maxY = block.getY() + 2;
+        double minZ = block.getZ() - 1.3D, maxZ = block.getZ() + 2.3D;
+        return location.getX() >= minX && location.getX() <= maxX && location.getY() >= minY && location.getY() < maxY &&
+                location.getZ() >= minZ && location.getZ() <= maxZ;
     }
 
 }
