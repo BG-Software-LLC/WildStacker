@@ -307,7 +307,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
-        if(!plugin.getSettings().barrelsToggleCommand)
+        if(!plugin.getSettings().barrelsToggleCommand || !e.getPlayer().hasPermission("wildstacker.toggle"))
             return;
 
         String commandSyntax = "/" + plugin.getSettings().barrelsToggleCommandSyntax;
