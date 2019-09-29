@@ -1,17 +1,15 @@
 name: WildStacker
-version: 3 Pre-1
+version: 3 Pre-2
 api-version: 1.13
 main: com.bgsoftware.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
-website: http://bg-software.com/
-authors: [Ome_R, WildSeries]
+website: https://bg-software.com/
+authors: Ome_R
 softdepend: [Multiverse-Core, Vault, SilkSpawners, CustomDrops, DropEdit, ClearLag, EpicSpawners, MergedSpawner, StackSpawners, FastAsyncWorldEdit, HolographicDisplays, Holograms, Arconix, WildTools, MythicMobs, CMI, ProtocolLib]
 loadbefore: [ShopGUIPlus]
 commands:
   stacker:
     description: Main command for the plugin
-  test:
-    description: Test
 permissions:
   wildstacker.*:
     description: Gives access to all the command.
