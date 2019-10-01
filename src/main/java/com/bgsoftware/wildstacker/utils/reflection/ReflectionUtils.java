@@ -1,6 +1,9 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -88,6 +91,7 @@ public final class ReflectionUtils {
             methodMap.values().forEach(method -> method.setAccessible(true));
         }catch(Exception ex){
             ex.printStackTrace();
+            Executor.sync(() -> Bukkit.getPluginManager().disablePlugin(WildStackerPlugin.getPlugin()));
         }
     }
 
