@@ -144,4 +144,7 @@ public enum  EntityTypes {
         return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
     }
 
+    public boolean isSlime() {
+        return this == SLIME || this == MAGMA_CUBE;
+    }
 }

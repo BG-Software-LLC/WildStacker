@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -146,7 +147,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
-        object.remove();
+        //Should be triggered synced if it's a slime
+        if(EntityTypes.fromEntity(object).isSlime())
+            Executor.sync(object::remove);
+        else
+            object.remove();
     }
 
     @Override
