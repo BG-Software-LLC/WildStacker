@@ -4,11 +4,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
 import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
-import com.bgsoftware.wildstacker.loot.custom.LootTableCustomDrops;
-import com.bgsoftware.wildstacker.loot.custom.LootTableDropEdit;
-import com.bgsoftware.wildstacker.loot.custom.LootTableEditDrops;
-import com.bgsoftware.wildstacker.loot.custom.LootTableEpicSpawners;
-import com.bgsoftware.wildstacker.loot.custom.LootTableStackSpawners;
 import com.bgsoftware.wildstacker.utils.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.google.gson.Gson;
@@ -146,27 +141,6 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/zombie_villager.json");
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public void initLootTableCustom(ProvidersHandler.DropsProvider dropsProvider){
-        switch (dropsProvider){
-            case CUSTOM_DROPS:
-                lootTableCustom = new LootTableCustomDrops();
-                break;
-            case DROP_EDIT:
-                lootTableCustom = new LootTableDropEdit();
-                break;
-            case EDIT_DROPS:
-                lootTableCustom = new LootTableEditDrops();
-                break;
-            case EPIC_SPAWNERS:
-                lootTableCustom = new LootTableEpicSpawners();
-                break;
-            case STACK_SPAWNERS:
-                lootTableCustom = new LootTableStackSpawners();
-                break;
-        }
-    }
-
     private boolean containsEntity(String entity){
         try{
             EntityType.valueOf(entity);
@@ -197,7 +171,6 @@ public final class LootHandler {
             Field field = WildStackerPlugin.class.getDeclaredField("lootHandler");
             field.setAccessible(true);
             field.set(plugin, new LootHandler(plugin));
-            plugin.getLootHandler().initLootTableCustom(plugin.getProviders().getDropsProvider());
         }catch(NoSuchFieldException | IllegalAccessException ex){
             ex.printStackTrace();
         }
