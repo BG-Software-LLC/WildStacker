@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("unused")
@@ -219,7 +220,7 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    private Map<Entity, UUID> explodableSources = new HashMap<>();
+    private Map<Entity, UUID> explodableSources = new WeakHashMap<>();
 
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
