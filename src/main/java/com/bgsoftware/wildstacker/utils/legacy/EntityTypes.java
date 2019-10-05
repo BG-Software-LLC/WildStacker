@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -130,8 +129,8 @@ public enum  EntityTypes {
         if(livingEntity instanceof MushroomCow)
             return EntityTypes.MOOSHROOM;
 
-        if(livingEntity.getType() == EntityType.UNKNOWN)
-            new IllegalArgumentException("The entity " + livingEntity.getUniqueId() + " has a unknown type. Check that.").printStackTrace();
+//        if(livingEntity.getType() == EntityType.UNKNOWN)
+//            new IllegalArgumentException("The entity " + livingEntity.getUniqueId() + " has a unknown type. Check that.").printStackTrace();
 
         return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
     }
