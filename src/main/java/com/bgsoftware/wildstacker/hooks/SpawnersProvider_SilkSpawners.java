@@ -17,8 +17,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("SameParameterValue")
 public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
@@ -28,13 +28,11 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     private SilkSpawners ss;
     private SilkUtil silkUtil;
-    private Random rnd;
 
     public SpawnersProvider_SilkSpawners(){
         instance = this;
         WildStackerPlugin.log(" - Using SilkSpawners as SpawnersProvider.");
         ss = JavaPlugin.getPlugin(SilkSpawners.class);
-        rnd = new Random();
         Executor.sync(() -> silkUtil = SilkUtil.hookIntoSilkSpanwers(), 1L);
     }
 
@@ -81,7 +79,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
         Object entityId = getSpawnerEntityID(spawner);
         String mobName = getCreatureName(entityId).toLowerCase().replace(" ", "");
-        int randomNumber = rnd.nextInt(100), dropChance;
+        int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
 
         ItemStack spawnerItem = getSpawnerItem(spawner, amount);
 
