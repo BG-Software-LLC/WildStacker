@@ -64,6 +64,7 @@ public enum  EntityTypes {
     TRADER_LLAMA,
     TROPICAL_FISH,
     TURTLE,
+    UNKNOWN,
     VEX,
     VILLAGER,
     VINDICATOR,
@@ -86,18 +87,6 @@ public enum  EntityTypes {
     }
 
     private String bukkitEntityType;
-
-    public EntityType toBukkit(){
-        try {
-            try {
-                return EntityType.valueOf(bukkitEntityType);
-            } catch (IllegalArgumentException ex) {
-                return EntityType.valueOf(name());
-            }
-        }catch(Exception ex){
-            throw new IllegalArgumentException("Couldn't cast " + name() + " into a bukkit enum. Contact Ome_R!");
-        }
-    }
 
     public static EntityTypes fromName(String name){
         try{
@@ -140,6 +129,9 @@ public enum  EntityTypes {
 
         if(livingEntity instanceof MushroomCow)
             return EntityTypes.MOOSHROOM;
+
+        if(livingEntity.getType() == EntityType.UNKNOWN)
+            new IllegalArgumentException("The entity " + livingEntity.getUniqueId() + " has a unknown type. Check that.").printStackTrace();
 
         return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
     }
