@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public final class StackService {
@@ -58,9 +57,7 @@ public final class StackService {
     public static void stop(){
         try{
             for(ServiceElement serviceElement : services.values())
-                serviceElement.executorService.shutdown();
-            for(ServiceElement serviceElement : services.values())
-                serviceElement.executorService.awaitTermination(1, TimeUnit.MINUTES);
+                serviceElement.executorService.shutdownNow();
         }catch(Exception ex){
             ex.printStackTrace();
         }
