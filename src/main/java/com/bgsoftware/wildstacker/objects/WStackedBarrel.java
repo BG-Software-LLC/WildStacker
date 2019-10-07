@@ -8,7 +8,6 @@ import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -39,20 +38,6 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
         super(block, stackAmount);
         this.barrelItem = itemStack;
-
-        if(plugin.getSettings().barrelsStackingEnabled) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (getLocation().getBlock().getType() == Material.CAULDRON) {
-                    SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(getLocation()) + "';", () ->
-                            Query.BARREL_INSERT.getStatementHolder()
-                                    .setLocation(getLocation())
-                                    .setInt(getStackAmount())
-                                    .setItemStack(getBarrelItem(1))
-                                    .execute(true)
-                    );
-                }
-            }, 2L);
-        }
     }
 
     @Override

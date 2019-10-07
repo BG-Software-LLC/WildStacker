@@ -7,6 +7,8 @@ import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -118,6 +120,16 @@ public final class BarrelsListener implements Listener {
                     EventUtils.cancelEventAsync(stackedBarrel, e, true);
                     return;
                 }
+
+                Location location = stackedBarrel.getLocation();
+
+                SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(location) + "';", () ->
+                        Query.BARREL_INSERT.getStatementHolder()
+                                .setLocation(location)
+                                .setInt(stackedBarrel.getStackAmount())
+                                .setItemStack(stackedBarrel.getBarrelItem(1))
+                                .execute(true)
+                );
 
                 Executor.sync(() -> {
                     e.getBlockPlaced().setType(Material.CAULDRON);
