@@ -12,6 +12,7 @@ import net.minecraft.server.v1_10_R1.EntityInsentient;
 import net.minecraft.server.v1_10_R1.EntityItem;
 import net.minecraft.server.v1_10_R1.EntityLiving;
 import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.EntityTracker;
 import net.minecraft.server.v1_10_R1.EnumItemSlot;
 import net.minecraft.server.v1_10_R1.EnumParticle;
 import net.minecraft.server.v1_10_R1.ItemStack;
@@ -21,6 +22,8 @@ import net.minecraft.server.v1_10_R1.NBTTagInt;
 import net.minecraft.server.v1_10_R1.NBTTagList;
 import net.minecraft.server.v1_10_R1.NBTTagShort;
 import net.minecraft.server.v1_10_R1.PacketPlayOutCollect;
+import net.minecraft.server.v1_10_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_10_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_10_R1.SoundEffect;
 import net.minecraft.server.v1_10_R1.World;
 import net.minecraft.server.v1_10_R1.WorldServer;
@@ -300,7 +303,11 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        ((WorldServer) entityLiving.world).getTracker().a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId()));
+        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
+        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId()));
+        //Makes sure the entity is still there.
+        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
+        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override
