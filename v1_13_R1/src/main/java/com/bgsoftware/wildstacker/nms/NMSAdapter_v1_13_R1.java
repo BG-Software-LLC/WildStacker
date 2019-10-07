@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_13_R1.ChatMessage;
 import net.minecraft.server.v1_13_R1.EnchantmentManager;
 import net.minecraft.server.v1_13_R1.Entity;
@@ -14,8 +15,10 @@ import net.minecraft.server.v1_13_R1.EntityItem;
 import net.minecraft.server.v1_13_R1.EntityLiving;
 import net.minecraft.server.v1_13_R1.EntityPlayer;
 import net.minecraft.server.v1_13_R1.EntityTracker;
+import net.minecraft.server.v1_13_R1.EntityTypes;
 import net.minecraft.server.v1_13_R1.EnumItemSlot;
 import net.minecraft.server.v1_13_R1.ItemStack;
+import net.minecraft.server.v1_13_R1.MinecraftKey;
 import net.minecraft.server.v1_13_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_13_R1.NBTTagCompound;
 import net.minecraft.server.v1_13_R1.NBTTagInt;
@@ -25,6 +28,7 @@ import net.minecraft.server.v1_13_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_13_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_13_R1.SoundEffect;
+import net.minecraft.server.v1_13_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_13_R1.World;
 import net.minecraft.server.v1_13_R1.WorldServer;
 import org.bukkit.Bukkit;
@@ -33,10 +37,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_13_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_13_R1.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_13_R1.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftItem;
@@ -433,6 +440,119 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         EntityItem entityItem = new EntityItem(world, location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         CraftItem craftItem = new CraftItem(world.getServer(), entityItem);
         return new Object[] { entityItem, craftItem };
+    }
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @SuppressWarnings("deprecation")
+    private static class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityMobSpawner> implements SyncedCreatureSpawner {
+
+        SyncedCreatureSpawnerImpl(Block block){
+            super(block, TileEntityMobSpawner.class);
+        }
+
+        @Override
+        public EntityType getSpawnedType() {
+            MinecraftKey key = getTileEntity().getSpawner().getMobName();
+            EntityType entityType = key == null ? EntityType.PIG : EntityType.fromName(key.getKey());
+            return entityType == null ? EntityType.PIG : entityType;
+        }
+
+        @Override
+        public void setSpawnedType(EntityType entityType) {
+            if (entityType != null && entityType.getName() != null) {
+                getTileEntity().getSpawner().setMobName(EntityTypes.a(entityType.getName()));
+            } else {
+                throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
+            }
+        }
+
+        @Override
+        public String getCreatureTypeName() {
+            MinecraftKey key = getTileEntity().getSpawner().getMobName();
+            return key == null ? "PIG" : key.getKey();
+        }
+
+        @Override
+        public void setCreatureTypeByName(String s) {
+            EntityType entityType = EntityType.fromName(s);
+            if(entityType != null && entityType != EntityType.UNKNOWN)
+                setSpawnedType(entityType);
+        }
+
+        @Override
+        public int getDelay() {
+            return getTileEntity().getSpawner().spawnDelay;
+        }
+
+        @Override
+        public void setDelay(int i) {
+            getTileEntity().getSpawner().spawnDelay = i;
+        }
+
+        @Override
+        public int getMinSpawnDelay() {
+            return getTileEntity().getSpawner().minSpawnDelay;
+        }
+
+        @Override
+        public void setMinSpawnDelay(int i) {
+            getTileEntity().getSpawner().minSpawnDelay = i;
+        }
+
+        @Override
+        public int getMaxSpawnDelay() {
+            return getTileEntity().getSpawner().maxSpawnDelay;
+        }
+
+        @Override
+        public void setMaxSpawnDelay(int i) {
+            getTileEntity().getSpawner().maxSpawnDelay = i;
+        }
+
+        @Override
+        public int getSpawnCount() {
+            return getTileEntity().getSpawner().spawnCount;
+        }
+
+        @Override
+        public void setSpawnCount(int i) {
+            getTileEntity().getSpawner().spawnCount = i;
+        }
+
+        @Override
+        public int getMaxNearbyEntities() {
+            return getTileEntity().getSpawner().maxNearbyEntities;
+        }
+
+        @Override
+        public void setMaxNearbyEntities(int i) {
+            getTileEntity().getSpawner().maxNearbyEntities = i;
+        }
+
+        @Override
+        public int getRequiredPlayerRange() {
+            return getTileEntity().getSpawner().requiredPlayerRange;
+        }
+
+        @Override
+        public void setRequiredPlayerRange(int i) {
+            getTileEntity().getSpawner().requiredPlayerRange = i;
+        }
+
+        @Override
+        public int getSpawnRange() {
+            return getTileEntity().getSpawner().spawnRange;
+        }
+
+        @Override
+        public void setSpawnRange(int i) {
+            getTileEntity().getSpawner().spawnRange = i;
+        }
+
     }
 
 }

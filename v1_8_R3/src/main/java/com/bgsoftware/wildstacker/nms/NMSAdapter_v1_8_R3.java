@@ -5,6 +5,8 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
@@ -22,12 +24,16 @@ import net.minecraft.server.v1_8_R3.NBTTagShort;
 import net.minecraft.server.v1_8_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_8_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
@@ -37,6 +43,8 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.CreatureType;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -394,6 +402,85 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         EntityItem entityItem = new EntityItem(world, location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         CraftItem craftItem = new CraftItem(world.getServer(), entityItem);
         return new Object[] { entityItem, craftItem };
+    }
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @SuppressWarnings("deprecation")
+    private static class SyncedCreatureSpawnerImpl extends CraftBlockState implements SyncedCreatureSpawner{
+
+        private World world;
+        private BlockPosition blockPosition;
+
+        SyncedCreatureSpawnerImpl(Block block){
+            super(block);
+            world = ((CraftWorld) block.getWorld()).getHandle();
+            blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
+        }
+
+        @Override
+        public CreatureType getCreatureType() {
+            return CreatureType.fromEntityType(getSpawnedType());
+        }
+
+        @Override
+        public void setCreatureType(CreatureType creatureType) {
+            setSpawnedType(creatureType.toEntityType());
+        }
+
+        @Override
+        public EntityType getSpawnedType() {
+            return EntityType.fromName(getSpawner().getSpawner().getMobName());
+        }
+
+        @Override
+        public void setSpawnedType(EntityType entityType) {
+            if (entityType != null && entityType.getName() != null) {
+                getSpawner().getSpawner().setMobName(entityType.getName());
+            } else {
+                throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
+            }
+        }
+
+        @Override
+        public String getCreatureTypeId() {
+            return getCreatureTypeName();
+        }
+
+        @Override
+        public String getCreatureTypeName() {
+            return getSpawner().getSpawner().getMobName();
+        }
+
+        @Override
+        public void setCreatureTypeId(String s) {
+            setCreatureTypeByName(s);
+        }
+
+        @Override
+        public void setCreatureTypeByName(String s) {
+            EntityType entityType = EntityType.fromName(s);
+            if(entityType != null && entityType != EntityType.UNKNOWN)
+                setSpawnedType(entityType);
+        }
+
+        @Override
+        public int getDelay() {
+            return getSpawner().getSpawner().spawnDelay;
+        }
+
+        @Override
+        public void setDelay(int i) {
+            getSpawner().getSpawner().spawnDelay = i;
+        }
+
+        TileEntityMobSpawner getSpawner(){
+            return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
+        }
+
     }
 
 }

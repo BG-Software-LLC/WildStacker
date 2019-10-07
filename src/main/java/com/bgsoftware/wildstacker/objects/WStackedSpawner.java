@@ -8,10 +8,10 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -37,20 +37,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     }
 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
-        super(creatureSpawner, stackAmount);
-
-        if(plugin.getSettings().spawnersStackingEnabled) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (getLocation().getBlock().getState() instanceof CreatureSpawner) {
-                    SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location ='" + SQLHelper.getLocation(getLocation()) + "';", () ->
-                            Query.SPAWNER_INSERT.getStatementHolder()
-                                    .setLocation(getLocation())
-                                    .setInt(getStackAmount())
-                                    .execute(true)
-                    );
-                }
-            }, 1L);
-        }
+        super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
     }
 
     @Override

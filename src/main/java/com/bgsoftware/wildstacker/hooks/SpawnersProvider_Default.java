@@ -31,8 +31,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     @Override
     public ItemStack getSpawnerItem(CreatureSpawner spawner, int amount) {
         //In order to make sure the creature spawner is updated, I just get a new instance of it.
-        CreatureSpawner updatedSpawner = (CreatureSpawner) spawner.getBlock().getState();
-        return ItemUtils.getSpawnerItem(updatedSpawner.getSpawnedType(), amount);
+        return ItemUtils.getSpawnerItem(spawner.getSpawnedType(), amount);
     }
 
     @Override

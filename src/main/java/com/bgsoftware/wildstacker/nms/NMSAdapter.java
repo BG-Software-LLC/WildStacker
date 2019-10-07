@@ -1,9 +1,11 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
@@ -89,5 +91,7 @@ public interface NMSAdapter {
     ItemStack getPlayerSkull(String texture);
 
     Object[] createItemEntity(Location location, ItemStack itemStack);
+
+    SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
 
 }
