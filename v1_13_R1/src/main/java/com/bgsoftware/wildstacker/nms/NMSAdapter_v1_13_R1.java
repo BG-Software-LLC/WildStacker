@@ -69,8 +69,6 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
 
-    private ThreadLocalRandom random = ThreadLocalRandom.current();
-
     @Override
     public Object getNBTTagCompound(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
@@ -118,6 +116,7 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
 
     @Override
     public List<org.bukkit.inventory.ItemStack> getEquipment(LivingEntity livingEntity) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         List<org.bukkit.inventory.ItemStack> equipment = new ArrayList<>();
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
 

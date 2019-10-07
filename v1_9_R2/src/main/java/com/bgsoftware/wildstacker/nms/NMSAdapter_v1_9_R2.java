@@ -62,8 +62,6 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
 
-    private ThreadLocalRandom random = ThreadLocalRandom.current();
-
     @Override
     public Object getNBTTagCompound(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
@@ -111,6 +109,7 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
 
     @Override
     public List<org.bukkit.inventory.ItemStack> getEquipment(LivingEntity livingEntity) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         List<org.bukkit.inventory.ItemStack> equipment = new ArrayList<>();
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
 
@@ -125,7 +124,7 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
                 if (itemStack != null && (livingEntity.getKiller() != null || dropChance > 1) && random.nextFloat() - (float) i * 0.01F < dropChance) {
                     if (dropChance <= 1 && itemStack.e()) {
                         int maxData = Math.max(itemStack.j() - 25, 1);
-                        int data = itemStack.j() - this.random.nextInt(this.random.nextInt(maxData) + 1);
+                        int data = itemStack.j() - random.nextInt(random.nextInt(maxData) + 1);
 
                         if (data > maxData) {
                             data = maxData;
