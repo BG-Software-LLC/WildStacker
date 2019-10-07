@@ -15,9 +15,11 @@ public final class StackService {
 
     private static final Map<Location, ServiceElement> services = new ConcurrentHashMap<>();
     private static int threadId = 1;
+    private static boolean mainThreadFlag = false;
 
     public static void execute(StackedObject stackedObject, Runnable runnable){
-        if(isStackThread()) {
+        if(isStackThread() || mainThreadFlag) {
+            mainThreadFlag = false;
             runnable.run();
         }
         else {
@@ -61,6 +63,10 @@ public final class StackService {
         }catch(Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    public static void runOnMain(){
+        mainThreadFlag = true;
     }
 
     private static ExecutorService createService(){

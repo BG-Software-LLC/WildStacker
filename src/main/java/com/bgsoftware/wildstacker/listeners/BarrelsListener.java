@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -106,6 +107,7 @@ public final class BarrelsListener implements Listener {
         Chunk chunk = e.getBlock().getChunk();
 
         //Stacking barrel
+        StackService.runOnMain();
         stackedBarrel.runStackAsync(blockOptional -> {
             if(!blockOptional.isPresent()) {
                 if(isChunkLimit(chunk)) {
@@ -131,10 +133,8 @@ public final class BarrelsListener implements Listener {
                                 .execute(true)
                 );
 
-                Executor.sync(() -> {
-                    e.getBlockPlaced().setType(Material.CAULDRON);
-                    stackedBarrel.createDisplayBlock();
-                }, 1L);
+                e.getBlockPlaced().setType(Material.CAULDRON);
+                stackedBarrel.createDisplayBlock();
 
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             }

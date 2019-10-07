@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -134,6 +135,7 @@ public final class SpawnersListener implements Listener {
         final ItemStack LIMIT_ITEM = limitItem;
         Chunk chunk = e.getBlock().getChunk();
 
+        StackService.runOnMain();
         stackedSpawner.runStackAsync(spawnerOptional -> {
             int stackAmount = stackedSpawner.getStackAmount();
 
@@ -221,13 +223,15 @@ public final class SpawnersListener implements Listener {
 
             plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount, false);
 
+            EntityType entityType = stackedSpawner.getSpawnedType();
+
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
 
             if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
-            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
+            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, amountToCharge);
         }
     }
 
