@@ -50,7 +50,7 @@ public interface NMSAdapter {
 
     ItemStack setTag(ItemStack itemStack, String key, Object value);
 
-    <T> T getTag(ItemStack itemStack, String key, Class<T> valueType);
+    <T> T getTag(ItemStack itemStack, String key, Class<T> valueType, Object def);
 
     int getEntityExp(LivingEntity livingEntity);
 

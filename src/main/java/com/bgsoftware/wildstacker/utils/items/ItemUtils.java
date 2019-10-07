@@ -84,7 +84,7 @@ public final class ItemUtils {
     }
 
     public static int getSpawnerItemAmount(ItemStack itemStack){
-        return Math.max(1, plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class));
+        return Math.max(1, plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1));
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
@@ -171,7 +171,7 @@ public final class ItemUtils {
     }
 
     public static EntityType getNMSEntityType(ItemStack itemStack){
-        String entityType = plugin.getNMSAdapter().getTag(itemStack, "entity-type", String.class);
+        String entityType = plugin.getNMSAdapter().getTag(itemStack, "entity-type", String.class, "");
         return entityType.isEmpty() ? null : EntityType.valueOf(entityType);
     }
 

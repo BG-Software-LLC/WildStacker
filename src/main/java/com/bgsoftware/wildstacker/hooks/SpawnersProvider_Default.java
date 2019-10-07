@@ -85,7 +85,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(spawner);
 
-        int spawnerItemAmount = Math.max(ItemUtils.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
+        int spawnerItemAmount = Math.min(ItemUtils.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
 
         stackedSpawner.setStackAmount(spawnerItemAmount, updateName);
     }
