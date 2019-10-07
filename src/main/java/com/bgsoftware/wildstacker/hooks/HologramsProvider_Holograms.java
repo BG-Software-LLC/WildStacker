@@ -1,9 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.sainttx.holograms.HologramPlugin;
 import com.sainttx.holograms.api.Hologram;
@@ -29,16 +27,7 @@ public final class HologramsProvider_Holograms implements HologramsProvider {
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            createHologram(location.add(0.5, 1, 0.5), line);
-        }
+        createHologram(stackedObject.getLocation().add(0.5, 1, 0.5), line);
     }
 
     @Override
@@ -51,16 +40,7 @@ public final class HologramsProvider_Holograms implements HologramsProvider {
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            deleteHologram(location.add(0.5, 1, 0.5));
-        }
+        deleteHologram(stackedObject.getLocation().add(0.5, 1, 0.5));
     }
 
     @Override
@@ -75,16 +55,7 @@ public final class HologramsProvider_Holograms implements HologramsProvider {
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            changeLine(location.add(0.5, 1, 0.5), newLine, createIfNull);
-        }
+        changeLine(stackedObject.getLocation().add(0.5, 1, 0.5), newLine, createIfNull);
     }
 
     @Override
@@ -106,7 +77,7 @@ public final class HologramsProvider_Holograms implements HologramsProvider {
     @Override
     public void clearHolograms() {
         for(Hologram hologram : hologramManager.getActiveHolograms().values()){
-            if(GeneralUtils.isChunkLoaded(hologram.getLocation())) {
+            if(hologram.getId().startsWith("WS") && GeneralUtils.isChunkLoaded(hologram.getLocation())) {
                 Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
                 if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
                     hologramManager.deleteHologram(hologram);

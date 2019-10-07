@@ -1,9 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.songoda.arconix.api.ArconixAPI;
 import com.songoda.arconix.plugin.Arconix;
@@ -30,16 +28,7 @@ public final class HologramsProvider_Arconix implements HologramsProvider, Liste
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            createHologram(location.add(0.5, 1, 0.5), line);
-        }
+        createHologram(stackedObject.getLocation().add(0.5, 1, 0.5), line);
     }
 
     @Override
@@ -50,16 +39,7 @@ public final class HologramsProvider_Arconix implements HologramsProvider, Liste
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            deleteHologram(location.add(0.5, 1, 0.5));
-        }
+        deleteHologram(stackedObject.getLocation().add(0.5, 1, 0.5));
     }
 
     @Override
@@ -73,16 +53,7 @@ public final class HologramsProvider_Arconix implements HologramsProvider, Liste
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        Location location = null;
-
-        if(stackedObject instanceof StackedSpawner)
-            location = ((StackedSpawner) stackedObject).getLocation();
-        else if(stackedObject instanceof StackedBarrel)
-            location = ((StackedBarrel) stackedObject).getLocation();
-
-        if(location != null) {
-            changeLine(location.add(0.5, 1, 0.5), newLine, createIfNull);
-        }
+        changeLine(stackedObject.getLocation().add(0.5, 1, 0.5), newLine, createIfNull);
     }
 
     @Override
@@ -99,10 +70,9 @@ public final class HologramsProvider_Arconix implements HologramsProvider, Liste
     public void clearHolograms() {
         ArrayList<Location> hologramsLocations = arconixAPI.packetLibrary.getHologramManager().getLocations();
         for(Location location : hologramsLocations){
-            if(GeneralUtils.isChunkLoaded(location)) {
+            if(savedLocations.contains(location) && GeneralUtils.isChunkLoaded(location)) {
                 Block underBlock = location.getBlock().getRelative(BlockFace.DOWN);
-                if (savedLocations.contains(location) &&
-                        (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock))) {
+                if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
                     deleteHologram(location);
                 }
             }
