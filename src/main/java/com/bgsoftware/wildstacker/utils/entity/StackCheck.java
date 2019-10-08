@@ -4,6 +4,7 @@ public enum StackCheck {
 
     SPAWN_REASON("SpawnReason"),
     NERFED("Nerfed"),
+    NAME_TAG(""),
     AGE(""),
     EXACT_AGE("Age"),
     CAN_BREED(""),

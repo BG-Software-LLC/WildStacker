@@ -508,8 +508,8 @@ public final class SystemHandler implements SystemManager {
                             (!applyTaskFilter || GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
-                        if((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
-                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1))
+                        if(((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
+                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1)) && !stackedEntity.hasNameTag())
                             stackedEntity.remove();
                     });
 

@@ -218,6 +218,7 @@ entities:
   stack-checks:
     SPAWN_REASON: false
     NERFED: true
+    NAME_TAG: true
     AGE: true
     EXACT_AGE: false
     CAN_BREED: true

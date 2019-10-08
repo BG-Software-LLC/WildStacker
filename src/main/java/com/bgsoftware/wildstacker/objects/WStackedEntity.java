@@ -25,6 +25,7 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -604,6 +605,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public int getDefaultUnstack() {
         return GeneralUtils.get(plugin.getSettings().defaultUnstack, this, 1);
+    }
+
+    @Override
+    public boolean hasNameTag() {
+        return object.getCustomName() != null && !object.isCustomNameVisible() &&
+                object.getCustomName().equals(ChatColor.stripColor(object.getCustomName()));
     }
 
     public boolean isCached(){

@@ -83,6 +83,8 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         entityLiving.b(nbtTagCompound);
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
         nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
+        if(stackedEntity.hasNameTag())
+            nbtTagCompound.setBoolean("NameTag", true);
         return nbtTagCompound;
     }
 

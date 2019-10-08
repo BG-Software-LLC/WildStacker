@@ -196,4 +196,9 @@ public interface StackedEntity extends StackedObject<LivingEntity> {
      */
     int getDefaultUnstack();
 
+    /**
+     * Checks if entity has a name tag.
+     */
+    boolean hasNameTag();
+
 }
