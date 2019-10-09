@@ -85,10 +85,15 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
         //If player is null, it broke by an explosion.
         if(player == null){
-            if (ss.mobs.contains("creatures." + entityId + ".explosionDropChance")) {
-                dropChance = ss.mobs.getInt("creatures." + entityId + ".explosionDropChance", 100);
-            } else {
-                dropChance = ss.config.getInt("explosionDropChance", 100);
+            if(isExplodeSource) {
+                if (ss.mobs.contains("creatures." + entityId + ".explosionDropChance")) {
+                    dropChance = ss.mobs.getInt("creatures." + entityId + ".explosionDropChance", 100);
+                } else {
+                    dropChance = ss.config.getInt("explosionDropChance", 100);
+                }
+            }
+            else{
+                dropChance = 100;
             }
             if (randomNumber < dropChance)
                 ItemUtils.dropItem(spawnerItem, spawner.getLocation());
