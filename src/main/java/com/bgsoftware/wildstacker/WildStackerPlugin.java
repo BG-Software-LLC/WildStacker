@@ -30,6 +30,7 @@ import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
+import com.bgsoftware.wildstacker.listeners.plugins.CitizensListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
@@ -135,6 +136,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new EpicBossesListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
                 getServer().getPluginManager().registerEvents(new MythicMobsListener(this), this);
+            if(getServer().getPluginManager().isPluginEnabled("Citizens"))
+                getServer().getPluginManager().registerEvents(new CitizensListener(), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
                 EpicSpawnersListener.register(this);
             if(getServer().getPluginManager().isPluginEnabled("CrazyEnchantments"))
