@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -52,6 +53,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -267,6 +269,18 @@ public final class EntitiesListener implements Listener {
     }
 
     private int mooshroomFlag = -1;
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntitySpawnLow(CreatureSpawnEvent e){
+        //Cache the data for the entity.
+        EntityData.of(e.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChunkLoad(ChunkLoadEvent e){
+        Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity)
+                .forEach(entity -> EntityData.of((LivingEntity) entity));
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e){

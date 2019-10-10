@@ -6,11 +6,14 @@ import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
 
 @SuppressWarnings("WeakerAccess")
 public final class EntityData {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final Map<UUID, EntityData> cachedData = new WeakHashMap<>();
 
     private Object nbtTagCompound = null;
     private Object epicSpawners = null;
@@ -22,7 +25,6 @@ public final class EntityData {
         nbtTagCompound = plugin.getNMSAdapter().getNBTTagCompound(livingEntity);
         if(EntityStorage.hasMetadata(livingEntity, "ES"))
             epicSpawners = EntityStorage.getMetadata(livingEntity, "ES", Object.class);
-
     }
 
     public void applyEntityData(LivingEntity livingEntity){
@@ -153,8 +155,18 @@ public final class EntityData {
     }
 
     public static EntityData of(LivingEntity livingEntity){
+        synchronized (cachedData){
+            if(cachedData.containsKey(livingEntity.getUniqueId()))
+                return cachedData.get(livingEntity.getUniqueId());
+        }
+
         EntityData entityData = new EntityData();
         entityData.loadEntityData(livingEntity);
+
+        synchronized (cachedData){
+            cachedData.put(livingEntity.getUniqueId(), entityData);
+        }
+
         return entityData;
     }
 
