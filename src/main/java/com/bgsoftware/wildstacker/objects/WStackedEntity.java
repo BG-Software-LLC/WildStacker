@@ -168,29 +168,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(isBlacklisted() || !isWhitelisted() || isWorldDisabled())
             return;
 
-        if(getSpawnCause() == SpawnCause.MYTHIC_MOBS && object.getCustomName() != null){
-            object.setCustomName(object.getCustomName().replace("{}", String.valueOf(stackAmount)));
-            return;
-        }
-
-        String customName = plugin.getSettings().entitiesCustomName;
-
-        if (customName.isEmpty())
-            return;
-
-        String newName = "";
-        boolean newNameVisible = false;
-
-        if(stackAmount > 1) {
-            newName = customName
-                    .replace("{0}", Integer.toString(stackAmount))
-                    .replace("{1}", EntityUtils.getFormattedType(getType().name()))
-                    .replace("{2}", EntityUtils.getFormattedType(getType().name()).toUpperCase());
-            newNameVisible = !plugin.getSettings().entitiesHideNames;
-        }
-
-        setCustomName(newName);
-        setCustomNameVisible(newNameVisible);
+        try {
+            String customName = EntityUtils.getEntityName(this);
+            boolean nameVisible = stackAmount > 1 && !plugin.getSettings().entitiesHideNames;
+            object.setCustomName(customName);
+            object.setCustomNameVisible(nameVisible);
+        }catch(NullPointerException ignored){}
     }
 
     @Override
@@ -609,8 +592,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean hasNameTag() {
-        return object.getCustomName() != null && !object.isCustomNameVisible() &&
-                object.getCustomName().equals(ChatColor.stripColor(object.getCustomName()));
+        String customName = ChatColor.stripColor(object.getCustomName());
+
+        try{
+            customName = EntityUtils.getEntityName(this);
+        }catch(NullPointerException ignored){}
+
+        return object.getCustomName() != null && !object.isCustomNameVisible() && !object.getCustomName().equals(customName);
     }
 
     public boolean isCached(){

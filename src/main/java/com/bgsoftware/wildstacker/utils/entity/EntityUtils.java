@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -115,6 +116,29 @@ public final class EntityUtils {
             experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
             experienceOrb.setExperience(amount);
         }
+    }
+
+    public static String getEntityName(StackedEntity stackedEntity){
+        int stackAmount = stackedEntity.getStackAmount();
+
+        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null)
+            return stackedEntity.getLivingEntity().getCustomName().replace("{}", String.valueOf(stackAmount));
+
+        String customName = plugin.getSettings().entitiesCustomName;
+
+        if (customName.isEmpty())
+            throw new NullPointerException();
+
+        String newName = "";
+
+        if(stackAmount > 1) {
+            newName = customName
+                    .replace("{0}", Integer.toString(stackAmount))
+                    .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
+                    .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
+        }
+
+        return newName;
     }
 
 }
