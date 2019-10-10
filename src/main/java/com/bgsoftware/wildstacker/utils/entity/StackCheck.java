@@ -2,8 +2,8 @@ package com.bgsoftware.wildstacker.utils.entity;
 
 public enum StackCheck {
 
-    SPAWN_REASON("SpawnReason"),
-    NERFED("Nerfed"),
+    SPAWN_REASON(""),
+    NERFED(""),
     NAME_TAG(""),
     AGE(""),
     EXACT_AGE("Age"),

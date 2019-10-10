@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.nms;
 
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -76,11 +74,6 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         entityLiving.b(nbtTagCompound);
-        StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
-        nbtTagCompound.setString("SpawnReason", stackedEntity.getSpawnCause().toSpawnReason().name());
-        if(stackedEntity.hasNameTag())
-            nbtTagCompound.setBoolean("NameTag", true);
-        nbtTagCompound.setBoolean("Nerfed", stackedEntity.isNerfed());
         return nbtTagCompound;
     }
 

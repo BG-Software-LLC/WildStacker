@@ -492,7 +492,6 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
-                duplicated.runStackAsync(null);
             }else{
                 stackedEntity.runStackAsync(null);
             }

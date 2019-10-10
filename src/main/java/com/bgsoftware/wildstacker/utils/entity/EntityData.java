@@ -42,11 +42,6 @@ public final class EntityData {
             Map map = Fields.NBT_TAG_MAP.get(nbtTagCompound, Map.class);
             Map otherMap = Fields.NBT_TAG_MAP.get(other.nbtTagCompound, Map.class);
 
-            if(StackCheck.NAME_TAG.isEnabled()){
-                if(map.containsKey("NameTag") || otherMap.containsKey("NameTag"))
-                    return false;
-            }
-
             if(StackCheck.AGE.isEnabled()){
                 if(map.containsKey("Age") != otherMap.containsKey("Age"))
                     return false;

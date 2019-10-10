@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -192,6 +193,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(object.isDead() || !object.isValid())
             return StackCheckResult.ALREADY_DEAD;
 
+        if(StackCheck.NAME_TAG.isEnabled() && hasNameTag())
+            return StackCheckResult.NAME_TAG;
+
         StackedEntity targetEntity = (StackedEntity) stackedObject;
 
         if(targetEntity.isNameBlacklisted())
@@ -202,6 +206,15 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         if(EntityStorage.hasMetadata(targetEntity.getLivingEntity(), "corpse"))
             return StackCheckResult.CORPSE;
+
+        if(StackCheck.NAME_TAG.isEnabled() && targetEntity.hasNameTag())
+            return StackCheckResult.TARGET_NAME_TAG;
+
+        if(StackCheck.NERFED.isEnabled() && isNerfed() != targetEntity.isNerfed())
+            return StackCheckResult.NERFED;
+
+        if(StackCheck.SPAWN_REASON.isEnabled() && getSpawnCause() != targetEntity.getSpawnCause())
+            return StackCheckResult.SPAWN_REASON;
 
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
             Set<String> regions = new HashSet<>();
