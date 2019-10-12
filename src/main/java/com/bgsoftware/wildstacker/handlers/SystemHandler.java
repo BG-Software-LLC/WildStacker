@@ -491,7 +491,7 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void performKillAll(Predicate<Entity> entityPredicate, Predicate<Item> itemPredicate, boolean applyTaskFilter) {
         if(!Bukkit.isPrimaryThread()){
-            Executor.sync(() -> performKillAll(entityPredicate, itemPredicate));
+            Executor.sync(() -> performKillAll(entityPredicate, itemPredicate, applyTaskFilter));
             return;
         }
 
