@@ -48,9 +48,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             (lootPair.getSpawnCauseFilter().isEmpty() || stackedEntity.getSpawnCause().name().equals(lootPair.getSpawnCauseFilter()))
         ).collect(Collectors.toList());
 
-        int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : stackAmount < 10 ?
-                Random.nextInt((max * stackAmount) - (min * stackAmount) + 1) + (min * stackAmount) :
-                Random.nextInt(min * stackAmount, max * stackAmount);
+        int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : max == min ? max : Random.nextInt(max - min + 1) + min;
         int chosenPairs = 0;
 
         do{
