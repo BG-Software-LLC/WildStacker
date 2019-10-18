@@ -181,7 +181,7 @@ public final class SpawnersListener implements Listener {
                 stackAmount = targetSpawner.getStackAmount();
             }
 
-            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().placeChargeWhitelist, stackedSpawner))
+            if(amountToCharge > 0 && GeneralUtils.containsOrEmpty(plugin.getSettings().placeChargeWhitelist, stackedSpawner))
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             //Removing item from player's inventory
@@ -228,7 +228,7 @@ public final class SpawnersListener implements Listener {
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
 
-            if(amountToCharge > 0 && GeneralUtils.contains(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
+            if(amountToCharge > 0 && GeneralUtils.containsOrEmpty(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, amountToCharge);

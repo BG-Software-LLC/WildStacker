@@ -24,6 +24,10 @@ public final class GeneralUtils {
         return list.contains(stackedSpawner.getSpawnedType().name()) || list.contains("all") || list.contains("ALL");
     }
 
+    public static boolean containsOrEmpty(List<String> list, StackedSpawner stackedSpawner){
+        return list.isEmpty() || contains(list, stackedSpawner);
+    }
+
     public static int get(KeyMap<Integer> map, StackedEntity stackedEntity, int def){
         if(map.containsKey(stackedEntity.getType().name()))
             return map.get(stackedEntity.getType().name());
