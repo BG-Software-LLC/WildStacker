@@ -62,6 +62,11 @@ public final class CommandKill implements ICommand {
         Executor.async(() -> {
             if(args.length > 1){
                 for(int i = 1; i < args.length; i++){
+                    if(!args[i].contains("=")){
+                        Locale.COMMAND_USAGE.send(sender, getUsage());
+                        return;
+                    }
+
                     String value = args[i].split("=")[1];
                     if(args[i].toLowerCase().startsWith("radius=")){
                         if(!(sender instanceof Player)){
