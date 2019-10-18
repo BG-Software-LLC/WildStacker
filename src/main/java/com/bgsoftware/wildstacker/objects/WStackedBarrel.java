@@ -174,24 +174,19 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                         });
             }
 
-            synchronized (mutex) {
-                Optional<StackedBarrel> barrelOptional = barrelStream
-                        .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
-                        .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
+            Optional<StackedBarrel> barrelOptional = barrelStream
+                    .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
+                    .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
 
-                if (barrelOptional.isPresent()) {
-                    StackedBarrel targetBarrel = barrelOptional.get();
-                    StackResult stackResult;
+            if (barrelOptional.isPresent()) {
+                StackedBarrel targetBarrel = barrelOptional.get();
 
-                    synchronized (((WStackedBarrel) targetBarrel).mutex) {
-                        stackResult = runStack(targetBarrel);
-                    }
+                StackResult stackResult = runStack(targetBarrel);
 
-                    if (stackResult == StackResult.SUCCESS) {
-                        if (result != null)
-                            result.accept(barrelOptional.map(StackedBarrel::getBlock));
-                        return;
-                    }
+                if (stackResult == StackResult.SUCCESS) {
+                    if (result != null)
+                        result.accept(barrelOptional.map(StackedBarrel::getBlock));
+                    return;
                 }
             }
 

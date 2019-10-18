@@ -250,50 +250,44 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
             Location entityLocation = getLivingEntity().getLocation();
 
-            synchronized (mutex) {
-                Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
-                        .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
-                        .collect(Collectors.toSet());
-                Optional<StackedEntity> entityOptional = filteredEntities.stream()
-                        .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
+            Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
+                    .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
+                    .collect(Collectors.toSet());
+            Optional<StackedEntity> entityOptional = filteredEntities.stream()
+                    .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
 
-                if (entityOptional.isPresent()) {
-                    StackedEntity targetEntity = entityOptional.get();
+            if (entityOptional.isPresent()) {
+                StackedEntity targetEntity = entityOptional.get();
 
-                    if (minimumStackSize > 1) {
-                        int totalStackSize = getStackAmount();
+                if (minimumStackSize > 1) {
+                    int totalStackSize = getStackAmount();
 
-                        for (StackedEntity stackedEntity : filteredEntities)
-                            totalStackSize += stackedEntity.getStackAmount();
+                    for (StackedEntity stackedEntity : filteredEntities)
+                        totalStackSize += stackedEntity.getStackAmount();
 
-                        if (totalStackSize < minimumStackSize) {
-                            updateName();
-                            if (result != null)
-                                result.accept(Optional.empty());
-                            return;
-                        }
-
-                        filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
-                    }
-
-                    StackResult stackResult;
-
-                    synchronized (((WStackedEntity) targetEntity).mutex){
-                        stackResult = runStack(targetEntity);
-                    }
-
-                    if (stackResult != StackResult.SUCCESS) {
+                    if (totalStackSize < minimumStackSize) {
                         updateName();
                         if (result != null)
                             result.accept(Optional.empty());
                         return;
                     }
 
+                    filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
                 }
 
-                if (result != null)
-                    result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+                StackResult stackResult = runStack(targetEntity);
+
+                if (stackResult != StackResult.SUCCESS) {
+                    updateName();
+                    if (result != null)
+                        result.accept(Optional.empty());
+                    return;
+                }
+
             }
+
+            if (result != null)
+                result.accept(entityOptional.map(StackedEntity::getLivingEntity));
         });
     }
 
@@ -399,11 +393,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
             if(linkedEntity != null){
                 StackedEntity targetEntity = WStackedEntity.of(linkedEntity);
-                StackResult stackResult;
 
-                synchronized (((WStackedEntity) targetEntity).mutex){
-                    stackResult = runStack(targetEntity);
-                }
+                StackResult stackResult = runStack(targetEntity);
 
                 if(stackResult == StackResult.SUCCESS) {
                     if (result != null)
