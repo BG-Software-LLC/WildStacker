@@ -366,6 +366,10 @@ public final class ConfigComments {
     public static String ENTITIES_AUTO_EXP_PICKUP = "entities.auto-exp-pickup";
 
     @Comment("")
+    @Comment("Should eggs that are laid by stacked chickens be multiplied by it's stack size?")
+    public static String ENTITIES_EGG_LAY_MULTIPLY = "entities.egg-lay-multiply";
+
+    @Comment("")
     @Comment("Here you can configurable all features related to stacked spawners.")
     public static String SPAWNERS = "spawners";
 

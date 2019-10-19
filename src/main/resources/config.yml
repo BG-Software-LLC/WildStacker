@@ -347,6 +347,9 @@ entities:
   # Should exp get added directly to killer instead of dropped to ground?
   auto-exp-pickup: []
 
+  # Should eggs that are laid by stacked chickens be multiplied by it's stack size?
+  egg-lay-multiply: true
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

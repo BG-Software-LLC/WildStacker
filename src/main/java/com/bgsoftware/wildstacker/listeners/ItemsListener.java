@@ -80,6 +80,9 @@ public final class ItemsListener implements Listener {
 
     @EventHandler
     public void onEggLay(EggLayEvent e){
+        if(!plugin.getSettings().eggLayMultiply)
+            return;
+
         StackedEntity stackedEntity = WStackedEntity.of(e.getChicken());
         ItemStack eggItem = e.getEgg().getItemStack();
         eggItem.setAmount(stackedEntity.getStackAmount());
