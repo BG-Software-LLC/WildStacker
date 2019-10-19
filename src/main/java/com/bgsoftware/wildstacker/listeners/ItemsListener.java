@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -28,7 +29,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Arrays;
 
@@ -65,8 +65,8 @@ public final class ItemsListener implements Listener {
 
         //Chunk Limit
         Executor.sync(() -> {
-            if(e.getEntity().hasMetadata("player-drop"))
-                e.getEntity().removeMetadata("player-drop", plugin);
+            if(EntityStorage.hasMetadata(e.getEntity(), "player-drop"))
+                EntityStorage.removeMetadata(e.getEntity(), "player-drop");
             else if(isChunkLimit(e.getLocation().getChunk()))
                 stackedItem.remove();
         }, 2L);
@@ -75,7 +75,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerItemDrop(PlayerDropItemEvent e){
-        e.getItemDrop().setMetadata("player-drop", new FixedMetadataValue(plugin, true));
+        EntityStorage.setMetadata(e.getItemDrop(), "player-drop", true);
     }
 
     @EventHandler

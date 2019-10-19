@@ -29,6 +29,12 @@ public final class EntityStorage {
         return hasMetadata(entity, key) ? type.cast(entityStorage.get(uuid).get(key)) : null;
     }
 
+    public static void removeMetadata(Entity entity, String key){
+        UUID uuid = entity.getUniqueId();
+        if(entityStorage.containsKey(uuid))
+            entityStorage.get(uuid).remove(key);
+    }
+
     public static void clearCache(){
         for(Map map : entityStorage.values())
             map.clear();
