@@ -25,8 +25,10 @@ import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Arrays;
 
@@ -63,9 +65,17 @@ public final class ItemsListener implements Listener {
 
         //Chunk Limit
         Executor.sync(() -> {
-            if(isChunkLimit(e.getLocation().getChunk()))
+            if(e.getEntity().hasMetadata("player-drop"))
+                e.getEntity().removeMetadata("player-drop", plugin);
+            else if(isChunkLimit(e.getLocation().getChunk()))
                 stackedItem.remove();
         }, 2L);
+    }
+
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerItemDrop(PlayerDropItemEvent e){
+        e.getItemDrop().setMetadata("player-drop", new FixedMetadataValue(plugin, true));
     }
 
     @EventHandler
