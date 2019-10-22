@@ -165,4 +165,13 @@ public final class EntityData {
         return entityData;
     }
 
+    public static void cache(LivingEntity livingEntity){
+        EntityData entityData = new EntityData();
+        entityData.loadEntityData(livingEntity);
+
+        synchronized (cachedData){
+            cachedData.put(livingEntity.getUniqueId(), entityData);
+        }
+    }
+
 }
