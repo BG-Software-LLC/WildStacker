@@ -22,14 +22,21 @@ public class LootTableSheep extends LootTable {
 
         if(stackedEntity.getLivingEntity() instanceof Sheep) {
             Sheep sheep = (Sheep) stackedEntity.getLivingEntity();
-            ItemStack wool = Materials.getWool(sheep.getColor());
-            for (ItemStack itemStack : drops) {
-                if (itemStack.getType().name().contains("WOOL")) {
-                    if (ServerVersion.isLegacy()) {
-                        //noinspection deprecation
-                        itemStack.setDurability(wool.getData().getData());
-                    } else {
-                        itemStack.setType(wool.getType());
+
+            if(sheep.isSheared()){
+                drops.removeIf(itemStack -> itemStack.getType().name().contains("WOOL"));
+            }
+
+            else {
+                ItemStack wool = Materials.getWool(sheep.getColor());
+                for (ItemStack itemStack : drops) {
+                    if (itemStack.getType().name().contains("WOOL")) {
+                        if (ServerVersion.isLegacy()) {
+                            //noinspection deprecation
+                            itemStack.setDurability(wool.getData().getData());
+                        } else {
+                            itemStack.setType(wool.getType());
+                        }
                     }
                 }
             }
