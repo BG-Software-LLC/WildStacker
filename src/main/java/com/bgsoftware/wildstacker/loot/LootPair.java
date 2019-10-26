@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Executor;
 import com.bgsoftware.wildstacker.utils.Random;
@@ -87,7 +88,7 @@ public class LootPair {
         return "LootPair{items=" + lootItems + "}";
     }
 
-    public static LootPair fromJson(JsonObject jsonObject){
+    public static LootPair fromJson(JsonObject jsonObject, String lootTableName){
         double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
         double lootingChance = jsonObject.has("lootingChance") ? jsonObject.get("lootingChance").getAsDouble() : 0;
         String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
@@ -95,18 +96,29 @@ public class LootPair {
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
         List<String> killer = new ArrayList<>();
+
         if(jsonObject.has("items")){
-            jsonObject.get("items").getAsJsonArray().forEach(element -> lootItems.add(LootItem.fromJson(element.getAsJsonObject())));
+            jsonObject.get("items").getAsJsonArray().forEach(element -> {
+                try {
+                    lootItems.add(LootItem.fromJson(element.getAsJsonObject()));
+                }catch(IllegalArgumentException ex){
+                    WildStackerPlugin.log("[" + lootTableName + "] " + ex.getMessage());
+                }
+            });
         }
+
         if(jsonObject.has("commands")){
             jsonObject.get("commands").getAsJsonArray().forEach(element -> lootCommands.add(LootCommand.fromJson(element.getAsJsonObject())));
         }
+
         if(jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean()){
             killer.add("PLAYER");
         }
+
         if(jsonObject.has("killedByCharged") && jsonObject.get("killedByCharged").getAsBoolean()){
             killer.add("CHARGED_CREEPER");
         }
+
         if(jsonObject.has("killer")){
             if(jsonObject.get("killer").isJsonArray()){
                 jsonObject.getAsJsonArray("killer").forEach(type -> killer.add(type.getAsString().toUpperCase()));
@@ -114,6 +126,7 @@ public class LootPair {
                 killer.add(jsonObject.get("killer").getAsString().toUpperCase());
             }
         }
+
         return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission, spawnCauseFilter);
     }
 

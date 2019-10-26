@@ -45,7 +45,7 @@ public class LootTableSheep extends LootTable {
         return drops;
     }
 
-    public static LootTableSheep fromJson(JsonObject jsonObject){
+    public static LootTableSheep fromJson(JsonObject jsonObject, String lootTableName){
         boolean dropEquipment = !jsonObject.has("dropEquipment") || jsonObject.get("dropEquipment").getAsBoolean();
         boolean alwaysDropsExp = false;
         int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
@@ -61,7 +61,7 @@ public class LootTableSheep extends LootTable {
 
         List<LootPair> lootPairs = new ArrayList<>();
         if(jsonObject.has("pairs")){
-            jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject())));
+            jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject(), lootTableName)));
         }
 
         return new LootTableSheep(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);

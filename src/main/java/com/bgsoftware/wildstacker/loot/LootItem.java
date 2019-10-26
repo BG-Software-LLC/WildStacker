@@ -96,7 +96,14 @@ public class LootItem {
     }
 
     private static ItemStack buildItemStack(JsonObject jsonObject){
-        Material type = Material.valueOf(jsonObject.get("type").getAsString());
+        Material type;
+
+        try{
+            type = Material.valueOf(jsonObject.get("type").getAsString());
+        }catch(IllegalArgumentException ex){
+            throw new IllegalArgumentException("Couldn't load item with an invalid material " + jsonObject.get("type").getAsString() + ".");
+        }
+
         short data = jsonObject.has("data") ? jsonObject.get("data").getAsShort() : 0;
 
         ItemStack itemStack = new ItemStack(type, 1, data);

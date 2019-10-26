@@ -28,6 +28,9 @@ public final class LootHandler {
     private final Gson gson = new Gson();
 
     public LootHandler(WildStackerPlugin plugin){
+        WildStackerPlugin.log("Loading loot-tables started...");
+        long startTime = System.currentTimeMillis();
+
         File folderFile = new File(plugin.getDataFolder(), "loottables");
 
         if(!folderFile.exists())
@@ -41,12 +44,14 @@ public final class LootHandler {
             try {
                 JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
                 String key = file.getName().replace(".json", "").toUpperCase();
-                lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject) : LootTable.fromJson(jsonObject));
+                lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject, file.getName()) : LootTable.fromJson(jsonObject, file.getName()));
             }catch(Exception ex){
-                System.out.println("Couldn't load " + file.getName());
-                ex.printStackTrace();
+                WildStackerPlugin.log("[" + file.getName() + "] Couldn't load loot table:");
+                WildStackerPlugin.log("    " + ex.getMessage());
             }
         }
+
+        WildStackerPlugin.log("Loading loot-tables done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }
 
     private void initAllLootTables(){
