@@ -37,6 +37,8 @@ public final class GeneralUtils {
             return map.get(stackedEntity.getType().name() + ":" + stackedEntity.getSpawnCause().name());
         if(map.containsKey("all"))
             return map.get("all");
+        if(map.containsKey("ALL"))
+            return map.get("ALL");
         return def;
     }
 
