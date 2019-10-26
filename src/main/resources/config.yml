@@ -262,6 +262,7 @@ entities:
     SHEEP_SHEAR: true
     SHEEP_DYE: true
     ENTITY_BREED: true
+    VILLAGER_INFECTION: true
 
   # Linked-entities are entities that are linked to one spawner or more.
   # A spawner that has an entity linked to, will try to stack it's entities first to the linked one.

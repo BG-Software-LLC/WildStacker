@@ -13,6 +13,8 @@ import net.minecraft.server.v1_12_R1.EntityItem;
 import net.minecraft.server.v1_12_R1.EntityLiving;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
 import net.minecraft.server.v1_12_R1.EntityTracker;
+import net.minecraft.server.v1_12_R1.EntityVillager;
+import net.minecraft.server.v1_12_R1.EntityZombieVillager;
 import net.minecraft.server.v1_12_R1.EnumItemSlot;
 import net.minecraft.server.v1_12_R1.EnumParticle;
 import net.minecraft.server.v1_12_R1.ItemStack;
@@ -41,6 +43,8 @@ import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftVillagerZombie;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -49,6 +53,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 
 import java.io.ByteArrayInputStream;
@@ -413,6 +418,21 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @Override
+    public void applyZombieVillager(Villager villager, Zombie zombie) {
+        EntityZombieVillager entityZombieVillager = ((CraftVillagerZombie) zombie).getHandle();
+        EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+
+        entityZombieVillager.setProfession(entityVillager.getProfession());
+        entityZombieVillager.setBaby(entityVillager.isBaby());
+        entityZombieVillager.setNoAI(entityVillager.isNoAI());
+
+        if (entityVillager.hasCustomName()) {
+            entityZombieVillager.setCustomName(entityVillager.getCustomName());
+            entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
+        }
     }
 
     @SuppressWarnings("deprecation")

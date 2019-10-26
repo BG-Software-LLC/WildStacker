@@ -7,7 +7,8 @@ public enum StackSplit {
     MUSHROOM_SHEAR,
     SHEEP_SHEAR,
     SHEEP_DYE,
-    ENTITY_BREED;
+    ENTITY_BREED,
+    VILLAGER_INFECTION;
 
     private boolean enabled;
 

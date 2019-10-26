@@ -12,6 +12,8 @@ import net.minecraft.server.v1_8_R3.EntityItem;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.EntityTracker;
+import net.minecraft.server.v1_8_R3.EntityVillager;
+import net.minecraft.server.v1_8_R3.EntityZombie;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
@@ -37,6 +39,8 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftZombie;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -46,6 +50,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 
 import java.io.ByteArrayInputStream;
@@ -405,6 +410,21 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @Override
+    public void applyZombieVillager(Villager villager, Zombie zombie) {
+        EntityZombie entityZombie = ((CraftZombie) zombie).getHandle();
+        EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+
+        entityZombie.setVillager(true);
+        entityZombie.setBaby(entityVillager.isBaby());
+        entityZombie.k(entityVillager.ce());
+
+        if (entityVillager.hasCustomName()) {
+            entityZombie.setCustomName(entityVillager.getCustomName());
+            entityZombie.setCustomNameVisible(entityVillager.getCustomNameVisible());
+        }
     }
 
     @SuppressWarnings("deprecation")

@@ -38,6 +38,7 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -157,6 +158,34 @@ public final class EntitiesListener implements Listener {
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
+
+            //Villager was killed by a zombie - should be turned into a zombie villager.
+            if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){
+                boolean spawnZombie = false;
+
+                switch (livingEntity.getWorld().getDifficulty()){
+                    case NORMAL:
+                        spawnZombie = ThreadLocalRandom.current().nextBoolean();
+                        break;
+                    case HARD:
+                        spawnZombie = true;
+                        break;
+                }
+
+                if(spawnZombie){
+                    StackedEntity zombieVillager = EntityUtils.spawnZombieVillager((Villager) livingEntity);
+                    if(StackSplit.VILLAGER_INFECTION.isEnabled()){
+                        stackedEntity.runUnstack(1);
+                    }else{
+                        zombieVillager.setStackAmount(stackedEntity.getStackAmount(), true);
+                        stackedEntity.remove();
+                    }
+                    zombieVillager.updateName();
+                    zombieVillager.runStackAsync(null);
+                }
+
+                return;
+            }
 
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
                 deadEntities.add(livingEntity.getUniqueId());
