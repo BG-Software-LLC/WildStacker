@@ -4,8 +4,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.key.Key;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
@@ -17,9 +15,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
-import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
@@ -169,21 +165,6 @@ public final class EntityUtils {
     public static boolean killedByZombie(LivingEntity livingEntity){
         EntityDamageEvent entityDamageEvent = livingEntity.getLastDamageCause();
         return entityDamageEvent instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) entityDamageEvent).getDamager() instanceof Zombie;
-    }
-
-    public static StackedEntity spawnZombieVillager(Villager villager){
-        Zombie zombie;
-
-        if(ServerVersion.isAtLeast(ServerVersion.v1_11)){
-            zombie = plugin.getSystemManager().spawnEntityWithoutStacking(villager.getLocation(), ZombieVillager.class, SpawnCause.INFECTION);
-        }
-        else{
-            zombie = plugin.getSystemManager().spawnEntityWithoutStacking(villager.getLocation(), Zombie.class, SpawnCause.INFECTION);
-        }
-
-        plugin.getNMSAdapter().applyZombieVillager(villager, zombie);
-
-        return WStackedEntity.of(zombie);
     }
 
 }

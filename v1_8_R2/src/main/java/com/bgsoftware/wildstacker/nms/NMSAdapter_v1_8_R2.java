@@ -40,7 +40,6 @@ import org.bukkit.craftbukkit.v1_8_R2.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R2.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_8_R2.entity.CraftZombie;
 import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -52,6 +51,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -414,10 +414,11 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
-    public void applyZombieVillager(Villager villager, Zombie zombie) {
-        EntityZombie entityZombie = ((CraftZombie) zombie).getHandle();
+    public Zombie spawnZombieVillager(Villager villager) {
         EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+        EntityZombie entityZombie = new EntityZombie(entityVillager.world);
 
+        entityZombie.m(entityVillager);
         entityZombie.setVillager(true);
         entityZombie.setBaby(entityVillager.isBaby());
         entityZombie.k(entityVillager.ce());
@@ -426,6 +427,11 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
             entityZombie.setCustomName(entityVillager.getCustomName());
             entityZombie.setCustomNameVisible(entityVillager.getCustomNameVisible());
         }
+
+        entityVillager.world.addEntity(entityZombie, CreatureSpawnEvent.SpawnReason.INFECTION);
+        entityVillager.world.a(null, 1016, new BlockPosition(entityVillager), 0);
+
+        return (Zombie) entityZombie.getBukkitEntity();
     }
 
     @SuppressWarnings("deprecation")

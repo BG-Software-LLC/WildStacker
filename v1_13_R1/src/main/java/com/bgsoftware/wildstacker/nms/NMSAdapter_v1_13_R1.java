@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import net.minecraft.server.v1_13_R1.BlockPosition;
 import net.minecraft.server.v1_13_R1.ChatMessage;
 import net.minecraft.server.v1_13_R1.EnchantmentManager;
 import net.minecraft.server.v1_13_R1.Entity;
@@ -50,7 +51,6 @@ import org.bukkit.craftbukkit.v1_13_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R1.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_13_R1.entity.CraftVillagerZombie;
 import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -61,6 +61,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -451,10 +452,11 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     }
 
     @Override
-    public void applyZombieVillager(Villager villager, Zombie zombie) {
-        EntityZombieVillager entityZombieVillager = ((CraftVillagerZombie) zombie).getHandle();
+    public Zombie spawnZombieVillager(Villager villager) {
         EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+        EntityZombieVillager entityZombieVillager = new EntityZombieVillager(entityVillager.world);
 
+        entityZombieVillager.u(entityVillager);
         entityZombieVillager.setProfession(entityVillager.getProfession());
         entityZombieVillager.setBaby(entityVillager.isBaby());
         entityZombieVillager.setNoAI(entityVillager.isNoAI());
@@ -463,6 +465,11 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
             entityZombieVillager.setCustomName(entityVillager.getCustomName());
             entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
         }
+
+        entityVillager.world.addEntity(entityZombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
+        entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
+
+        return (Zombie) entityZombieVillager.getBukkitEntity();
     }
 
     @SuppressWarnings("deprecation")

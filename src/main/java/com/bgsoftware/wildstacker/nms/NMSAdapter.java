@@ -96,6 +96,6 @@ public interface NMSAdapter {
 
     SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
 
-    void applyZombieVillager(Villager villager, Zombie zombie);
+    Zombie spawnZombieVillager(Villager villager);
 
 }

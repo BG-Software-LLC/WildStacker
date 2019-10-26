@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import net.minecraft.server.v1_13_R2.BlockPosition;
 import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.EnchantmentManager;
 import net.minecraft.server.v1_13_R2.Entity;
@@ -50,7 +51,6 @@ import org.bukkit.craftbukkit.v1_13_R2.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftVillagerZombie;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -61,6 +61,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -69,6 +71,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -460,10 +463,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
-    public void applyZombieVillager(Villager villager, Zombie zombie) {
-        EntityZombieVillager entityZombieVillager = ((CraftVillagerZombie) zombie).getHandle();
+    public Zombie spawnZombieVillager(Villager villager) {
         EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+        EntityZombieVillager entityZombieVillager = new EntityZombieVillager(entityVillager.world);
 
+        entityZombieVillager.u(entityVillager);
         entityZombieVillager.setProfession(entityVillager.getProfession());
         entityZombieVillager.setBaby(entityVillager.isBaby());
         entityZombieVillager.setNoAI(entityVillager.isNoAI());
@@ -472,6 +476,17 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
             entityZombieVillager.setCustomName(entityVillager.getCustomName());
             entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
         }
+
+        EntityTransformEvent entityTransformEvent = new EntityTransformEvent(entityVillager.getBukkitEntity(), Collections.singletonList(entityZombieVillager.getBukkitEntity()), EntityTransformEvent.TransformReason.INFECTION);
+        Bukkit.getPluginManager().callEvent(entityTransformEvent);
+
+        if(entityTransformEvent.isCancelled())
+            return null;
+
+        entityVillager.world.addEntity(entityZombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
+        entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
+
+        return (Zombie) entityZombieVillager.getBukkitEntity();
     }
 
     @SuppressWarnings("deprecation")

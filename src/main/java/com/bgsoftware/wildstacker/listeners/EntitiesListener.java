@@ -39,6 +39,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -173,15 +174,18 @@ public final class EntitiesListener implements Listener {
                 }
 
                 if(spawnZombie){
-                    StackedEntity zombieVillager = EntityUtils.spawnZombieVillager((Villager) livingEntity);
-                    if(StackSplit.VILLAGER_INFECTION.isEnabled()){
-                        stackedEntity.runUnstack(1);
-                    }else{
-                        zombieVillager.setStackAmount(stackedEntity.getStackAmount(), true);
-                        stackedEntity.remove();
+                    Zombie zombieVillager = plugin.getNMSAdapter().spawnZombieVillager((Villager) livingEntity);
+                    if(zombieVillager != null) {
+                        StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
+                        if (StackSplit.VILLAGER_INFECTION.isEnabled()) {
+                            stackedEntity.runUnstack(1);
+                        } else {
+                            stackedZombie.setStackAmount(stackedEntity.getStackAmount(), true);
+                            stackedEntity.remove();
+                        }
+                        stackedZombie.updateName();
+                        stackedZombie.runStackAsync(null);
                     }
-                    zombieVillager.updateName();
-                    zombieVillager.runStackAsync(null);
                 }
 
                 return;
