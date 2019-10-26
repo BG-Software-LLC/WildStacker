@@ -114,7 +114,7 @@ public final class CommandKill implements ICommand {
             Predicate<Item> itemPredicate = item ->
                     integerValue.i == -1 || inRadius(((Player) sender).getLocation(), item.getLocation(), integerValue.i);
 
-            plugin.getSystemManager().performKillAll(entityPredicate, itemPredicate);
+            plugin.getSystemManager().performKillAll(entityPredicate, itemPredicate, true);
         });
 
     }
