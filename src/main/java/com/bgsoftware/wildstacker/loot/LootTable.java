@@ -6,8 +6,8 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.google.gson.JsonObject;
 import org.bukkit.Material;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -43,7 +43,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new ArrayList<>();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-            (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity).name())) &&
+            (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
             (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
             (lootPair.getSpawnCauseFilter().isEmpty() || stackedEntity.getSpawnCause().name().equals(lootPair.getSpawnCauseFilter()))
         ).collect(Collectors.toList());
@@ -131,20 +131,24 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getFireTicks() > 0;
     }
 
-    static EntityType getEntityKiller(StackedEntity stackedEntity){
+    static String getEntityKiller(StackedEntity stackedEntity){
         EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
-        EntityType returnType = EntityType.UNKNOWN;
+        String returnType = "UNKNOWN";
 
         if(damageEvent instanceof EntityDamageByEntityEvent){
             EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
-            if(entityDamageByEntityEvent.getDamager() instanceof Projectile) {
-                Projectile projectile = (Projectile) entityDamageByEntityEvent.getDamager();
+            Entity damager = entityDamageByEntityEvent.getDamager();
+            if(damager instanceof Projectile) {
+                Projectile projectile = (Projectile) damager;
                 if(projectile.getShooter() instanceof Entity)
-                    returnType = ((Entity) projectile.getShooter()).getType();
+                    returnType = ((Entity) projectile.getShooter()).getType().name();
                 else
-                    returnType = projectile.getType();
+                    returnType = projectile.getType().name();
             }else{
-                returnType = entityDamageByEntityEvent.getDamager().getType();
+                if(damager instanceof Creeper && ((Creeper) damager).isPowered())
+                    returnType = "CHARGED_CREEPER";
+                else
+                    returnType = damager.getType().name();
             }
         }
 

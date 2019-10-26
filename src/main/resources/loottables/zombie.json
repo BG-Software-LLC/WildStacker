@@ -13,6 +13,18 @@
       ]
     },
     {
+      "killedByCharged": true,
+      "chance": 100,
+      "items": [
+        {
+          "type": "ZOMBIE_HEAD",
+          "chance": 100,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
       "killedByPlayer": true,
       "chance": 2.5,
       "lootingChance": 1,

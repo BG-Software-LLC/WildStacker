@@ -104,6 +104,9 @@ public class LootPair {
         if(jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean()){
             killer.add("PLAYER");
         }
+        if(jsonObject.has("killedByCharged") && jsonObject.get("killedByCharged").getAsBoolean()){
+            killer.add("CHARGED_CREEPER");
+        }
         if(jsonObject.has("killer")){
             if(jsonObject.get("killer").isJsonArray()){
                 jsonObject.getAsJsonArray("killer").forEach(type -> killer.add(type.getAsString().toUpperCase()));
