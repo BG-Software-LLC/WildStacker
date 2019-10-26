@@ -55,6 +55,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,6 +213,18 @@ public final class EntitiesListener implements Listener {
                             }
                             else {
                                 EntityUtils.spawnExp(livingEntity.getLocation(), entityDeathEvent.getDroppedExp());
+                            }
+                        }
+
+                        if(livingEntity.getKiller() != null && EntityTypes.fromEntity(livingEntity) == EntityTypes.PILLAGER){
+                            org.bukkit.entity.Raider pillager = (org.bukkit.entity.Raider) livingEntity;
+                            if(pillager.isPatrolLeader()){
+                                livingEntity.getKiller().addPotionEffect(new PotionEffect(
+                                        PotionEffectType.getByName("BAD_OMEN"),
+                                        120000,
+                                        EntityUtils.getBadOmenAmplifier(livingEntity.getKiller()),
+                                        false
+                                ));
                             }
                         }
 

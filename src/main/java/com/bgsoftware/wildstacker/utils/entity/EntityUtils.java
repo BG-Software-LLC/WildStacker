@@ -15,6 +15,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +141,22 @@ public final class EntityUtils {
         }
 
         return newName;
+    }
+
+    public static int getBadOmenAmplifier(Player player){
+        int amplifier = 0;
+
+        for(PotionEffect potionEffect : player.getActivePotionEffects()){
+            if(potionEffect.getType().getName().equals("BAD_OMEN")) {
+                amplifier = potionEffect.getAmplifier() + 1;
+                break;
+            }
+        }
+
+        if(amplifier >= 0 && amplifier <= 5)
+            player.removePotionEffect(PotionEffectType.getByName("BAD_OMEN"));
+
+        return Math.max(0, Math.min(5, amplifier));
     }
 
 }
