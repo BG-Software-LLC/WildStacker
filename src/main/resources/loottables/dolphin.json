@@ -14,6 +14,18 @@
           }
         }
       ]
+    },
+    {
+      "killer": [
+        "WITHER"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "WITHER_ROSE",
+          "chance": 100
+        }
+      ]
     }
   ]
 }
