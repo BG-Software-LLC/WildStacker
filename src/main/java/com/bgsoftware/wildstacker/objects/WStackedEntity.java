@@ -246,93 +246,101 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
                 entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player));
 
+        //Cache data of entities
+        EntityData.cache(object);
+        nearbyEntities.forEach(entity -> EntityData.cache((LivingEntity) entity));
+
         StackService.execute(this, () -> {
-            int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
-            Location entityLocation = getLivingEntity().getLocation();
+            synchronized (StackedEntity.class) {
+                int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+                Location entityLocation = getLivingEntity().getLocation();
 
-            Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
-                    .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
-                    .collect(Collectors.toSet());
-            Optional<StackedEntity> entityOptional = filteredEntities.stream()
-                    .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
+                Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
+                        .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
+                        .collect(Collectors.toSet());
+                Optional<StackedEntity> entityOptional = filteredEntities.stream()
+                        .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
 
-            if (entityOptional.isPresent()) {
-                StackedEntity targetEntity = entityOptional.get();
+                if (entityOptional.isPresent()) {
+                    StackedEntity targetEntity = entityOptional.get();
 
-                if (minimumStackSize > 1) {
-                    int totalStackSize = getStackAmount();
+                    if (minimumStackSize > 2) {
+                        int totalStackSize = getStackAmount();
 
-                    for (StackedEntity stackedEntity : filteredEntities)
-                        totalStackSize += stackedEntity.getStackAmount();
+                        for (StackedEntity stackedEntity : filteredEntities)
+                            totalStackSize += stackedEntity.getStackAmount();
 
-                    if (totalStackSize < minimumStackSize) {
+                        if (totalStackSize < minimumStackSize) {
+                            updateName();
+                            if (result != null)
+                                result.accept(Optional.empty());
+                            return;
+                        }
+
+                        filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
+                    }
+
+                    StackResult stackResult = runStack(targetEntity);
+
+                    if (stackResult != StackResult.SUCCESS) {
                         updateName();
                         if (result != null)
                             result.accept(Optional.empty());
                         return;
                     }
 
-                    filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
                 }
 
-                StackResult stackResult = runStack(targetEntity);
-
-                if (stackResult != StackResult.SUCCESS) {
-                    updateName();
-                    if (result != null)
-                        result.accept(Optional.empty());
-                    return;
-                }
-
+                if (result != null)
+                    result.accept(entityOptional.map(StackedEntity::getLivingEntity));
             }
-
-            if (result != null)
-                result.accept(entityOptional.map(StackedEntity::getLivingEntity));
         });
     }
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if(!StackService.canStackFromThread())
-            return StackResult.THREAD_CATCHER;
+        synchronized (StackedEntity.class) {
+            if (!StackService.canStackFromThread())
+                return StackResult.THREAD_CATCHER;
 
-        if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
-            return StackResult.NOT_SIMILAR;
+            if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
+                return StackResult.NOT_SIMILAR;
 
-        StackedEntity targetEntity = (StackedEntity) stackedObject;
+            StackedEntity targetEntity = (StackedEntity) stackedObject;
 
-        EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
-        Bukkit.getPluginManager().callEvent(entityStackEvent);
+            EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
+            Bukkit.getPluginManager().callEvent(entityStackEvent);
 
-        if (entityStackEvent.isCancelled())
-            return StackResult.EVENT_CANCELLED;
+            if (entityStackEvent.isCancelled())
+                return StackResult.EVENT_CANCELLED;
 
-        double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
-                Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
-        int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
+            double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
+                    Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
+            int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
-        targetEntity.setStackAmount(newStackAmount, false);
-        targetEntity.setHealth(health);
+            targetEntity.setStackAmount(newStackAmount, false);
+            targetEntity.setHealth(health);
 
-        Executor.sync(() -> {
-            if (targetEntity.getLivingEntity().isValid())
-                targetEntity.updateName();
-        }, 2L);
+            Executor.sync(() -> {
+                if (targetEntity.getLivingEntity().isValid())
+                    targetEntity.updateName();
+            }, 2L);
 
-        plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
+            plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
-        if(object.getType().name().equals("PARROT"))
-            Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
+            if (object.getType().name().equals("PARROT"))
+                Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
 
-        this.remove();
+            this.remove();
 
-        if(plugin.getSettings().entitiesParticlesEnabled) {
-            Location location = getLivingEntity().getLocation();
-            for(ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
-                particleWrapper.spawnParticle(location);
+            if (plugin.getSettings().entitiesParticlesEnabled) {
+                Location location = getLivingEntity().getLocation();
+                for (ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
+                    particleWrapper.spawnParticle(location);
+            }
+
+            return StackResult.SUCCESS;
         }
-
-        return StackResult.SUCCESS;
     }
 
     @Override
@@ -382,7 +390,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
      */
 
     @Override
-    public void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result) {
+    public synchronized void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result) {
         if (!plugin.getSettings().linkedEntitiesEnabled) {
             runStackAsync(result);
             return;
@@ -394,13 +402,22 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             if(linkedEntity != null){
                 StackedEntity targetEntity = WStackedEntity.of(linkedEntity);
 
-                StackResult stackResult = runStack(targetEntity);
+                try {
+                    boolean cont = StackService.submit(targetEntity, () -> {
+                        StackResult stackResult = runStack(targetEntity);
 
-                if(stackResult == StackResult.SUCCESS) {
-                    if (result != null)
-                        result.accept(Optional.of(linkedEntity));
-                    return;
-                }
+                        if (stackResult == StackResult.SUCCESS) {
+                            if (result != null)
+                                result.accept(Optional.of(linkedEntity));
+                            return false;
+                        }
+
+                        return true;
+                    }).get();
+
+                    if(!cont)
+                        return;
+                }catch(Exception ignored){}
             }
 
             runStackAsync(entityOptional -> {

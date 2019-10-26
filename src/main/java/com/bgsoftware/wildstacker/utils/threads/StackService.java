@@ -13,9 +13,11 @@ import org.bukkit.Location;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
@@ -37,12 +39,20 @@ public final class StackService {
         }
     }
 
-    public static void findExecutor(StackedObject stackedObject, Consumer<ExecutorService> executorServiceConsumer){
+    public static Future<Boolean> submit(StackedObject stackedObject, Callable<Boolean> callable){
+        return findExecutor(stackedObject).submit(callable);
+    }
+
+    private static void findExecutor(StackedObject stackedObject, Consumer<ExecutorService> executorServiceConsumer){
         if(Bukkit.isPrimaryThread()){
             Executor.async(() -> findExecutor(stackedObject, executorServiceConsumer));
             return;
         }
 
+        executorServiceConsumer.accept(findExecutor(stackedObject));
+    }
+
+    private static ExecutorService findExecutor(StackedObject stackedObject){
         Location location = stackedObject.getLocation();
         int stackCheck = 0;
 
@@ -55,12 +65,12 @@ public final class StackService {
         else if(stackedObject instanceof StackedBarrel)
             stackCheck = plugin.getSettings().barrelsCheckRange;
 
-        executorServiceConsumer.accept(getClosest(location, stackCheck));
+        return getClosest(location, stackCheck);
     }
 
     public static ExecutorService getClosest(Location location, int stackCheck){
         Optional<Location> optionalLocation = services.keySet().stream().min((o1, o2) -> {
-            double distance1 = o1.distanceSquared(location), distance2 = o2.distance(location);
+            double distance1 = distance(o1, location), distance2 = distance(o2, location);
             return Double.compare(distance1, distance2);
         });
 
@@ -108,10 +118,17 @@ public final class StackService {
     }
 
     private static boolean isInsideRange(Location location, Location target, int range){
+        if(!location.getWorld().getName().equals(target.getWorld().getName()))
+            return false;
+
         Location max = location.clone().add(range, range, range), min = location.clone().subtract(range, range, range);
         return target.getX() >= min.getX() && target.getX() <= max.getX() &&
                 target.getY() >= min.getY() && target.getY() <= max.getY() &&
                 target.getZ() >= min.getZ() && target.getZ() <= max.getZ();
+    }
+
+    private static double distance(Location loc1, Location loc2){
+        return loc1.getWorld().getName().equals(loc2.getWorld().getName()) ? loc1.distanceSquared(loc2) : Double.MAX_VALUE;
     }
 
     private static ExecutorService createService(){
