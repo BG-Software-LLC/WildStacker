@@ -52,7 +52,7 @@ public final class ReflectionUtils {
                             ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp"
             ));
             methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundVolume" :
+                    ServerVersion.isEquals(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cD" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cq" :
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
@@ -117,6 +117,16 @@ public final class ReflectionUtils {
             return Class.forName("org.bukkit.craftbukkit." + ServerVersion.getBukkitVersion() + "." + className);
         }catch(ClassNotFoundException ex){
             throw new NullPointerException(ex.getMessage());
+        }
+    }
+
+    private static String getValidMethod(Class clazz, String methodName1, String methodName2){
+        try{
+            //noinspection unchecked
+            clazz.getDeclaredMethod(methodName1);
+            return methodName1;
+        }catch(Throwable ex){
+            return methodName2;
         }
     }
 
