@@ -163,7 +163,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        if(EntityUtils.isNameBlacklisted(object.getCustomName()))
+        if(EntityUtils.isNameBlacklisted(object.getCustomName()) || hasNameTag())
             return;
 
         if(isBlacklisted() || !isWhitelisted() || isWorldDisabled())
