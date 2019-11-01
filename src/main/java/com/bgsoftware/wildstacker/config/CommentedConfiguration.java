@@ -28,7 +28,7 @@ import java.util.Map;
 public final class CommentedConfiguration extends YamlConfiguration{
 
     private Class commentsClass;
-    private String[] ignoredSections = new String[] {"limits", "minimum-limits", "default-unstack"};
+    private String[] ignoredSections = new String[] {"limits", "minimum-limits", "default-unstack", "break-slots", "fill-items"};
 
     public CommentedConfiguration(Class commentsClass, File file){
         this.commentsClass = commentsClass;
