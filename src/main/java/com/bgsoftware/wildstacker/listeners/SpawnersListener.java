@@ -502,7 +502,7 @@ public final class SpawnersListener implements Listener {
                     if(itemStack != null) {
                         if (itemStack.getType() == Materials.SPAWNER.toBukkitType() &&
                                 plugin.getProviders().getSpawnerType(itemStack) == stackedSpawner.getSpawnedType())
-                            amount += ItemUtils.getSpawnerItemAmount(itemStack);
+                            amount += ItemUtils.getSpawnerItemAmount(itemStack) * itemStack.getAmount();
                         else if (itemStack.getType() != Material.AIR)
                             ItemUtils.addItem(itemStack, e.getPlayer().getInventory(), stackedSpawner.getLocation());
                     }
