@@ -65,15 +65,17 @@ public final class HologramsProvider_HolographicDisplays implements HologramsPro
 
     @Override
     public void clearHolograms() {
-        for(Hologram hologram : HologramsAPI.getHolograms(plugin)){
-            if(GeneralUtils.isChunkLoaded(hologram.getLocation())) {
-                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
-                if (!plugin.getSystemManager().isStackedBarrel(underBlock) && !plugin.getSystemManager().isStackedSpawner(underBlock)) {
-                    hologram.delete();
-                    break;
+        try {
+            for (Hologram hologram : HologramsAPI.getHolograms(plugin)) {
+                if (GeneralUtils.isChunkLoaded(hologram.getLocation())) {
+                    Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
+                    if (!plugin.getSystemManager().isStackedBarrel(underBlock) && !plugin.getSystemManager().isStackedSpawner(underBlock)) {
+                        hologram.delete();
+                        break;
+                    }
                 }
             }
-        }
+        }catch(Exception ignored){}
     }
 
     @Override
