@@ -61,15 +61,17 @@ public final class ItemsListener implements Listener {
             spawnedItem.getItem().setPickupDelay(40);
         }
 
-        stackedItem.runStackAsync(null);
+        stackedItem.runStackAsync(optionalItem -> {
+            if(optionalItem.isPresent())
+                return;
 
-        //Chunk Limit
-        Executor.sync(() -> {
-            if(EntityStorage.hasMetadata(e.getEntity(), "player-drop"))
-                EntityStorage.removeMetadata(e.getEntity(), "player-drop");
-            else if(isChunkLimit(e.getLocation().getChunk()))
-                stackedItem.remove();
-        }, 2L);
+            Executor.sync(() -> {
+                if(EntityStorage.hasMetadata(e.getEntity(), "player-drop"))
+                    EntityStorage.removeMetadata(e.getEntity(), "player-drop");
+                else if(isChunkLimit(e.getLocation().getChunk()))
+                    stackedItem.remove();
+            });
+        });
     }
 
 
@@ -170,13 +172,9 @@ public final class ItemsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryPickup(InventoryPickupItemEvent e){
         StackedItem stackedItem = WStackedItem.of(e.getItem());
-        if(stackedItem.getStackAmount() > 1) {
+        if (stackedItem.getStackAmount() > 1) {
             e.setCancelled(true);
             stackedItem.giveItemStack(e.getInventory());
-            if (stackedItem.getStackAmount() <= 0) {
-                stackedItem.remove();
-            }
-
             Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
             hopper.getState().update();
         }
