@@ -30,6 +30,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("WeakerAccess")
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
+    public static final Object stackingMutex = new Object();
+
     private final static int MAX_PICKUP_DELAY = 32767;
 
     public WStackedItem(Item item){
@@ -162,35 +164,37 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if (!plugin.getSettings().itemsStackingEnabled)
-            return StackCheckResult.NOT_ENABLED;
+        synchronized (stackingMutex) {
+            if (!plugin.getSettings().itemsStackingEnabled)
+                return StackCheckResult.NOT_ENABLED;
 
-        StackCheckResult superResult = super.runStackCheck(stackedObject);
+            StackCheckResult superResult = super.runStackCheck(stackedObject);
 
-        if(superResult != StackCheckResult.SUCCESS)
-            return superResult;
+            if (superResult != StackCheckResult.SUCCESS)
+                return superResult;
 
-        if(!plugin.getSettings().itemsMaxPickupDelay && getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
-            return StackCheckResult.PICKUP_DELAY_EXCEEDED;
+            if (!plugin.getSettings().itemsMaxPickupDelay && getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+                return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
-        if(object.isDead())
-            return StackCheckResult.ALREADY_DEAD;
+            if (object.isDead())
+                return StackCheckResult.ALREADY_DEAD;
 
-        StackedItem targetItem = (StackedItem) stackedObject;
+            StackedItem targetItem = (StackedItem) stackedObject;
 
-        if(!plugin.getSettings().itemsMaxPickupDelay && targetItem.getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
-            return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
+            if (!plugin.getSettings().itemsMaxPickupDelay && targetItem.getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+                return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
 
-        if(targetItem.getItem().isDead())
-            return StackCheckResult.TARGET_ALREADY_DEAD;
+            if (targetItem.getItem().isDead())
+                return StackCheckResult.TARGET_ALREADY_DEAD;
 
-        if(getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-            return StackCheckResult.INSIDE_PORTAL;
+            if (getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+                return StackCheckResult.INSIDE_PORTAL;
 
-        if(targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-            return StackCheckResult.TARGET_INSIDE_PORTAL;
+            if (targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+                return StackCheckResult.TARGET_INSIDE_PORTAL;
 
-        return StackCheckResult.SUCCESS;
+            return StackCheckResult.SUCCESS;
+        }
     }
 
     @Override
@@ -199,29 +203,31 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
-        StackService.execute(this, () -> {
-            Location itemLocation = getItem().getLocation();
+        StackService.execute(() -> {
+            synchronized (stackingMutex) {
+                Location itemLocation = getItem().getLocation();
 
-            Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
-                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                    .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
+                Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
+                        .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+                        .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 
-            if (itemOptional.isPresent()) {
-                StackedItem targetItem = itemOptional.get();
+                if (itemOptional.isPresent()) {
+                    StackedItem targetItem = itemOptional.get();
 
-                StackResult stackResult = runStack(targetItem);
+                    StackResult stackResult = runStack(targetItem);
 
-                if (stackResult == StackResult.SUCCESS) {
-                    if (result != null)
-                        result.accept(itemOptional.map(StackedItem::getItem));
-                    return;
+                    if (stackResult == StackResult.SUCCESS) {
+                        if (result != null)
+                            result.accept(itemOptional.map(StackedItem::getItem));
+                        return;
+                    }
                 }
+
+                updateName();
+
+                if (result != null)
+                    result.accept(Optional.empty());
             }
-
-            updateName();
-
-            if(result != null)
-                result.accept(Optional.empty());
         });
     }
 
@@ -289,8 +295,10 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         int giveAmount = getStackAmount();
 
-        if(giveAmount <= 0)
+        if (giveAmount <= 0) {
+            remove();
             return;
+        }
 
         /*
          * I am not using ItemUtil#addItem so it won't drop the leftovers
@@ -306,18 +314,32 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         int amountOfStacks = giveAmount / maxStackAmount;
         int leftOvers = giveAmount % maxStackAmount;
+        boolean inventoryFull = false;
 
         itemStack.setAmount(maxStackAmount);
 
-        for(int i = 0; i < amountOfStacks; i++)
-            amountLeft += giveItem(inventory, itemStack);
-
-        if(leftOvers > 0) {
-            itemStack.setAmount(leftOvers);
-            amountLeft += giveItem(inventory, itemStack);
+        for (int i = 0; i < amountOfStacks; i++) {
+            if (inventoryFull) {
+                amountLeft += maxStackAmount;
+            } else {
+                int _amountLeft = giveItem(inventory, itemStack.clone());
+                if (_amountLeft > 0) {
+                    inventoryFull = true;
+                    amountLeft += _amountLeft;
+                }
+            }
         }
 
-        setStackAmount(amountLeft, true);
+        if (leftOvers > 0) {
+            itemStack.setAmount(leftOvers);
+            amountLeft += giveItem(inventory, itemStack.clone());
+        }
+
+        if (amountLeft <= 0) {
+            remove();
+        } else {
+            setStackAmount(amountLeft, true);
+        }
     }
 
     private int giveItem(Inventory inventory, ItemStack itemStack){
