@@ -7,14 +7,12 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public final class PluginHook_SpawnerProvider {
@@ -55,15 +53,12 @@ public final class PluginHook_SpawnerProvider {
         }
 
         boolean register(){
-            WildStackerPlugin.log("New Spawners Provider");
             try {
                 //noinspection JavaReflectionMemberAccess
                 Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
                 method.invoke(null, this);
                 return true;
-            } catch (InvocationTargetException ex) {
-                ex.getTargetException().printStackTrace();
-            } catch(Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
             return false;
@@ -80,21 +75,7 @@ public final class PluginHook_SpawnerProvider {
 
         @Override
         public ItemStack getSpawnerItem(String entityId, String customName) {
-            ItemStack itemStack = Materials.SPAWNER.toBukkitItem();
-
-            BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-            CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
-
-            creatureSpawner.setSpawnedType(EntityType.valueOf(entityId.toUpperCase()));
-
-            blockStateMeta.setBlockState(creatureSpawner);
-
-            if(!customName.isEmpty())
-                blockStateMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', customName));
-
-            itemStack.setItemMeta(blockStateMeta);
-
-            return itemStack;
+            return ItemUtils.getSpawnerItem(EntityType.valueOf(entityId), 1);
         }
 
         @Override
