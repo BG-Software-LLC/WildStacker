@@ -630,7 +630,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             customName = EntityUtils.getEntityName(this);
         }catch(NullPointerException ignored){}
 
-        return object.getCustomName() != null && !object.isCustomNameVisible() && !object.getCustomName().contains(customName);
+        return object.getCustomName() != null && !object.isCustomNameVisible() && (customName.isEmpty() || !object.getCustomName().contains(customName));
     }
 
     public boolean isCached(){
