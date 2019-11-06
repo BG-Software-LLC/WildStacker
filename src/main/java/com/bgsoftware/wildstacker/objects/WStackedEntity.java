@@ -52,6 +52,8 @@ import java.util.stream.Collectors;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
 
+    private static final Object stackingMutex = new Object();
+
     private boolean ignoreDeathEvent = false;
     private SpawnCause spawnCause;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
@@ -250,8 +252,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         EntityData.cache(object);
         nearbyEntities.forEach(entity -> EntityData.cache((LivingEntity) entity));
 
-        StackService.execute(this, () -> {
-            synchronized (StackedEntity.class) {
+        StackService.execute(() -> {
+            synchronized (stackingMutex) {
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
 
@@ -299,7 +301,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        synchronized (StackedEntity.class) {
+        synchronized (stackingMutex) {
             if (!StackService.canStackFromThread())
                 return StackResult.THREAD_CATCHER;
 
@@ -396,34 +398,42 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        StackService.execute(this, () -> {
+        StackService.execute(() -> {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
-            if(linkedEntity != null){
+            if (linkedEntity != null) {
                 StackedEntity targetEntity = WStackedEntity.of(linkedEntity);
 
-                try {
-                    boolean cont = StackService.submit(targetEntity, () -> {
-                        StackResult stackResult = runStack(targetEntity);
+                StackResult stackResult = runStack(targetEntity);
 
-                        if (stackResult == StackResult.SUCCESS) {
-                            if (result != null)
-                                result.accept(Optional.of(linkedEntity));
-                            return false;
-                        }
-
-                        return true;
-                    }).get();
-
-                    if(!cont)
-                        return;
-                }catch(Exception ignored){}
+                if (stackResult == StackResult.SUCCESS) {
+                    if (result != null)
+                        result.accept(Optional.of(linkedEntity));
+                    return;
+                }
+//                try {
+//                    boolean cont = StackService.submit(targetEntity, () -> {
+//                        StackResult stackResult = runStack(targetEntity);
+//
+//                        if (stackResult == StackResult.SUCCESS) {
+//                            if (result != null)
+//                                result.accept(Optional.of(linkedEntity));
+//                            return false;
+//                        }
+//
+//                        return true;
+//                    }).get();
+//
+//                    if (!cont)
+//                        return;
+//                } catch (Exception ignored) {
+//                }
             }
 
             runStackAsync(entityOptional -> {
                 LivingEntity targetEntity = entityOptional.orElse(object);
                 stackedSpawner.setLinkedEntity(targetEntity);
-                if(result != null)
+                if (result != null)
                     result.accept(Optional.of(targetEntity));
             });
         });

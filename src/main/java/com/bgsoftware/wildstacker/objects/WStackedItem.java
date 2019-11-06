@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("WeakerAccess")
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
-    public static final Object stackingMutex = new Object();
+    private static final Object stackingMutex = new Object();
 
     private final static int MAX_PICKUP_DELAY = 32767;
 

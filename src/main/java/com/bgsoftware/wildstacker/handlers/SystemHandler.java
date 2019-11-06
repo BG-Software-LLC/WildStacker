@@ -31,7 +31,6 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -315,8 +314,6 @@ public final class SystemHandler implements SystemManager {
                 }
             }
         }
-
-        StackService.clearCache();
 
         plugin.getProviders().clearHolograms();
     }
