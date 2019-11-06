@@ -97,7 +97,8 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public int getStackLimit() {
-        return plugin.getSettings().itemsLimits.getOrDefault(getItemStack(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().itemsLimits.getOrDefault(getItemStack(), Integer.MAX_VALUE);
+        return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override

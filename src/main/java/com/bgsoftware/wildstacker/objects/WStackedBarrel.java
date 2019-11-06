@@ -78,7 +78,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
     @Override
     public int getStackLimit() {
-        return plugin.getSettings().barrelsLimits.getOrDefault(getBarrelItem(1), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().barrelsLimits.getOrDefault(getBarrelItem(1), Integer.MAX_VALUE);
+        return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override

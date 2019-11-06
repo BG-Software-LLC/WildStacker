@@ -130,7 +130,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public int getStackLimit() {
-        return GeneralUtils.get(plugin.getSettings().entitiesLimits, this, Integer.MAX_VALUE);
+        int limit = GeneralUtils.get(plugin.getSettings().entitiesLimits, this, Integer.MAX_VALUE);
+        return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override

@@ -79,7 +79,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public int getStackLimit() {
-        return plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType().name(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType().name(), Integer.MAX_VALUE);
+        return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
