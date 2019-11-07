@@ -200,6 +200,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                     result.accept(Optional.empty());
             }
         });
+        StackService.runAsync();
     }
 
     @Override

@@ -205,6 +205,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                     result.accept(Optional.empty());
             }
         });
+        StackService.runAsync();
     }
 
     @Override

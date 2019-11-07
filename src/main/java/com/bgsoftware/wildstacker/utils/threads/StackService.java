@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 public final class StackService {
 
     private static int threadId = 1;
-    private static boolean mainThreadFlag;
+    private static boolean mainThreadFlag = false;
 
     public static void execute(Runnable runnable){
         if(mainThreadFlag){
@@ -16,7 +16,7 @@ public final class StackService {
             else
                 Executor.sync(runnable);
 
-            mainThreadFlag = false;
+            return;
         }
 
         if(isStackThread()) {
@@ -40,8 +40,12 @@ public final class StackService {
         return isStackThread() || Bukkit.isPrimaryThread();
     }
 
-    public static void runOnMain() {
+    public synchronized static void runOnMain() {
         mainThreadFlag = true;
+    }
+
+    public synchronized static void runAsync() {
+        mainThreadFlag = false;
     }
 
 }
