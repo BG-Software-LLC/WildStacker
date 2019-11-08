@@ -104,6 +104,7 @@ public final class SpawnersListener implements Listener {
         boolean replaceAir = false;
         ItemStack limitItem = null;
         ItemStack inHand = e.getItemInHand().clone();
+        int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
 
         if(e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
             replaceAir = true;
@@ -186,7 +187,7 @@ public final class SpawnersListener implements Listener {
 
             //Removing item from player's inventory
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE && REPLACE_AIR)
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getItemInHand(), new ItemStack(Material.AIR));
+                e.getPlayer().getInventory().setItem(heldSlot, new ItemStack(Material.AIR));
 
             if(LIMIT_ITEM != null)
                 ItemUtils.addItem(LIMIT_ITEM, e.getPlayer().getInventory(), e.getPlayer().getLocation());
