@@ -81,6 +81,8 @@ public final class SpawnersListener implements Listener {
             return;
 
         plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), e.getItemInHand(), true);
+        stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
+
         int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(e.getItemInHand());
 
         if(plugin.getSettings().spawnersPlacementPermission && !e.getPlayer().hasPermission("wildstacker.place.*") &&
