@@ -41,11 +41,22 @@ public enum SpawnCause {
     CUSTOM_BOSSES,
     EPIC_BOSSES,
     EPIC_BOSSES_MINION,
-    EPIC_SPAWNERS,
-    CITIZENS;
+    EPIC_SPAWNERS;
 
     public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason){
-        return valueOf(spawnReason.name());
+        return matchCause(spawnReason.name());
+    }
+
+    /**
+     * Returns a spawn cause from string. If not found, returning DEFAULT.
+     * @param name The name to check.
+     */
+    public static SpawnCause matchCause(String name){
+        try{
+            return valueOf(name);
+        }catch(IllegalArgumentException ex){
+            return DEFAULT;
+        }
     }
 
     public CreatureSpawnEvent.SpawnReason toSpawnReason(){

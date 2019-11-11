@@ -14,7 +14,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.database.StatementHolder;
-import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -503,8 +502,7 @@ public final class SystemHandler implements SystemManager {
         Executor.async(() -> {
             entityList.stream()
                     .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity) &&
-                            (!applyTaskFilter || GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity))) &&
-                            !CitizensHook.isNPC(entity))
+                            (!applyTaskFilter || GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
                         if(((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||

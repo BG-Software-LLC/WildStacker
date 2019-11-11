@@ -139,7 +139,7 @@ public final class DataHandler {
                             while (resultSet.next()) {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
-                                SpawnCause spawnCause = SpawnCause.valueOf(resultSet.getString("spawn_reason"));
+                                SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawn_reason"));
                                 CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
                                 CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
                             }
@@ -224,7 +224,7 @@ public final class DataHandler {
         SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
             while (resultSet.next()) {
                 int stackAmount = resultSet.getInt("stackAmount");
-                SpawnCause spawnCause = SpawnCause.valueOf(resultSet.getString("spawnCause"));
+                SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                 CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
                 CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
@@ -356,7 +356,7 @@ public final class DataHandler {
                 if (cfg.contains("entities")) {
                     for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
                         int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
-                        SpawnCause spawnCause = SpawnCause.valueOf(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
+                        SpawnCause spawnCause = SpawnCause.matchCause(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
                         UUID _uuid = UUID.fromString(uuid);
                         CACHED_AMOUNT_ENTITIES.put(_uuid, stackAmount);
                         CACHED_SPAWN_CAUSE_ENTITIES.put(_uuid, spawnCause);

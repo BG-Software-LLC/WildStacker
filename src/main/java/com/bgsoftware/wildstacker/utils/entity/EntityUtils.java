@@ -104,7 +104,7 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity){
-        return entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player);
+        return entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC");
     }
 
     public static void spawnExp(Location location, int amount){
