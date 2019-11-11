@@ -249,9 +249,9 @@ public final class EntitiesListener implements Listener {
                             }
                         }
 
-                        if(livingEntity.getKiller() != null && EntityTypes.fromEntity(livingEntity) == EntityTypes.PILLAGER){
-                            org.bukkit.entity.Raider pillager = (org.bukkit.entity.Raider) livingEntity;
-                            if(pillager.isPatrolLeader()){
+                        if(livingEntity.getKiller() != null && EntityTypes.fromEntity(livingEntity).isRaider()){
+                            org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) livingEntity;
+                            if(raider.isPatrolLeader()){
                                 livingEntity.getKiller().addPotionEffect(new PotionEffect(
                                         PotionEffectType.getByName("BAD_OMEN"),
                                         120000,

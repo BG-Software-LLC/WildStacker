@@ -138,4 +138,9 @@ public enum  EntityTypes {
     public boolean isSlime() {
         return this == SLIME || this == MAGMA_CUBE;
     }
+
+    public boolean isRaider() {
+        return this == EVOKER || this == PILLAGER || this == VINDICATOR;
+    }
+
 }
