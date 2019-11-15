@@ -279,14 +279,18 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public LivingEntity getLinkedEntity(){
-        if (linkedEntity != null && (linkedEntity.isDead() || !linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
-            linkedEntity = null;
-        return linkedEntity;
+        synchronized (stackingMutex) {
+            if (linkedEntity != null && (linkedEntity.isDead() || !linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
+                linkedEntity = null;
+            return linkedEntity;
+        }
     }
 
     @Override
     public void setLinkedEntity(LivingEntity linkedEntity){
-        this.linkedEntity = linkedEntity;
+        synchronized (stackingMutex) {
+            this.linkedEntity = linkedEntity;
+        }
     }
 
     @Override
