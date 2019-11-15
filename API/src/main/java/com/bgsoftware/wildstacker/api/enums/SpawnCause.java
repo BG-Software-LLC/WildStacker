@@ -39,6 +39,7 @@ public enum SpawnCause {
 
     MYTHIC_MOBS,
     CUSTOM_BOSSES,
+    BOSS,
     EPIC_BOSSES,
     EPIC_BOSSES_MINION,
     EPIC_SPAWNERS;
