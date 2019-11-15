@@ -16,7 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -40,10 +39,8 @@ public interface NMSAdapter {
 
     List<Entity> getNearbyEntities(Entity entity, int xRange, int yRange, int zRange, Predicate<? super Entity> predicate);
 
-    @Nullable
     String serialize(ItemStack itemStack);
 
-    @Nullable
     ItemStack deserialize(String serialized);
 
     default Object getChatMessage(String message){
