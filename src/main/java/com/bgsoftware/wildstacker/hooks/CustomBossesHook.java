@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import net.aminecraftdev.custombosses.CustomBosses;
 import net.aminecraftdev.custombosses.utils.IBossUtils;
 import net.aminecraftdev.custombosses.utils.IDropTableUtils;

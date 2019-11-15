@@ -7,7 +7,7 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;

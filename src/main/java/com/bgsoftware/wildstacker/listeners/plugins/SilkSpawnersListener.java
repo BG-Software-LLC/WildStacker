@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.listeners.plugins;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerBreakEvent;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerChangeEvent;
 import org.bukkit.event.EventHandler;

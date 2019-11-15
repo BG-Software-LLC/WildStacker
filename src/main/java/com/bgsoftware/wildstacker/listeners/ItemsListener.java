@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.listeners.events.EggLayEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

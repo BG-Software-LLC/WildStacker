@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 

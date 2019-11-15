@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import net.coreprotect.CoreProtect;
 import org.bukkit.Bukkit;

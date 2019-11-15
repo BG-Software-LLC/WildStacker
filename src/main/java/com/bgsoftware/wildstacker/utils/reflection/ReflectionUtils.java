@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

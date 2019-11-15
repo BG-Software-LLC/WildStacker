@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
-import com.bgsoftware.wildstacker.utils.Executor;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 

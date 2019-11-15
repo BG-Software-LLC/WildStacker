@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.database;
 
-import com.bgsoftware.wildstacker.utils.Executor;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
 
 import java.io.File;

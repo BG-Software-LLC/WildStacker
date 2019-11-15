@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.threads;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class Executor {
 
-    private static final ExecutorService dataService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("WildStacker DB #%d").build());
+    private static final ExecutorService dataService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("WildStacker Database Thread #%d").build());
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static void sync(Runnable runnable){
