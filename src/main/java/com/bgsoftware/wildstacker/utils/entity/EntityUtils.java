@@ -146,6 +146,30 @@ public final class EntityUtils {
         return newName;
     }
 
+    public static String getEntityNameRegex(StackedEntity stackedEntity){
+        String regexName = "";
+
+        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null) {
+            regexName = stackedEntity.getLivingEntity().getCustomName().replace("{}", "([0-9]+)");
+        }
+
+        else {
+            String customName = plugin.getSettings().entitiesCustomName;
+
+            if (customName.isEmpty())
+                throw new NullPointerException();
+
+            if (stackedEntity.getStackAmount() > 1) {
+                regexName = customName
+                        .replace("{0}", "([0-9]+)")
+                        .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
+                        .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
+            }
+        }
+
+        return "(.*)" + regexName + "(.*)";
+    }
+
     public static int getBadOmenAmplifier(Player player){
         int amplifier = 0;
 

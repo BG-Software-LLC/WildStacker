@@ -47,6 +47,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
@@ -621,13 +622,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean hasNameTag() {
-        String customName = ChatColor.stripColor(object.getCustomName());
+        String regexName = ChatColor.stripColor(object.getCustomName());
 
         try{
-            customName = EntityUtils.getEntityName(this);
+            regexName = EntityUtils.getEntityNameRegex(this);
         }catch(NullPointerException ignored){}
 
-        return object.getCustomName() != null && !object.isCustomNameVisible() && (customName.isEmpty() || !object.getCustomName().contains(customName));
+        return object.getCustomName() != null && !object.isCustomNameVisible() && (regexName.isEmpty() || !Pattern.compile(regexName).matcher(object.getCustomName()).matches());
     }
 
     public boolean isCached(){
