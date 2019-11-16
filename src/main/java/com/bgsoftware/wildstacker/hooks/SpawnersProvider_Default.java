@@ -1,10 +1,11 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildtools.api.WildToolsAPI;
 import com.bgsoftware.wildtools.api.objects.tools.Tool;
 import org.bukkit.Bukkit;
@@ -51,11 +52,11 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
-        ItemStack spawnerItem = getSpawnerItem(spawner, amount);
-
         //If player is null, it broke by an explosion.
         if(player == null){
-            Executor.sync(() -> ItemUtils.dropItem(spawnerItem, spawner.getLocation()), 5L);
+            SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
+            Bukkit.getPluginManager().callEvent(spawnerDropEvent);
+            Executor.sync(() -> ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation()), 5L);
             return;
         }
 
@@ -66,10 +67,12 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         if(isExplodeSource || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) {
             if (isExplodeSource || (plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
                     (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
+                SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
+                Bukkit.getPluginManager().callEvent(spawnerDropEvent);
                 if (isExplodeSource || plugin.getSettings().dropToInventory) {
-                    ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+                    ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
                 } else {
-                    ItemUtils.dropItem(spawnerItem, spawner.getLocation());
+                    ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
                 }
             }
         }

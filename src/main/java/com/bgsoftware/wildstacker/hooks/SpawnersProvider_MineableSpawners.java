@@ -1,12 +1,14 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.dnyferguson.mineablespawners.MineableSpawners;
 import com.dnyferguson.mineablespawners.utils.Chat;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -83,17 +85,18 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
             return;
         }
 
-        ItemStack spawnerItem = getSpawnerItem(spawner, amount);
-
         if (dropChance != 1.0 && (dropChance <= 0 || Math.random() <= dropChance)) {
             return;
         }
 
+        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
+        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
+
         if (!dropInInventory) {
-            ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
         }
         else{
-            ItemUtils.dropItem(spawnerItem, spawner.getLocation());
+            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
         }
     }
 

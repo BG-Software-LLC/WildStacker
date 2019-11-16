@@ -1,9 +1,10 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
 import org.bukkit.Bukkit;
@@ -81,8 +82,6 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         String mobName = getCreatureName(entityId).toLowerCase().replace(" ", "");
         int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
 
-        ItemStack spawnerItem = getSpawnerItem(spawner, amount);
-
         //If player is null, it broke by an explosion.
         if(player == null){
             if(isExplodeSource) {
@@ -95,8 +94,11 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             else{
                 dropChance = 100;
             }
-            if (randomNumber < dropChance)
-                ItemUtils.dropItem(spawnerItem, spawner.getLocation());
+            if (randomNumber < dropChance) {
+                SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
+                Bukkit.getPluginManager().callEvent(spawnerDropEvent);
+                ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
+            }
             return;
         }
 
@@ -109,10 +111,12 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             }
 
             if (randomNumber < dropChance) {
+                SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
+                Bukkit.getPluginManager().callEvent(spawnerDropEvent);
                 if (ss.config.getBoolean("dropSpawnerToInventory", false)) {
-                    ItemUtils.addItem(spawnerItem, player.getInventory(), spawner.getLocation());
+                    ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
                 } else {
-                    ItemUtils.dropItem(spawnerItem, spawner.getLocation());
+                    ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
                 }
             }
         }
