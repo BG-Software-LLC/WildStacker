@@ -13,10 +13,10 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.EventUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -101,7 +101,8 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        int toPlace = ItemUtils.getSpawnerItemAmount(e.getItemInHand());
+        ItemStack inHand = e.getItemInHand().clone();
+        int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
         stackedBarrel.setStackAmount(toPlace, false);
 
         Chunk chunk = e.getBlock().getChunk();
@@ -115,7 +116,7 @@ public final class BarrelsListener implements Listener {
                     return;
                 }
 
-                BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel);
+                BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel, inHand);
                 Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
                 if(barrelPlaceEvent.isCancelled()) {
