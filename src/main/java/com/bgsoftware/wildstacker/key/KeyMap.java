@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.key;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -17,7 +16,6 @@ public class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> {
         this.map = new HashMap<>();
     }
 
-    @NotNull
     @Override
     public Set<Entry<Key, V>> entrySet() {
         return asKeyMap().entrySet();

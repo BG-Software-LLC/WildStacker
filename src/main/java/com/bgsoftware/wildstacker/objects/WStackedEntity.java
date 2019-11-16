@@ -14,8 +14,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
-import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -24,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -505,9 +504,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         else{
             LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-            LootTableCustom lootTableCustom = plugin.getLootHandler().getLootTableCustom();
-            drops.addAll(lootTableCustom == null ? lootTable.getDrops(this, lootBonusLevel, stackAmount) :
-                    lootTableCustom.getDrops(lootTable, this, lootBonusLevel, stackAmount));
+            drops.addAll(lootTable.getDrops(this, lootBonusLevel, stackAmount));
         }
 
         return drops.toList();

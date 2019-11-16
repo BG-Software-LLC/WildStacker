@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
-import com.bgsoftware.wildstacker.loot.custom.LootTableCustom;
 import com.bgsoftware.wildstacker.utils.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.google.gson.Gson;
@@ -24,7 +23,6 @@ import java.util.Map;
 public final class LootHandler {
 
     private final Map<String, LootTable> lootTables = new HashMap<>();
-    private LootTableCustom lootTableCustom = null;
     private final Gson gson = new Gson();
 
     public LootHandler(WildStackerPlugin plugin){
@@ -164,10 +162,6 @@ public final class LootHandler {
             entityTypeName += "_BABY";
 
         return lootTables.getOrDefault(entityTypeName, lootTables.get("EMPTY"));
-    }
-
-    public LootTableCustom getLootTableCustom(){
-        return lootTableCustom;
     }
 
     public static void reload(){

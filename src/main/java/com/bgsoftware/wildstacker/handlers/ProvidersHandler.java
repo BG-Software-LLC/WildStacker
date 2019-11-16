@@ -2,11 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.hooks.AntiCheatProvider;
-import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_AAC;
-import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_Default;
-import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_NoCheatPlus;
-import com.bgsoftware.wildstacker.hooks.AntiCheatProvider_Spartan;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
@@ -38,7 +33,6 @@ import java.util.UUID;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class ProvidersHandler {
 
-    private AntiCheatProvider antiCheatProvider;
     private SpawnersProvider spawnersProvider;
     private HologramsProvider hologramsProvider;
     private List<ClaimsProvider> claimsProviders;
@@ -63,15 +57,6 @@ public final class ProvidersHandler {
         else if(Bukkit.getPluginManager().isPluginEnabled("CMI"))
             hologramsProvider = new HologramsProvider_CMI();
         else hologramsProvider = new HologramsProvider_Default();
-
-        if(Bukkit.getPluginManager().isPluginEnabled("AAC"))
-            antiCheatProvider = new AntiCheatProvider_AAC();
-        else if(Bukkit.getPluginManager().isPluginEnabled("NoCheatPlus"))
-            antiCheatProvider = new AntiCheatProvider_NoCheatPlus();
-        else if(Bukkit.getPluginManager().isPluginEnabled("Spartan"))
-            antiCheatProvider = new AntiCheatProvider_Spartan();
-        else
-            antiCheatProvider = new AntiCheatProvider_Default();
 
         claimsProviders = new ArrayList<>();
         if(Bukkit.getPluginManager().isPluginEnabled("Factions")){
@@ -152,18 +137,6 @@ public final class ProvidersHandler {
 
     public void clearHolograms(){
         hologramsProvider.clearHolograms();
-    }
-
-    /*
-     *  AntiCheat Provider
-     */
-
-    public void enableBypass(Player player){
-        antiCheatProvider.enableBypass(player);
-    }
-
-    public void disableBypass(Player player){
-        antiCheatProvider.disableBypass(player);
     }
 
     /*
