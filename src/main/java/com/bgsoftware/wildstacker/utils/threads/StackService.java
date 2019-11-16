@@ -1,10 +1,10 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public final class StackService {
 
-    private static final List<Runnable> asyncRunnables = new ArrayList<>();
+    private static final Set<Runnable> asyncRunnables = Sets.newConcurrentHashSet();
 
     private static boolean mainThreadFlag = false;
     private static long taskId = -1;
@@ -45,9 +45,7 @@ public final class StackService {
             return;
         }
 
-        synchronized (asyncRunnables){
-            asyncRunnables.add(runnable);
-        }
+        asyncRunnables.add(runnable);
     }
 
     public static boolean isStackThread(){
