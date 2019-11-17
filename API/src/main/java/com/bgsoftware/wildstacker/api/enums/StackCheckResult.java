@@ -25,6 +25,8 @@ public enum StackCheckResult {
     NAME_TAG,
     TARGET_NAME_TAG,
     NERFED,
+    CHUNK_NOT_LOADED,
+    TARGET_CHUNK_NOT_LOADED,
     SPAWN_REASON,
     SUCCESS
 
