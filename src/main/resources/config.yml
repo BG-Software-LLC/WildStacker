@@ -346,6 +346,9 @@ entities:
     all: 1
 
   # Should exp get added directly to killer instead of dropped to ground?
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   auto-exp-pickup: []
 
   # Should eggs that are laid by stacked chickens be multiplied by it's stack size?

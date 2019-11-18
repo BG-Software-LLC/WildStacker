@@ -363,6 +363,9 @@ public final class ConfigComments {
 
     @Comment("")
     @Comment("Should exp get added directly to killer instead of dropped to ground?")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_AUTO_EXP_PICKUP = "entities.auto-exp-pickup";
 
     @Comment("")
