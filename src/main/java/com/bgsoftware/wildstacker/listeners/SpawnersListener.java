@@ -318,6 +318,13 @@ public final class SpawnersListener implements Listener {
         if(!(e.getEntity() instanceof LivingEntity))
             return;
 
+        boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
+
+        if(!multipleEntities){
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+            multipleEntities = !stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled();
+        }
+
         //DO NOT CANCEL EVENT - CAUSES ENTITIES TO SPAWN LIKE CRAZY
         //e.setCancelled(true);
         //Doing it on the next tick so taco paper won't get weird message
@@ -325,8 +332,7 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
-        if(!plugin.getSettings().entitiesStackingEnabled || plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntities.contains("SPAWNER")) {
+        if(multipleEntities) {
             for (int i = 0; i < stackedSpawner.getStackAmount(); i++) {
                 StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
                 com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);
