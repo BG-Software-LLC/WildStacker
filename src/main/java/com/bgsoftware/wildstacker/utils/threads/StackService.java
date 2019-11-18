@@ -1,13 +1,11 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
 
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public final class StackService {
@@ -18,16 +16,19 @@ public final class StackService {
     private static long taskId = -1;
 
     static {
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("WildStacker Stacking Thread").build());
+        final Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if(taskId == -1){
+                    Thread.currentThread().setName("WildStacker Stacking Thread");
+                    taskId = Thread.currentThread().getId();
+                }
 
-        executorService.submit(() -> taskId = Thread.currentThread().getId());
-
-        executorService.scheduleAtFixedRate(() -> {
-            synchronized (asyncRunnables){
                 asyncRunnables.forEach(Runnable::run);
                 asyncRunnables.clear();
             }
-        }, 250, 250, TimeUnit.MILLISECONDS);
+        }, 250, 250);
     }
 
     public static void execute(Runnable runnable){
