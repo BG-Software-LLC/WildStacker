@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.command.commands.CommandSave;
 import com.bgsoftware.wildstacker.command.commands.CommandSettings;
 import com.bgsoftware.wildstacker.command.commands.CommandSimulate;
 import com.bgsoftware.wildstacker.command.commands.CommandStats;
+import com.bgsoftware.wildstacker.command.commands.CommandTest;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -34,6 +35,7 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
         subCommands.add(new CommandSettings());
         subCommands.add(new CommandSimulate());
         subCommands.add(new CommandStats());
+        subCommands.add(new CommandTest());
     }
 
     @Override
