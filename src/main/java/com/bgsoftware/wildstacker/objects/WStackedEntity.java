@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
@@ -177,6 +178,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             boolean nameVisible = stackAmount > 1 && !plugin.getSettings().entitiesHideNames;
             object.setCustomName(customName);
             object.setCustomNameVisible(nameVisible);
+
+            //We update cached values of mcmmo
+            if(McMMOHook.isEnabled())
+                McMMOHook.updateCachedName(object);
+
         }catch(NullPointerException ignored){}
     }
 

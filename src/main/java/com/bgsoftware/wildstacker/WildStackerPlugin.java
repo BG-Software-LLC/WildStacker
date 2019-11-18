@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.handlers.SystemHandler;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
+import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
@@ -39,11 +40,11 @@ import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -141,6 +142,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 CrazyEnchantmentsHook.register();
             if(getServer().getPluginManager().isPluginEnabled("Boss"))
                 getServer().getPluginManager().registerEvents(new BossListener(), this);
+            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
+                McMMOHook.setEnabled();
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
