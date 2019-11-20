@@ -30,12 +30,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -252,8 +250,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         int range = plugin.getSettings().entitiesCheckRange;
 
-        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range,
-                entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player));
+        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, EntityUtils::isStackable);
 
         //Cache data of entities
         EntityData.cache(object);
@@ -265,7 +262,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 Location entityLocation = getLivingEntity().getLocation();
 
                 Set<StackedEntity> filteredEntities = nearbyEntities.stream()
-                        .filter(EntityUtils::isStackable)
                         .map(WStackedEntity::of)
                         .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                         .collect(Collectors.toSet());
