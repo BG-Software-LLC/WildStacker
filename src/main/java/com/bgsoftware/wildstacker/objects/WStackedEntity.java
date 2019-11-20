@@ -644,12 +644,19 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     }
 
     public static StackedEntity of(Entity entity){
-        if(EntityUtils.isStackable(entity))
+        if(entity instanceof LivingEntity)
             return of((LivingEntity) entity);
+
         throw new IllegalArgumentException("The entity-type " + entity.getType() + " is not a stackable entity.");
     }
 
     public static StackedEntity of(LivingEntity livingEntity){
-        return plugin.getSystemManager().getStackedEntity(livingEntity);
+        if(EntityUtils.isStackable(livingEntity))
+            return plugin.getSystemManager().getStackedEntity(livingEntity);
+
+        if(livingEntity.hasMetadata("NPC"))
+            throw new IllegalArgumentException("Cannot get a stacked entity from an NPC of Citizens.");
+        else
+            throw new IllegalArgumentException("The entity-type " + livingEntity.getType() + " is not a stackable entity.");
     }
 }
