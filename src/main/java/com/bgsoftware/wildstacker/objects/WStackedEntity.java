@@ -264,7 +264,9 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
 
-                Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of)
+                Set<StackedEntity> filteredEntities = nearbyEntities.stream()
+                        .filter(EntityUtils::isStackable)
+                        .map(WStackedEntity::of)
                         .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                         .collect(Collectors.toSet());
                 Optional<StackedEntity> entityOptional = filteredEntities.stream()
