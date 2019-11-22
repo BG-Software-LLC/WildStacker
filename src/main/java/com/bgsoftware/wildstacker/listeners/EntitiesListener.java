@@ -421,7 +421,7 @@ public final class EntitiesListener implements Listener {
     public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
         if(!EntityUtils.isStackable(e.getEntity()))
             return;
-        
+
         if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
                 EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
             return;

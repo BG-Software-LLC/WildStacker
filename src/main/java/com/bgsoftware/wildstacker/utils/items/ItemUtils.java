@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -32,6 +33,8 @@ import java.util.List;
 public final class ItemUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private final static int MAX_PICKUP_DELAY = 32767;
 
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
@@ -355,6 +358,10 @@ public final class ItemUtils {
             return;
 
         inventory.setItem(slot, itemStack);
+    }
+
+    public static boolean canPickup(Item item){
+        return item.getPickupDelay() < MAX_PICKUP_DELAY;
     }
 
 }
