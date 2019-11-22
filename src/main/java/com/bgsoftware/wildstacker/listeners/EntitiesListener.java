@@ -335,7 +335,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChunkLoad(ChunkLoadEvent e){
-        Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity)
+        Arrays.stream(e.getChunk().getEntities())
+                .filter(EntityUtils::isStackable)
                 .forEach(entity -> EntityData.of((LivingEntity) entity));
     }
 
@@ -418,6 +419,9 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
+        if(!EntityUtils.isStackable(e.getEntity()))
+            return;
+        
         if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
                 EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
             return;
