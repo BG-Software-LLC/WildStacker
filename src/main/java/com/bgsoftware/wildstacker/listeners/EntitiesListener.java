@@ -156,6 +156,8 @@ public final class EntitiesListener implements Listener {
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
             int currentStackAmount = stackedEntity.getStackAmount();
 
+            int fireTicks = livingEntity.getFireTicks();
+
             e.setDamage(0);
 
             if(!plugin.getSettings().nextStackKnockback)
@@ -218,6 +220,7 @@ public final class EntitiesListener implements Listener {
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 Executor.async(() -> {
+                    livingEntity.setFireTicks(fireTicks);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(e);
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(null);
