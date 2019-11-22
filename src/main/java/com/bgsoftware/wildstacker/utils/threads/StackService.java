@@ -20,13 +20,17 @@ public final class StackService {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(taskId == -1){
-                    Thread.currentThread().setName("WildStacker Stacking Thread");
-                    taskId = Thread.currentThread().getId();
-                }
+                try {
+                    if (taskId == -1) {
+                        Thread.currentThread().setName("WildStacker Stacking Thread");
+                        taskId = Thread.currentThread().getId();
+                    }
 
-                asyncRunnables.forEach(Runnable::run);
-                asyncRunnables.clear();
+                    asyncRunnables.forEach(Runnable::run);
+                    asyncRunnables.clear();
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
             }
         }, 250, 250);
     }
