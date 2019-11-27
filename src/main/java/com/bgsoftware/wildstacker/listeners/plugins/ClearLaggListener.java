@@ -10,17 +10,18 @@ public final class ClearLaggListener implements Listener {
 
     private WildStackerPlugin instance;
 
-    private long lastTime = 0;
-
     public ClearLaggListener(WildStackerPlugin instance){
         this.instance = instance;
     }
 
     @EventHandler
     public void onClearLaggTask(EntityRemoveEvent e){
-        if (instance.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {
-            lastTime = System.currentTimeMillis();
-            instance.getSystemManager().performKillAll();
+        if (instance.getSettings().killTaskSyncClearLagg) {
+            instance.getSystemManager().performKillAll(
+                    entity -> entity.getWorld().equals(e.getWorld()),
+                    item -> item.getWorld().equals(e.getWorld()),
+                    true
+            );
         }
     }
 
