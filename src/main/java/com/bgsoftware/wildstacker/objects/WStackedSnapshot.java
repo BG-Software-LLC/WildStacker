@@ -69,7 +69,7 @@ public final class WStackedSnapshot implements StackedSnapshot {
 
             @Override
             public EntityType getValue() {
-                return EntityType.PIG;
+                return null;
             }
 
             @Override
