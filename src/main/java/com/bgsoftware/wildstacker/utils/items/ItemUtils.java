@@ -361,7 +361,7 @@ public final class ItemUtils {
     }
 
     public static boolean canPickup(Item item){
-        return item.getPickupDelay() < MAX_PICKUP_DELAY;
+        return item.getPickupDelay() < MAX_PICKUP_DELAY && !item.hasMetadata("ChestShop_Display");
     }
 
 }
