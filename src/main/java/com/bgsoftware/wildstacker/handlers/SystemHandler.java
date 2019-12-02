@@ -494,8 +494,10 @@ public final class SystemHandler implements SystemManager {
         List<Entity> entityList = new ArrayList<>();
 
         for(World world : Bukkit.getWorlds()){
-            for(Chunk chunk : world.getLoadedChunks()){
-                entityList.addAll(Arrays.asList(chunk.getEntities()));
+            if(!applyTaskFilter || plugin.getSettings().killTaskWorlds.isEmpty() || plugin.getSettings().killTaskWorlds.contains(world.getName())) {
+                for (Chunk chunk : world.getLoadedChunks()) {
+                    entityList.addAll(Arrays.asList(chunk.getEntities()));
+                }
             }
         }
 

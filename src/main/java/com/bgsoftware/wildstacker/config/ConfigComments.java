@@ -70,6 +70,10 @@ public final class ConfigComments {
     @Comment("If you want all entities to be killed, set this to []")
     public static String KILL_TASK_WHITELIST = "kill-task.whitelist";
 
+    @Comment("A list of worlds that entities will be cleared inside.")
+    @Comment("If you want all worlds, set this to []")
+    public static String KILL_TASK_WORLDS = "kill-task.worlds";
+
     @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";

@@ -57,6 +57,9 @@ kill-task:
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you want all entities to be killed, set this to []
   whitelist: []
+  # A list of worlds that entities will be cleared inside.
+  # If you want all worlds, set this to []
+  worlds: []
 
 # Here you can configurable all features related to stacked items.
 items:

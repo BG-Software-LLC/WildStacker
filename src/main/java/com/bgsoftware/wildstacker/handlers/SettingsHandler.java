@@ -34,6 +34,7 @@ public final class SettingsHandler {
     public final KeyMap<String> customNames;
     public final long killTaskInterval;
     public final List<String> killTaskWhitelist;
+    public final List<String> killTaskWorlds;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
@@ -123,6 +124,7 @@ public final class SettingsHandler {
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
         killTaskWhitelist = cfg.getStringList("kill-task.whitelist");
+        killTaskWorlds = cfg.getStringList("kill-task.worlds");
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 
