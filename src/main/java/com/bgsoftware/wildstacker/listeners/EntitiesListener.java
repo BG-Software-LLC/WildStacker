@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -63,7 +64,6 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -87,13 +87,6 @@ public final class EntitiesListener implements Listener {
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
-
-//    @EventHandler(priority = EventPriority.LOWEST)
-//    public void g(EntityDeathEvent e){
-//        if(e.getEntity() instanceof Sheep){
-//            Bukkit.broadcastMessage(e.getEntity().getUniqueId() + ": " + e.getEntity().hasMetadata("mcMMO: Custom Name"));
-//        }
-//    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
@@ -131,10 +124,9 @@ public final class EntitiesListener implements Listener {
 
         //Calling the onEntityLastDamage function with default parameters.
 
-        //noinspection unchecked
         EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
         noDeathEvent.add(e.getEntity().getUniqueId());
 
@@ -348,8 +340,7 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getSettings().entitiesStackingEnabled)
             return;
 
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER ||
-                EntityStorage.hasMetadata(e.getEntity(), "corpse"))
+        if(!EntityUtils.isStackable(e.getEntity()) || EntityStorage.hasMetadata(e.getEntity(), "corpse"))
             return;
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
@@ -659,10 +650,9 @@ public final class EntitiesListener implements Listener {
 
             e.setCancelled(true);
 
-            //noinspection unchecked
             EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
             onEntityLastDamage(entityDamageEvent);
         }
