@@ -528,17 +528,25 @@ spawners:
   # is holding will be placed instead of only 1.
   shift-place-stack: true
 
-  # Set a charge amount for breaking spawners.
+  # All settings related to break charge.
+  # break-charge:
+  #   EXAMPLE_MOB:                     The name of the mob.
+  #     price: 0                       The price to charge upon breaking.
+  #     multiply-stack-amount: false   Should the price get multiplied by the amount that were broken?
   break-charge:
-    amount: 0
-    multiply-stack-amount: false
-    whitelist: []
+    EXAMPLE_MOB:
+      price: 0
+      multiply-stack-amount: false
 
-  # Set a charge amount for placing spawners.
+  # All settings related to break charge.
+  # place-charge:
+  #   EXAMPLE_MOB:                     The name of the mob.
+  #     price: 0                       The price to charge upon placing.
+  #     multiply-stack-amount: false   Should the price get multiplied by the amount that were placed?
   place-charge:
-    amount: 0
-    multiply-stack-amount: false
-    whitelist: []
+    EXAMPLE_MOB:
+      price: 0
+      multiply-stack-amount: false
 
   # When enabled, players will be able to change spawners by clicking them with spawn eggs.
   change-using-eggs: true

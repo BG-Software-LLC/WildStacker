@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.config.ConfigComments;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
+import com.bgsoftware.wildstacker.utils.Pair;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -64,16 +65,14 @@ public final class SettingsHandler {
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
-            spawnersShiftPlaceStack, breakChargeMultiply, placeChargeMultiply, changeUsingEggs, eggsStackMultiply,
-            nextSpawnerPlacement, onlyOneSpawner;
+            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
     public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
             silkTouchBreakChance, spawnersChunkLimit;
-    public final double breakChargeAmount, placeChargeAmount;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds,
-            breakChargeWhitelist, placeChargeWhitelist;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
     public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
+    public final KeyMap<Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
@@ -213,12 +212,22 @@ public final class SettingsHandler {
         plugin.getBreakMenuHandler().loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
-        breakChargeAmount = cfg.getDouble("spawners.break-charge.amount", 0);
-        breakChargeMultiply = cfg.getBoolean("spawners.break-charge.multiply-stack-amount", false);
-        breakChargeWhitelist = cfg.getStringList("spawners.break-charge.whitelist");
-        placeChargeAmount = cfg.getDouble("spawners.place-charge.amount", 0);
-        placeChargeMultiply = cfg.getBoolean("spawners.place-charge.multiply-stack-amount", false);
-        placeChargeWhitelist = cfg.getStringList("spawners.place-charge.whitelist");
+        spawnersBreakCharge = new KeyMap<>();
+        for(String key : cfg.getConfigurationSection("spawners.break-charge").getKeys(false)){
+            ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.break-charge." + key);
+            double amount = mobSection.getDouble("price", 0.0);
+            if(amount > 0) {
+                spawnersBreakCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+            }
+        }
+        spawnersPlaceCharge = new KeyMap<>();
+        for(String key : cfg.getConfigurationSection("spawners.place-charge").getKeys(false)){
+            ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.place-charge." + key);
+            double amount = mobSection.getDouble("price", 0.0);
+            if(amount > 0) {
+                spawnersBreakCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+            }
+        }
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
         eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
         nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);
@@ -395,6 +404,36 @@ public final class SettingsHandler {
             cfg.set("entities.nerfed-entities.whitelist", cfg.getStringList("entities.nerfed-spawning"));
         if(cfg.contains("entities.nerfed-worlds"))
             cfg.set("entities.nerfed-entities.worlds", cfg.getStringList("entities.nerfed-worlds"));
+        if(cfg.contains("spawners.break-charge.whitelist")){
+            List<String> mobs = cfg.getStringList("spawners.break-charge.whitelist");
+            if(mobs.isEmpty()) {
+                mobs.add("EXAMPLE_MOB");
+            }
+
+            for (String mob : mobs) {
+                cfg.set("spawners.break-charge." + mob + ".price", cfg.getInt("spawners.break-charge.amount"));
+                cfg.set("spawners.break-charge." + mob + ".multiply-stack-amount", cfg.getBoolean("spawners.break-charge.multiply-stack-amount"));
+            }
+
+            cfg.set("spawners.break-charge.amount", null);
+            cfg.set("spawners.break-charge.multiply-stack-amount", null);
+            cfg.set("spawners.break-charge.whitelist", null);
+        }
+        if(cfg.contains("spawners.place-charge.whitelist")){
+            List<String> mobs = cfg.getStringList("spawners.place-charge.whitelist");
+            if(mobs.isEmpty()) {
+                mobs.add("EXAMPLE_MOB");
+            }
+
+            for (String mob : mobs) {
+                cfg.set("spawners.place-charge." + mob + ".price", cfg.getInt("spawners.place-charge.amount"));
+                cfg.set("spawners.place-charge." + mob + ".multiply-stack-amount", cfg.getBoolean("spawners.place-charge.multiply-stack-amount"));
+            }
+
+            cfg.set("spawners.place-charge.amount", null);
+            cfg.set("spawners.place-charge.multiply-stack-amount", null);
+            cfg.set("spawners.place-charge.whitelist", null);
+        }
     }
 
     public static void reload(){

@@ -560,11 +560,19 @@ public final class ConfigComments {
     public static String SPAWNERS_SHIFT_PLACE_STACK = "spawners.shift-place-stack";
 
     @Comment("")
-    @Comment("Set a charge amount for breaking spawners.")
+    @Comment("All settings related to break charge.")
+    @Comment("break-charge:")
+    @Comment("  EXAMPLE_MOB:                     The name of the mob.")
+    @Comment("    price: 0                       The price to charge upon breaking.")
+    @Comment("    multiply-stack-amount: false   Should the price get multiplied by the amount that were broken?")
     public static String SPAWNERS_BREAK_CHARGE = "spawners.break-charge";
 
     @Comment("")
-    @Comment("Set a charge amount for placing spawners.")
+    @Comment("All settings related to place charge.")
+    @Comment("place-charge:")
+    @Comment("  EXAMPLE_MOB:                     The name of the mob.")
+    @Comment("    price: 0                       The price to charge upon placing.")
+    @Comment("    multiply-stack-amount: false   Should the price get multiplied by the amount that were placed?")
     public static String SPAWNERS_PLACE_CHARGE = "spawners.place-charge";
 
     @Comment("")
