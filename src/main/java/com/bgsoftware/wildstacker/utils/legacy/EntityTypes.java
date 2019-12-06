@@ -140,7 +140,7 @@ public enum  EntityTypes {
     }
 
     public boolean isRaider() {
-        return this == EVOKER || this == PILLAGER || this == VINDICATOR;
+        return ServerVersion.isAtLeast(ServerVersion.v1_14) && (this == EVOKER || this == PILLAGER || this == VINDICATOR);
     }
 
 }
