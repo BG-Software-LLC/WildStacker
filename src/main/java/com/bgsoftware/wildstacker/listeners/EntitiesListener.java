@@ -296,8 +296,6 @@ public final class EntitiesListener implements Listener {
                     }
 
                 }
-
-                deadEntities.add(e.getEntity().getUniqueId());
             }
         }
     }
