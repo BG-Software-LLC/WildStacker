@@ -1,8 +1,8 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -38,11 +38,12 @@ public final class BucketsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
         if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = e.getPlayer().getItemInHand().clone();
-            inHand.setAmount(inHand.getAmount() - 1);
+            ItemStack itemInHand = e.getItemStack().clone();
+            ItemStack itemToGive = itemInHand.clone();
+            itemToGive.setAmount(itemToGive.getAmount() - 1);
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                e.getPlayer().setItemInHand(inHand);
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), itemInHand, itemToGive);
                 e.getPlayer().getInventory().addItem(e.getItemStack());
             });
         }
