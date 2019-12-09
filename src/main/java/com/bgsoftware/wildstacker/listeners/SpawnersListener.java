@@ -87,7 +87,7 @@ public final class SpawnersListener implements Listener {
         //We're making it delayed so we avoid the check of CMI & prevent other bugs.
         Executor.sync(() -> {
             if(e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
-                plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), e.getItemInHand(), true);
+                plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), itemInHand, true);
                 stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
             }
         }, 2L);
@@ -118,7 +118,7 @@ public final class SpawnersListener implements Listener {
 
         if(e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
             replaceAir = true;
-            spawnerItemAmount *= e.getItemInHand().getAmount();
+            spawnerItemAmount *= itemInHand.getAmount();
         }
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE){
