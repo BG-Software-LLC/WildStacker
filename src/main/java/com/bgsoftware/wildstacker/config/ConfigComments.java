@@ -377,7 +377,11 @@ public final class ConfigComments {
     public static String ENTITIES_EGG_LAY_MULTIPLY = "entities.egg-lay-multiply";
 
     @Comment("")
-    @Comment("Here you can configurable all features related to stacked spawners.")
+    @Comment("Should eggs that are laid by stacked chickens be multiplied by it's stack size?")
+    public static String ENTITIES_CLEAR_EQUIPMENT = "entities.clear-equipment";
+
+    @Comment("")
+    @Comment("Should vanilla equipment of entities get cleared after they unstack?")
     public static String SPAWNERS = "spawners";
 
     @Comment("Should spawners get stacked on the server?")

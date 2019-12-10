@@ -357,6 +357,9 @@ entities:
   # Should eggs that are laid by stacked chickens be multiplied by it's stack size?
   egg-lay-multiply: true
 
+  # Should vanilla equipment of entities get cleared after they unstack?
+  clear-equipment: false
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

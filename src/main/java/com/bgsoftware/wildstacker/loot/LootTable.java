@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.google.gson.JsonObject;
 import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
@@ -73,34 +74,31 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
         if(dropEquipment) {
             drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
-            clearEquipment(stackedEntity.getLivingEntity().getEquipment());
         }
+
+        clearEquipment(stackedEntity.getLivingEntity().getEquipment());
 
         return drops;
     }
 
-    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressWarnings("ConstantConditions")
     private void clearEquipment(EntityEquipment entityEquipment){
         if(ServerVersion.isEquals(ServerVersion.v1_8)) {
-            if (entityEquipment.getItemInHandDropChance() >= 2.0F)
+            if (plugin.getSettings().entitiesClearEquipment || entityEquipment.getItemInHandDropChance() >= 2.0F)
                 entityEquipment.setItemInHand(new ItemStack(Material.AIR));
         }else{
-            try{
-                if((Float) EntityEquipment.class.getMethod("getItemInMainHandDropChance").invoke(entityEquipment) >= 2.0F)
-                    EntityEquipment.class.getMethod("setItemInMainHand", ItemStack.class).invoke(entityEquipment, new ItemStack(Material.AIR));
-                if((Float) EntityEquipment.class.getMethod("getItemInOffHandDropChance").invoke(entityEquipment) >= 2.0F)
-                    EntityEquipment.class.getMethod("setItemInOffHand", ItemStack.class).invoke(entityEquipment, new ItemStack(Material.AIR));
-            }catch(Exception ex){
-                ex.printStackTrace();
-            }
+            if(plugin.getSettings().entitiesClearEquipment || (Float) Methods.ENTITY_GET_ITEM_IN_MAIN_HAND_DROP_CHANCE.invoke(entityEquipment) >= 2.0F)
+                Methods.ENTITY_SET_ITEM_IN_MAIN_HAND.invoke(entityEquipment, new ItemStack(Material.AIR));
+            if(plugin.getSettings().entitiesClearEquipment || (Float) Methods.ENTITY_GET_ITEM_IN_OFF_HAND_DROP_CHANCE.invoke(entityEquipment) >= 2.0F)
+                Methods.ENTITY_SET_ITEM_IN_OFF_HAND.invoke(entityEquipment, new ItemStack(Material.AIR));
         }
-        if(entityEquipment.getHelmetDropChance() >= 2.0F)
+        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getHelmetDropChance() >= 2.0F)
             entityEquipment.setHelmet(new ItemStack(Material.AIR));
-        if(entityEquipment.getChestplateDropChance() >= 2.0F)
+        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getChestplateDropChance() >= 2.0F)
             entityEquipment.setChestplate(new ItemStack(Material.AIR));
-        if(entityEquipment.getLeggingsDropChance() >= 2.0F)
+        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getLeggingsDropChance() >= 2.0F)
             entityEquipment.setLeggings(new ItemStack(Material.AIR));
-        if(entityEquipment.getBootsDropChance() >= 2.0F)
+        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getBootsDropChance() >= 2.0F)
             entityEquipment.setBoots(new ItemStack(Material.AIR));
     }
 

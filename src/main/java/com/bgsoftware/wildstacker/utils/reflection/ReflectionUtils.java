@@ -1,12 +1,14 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,7 +29,8 @@ public final class ReflectionUtils {
                     entityItemClass = getNMSClass("EntityItem"),
                     craftEntityClass = getBukkitClass("entity.CraftEntity"),
                     nmsTagClass = getNMSClass("NBTTagCompound"),
-                    entityInsentientClass = getNMSClass("EntityInsentient");
+                    entityInsentientClass = getNMSClass("EntityInsentient"),
+                    entityEquipmentClass = EntityEquipment.class;
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isEquals(ServerVersion.v1_14) ? "f" : "b_"));
@@ -85,6 +88,11 @@ public final class ReflectionUtils {
                 }catch (Throwable ignored) {
                     methodMap.put(Methods.BLOCK_DATA_FROM_DATA, getBukkitClass("block.data.CraftBlockData").getMethod("fromData", getNMSClass("IBlockData")));
                 }
+
+                methodMap.put(Methods.ENTITY_GET_ITEM_IN_MAIN_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInMainHandDropChance"));
+                methodMap.put(Methods.ENTITY_SET_ITEM_IN_MAIN_HAND, entityEquipmentClass.getMethod("setItemInMainHand", ItemStack.class));
+                methodMap.put(Methods.ENTITY_GET_ITEM_IN_OFF_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInOffHandDropChance"));
+                methodMap.put(Methods.ENTITY_SET_ITEM_IN_OFF_HAND, entityEquipmentClass.getMethod("setItemInOffHand", ItemStack.class));
             }catch(Throwable ignored){}
 
             fieldMap.values().forEach(field -> field.setAccessible(true));
