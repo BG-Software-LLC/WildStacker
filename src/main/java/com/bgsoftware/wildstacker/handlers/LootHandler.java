@@ -54,6 +54,8 @@ public final class LootHandler {
 
     private void initAllLootTables(){
         FileUtils.saveResource("loottables/bat.json");
+        if(containsEntity("BEE"))
+            FileUtils.saveResource("loottables/bee.json");
         FileUtils.saveResource("loottables/blaze.json");
         if(containsEntity("CAT"))
             FileUtils.saveResource("loottables/cat.json");

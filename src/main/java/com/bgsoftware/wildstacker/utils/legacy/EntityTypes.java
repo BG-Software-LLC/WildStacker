@@ -12,6 +12,7 @@ import org.bukkit.entity.Zombie;
 public enum  EntityTypes {
 
     BAT,
+    BEE,
     BLAZE,
     CAT,
     CAVE_SPIDER,
