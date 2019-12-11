@@ -475,13 +475,20 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     @SuppressWarnings("deprecation")
     private static class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityMobSpawner> implements SyncedCreatureSpawner {
 
+        private World world;
+        private BlockPosition blockPosition;
+        private Location blockLocation;
+
         SyncedCreatureSpawnerImpl(Block block){
             super(block, TileEntityMobSpawner.class);
+            world = ((CraftWorld) block.getWorld()).getHandle();
+            blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
+            blockLocation = block.getLocation();
         }
 
         @Override
         public EntityType getSpawnedType() {
-            MinecraftKey key = getTileEntity().getSpawner().getMobName();
+            MinecraftKey key = getSpawner().getSpawner().getMobName();
             EntityType entityType = key == null ? EntityType.PIG : EntityType.fromName(key.getKey());
             return entityType == null ? EntityType.PIG : entityType;
         }
@@ -489,7 +496,7 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         @Override
         public void setSpawnedType(EntityType entityType) {
             if (entityType != null && entityType.getName() != null) {
-                getTileEntity().getSpawner().setMobName(EntityTypes.a(entityType.getName()));
+                getSpawner().getSpawner().setMobName(EntityTypes.a(entityType.getName()));
             } else {
                 throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
             }
@@ -497,7 +504,7 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
 
         @Override
         public String getCreatureTypeName() {
-            MinecraftKey key = getTileEntity().getSpawner().getMobName();
+            MinecraftKey key = getSpawner().getSpawner().getMobName();
             return key == null ? "PIG" : key.getKey();
         }
 
@@ -510,72 +517,81 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
 
         @Override
         public int getDelay() {
-            return getTileEntity().getSpawner().spawnDelay;
+            return getSpawner().getSpawner().spawnDelay;
         }
 
         @Override
         public void setDelay(int i) {
-            getTileEntity().getSpawner().spawnDelay = i;
+            getSpawner().getSpawner().spawnDelay = i;
         }
 
         @Override
         public int getMinSpawnDelay() {
-            return getTileEntity().getSpawner().minSpawnDelay;
+            return getSpawner().getSpawner().minSpawnDelay;
         }
 
         @Override
         public void setMinSpawnDelay(int i) {
-            getTileEntity().getSpawner().minSpawnDelay = i;
+            getSpawner().getSpawner().minSpawnDelay = i;
         }
 
         @Override
         public int getMaxSpawnDelay() {
-            return getTileEntity().getSpawner().maxSpawnDelay;
+            return getSpawner().getSpawner().maxSpawnDelay;
         }
 
         @Override
         public void setMaxSpawnDelay(int i) {
-            getTileEntity().getSpawner().maxSpawnDelay = i;
+            getSpawner().getSpawner().maxSpawnDelay = i;
         }
 
         @Override
         public int getSpawnCount() {
-            return getTileEntity().getSpawner().spawnCount;
+            return getSpawner().getSpawner().spawnCount;
         }
 
         @Override
         public void setSpawnCount(int i) {
-            getTileEntity().getSpawner().spawnCount = i;
+            getSpawner().getSpawner().spawnCount = i;
         }
 
         @Override
         public int getMaxNearbyEntities() {
-            return getTileEntity().getSpawner().maxNearbyEntities;
+            return getSpawner().getSpawner().maxNearbyEntities;
         }
 
         @Override
         public void setMaxNearbyEntities(int i) {
-            getTileEntity().getSpawner().maxNearbyEntities = i;
+            getSpawner().getSpawner().maxNearbyEntities = i;
         }
 
         @Override
         public int getRequiredPlayerRange() {
-            return getTileEntity().getSpawner().requiredPlayerRange;
+            return getSpawner().getSpawner().requiredPlayerRange;
         }
 
         @Override
         public void setRequiredPlayerRange(int i) {
-            getTileEntity().getSpawner().requiredPlayerRange = i;
+            getSpawner().getSpawner().requiredPlayerRange = i;
         }
 
         @Override
         public int getSpawnRange() {
-            return getTileEntity().getSpawner().spawnRange;
+            return getSpawner().getSpawner().spawnRange;
         }
 
         @Override
         public void setSpawnRange(int i) {
-            getTileEntity().getSpawner().spawnRange = i;
+            getSpawner().getSpawner().spawnRange = i;
+        }
+
+        @Override
+        public boolean update(boolean force, boolean applyPhysics) {
+            return blockLocation.getBlock().getState().update(force, applyPhysics);
+        }
+
+        TileEntityMobSpawner getSpawner(){
+            return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
         }
 
     }
