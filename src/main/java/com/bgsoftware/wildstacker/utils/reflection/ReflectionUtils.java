@@ -33,7 +33,7 @@ public final class ReflectionUtils {
                     entityEquipmentClass = EntityEquipment.class;
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
-            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isEquals(ServerVersion.v1_14) ? "f" : "b_"));
+            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" : "b_"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.ITEM_PICKUP_DELAY, entityItemClass.getDeclaredField("pickupDelay"));
@@ -44,7 +44,7 @@ public final class ReflectionUtils {
             methodMap.put(Methods.WORLD_ADD_ENTITY, craftWorldClass.getDeclaredMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class));
             methodMap.put(Methods.ENTITY_GET_HANDLE, craftEntityClass.getDeclaredMethod("getHandle"));
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundDeath" :
+                    ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cs" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cf" :
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "bX" :
@@ -55,7 +55,7 @@ public final class ReflectionUtils {
                             ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp"
             ));
             methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
+                    ServerVersion.isAtLeast(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cD" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cq" :
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
@@ -66,6 +66,7 @@ public final class ReflectionUtils {
                             ServerVersion.getBukkitVersion().contains("R1") ? "bA" : "bB"
             ));
             methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_15) ? "dn" :
                     ServerVersion.isEquals(ServerVersion.v1_14) ? "cV" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cE" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cr" :
