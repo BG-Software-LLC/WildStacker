@@ -18,25 +18,27 @@ public final class WorldGuardHook {
     @SuppressWarnings("JavaReflectionMemberAccess")
     public static List<String> getRegionsName(org.bukkit.Location bukkitLocation){
         if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-            ApplicableRegionSet applicableRegionSet;
             try {
-                RegionContainer regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
-                Location location = new Location(new BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
-                applicableRegionSet = regionContainer.createQuery().getApplicableRegions(location);
-            }catch(Throwable ex){
+                ApplicableRegionSet applicableRegionSet;
                 try {
-                    Class<?> regionQueryClass = Class.forName("com.sk89q.worldguard.bukkit.RegionQuery");
-                    Class<?> regionContainerClass = Class.forName("com.sk89q.worldguard.bukkit.RegionContainer");
-                    Object regionContainer = WorldGuardPlugin.class.getMethod("getRegionContainer").invoke(WorldGuardPlugin.inst());
-                    Object regionQuery = regionContainerClass.getMethod("createQuery").invoke(regionContainer);
-                    applicableRegionSet = (ApplicableRegionSet) regionQueryClass.getMethod("getApplicableRegions", bukkitLocation.getClass())
-                            .invoke(regionQuery, bukkitLocation);
-                }catch(Exception ex1){
-                    ex1.printStackTrace();
-                    return new ArrayList<>();
+                    RegionContainer regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
+                    Location location = new Location(new BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
+                    applicableRegionSet = regionContainer.createQuery().getApplicableRegions(location);
+                } catch (Throwable ex) {
+                    try {
+                        Class<?> regionQueryClass = Class.forName("com.sk89q.worldguard.bukkit.RegionQuery");
+                        Class<?> regionContainerClass = Class.forName("com.sk89q.worldguard.bukkit.RegionContainer");
+                        Object regionContainer = WorldGuardPlugin.class.getMethod("getRegionContainer").invoke(WorldGuardPlugin.inst());
+                        Object regionQuery = regionContainerClass.getMethod("createQuery").invoke(regionContainer);
+                        applicableRegionSet = (ApplicableRegionSet) regionQueryClass.getMethod("getApplicableRegions", bukkitLocation.getClass())
+                                .invoke(regionQuery, bukkitLocation);
+                    } catch (Exception ex1) {
+                        ex1.printStackTrace();
+                        return new ArrayList<>();
+                    }
                 }
-            }
-            return applicableRegionSet.getRegions().stream().map(ProtectedRegion::getId).collect(Collectors.toList());
+                return applicableRegionSet.getRegions().stream().map(ProtectedRegion::getId).collect(Collectors.toList());
+            }catch(Throwable ignored){}
         }
         return new ArrayList<>();
     }
