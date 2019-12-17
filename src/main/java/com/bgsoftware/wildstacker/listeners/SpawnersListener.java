@@ -84,13 +84,8 @@ public final class SpawnersListener implements Listener {
         ItemStack itemInHand = e.getItemInHand().clone();
         EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
-        //We're making it delayed so we avoid the check of CMI & prevent other bugs.
-        Executor.sync(() -> {
-            if(e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
-                plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), itemInHand, true);
-                stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
-            }
-        }, 2L);
+        plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), itemInHand, true);
+        stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
 
         int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
 
