@@ -45,6 +45,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -184,6 +185,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("Terminating all database threads...");
         Executor.stop();
+        StackService.stop();
     }
 
     private void loadAPI(){

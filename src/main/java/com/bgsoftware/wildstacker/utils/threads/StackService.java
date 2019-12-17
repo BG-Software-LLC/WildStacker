@@ -14,9 +14,9 @@ public final class StackService {
 
     private static boolean mainThreadFlag = false;
     private static long taskId = -1;
+    private static final Timer timer = new Timer(true);
 
     static {
-        final Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -67,6 +67,10 @@ public final class StackService {
 
     public synchronized static void runAsync() {
         mainThreadFlag = false;
+    }
+
+    public static void stop(){
+        timer.cancel();
     }
 
 }
