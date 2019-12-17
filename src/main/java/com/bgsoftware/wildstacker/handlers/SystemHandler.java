@@ -504,7 +504,8 @@ public final class SystemHandler implements SystemManager {
         Executor.async(() -> {
             entityList.stream()
                     .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity) &&
-                            (!applyTaskFilter || GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity))))
+                            (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity)) &&
+                                    !GeneralUtils.contains(plugin.getSettings().killTaskBlacklist, WStackedEntity.of(entity)))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
                         if(((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||

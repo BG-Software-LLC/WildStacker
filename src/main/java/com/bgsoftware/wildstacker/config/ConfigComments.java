@@ -70,6 +70,13 @@ public final class ConfigComments {
     @Comment("If you want all entities to be killed, set this to []")
     public static String KILL_TASK_WHITELIST = "kill-task.whitelist";
 
+    @Comment("A list of entities that won't be cleared.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
+    @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
+    public static String KILL_TASK_BLACKLIST = "kill-task.blacklist";
+
     @Comment("A list of worlds that entities will be cleared inside.")
     @Comment("If you want all worlds, set this to []")
     public static String KILL_TASK_WORLDS = "kill-task.worlds";

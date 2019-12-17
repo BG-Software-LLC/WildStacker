@@ -57,6 +57,12 @@ kill-task:
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you want all entities to be killed, set this to []
   whitelist: []
+  # A list of entities that won't be cleared.
+  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
+  # If you wish to disable blacklisted entities, use "blacklist: []"
+  blacklist: []
   # A list of worlds that entities will be cleared inside.
   # If you want all worlds, set this to []
   worlds: []
