@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 @SuppressWarnings("unused")
 public final class BucketsListener implements Listener {
@@ -38,14 +39,15 @@ public final class BucketsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
         if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack itemInHand = e.getItemStack().clone();
+            PlayerInventory inventory = e.getPlayer().getInventory();
+            int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
+            ItemStack itemInHand = inventory.getItem(heldItemSlot).clone();
             ItemStack itemToGive = itemInHand.clone();
             itemToGive.setAmount(itemToGive.getAmount() - 1);
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), itemInHand, itemToGive);
-                e.getPlayer().getInventory().addItem(e.getItemStack());
-            });
+            Executor.sync(() -> {
+                inventory.setItem(heldItemSlot, itemToGive);
+                inventory.addItem(e.getItemStack());
+            }, 1L);
         }
     }
 
