@@ -89,7 +89,9 @@ public final class ReflectionUtils {
                 }catch (Throwable ignored) {
                     methodMap.put(Methods.BLOCK_DATA_FROM_DATA, getBukkitClass("block.data.CraftBlockData").getMethod("fromData", getNMSClass("IBlockData")));
                 }
+            }catch(Throwable ignored){}
 
+            try{
                 methodMap.put(Methods.ENTITY_GET_ITEM_IN_MAIN_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInMainHandDropChance"));
                 methodMap.put(Methods.ENTITY_SET_ITEM_IN_MAIN_HAND, entityEquipmentClass.getMethod("setItemInMainHand", ItemStack.class));
                 methodMap.put(Methods.ENTITY_GET_ITEM_IN_OFF_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInOffHandDropChance"));
