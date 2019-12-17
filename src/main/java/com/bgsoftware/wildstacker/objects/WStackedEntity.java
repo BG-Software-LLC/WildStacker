@@ -284,7 +284,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                             return;
                         }
 
-                        filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
+                        filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStack(targetEntity));
                     }
 
                     StackResult stackResult = runStack(targetEntity);
