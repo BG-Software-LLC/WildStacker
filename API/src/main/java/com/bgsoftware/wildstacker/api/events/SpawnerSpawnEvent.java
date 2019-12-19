@@ -8,7 +8,10 @@ import org.bukkit.event.HandlerList;
 /**
  * SpawnerSpawnEvent is called when an entity is spawned by a spawner.
  * This is a replacement for Bukkit's event.
+ *
+ * @deprecated Will be switched with vanilla's event.
  */
+@Deprecated
 public class SpawnerSpawnEvent extends Event {
 
     private static final HandlerList HANDLERS = new HandlerList();

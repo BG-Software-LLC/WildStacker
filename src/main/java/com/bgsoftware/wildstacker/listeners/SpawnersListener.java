@@ -55,8 +55,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -322,10 +324,14 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private boolean listenToSpawnEvent = true;
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!(e.getEntity() instanceof LivingEntity))
+        if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
+
+        listenToSpawnEvent = false;
 
         boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
 
@@ -334,33 +340,57 @@ public final class SpawnersListener implements Listener {
             multipleEntities = !stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled();
         }
 
-        //DO NOT CANCEL EVENT - CAUSES ENTITIES TO SPAWN LIKE CRAZY
-        //e.setCancelled(true);
-        //Doing it on the next tick so taco paper won't get weird message
-        Executor.sync(() -> e.getEntity().remove(), 1L);
-
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
         if(multipleEntities) {
-            for (int i = 0; i < stackedSpawner.getStackAmount(); i++) {
-                StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
-                com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);
-                Bukkit.getPluginManager().callEvent(spawnerSpawnEvent);
+            if(stackedSpawner.getStackAmount() > 1) {
+                Executor.async(() -> {
+                    Set<Location> locationsToSpawn = new HashSet<>();
+                    Location location = e.getSpawner().getLocation();
+                    ThreadLocalRandom random = ThreadLocalRandom.current();
+                    for (int i = 0; i < stackedSpawner.getStackAmount() - 1; i++) {
+                        locationsToSpawn.add(new Location(location.getWorld(),
+                                location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
+                                location.getBlockY(),
+                                location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
+                        ));
+                    }
+                    Executor.sync(() -> {
+                        listenToSpawnEvent = false;
+                        for (Location toSpawn : locationsToSpawn) {
+                            StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
+                            if(!callSpawnerSpawnEvent(stackedEntity, stackedSpawner))
+                                stackedEntity.remove();
+                        }
+                        listenToSpawnEvent = true;
+                    });
+                });
             }
         }
 
         else{
-            StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
-            com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);
-            Bukkit.getPluginManager().callEvent(spawnerSpawnEvent);
-
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-
             stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
                 if(!entityOptional.isPresent())
                     stackedEntity.updateNerfed();
             });
         }
+
+        listenToSpawnEvent = true;
+    }
+
+    private boolean callSpawnerSpawnEvent(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
+        SpawnerSpawnEvent spawnerSpawnEvent = new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner());
+        Bukkit.getPluginManager().callEvent(new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner()));
+
+        if(spawnerSpawnEvent.isCancelled() || stackedEntity.getLivingEntity().isDead() || !stackedEntity.getLivingEntity().isValid())
+            return false;
+
+        //noinspection deprecation
+        Bukkit.getPluginManager().callEvent(new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner));
+
+        return true;
     }
 
     //Same as SilkSpawnersSpawnerChangeEvent, but will only work if SilkSpawners is disabled
