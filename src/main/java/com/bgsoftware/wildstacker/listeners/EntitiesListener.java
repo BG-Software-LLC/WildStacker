@@ -426,7 +426,13 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(nextEntityStackAmount, true);
+        stackedEntity.setStackAmount(nextEntityStackAmount, false);
+
+        Executor.sync(() -> {
+            //Resetting the name, so updateName will work.
+            e.getEntity().setCustomName("");
+            stackedEntity.updateName();
+        }, 1L);
 
         nextEntityStackAmount = -1;
         nextEntityType = null;
