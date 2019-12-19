@@ -30,6 +30,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -70,6 +71,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public Location getLocation() {
         return object.getLocation();
+    }
+
+    @Override
+    public World getWorld() {
+        return object.getWorld();
     }
 
     @Override
@@ -256,7 +262,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         EntityData.cache(object);
         nearbyEntities.forEach(entity -> EntityData.cache((LivingEntity) entity));
 
-        StackService.execute(() -> {
+        StackService.execute(getWorld(), () -> {
             synchronized (stackingMutex) {
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
@@ -403,7 +409,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        StackService.execute(() -> {
+        StackService.execute(getWorld(), () -> {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
             if (linkedEntity != null) {
@@ -416,23 +422,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                         result.accept(Optional.of(linkedEntity));
                     return;
                 }
-//                try {
-//                    boolean cont = StackService.submit(targetEntity, () -> {
-//                        StackResult stackResult = runStack(targetEntity);
-//
-//                        if (stackResult == StackResult.SUCCESS) {
-//                            if (result != null)
-//                                result.accept(Optional.of(linkedEntity));
-//                            return false;
-//                        }
-//
-//                        return true;
-//                    }).get();
-//
-//                    if (!cont)
-//                        return;
-//                } catch (Exception ignored) {
-//                }
             }
 
             runStackAsync(entityOptional -> {

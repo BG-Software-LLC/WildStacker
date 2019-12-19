@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -14,6 +15,11 @@ public interface StackedObject<T> {
      * Get the location of the object.
      */
     Location getLocation();
+
+    /**
+     * Get the world of the object.
+     */
+    World getWorld();
 
     /**
      * Get the stack amount

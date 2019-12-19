@@ -15,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
@@ -43,6 +44,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public Location getLocation() {
         return object.getLocation();
+    }
+
+    @Override
+    public World getWorld() {
+        return object.getWorld();
     }
 
     @Override
@@ -202,7 +208,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
-        StackService.execute(() -> {
+        StackService.execute(getWorld(), () -> {
             synchronized (stackingMutex) {
                 Location itemLocation = getItem().getLocation();
 
