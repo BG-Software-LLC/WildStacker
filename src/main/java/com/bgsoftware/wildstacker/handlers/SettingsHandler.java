@@ -407,7 +407,7 @@ public final class SettingsHandler {
             cfg.set("entities.nerfed-entities.whitelist", cfg.getStringList("entities.nerfed-spawning"));
         if(cfg.contains("entities.nerfed-worlds"))
             cfg.set("entities.nerfed-entities.worlds", cfg.getStringList("entities.nerfed-worlds"));
-        if(cfg.contains("spawners.break-charge.whitelist")){
+        if(cfg.contains("spawners.break-charge.amount")){
             List<String> mobs = cfg.getStringList("spawners.break-charge.whitelist");
             if(mobs.isEmpty()) {
                 mobs.add("EXAMPLE_MOB");
@@ -422,7 +422,7 @@ public final class SettingsHandler {
             cfg.set("spawners.break-charge.multiply-stack-amount", null);
             cfg.set("spawners.break-charge.whitelist", null);
         }
-        if(cfg.contains("spawners.place-charge.whitelist")){
+        if(cfg.contains("spawners.place-charge.amount")){
             List<String> mobs = cfg.getStringList("spawners.place-charge.whitelist");
             if(mobs.isEmpty()) {
                 mobs.add("EXAMPLE_MOB");
