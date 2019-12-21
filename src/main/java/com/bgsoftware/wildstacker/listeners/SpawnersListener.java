@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceInventoryEvent;
@@ -328,7 +329,13 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
+        if(!(e.getEntity() instanceof LivingEntity))
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+        stackedEntity.setSpawnCause(SpawnCause.SPAWNER);
+
+        if(!listenToSpawnEvent)
             return;
 
         listenToSpawnEvent = false;
@@ -336,7 +343,6 @@ public final class SpawnersListener implements Listener {
         boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
 
         if(!multipleEntities){
-            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
             multipleEntities = !stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled();
         }
 
@@ -358,8 +364,8 @@ public final class SpawnersListener implements Listener {
                     Executor.sync(() -> {
                         listenToSpawnEvent = false;
                         for (Location toSpawn : locationsToSpawn) {
-                            StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
-                            if(!callSpawnerSpawnEvent(stackedEntity, stackedSpawner))
+                            StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
+                            if(!callSpawnerSpawnEvent(targetEntity, stackedSpawner))
                                 stackedEntity.remove();
                         }
                         listenToSpawnEvent = true;
@@ -369,7 +375,6 @@ public final class SpawnersListener implements Listener {
         }
 
         else{
-            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
             stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
                 if(!entityOptional.isPresent())
