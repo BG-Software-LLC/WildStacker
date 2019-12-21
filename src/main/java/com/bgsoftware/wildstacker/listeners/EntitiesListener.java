@@ -350,7 +350,6 @@ public final class EntitiesListener implements Listener {
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setSpawnCause(SpawnCause.valueOf(e.getSpawnReason()));
 
         if(mooshroomFlag != -1){
             stackedEntity.setStackAmount(mooshroomFlag, true);

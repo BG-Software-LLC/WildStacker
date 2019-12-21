@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.EventUtils;
 import com.bgsoftware.wildstacker.utils.Pair;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -332,13 +333,8 @@ public final class SpawnersListener implements Listener {
         if(!(e.getEntity() instanceof LivingEntity))
             return;
 
+        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.SPAWNER);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setSpawnCause(SpawnCause.SPAWNER);
-
-        if(!listenToSpawnEvent)
-            return;
-
-        listenToSpawnEvent = false;
 
         boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
 
@@ -381,8 +377,6 @@ public final class SpawnersListener implements Listener {
                     stackedEntity.updateNerfed();
             });
         }
-
-        listenToSpawnEvent = true;
     }
 
     private boolean callSpawnerSpawnEvent(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
