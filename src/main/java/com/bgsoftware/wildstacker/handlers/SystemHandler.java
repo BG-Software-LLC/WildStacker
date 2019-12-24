@@ -300,7 +300,6 @@ public final class SystemHandler implements SystemManager {
                 StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
                 if(GeneralUtils.isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
                     removeStackObject(stackedObject);
-                    plugin.getProviders().deleteHologram(stackedSpawner);
                 }
             }
 
@@ -309,12 +308,11 @@ public final class SystemHandler implements SystemManager {
                 if(GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
                     removeStackObject(stackedObject);
                     stackedBarrel.removeDisplayBlock();
-                    plugin.getProviders().deleteHologram(stackedBarrel);
                 }
             }
         }
 
-        plugin.getProviders().clearHolograms();
+        Executor.sync(plugin.getProviders()::clearHolograms);
     }
 
     @Override
