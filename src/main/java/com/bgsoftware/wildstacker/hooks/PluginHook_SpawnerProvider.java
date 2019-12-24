@@ -19,7 +19,8 @@ public final class PluginHook_SpawnerProvider {
 
     public static void register(){
         if (!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
-                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
+                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")
+                && !Bukkit.getPluginManager().isPluginEnabled("UnioSpawners")) {
             if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
                     new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
                 WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
