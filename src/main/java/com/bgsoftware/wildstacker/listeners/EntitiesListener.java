@@ -134,8 +134,20 @@ public final class EntitiesListener implements Listener {
         onEntityLastDamage(entityDamageEvent);
     }
 
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onDeadEntityDamage(EntityDamageEvent e){
+        if(deadEntities.contains(e.getEntity().getUniqueId())) {
+            e.setDamage(0);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
+        if(deadEntities.contains(e.getEntity().getUniqueId())) {
+            e.setDamage(0);
+            return;
+        }
+
         //Checks that it's the last hit of the entity
         if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
             return;
@@ -155,9 +167,6 @@ public final class EntitiesListener implements Listener {
 
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
-
-            if(deadEntities.contains(e.getEntity().getUniqueId()))
-                return;
 
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
@@ -267,7 +276,7 @@ public final class EntitiesListener implements Listener {
                             }
                         }
 
-                        deadEntities.remove(livingEntity.getUniqueId());
+                        deadEntities.remove(stackedEntity.getUniqueId());
                     });
                 });
 
