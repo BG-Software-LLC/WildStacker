@@ -4,34 +4,36 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import net.minecraft.server.v1_13_R2.BlockPosition;
-import net.minecraft.server.v1_13_R2.ChatMessage;
-import net.minecraft.server.v1_13_R2.EnchantmentManager;
-import net.minecraft.server.v1_13_R2.Entity;
-import net.minecraft.server.v1_13_R2.EntityAnimal;
-import net.minecraft.server.v1_13_R2.EntityInsentient;
-import net.minecraft.server.v1_13_R2.EntityItem;
-import net.minecraft.server.v1_13_R2.EntityLiving;
-import net.minecraft.server.v1_13_R2.EntityPlayer;
-import net.minecraft.server.v1_13_R2.EntityTracker;
-import net.minecraft.server.v1_13_R2.EntityTypes;
-import net.minecraft.server.v1_13_R2.EntityVillager;
-import net.minecraft.server.v1_13_R2.EntityZombieVillager;
-import net.minecraft.server.v1_13_R2.EnumItemSlot;
-import net.minecraft.server.v1_13_R2.ItemStack;
-import net.minecraft.server.v1_13_R2.MinecraftKey;
-import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
-import net.minecraft.server.v1_13_R2.NBTTagCompound;
-import net.minecraft.server.v1_13_R2.NBTTagInt;
-import net.minecraft.server.v1_13_R2.NBTTagList;
-import net.minecraft.server.v1_13_R2.NBTTagShort;
-import net.minecraft.server.v1_13_R2.PacketPlayOutCollect;
-import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_13_R2.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_13_R2.SoundEffect;
-import net.minecraft.server.v1_13_R2.TileEntityMobSpawner;
-import net.minecraft.server.v1_13_R2.World;
-import net.minecraft.server.v1_13_R2.WorldServer;
+import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.ChatMessage;
+import net.minecraft.server.v1_15_R1.ChunkProviderServer;
+import net.minecraft.server.v1_15_R1.DynamicOpsNBT;
+import net.minecraft.server.v1_15_R1.EnchantmentManager;
+import net.minecraft.server.v1_15_R1.Entity;
+import net.minecraft.server.v1_15_R1.EntityAnimal;
+import net.minecraft.server.v1_15_R1.EntityInsentient;
+import net.minecraft.server.v1_15_R1.EntityItem;
+import net.minecraft.server.v1_15_R1.EntityLiving;
+import net.minecraft.server.v1_15_R1.EntityPlayer;
+import net.minecraft.server.v1_15_R1.EntityTypes;
+import net.minecraft.server.v1_15_R1.EntityVillager;
+import net.minecraft.server.v1_15_R1.EntityZombieVillager;
+import net.minecraft.server.v1_15_R1.EnumItemSlot;
+import net.minecraft.server.v1_15_R1.GameRules;
+import net.minecraft.server.v1_15_R1.ItemStack;
+import net.minecraft.server.v1_15_R1.MinecraftKey;
+import net.minecraft.server.v1_15_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
+import net.minecraft.server.v1_15_R1.NBTTagInt;
+import net.minecraft.server.v1_15_R1.NBTTagList;
+import net.minecraft.server.v1_15_R1.NBTTagShort;
+import net.minecraft.server.v1_15_R1.PacketPlayOutCollect;
+import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_15_R1.SoundEffect;
+import net.minecraft.server.v1_15_R1.TileEntityMobSpawner;
+import net.minecraft.server.v1_15_R1.World;
+import net.minecraft.server.v1_15_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -41,17 +43,17 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.v1_13_R2.CraftChunk;
-import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftChicken;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_15_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_15_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftChicken;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Chicken;
@@ -80,7 +82,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
-public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
+public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public Object getNBTTagCompound(LivingEntity livingEntity) {
@@ -192,7 +194,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         }catch(Exception ex){
             return null;
         }
-
     }
 
     @Override
@@ -275,7 +276,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
         boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
         boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
-        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean("doMobLoot");
+        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
     }
 
     @Override
@@ -298,25 +299,16 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
     @Override
     public int getNBTInteger(Object nbtTag) {
-        try {
-            return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).asInt() : ((NBTTagInt) nbtTag).asInt();
-        }catch(Throwable ex){
-            try{
-                return (int) nbtTag.getClass().getMethod("e").invoke(nbtTag);
-            }catch(Exception ex1){
-                ex1.printStackTrace();
-                return 0;
-            }
-        }
+        return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).asInt() : ((NBTTagInt) nbtTag).asInt();
     }
 
     @Override
     public int getEggLayTime(Chicken chicken) {
-        return ((CraftChicken) chicken).getHandle().bI;
+        return ((CraftChicken) chicken).getHandle().eggLayTime;
     }
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
+    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, Predicate<BlockState> condition) {
         return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
                 .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
                 .filter(condition);
@@ -324,8 +316,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
     @Override
     public void grandAchievement(Player player, EntityType victim, String name) {
-        //noinspection deprecation
-        grandAchievement(player, NamespacedKey.minecraft(victim.getName()).toString(), name);
+        grandAchievement(player, victim.getKey().toString(), name);
     }
 
     @Override
@@ -346,11 +337,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
-        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
+        ChunkProviderServer chunkProvider = ((WorldServer) entityLiving.world).getChunkProvider();
+        chunkProvider.broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
         //Makes sure the entity is still there.
-        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
-        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
+        chunkProvider.broadcast(entityItem, new PacketPlayOutSpawnEntity(entityItem));
+        chunkProvider.broadcast(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override
@@ -378,6 +369,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
+    @SuppressWarnings("all")
     public Enchantment getGlowEnchant() {
         return new Enchantment(NamespacedKey.minecraft("glowing_enchant")) {
             @Override
@@ -465,10 +457,14 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public Zombie spawnZombieVillager(Villager villager) {
         EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
-        EntityZombieVillager entityZombieVillager = new EntityZombieVillager(entityVillager.world);
+        EntityZombieVillager entityZombieVillager = EntityTypes.ZOMBIE_VILLAGER.a(entityVillager.world);
 
+        assert entityZombieVillager != null;
         entityZombieVillager.u(entityVillager);
-        entityZombieVillager.setProfession(entityVillager.getProfession());
+        entityZombieVillager.setVillagerData(entityVillager.getVillagerData());
+        entityZombieVillager.a(entityVillager.eN().a(DynamicOpsNBT.a).getValue());
+        entityZombieVillager.setOffers(entityVillager.getOffers().a());
+        entityZombieVillager.a(entityVillager.getExperience());
         entityZombieVillager.setBaby(entityVillager.isBaby());
         entityZombieVillager.setNoAI(entityVillager.isNoAI());
 
@@ -489,7 +485,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         return (Zombie) entityZombieVillager.getBukkitEntity();
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "NullableProblems"})
     private static class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityMobSpawner> implements SyncedCreatureSpawner {
 
         private World world;
@@ -513,7 +509,7 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         @Override
         public void setSpawnedType(EntityType entityType) {
             if (entityType != null && entityType.getName() != null) {
-                getSpawner().getSpawner().setMobName(EntityTypes.a(entityType.getName()));
+                getSpawner().getSpawner().setMobName(EntityTypes.a(entityType.getName()).orElse(EntityTypes.PIG));
             } else {
                 throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
             }

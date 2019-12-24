@@ -16,6 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -33,6 +34,8 @@ import java.util.List;
 public final class ItemUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private final static int MAX_PICKUP_DELAY = 32767;
 
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
@@ -344,22 +347,28 @@ public final class ItemUtils {
         }
     }
 
-    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
-        int slot = -1;
+    public static int getHeldItemSlot(PlayerInventory inventory, Material material){
+        ItemStack itemStack;
 
-        if(inHand.equals(inventory.getItem(inventory.getHeldItemSlot())))
-            slot = inventory.getHeldItemSlot();
+        if((itemStack = inventory.getItem(inventory.getHeldItemSlot())) != null && itemStack.getType() == material)
+            return inventory.getHeldItemSlot();
 
         else try{
-            if(inHand.equals(inventory.getItem(40)))
-                slot = 40;
+            if((itemStack = inventory.getItem(40)) != null && itemStack.getType() == material)
+                return 40;
         }catch(ArrayIndexOutOfBoundsException ignored){}
 
-        //Player probably ran out of items...
-        if(slot == -1)
-            return;
+        return -1;
+    }
 
-        inventory.setItem(slot, itemStack);
+    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
+        int slot = getHeldItemSlot(inventory, inHand.getType());
+        if(slot != -1)
+            inventory.setItem(slot, itemStack);
+    }
+
+    public static boolean canPickup(Item item){
+        return item.getPickupDelay() < MAX_PICKUP_DELAY && !item.hasMetadata("ChestShop_Display");
     }
 
 }

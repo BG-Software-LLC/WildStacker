@@ -3,9 +3,9 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.config.ConfigComments;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -33,7 +33,8 @@ public final class EditorHandler {
             GENERAL_SLOT_2 = "database.delete-invalid-blocks", GENERAL_SLOT_3 = "kill-task.interval",
             GENERAL_SLOT_4 = "kill-task.stacked-entities", GENERAL_SLOT_5 = "kill-task.unstacked-entities",
             GENERAL_SLOT_6 = "kill-task.stacked-items", GENERAL_SLOT_7 = "kill-task.unstacked-items",
-            GENERAL_SLOT_8 = "kill-task.sync-clear-lagg", GENERAL_SLOT_9 = "kill-task.whitelist";
+            GENERAL_SLOT_8 = "kill-task.sync-clear-lagg", GENERAL_SLOT_9 = "kill-task.whitelist",
+            GENERAL_SLOT_10 = "kill-task.blacklist";
 
     public final static String ITEMS_SLOT_0 = "items.enabled", ITEMS_SLOT_1 = "items.merge-radius",
             ITEMS_SLOT_2 = "items.custom-name", ITEMS_SLOT_3 = "items.blacklist", ITEMS_SLOT_4 = "items.whitelist",
@@ -59,7 +60,8 @@ public final class EditorHandler {
             ENTITIES_SLOT_24 = "entities.mythic-mobs-custom-name", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
             ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names",
             ENTITIES_SLOT_28 = "entities.next-stack-knockback", ENTITIES_SLOT_29 = "entities.default-unstack",
-            ENTITIES_SLOT_30 = "entities.auto-exp-pickup";
+            ENTITIES_SLOT_30 = "entities.auto-exp-pickup", ENTITIES_SLOT_31 = "entities.egg-lay-multiply",
+            ENTITIES_SLOT_32 = "entities.clear-equipment";
 
     public final static String BUCKETS_SLOT_0 = "buckets.enabled", BUCKETS_SLOT_1 = "buckets.name-blacklist",
             BUCKETS_SLOT_2 = "buckets.max-stack";
@@ -79,11 +81,9 @@ public final class EditorHandler {
             SPAWNERS_SLOT_24 = "spawners.get-stacked-item", SPAWNERS_SLOT_25 = "spawners.floating-names",
             SPAWNERS_SLOT_26 = "spawners.break-menu.enabled", SPAWNERS_SLOT_27 = "spawners.place-inventory.enabled",
             SPAWNERS_SLOT_28 = "spawners.place-inventory.title", SPAWNERS_SLOT_29 = "spawners.placement-permission",
-            SPAWNERS_SLOT_30 = "spawners.shift-place-stack", SPAWNERS_SLOT_31 = "spawners.break-charge.amount",
-            SPAWNERS_SLOT_32 = "spawners.break-charge.multiply-stack-amount", SPAWNERS_SLOT_33 = "spawners.place-charge.amount",
-            SPAWNERS_SLOT_34 = "spawners.place-charge.multiply-stack-amount", SPAWNERS_SLOT_35 = "spawners.change-using-eggs",
-            SPAWNERS_SLOT_36 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_37 = "spawners.next-spawner-placement",
-            SPAWNERS_SLOT_38 = "spawners.only-one-spawner";
+            SPAWNERS_SLOT_30 = "spawners.shift-place-stack", SPAWNERS_SLOT_31 = "spawners.change-using-eggs",
+            SPAWNERS_SLOT_32 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_33 = "spawners.next-spawner-placement",
+            SPAWNERS_SLOT_34 = "spawners.only-one-spawner";
 
     public final static String BARRELS_SLOT_0 = "barrels.enabled", BARRELS_SLOT_1 = "barrels.merge-radius",
             BARRELS_SLOT_2 = "barrels.custom-name", BARRELS_SLOT_3 = "barrels.blacklist", BARRELS_SLOT_4 = "barrels.whitelist",
@@ -195,7 +195,7 @@ public final class EditorHandler {
             return;
         }
 
-        Inventory editor = Bukkit.createInventory(null, 9 * 5, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
         buildInventory(editor, spawnersFields, "spawners.");
 
         Executor.sync(() -> player.openInventory(editor));

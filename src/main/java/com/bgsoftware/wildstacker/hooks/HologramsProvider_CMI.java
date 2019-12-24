@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.Zrips.CMI.CMI;
+import com.Zrips.CMI.Containers.CMILocation;
 import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.Zrips.CMI.Modules.Holograms.HologramManager;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -10,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 public final class HologramsProvider_CMI implements HologramsProvider {
@@ -24,22 +24,20 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        createHologram(stackedObject.getLocation().add(0.5, 1, 0.5), line);
+        createHologram(stackedObject.getLocation().add(0.5, -1, 0.5), line);
     }
 
     @Override
     public void createHologram(Location location, String line) {
-        CMIHologram hologram = new CMIHologram("WS-" + getLocation(location), location);
-        hologramManager.addHologram(hologram);
+        CMIHologram hologram = new CMIHologram("WS-" + getLocation(location), new CMILocation(location));
         hologram.setLines(Collections.singletonList(line));
-        hologramManager.resetHoloForAllPlayers(hologram);
-        hologram.updatePages();
-        hologramManager.save();
+        hologram.setSaveToFile(false);
+        hologramManager.addHologram(hologram);
     }
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        deleteHologram(stackedObject.getLocation().add(0.5, 1, 0.5));
+        deleteHologram(stackedObject.getLocation().add(0.5, -1, 0.5));
     }
 
     @Override
@@ -48,15 +46,12 @@ public final class HologramsProvider_CMI implements HologramsProvider {
             return;
 
         CMIHologram hologram = getHologram(location);
-        hologram.setLines(new ArrayList<>());
-        hologramManager.resetHoloForAllPlayers(hologram);
-        hologram.updatePages();
         hologramManager.removeHolo(hologram);
     }
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        changeLine(stackedObject.getLocation().add(0.5, 1, 0.5), newLine, createIfNull);
+        changeLine(stackedObject.getLocation().add(0.5, -1, 0.5), newLine, createIfNull);
     }
 
     @Override
@@ -71,16 +66,14 @@ public final class HologramsProvider_CMI implements HologramsProvider {
         }
 
         hologram.setLines(Collections.singletonList(newLine));
-        hologramManager.resetHoloForAllPlayers(hologram);
-        hologram.updatePages();
-        hologramManager.save();
+        hologram.refresh();
     }
 
     @Override
     public void clearHolograms() {
         for(CMIHologram hologram : hologramManager.getHolograms().values()){
-            if(hologram.getName().startsWith("WS") && GeneralUtils.isChunkLoaded(hologram.getLoc())) {
-                Block underBlock = hologram.getLoc().getBlock().getRelative(BlockFace.DOWN);
+            if(hologram.getName().startsWith("WS") && GeneralUtils.isChunkLoaded(hologram.getLocation())) {
+                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.UP);
                 if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
                     hologramManager.removeHolo(hologram);
                     break;

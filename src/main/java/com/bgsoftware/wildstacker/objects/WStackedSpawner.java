@@ -8,14 +8,15 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
@@ -65,7 +66,12 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public Location getLocation() {
-        return object.getLocation().clone();
+        return object.getLocation();
+    }
+
+    @Override
+    public World getWorld() {
+        return object.getWorld();
     }
 
     /*
@@ -158,7 +164,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     public void runStackAsync(Consumer<Optional<CreatureSpawner>> result) {
         Chunk chunk = getChunk();
 
-        StackService.execute(() -> {
+        StackService.execute(getWorld(), () -> {
             synchronized (stackingMutex) {
                 boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
                 Location blockLocation = getLocation();

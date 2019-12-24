@@ -28,11 +28,12 @@ import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.*;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -133,6 +134,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 CrazyEnchantmentsHook.register();
             if(getServer().getPluginManager().isPluginEnabled("Boss"))
                 getServer().getPluginManager().registerEvents(new BossListener(), this);
+            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
+                McMMOHook.setEnabled();
 
             //Set WildStacker as SpawnersProvider with Novucs
             if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
@@ -173,6 +176,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("Terminating all database threads...");
         Executor.stop();
+        StackService.stop();
     }
 
     private void loadAPI(){

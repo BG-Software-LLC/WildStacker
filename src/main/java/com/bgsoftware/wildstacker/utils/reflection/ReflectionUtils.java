@@ -1,12 +1,14 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,10 +29,11 @@ public final class ReflectionUtils {
                     entityItemClass = getNMSClass("EntityItem"),
                     craftEntityClass = getBukkitClass("entity.CraftEntity"),
                     nmsTagClass = getNMSClass("NBTTagCompound"),
-                    entityInsentientClass = getNMSClass("EntityInsentient");
+                    entityInsentientClass = getNMSClass("EntityInsentient"),
+                    entityEquipmentClass = EntityEquipment.class;
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
-            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isEquals(ServerVersion.v1_14) ? "f" : "b_"));
+            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" : "b_"));
             fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.ITEM_PICKUP_DELAY, entityItemClass.getDeclaredField("pickupDelay"));
@@ -41,7 +44,7 @@ public final class ReflectionUtils {
             methodMap.put(Methods.WORLD_ADD_ENTITY, craftWorldClass.getDeclaredMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class));
             methodMap.put(Methods.ENTITY_GET_HANDLE, craftEntityClass.getDeclaredMethod("getHandle"));
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_14) ? "getSoundDeath" :
+                    ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cs" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cf" :
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "bX" :
@@ -52,7 +55,7 @@ public final class ReflectionUtils {
                             ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp"
             ));
             methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
+                    ServerVersion.isAtLeast(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cD" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cq" :
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
@@ -63,6 +66,7 @@ public final class ReflectionUtils {
                             ServerVersion.getBukkitVersion().contains("R1") ? "bA" : "bB"
             ));
             methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_15) ? "dn" :
                     ServerVersion.isEquals(ServerVersion.v1_14) ? "cV" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cE" :
                     ServerVersion.isEquals(ServerVersion.v1_12) ? "cr" :
@@ -85,6 +89,13 @@ public final class ReflectionUtils {
                 }catch (Throwable ignored) {
                     methodMap.put(Methods.BLOCK_DATA_FROM_DATA, getBukkitClass("block.data.CraftBlockData").getMethod("fromData", getNMSClass("IBlockData")));
                 }
+            }catch(Throwable ignored){}
+
+            try{
+                methodMap.put(Methods.ENTITY_GET_ITEM_IN_MAIN_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInMainHandDropChance"));
+                methodMap.put(Methods.ENTITY_SET_ITEM_IN_MAIN_HAND, entityEquipmentClass.getMethod("setItemInMainHand", ItemStack.class));
+                methodMap.put(Methods.ENTITY_GET_ITEM_IN_OFF_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInOffHandDropChance"));
+                methodMap.put(Methods.ENTITY_SET_ITEM_IN_OFF_HAND, entityEquipmentClass.getMethod("setItemInOffHand", ItemStack.class));
             }catch(Throwable ignored){}
 
             fieldMap.values().forEach(field -> field.setAccessible(true));

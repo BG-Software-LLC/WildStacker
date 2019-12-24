@@ -1,36 +1,22 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public final class StackService {
 
-    private static final Set<Runnable> asyncRunnables = Sets.newConcurrentHashSet();
-
+    private static final Map<String, StackServiceWorld> stackServiceWorldMap = Maps.newConcurrentMap();
     private static boolean mainThreadFlag = false;
-    private static long taskId = -1;
 
-    static {
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("WildStacker Stacking Thread").build());
-
-        executorService.submit(() -> taskId = Thread.currentThread().getId());
-
-        executorService.scheduleAtFixedRate(() -> {
-            synchronized (asyncRunnables){
-                asyncRunnables.forEach(Runnable::run);
-                asyncRunnables.clear();
-            }
-        }, 250, 250, TimeUnit.MILLISECONDS);
-    }
-
-    public static void execute(Runnable runnable){
+    public static void execute(World world, Runnable runnable){
         if(mainThreadFlag){
             if(Bukkit.isPrimaryThread())
                 runnable.run();
@@ -45,11 +31,12 @@ public final class StackService {
             return;
         }
 
-        asyncRunnables.add(runnable);
+        stackServiceWorldMap.computeIfAbsent(world.getName(), stackServiceWorld -> new StackServiceWorld(world.getName())).add(runnable);
     }
 
     public static boolean isStackThread(){
-        return taskId == Thread.currentThread().getId();
+        long threadId =  Thread.currentThread().getId();
+        return stackServiceWorldMap.values().stream().anyMatch(stackServiceWorld -> stackServiceWorld.taskId == threadId);
     }
 
     public static boolean canStackFromThread(){
@@ -62,6 +49,47 @@ public final class StackService {
 
     public synchronized static void runAsync() {
         mainThreadFlag = false;
+    }
+
+    public static void stop(){
+        stackServiceWorldMap.values().forEach(StackServiceWorld::stop);
+        stackServiceWorldMap.clear();
+    }
+
+    private static final class StackServiceWorld {
+
+        private final Set<Runnable> asyncRunnables = Sets.newConcurrentHashSet();
+        private long taskId = -1;
+        private final Timer timer = new Timer(true);
+
+        StackServiceWorld(String world){
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        if (taskId == -1) {
+                            Thread.currentThread().setName("WildStacker Stacking Thread (" + world + ")");
+                            taskId = Thread.currentThread().getId();
+                        }
+
+                        asyncRunnables.forEach(Runnable::run);
+                        asyncRunnables.clear();
+                    }catch(Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+            }, 250, 250);
+        }
+
+        void add(Runnable runnable){
+            asyncRunnables.add(runnable);
+        }
+
+        void stop(){
+            timer.cancel();
+            asyncRunnables.clear();
+        }
+
     }
 
 }

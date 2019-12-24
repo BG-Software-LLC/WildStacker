@@ -147,27 +147,29 @@ public final class EntityUtils {
     }
 
     public static String getEntityNameRegex(StackedEntity stackedEntity){
-        String regexName = "";
+        String customName;
 
         if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null) {
-            regexName = stackedEntity.getLivingEntity().getCustomName().replace("{}", "([0-9]+)");
+            customName = stackedEntity.getLivingEntity().getCustomName().replace("{}", "\n");
         }
 
         else {
-            String customName = plugin.getSettings().entitiesCustomName;
+            customName = plugin.getSettings().entitiesCustomName;
 
             if (customName.isEmpty())
                 throw new NullPointerException();
 
             if (stackedEntity.getStackAmount() > 1) {
-                regexName = customName
-                        .replace("{0}", "([0-9]+)")
+                customName = customName
+                        .replace("{0}", "\n")
                         .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
                         .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
             }
         }
 
-        return "(.*)" + regexName + "(.*)";
+        String[] nameSections = customName.split("\n");
+
+        return "(.*)" + (nameSections.length == 1 ? nameSections[0] : Pattern.quote(nameSections[0]) + "([0-9]+)" + Pattern.quote(nameSections[1])) + "(.*)";
     }
 
     public static int getBadOmenAmplifier(Player player){

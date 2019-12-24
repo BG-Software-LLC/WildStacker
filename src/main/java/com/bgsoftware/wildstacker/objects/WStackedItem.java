@@ -15,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
@@ -32,8 +33,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     private static final Object stackingMutex = new Object();
 
-    private final static int MAX_PICKUP_DELAY = 32767;
-
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
     }
@@ -45,6 +44,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public Location getLocation() {
         return object.getLocation();
+    }
+
+    @Override
+    public World getWorld() {
+        return object.getWorld();
     }
 
     @Override
@@ -174,7 +178,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
             if (superResult != StackCheckResult.SUCCESS)
                 return superResult;
 
-            if (!plugin.getSettings().itemsMaxPickupDelay && getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+            if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(object))
                 return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
             if (object.isDead())
@@ -182,7 +186,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
             StackedItem targetItem = (StackedItem) stackedObject;
 
-            if (!plugin.getSettings().itemsMaxPickupDelay && targetItem.getItem().getPickupDelay() >= MAX_PICKUP_DELAY)
+            if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(targetItem.getItem()))
                 return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
 
             if (targetItem.getItem().isDead())
@@ -204,7 +208,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
-        StackService.execute(() -> {
+        StackService.execute(getWorld(), () -> {
             synchronized (stackingMutex) {
                 Location itemLocation = getItem().getLocation();
 

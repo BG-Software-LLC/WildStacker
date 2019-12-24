@@ -11,10 +11,11 @@ import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.EventUtils;
-import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Pair;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -54,8 +55,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -80,14 +83,17 @@ public final class SpawnersListener implements Listener {
         if(stackedSpawner.isBlacklisted() || !stackedSpawner.isWhitelisted() || stackedSpawner.isWorldDisabled())
             return;
 
-        plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), e.getItemInHand(), true);
+        ItemStack itemInHand = e.getItemInHand().clone();
+        EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
+
+        plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), itemInHand, true);
         stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
 
-        int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(e.getItemInHand());
+        int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
 
         if(plugin.getSettings().spawnersPlacementPermission && !e.getPlayer().hasPermission("wildstacker.place.*") &&
-                !e.getPlayer().hasPermission("wildstacker.place." + stackedSpawner.getSpawnedType().name().toLowerCase())) {
-            Locale.SPAWNER_PLACE_BLOCKED.send(e.getPlayer(), "wildstacker.place." + stackedSpawner.getSpawnedType().name().toLowerCase());
+                !e.getPlayer().hasPermission("wildstacker.place." + spawnerType.name().toLowerCase())) {
+            Locale.SPAWNER_PLACE_BLOCKED.send(e.getPlayer(), "wildstacker.place." + spawnerType.name().toLowerCase());
             e.setCancelled(true);
             return;
         }
@@ -105,12 +111,11 @@ public final class SpawnersListener implements Listener {
 
         boolean replaceAir = false;
         ItemStack limitItem = null;
-        ItemStack inHand = e.getItemInHand().clone();
         int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
 
         if(e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
             replaceAir = true;
-            spawnerItemAmount *= e.getItemInHand().getAmount();
+            spawnerItemAmount *= itemInHand.getAmount();
         }
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE){
@@ -123,9 +128,12 @@ public final class SpawnersListener implements Listener {
             }
         }
 
-        double amountToCharge = plugin.getSettings().placeChargeAmount * (plugin.getSettings().placeChargeMultiply ? spawnerItemAmount : 1);
+        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge.getOrDefault(
+                Key.of(spawnerType.name()), new Pair<>(0.0, false));
 
-        if(EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge){
+        double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
+
+        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
             return;
@@ -143,25 +151,25 @@ public final class SpawnersListener implements Listener {
             int stackAmount = stackedSpawner.getStackAmount();
 
             if(!spawnerOptional.isPresent()){
-                if(isChunkLimit(chunk, stackedSpawner.getSpawnedType())) {
-                    EventUtils.cancelEventAsync(stackedSpawner, e, inHand, true);
+                if(isChunkLimit(chunk, spawnerType)) {
+                    EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
                     return;
                 }
 
                 if(plugin.getSettings().onlyOneSpawner){
                     for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
                         if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()) {
-                            EventUtils.cancelEventAsync(stackedSpawner, e, inHand, true);
+                            EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
                             return;
                         }
                     }
                 }
 
-                SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner, inHand);
+                SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner, itemInHand);
                 Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
 
                 if(spawnerPlaceEvent.isCancelled()) {
-                    EventUtils.cancelEventAsync(stackedSpawner, e, inHand, true);
+                    EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
                     return;
                 }
 
@@ -175,7 +183,7 @@ public final class SpawnersListener implements Listener {
                 );
             }
             else{
-                EventUtils.cancelEventAsync(stackedSpawner, e, inHand,false);
+                EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand,false);
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
                 if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
@@ -184,7 +192,7 @@ public final class SpawnersListener implements Listener {
                 stackAmount = targetSpawner.getStackAmount();
             }
 
-            if(amountToCharge > 0 && GeneralUtils.containsOrEmpty(plugin.getSettings().placeChargeWhitelist, stackedSpawner))
+            if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             //Removing item from player's inventory
@@ -194,7 +202,7 @@ public final class SpawnersListener implements Listener {
             if(LIMIT_ITEM != null)
                 ItemUtils.addItem(LIMIT_ITEM, e.getPlayer().getInventory(), e.getPlayer().getLocation());
 
-            Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()), stackAmount, amountToCharge);
+            Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(spawnerType.name()), stackAmount, amountToCharge);
         });
     }
 
@@ -212,11 +220,14 @@ public final class SpawnersListener implements Listener {
         int originalAmount = stackedSpawner.getStackAmount();
         int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().shiftGetWholeSpawnerStack ? originalAmount : 1;
 
-        double amountToCharge = plugin.getSettings().breakChargeAmount * (plugin.getSettings().breakChargeMultiply ? stackAmount : 1);
+        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge.getOrDefault(
+                Key.of(stackedSpawner.getSpawnedType().name()), new Pair<>(0.0, false));
 
-        if(EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge){
-            e.setCancelled(true);
+        double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? stackAmount : 1);
+
+        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
+            e.setCancelled(true);
             return;
         }
 
@@ -231,7 +242,7 @@ public final class SpawnersListener implements Listener {
             if(stackedSpawner.getStackAmount() <= 0)
                 e.getBlock().setType(Material.AIR);
 
-            if(amountToCharge > 0 && GeneralUtils.containsOrEmpty(plugin.getSettings().breakChargeWhitelist, stackedSpawner))
+            if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
             Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, amountToCharge);
@@ -313,39 +324,73 @@ public final class SpawnersListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private boolean listenToSpawnEvent = true;
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!(e.getEntity() instanceof LivingEntity))
+        if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
-        //DO NOT CANCEL EVENT - CAUSES ENTITIES TO SPAWN LIKE CRAZY
-        //e.setCancelled(true);
-        //Doing it on the next tick so taco paper won't get weird message
-        Executor.sync(() -> e.getEntity().remove(), 1L);
+        listenToSpawnEvent = false;
+
+        boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
+
+        if(!multipleEntities){
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+            multipleEntities = !stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled();
+        }
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
-        if(!plugin.getSettings().entitiesStackingEnabled || plugin.getSettings().blacklistedEntities.contains(e.getEntityType().name()) ||
-                plugin.getSettings().blacklistedEntities.contains("SPAWNER")) {
-            for (int i = 0; i < stackedSpawner.getStackAmount(); i++) {
-                StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
-                com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);
-                Bukkit.getPluginManager().callEvent(spawnerSpawnEvent);
+        if(multipleEntities) {
+            if(stackedSpawner.getStackAmount() > 1) {
+                Executor.async(() -> {
+                    Set<Location> locationsToSpawn = new HashSet<>();
+                    Location location = e.getSpawner().getLocation();
+                    ThreadLocalRandom random = ThreadLocalRandom.current();
+                    for (int i = 0; i < stackedSpawner.getStackAmount() - 1; i++) {
+                        locationsToSpawn.add(new Location(location.getWorld(),
+                                location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
+                                location.getBlockY(),
+                                location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
+                        ));
+                    }
+                    Executor.sync(() -> {
+                        listenToSpawnEvent = false;
+                        for (Location toSpawn : locationsToSpawn) {
+                            StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
+                            if(!callSpawnerSpawnEvent(stackedEntity, stackedSpawner))
+                                stackedEntity.remove();
+                        }
+                        listenToSpawnEvent = true;
+                    });
+                });
             }
         }
 
         else{
-            StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(e.getLocation(), e.getEntityType().getEntityClass()));
-            com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent spawnerSpawnEvent = new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner);
-            Bukkit.getPluginManager().callEvent(spawnerSpawnEvent);
-
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-
             stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
                 if(!entityOptional.isPresent())
                     stackedEntity.updateNerfed();
             });
         }
+
+        listenToSpawnEvent = true;
+    }
+
+    private boolean callSpawnerSpawnEvent(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
+        SpawnerSpawnEvent spawnerSpawnEvent = new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner());
+        Bukkit.getPluginManager().callEvent(new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner()));
+
+        if(spawnerSpawnEvent.isCancelled() || stackedEntity.getLivingEntity().isDead() || !stackedEntity.getLivingEntity().isValid())
+            return false;
+
+        //noinspection deprecation
+        Bukkit.getPluginManager().callEvent(new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner));
+
+        return true;
     }
 
     //Same as SilkSpawnersSpawnerChangeEvent, but will only work if SilkSpawners is disabled
@@ -453,11 +498,14 @@ public final class SpawnersListener implements Listener {
 
         removeAmount = Math.min(stackedSpawner.getStackAmount(), removeAmount);
 
-        double amountToCharge = plugin.getSettings().breakChargeAmount * (plugin.getSettings().breakChargeMultiply ? removeAmount : 1);
+        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge.getOrDefault(
+                Key.of(stackedSpawner.getSpawnedType().name()), new Pair<>(0.0, false));
 
-        if(EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(player) < amountToCharge){
-            e.setCancelled(true);
+        double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? removeAmount : 1);
+
+        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(player) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(player, amountToCharge);
+            e.setCancelled(true);
             return;
         }
 
@@ -465,7 +513,8 @@ public final class SpawnersListener implements Listener {
             if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
                 CoreProtectHook.recordBlockChange(player, spawnerBlock, false);
 
-            EconomyHook.withdrawMoney(player, amountToCharge);
+            if(amountToCharge > 0)
+                EconomyHook.withdrawMoney(player, amountToCharge);
 
             //noinspection all
             plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount, false);

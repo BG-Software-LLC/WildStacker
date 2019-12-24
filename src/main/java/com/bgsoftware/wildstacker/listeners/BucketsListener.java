@@ -1,8 +1,8 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 @SuppressWarnings("unused")
 public final class BucketsListener implements Listener {
@@ -38,13 +39,15 @@ public final class BucketsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
         if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = e.getPlayer().getItemInHand().clone();
-            inHand.setAmount(inHand.getAmount() - 1);
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                e.getPlayer().setItemInHand(inHand);
-                e.getPlayer().getInventory().addItem(e.getItemStack());
-            });
+            PlayerInventory inventory = e.getPlayer().getInventory();
+            int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
+            ItemStack itemInHand = inventory.getItem(heldItemSlot).clone();
+            ItemStack itemToGive = itemInHand.clone();
+            itemToGive.setAmount(itemToGive.getAmount() - 1);
+            Executor.sync(() -> {
+                inventory.setItem(heldItemSlot, itemToGive);
+                inventory.addItem(e.getItemStack());
+            }, 1L);
         }
     }
 

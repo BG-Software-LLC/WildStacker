@@ -6,6 +6,7 @@
 
     <groupId>com.bgsoftware</groupId>
     <artifactId>wildstacker</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
     <build>
@@ -23,6 +24,7 @@
 
     <modules>
         <module>API</module>
+        <module>v1_15_R1</module>
     </modules>
 
     <repositories>

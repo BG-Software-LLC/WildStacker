@@ -70,6 +70,17 @@ public final class ConfigComments {
     @Comment("If you want all entities to be killed, set this to []")
     public static String KILL_TASK_WHITELIST = "kill-task.whitelist";
 
+    @Comment("A list of entities that won't be cleared.")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
+    @Comment("If you wish to disable blacklisted entities, use \"blacklist: []\"")
+    public static String KILL_TASK_BLACKLIST = "kill-task.blacklist";
+
+    @Comment("A list of worlds that entities will be cleared inside.")
+    @Comment("If you want all worlds, set this to []")
+    public static String KILL_TASK_WORLDS = "kill-task.worlds";
+
     @Comment("")
     @Comment("Here you can configurable all features related to stacked items.")
     public static String ITEMS = "items";
@@ -363,6 +374,9 @@ public final class ConfigComments {
 
     @Comment("")
     @Comment("Should exp get added directly to killer instead of dropped to ground?")
+    @Comment("EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html")
+    @Comment("SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html")
+    @Comment("You can combine both filters using \"ENTITY_TYPE:SPAWN_REASON\"")
     public static String ENTITIES_AUTO_EXP_PICKUP = "entities.auto-exp-pickup";
 
     @Comment("")
@@ -370,7 +384,11 @@ public final class ConfigComments {
     public static String ENTITIES_EGG_LAY_MULTIPLY = "entities.egg-lay-multiply";
 
     @Comment("")
-    @Comment("Here you can configurable all features related to stacked spawners.")
+    @Comment("Should eggs that are laid by stacked chickens be multiplied by it's stack size?")
+    public static String ENTITIES_CLEAR_EQUIPMENT = "entities.clear-equipment";
+
+    @Comment("")
+    @Comment("Should vanilla equipment of entities get cleared after they unstack?")
     public static String SPAWNERS = "spawners";
 
     @Comment("Should spawners get stacked on the server?")
@@ -553,11 +571,19 @@ public final class ConfigComments {
     public static String SPAWNERS_SHIFT_PLACE_STACK = "spawners.shift-place-stack";
 
     @Comment("")
-    @Comment("Set a charge amount for breaking spawners.")
+    @Comment("All settings related to break charge.")
+    @Comment("break-charge:")
+    @Comment("  EXAMPLE_MOB:                     The name of the mob.")
+    @Comment("    price: 0                       The price to charge upon breaking.")
+    @Comment("    multiply-stack-amount: false   Should the price get multiplied by the amount that were broken?")
     public static String SPAWNERS_BREAK_CHARGE = "spawners.break-charge";
 
     @Comment("")
-    @Comment("Set a charge amount for placing spawners.")
+    @Comment("All settings related to place charge.")
+    @Comment("place-charge:")
+    @Comment("  EXAMPLE_MOB:                     The name of the mob.")
+    @Comment("    price: 0                       The price to charge upon placing.")
+    @Comment("    multiply-stack-amount: false   Should the price get multiplied by the amount that were placed?")
     public static String SPAWNERS_PLACE_CHARGE = "spawners.place-charge";
 
     @Comment("")

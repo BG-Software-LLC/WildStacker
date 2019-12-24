@@ -6,10 +6,10 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
@@ -19,8 +19,10 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -48,6 +50,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -62,7 +65,6 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -123,10 +125,9 @@ public final class EntitiesListener implements Listener {
 
         //Calling the onEntityLastDamage function with default parameters.
 
-        //noinspection unchecked
         EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
         noDeathEvent.add(e.getEntity().getUniqueId());
 
@@ -147,6 +148,8 @@ public final class EntitiesListener implements Listener {
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
             int currentStackAmount = stackedEntity.getStackAmount();
+
+            int fireTicks = livingEntity.getFireTicks();
 
             e.setDamage(0);
 
@@ -210,12 +213,15 @@ public final class EntitiesListener implements Listener {
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 Executor.async(() -> {
+                    livingEntity.setFireTicks(fireTicks);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(e);
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(null);
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
                         stackedEntity.setStackAmount(stackAmount, false);
+                        if(McMMOHook.isEnabled())
+                            McMMOHook.updateCachedName(livingEntity);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
 
@@ -291,10 +297,14 @@ public final class EntitiesListener implements Listener {
                     }
 
                 }
-
-                deadEntities.add(e.getEntity().getUniqueId());
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityTeleport(EntityTeleportEvent e){
+        if(deadEntities.contains(e.getEntity().getUniqueId()))
+            e.setCancelled(true);
     }
 
     private void grandAchievement(Player killer, EntityType entityType, String name){
@@ -325,7 +335,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChunkLoad(ChunkLoadEvent e){
-        Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity)
+        Arrays.stream(e.getChunk().getEntities())
+                .filter(EntityUtils::isStackable)
                 .forEach(entity -> EntityData.of((LivingEntity) entity));
     }
 
@@ -334,8 +345,7 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getSettings().entitiesStackingEnabled)
             return;
 
-        if(e.getEntityType() == EntityType.ARMOR_STAND || e.getEntityType() == EntityType.PLAYER ||
-                EntityStorage.hasMetadata(e.getEntity(), "corpse"))
+        if(!EntityUtils.isStackable(e.getEntity()) || EntityStorage.hasMetadata(e.getEntity(), "corpse"))
             return;
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
@@ -408,12 +418,21 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnFromEgg(CreatureSpawnEvent e){
+        if(!EntityUtils.isStackable(e.getEntity()))
+            return;
+
         if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
                 EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(nextEntityStackAmount, true);
+        stackedEntity.setStackAmount(nextEntityStackAmount, false);
+
+        Executor.sync(() -> {
+            //Resetting the name, so updateName will work.
+            e.getEntity().setCustomName("");
+            stackedEntity.updateName();
+        }, 1L);
 
         nextEntityStackAmount = -1;
         nextEntityType = null;
@@ -642,10 +661,9 @@ public final class EntitiesListener implements Listener {
 
             e.setCancelled(true);
 
-            //noinspection unchecked
             EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                    new EnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
+                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
+                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
             onEntityLastDamage(entityDamageEvent);
         }

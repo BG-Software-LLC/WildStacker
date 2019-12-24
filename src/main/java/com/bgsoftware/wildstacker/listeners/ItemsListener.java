@@ -9,8 +9,8 @@ import com.bgsoftware.wildstacker.listeners.events.EggLayEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -31,6 +31,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -118,13 +121,23 @@ public final class ItemsListener implements Listener {
         WStackedItem.of(e.getEntity()).remove();
     }
 
+    private Set<UUID> twiceEventFix = new HashSet<>();
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityPickup(EntityPickupItemEvent e) {
+        if(e.getPlayer() != null && twiceEventFix.contains(e.getItem().getUniqueId())){
+            ItemStack itemStack = e.getItem().getItemStack().clone();
+            Executor.sync(() -> e.getPlayer().getInventory().removeItem(itemStack), 2L);
+            return;
+        }
+
         StackedItem stackedItem = WStackedItem.of(e.getItem());
 
         //Should run only if the item is 1 (stacked item)
         if(stackedItem.getStackAmount() > 1 || e.getItem().getItemStack().getType().name().contains("BUCKET")) {
             e.setCancelled(true);
+            twiceEventFix.add(e.getItem().getUniqueId());
+            Executor.sync(() -> twiceEventFix.remove(e.getItem().getUniqueId()), 20L);
 
             //Causes too many issues
             if(e.getEntityType().name().equals("DOLPHIN"))
@@ -162,8 +175,10 @@ public final class ItemsListener implements Listener {
             plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
 
             if (stackedItem.getStackAmount() <= 0) {
-                e.getItem().remove();
-                stackedItem.remove();
+                Executor.sync(() -> {
+                    e.getItem().remove();
+                    stackedItem.remove();
+                }, 2L);
             }
         }
     }
