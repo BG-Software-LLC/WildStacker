@@ -141,6 +141,19 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityNerfDamage(EntityDamageByEntityEvent e){
+        if(!EntityUtils.isStackable(e.getDamager()))
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getDamager());
+
+        if(stackedEntity.isNerfed()){
+            e.setCancelled(true);
+            e.setDamage(0);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         if(deadEntities.contains(e.getEntity().getUniqueId())) {
@@ -433,6 +446,7 @@ public final class EntitiesListener implements Listener {
                 EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
             return;
 
+        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setStackAmount(nextEntityStackAmount, false);
 
