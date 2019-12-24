@@ -12,13 +12,7 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
-import com.bgsoftware.wildstacker.hooks.EconomyHook;
-import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
-import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
-import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.hooks.*;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
@@ -31,13 +25,7 @@ import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
-import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
-import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
-import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
-import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
-import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
-import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
+import com.bgsoftware.wildstacker.listeners.plugins.*;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -127,6 +115,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         Bukkit.getScheduler().runTask(this, () -> {
             providersHandler = new ProvidersHandler(this);
 
+            new LangUtilsHook();
             if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
                 getServer().getPluginManager().registerEvents(new ClearLaggListener(this), this);
             if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
@@ -139,6 +128,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
             if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
                 EpicSpawnersListener.register(this);
+            if(getServer().getPluginManager().isPluginEnabled("UnioSpawners"))
+                getServer().getPluginManager().registerEvents(new UnioSpawnersListener(), this);
             if(getServer().getPluginManager().isPluginEnabled("CrazyEnchantments"))
                 CrazyEnchantmentsHook.register();
             if(getServer().getPluginManager().isPluginEnabled("Boss"))
@@ -214,6 +205,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         List<String> messages = new ArrayList<>();
         if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")){
             messages.add("Detected EpicSpawners - Disabling spawners stacking...");
+        }
+        if(Bukkit.getPluginManager().isPluginEnabled("UnioSpawners")){
+            messages.add("Detected UnioSpawners - Disabling spawners stacking...");
         }
         if(Bukkit.getPluginManager().isPluginEnabled("MergedSpawner")){
             messages.add("Detected MergedSpawner - Disabling spawners stacking...");

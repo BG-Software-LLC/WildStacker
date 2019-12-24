@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.hooks.LangUtilsHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -180,6 +181,10 @@ public final class ItemUtils {
 
     public static String getFormattedType(ItemStack itemStack){
         String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
+
+        if (LangUtilsHook.enabled) {
+            typeName = LangUtilsHook.getItemName(itemStack);
+        }
 
         typeName = ChatColor.stripColor(plugin.getSettings().customNames.getOrDefault(itemStack, typeName));
 
