@@ -1,10 +1,12 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
+import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -14,10 +16,10 @@ import java.util.TimerTask;
 public final class StackService {
 
     private static final Map<String, StackServiceWorld> stackServiceWorldMap = Maps.newConcurrentMap();
-    private static boolean mainThreadFlag = false;
+    private static final Set<StackedObject> mainThreadObjects = new HashSet<>();
 
-    public static void execute(World world, Runnable runnable){
-        if(mainThreadFlag){
+    public static void execute(StackedObject stackedObject, Runnable runnable){
+        if(mainThreadObjects.contains(stackedObject)){
             if(Bukkit.isPrimaryThread())
                 runnable.run();
             else
@@ -26,6 +28,10 @@ public final class StackService {
             return;
         }
 
+        execute(stackedObject.getWorld(), runnable);
+    }
+
+    public static void execute(World world, Runnable runnable){
         if(isStackThread()) {
             runnable.run();
             return;
@@ -43,12 +49,12 @@ public final class StackService {
         return isStackThread() || Bukkit.isPrimaryThread();
     }
 
-    public synchronized static void runOnMain() {
-        mainThreadFlag = true;
+    public synchronized static void runOnMain(StackedObject stackedObject) {
+        mainThreadObjects.add(stackedObject);
     }
 
-    public synchronized static void runAsync() {
-        mainThreadFlag = false;
+    public synchronized static void runAsync(StackedObject stackedObject) {
+        mainThreadObjects.remove(stackedObject);
     }
 
     public static void stop(){

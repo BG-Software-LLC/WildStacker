@@ -164,7 +164,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
     public void runStackAsync(Consumer<Optional<CreatureSpawner>> result) {
         Chunk chunk = getChunk();
 
-        StackService.execute(getWorld(), () -> {
+        StackService.execute(this, () -> {
             synchronized (stackingMutex) {
                 boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
                 Location blockLocation = getLocation();
@@ -211,7 +211,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                     result.accept(Optional.empty());
             }
         });
-        StackService.runAsync();
+        StackService.runAsync(this);
     }
 
     @Override

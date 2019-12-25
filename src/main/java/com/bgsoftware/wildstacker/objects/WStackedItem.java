@@ -208,7 +208,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
         List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
 
-        StackService.execute(getWorld(), () -> {
+        StackService.execute(this, () -> {
             synchronized (stackingMutex) {
                 Location itemLocation = getItem().getLocation();
 

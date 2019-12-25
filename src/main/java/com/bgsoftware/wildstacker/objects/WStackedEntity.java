@@ -262,7 +262,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         EntityData.cache(object);
         nearbyEntities.forEach(entity -> EntityData.cache((LivingEntity) entity));
 
-        StackService.execute(getWorld(), () -> {
+        StackService.execute(this, () -> {
             synchronized (stackingMutex) {
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
@@ -409,7 +409,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             return;
         }
 
-        StackService.execute(getWorld(), () -> {
+        StackService.execute(this, () -> {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
             if (linkedEntity != null) {

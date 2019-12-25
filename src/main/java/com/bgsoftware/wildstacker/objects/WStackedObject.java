@@ -118,7 +118,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
-        StackService.execute(stackedObject.getWorld(), () -> {
+        StackService.execute(stackedObject, () -> {
             StackResult _stackResult = runStack(stackedObject);
             if(stackResult != null)
                 stackResult.accept(_stackResult);

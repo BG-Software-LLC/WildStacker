@@ -159,7 +159,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     public void runStackAsync(Consumer<Optional<Block>> result) {
         Chunk chunk = getChunk();
 
-        StackService.execute(getWorld(), () -> {
+        StackService.execute(this, () -> {
             synchronized (stackingMutex) {
                 boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
                 Location blockLocation = getLocation();
@@ -206,7 +206,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                     result.accept(Optional.empty());
             }
         });
-        StackService.runAsync();
+        StackService.runAsync(this);
     }
 
     @Override
