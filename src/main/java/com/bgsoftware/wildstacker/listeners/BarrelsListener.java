@@ -6,17 +6,14 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
-import com.bgsoftware.wildstacker.utils.EventUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -108,11 +105,11 @@ public final class BarrelsListener implements Listener {
         Chunk chunk = e.getBlock().getChunk();
 
         //Stacking barrel
-        StackService.runOnMain();
+        StackService.runOnMain(stackedBarrel);
         stackedBarrel.runStackAsync(blockOptional -> {
             if(!blockOptional.isPresent()) {
                 if(isChunkLimit(chunk)) {
-                    EventUtils.cancelEventAsync(stackedBarrel, e, true);
+                    e.setCancelled(true);
                     return;
                 }
 
@@ -120,7 +117,7 @@ public final class BarrelsListener implements Listener {
                 Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
                 if(barrelPlaceEvent.isCancelled()) {
-                    EventUtils.cancelEventAsync(stackedBarrel, e, true);
+                    e.setCancelled(true);
                     return;
                 }
 
@@ -140,7 +137,10 @@ public final class BarrelsListener implements Listener {
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             }
             else {
-                EventUtils.cancelEventAsync(stackedBarrel, e, false);
+                e.setCancelled(true);
+
+                revokeItem(e.getPlayer(), inHand);
+
                 StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
             }
@@ -150,15 +150,13 @@ public final class BarrelsListener implements Listener {
         });
     }
 
-    private void cancelEvent(StackedSpawner stackedSpawner, BlockPlaceEvent e, boolean giveItem){
-        ItemStack inHand = e.getItemInHand().clone();
-        inHand.setAmount(1);
-        stackedSpawner.remove();
-        Executor.sync(() -> {
-            if(giveItem)
-                ItemUtils.addItem(inHand, e.getPlayer().getInventory(), e.getPlayer().getLocation());
-            e.getBlock().setType(Material.AIR);
-        });
+    private void revokeItem(Player player, ItemStack itemInHand){
+        if(player.getGameMode() != GameMode.CREATIVE) {
+            ItemStack inHand = itemInHand.clone();
+            inHand.setAmount(inHand.getAmount() - 1);
+            //Using this method as remove() doesn't affect off hand
+            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

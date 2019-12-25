@@ -15,7 +15,6 @@ import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.EventUtils;
 import com.bgsoftware.wildstacker.utils.Pair;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -148,20 +147,20 @@ public final class SpawnersListener implements Listener {
         final ItemStack LIMIT_ITEM = limitItem;
         Chunk chunk = e.getBlock().getChunk();
 
-        StackService.runOnMain();
+        StackService.runOnMain(stackedSpawner);
         stackedSpawner.runStackAsync(spawnerOptional -> {
             int stackAmount = stackedSpawner.getStackAmount();
 
             if(!spawnerOptional.isPresent()){
                 if(isChunkLimit(chunk, spawnerType)) {
-                    EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
+                    e.setCancelled(true);
                     return;
                 }
 
                 if(plugin.getSettings().onlyOneSpawner){
                     for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
                         if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()) {
-                            EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
+                            e.setCancelled(true);
                             return;
                         }
                     }
@@ -171,7 +170,7 @@ public final class SpawnersListener implements Listener {
                 Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
 
                 if(spawnerPlaceEvent.isCancelled()) {
-                    EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand, true);
+                    e.setCancelled(true);
                     return;
                 }
 
@@ -185,7 +184,10 @@ public final class SpawnersListener implements Listener {
                 );
             }
             else{
-                EventUtils.cancelEventAsync(stackedSpawner, e, itemInHand,false);
+                e.setCancelled(true);
+
+                revokeItem(e.getPlayer(), itemInHand);
+
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
                 if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
@@ -199,13 +201,22 @@ public final class SpawnersListener implements Listener {
 
             //Removing item from player's inventory
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE && REPLACE_AIR)
-                e.getPlayer().getInventory().setItem(heldSlot, new ItemStack(Material.AIR));
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), itemInHand, new ItemStack(Material.AIR));
 
             if(LIMIT_ITEM != null)
                 ItemUtils.addItem(LIMIT_ITEM, e.getPlayer().getInventory(), e.getPlayer().getLocation());
 
             Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(spawnerType.name()), stackAmount, amountToCharge);
         });
+    }
+
+    private void revokeItem(Player player, ItemStack itemInHand){
+        if(player.getGameMode() != GameMode.CREATIVE) {
+            ItemStack inHand = itemInHand.clone();
+            inHand.setAmount(inHand.getAmount() - 1);
+            //Using this method as remove() doesn't affect off hand
+            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
+        }
     }
 
     //Priority is high so it can be fired before SilkSpawners
