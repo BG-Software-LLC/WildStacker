@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
 import java.util.List;
@@ -326,6 +327,11 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         }
 
         return spawnerStream.filter(this::canStackIntoNoLimit).collect(Collectors.toList());
+    }
+
+    @Override
+    public ItemStack getDropItem() {
+        return plugin.getProviders().getSpawnerItem(object, stackAmount);
     }
 
     public LivingEntity getRawLinkedEntity(){

@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.api.objects;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
@@ -34,5 +35,10 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
      * Get all the nearby stacked-spawners that the spawner can stack into in the merge range.
      */
     List<StackedSpawner> getNearbySpawners();
+
+    /**
+     * Get the drop item of the spawner.
+     */
+    ItemStack getDropItem();
 
 }
