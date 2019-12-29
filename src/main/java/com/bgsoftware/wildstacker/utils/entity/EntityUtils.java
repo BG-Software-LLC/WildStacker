@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.entity;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -104,7 +105,11 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity){
-        return entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC");
+        if(!(entity instanceof LivingEntity))
+            return false;
+
+        return MythicMobsHook.isMythicMob((LivingEntity) entity) ||
+                (!(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC"));
     }
 
     public static void spawnExp(Location location, int amount){
