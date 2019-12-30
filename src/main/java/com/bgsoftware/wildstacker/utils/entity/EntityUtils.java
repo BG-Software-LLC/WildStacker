@@ -35,6 +35,9 @@ public final class EntityUtils {
         if(en1.getType() != en2.getType())
             return false;
 
+        if(!MythicMobsHook.areSimilar(en1.getUniqueId(), en2.getUniqueId()))
+            return false;
+
         //EpicSpawners drops data
         if(EntityStorage.hasMetadata(en1.getLivingEntity(), "ES") !=
                 EntityStorage.hasMetadata(en2.getLivingEntity(), "ES"))
@@ -105,11 +108,8 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity){
-        if(!(entity instanceof LivingEntity))
-            return false;
-
-        return MythicMobsHook.isMythicMob((LivingEntity) entity) ||
-                (!(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC"));
+        return MythicMobsHook.isMythicMob(entity) ||
+                (entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC"));
     }
 
     public static void spawnExp(Location location, int amount){
@@ -131,8 +131,9 @@ public final class EntityUtils {
     public static String getEntityName(StackedEntity stackedEntity){
         int stackAmount = stackedEntity.getStackAmount();
 
-        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null)
-            return stackedEntity.getLivingEntity().getCustomName().replace("{}", String.valueOf(stackAmount));
+        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null) {
+            return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
+        }
 
         String customName = plugin.getSettings().entitiesCustomName;
 
