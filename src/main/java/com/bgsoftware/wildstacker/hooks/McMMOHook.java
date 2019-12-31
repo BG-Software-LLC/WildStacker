@@ -15,10 +15,14 @@ public final class McMMOHook {
     public static void updateCachedName(LivingEntity livingEntity){
         if(enabled){
             mcMMO mcMMO = (mcMMO) Bukkit.getPluginManager().getPlugin("mcMMO");
-            if(livingEntity.hasMetadata(CUSTOM_NAME_KEY))
+            if(livingEntity.hasMetadata(CUSTOM_NAME_KEY)) {
+                livingEntity.removeMetadata(CUSTOM_NAME_KEY, mcMMO);
                 livingEntity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, livingEntity.getCustomName()));
-            if(livingEntity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY))
+            }
+            if(livingEntity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY)) {
+                livingEntity.removeMetadata(CUSTOM_NAME_VISIBLE_KEY, mcMMO);
                 livingEntity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, livingEntity.isCustomNameVisible()));
+            }
         }
     }
 
