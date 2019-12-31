@@ -6,8 +6,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.bgsoftware.wildtools.api.WildToolsAPI;
-import com.bgsoftware.wildtools.api.objects.tools.Tool;
 import org.bukkit.Bukkit;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
@@ -103,13 +101,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         if(itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
-        if(Bukkit.getPluginManager().isPluginEnabled("WildTools")){
-            Tool tool = WildToolsAPI.getTool(itemStack);
-            if(tool != null && tool.hasSilkTouch())
-                return true;
-        }
-
-        return itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= 1;
+        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= 1;
     }
 
 }

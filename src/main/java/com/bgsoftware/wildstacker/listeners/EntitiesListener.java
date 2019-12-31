@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -242,8 +243,8 @@ public final class EntitiesListener implements Listener {
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
                         stackedEntity.setStackAmount(stackAmount, false);
-                        if(McMMOHook.isEnabled())
-                            McMMOHook.updateCachedName(livingEntity);
+
+                        McMMOHook.updateCachedName(livingEntity);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
 
@@ -390,8 +391,8 @@ public final class EntitiesListener implements Listener {
         if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!Bukkit.getPluginManager().isPluginEnabled("MergedSpawner") &&
-                plugin.getSettings().linkedEntitiesEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
+        if (!PluginHooks.isMergedSpawnersEnabled && plugin.getSettings().linkedEntitiesEnabled &&
+                e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
         Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
@@ -402,7 +403,7 @@ public final class EntitiesListener implements Listener {
         //Need to add a delay so eggs will get removed from inventory
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
                 e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
-                Bukkit.getPluginManager().isPluginEnabled("MythicMobs") || Bukkit.getPluginManager().isPluginEnabled("EpicBosses"))
+                PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
@@ -630,7 +631,7 @@ public final class EntitiesListener implements Listener {
 
         e.setCancelled(true);
 
-        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+        if(!PluginHooks.isProtocolLibEnabled){
             e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
             return;
         }

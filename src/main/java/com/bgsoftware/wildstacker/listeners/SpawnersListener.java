@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
@@ -134,7 +135,7 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
 
-        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
+        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
             return;
@@ -190,8 +191,7 @@ public final class SpawnersListener implements Listener {
 
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
-                if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                    CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getLocation(), Materials.SPAWNER.toBukkitType(), (byte) 0, true);
+                CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getLocation(), Materials.SPAWNER.toBukkitType(), (byte) 0, true);
 
                 stackAmount = targetSpawner.getStackAmount();
             }
@@ -238,15 +238,14 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? stackAmount : 1);
 
-        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
+        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
             return;
         }
 
         if(stackedSpawner.runUnstack(stackAmount) == UnstackResult.SUCCESS){
-            if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
+            CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
             plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount, false);
 
@@ -513,15 +512,14 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? removeAmount : 1);
 
-        if (EconomyHook.isVaultEnabled() && EconomyHook.getMoneyInBank(player) < amountToCharge) {
+        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(player, amountToCharge);
             e.setCancelled(true);
             return;
         }
 
         if(stackedSpawner.runUnstack(removeAmount) == UnstackResult.SUCCESS){
-            if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(player, spawnerBlock, false);
+            CoreProtectHook.recordBlockChange(player, spawnerBlock, false);
 
             if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(player, amountToCharge);

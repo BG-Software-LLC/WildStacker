@@ -91,7 +91,7 @@ public final class ItemUtils {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
-        if(Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && SpawnersProvider_SilkSpawners.isRegisered()){
+        if(SpawnersProvider_SilkSpawners.isRegisered()){
             return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
         }
 
@@ -138,15 +138,20 @@ public final class ItemUtils {
         if(!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(ServerVersion.isLegacy()) {
-            try {
-                SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
-                return spawnEggMeta.getSpawnedType() == null ? EntityTypes.PIG : EntityTypes.fromName(spawnEggMeta.getSpawnedType().name());
-            } catch (NoClassDefFoundError error) {
-                return EntityTypes.fromName(EntityType.fromId(itemStack.getDurability()).name());
+        try {
+            if (ServerVersion.isLegacy()) {
+                try {
+                    SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
+                    return spawnEggMeta.getSpawnedType() == null ? EntityTypes.PIG : EntityTypes.fromName(spawnEggMeta.getSpawnedType().name());
+                } catch (NoClassDefFoundError error) {
+                    return EntityTypes.fromName(EntityType.fromId(itemStack.getDurability()).name());
+                }
+            } else {
+                return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
             }
-        }else{
-            return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
+        }catch(NullPointerException ex){
+            WildStackerPlugin.log("Issue occured while getting type of " + itemStack);
+            throw ex;
         }
     }
 

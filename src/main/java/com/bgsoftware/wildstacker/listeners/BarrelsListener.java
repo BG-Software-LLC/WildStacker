@@ -145,8 +145,7 @@ public final class BarrelsListener implements Listener {
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
             }
 
-            if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
+            CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
         });
     }
 
@@ -178,8 +177,7 @@ public final class BarrelsListener implements Listener {
         e.setCancelled(true);
 
         if(stackedBarrel.runUnstack(stackedBarrel.getStackAmount()) == UnstackResult.SUCCESS){
-            if(Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
+            CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
             e.getBlock().setType(Material.AIR);
 
@@ -208,10 +206,12 @@ public final class BarrelsListener implements Listener {
 
         else {
             stackedBarrel.runUnstack(1);
-            if (Bukkit.getPluginManager().isPluginEnabled("CoreProtect"))
-                CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
+
+            CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
+
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
                 ItemUtils.dropItem(stackedBarrel.getBarrelItem(1), e.getClickedBlock().getLocation());
+
             if(stackedBarrel.getStackAmount() <= 0)
                 e.getClickedBlock().setType(Material.AIR);
         }

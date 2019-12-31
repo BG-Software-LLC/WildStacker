@@ -80,11 +80,11 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
         Bukkit.getPluginManager().callEvent(spawnerMultiplierChangeEvent);
     }
 
-    public static void register(WildStackerPlugin instance){
+    public static void setEnabled(WildStackerPlugin plugin){
         try{
             Field field = FactionsTopPlugin.class.getDeclaredField("spawnerStackerHook");
             field.setAccessible(true);
-            field.set(JavaPlugin.getPlugin(FactionsTopPlugin.class), new PluginHook_Novucs(instance));
+            field.set(JavaPlugin.getPlugin(FactionsTopPlugin.class), new PluginHook_Novucs(plugin));
         }catch(NoClassDefFoundError | Exception ignored){}
     }
 

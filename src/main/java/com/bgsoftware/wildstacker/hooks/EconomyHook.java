@@ -8,37 +8,32 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 public  final class EconomyHook {
 
     private static Economy economy = null;
-    private static boolean vaultEnabled = Bukkit.getPluginManager().getPlugin("Vault") != null;
 
     public static double getMoneyInBank(Player player){
-        if(isVaultEnabled()) {
-            if (!economy.hasAccount(player))
-                economy.createPlayerAccount(player);
+        if (!economy.hasAccount(player))
+            economy.createPlayerAccount(player);
 
-            return economy.getBalance(player);
-        }
-        return 0;
+        return economy.getBalance(player);
     }
 
     public static void withdrawMoney(Player player, double amount){
-        if(isVaultEnabled()) {
-            if (!economy.hasAccount(player))
-                economy.createPlayerAccount(player);
+        if (!economy.hasAccount(player))
+            economy.createPlayerAccount(player);
 
-            economy.withdrawPlayer(player, amount);
-        }
+        economy.withdrawPlayer(player, amount);
     }
 
-    public static boolean isVaultEnabled(){
-        return vaultEnabled;
-    }
-
-    public static void register(){
-        if (isVaultEnabled()) {
-            RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
-            if (rsp != null) {
-                economy = rsp.getProvider();
+    public static void setEnabled(boolean enabled){
+        try {
+            PluginHooks.isVaultEnabled = enabled;
+            if (enabled) {
+                RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
+                if (rsp != null) {
+                    economy = rsp.getProvider();
+                }
             }
+        }catch(Throwable ex){
+            PluginHooks.isVaultEnabled = enabled;
         }
     }
 

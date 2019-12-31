@@ -12,13 +12,6 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
-import com.bgsoftware.wildstacker.hooks.EconomyHook;
-import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
-import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
-import com.bgsoftware.wildstacker.hooks.PluginHook_SpawnerProvider;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
@@ -31,13 +24,6 @@ import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
-import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
-import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
-import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
-import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
-import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
-import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -52,8 +38,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -83,6 +67,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
         dataHandler = new DataHandler(this);
+        providersHandler = new ProvidersHandler(this);
         systemManager = new SystemHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
@@ -107,8 +92,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getCommand("stacker").setExecutor(commandsHandler);
         getCommand("stacker").setTabCompleter(commandsHandler);
 
-        fixConflicts();
-
         if(Updater.isOutdated()) {
             log("");
             log("A new version is available (v" + Updater.getLatestVersion() + ")!");
@@ -117,44 +100,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         log("******** ENABLE DONE ********");
-
-        //Enable economy hook
-        if(EconomyHook.isVaultEnabled())
-            EconomyHook.register();
-        if(getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
-            ProtocolLibHook.register();
-
-        Bukkit.getScheduler().runTask(this, () -> {
-            providersHandler = new ProvidersHandler(this);
-
-            if(getServer().getPluginManager().isPluginEnabled("ClearLag"))
-                getServer().getPluginManager().registerEvents(new ClearLaggListener(this), this);
-            if(getServer().getPluginManager().isPluginEnabled("SilkSpawners"))
-                getServer().getPluginManager().registerEvents(new SilkSpawnersListener(this), this);
-            if(getServer().getPluginManager().isPluginEnabled("CustomBosses"))
-                getServer().getPluginManager().registerEvents(new CustomBossesListener(), this);
-            if(getServer().getPluginManager().isPluginEnabled("EpicBosses"))
-                getServer().getPluginManager().registerEvents(new EpicBossesListener(), this);
-            if(getServer().getPluginManager().isPluginEnabled("MythicMobs"))
-                getServer().getPluginManager().registerEvents(new MythicMobsListener(), this);
-            if(getServer().getPluginManager().isPluginEnabled("EpicSpawners"))
-                EpicSpawnersListener.register(this);
-            if(getServer().getPluginManager().isPluginEnabled("CrazyEnchantments"))
-                CrazyEnchantmentsHook.register();
-            if(getServer().getPluginManager().isPluginEnabled("Boss"))
-                getServer().getPluginManager().registerEvents(new BossListener(), this);
-            if(getServer().getPluginManager().isPluginEnabled("mcMMO"))
-                McMMOHook.setEnabled();
-
-            //Set WildStacker as SpawnersProvider with Novucs
-            if(getServer().getPluginManager().isPluginEnabled("FactionsTop") &&
-                    getServer().getPluginManager().getPlugin("FactionsTop").getDescription().getAuthors().contains("novucs"))
-                PluginHook_Novucs.register(this);
-
-            //Set WildStacker as SpawnersProvider with ShopGUIPlus
-            if (ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
-                PluginHook_SpawnerProvider.register();
-        });
     }
 
     @Override
@@ -208,33 +153,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             Executor.sync(() -> getServer().getPluginManager().disablePlugin(this));
         }
-    }
-
-    private void fixConflicts(){
-        List<String> messages = new ArrayList<>();
-        if(Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")){
-            messages.add("Detected EpicSpawners - Disabling spawners stacking...");
-        }
-        if(Bukkit.getPluginManager().isPluginEnabled("MergedSpawner")){
-            messages.add("Detected MergedSpawner - Disabling spawners stacking...");
-        }
-        if(Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") && Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R")){
-            messages.add("Detected SuperiorSkyblock - Disabling barrels stacking...");
-        }
-        if(Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit") && settingsHandler.itemsStackingEnabled){
-            //WildStacker disabled the tick limiter for items.
-            try {
-                FastAsyncWEHook.disableTicksLimiter();
-                messages.add("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");
-            }catch(Throwable ignored){}
-        }
-
-        if(!messages.isEmpty()){
-            log("");
-            for(String msg : messages)
-                log(msg);
-        }
-
     }
 
     public NMSAdapter getNMSAdapter() {

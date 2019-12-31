@@ -30,30 +30,34 @@ public final class ProtocolLibHook {
     public static Set<UUID> itemsDisabledNames = new HashSet<>();
     public static Set<UUID> entitiesDisabledNames = new HashSet<>();
 
-    public static void register(){
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
-                    PacketContainer packetContainer = event.getPacket();
-                    StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
-                    try {
-                        if (entityModifier.size() > 0) {
-                            if ((itemsDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof Item) ||
-                                    (entitiesDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof LivingEntity)) {
-                                StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
-                                if (structureModifier.size() > 0) {
-                                    WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
-                                    watcher.setObject(2, new WrappedWatchableObject(2, getCustomName("")));
-                                    watcher.setObject(3, new WrappedWatchableObject(3, false));
-                                    packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+    public static void setEnabled(boolean enabled){
+        PluginHooks.isProtocolLibEnabled = enabled;
+        if(enabled) {
+            ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
+                @Override
+                public void onPacketSending(PacketEvent event) {
+                    if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
+                        PacketContainer packetContainer = event.getPacket();
+                        StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
+                        try {
+                            if (entityModifier.size() > 0) {
+                                if ((itemsDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof Item) ||
+                                        (entitiesDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof LivingEntity)) {
+                                    StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
+                                    if (structureModifier.size() > 0) {
+                                        WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
+                                        watcher.setObject(2, new WrappedWatchableObject(2, getCustomName("")));
+                                        watcher.setObject(3, new WrappedWatchableObject(3, false));
+                                        packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+                                    }
                                 }
                             }
+                        } catch (Throwable ignored) {
                         }
-                    }catch(Throwable ignored){}
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public static void updateName(Player player, Entity entity){

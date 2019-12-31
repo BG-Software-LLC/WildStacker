@@ -184,9 +184,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             object.setCustomNameVisible(nameVisible);
 
             //We update cached values of mcmmo
-            if(McMMOHook.isEnabled())
-                McMMOHook.updateCachedName(object);
-
+            McMMOHook.updateCachedName(object);
         }catch(NullPointerException ignored){}
     }
 
@@ -229,13 +227,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(StackCheck.SPAWN_REASON.isEnabled() && getSpawnCause() != targetEntity.getSpawnCause())
             return StackCheckResult.SPAWN_REASON;
 
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")){
-            Set<String> regions = new HashSet<>();
-            regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
-            regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
-            if(regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
-                return StackCheckResult.DISABLED_REGION;
-        }
+        Set<String> regions = new HashSet<>();
+        regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
+        regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
+        if(regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
+            return StackCheckResult.DISABLED_REGION;
 
         if (plugin.getSettings().stackDownEnabled && GeneralUtils.contains(plugin.getSettings().stackDownTypes, this)) {
             if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {

@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import net.brcdev.shopgui.ShopGuiPlusApi;
-import org.bukkit.Bukkit;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -15,11 +14,10 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
-public final class PluginHook_SpawnerProvider {
+public final class ShopGUIPlusHook {
 
-    public static void register(){
-        if (!Bukkit.getPluginManager().isPluginEnabled("PickUpSpawners") &&
-                !Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && !Bukkit.getPluginManager().isPluginEnabled("EpicSpawners")) {
+    public static void setEnabled(){
+        if (!PluginHooks.isPickupSpawnersEnabled && !PluginHooks.isSilkSpawnersEnabled && !PluginHooks.isEpicSpawnersEnabled) {
             if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
                     new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
                 WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
@@ -53,12 +51,12 @@ public final class PluginHook_SpawnerProvider {
         }
 
         boolean register(){
-            try {
+            try{
                 //noinspection JavaReflectionMemberAccess
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass());
                 method.invoke(null, this);
                 return true;
-            } catch (Exception ex) {
+            }catch(Exception ex){
                 ex.printStackTrace();
             }
             return false;
@@ -98,8 +96,15 @@ public final class PluginHook_SpawnerProvider {
         }
 
         boolean register(){
-            ShopGuiPlusApi.registerSpawnerProvider(this);
-            return true;
+            try{
+                //noinspection JavaReflectionMemberAccess
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass());
+                method.invoke(null, this);
+                return true;
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+            return false;
         }
 
     }

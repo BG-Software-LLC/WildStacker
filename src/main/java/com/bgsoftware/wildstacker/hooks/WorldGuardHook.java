@@ -7,7 +7,6 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public final class WorldGuardHook {
 
     @SuppressWarnings("JavaReflectionMemberAccess")
     public static List<String> getRegionsName(org.bukkit.Location bukkitLocation){
-        if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+        if(PluginHooks.isWorldGuardEnabled) {
             try {
                 ApplicableRegionSet applicableRegionSet;
                 try {

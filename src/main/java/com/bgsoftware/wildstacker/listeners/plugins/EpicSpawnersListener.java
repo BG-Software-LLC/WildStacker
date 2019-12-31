@@ -4,10 +4,11 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.songoda.epicspawners.api.events.SpawnerSpawnEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -19,6 +20,7 @@ import java.lang.reflect.Method;
 public final class EpicSpawnersListener implements Listener {
 
     public static void register(WildStackerPlugin plugin){
+        PluginHooks.isEpicSpawnersEnabled = true;
         if(Bukkit.getPluginManager().getPlugin("EpicSpawners").getDescription().getVersion().startsWith("6"))
             Bukkit.getPluginManager().registerEvents(new EpicSpawners6Listener(), plugin);
         else

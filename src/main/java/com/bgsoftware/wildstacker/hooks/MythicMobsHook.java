@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
@@ -23,13 +22,13 @@ public final class MythicMobsHook {
     }
 
     public static boolean isMythicMob(Entity entity){
-        if(Bukkit.getPluginManager().isPluginEnabled("MythicMobs"))
+        if(PluginHooks.isMythicMobsEnabled)
             return MythicMobs.inst().getMobManager().isActiveMob(entity.getUniqueId());
         return false;
     }
 
     public static boolean areSimilar(UUID en1, UUID en2){
-        if(Bukkit.getPluginManager().isPluginEnabled("MythicMobs")){
+        if(PluginHooks.isMythicMobsEnabled){
             ActiveMob activeMob1 = MythicMobs.inst().getMobManager().getActiveMob(en1).orElse(null);
             ActiveMob activeMob2 = MythicMobs.inst().getMobManager().getActiveMob(en2).orElse(null);
 
@@ -43,7 +42,7 @@ public final class MythicMobsHook {
     }
 
     public static String getMythicName(LivingEntity livingEntity){
-        if(Bukkit.getPluginManager().isPluginEnabled("MythicMobs")){
+        if(PluginHooks.isMythicMobsEnabled){
             ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
             return activeMob.getDisplayName();
         }

@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EggLayEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
@@ -11,7 +12,6 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Sound;
@@ -207,7 +207,7 @@ public final class ItemsListener implements Listener {
 
         e.setCancelled(true);
 
-        if(!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+        if(!PluginHooks.isProtocolLibEnabled){
             e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
             return;
         }
