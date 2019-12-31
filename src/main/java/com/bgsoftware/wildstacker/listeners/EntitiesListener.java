@@ -240,13 +240,14 @@ public final class EntitiesListener implements Listener {
                     ((WStackedEntity) stackedEntity).setLastDamageCause(e);
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
                     ((WStackedEntity) stackedEntity).setLastDamageCause(null);
+                    int droppedExp = stackedEntity.getExp(stackAmount, 0);
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
                         stackedEntity.setStackAmount(stackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
 
-                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), stackedEntity.getExp(stackAmount, 0));
+                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
 
                         if(!noDeathEvent.contains(e.getEntity().getUniqueId()))
                             Bukkit.getPluginManager().callEvent(entityDeathEvent);
