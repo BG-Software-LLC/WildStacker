@@ -2,11 +2,13 @@ package com.bgsoftware.wildstacker.utils.threads;
 
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -64,7 +66,7 @@ public final class StackService {
 
     private static final class StackServiceWorld {
 
-        private final Set<Runnable> asyncRunnables = Sets.newConcurrentHashSet();
+        private final List<Runnable> asyncRunnables = Collections.synchronizedList(new ArrayList<>());
         private long taskId = -1;
         private final Timer timer = new Timer(true);
 
