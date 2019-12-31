@@ -1,9 +1,6 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -20,8 +17,8 @@ public final class ReflectionUtils {
     static Map<Fields, Field> fieldMap = new HashMap<>();
     static Map<Methods, Method> methodMap = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public static void init(){
+    @SuppressWarnings({"unchecked", "JavaReflectionMemberAccess"})
+    public static boolean init(){
         try{
             Class entityLivingClass = getNMSClass("EntityLiving"),
                     craftWorldClass = getBukkitClass("CraftWorld"),
@@ -100,9 +97,11 @@ public final class ReflectionUtils {
 
             fieldMap.values().forEach(field -> field.setAccessible(true));
             methodMap.values().forEach(method -> method.setAccessible(true));
+
+            return true;
         }catch(Exception ex){
             ex.printStackTrace();
-            Executor.sync(() -> Bukkit.getPluginManager().disablePlugin(WildStackerPlugin.getPlugin()));
+            return false;
         }
     }
 
@@ -131,6 +130,7 @@ public final class ReflectionUtils {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static String getValidMethod(Class clazz, String methodName1, String methodName2){
         try{
             //noinspection unchecked

@@ -33,6 +33,7 @@ import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -53,27 +54,45 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private NMSAdapter nmsAdapter;
 
+    private boolean shouldEnable = true;
+
     @Override
-    public void onEnable() {
+    public void onLoad() {
         plugin = this;
         new Metrics(this);
-        ReflectionUtils.init();
+
+        if(!ReflectionUtils.init()){
+            shouldEnable = false;
+        }
+        else {
+            loadNMSAdapter();
+            loadAPI();
+        }
+
+        if(!shouldEnable)
+            log("&cThere was an error while loading the plugin.");
+    }
+
+    @Override
+    public void onEnable() {
+        if(!shouldEnable) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         log("******** ENABLE START ********");
 
-        loadNMSAdapter();
         GlowEnchantment.registerEnchantment();
 
         breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
         dataHandler = new DataHandler(this);
-        providersHandler = new ProvidersHandler(this);
         systemManager = new SystemHandler(this);
+        providersHandler = new ProvidersHandler(this);
         editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
 
         Locale.reload();
-        loadAPI();
 
         getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
         getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
@@ -104,6 +123,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     @Override
     public void onDisable() {
+        if(!shouldEnable)
+            return;
+
         //We need to save the entire database
         systemManager.performCacheSave();
 
@@ -151,8 +173,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
-            Executor.sync(() -> getServer().getPluginManager().disablePlugin(this));
         }
+
+        shouldEnable = false;
     }
 
     public NMSAdapter getNMSAdapter() {
@@ -187,8 +210,14 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return settingsHandler;
     }
 
-    public static void log(final String message){
-        plugin.getLogger().info(message);
+    public static void log(String message){
+        message = ChatColor.translateAlternateColorCodes('&', message);
+        if(message.contains(ChatColor.COLOR_CHAR + "")){
+            Bukkit.getConsoleSender().sendMessage("[WildStacker] " + message);
+        }
+        else {
+            plugin.getLogger().info(message);
+        }
     }
 
     public static WildStackerPlugin getPlugin(){
