@@ -2,8 +2,8 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -60,7 +60,12 @@ public class LootPair {
         List<String> commands = new ArrayList<>();
 
         for(LootCommand lootCommand : lootCommands){
-            int amountOfCommands = (int) Math.round(lootCommand.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+            int amountOfCommands = (int) (lootCommand.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+
+            if (amountOfCommands == 0) {
+                amountOfCommands = Random.nextChance(lootCommand.getChance(lootBonusLevel, lootingChance), amountOfPairs);
+            }
+
             commands.addAll(lootCommand.getCommands(player, amountOfCommands));
         }
 
