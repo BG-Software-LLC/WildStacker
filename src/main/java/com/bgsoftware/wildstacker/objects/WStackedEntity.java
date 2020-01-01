@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
@@ -227,11 +228,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(StackCheck.SPAWN_REASON.isEnabled() && getSpawnCause() != targetEntity.getSpawnCause())
             return StackCheckResult.SPAWN_REASON;
 
-        Set<String> regions = new HashSet<>();
-        regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
-        regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
-        if(regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
-            return StackCheckResult.DISABLED_REGION;
+        if(PluginHooks.isWorldGuardEnabled) {
+            Set<String> regions = new HashSet<>();
+            regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
+            regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
+            if (regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
+                return StackCheckResult.DISABLED_REGION;
+        }
 
         if (plugin.getSettings().stackDownEnabled && GeneralUtils.contains(plugin.getSettings().stackDownTypes, this)) {
             if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
