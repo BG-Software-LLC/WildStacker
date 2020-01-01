@@ -208,6 +208,10 @@ public final class SpawnersListener implements Listener {
 
             Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(spawnerType.name()), stackAmount, amountToCharge);
         });
+
+        if(e.isCancelled()){
+            stackedSpawner.remove();
+        }
     }
 
     private void revokeItem(Player player, ItemStack itemInHand){

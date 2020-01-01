@@ -147,6 +147,10 @@ public final class BarrelsListener implements Listener {
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
         });
+
+        if(e.isCancelled()){
+            stackedBarrel.remove();
+        }
     }
 
     private void revokeItem(Player player, ItemStack itemInHand){
