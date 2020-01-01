@@ -52,8 +52,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                //noinspection JavaReflectionMemberAccess
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass());
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass().getSuperclass());
                 method.invoke(null, this);
                 return true;
             }catch(Exception ex){
@@ -97,8 +96,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                //noinspection JavaReflectionMemberAccess
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass());
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass().getSuperclass());
                 method.invoke(null, this);
                 return true;
             }catch(Exception ex){
