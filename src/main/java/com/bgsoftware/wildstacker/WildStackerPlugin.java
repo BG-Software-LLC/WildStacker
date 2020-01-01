@@ -162,8 +162,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             instance.set(null, this);
         }catch(Exception ex){
             log("Failed to set-up API - disabling plugin...");
-            setEnabled(false);
             ex.printStackTrace();
+            shouldEnable = false;
         }
     }
 
@@ -173,9 +173,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
+            shouldEnable = false;
         }
-
-        shouldEnable = false;
     }
 
     public NMSAdapter getNMSAdapter() {
