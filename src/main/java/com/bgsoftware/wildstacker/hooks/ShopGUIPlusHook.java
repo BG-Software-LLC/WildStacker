@@ -52,7 +52,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass().getSuperclass());
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
                 method.invoke(null, this);
                 return true;
             }catch(Exception ex){
@@ -96,7 +96,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", getClass().getSuperclass());
+                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.provider.spawner.SpawnerProvider.class);
                 method.invoke(null, this);
                 return true;
             }catch(Exception ex){
