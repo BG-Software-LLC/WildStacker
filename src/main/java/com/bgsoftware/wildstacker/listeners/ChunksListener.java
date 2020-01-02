@@ -4,8 +4,9 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -33,20 +34,26 @@ public final class ChunksListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent e){
-        Stream<StackedEntity> entityStream = Arrays.stream(e.getChunk().getEntities())
+        Entity[] entityList = e.getChunk().getEntities();
+        Stream<StackedEntity> entityStream = Arrays.stream(entityList)
                 .filter(EntityUtils::isStackable).map(WStackedEntity::of);
 
-        Executor.async(() -> entityStream.filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
-                .forEach(stackedEntity -> {
-                    plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
-                    plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
-                    plugin.getSystemManager().removeStackObject(stackedEntity);
-                }));
+        Executor.async(() -> {
+            Arrays.stream(entityList).forEach(entity -> EntityData.uncache(entity.getUniqueId()));
+
+            entityStream.filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
+                    .forEach(stackedEntity -> {
+                        plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
+                        plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+                        plugin.getSystemManager().removeStackObject(stackedEntity);
+                    });
+        });
     }
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e){
         List<Entity> chunkEntities = Arrays.asList(e.getChunk().getEntities());
+
         if(loadedData) {
             //Trying to remove all the corrupted stacked blocks
             Executor.async(() -> {

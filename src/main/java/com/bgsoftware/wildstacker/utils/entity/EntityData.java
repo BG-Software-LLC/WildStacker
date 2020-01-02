@@ -174,4 +174,10 @@ public final class EntityData {
         }
     }
 
+    public static void uncache(UUID uuid){
+        synchronized (cachedData){
+            cachedData.remove(uuid);
+        }
+    }
+
 }
