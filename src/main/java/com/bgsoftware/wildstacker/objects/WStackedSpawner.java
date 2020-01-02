@@ -255,7 +255,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         if(spawnerUnstackEvent.isCancelled())
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.stackAmount - amount;
+        int stackAmount = this.getStackAmount() - amount;
 
         setStackAmount(stackAmount, true);
 
@@ -331,7 +331,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public ItemStack getDropItem() {
-        return plugin.getProviders().getSpawnerItem(object, stackAmount);
+        return plugin.getProviders().getSpawnerItem(object, getStackAmount());
     }
 
     public LivingEntity getRawLinkedEntity(){

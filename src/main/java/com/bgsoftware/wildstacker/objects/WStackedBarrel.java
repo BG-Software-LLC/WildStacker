@@ -249,7 +249,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
         if(barrelUnstackEvent.isCancelled())
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.stackAmount - amount;
+        int stackAmount = this.getStackAmount() - amount;
 
         setStackAmount(stackAmount, true);
 

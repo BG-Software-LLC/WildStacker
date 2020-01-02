@@ -180,7 +180,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         try {
             String customName = EntityUtils.getEntityName(this);
-            boolean nameVisible = stackAmount > 1 && !plugin.getSettings().entitiesHideNames;
+            boolean nameVisible = getStackAmount() > 1 && !plugin.getSettings().entitiesHideNames;
             object.setCustomName(customName);
             object.setCustomNameVisible(nameVisible);
 
@@ -363,7 +363,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(entityUnstackEvent.isCancelled())
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.stackAmount - amount;
+        int stackAmount = this.getStackAmount() - amount;
 
         setStackAmount(stackAmount, true);
 
@@ -480,7 +480,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public List<ItemStack> getDrops(int lootBonusLevel) {
-        return getDrops(lootBonusLevel, stackAmount);
+        return getDrops(lootBonusLevel, getStackAmount());
     }
 
     @Override

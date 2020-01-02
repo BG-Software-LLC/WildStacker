@@ -173,7 +173,6 @@ public final class EntitiesListener implements Listener {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
-            int currentStackAmount = stackedEntity.getStackAmount();
 
             int fireTicks = livingEntity.getFireTicks();
 
@@ -243,6 +242,8 @@ public final class EntitiesListener implements Listener {
                     int droppedExp = stackedEntity.getExp(stackAmount, 0);
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
+
+                        int currentStackAmount = stackedEntity.getStackAmount();
                         stackedEntity.setStackAmount(stackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
@@ -255,7 +256,7 @@ public final class EntitiesListener implements Listener {
                             noDeathEvent.remove(e.getEntity().getUniqueId());
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
-                        stackedEntity.setStackAmount(currentStackAmount - stackAmount, false);
+                        stackedEntity.setStackAmount(currentStackAmount, false);
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
                         entityDeathEvent.getDrops().clear();

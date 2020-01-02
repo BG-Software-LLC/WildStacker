@@ -19,7 +19,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     protected static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     protected final T object;
-    protected int stackAmount;
+    private int stackAmount;
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
@@ -28,14 +28,17 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public int getStackAmount(){
-        //return instance.getSystemManager().getStackAmount(this);
-        return stackAmount;
+        synchronized (this) {
+            return stackAmount;
+        }
     }
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName){
-        //instance.getSystemManager().setStackAmount(this, stackAmount);
-        this.stackAmount = stackAmount;
+        synchronized (this) {
+            this.stackAmount = stackAmount;
+        }
+
         if(updateName)
             updateName();
     }
