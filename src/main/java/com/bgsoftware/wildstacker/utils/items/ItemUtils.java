@@ -150,8 +150,7 @@ public final class ItemUtils {
                 return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
             }
         }catch(NullPointerException ex){
-            WildStackerPlugin.log("Issue occured while getting type of " + itemStack);
-            throw ex;
+            return null;
         }
     }
 

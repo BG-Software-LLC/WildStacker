@@ -437,6 +437,11 @@ public final class EntitiesListener implements Listener {
         nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(e.getItem());
         nextEntityType = ItemUtils.getEntityType(e.getItem());
 
+        if(nextEntityType == null) {
+            nextEntityStackAmount = -1;
+            return;
+        }
+
         EntityType nmsEntityType = ItemUtils.getNMSEntityType(e.getItem());
         if(nmsEntityType != null){
             e.setCancelled(true);
