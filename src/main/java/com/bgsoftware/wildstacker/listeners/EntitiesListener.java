@@ -16,6 +16,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -155,12 +156,15 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         if(deadEntities.contains(e.getEntity().getUniqueId())) {
             e.setDamage(0);
             return;
         }
+
+        if(EventUtils.isFakeEvent(e))
+            return;
 
         //Checks that it's the last hit of the entity
         if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
@@ -184,6 +188,10 @@ public final class EntitiesListener implements Listener {
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
+
+            //We want to call the entity damage event again, so the rest of the plugins will also get it.
+            if(!EventUtils.callEntityDamageEvent(e))
+                return;
 
             //Villager was killed by a zombie - should be turned into a zombie villager.
             if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){
