@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public final class StackService {
 
     private static final class StackServiceWorld {
 
-        private final List<Runnable> asyncRunnables = Collections.synchronizedList(new ArrayList<>());
+        private final List<Runnable> asyncRunnables = new ArrayList<>();
         private long taskId = -1;
         private final Timer timer = new Timer(true);
 
@@ -80,8 +79,14 @@ public final class StackService {
                             taskId = Thread.currentThread().getId();
                         }
 
-                        asyncRunnables.forEach(Runnable::run);
-                        asyncRunnables.clear();
+                        List<Runnable> runnableList;
+
+                        synchronized (this) {
+                            runnableList = new ArrayList<>(asyncRunnables);
+                            asyncRunnables.clear();
+                        }
+
+                        runnableList.forEach(Runnable::run);
                     }catch(Exception ex){
                         ex.printStackTrace();
                     }
@@ -90,12 +95,16 @@ public final class StackService {
         }
 
         void add(Runnable runnable){
-            asyncRunnables.add(runnable);
+            synchronized (this) {
+                asyncRunnables.add(runnable);
+            }
         }
 
         void stop(){
             timer.cancel();
-            asyncRunnables.clear();
+            synchronized (this) {
+                asyncRunnables.clear();
+            }
         }
 
     }
