@@ -467,8 +467,7 @@ spawners:
 
     # A list of worlds that silk touch will work in.
     # If you want silk touch to work inside all the worlds, use "worlds: []"
-    worlds:
-    - 'world'
+    worlds: []
 
   # Should sneaking while mining break the entire stack instead of reducing it by one?
   shift-get-whole-stack: true
