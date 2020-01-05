@@ -12,7 +12,7 @@ public final class EventUtils {
         Event event = original instanceof EntityDamageByEntityEvent ?
                 new FakeEntityDamageByEntityEvent((EntityDamageByEntityEvent) original) : new FakeEntityDamageEvent(original);
         Bukkit.getPluginManager().callEvent(event);
-        return ((Cancellable) event).isCancelled() || ((EntityDamageEvent) event).getFinalDamage() <= 0;
+        return !((Cancellable) event).isCancelled() && ((EntityDamageEvent) event).getFinalDamage() > 0;
     }
 
     public static boolean isFakeEvent(EntityDamageEvent event){
