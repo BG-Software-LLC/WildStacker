@@ -169,8 +169,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void updateName() {
-        if(!Bukkit.isPrimaryThread()){
-            Executor.sync(this::updateName);
+        if(Bukkit.isPrimaryThread()){
+            Executor.async(this::updateName);
             return;
         }
 
@@ -183,11 +183,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         try {
             String customName = EntityUtils.getEntityName(this);
             boolean nameVisible = getStackAmount() > 1 && !plugin.getSettings().entitiesHideNames;
-            object.setCustomName(customName);
-            object.setCustomNameVisible(nameVisible);
 
-            //We update cached values of mcmmo
-            McMMOHook.updateCachedName(object);
+            Executor.sync(() -> {
+                object.setCustomName(customName);
+                object.setCustomNameVisible(nameVisible);
+
+                //We update cached values of mcmmo
+                McMMOHook.updateCachedName(object);
+            });
         }catch(NullPointerException ignored){}
     }
 
