@@ -29,7 +29,7 @@ public final class CommandGive implements ICommand {
 
     @Override
     public String getUsage() {
-        return "stacker give <player-name> <spawner/egg/barrel> <entity-type/material-type> <stack-size>";
+        return "stacker give [-s] <player-name> <spawner/egg/barrel> <entity-type/material-type> <stack-size>";
     }
 
     @Override
@@ -49,11 +49,22 @@ public final class CommandGive implements ICommand {
 
     @Override
     public int getMaxArgs() {
-        return 5;
+        return 6;
     }
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
+        boolean silence = false;
+
+        if(args[1].equalsIgnoreCase("-s")){
+            silence = true;
+            if(args.length != 6){
+                Locale.COMMAND_USAGE.send(sender, getUsage());
+                return;
+            }
+            args = new String[] {"give", args[2], args[3], args[4], args[5] };
+        }
+
         Player target = Bukkit.getPlayer(args[1]);
 
         if(target == null){
@@ -148,14 +159,20 @@ public final class CommandGive implements ICommand {
 
         ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());
 
-        Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
-        if(!target.equals(sender))
-            Locale.STACK_RECEIVE.send(target, stackSize, typeName + " " + args[2], sender.getName());
+        if(!silence) {
+            Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
+            if (!target.equals(sender))
+                Locale.STACK_RECEIVE.send(target, stackSize, typeName + " " + args[2], sender.getName());
+        }
     }
 
     @Override
     public List<String> tabComplete(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
+
+        if(args.length >= 2 && args[1].equalsIgnoreCase("-s"))
+            return tabCompleteSilence(plugin, args);
+
         switch(args.length){
             case 2:
                 return null;
@@ -171,6 +188,34 @@ public final class CommandGive implements ICommand {
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
                 }else if(args[2].equalsIgnoreCase("barrel")) {
+                    plugin.getSettings().whitelistedBarrels.asStringSet().stream()
+                            .filter(this::isValidMaterial)
+                            .forEach(materialName -> list.add(materialName.toLowerCase()));
+                }
+                break;
+        }
+
+        return list;
+    }
+
+    private List<String> tabCompleteSilence(WildStackerPlugin plugin, String[] args) {
+        List<String> list = new ArrayList<>();
+
+        switch(args.length){
+            case 3:
+                return null;
+            case 4:
+                Stream.of("egg", "spawner", "barrel")
+                        .filter(stack -> stack.toLowerCase().startsWith(args[3]))
+                        .forEach(stack -> list.add(stack.toLowerCase()));
+                break;
+            case 5:
+                if(args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
+                    Arrays.stream(EntityType.values())
+                            .filter(entityType -> entityType.name().toLowerCase().startsWith(args[4]) &&
+                                    entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
+                            .forEach(entityType -> list.add(entityType.name().toLowerCase()));
+                }else if(args[3].equalsIgnoreCase("barrel")) {
                     plugin.getSettings().whitelistedBarrels.asStringSet().stream()
                             .filter(this::isValidMaterial)
                             .forEach(materialName -> list.add(materialName.toLowerCase()));
