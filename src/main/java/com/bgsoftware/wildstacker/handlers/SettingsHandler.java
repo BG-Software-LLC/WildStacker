@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.config.ConfigComments;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
@@ -102,11 +101,11 @@ public final class SettingsHandler {
         if(!file.exists())
             plugin.saveResource("config.yml", false);
 
-        CommentedConfiguration cfg = new CommentedConfiguration(ConfigComments.class, file);
+        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
 
         dataConvertor(cfg);
 
-        cfg.resetYamlFile(plugin, "config.yml");
+        cfg.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
 
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&e{0} &f{1} x{2}"));
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))

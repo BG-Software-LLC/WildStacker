@@ -1,23 +1,35 @@
+/*******************************************************************************
+ *
+ *     CommentedConfiguration
+ *     Developed by Ome_R
+ *
+ *     You may use the resource and/or modify it - but not
+ *     claiming it as your own work. You are not allowed
+ *     to remove this message, unless being permitted by
+ *     the developer of the resource.
+ *
+ *     Spigot: https://www.spigotmc.org/resources/authors/ome_r.25629/
+ *     MC-Market: https://www.mc-market.org/resources/authors/40228/
+ *     Github: https://github.com/OmerBenGera?tab=repositories
+ *     Website: https://bg-software.com/
+ *
+ *******************************************************************************/
+
 package com.bgsoftware.wildstacker.config;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,279 +37,425 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class CommentedConfiguration extends YamlConfiguration{
+public final class CommentedConfiguration extends YamlConfiguration {
 
-    private Class commentsClass;
-    private String[] ignoredSections = new String[] {"limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge"};
+    /**
+     * Holds all comments for the config.
+     * Can be accessed by using the methods that are provided
+     * by the class.
+     */
+    private final Map<String, String> configComments = new HashMap<>();
 
-    public CommentedConfiguration(Class commentsClass, File file){
-        this.commentsClass = commentsClass;
-        load(file);
-    }
-
-    public void resetYamlFile(Plugin plugin, String resourceName){
-        File configFile = new File(plugin.getDataFolder(), resourceName);
-        plugin.saveResource(resourceName, true);
-        CommentedConfiguration destination = new CommentedConfiguration(commentsClass, configFile);
-
-        copyConfigurationSection(getConfigurationSection(""), destination.getConfigurationSection(""));
-
-        destination.save(configFile);
-        load(configFile);
-    }
-
-    private void copyConfigurationSection(ConfigurationSection source, ConfigurationSection dest){
-        for (String key : dest.getKeys(false)) {
-            if (source.contains(key)) {
-                if (source.isConfigurationSection(key) && dest.contains(key) && !Arrays.asList(ignoredSections).contains(key)) {
-                    copyConfigurationSection(source.getConfigurationSection(key), dest.getConfigurationSection(key));
-                } else {
-                    dest.set(key, source.get(key));
-                }
+    /**
+     * Sync the config with another resource.
+     * This method can be used as an auto updater for your config files.
+     * @param file The file to save changes into if there are any.
+     * @param resource The resource to sync with. Can be provided by JavaPlugin#getResource
+     * @param ignoredSections An array of sections that will be ignored, and won't get updated
+     *                        if they are already exist in the config. If they are not in the
+     *                        config, they will be synced with the resource's config.
+     */
+    public void syncWithConfig(File file, InputStream resource, String... ignoredSections){
+        CommentedConfiguration cfg = loadConfiguration(resource);
+        if(syncConfigurationSection(cfg, cfg.getConfigurationSection(""), Arrays.asList(ignoredSections)) && file != null) {
+            try {
+                save(file);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
 
-    @Override
-    public void load(File file){
-        try {
-            super.load(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
+    /**
+     * Set a new comment to a path.
+     * You can remove comments by providing a null as a comment argument.
+     * @param path The path to set the comment to.
+     * @param comment The comment to set. Supports multiple lines (use \n as a spacer).
+     */
+    public void setComment(String path, String comment){
+        if(comment == null)
+            configComments.remove(path);
+        else
+            configComments.put(path, comment);
     }
 
+    /**
+     * Get a comment of a path.
+     * @param path The path to get the comment of.
+     * @return Returns a string that contains the comment. If no comment exists, null will be returned.
+     */
+    public String getComment(String path){
+        return getComment(path, null);
+    }
+
+    /**
+     * Get a comment of a path with a default value if no comment exists.
+     * @param path The path to get the comment of.
+     * @param def A default comment that will be returned if no comment exists for the path.
+     * @return Returns a string that contains the comment. If no comment exists, the def value will be returned.
+     */
+    public String getComment(String path, String def){
+        return configComments.getOrDefault(path, def);
+    }
+
+    /**
+     * Checks whether or not a path has a comment.
+     * @param path The path to check.
+     * @return Returns true if there's an existing comment, otherwise false.
+     */
+    public boolean containsComment(String path){
+        return getComment(path) != null;
+    }
+
+    /**
+     * Load all data related to the config file - keys, values and comments.
+     * @param contents The contents of the file.
+     * @throws InvalidConfigurationException if the contents are invalid.
+     */
     @Override
-    public void save(String file){
-        save(new File(file));
+    public void loadFromString(String contents) throws InvalidConfigurationException {
+        //Load data of the base yaml (keys and values).
+        super.loadFromString(contents);
+
+        //Parse the contents into lines.
+        String[] lines = contents.split("\n");
+        int currentIndex = 0;
+
+        //Variables that are used to track progress.
+        StringBuilder comments = new StringBuilder();
+        String currentSection = "";
+
+        while(currentIndex < lines.length){
+            //Checking if the current line is a comment.
+            if(isComment(lines[currentIndex])){
+                //Adding the comment to the builder with an enter at the end.
+                comments.append(lines[currentIndex]).append("\n");
+            }
+
+            //Checking if the current line is a valid new section.
+            else if(isNewSection(lines[currentIndex])){
+                //Parsing the line into a full-path.
+                currentSection = getSectionPath(this, lines[currentIndex], currentSection);
+
+                //If there is a valid comment for the section.
+                if(comments.length() > 0)
+                    //Adding the comment.
+                    setComment(currentSection, comments.toString().substring(0, comments.length() - 1));
+
+                //Reseting the comment variable for further usage.
+                comments = new StringBuilder();
+            }
+
+            //Skipping to the next line.
+            currentIndex++;
+        }
     }
 
     @Override
     public void save(File file){
-        Map<String, String> comments = new HashMap<>();
-        init(comments);
-
-        boolean saved = true;
-
-        // Save the config just like normal
         try {
             super.save(file);
-        } catch (Exception e) {
-            saved = false;
-        }
-
-        // if there's comments to add and it saved fine, we need to add comments
-        if (!comments.isEmpty() && saved) {
-            // String array of each line in the config file
-            String[] yamlContents = convertFileToString(file).split("[" + System.getProperty("line.separator") + "]");
-
-            // This will hold the newly formatted line
-            StringBuilder newContents = new StringBuilder();
-            // This holds the current path the lines are at in the config
-            String currentPath = "";
-            // This flags if the line is a node or unknown text.
-            boolean node;
-            // The depth of the path. (number of words separated by periods - 1)
-            int depth = 0;
-
-            if(comments.containsKey("")){
-                newContents.append(comments.get("")).append(System.getProperty("line.separator"));
-            }
-
-            // Loop through the config lines
-            for (String line : yamlContents) {
-                if(line.startsWith("#"))
-                    continue;
-
-                // If the line is a node (and not something like a list value)
-                if (line.contains(": ") || (line.length() > 1 && line.charAt(line.length() - 1) == ':')) {
-
-                    // This is a node so flag it as one
-                    node = true;
-
-                    // Grab the index of the end of the node name
-                    int index = line.indexOf(": ");
-                    if (index < 0) {
-                        index = line.length() - 1;
-                    }
-                    // If currentPath is empty, store the node name as the currentPath. (this is only on the first iteration, i think)
-                    if (currentPath.isEmpty()) {
-                        currentPath = line.substring(0, index);
-                    } else {
-                        // Calculate the whitespace preceding the node name
-                        int whiteSpace = 0;
-                        for (int n = 0; n < line.length(); n++) {
-                            if (line.charAt(n) == ' ') {
-                                whiteSpace++;
-                            } else {
-                                break;
-                            }
-                        }
-                        // Find out if the current depth (whitespace * 2) is greater/lesser/equal to the previous depth
-                        if (whiteSpace / 2 > depth) {
-                            // Path is deeper.  Add a . and the node name
-                            currentPath += "." + line.substring(whiteSpace, index);
-                            depth++;
-                        } else if (whiteSpace / 2 < depth) {
-                            // Path is shallower, calculate current depth from whitespace (whitespace / 2) and subtract that many levels from the currentPath
-                            int newDepth = whiteSpace / 2;
-                            for (int i = 0; i < depth - newDepth; i++) {
-                                currentPath = currentPath.replace(currentPath.substring(currentPath.lastIndexOf(".")), "");
-                            }
-                            // Grab the index of the final period
-                            int lastIndex = currentPath.lastIndexOf(".");
-                            if (lastIndex < 0) {
-                                // if there isn't a final period, set the current path to nothing because we're at root
-                                currentPath = "";
-                            } else {
-                                // If there is a final period, replace everything after it with nothing
-                                currentPath = currentPath.replace(currentPath.substring(currentPath.lastIndexOf(".")), "");
-                                currentPath += ".";
-                            }
-                            // Add the new node name to the path
-                            currentPath += line.substring(whiteSpace, index);
-                            // Reset the depth
-                            depth = newDepth;
-                        } else {
-                            // Path is same depth, replace the last path node name to the current node name
-                            int lastIndex = currentPath.lastIndexOf(".");
-                            if (lastIndex < 0) {
-                                // if there isn't a final period, set the current path to nothing because we're at root
-                                currentPath = "";
-                            } else {
-                                // If there is a final period, replace everything after it with nothing
-                                currentPath = currentPath.replace(currentPath.substring(currentPath.lastIndexOf(".")), "");
-                                currentPath += ".";
-                            }
-                            //currentPath = currentPath.replace(currentPath.substring(currentPath.lastIndexOf(".")), "");
-                            currentPath += line.substring(whiteSpace, index);
-
-                        }
-
-                    }
-
-                } else
-                    node = false;
-
-                if (node) {
-                    String comment = comments.get(currentPath);
-                    if (comment != null) {
-                        // Add the comment to the beginning of the current line
-                        line = comment + System.getProperty("line.separator") + line + System.getProperty("line.separator");
-                    } else {
-                        // Add a new line as it is a node, but has no comment
-                        line += System.getProperty("line.separator");
-                    }
-                }
-
-                // Add the (modified) line to the total config String
-                newContents.append(line).append((!node) ? System.getProperty("line.separator") : "");
-
-            }
-            /*
-             * Due to a bukkit bug we need to strip any extra new lines from the
-             * beginning of this file, else they will multiply.
-             */
-            while (newContents.toString().startsWith(System.getProperty("line.separator")))
-                newContents = new StringBuilder(newContents.toString().replaceFirst(System.getProperty("line.separator"), ""));
-
-            //System.out.println(newContents);
-
-            // Write the string to the config file
-            stringToFile(newContents.toString(), file);
-        }
-    }
-
-    private void init(Map<String, String> comments){
-        try {
-            for (Field field : commentsClass.getDeclaredFields()) {
-                List<Comment> commentList = new ArrayList<>();
-
-                for (Annotation annotation : field.getAnnotations()) {
-                    if (annotation instanceof Comment.List) {
-                        commentList.addAll(Arrays.asList(((Comment.List) annotation).value()));
-                    } else if (annotation instanceof Comment) {
-                        commentList.add((Comment) annotation);
-                    }
-                }
-
-                if(!commentList.isEmpty()){
-                    String pathName = (String) field.get(this);
-                    String whiteSpaces = getWhiteSpaces(pathName);
-                    StringBuilder comment = new StringBuilder();
-
-                    for (Comment _comment : commentList) {
-                        String cmnt = _comment.value();
-                        if (cmnt.isEmpty()) {
-                            comment.append(System.getProperty("line.separator"));
-                        } else {
-                            if (pathName.isEmpty()) {
-                                comment.append(cmnt).append(System.getProperty("line.separator"));
-                            } else {
-                                comment.append(whiteSpaces).append("# ").append(cmnt).append(System.getProperty("line.separator"));
-                            }
-                        }
-                    }
-
-                    comments.put(pathName, comment.substring(0, comment.length() - 2));
-                }
-            }
         }catch(Exception ex){
             ex.printStackTrace();
         }
     }
 
-    private String getWhiteSpaces(String pathName) {
-        StringBuilder whiteSpaces = new StringBuilder();
+    /**
+     * Parsing all the data (keys, values and comments) into a valid string, that will be written into a file later.
+     * @return A string that contains all the data, ready to be written into a file.
+     */
+    @Override
+    public String saveToString() {
+        //First, we set headers to null - as we will handle all comments, including headers, in this method.
+        this.options().header(null);
+        //Get the string of the data (keys and values) and parse it into an array of lines.
+        List<String> lines = new ArrayList<>(Arrays.asList(super.saveToString().split("\n")));
 
-        for(int i = 0; i < pathName.length(); i++){
-            if(pathName.charAt(i) == '.'){
-                whiteSpaces.append("  ");
-            }
-        }
+        //Variables that are used to track progress.
+        int currentIndex = 0;
+        String currentSection = "";
 
-        return whiteSpaces.toString();
-    }
+        while(currentIndex < lines.size()){
+            String line = lines.get(currentIndex);
 
-
-    private String convertFileToString(File file) {
-        if (file != null && file.exists() && file.canRead() && !file.isDirectory()) {
-            Writer writer = new StringWriter();
-
-            char[] buffer = new char[1024];
-            try (InputStream is = new FileInputStream(file)) {
-                Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, n);
+            //Checking if the line is a new section.
+            if(isNewSection(line)){
+                //Parsing the line into a full-path.
+                currentSection = getSectionPath(this, line, currentSection);
+                //Checking if that path contains a comment
+                if(containsComment(currentSection)) {
+                    //Adding the comment to the lines array at that index (adding it one line before the actual line)
+                    lines.add(currentIndex, getComment(currentSection));
+                    //Skipping one line so the pointer will point to the line we checked again.
+                    currentIndex++;
                 }
-                reader.close();
-            } catch (IOException e) {
-                System.out.println("Exception ");
             }
-            return writer.toString();
-        } else {
-            return "";
+
+            //Skipping to the next line.
+            currentIndex++;
+        }
+
+        //Parsing the array of lines into a one single string.
+        StringBuilder contents = new StringBuilder();
+        for(String line : lines)
+            contents.append("\n").append(line);
+
+        return contents.length() == 0 ? "" : contents.substring(1);
+    }
+
+    /**
+     * Sync a specific configuration section with another one, recursively.
+     * @param commentedConfig The config that contains the data we need to sync with.
+     * @param section The current section that we sync.
+     * @param ignoredSections A list of ignored sections that won't be synced (unless not found in the file).
+     * @return Returns true if there were any changes, otherwise false.
+     */
+    private boolean syncConfigurationSection(CommentedConfiguration commentedConfig, ConfigurationSection section, List<String> ignoredSections){
+        //Variables that are used to track progress.
+        boolean changed = false;
+
+        //Going through all the keys of the section.
+        for (String key : section.getKeys(false)) {
+            //Parsing the key into a full-path.
+            String path = section.getCurrentPath().isEmpty() ? key : section.getCurrentPath() + "." + key;
+
+            //Checking if the key is also a section.
+            if (section.isConfigurationSection(key)) {
+                //Checking if the section is ignored.
+                boolean isIgnored = ignoredSections.stream().anyMatch(path::contains);
+                //Checking if the config contains the section.
+                boolean containsSection = contains(path);
+                //If the config doesn't contain the section, or it's not ignored - we will sync data.
+                if(!containsSection || !isIgnored) {
+                    //Syncing data and updating the changed variable.
+                    changed = syncConfigurationSection(commentedConfig, section.getConfigurationSection(key), ignoredSections) || changed;
+                }
+            }
+
+            //Checking if the config contains the path (not a section).
+            else if (!contains(path)) {
+                //Saving the value of the key into the config.
+                set(path, section.get(key));
+                //Updating variables.
+                changed = true;
+            }
+
+            //Checking if there is a valid comment for the path, and also making sure the comments are not the same.
+            if (commentedConfig.containsComment(path) && !commentedConfig.getComment(path).equals(getComment(path))) {
+                //Saving the comment of the key into the config.
+                setComment(path, commentedConfig.getComment(path));
+                //Updating variable.
+                changed = true;
+            }
+
+        }
+
+        /*Keys cannot be ordered easily, so we need to do some tricks to make sure
+        all of the keys are ordered correctly (and the new config will look the same
+        as the resource that was provided).*/
+
+        //Checking if there was a value that had been added into the config
+        if(changed)
+            correctIndexes(section, getConfigurationSection(section.getCurrentPath()));
+
+        return changed;
+    }
+
+    /**
+     * Load a config from a file.
+     * @param file The file to load the config from.
+     * @return A new instance of CommentedConfiguration contains all the data (keys, values and comments).
+     */
+    public static CommentedConfiguration loadConfiguration(File file) {
+        try {
+            FileInputStream stream = new FileInputStream(file);
+            return loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        }catch(FileNotFoundException ex){
+            Bukkit.getLogger().warning("File " + file.getName() + " doesn't exist.");
+            return new CommentedConfiguration();
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void stringToFile(String source, File file) {
-        try {
-            if(file.exists())
-                file.delete();
+    /**
+     * Load a config from an input-stream, which is used for resources that are obtained using JavaPlugin#getResource.
+     * @param inputStream The input-stream to load the config from.
+     * @return A new instance of CommentedConfiguration contains all the data (keys, values and comments).
+     */
+    public static CommentedConfiguration loadConfiguration(InputStream inputStream) {
+        return loadConfiguration(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    }
 
-            file.getParentFile().mkdirs();
-            file.createNewFile();
+    /**
+     * Load a config from a reader (used for files and streams together).
+     * @param reader The reader to load the config from.
+     * @return A new instance of CommentedConfiguration contains all the data (keys, values and comments).
+     */
+    public static CommentedConfiguration loadConfiguration(Reader reader) {
+        //Creating a blank instance of the config.
+        CommentedConfiguration config = new CommentedConfiguration();
 
-            //OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+        //Parsing the reader into a BufferedReader for an easy reading of it.
+        try(BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader)reader : new BufferedReader(reader)){
+            StringBuilder contents = new StringBuilder();
 
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
+            String line;
+            while((line = bufferedReader.readLine()) != null) {
+                contents.append(line).append('\n');
+            }
 
-            out.write(source);
-            out.close();
-        } catch (IOException e) {
-            System.out.println("Exception ");
+            config.loadFromString(contents.toString());
+        } catch (IOException | InvalidConfigurationException ex) {
+            ex.printStackTrace();
+        }
+
+        return config;
+    }
+
+    /**
+     * Checks if a line is a new section or not.
+     * Sadly, that's not possible to use ":" as a spacer between key and value, and ": " must be used.
+     * @param line The line to check.
+     * @return True if the line is a new section, otherwise false.
+     */
+    private static boolean isNewSection(String line){
+        String trimLine = line.trim();
+        return trimLine.contains(": ") || trimLine.endsWith(":");
+    }
+
+    /**
+     * Creates a full path of a line.
+     * @param commentedConfig The config to get the path from.
+     * @param line The line to get the path of.
+     * @param currentSection The last known section.
+     * @return The full path of the line.
+     */
+    private static String getSectionPath(CommentedConfiguration commentedConfig, String line, String currentSection){
+        //Removing all spaces and getting the name of the section.
+        String newSection = line.trim().split(": ")[0];
+
+        //Parsing some formats to make sure having a plain name.
+        if(newSection.endsWith(":"))
+            newSection = newSection.substring(0, newSection.length() - 1);
+        if(newSection.startsWith("."))
+            newSection = newSection.substring(1);
+        if(newSection.startsWith("'") && newSection.endsWith("'"))
+            newSection = newSection.substring(1, newSection.length() - 1);
+
+        //Checking if the new section is a child-section of the currentSection.
+        if(!currentSection.isEmpty() && commentedConfig.contains(currentSection + "." + newSection)){
+            newSection = currentSection + "." + newSection;
+        }
+
+        //Looking for the parent of the the new section.
+        else{
+            String parentSection = currentSection;
+
+            /*Getting the parent of the new section. The loop will stop in one of the following situations:
+            1) The parent is empty - which means we have no where to go, as that's the root section.
+            2) The config contains a valid path that was built with <parent-section>.<new-section>.*/
+            while(!parentSection.isEmpty() &&
+                    !commentedConfig.contains((parentSection = getParentPath(parentSection)) + "." + newSection));
+
+            //Parsing and building the new full path.
+            newSection = parentSection.trim().isEmpty() ? newSection : parentSection + "." + newSection;
+        }
+
+        return newSection;
+    }
+
+    /**
+     * Checks if a line represents a comment or not.
+     * @param line The line to check.
+     * @return True if the line is a comment (stars with # or it's empty), otherwise false.
+     */
+    private static boolean isComment(String line){
+        String trimLine = line.trim();
+        return trimLine.startsWith("#") || trimLine.isEmpty();
+    }
+
+    /**
+     * Get the parent path of the provided path, by removing the last '.' from the path.
+     * @param path The path to check.
+     * @return The parent path of the provided path.
+     */
+    private static String getParentPath(String path){
+        return path.contains(".") ? path.substring(0, path.lastIndexOf('.')) : "";
+    }
+
+    /**
+     * Convert key-indexes of a section into the same key-indexes that another section has.
+     * @param section The section that will be used as a way to get the correct indexes.
+     * @param target The target section that will be ordered again.
+     */
+    private static void correctIndexes(ConfigurationSection section, ConfigurationSection target){
+        //Parsing the sections into ArrayLists with their keys and values.
+        List<Pair<String, Object>> sectionMap = getSectionMap(section), correctOrder = new ArrayList<>();
+
+        //Going through the sectionMap, which is in the correct order.
+        for (Pair<String, Object> entry : sectionMap) {
+            //Adding the entry into a new list with the correct value from the target section.
+            correctOrder.add(new Pair<>(entry.key, target.get(entry.key)));
+        }
+
+        /*The only way to change key-indexes is to add them one-by-one again, in the correct order.
+        In order to do so, the section needs to be cleared so the indexes will be reset.*/
+
+        //Clearing the configuration.
+        clearConfiguration(target);
+
+        //Adding the entries again in the correct order.
+        for(Pair<String, Object> entry : correctOrder)
+            target.set(entry.key, entry.value);
+    }
+
+    /**
+     * Parsing a section into a list that contains all of it's keys and their values without changing their order.
+     * @param section The section to convert.
+     * @return A list that contains all the keys and their values.
+     */
+    private static List<Pair<String, Object>> getSectionMap(ConfigurationSection section){
+        //Creating an empty ArrayList.
+        List<Pair<String, Object>> list = new ArrayList<>();
+
+        //Going through all the keys and adding them in the same order.
+        for(String key : section.getKeys(false)) {
+            list.add(new Pair<>(key, section.get(key)));
+        }
+
+        return list;
+    }
+
+    /**
+     * Clear a configuration section from all of it's keys.
+     * This can be done by setting all the keys' values to null.
+     * @param section The section to clear.
+     */
+    private static void clearConfiguration(ConfigurationSection section){
+        for(String key : section.getKeys(false))
+            section.set(key, null);
+    }
+
+    /**
+     * A class that is used as a way of representing a map's entry (which is not implemented).
+     */
+    private static class Pair<K, V>{
+
+        private final K key;
+        private final V value;
+
+        Pair(K key, V value){
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof Pair && key.equals(((Pair) obj).key) && value.equals(((Pair) obj).value);
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode();
         }
     }
 

@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.config.ConfigComments;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -97,7 +96,11 @@ public final class EditorHandler {
 
     public EditorHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
-        this.config = new CommentedConfiguration(ConfigComments.class, new File(plugin.getDataFolder(), "config.yml"));
+
+        File file = new File(plugin.getDataFolder(), "config.yml");
+
+        this.config = CommentedConfiguration.loadConfiguration(file);
+        this.config.syncWithConfig(file, plugin.getResource("config.yml"), "tools");
 
         for(Field field : getClass().getDeclaredFields()){
             if(field.getName().startsWith("GENERAL")){
@@ -132,7 +135,11 @@ public final class EditorHandler {
     }
 
     public void reloadConfiguration(){
-        config.load(new File(plugin.getDataFolder(), "config.yml"));
+        try {
+            config.load(new File(plugin.getDataFolder(), "config.yml"));
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     public Inventory getSettingsEditor(){
