@@ -28,6 +28,10 @@ public abstract class PlaceEvent extends Event implements Cancellable {
         cancelled = false;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
     @Override
     public boolean isCancelled() {
         return cancelled;
