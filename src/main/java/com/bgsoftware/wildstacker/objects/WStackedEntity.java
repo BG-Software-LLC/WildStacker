@@ -60,6 +60,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
     private EntityDamageEvent lastDamageCause;
 
+    private boolean deadEntityFlag = false;
+
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
     }
@@ -357,17 +359,21 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public UnstackResult runUnstack(int amount) {
+        if(hasDeadFlag())
+            return UnstackResult.ALREADY_DEAD;
+
         EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(this, amount);
         Bukkit.getPluginManager().callEvent(entityUnstackEvent);
 
         if(entityUnstackEvent.isCancelled())
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.getStackAmount() - amount;
+        int stackAmount = this.getStackAmount();
+        int newStackAmount = stackAmount - amount;
 
-        setStackAmount(stackAmount, true);
+        setStackAmount(newStackAmount, true);
 
-        if(stackAmount >= 1){
+        if(newStackAmount >= 1){
             spawnCorpse();
         }
 
@@ -629,6 +635,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     public void setLastDamageCause(EntityDamageEvent lastDamageCause){
         this.lastDamageCause = lastDamageCause;
+    }
+
+    public void setDeadFlag(boolean deadEntityFlag){
+        this.deadEntityFlag = deadEntityFlag;
+    }
+
+    public boolean hasDeadFlag(){
+        return deadEntityFlag;
     }
 
     public static StackedEntity of(Entity entity){

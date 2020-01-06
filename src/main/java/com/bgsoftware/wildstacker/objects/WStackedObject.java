@@ -28,17 +28,12 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public int getStackAmount(){
-        synchronized (this) {
-            return stackAmount;
-        }
+        return stackAmount;
     }
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName){
-        synchronized (this) {
-            this.stackAmount = stackAmount;
-        }
-
+        this.stackAmount = stackAmount;
         if(updateName)
             updateName();
     }

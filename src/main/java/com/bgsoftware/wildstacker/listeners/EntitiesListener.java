@@ -111,16 +111,15 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    private Set<UUID> deadEntities = new HashSet<>();
     private Set<UUID> noDeathEvent = new HashSet<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
         //Checks if the entity is not a corpse.
-        if(EntityStorage.hasMetadata(e.getEntity(), "corpse"))
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse") || !EntityUtils.isStackable(e.getEntity()))
             return;
 
-        if(deadEntities.contains(e.getEntity().getUniqueId())){
+        if(((WStackedEntity) WStackedEntity.of(e.getEntity())).hasDeadFlag()){
             //deadEntities.remove(e.getEntity().getUniqueId());
             return;
         }
@@ -138,7 +137,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onDeadEntityDamage(EntityDamageEvent e){
-        if(deadEntities.contains(e.getEntity().getUniqueId())) {
+        if(EntityUtils.isStackable(e.getEntity()) &&
+                ((WStackedEntity) WStackedEntity.of(e.getEntity())).hasDeadFlag()) {
             e.setDamage(0);
         }
     }
@@ -158,20 +158,20 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
-        if(deadEntities.contains(e.getEntity().getUniqueId())) {
-            e.setDamage(0);
-            return;
-        }
-
-        if(EventUtils.isFakeEvent(e))
-            return;
-
-        //Checks that it's the last hit of the entity
-        if(!EntityUtils.isStackable(e.getEntity()) || ((LivingEntity) e.getEntity()).getHealth() - e.getFinalDamage() > 0)
+        if(EventUtils.isFakeEvent(e) || !EntityUtils.isStackable(e.getEntity()))
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
+
+        if(((WStackedEntity) stackedEntity).hasDeadFlag()){
+            e.setDamage(0);
+            return;
+        }
+
+        //Checks that it's the last hit of the entity
+        if(stackedEntity.getHealth() - e.getFinalDamage() > 0)
+            return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
@@ -225,7 +225,7 @@ public final class EntitiesListener implements Listener {
             }
 
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
-                deadEntities.add(livingEntity.getUniqueId());
+                ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 if (e instanceof EntityDamageByEntityEvent) {
                     if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
@@ -252,6 +252,7 @@ public final class EntitiesListener implements Listener {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
 
                         int currentStackAmount = stackedEntity.getStackAmount();
+
                         stackedEntity.setStackAmount(stackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
@@ -264,6 +265,7 @@ public final class EntitiesListener implements Listener {
                             noDeathEvent.remove(e.getEntity().getUniqueId());
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
+
                         stackedEntity.setStackAmount(currentStackAmount, false);
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
@@ -300,7 +302,7 @@ public final class EntitiesListener implements Listener {
                             }
                         }
 
-                        deadEntities.remove(stackedEntity.getUniqueId());
+                        ((WStackedEntity) stackedEntity).setDeadFlag(false);
                     });
                 });
 
@@ -336,7 +338,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityTeleport(EntityTeleportEvent e){
-        if(deadEntities.contains(e.getEntity().getUniqueId()))
+        if(EntityUtils.isStackable(e.getEntity()) && ((WStackedEntity) WStackedEntity.of(e.getEntity())).hasDeadFlag())
             e.setCancelled(true);
     }
 
