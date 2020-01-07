@@ -340,10 +340,10 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
             amountLeft += giveItem(inventory, itemStack.clone());
         }
 
+        setStackAmount(amountLeft, true);
+
         if (amountLeft <= 0) {
             remove();
-        } else {
-            setStackAmount(amountLeft, true);
         }
     }
 

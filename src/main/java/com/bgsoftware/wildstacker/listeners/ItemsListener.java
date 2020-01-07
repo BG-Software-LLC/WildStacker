@@ -32,9 +32,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -122,23 +119,13 @@ public final class ItemsListener implements Listener {
         WStackedItem.of(e.getEntity()).remove();
     }
 
-    private Set<UUID> twiceEventFix = new HashSet<>();
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityPickup(EntityPickupItemEvent e) {
-        if(e.getPlayer() != null && twiceEventFix.contains(e.getItem().getUniqueId())){
-            ItemStack itemStack = e.getItem().getItemStack().clone();
-            Executor.sync(() -> e.getPlayer().getInventory().removeItem(itemStack), 2L);
-            return;
-        }
-
         StackedItem stackedItem = WStackedItem.of(e.getItem());
 
         //Should run only if the item is 1 (stacked item)
         if(stackedItem.getStackAmount() > 1 || e.getItem().getItemStack().getType().name().contains("BUCKET")) {
             e.setCancelled(true);
-            twiceEventFix.add(e.getItem().getUniqueId());
-            Executor.sync(() -> twiceEventFix.remove(e.getItem().getUniqueId()), 20L);
 
             //Causes too many issues
             if(e.getEntityType().name().equals("DOLPHIN"))
@@ -171,6 +158,8 @@ public final class ItemsListener implements Listener {
                 e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
                         plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
             }
+
+            e.getItem().setPickupDelay(Integer.MAX_VALUE);
 
             //Pick up animation
             plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
