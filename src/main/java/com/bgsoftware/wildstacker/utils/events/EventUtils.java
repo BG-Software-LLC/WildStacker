@@ -16,7 +16,7 @@ public final class EventUtils {
     }
 
     public static boolean isFakeEvent(EntityDamageEvent event){
-        return event instanceof FakeEntityDamageEvent || event instanceof FakeEntityDamageByEntityEvent;
+        return !event.getClass().equals(EntityDamageByEntityEvent.class) && !event.getClass().equals(EntityDamageEvent.class);
     }
 
     private static final class FakeEntityDamageByEntityEvent extends EntityDamageByEntityEvent{
