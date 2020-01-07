@@ -185,13 +185,13 @@ public final class EntitiesListener implements Listener {
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
 
-            livingEntity.setHealth(livingEntity.getMaxHealth());
-
-            livingEntity.setLastDamageCause(e);
-
             //We want to call the entity damage event again, so the rest of the plugins will also get it.
             if(!EventUtils.callEntityDamageEvent(e))
                 return;
+
+            livingEntity.setHealth(livingEntity.getMaxHealth());
+
+            livingEntity.setLastDamageCause(e);
 
             //Villager was killed by a zombie - should be turned into a zombie villager.
             if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){
