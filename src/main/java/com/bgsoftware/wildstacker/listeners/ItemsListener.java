@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -85,7 +86,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler
     public void onEggLay(EggLayEvent e){
-        if(!plugin.getSettings().eggLayMultiply)
+        if(!plugin.getSettings().eggLayMultiply || !EntityUtils.isStackable(e.getChicken()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getChicken());
