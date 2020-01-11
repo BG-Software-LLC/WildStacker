@@ -338,6 +338,12 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     }
 
     @Override
+    public void playSpawnEffect(LivingEntity livingEntity) {
+        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        entityInsentient.y();
+    }
+
+    @Override
     public Enchantment getGlowEnchant() {
         return new Enchantment(101) {
             @Override

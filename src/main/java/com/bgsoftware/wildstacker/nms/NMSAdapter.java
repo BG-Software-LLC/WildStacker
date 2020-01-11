@@ -85,6 +85,8 @@ public interface NMSAdapter {
 
     void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
 
+    void playSpawnEffect(LivingEntity livingEntity);
+
     Enchantment getGlowEnchant();
 
     ItemStack getPlayerSkull(String texture);

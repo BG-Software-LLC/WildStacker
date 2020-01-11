@@ -377,6 +377,7 @@ public final class SpawnersListener implements Listener {
                         listenToSpawnEvent = false;
                         for (Location toSpawn : locationsToSpawn) {
                             StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
+                            plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
                             if(!callSpawnerSpawnEvent(targetEntity, stackedSpawner))
                                 stackedEntity.remove();
                             targetEntity.updateNerfed();
