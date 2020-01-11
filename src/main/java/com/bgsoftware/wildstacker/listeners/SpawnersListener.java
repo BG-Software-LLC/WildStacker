@@ -350,6 +350,8 @@ public final class SpawnersListener implements Listener {
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.SPAWNER);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
+        stackedEntity.updateNerfed();
+
         boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
 
         if(!multipleEntities){
@@ -377,6 +379,7 @@ public final class SpawnersListener implements Listener {
                             StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
                             if(!callSpawnerSpawnEvent(targetEntity, stackedSpawner))
                                 stackedEntity.remove();
+                            targetEntity.updateNerfed();
                         }
                         listenToSpawnEvent = true;
                     });
@@ -386,10 +389,7 @@ public final class SpawnersListener implements Listener {
 
         else{
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-            stackedEntity.runSpawnerStackAsync(stackedSpawner, entityOptional -> {
-                if(!entityOptional.isPresent())
-                    stackedEntity.updateNerfed();
-            });
+            stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
         }
     }
 
