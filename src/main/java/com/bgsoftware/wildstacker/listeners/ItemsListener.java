@@ -159,12 +159,12 @@ public final class ItemsListener implements Listener {
                         plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
             }
 
-            e.getItem().setPickupDelay(Integer.MAX_VALUE);
-
             //Pick up animation
             plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
 
             if (stackedItem.getStackAmount() <= 0) {
+                e.getItem().setPickupDelay(Integer.MAX_VALUE);
+
                 Executor.sync(() -> {
                     e.getItem().remove();
                     stackedItem.remove();
