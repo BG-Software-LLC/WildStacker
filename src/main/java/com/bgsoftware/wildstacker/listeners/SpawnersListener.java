@@ -344,7 +344,7 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!(e.getEntity() instanceof LivingEntity))
+        if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.SPAWNER);
