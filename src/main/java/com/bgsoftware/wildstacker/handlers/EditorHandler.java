@@ -100,7 +100,7 @@ public final class EditorHandler {
         File file = new File(plugin.getDataFolder(), "config.yml");
 
         this.config = CommentedConfiguration.loadConfiguration(file);
-        this.config.syncWithConfig(file, plugin.getResource("config.yml"), "tools");
+        this.config.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
 
         for(Field field : getClass().getDeclaredFields()){
             if(field.getName().startsWith("GENERAL")){
