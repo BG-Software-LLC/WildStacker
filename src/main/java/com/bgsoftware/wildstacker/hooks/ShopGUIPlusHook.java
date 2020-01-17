@@ -17,11 +17,9 @@ import java.lang.reflect.Method;
 public final class ShopGUIPlusHook {
 
     public static void setEnabled(){
-        if (!PluginHooks.isPickupSpawnersEnabled && !PluginHooks.isSilkSpawnersEnabled && !PluginHooks.isEpicSpawnersEnabled) {
-            if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
-                    new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
-                WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
-            }
+        if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
+                new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
+            WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
         }
     }
 
@@ -29,7 +27,7 @@ public final class ShopGUIPlusHook {
 
         @Override
         public String getName() {
-            return "WildStacker-Spawners";
+            return "WildStacker";
         }
 
         @Override

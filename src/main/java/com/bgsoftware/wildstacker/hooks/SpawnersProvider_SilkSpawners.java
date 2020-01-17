@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
 import org.bukkit.Bukkit;
@@ -18,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -34,7 +34,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         instance = this;
         WildStackerPlugin.log(" - Using SilkSpawners as SpawnersProvider.");
         ss = JavaPlugin.getPlugin(SilkSpawners.class);
-        Executor.sync(() -> silkUtil = SilkUtil.hookIntoSilkSpanwers(), 1L);
+        silkUtil = SilkUtil.hookIntoSilkSpanwers();
     }
 
     @Override
@@ -138,9 +138,10 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     @SuppressWarnings("deprecation")
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
         try {
+            SilkUtil.class.getMethod("getCreatureName", String.class);
             String mobName = instance.getCreatureName(entityType.name()).toLowerCase().replace(" ", "");
             return instance.newSpawnerItem(entityType.name(), instance.silkUtil.getCustomSpawnerName(mobName), amount, false);
-        }catch(Exception ex){
+        }catch(Throwable ex){
             String mobName = instance.getCreatureName(entityType.getTypeId()).toLowerCase().replace(" ", "");
             return instance.newSpawnerItem(entityType.getTypeId(), instance.silkUtil.getCustomSpawnerName(mobName), amount, false);
         }
@@ -169,9 +170,11 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     private String getCreatureName(Object entityId){
         Class objectClass = entityId instanceof String ? String.class : short.class;
         try{
-            return (String) SilkUtil.class.getMethod("getCreatureName", objectClass).invoke(silkUtil, entityId);
+            Method method = SilkUtil.class.getMethod("getCreatureName", objectClass);
+            return (String) method.invoke(silkUtil, entityId);
         }catch(Exception ex){
-            throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
+            ex.printStackTrace();
+            return null;
         }
     }
 
