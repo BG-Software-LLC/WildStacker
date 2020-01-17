@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -192,11 +191,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
             if (targetItem.getItem().isDead())
                 return StackCheckResult.TARGET_ALREADY_DEAD;
 
-            if (getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-                return StackCheckResult.INSIDE_PORTAL;
-
-            if (targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-                return StackCheckResult.TARGET_INSIDE_PORTAL;
+//            if (getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+//                return StackCheckResult.INSIDE_PORTAL;
+//
+//            if (targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
+//                return StackCheckResult.TARGET_INSIDE_PORTAL;
 
             return StackCheckResult.SUCCESS;
         }
