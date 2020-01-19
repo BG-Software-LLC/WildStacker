@@ -590,6 +590,9 @@ public final class SpawnersListener implements Listener {
                         stackedSpawner.setStackAmount(newStackAmount, true);
                         Locale.SPAWNER_UPDATE.send(e.getPlayer(), stackedSpawner.getStackAmount());
                     }
+                    else{
+                        ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedSpawner.getLocation());
+                    }
                 }
             }
 

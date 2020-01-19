@@ -27,6 +27,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,6 +36,12 @@ public final class ItemUtils {
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final static int MAX_PICKUP_DELAY = 32767;
+
+    public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location){
+        Arrays.stream(itemStacks)
+                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
+                .forEach(itemStack -> addItem(itemStack, inventory, location));
+    }
 
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);

@@ -282,6 +282,9 @@ public final class BarrelsListener implements Listener {
                     stackedBarrel.setStackAmount(newStackAmount, true);
                     Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
                 }
+                else{
+                    ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedBarrel.getLocation());
+                }
             }
 
             barrelPlaceInventory.remove(e.getPlayer().getUniqueId());
