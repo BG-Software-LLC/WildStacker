@@ -133,7 +133,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
             return;
         }
 
-        if(!plugin.getSettings().itemsStackingEnabled)
+        if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object))
             return;
 
         String customName = plugin.getSettings().itemsCustomName;
