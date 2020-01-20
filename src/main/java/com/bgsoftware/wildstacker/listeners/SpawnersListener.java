@@ -270,7 +270,7 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent e){
-        if(!plugin.getSettings().spawnersStackingEnabled)
+        if(!plugin.getSettings().spawnersStackingEnabled || plugin.getSettings().explosionsBreakChance <= 0)
             return;
 
         List<Block> blockList = new ArrayList<>(e.blockList());
