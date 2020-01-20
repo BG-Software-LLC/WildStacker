@@ -163,7 +163,7 @@ public final class ItemsListener implements Listener {
             plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
 
             if (stackedItem.getStackAmount() <= 0) {
-                e.getItem().setPickupDelay(Integer.MAX_VALUE);
+                e.getItem().setPickupDelay(400);
 
                 Executor.sync(() -> {
                     e.getItem().remove();
