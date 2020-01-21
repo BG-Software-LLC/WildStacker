@@ -74,6 +74,20 @@ public final class ProvidersHandler {
 
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 0L);
+
+        Executor.sync(() -> {
+            if(Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
+                    !Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R")){
+                WildStackerPlugin.log("&c#################################################################");
+                WildStackerPlugin.log("&c##                                                             ##");
+                WildStackerPlugin.log("&c## Seems like you're using ASkyBlock, but not the custom fork. ##");
+                WildStackerPlugin.log("&c##            <The custom fork supports WildStacker>           ##");
+                WildStackerPlugin.log("&c##           https://github.com/OmerBenGera/askyblock          ##");
+                WildStackerPlugin.log("&c##                                                             ##");
+                WildStackerPlugin.log("&c#################################################################");
+            }
+        }, 10L);
+
     }
 
     private void loadSpawnersProvider(){
