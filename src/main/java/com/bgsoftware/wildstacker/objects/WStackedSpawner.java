@@ -20,9 +20,12 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +36,8 @@ import java.util.stream.Stream;
 public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
 
     private static final Object stackingMutex = new Object();
+
+    private final List<Inventory> linkedInventories = new ArrayList<>();
 
     private LivingEntity linkedEntity = null;
 
@@ -120,6 +125,13 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                 .execute(true);
 
         plugin.getProviders().deleteHologram(this);
+
+        List<HumanEntity> viewers = new ArrayList<>();
+        linkedInventories.forEach(i ->  viewers.addAll(i.getViewers()));
+
+        viewers.forEach(HumanEntity::closeInventory);
+
+        linkedInventories.clear();
     }
 
     @Override
@@ -336,6 +348,14 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     public LivingEntity getRawLinkedEntity(){
         return linkedEntity;
+    }
+
+    public void linkInventory(Inventory inventory){
+        this.linkedInventories.add(inventory);
+    }
+
+    public void unlinkInventory(Inventory inventory){
+        this.linkedInventories.remove(inventory);
     }
 
     public static StackedSpawner of(Block block){

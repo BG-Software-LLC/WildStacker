@@ -53,6 +53,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -449,8 +450,10 @@ public final class SpawnersListener implements Listener {
                 e.setCancelled(true);
             }else if(plugin.getSettings().spawnersPlaceMenu){
                 clickedSpawners.put(e.getPlayer().getUniqueId(), stackedSpawner.getLocation());
-                e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4,
-                        plugin.getSettings().spawnersPlaceMenuTitle.replace("{0}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()))));
+                Inventory inventory = Bukkit.createInventory(null, 9 * 4,
+                        plugin.getSettings().spawnersPlaceMenuTitle.replace("{0}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name())));
+                e.getPlayer().openInventory(inventory);
+                ((WStackedSpawner) stackedSpawner).linkInventory(inventory);
                 e.setCancelled(true);
             }
         }
@@ -594,6 +597,8 @@ public final class SpawnersListener implements Listener {
                         ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedSpawner.getLocation());
                     }
                 }
+
+                ((WStackedSpawner) stackedSpawner).unlinkInventory(e.getInventory());
             }
 
             clickedSpawners.remove(e.getPlayer().getUniqueId());
