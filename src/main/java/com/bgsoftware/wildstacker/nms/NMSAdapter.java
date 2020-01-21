@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
@@ -28,11 +29,13 @@ public interface NMSAdapter {
 
     void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound);
 
-    void setInLove(Entity entity, Player breeder, boolean inLove);
+    void setInLove(Animals entity, Player breeder, boolean inLove);
+
+    boolean isInLove(Animals entity);
 
     boolean isAnimalFood(Animals animal, ItemStack itemStack);
 
-    boolean canBeBred(Entity entity);
+    boolean canBeBred(Ageable entity);
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 

@@ -29,11 +29,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
@@ -607,10 +609,13 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFeed(PlayerInteractEntityEvent e){
-        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
+        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Ageable) || ItemUtils.isOffHand(e))
             return;
 
         if(!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
+            return;
+
+        if(!plugin.getNMSAdapter().canBeBred((Ageable) e.getRightClicked()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
@@ -618,9 +623,18 @@ public final class EntitiesListener implements Listener {
 
         if(amount > 1){
             e.setCancelled(true);
+
             stackedEntity.setStackAmount(amount - 1, true);
             StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-            plugin.getNMSAdapter().setInLove(duplicated.getLivingEntity(), e.getPlayer(), true);
+
+            if(duplicated.getLivingEntity() instanceof Animals)
+                plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
+
+            if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                ItemStack inHand = e.getPlayer().getItemInHand().clone();
+                inHand.setAmount(inHand.getAmount() - 1);
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getPlayer().getItemInHand(), inHand);
+            }
         }
     }
 
@@ -628,7 +642,8 @@ public final class EntitiesListener implements Listener {
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
             plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity ->
-                    EntityUtils.isStackable(entity) && entity.isValid() && !plugin.getNMSAdapter().canBeBred(entity))
+                    EntityUtils.isStackable(entity) && entity.isValid() &&
+                            (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)))
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
         }
     }

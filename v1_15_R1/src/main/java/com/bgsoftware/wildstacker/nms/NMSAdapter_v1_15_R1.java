@@ -10,6 +10,7 @@ import net.minecraft.server.v1_15_R1.ChunkProviderServer;
 import net.minecraft.server.v1_15_R1.DynamicOpsNBT;
 import net.minecraft.server.v1_15_R1.EnchantmentManager;
 import net.minecraft.server.v1_15_R1.Entity;
+import net.minecraft.server.v1_15_R1.EntityAgeable;
 import net.minecraft.server.v1_15_R1.EntityAnimal;
 import net.minecraft.server.v1_15_R1.EntityInsentient;
 import net.minecraft.server.v1_15_R1.EntityItem;
@@ -47,6 +48,7 @@ import org.bukkit.craftbukkit.v1_15_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_15_R1.CraftParticle;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftAgeable;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
@@ -57,6 +59,7 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
@@ -114,13 +117,18 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     }
 
     @Override
-    public void setInLove(org.bukkit.entity.Entity entity, Player breeder, boolean inLove) {
-        EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
+    public void setInLove(Animals entity, Player breeder, boolean inLove) {
+        EntityAnimal nmsEntity = ((CraftAnimals) entity).getHandle();
         EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
         if(inLove)
             nmsEntity.f(entityPlayer);
         else
             nmsEntity.resetLove();
+    }
+
+    @Override
+    public boolean isInLove(Animals entity) {
+        return ((EntityAnimal) ((CraftEntity) entity).getHandle()).isInLove();
     }
 
     @Override
@@ -130,9 +138,9 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     }
 
     @Override
-    public boolean canBeBred(org.bukkit.entity.Entity bukkitEntity) {
-        EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) bukkitEntity).getHandle();
-        return nmsEntity.getAge() == 0 && !nmsEntity.isInLove();
+    public boolean canBeBred(Ageable entity) {
+        EntityAgeable nmsEntity = ((CraftAgeable) entity).getHandle();
+        return nmsEntity.getAge() == 0 && (!(entity instanceof Animals) || isInLove((Animals) entity));
     }
 
     @Override
