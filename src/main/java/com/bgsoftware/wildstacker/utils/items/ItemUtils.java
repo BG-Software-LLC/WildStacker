@@ -17,6 +17,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -375,6 +376,14 @@ public final class ItemUtils {
 
     public static boolean canPickup(Item item){
         return item.getPickupDelay() < MAX_PICKUP_DELAY && !item.hasMetadata("ChestShop_Display") && !item.hasMetadata("no_pickup");
+    }
+
+    public static boolean isOffHand(Event event){
+        try{
+            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
+        }catch(Throwable ex){
+            return false;
+        }
     }
 
 }

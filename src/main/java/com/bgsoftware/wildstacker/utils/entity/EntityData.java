@@ -51,15 +51,6 @@ public final class EntityData {
                 }
             }
 
-            if(StackCheck.CAN_BREED.isEnabled()){
-                if(map.containsKey("Age") != otherMap.containsKey("Age"))
-                    return false;
-                if(map.containsKey("Age")) {
-                    if ((getInteger(map.get("Age")) == 0) != (getInteger(otherMap.get("Age")) == 0)) //canBreed
-                        return false;
-                }
-            }
-
             if(StackCheck.ZOMBIE_PIGMAN_ANGRY.isEnabled()){
                 if(map.containsKey("Anger") != otherMap.containsKey("Anger"))
                     return false;

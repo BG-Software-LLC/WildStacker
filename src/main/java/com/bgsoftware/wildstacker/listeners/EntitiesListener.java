@@ -58,6 +58,7 @@ import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -605,34 +606,29 @@ public final class EntitiesListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityFeed(PlayerInteractAtEntityEvent e){
-        if(!StackSplit.ENTITY_BREED.isEnabled())
+    public void onEntityFeed(PlayerInteractEntityEvent e){
+        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
             return;
 
-        if(!(e.getRightClicked() instanceof Animals))
+        if(!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
             return;
 
-        Executor.sync(() -> {
-            if(!plugin.getNMSAdapter().isInLove(e.getRightClicked()))
-                return;
+        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+        int amount = stackedEntity.getStackAmount();
 
-            StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-            int amount = stackedEntity.getStackAmount();
-
-            if(amount > 1){
-                plugin.getNMSAdapter().setInLove(stackedEntity.getLivingEntity(), e.getPlayer(), false);
-                stackedEntity.setStackAmount(amount - 1, true);
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-                plugin.getNMSAdapter().setInLove(duplicated.getLivingEntity(), e.getPlayer(), true);
-            }
-        }, 1L);
+        if(amount > 1){
+            e.setCancelled(true);
+            stackedEntity.setStackAmount(amount - 1, true);
+            StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+            plugin.getNMSAdapter().setInLove(duplicated.getLivingEntity(), e.getPlayer(), true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
             plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity ->
-                    EntityUtils.isStackable(entity) && entity.isValid() && !plugin.getNMSAdapter().isInLove(entity))
+                    EntityUtils.isStackable(entity) && entity.isValid() && !plugin.getNMSAdapter().canBeBred(entity))
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
         }
     }

@@ -45,6 +45,7 @@ import org.bukkit.craftbukkit.v1_13_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftItem;
@@ -54,6 +55,7 @@ import org.bukkit.craftbukkit.v1_13_R2.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -110,12 +112,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
-    public boolean isInLove(org.bukkit.entity.Entity entity) {
-        EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
-        return nmsEntity.isInLove();
-    }
-
-    @Override
     public void setInLove(org.bukkit.entity.Entity entity, Player breeder, boolean inLove) {
         EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) entity).getHandle();
         EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
@@ -123,6 +119,18 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
             nmsEntity.f(entityPlayer);
         else
             nmsEntity.resetLove();
+    }
+
+    @Override
+    public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
+        EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
+        return itemStack != null && nmsEntity.f(CraftItemStack.asNMSCopy(itemStack));
+    }
+
+    @Override
+    public boolean canBeBred(org.bukkit.entity.Entity bukkitEntity) {
+        EntityAnimal nmsEntity = (EntityAnimal) ((CraftEntity) bukkitEntity).getHandle();
+        return nmsEntity.getAge() == 0 && !nmsEntity.isInLove();
     }
 
     @Override

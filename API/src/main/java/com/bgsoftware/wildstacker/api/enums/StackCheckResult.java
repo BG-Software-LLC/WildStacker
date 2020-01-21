@@ -28,6 +28,7 @@ public enum StackCheckResult {
     CHUNK_NOT_LOADED,
     TARGET_CHUNK_NOT_LOADED,
     SPAWN_REASON,
+    BREED_STATUS,
     SUCCESS
 
 }

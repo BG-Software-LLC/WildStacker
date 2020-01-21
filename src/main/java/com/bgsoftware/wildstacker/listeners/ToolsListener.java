@@ -36,7 +36,7 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityInspect(PlayerInteractAtEntityEvent e){
-        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
+        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
                 !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
@@ -85,7 +85,7 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySimulate(PlayerInteractAtEntityEvent e){
-        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
+        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
             return;
 
         e.setCancelled(true);
@@ -95,7 +95,7 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockSimulate(PlayerInteractEvent e){
-        if(isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) || e.getClickedBlock() == null)
+        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) || e.getClickedBlock() == null)
             return;
 
         e.setCancelled(true);
@@ -123,22 +123,6 @@ public final class ToolsListener implements Listener {
                 Locale.OBJECT_SIMULATE_SUCCESS_RESULT.send(player);
             else
                 Locale.OBJECT_SIMULATE_FAIL_RESULT.send(player, stackCheckResult.name());
-        }
-    }
-
-    private boolean isOffHand(PlayerInteractEvent event){
-        try{
-            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        }catch(Throwable ex){
-            return false;
-        }
-    }
-
-    private boolean isOffHand(PlayerInteractAtEntityEvent event){
-        try{
-            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        }catch(Throwable ex){
-            return false;
         }
     }
 

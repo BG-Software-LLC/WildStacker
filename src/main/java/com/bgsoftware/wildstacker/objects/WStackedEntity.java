@@ -32,6 +32,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -232,6 +233,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         if(StackCheck.SPAWN_REASON.isEnabled() && getSpawnCause() != targetEntity.getSpawnCause())
             return StackCheckResult.SPAWN_REASON;
+
+        if(StackCheck.CAN_BREED.isEnabled() && object instanceof Animals &&
+                plugin.getNMSAdapter().canBeBred(object) != plugin.getNMSAdapter().canBeBred(targetEntity.getLivingEntity()))
+            return StackCheckResult.BREED_STATUS;
 
         if(PluginHooks.isWorldGuardEnabled) {
             Set<String> regions = new HashSet<>();

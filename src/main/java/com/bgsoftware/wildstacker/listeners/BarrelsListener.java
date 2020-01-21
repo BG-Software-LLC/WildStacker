@@ -194,7 +194,7 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(isOffHand(e) || e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if(ItemUtils.isOffHand(e) || e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
         if(!plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
@@ -363,14 +363,6 @@ public final class BarrelsListener implements Listener {
                 e.setCancelled(true);
                 break;
             }
-        }
-    }
-
-    private boolean isOffHand(PlayerInteractEvent event){
-        try{
-            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        }catch(Throwable ex){
-            return false;
         }
     }
 
