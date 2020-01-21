@@ -175,6 +175,10 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
+            //We want to call the entity damage event again, so the rest of the plugins will also get it.
+            if(!EventUtils.callEntityDamageEvent(e))
+                return;
+
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
@@ -185,10 +189,6 @@ public final class EntitiesListener implements Listener {
 
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
-
-            //We want to call the entity damage event again, so the rest of the plugins will also get it.
-            if(!EventUtils.callEntityDamageEvent(e))
-                return;
 
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
