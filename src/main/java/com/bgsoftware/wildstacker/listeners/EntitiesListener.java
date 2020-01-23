@@ -35,7 +35,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
@@ -609,13 +608,13 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFeed(PlayerInteractEntityEvent e){
-        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Ageable) || ItemUtils.isOffHand(e))
+        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
             return;
 
         if(!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
             return;
 
-        if(!plugin.getNMSAdapter().canBeBred((Ageable) e.getRightClicked()))
+        if(!plugin.getNMSAdapter().canBeBred((Animals) e.getRightClicked()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
@@ -627,8 +626,7 @@ public final class EntitiesListener implements Listener {
             stackedEntity.setStackAmount(amount - 1, true);
             StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
 
-            if(duplicated.getLivingEntity() instanceof Animals)
-                plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
+            plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
 
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 ItemStack inHand = e.getPlayer().getItemInHand().clone();
