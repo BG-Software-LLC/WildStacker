@@ -67,7 +67,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
                     (isValidAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))) {
                 SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
                 Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-                if (isExplodeSource || plugin.getSettings().dropToInventory) {
+                if (plugin.getSettings().dropToInventory) {
                     ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
                 } else {
                     ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
