@@ -647,6 +647,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     public void setDeadFlag(boolean deadEntityFlag){
         this.deadEntityFlag = deadEntityFlag;
+        if(!isCached())
+            plugin.getDataHandler().CACHED_DEAD_ENTITIES.add(object.getUniqueId());
     }
 
     public boolean hasDeadFlag(){

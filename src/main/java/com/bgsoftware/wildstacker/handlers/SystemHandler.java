@@ -130,6 +130,12 @@ public final class SystemHandler implements SystemManager {
                 dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(stackedEntity.getUniqueId());
         }
 
+        if(dataHandler.CACHED_DEAD_ENTITIES.contains(livingEntity.getUniqueId())){
+            ((WStackedEntity) stackedEntity).setDeadFlag(true);
+            if(shouldBeCached)
+                dataHandler.CACHED_DEAD_ENTITIES.remove(stackedEntity.getUniqueId());
+        }
+
         return stackedEntity;
     }
 
