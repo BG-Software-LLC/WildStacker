@@ -177,8 +177,8 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             //We want to call the entity damage event again, so the rest of the plugins will also get it.
-            if(!EventUtils.callEntityDamageEvent(e))
-                return;
+//            if(!EventUtils.callEntityDamageEvent(e))
+//                return;
 
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
