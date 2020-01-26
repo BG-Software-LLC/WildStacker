@@ -128,11 +128,6 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public void updateName() {
-        if(!Bukkit.isPrimaryThread()){
-            Executor.sync(this::updateName);
-            return;
-        }
-
         if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object))
             return;
 
@@ -161,9 +156,12 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
                     .replace("{2}", itemType.toUpperCase());
         }
 
+        String CUSTOM_NAME = customName;
 
-        object.setCustomName(customName);
-        object.setCustomNameVisible(updateName);
+        Executor.sync(() -> {
+            object.setCustomName(CUSTOM_NAME);
+            object.setCustomNameVisible(updateName);
+        });
     }
 
     @Override
