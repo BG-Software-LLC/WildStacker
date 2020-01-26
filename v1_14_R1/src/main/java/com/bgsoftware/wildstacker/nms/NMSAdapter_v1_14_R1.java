@@ -140,7 +140,7 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     @Override
     public boolean canBeBred(Ageable entity) {
         EntityAgeable nmsEntity = ((CraftAgeable) entity).getHandle();
-        return nmsEntity.getAge() == 0 && (!(entity instanceof Animals) || isInLove((Animals) entity));
+        return nmsEntity.getAge() == 0 && entity instanceof Animals && !isInLove((Animals) entity);
     }
 
     @Override
