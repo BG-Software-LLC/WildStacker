@@ -242,6 +242,8 @@ public final class EntitiesListener implements Listener {
                     EntityUtils.setKiller(livingEntity, null);
                 }
 
+                ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
+
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 Executor.async(() -> {
@@ -301,6 +303,26 @@ public final class EntitiesListener implements Listener {
                                         EntityUtils.getBadOmenAmplifier(livingEntity.getKiller()),
                                         false
                                 ));
+                            }
+                        }
+
+                        //Decrease durability when next-stack-knockback is false
+                        if(e.isCancelled() && itemInHand != null) {
+                            int damage = ItemUtils.isSword(itemInHand.getType()) ? 1 : ItemUtils.isTool(itemInHand.getType()) ? 2 : 0;
+                            ThreadLocalRandom random = ThreadLocalRandom.current();
+                            if(damage > 0) {
+                                int unbreakingLevel = itemInHand.getEnchantmentLevel(Enchantment.DURABILITY);
+                                int damageDecrease = 0;
+
+                                for(int i = 0; unbreakingLevel > 0 && i < damage; i++){
+                                    if(random.nextInt(damage + 1) > 0)
+                                        damageDecrease++;
+                                }
+
+                                damage -= damageDecrease;
+
+                                if(damage > 0)
+                                    itemInHand.setDurability((short) (itemInHand.getDurability() + damage));
                             }
                         }
 

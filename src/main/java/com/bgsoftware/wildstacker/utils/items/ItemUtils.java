@@ -386,4 +386,34 @@ public final class ItemUtils {
         }
     }
 
+    public static boolean isSword(Material material){
+        return material.name().contains("SWORD");
+    }
+
+    public static boolean isTool(Material material){
+        switch (material.name()){
+            case "IRON_SPADE":
+            case "IRON_PICKAXE":
+            case "IRON_AXE":
+            case "WOOD_SPADE":
+            case "WOOD_PICKAXE":
+            case "WOOD_AXE":
+            case "STONE_SPADE":
+            case "STONE_PICKAXE":
+            case "STONE_AXE":
+            case "DIAMOND_SPADE":
+            case "DIAMOND_PICKAXE":
+            case "DIAMOND_AXE":
+            case "GOLD_SPADE":
+            case "GOLD_PICKAXE":
+            case "GOLD_AXE":
+            case "GOLDEN_SHOVEL":
+            case "GOLDEN_PICKAXE":
+            case "GOLDEN_AXE":
+                return true;
+            default:
+                return false;
+        }
+    }
+
 }
