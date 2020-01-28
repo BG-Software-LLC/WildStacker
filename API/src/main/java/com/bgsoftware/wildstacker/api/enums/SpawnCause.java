@@ -42,7 +42,8 @@ public enum SpawnCause {
     BOSS,
     EPIC_BOSSES,
     EPIC_BOSSES_MINION,
-    EPIC_SPAWNERS;
+    EPIC_SPAWNERS,
+    MY_PET;
 
     public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason){
         return matchCause(spawnReason.name());

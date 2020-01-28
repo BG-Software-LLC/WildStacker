@@ -33,6 +33,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
+import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
@@ -145,6 +146,8 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new EpicBossesListener(), plugin);
         if(enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
             pluginManager.registerEvents(new MythicMobsListener(), plugin);
+        if(enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
+            pluginManager.registerEvents(new MyPetListener(), plugin);
         if(enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners"))
             EpicSpawnersListener.register(plugin);
         if(enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
