@@ -82,7 +82,7 @@ public final class EditorHandler {
             SPAWNERS_SLOT_28 = "spawners.place-inventory.title", SPAWNERS_SLOT_29 = "spawners.placement-permission",
             SPAWNERS_SLOT_30 = "spawners.shift-place-stack", SPAWNERS_SLOT_31 = "spawners.change-using-eggs",
             SPAWNERS_SLOT_32 = "spawners.eggs-stack-multiply", SPAWNERS_SLOT_33 = "spawners.next-spawner-placement",
-            SPAWNERS_SLOT_34 = "spawners.only-one-spawner";
+            SPAWNERS_SLOT_34 = "spawners.only-one-spawner", SPAWNERS_SLOT_35 = "spawners.inventory-tweaks";
 
     public final static String BARRELS_SLOT_0 = "barrels.enabled", BARRELS_SLOT_1 = "barrels.merge-radius",
             BARRELS_SLOT_2 = "barrels.custom-name", BARRELS_SLOT_3 = "barrels.blacklist", BARRELS_SLOT_4 = "barrels.whitelist",
@@ -202,7 +202,7 @@ public final class EditorHandler {
             return;
         }
 
-        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory editor = Bukkit.createInventory(null, 9 * 5, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
         buildInventory(editor, spawnersFields, "spawners.");
 
         Executor.sync(() -> player.openInventory(editor));

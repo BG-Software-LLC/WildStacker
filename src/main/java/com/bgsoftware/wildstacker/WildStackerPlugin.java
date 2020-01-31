@@ -126,6 +126,14 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         if(!shouldEnable)
             return;
 
+        try{
+            Bukkit.getScheduler().cancelAllTasks();
+        }catch(Throwable ex){
+            try {
+                BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
+            } catch (Exception ignored) { }
+        }
+
         //We need to save the entire database
         systemManager.performCacheSave();
 
@@ -138,14 +146,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             providersHandler.deleteHologram(stackedBarrel);
             stackedBarrel.getLocation().getChunk().load(true);
             stackedBarrel.removeDisplayBlock();
-        }
-
-        try{
-            Bukkit.getScheduler().cancelAllTasks();
-        }catch(Throwable ex){
-            try {
-                BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
-            } catch (Exception ignored) { }
         }
 
         EntityStorage.clearCache();

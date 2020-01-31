@@ -569,6 +569,9 @@ spawners:
   # Should there be only one spawner in the merge radius?
   only-one-spawner: true
 
+  # Should there be inventory tweaks for spawner items?
+  inventory-tweaks: true
+
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
   # Should blocks get stacked into barrels on the server?

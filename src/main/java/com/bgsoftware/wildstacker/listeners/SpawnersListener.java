@@ -605,6 +605,74 @@ public final class SpawnersListener implements Listener {
         }
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent e){
+        if(!plugin.getSettings().spawnersInventoryTweaks)
+            return;
+
+        InventoryAction action = e.getAction();
+
+        switch (action){
+            case PICKUP_HALF:
+                if(e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType()) {
+                    int spawnersAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem());
+                    if(spawnersAmount > 1 && e.getCurrentItem().getAmount() == 1) {
+                        e.setCancelled(true);
+                        EntityType entityType = plugin.getProviders().getSpawnerType(e.getCurrentItem());
+                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, spawnersAmount / 2));
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, spawnersAmount - (spawnersAmount / 2)));
+                    }
+                }
+                break;
+            case PLACE_ONE:
+                if(e.getCurrentItem() != null) {
+                    action = InventoryAction.SWAP_WITH_CURSOR;
+                }
+                else {
+                    if(e.getCursor().getType() == Materials.SPAWNER.toBukkitType()){
+                        int cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
+                        if (cursorAmount > 1 && e.getCursor().getAmount() == 1) {
+                            e.setCancelled(true);
+                            EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
+                            e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, cursorAmount - 1));
+                            e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, 1));
+                        }
+                    }
+                    break;
+                }
+            case SWAP_WITH_CURSOR:
+                if(e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType() && e.getCursor().getType() == Materials.SPAWNER.toBukkitType()){
+                    int currentAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem()), cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
+                    EntityType currentType = plugin.getProviders().getSpawnerType(e.getCurrentItem()), cursorType = plugin.getProviders().getSpawnerType(e.getCursor());
+                    if(currentType == cursorType){
+                        e.setCancelled(true);
+                        e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
+                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType, currentAmount + cursorAmount));
+                    }
+                }
+                break;
+            case COLLECT_TO_CURSOR:
+                if(e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
+                    int newCursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
+                    if (e.getCursor().getAmount() == 1) {
+                        e.setCancelled(true);
+                        EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
+                        for(int i = 0; i < e.getClickedInventory().getSize(); i++) {
+                            ItemStack itemStack = e.getClickedInventory().getItem(i);
+                            if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
+                                if (plugin.getProviders().getSpawnerType(itemStack) == entityType) {
+                                    newCursorAmount += ItemUtils.getSpawnerItemAmount(itemStack);
+                                    e.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
+                                }
+                            }
+                        }
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, newCursorAmount));
+                    }
+                }
+                break;
+        }
+    }
+
     private boolean isChunkLimit(Chunk chunk, EntityType entityType){
         int chunkLimit = plugin.getSettings().spawnersChunkLimit;
 

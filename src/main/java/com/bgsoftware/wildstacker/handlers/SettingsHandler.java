@@ -65,7 +65,7 @@ public final class SettingsHandler {
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
-            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner;
+            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, spawnersInventoryTweaks;
     public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
             silkTouchBreakChance, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
@@ -234,6 +234,7 @@ public final class SettingsHandler {
         eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
         nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);
         onlyOneSpawner = cfg.getBoolean("spawners.only-one-spawner", true);
+        spawnersInventoryTweaks = cfg.getBoolean("spawners.inventory-tweaks", true);
 
         barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
         barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);
