@@ -213,8 +213,14 @@ public final class BarrelsListener implements Listener {
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
-            if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
-                ItemUtils.dropItem(stackedBarrel.getBarrelItem(1), e.getClickedBlock().getLocation());
+            if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                if(plugin.getSettings().barrelsAutoPickup) {
+                    ItemUtils.addItem(stackedBarrel.getBarrelItem(1), e.getPlayer().getInventory(), e.getClickedBlock().getLocation());
+                }
+                else {
+                    ItemUtils.dropItem(stackedBarrel.getBarrelItem(1), e.getClickedBlock().getLocation());
+                }
+            }
 
             if(stackedBarrel.getStackAmount() <= 0)
                 e.getClickedBlock().setType(Material.AIR);

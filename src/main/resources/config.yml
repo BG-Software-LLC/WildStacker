@@ -650,6 +650,9 @@ barrels:
   # If you want to disable it, use "required-permission: ''"
   required-permission: ''
 
+  # Should items from barrels get added directed into the player's inventory?
+  auto-pickup: false
+
 # Here you can configurable all features related to stacked buckets
 buckets:
   # Should buckets get stacked on the server?
