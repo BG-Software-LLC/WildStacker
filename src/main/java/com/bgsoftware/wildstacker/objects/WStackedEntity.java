@@ -63,6 +63,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     private boolean deadEntityFlag = false;
 
+    private String cachedRegexName = "";
+
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
     }
@@ -84,6 +86,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
+        try{
+            cachedRegexName = EntityUtils.getEntityNameRegex(this);
+        }catch(Exception ex){
+            cachedRegexName = ChatColor.stripColor(object.getCustomName());
+        }
         super.setStackAmount(stackAmount, updateName);
         if(!isCached())
             plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(object.getUniqueId(), stackAmount);
@@ -630,9 +637,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     public boolean hasNameTag() {
         String regexName = ChatColor.stripColor(object.getCustomName());
 
-        try{
-            regexName = EntityUtils.getEntityNameRegex(this);
-        }catch(NullPointerException ignored){}
+        if(cachedRegexName.isEmpty()) {
+            try {
+                regexName = EntityUtils.getEntityNameRegex(this);
+            } catch (NullPointerException ignored) { }
+        }else{
+            regexName = cachedRegexName;
+        }
 
         return object.getCustomName() != null && !object.isCustomNameVisible() && (regexName.isEmpty() || !Pattern.compile(regexName).matcher(object.getCustomName()).matches());
     }
