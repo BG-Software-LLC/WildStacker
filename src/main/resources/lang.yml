@@ -37,6 +37,10 @@ INVALID_PLAYER: '&6&lWildStacker &7Coludn''t find a player called {0}.'
 INVALID_SPAWN_CAUSE: '&6&lWildStacker &7Coludn''t find a spawn cause called {0}.'
 INVALID_TYPE: '&6&lWildStacker &7Please specify if you want to give an egg or a spawner.'
 
+# Called when a player toggles inventory tweaks on and off.
+INVENTORY_TWEAKS_TOGGLE_ON: '&6&lWildStacker &7Inventory tweaks are now enabled.'
+INVENTORY_TWEAKS_TOGGLE_OFF: '&6&lWildStacker &7Inventory tweaks are now disabled.'
+
 # Called when a player successfully runs a inspect command.
 INSPECT_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} inspect tool(s).'
 INSPECT_RECEIVE: '&6&lWildStacker &7You received x{0} inspect tool(s) from {1}.'

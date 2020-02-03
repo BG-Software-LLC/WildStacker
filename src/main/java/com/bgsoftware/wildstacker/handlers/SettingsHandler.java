@@ -65,11 +65,11 @@ public final class SettingsHandler {
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu, spawnersPlacementPermission,
-            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, spawnersInventoryTweaks;
+            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled;
     public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
             silkTouchBreakChance, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
-    public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle;
+    public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
     public final KeyMap<Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
@@ -234,7 +234,9 @@ public final class SettingsHandler {
         eggsStackMultiply = cfg.getBoolean("spawners.eggs-stack-multiply", true);
         nextSpawnerPlacement = cfg.getBoolean("spawners.next-spawner-placement", true);
         onlyOneSpawner = cfg.getBoolean("spawners.only-one-spawner", true);
-        spawnersInventoryTweaks = cfg.getBoolean("spawners.inventory-tweaks", true);
+        inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
+        inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
+        inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
 
         barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
         barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);

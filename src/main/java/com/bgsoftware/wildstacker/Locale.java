@@ -33,6 +33,8 @@ public final class Locale {
     public static Locale INVALID_PLAYER = new Locale("INVALID_PLAYER");
     public static Locale INVALID_SPAWN_CAUSE = new Locale("INVALID_SPAWN_CAUSE");
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
+    public static Locale INVENTORY_TWEAKS_TOGGLE_ON = new Locale("INVENTORY_TWEAKS_TOGGLE_ON");
+    public static Locale INVENTORY_TWEAKS_TOGGLE_OFF = new Locale("INVENTORY_TWEAKS_TOGGLE_OFF");
     public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
     public static Locale INSPECT_RECEIVE = new Locale("INSPECT_RECEIVE");
     public static Locale SIMULATE_GIVE_PLAYER = new Locale("SIMULATE_GIVE_PLAYER");

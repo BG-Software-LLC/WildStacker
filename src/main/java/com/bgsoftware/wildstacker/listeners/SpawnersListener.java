@@ -51,6 +51,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -607,7 +608,16 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent e){
-        if(!plugin.getSettings().spawnersInventoryTweaks)
+        if(!plugin.getSettings().inventoryTweaksEnabled)
+            return;
+
+        String permission = plugin.getSettings().inventoryTweaksPermission;
+
+        if(!permission.isEmpty() && e.getWhoClicked().hasPermission(permission))
+            return;
+
+        if(!plugin.getSettings().inventoryTweaksCommand.isEmpty() &&
+                !inventoryTweaksToggleCommandPlayers.contains(e.getWhoClicked().getUniqueId()))
             return;
 
         InventoryAction action = e.getAction();
@@ -624,6 +634,7 @@ public final class SpawnersListener implements Listener {
                     }
                 }
                 break;
+            case PLACE_ALL:
             case PLACE_ONE:
                 if(e.getCurrentItem() != null) {
                     action = InventoryAction.SWAP_WITH_CURSOR;
@@ -642,7 +653,8 @@ public final class SpawnersListener implements Listener {
                 }
             case SWAP_WITH_CURSOR:
                 if(e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType() && e.getCursor().getType() == Materials.SPAWNER.toBukkitType()){
-                    int currentAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem()), cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
+                    int currentAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem()) * e.getCurrentItem().getAmount(),
+                            cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor()) * e.getCursor().getAmount();
                     EntityType currentType = plugin.getProviders().getSpawnerType(e.getCurrentItem()), cursorType = plugin.getProviders().getSpawnerType(e.getCursor());
                     if(currentType == cursorType){
                         e.setCancelled(true);
@@ -670,6 +682,38 @@ public final class SpawnersListener implements Listener {
                     }
                 }
                 break;
+        }
+    }
+
+    private Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
+
+    @EventHandler
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
+        if(plugin.getSettings().inventoryTweaksCommand.isEmpty())
+            return;
+
+        String permission = plugin.getSettings().inventoryTweaksPermission;
+
+        if(!permission.isEmpty() && e.getPlayer().hasPermission(permission))
+            return;
+
+        for(String commandSyntax : plugin.getSettings().inventoryTweaksCommand.split(",")) {
+            commandSyntax = "/" + commandSyntax;
+
+            if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
+                continue;
+
+            e.setCancelled(true);
+
+            if (inventoryTweaksToggleCommandPlayers.contains(e.getPlayer().getUniqueId())) {
+                inventoryTweaksToggleCommandPlayers.remove(e.getPlayer().getUniqueId());
+                Locale.INVENTORY_TWEAKS_TOGGLE_OFF.send(e.getPlayer());
+            } else {
+                inventoryTweaksToggleCommandPlayers.add(e.getPlayer().getUniqueId());
+                Locale.INVENTORY_TWEAKS_TOGGLE_ON.send(e.getPlayer());
+            }
+
+            return;
         }
     }
 

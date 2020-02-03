@@ -569,8 +569,18 @@ spawners:
   # Should there be only one spawner in the merge radius?
   only-one-spawner: true
 
-  # Should there be inventory tweaks for spawner items?
-  inventory-tweaks: true
+  # All settings related to the inventory tweaks.
+  # For example, right clicking a stacked item will split it into two stack in the inventory.
+  inventory-tweaks:
+    # Should there be inventory tweaks for spawner items?
+    enabled: true
+    # Set a permission to use the inventory tweaks.
+    # You can set it to be empty in order to disable the feature.
+    permission: ''
+    # Set a command for a toggle mode for the inventory teaks.
+    # You can split multiple commands using ",".
+    # You can set it to be disabled in order to disable the feature.
+    toggle-command: 'stacker inventorytweaks,stacker it'
 
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
