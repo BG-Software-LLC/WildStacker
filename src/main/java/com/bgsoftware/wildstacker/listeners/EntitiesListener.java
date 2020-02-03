@@ -16,7 +16,6 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.events.EventUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -160,7 +159,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
-        if(EventUtils.isFakeEvent(e) || !EntityUtils.isStackable(e.getEntity()))
+        if(!EntityUtils.isStackable(e.getEntity()))
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
@@ -176,17 +175,11 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            //We want to call the entity damage event again, so the rest of the plugins will also get it.
-//            if(!EventUtils.callEntityDamageEvent(e))
-//                return;
-
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
 
             int fireTicks = livingEntity.getFireTicks();
-
-            e.setDamage(0);
 
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
