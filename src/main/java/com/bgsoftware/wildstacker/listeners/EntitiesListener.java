@@ -382,7 +382,8 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnLow(CreatureSpawnEvent e){
         //Cache the data for the entity.
-        EntityData.of(e.getEntity());
+        if(EntityUtils.isStackable(e.getEntity()))
+            EntityData.of(e.getEntity());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
