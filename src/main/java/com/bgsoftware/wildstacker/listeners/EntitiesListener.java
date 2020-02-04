@@ -157,7 +157,7 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         if(!EntityUtils.isStackable(e.getEntity()))
             return;
