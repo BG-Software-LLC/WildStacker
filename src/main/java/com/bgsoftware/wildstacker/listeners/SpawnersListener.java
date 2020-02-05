@@ -362,6 +362,10 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
+        int minimumEntityLimit = plugin.getSettings().minimumEntitiesLimit.getOrDefault(stackedEntity.getType().name(), 1);
+
+        multipleEntities = multipleEntities || minimumEntityLimit > stackedSpawner.getStackAmount();
+
         if(multipleEntities) {
             if(stackedSpawner.getStackAmount() > 1) {
                 Executor.async(() -> {
