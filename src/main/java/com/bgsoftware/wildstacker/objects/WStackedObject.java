@@ -103,7 +103,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
         int newStackAmount = this.getStackAmount() + stackedObject.getStackAmount();
 
-        if(getStackLimit() < newStackAmount)
+        if(newStackAmount <= 0 || getStackLimit() < newStackAmount)
             return StackCheckResult.LIMIT_EXCEEDED;
 
         return StackCheckResult.SUCCESS;
