@@ -25,16 +25,17 @@ public  final class EconomyHook {
 
     public static void setEnabled(boolean enabled){
         try {
-            PluginHooks.isVaultEnabled = enabled;
             if (enabled) {
                 RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
                 if (rsp != null) {
                     economy = rsp.getProvider();
+                    PluginHooks.isVaultEnabled = true;
+                    return;
                 }
             }
-        }catch(Throwable ex){
-            PluginHooks.isVaultEnabled = enabled;
-        }
+        }catch(Throwable ignored){ }
+
+        PluginHooks.isVaultEnabled = false;
     }
 
 }
