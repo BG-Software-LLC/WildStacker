@@ -96,31 +96,60 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
+    /*
+     *   Entity methods
+     */
+
     @Override
-    public Object getNBTTagCompound(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        entityLiving.b(nbtTagCompound);
-        return nbtTagCompound;
+    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer) {
+        CraftWorld world = (CraftWorld) location.getWorld();
+
+        assert world != null;
+
+        Entity nmsEntity = world.createEntity(location, type);
+        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
+
+        if(entityConsumer != null) {
+            //noinspection unchecked
+            entityConsumer.accept((T) bukkitEntity);
+        }
+
+        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
+
+        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
+
+        return type.cast(bukkitEntity);
     }
 
     @Override
-    public void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound) {
-        if(!(_nbtTagCompound instanceof NBTTagCompound))
-            return;
+    public Zombie spawnZombieVillager(Villager villager) {
+        EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
+        EntityZombieVillager entityZombieVillager = EntityTypes.ZOMBIE_VILLAGER.a(entityVillager.world);
 
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        NBTTagCompound nbtTagCompound = (NBTTagCompound) _nbtTagCompound;
+        assert entityZombieVillager != null;
+        entityZombieVillager.u(entityVillager);
+        entityZombieVillager.setVillagerData(entityVillager.getVillagerData());
+        entityZombieVillager.a(entityVillager.eN().a(DynamicOpsNBT.a).getValue());
+        entityZombieVillager.setOffers(entityVillager.getOffers().a());
+        entityZombieVillager.a(entityVillager.getExperience());
+        entityZombieVillager.setBaby(entityVillager.isBaby());
+        entityZombieVillager.setNoAI(entityVillager.isNoAI());
 
-        nbtTagCompound.setFloat("Health", 20);
-        nbtTagCompound.remove("SaddleItem");
-        nbtTagCompound.remove("ArmorItem");
-        nbtTagCompound.remove("ArmorItems");
-        nbtTagCompound.remove("HandItems");
-        if(livingEntity instanceof Zombie)
-            ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
+        if (entityVillager.hasCustomName()) {
+            entityZombieVillager.setCustomName(entityVillager.getCustomName());
+            entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
+        }
 
-        entityLiving.a(nbtTagCompound);
+        EntityTransformEvent entityTransformEvent = new EntityTransformEvent(entityVillager.getBukkitEntity(), Collections.singletonList(entityZombieVillager.getBukkitEntity()), EntityTransformEvent.TransformReason.INFECTION);
+        Bukkit.getPluginManager().callEvent(entityTransformEvent);
+
+        if(entityTransformEvent.isCancelled())
+            return null;
+
+        entityVillager.world.addEntity(entityZombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
+        entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
+
+        return (Zombie) entityZombieVillager.getBukkitEntity();
     }
 
     @Override
@@ -182,6 +211,288 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         Predicate<? super Entity> wrapper = entity -> predicate.test(entity.getBukkitEntity());
         return entityLiving.world.getEntities(entityLiving, entityLiving.getBoundingBox().grow(xRange, yRange, zRange), wrapper)
                 .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
+    }
+
+    @Override
+    public int getEntityExp(LivingEntity livingEntity) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+
+        int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
+        int exp = entityLiving.getExpReward();
+
+        Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
+
+        return exp;
+    }
+
+    @Override
+    public boolean canDropExp(LivingEntity livingEntity){
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
+        boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
+        boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
+        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
+    }
+
+    @Override
+    public void updateLastDamageTime(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
+    }
+
+    @Override
+    public void setHealthDirectly(LivingEntity livingEntity, double health) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.setHealth((float) health);
+    }
+
+    @Override
+    public void setEntityDead(LivingEntity livingEntity, boolean dead) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Fields.ENTITY_DEAD.set(entityLiving, dead);
+    }
+
+    @Override
+    public int getEggLayTime(Chicken chicken) {
+        return ((CraftChicken) chicken).getHandle().eggLayTime;
+    }
+
+    @Override
+    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.fromMobSpawner = nerfed;
+    }
+
+    @Override
+    public void setKiller(LivingEntity livingEntity, Player killer) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+    }
+
+    @Override
+    public float getItemInMainHandDropChance(EntityEquipment entityEquipment) {
+        return entityEquipment.getItemInMainHandDropChance();
+    }
+
+    @Override
+    public float getItemInOffHandDropChance(EntityEquipment entityEquipment) {
+        return entityEquipment.getItemInOffHandDropChance();
+    }
+
+    @Override
+    public void setItemInMainHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
+        entityEquipment.setItemInMainHand(itemStack);
+    }
+
+    @Override
+    public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
+        entityEquipment.setItemInOffHand(itemStack);
+    }
+
+    /*
+     *   Spawner methods
+     */
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    /*
+     *   Item methods
+     */
+
+    @Override
+    public Item createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer) {
+        CraftWorld craftWorld = (CraftWorld) location.getWorld();
+
+        assert craftWorld != null;
+
+        EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
+        Item bukkitItem = (Item) entityItem.getBukkitEntity();
+
+        entityItem.pickupDelay = 10;
+
+        itemConsumer.accept(bukkitItem);
+
+        craftWorld.addEntity(entityItem, spawnCause.toSpawnReason());
+
+        return bukkitItem;
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    public Enchantment getGlowEnchant() {
+        return new Enchantment(NamespacedKey.minecraft("glowing_enchant")) {
+            @Override
+            public String getName() {
+                return "WildStackerGlow";
+            }
+
+            @Override
+            public int getMaxLevel() {
+                return 1;
+            }
+
+            @Override
+            public int getStartLevel() {
+                return 0;
+            }
+
+            @Override
+            public EnchantmentTarget getItemTarget() {
+                return null;
+            }
+
+            @Override
+            public boolean isTreasure() {
+                return false;
+            }
+
+            @Override
+            public boolean isCursed() {
+                return false;
+            }
+
+            @Override
+            public boolean conflictsWith(Enchantment enchantment) {
+                return false;
+            }
+
+            @Override
+            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
+                return true;
+            }
+        };
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack getPlayerSkull(String texture) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(Materials.PLAYER_HEAD.toBukkitItem());
+        NBTTagCompound nbtTagCompound = itemStack.getOrCreateTag();
+
+        NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
+
+        skullOwner.setString("Id", new UUID(texture.hashCode(), texture.hashCode()).toString());
+
+        NBTTagCompound properties = new NBTTagCompound();
+
+        NBTTagList textures = new NBTTagList();
+        NBTTagCompound signature = new NBTTagCompound();
+        signature.setString("Value", texture);
+        textures.add(signature);
+
+        properties.set("textures", textures);
+
+        skullOwner.set("Properties", properties);
+
+        nbtTagCompound.set("SkullOwner", skullOwner);
+
+        itemStack.setTag(nbtTagCompound);
+
+        return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    /*
+     *   World methods
+     */
+
+    @Override
+    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, Predicate<BlockState> condition) {
+        return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
+                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
+                .filter(condition);
+    }
+
+    @Override
+    public void grandAchievement(Player player, EntityType victim, String name) {
+        grandAchievement(player, victim.getKey().toString(), name);
+    }
+
+    @Override
+    public void grandAchievement(Player player, String criteria, String name) {
+        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft(name));
+
+        if(advancement == null)
+            throw new NullPointerException("Invalid advancement " + name);
+
+        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
+
+        if(!advancementProgress.isDone()){
+            advancementProgress.awardCriteria(criteria);
+        }
+    }
+
+    @Override
+    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
+        ChunkProviderServer chunkProvider = ((WorldServer) entityLiving.world).getChunkProvider();
+        chunkProvider.broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
+        //Makes sure the entity is still there.
+        chunkProvider.broadcast(entityItem, new PacketPlayOutSpawnEntity(entityItem));
+        chunkProvider.broadcast(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
+    }
+
+    @Override
+    public void playDeathSound(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        Object soundEffect = Methods.ENTITY_SOUND_DEATH.invoke(entityLiving);
+        if (soundEffect != null) {
+            float soundVolume = (float) Methods.ENTITY_SOUND_VOLUME.invoke(entityLiving);
+            float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
+            entityLiving.a((SoundEffect) soundEffect, soundVolume, soundPitch);
+        }
+    }
+
+    @Override
+    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
+        assert location.getWorld() != null;
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
+        world.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                count, offsetX, offsetY, offsetZ, extra, false);
+    }
+
+    @Override
+    public void playSpawnEffect(LivingEntity livingEntity) {
+        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        entityInsentient.doSpawnEffect();
+    }
+
+    @Override
+    public Object getBlockData(Material type, short data) {
+        return CraftBlockData.fromData(CraftMagicNumbers.getBlock(type, (byte) data));
+    }
+
+    /*
+     *   Tag methods
+     */
+
+    @Override
+    public Object getNBTTagCompound(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        NBTTagCompound nbtTagCompound = new NBTTagCompound();
+        entityLiving.b(nbtTagCompound);
+        return nbtTagCompound;
+    }
+
+    @Override
+    public void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound) {
+        if(!(_nbtTagCompound instanceof NBTTagCompound))
+            return;
+
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        NBTTagCompound nbtTagCompound = (NBTTagCompound) _nbtTagCompound;
+
+        nbtTagCompound.setFloat("Health", 20);
+        nbtTagCompound.remove("SaddleItem");
+        nbtTagCompound.remove("ArmorItem");
+        nbtTagCompound.remove("ArmorItems");
+        nbtTagCompound.remove("HandItems");
+        if(livingEntity instanceof Zombie)
+            ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
+
+        entityLiving.a(nbtTagCompound);
     }
 
     @Override
@@ -277,303 +588,17 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     }
 
     @Override
-    public Object getChatMessage(String message) {
-        return new ChatMessage(message);
-    }
-
-    @Override
-    public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-
-        int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
-        int exp = entityLiving.getExpReward();
-
-        Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
-
-        return exp;
-    }
-
-    @Override
-    public boolean canDropExp(LivingEntity livingEntity){
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
-        boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
-        boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
-        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
-    }
-
-    @Override
-    public void updateLastDamageTime(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
-    }
-
-    @Override
-    public void setHealthDirectly(LivingEntity livingEntity, double health) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.setHealth((float) health);
-    }
-
-    @Override
-    public void setEntityDead(LivingEntity livingEntity, boolean dead) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Fields.ENTITY_DEAD.set(entityLiving, dead);
-    }
-
-    @Override
     public int getNBTInteger(Object nbtTag) {
         return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).asInt() : ((NBTTagInt) nbtTag).asInt();
     }
 
-    @Override
-    public int getEggLayTime(Chicken chicken) {
-        return ((CraftChicken) chicken).getHandle().eggLayTime;
-    }
+    /*
+     *   Other methods
+     */
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, Predicate<BlockState> condition) {
-        return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
-                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
-                .filter(condition);
-    }
-
-    @Override
-    public void grandAchievement(Player player, EntityType victim, String name) {
-        grandAchievement(player, victim.getKey().toString(), name);
-    }
-
-    @Override
-    public void grandAchievement(Player player, String criteria, String name) {
-        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft(name));
-
-        if(advancement == null)
-            throw new NullPointerException("Invalid advancement " + name);
-
-        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
-
-        if(!advancementProgress.isDone()){
-            advancementProgress.awardCriteria(criteria);
-        }
-    }
-
-    @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        ChunkProviderServer chunkProvider = ((WorldServer) entityLiving.world).getChunkProvider();
-        chunkProvider.broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
-        //Makes sure the entity is still there.
-        chunkProvider.broadcast(entityItem, new PacketPlayOutSpawnEntity(entityItem));
-        chunkProvider.broadcast(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
-    }
-
-    @Override
-    public void playDeathSound(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Object soundEffect = Methods.ENTITY_SOUND_DEATH.invoke(entityLiving);
-        if (soundEffect != null) {
-            float soundVolume = (float) Methods.ENTITY_SOUND_VOLUME.invoke(entityLiving);
-            float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
-            entityLiving.a((SoundEffect) soundEffect, soundVolume, soundPitch);
-        }
-    }
-
-    @Override
-    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.fromMobSpawner = nerfed;
-    }
-
-    @Override
-    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
-        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
-        world.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                count, offsetX, offsetY, offsetZ, extra, false);
-    }
-
-    @Override
-    public void playSpawnEffect(LivingEntity livingEntity) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityInsentient.doSpawnEffect();
-    }
-
-    @Override
-    @SuppressWarnings("all")
-    public Enchantment getGlowEnchant() {
-        return new Enchantment(NamespacedKey.minecraft("glowing_enchant")) {
-            @Override
-            public String getName() {
-                return "WildStackerGlow";
-            }
-
-            @Override
-            public int getMaxLevel() {
-                return 1;
-            }
-
-            @Override
-            public int getStartLevel() {
-                return 0;
-            }
-
-            @Override
-            public EnchantmentTarget getItemTarget() {
-                return null;
-            }
-
-            @Override
-            public boolean conflictsWith(Enchantment enchantment) {
-                return false;
-            }
-
-            @Override
-            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
-                return true;
-            }
-
-            @Override
-            public boolean isTreasure() {
-                return false;
-            }
-
-            @Override
-            public boolean isCursed() {
-                return false;
-            }
-        };
-    }
-
-    @Override
-    public org.bukkit.inventory.ItemStack getPlayerSkull(String texture) {
-        ItemStack itemStack = CraftItemStack.asNMSCopy(Materials.PLAYER_HEAD.toBukkitItem());
-        NBTTagCompound nbtTagCompound = itemStack.getOrCreateTag();
-
-        NBTTagCompound skullOwner = nbtTagCompound.hasKey("SkullOwner") ? nbtTagCompound.getCompound("SkullOwner") : new NBTTagCompound();
-
-        skullOwner.setString("Id", new UUID(texture.hashCode(), texture.hashCode()).toString());
-
-        NBTTagCompound properties = new NBTTagCompound();
-
-        NBTTagList textures = new NBTTagList();
-        NBTTagCompound signature = new NBTTagCompound();
-        signature.setString("Value", texture);
-        textures.add(signature);
-
-        properties.set("textures", textures);
-
-        skullOwner.set("Properties", properties);
-
-        nbtTagCompound.set("SkullOwner", skullOwner);
-
-        itemStack.setTag(nbtTagCompound);
-
-        return CraftItemStack.asBukkitCopy(itemStack);
-    }
-
-    @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
-    }
-
-    @Override
-    public Zombie spawnZombieVillager(Villager villager) {
-        EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
-        EntityZombieVillager entityZombieVillager = EntityTypes.ZOMBIE_VILLAGER.a(entityVillager.world);
-
-        assert entityZombieVillager != null;
-        entityZombieVillager.u(entityVillager);
-        entityZombieVillager.setVillagerData(entityVillager.getVillagerData());
-        entityZombieVillager.a(entityVillager.eN().a(DynamicOpsNBT.a).getValue());
-        entityZombieVillager.setOffers(entityVillager.getOffers().a());
-        entityZombieVillager.a(entityVillager.getExperience());
-        entityZombieVillager.setBaby(entityVillager.isBaby());
-        entityZombieVillager.setNoAI(entityVillager.isNoAI());
-
-        if (entityVillager.hasCustomName()) {
-            entityZombieVillager.setCustomName(entityVillager.getCustomName());
-            entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
-        }
-
-        EntityTransformEvent entityTransformEvent = new EntityTransformEvent(entityVillager.getBukkitEntity(), Collections.singletonList(entityZombieVillager.getBukkitEntity()), EntityTransformEvent.TransformReason.INFECTION);
-        Bukkit.getPluginManager().callEvent(entityTransformEvent);
-
-        if(entityTransformEvent.isCancelled())
-            return null;
-
-        entityVillager.world.addEntity(entityZombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
-        entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
-
-        return (Zombie) entityZombieVillager.getBukkitEntity();
-    }
-
-    @Override
-    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer) {
-        CraftWorld world = (CraftWorld) location.getWorld();
-
-        assert world != null;
-
-        Entity nmsEntity = world.createEntity(location, type);
-        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
-
-        if(entityConsumer != null) {
-            //noinspection unchecked
-            entityConsumer.accept((T) bukkitEntity);
-        }
-
-        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
-
-        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
-
-        return type.cast(bukkitEntity);
-    }
-
-    @Override
-    public Item createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer) {
-        CraftWorld craftWorld = (CraftWorld) location.getWorld();
-
-        assert craftWorld != null;
-
-        EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
-        Item bukkitItem = (Item) entityItem.getBukkitEntity();
-
-        entityItem.pickupDelay = 10;
-
-        itemConsumer.accept(bukkitItem);
-
-        craftWorld.addEntity(entityItem, spawnCause.toSpawnReason());
-
-        return bukkitItem;
-    }
-
-    @Override
-    public void setKiller(LivingEntity livingEntity, Player killer) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
-    }
-
-    @Override
-    public Object getBlockData(Material type, short data) {
-        return CraftBlockData.fromData(CraftMagicNumbers.getBlock(type, (byte) data));
-    }
-
-    @Override
-    public float getItemInMainHandDropChance(EntityEquipment entityEquipment) {
-        return entityEquipment.getItemInMainHandDropChance();
-    }
-
-    @Override
-    public float getItemInOffHandDropChance(EntityEquipment entityEquipment) {
-        return entityEquipment.getItemInOffHandDropChance();
-    }
-
-    @Override
-    public void setItemInMainHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
-        entityEquipment.setItemInMainHand(itemStack);
-    }
-
-    @Override
-    public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
-        entityEquipment.setItemInOffHand(itemStack);
+    public Object getChatMessage(String message) {
+        return new ChatMessage(message);
     }
 
     @SuppressWarnings({"deprecation", "NullableProblems"})
@@ -611,16 +636,16 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         }
 
         @Override
-        public String getCreatureTypeName() {
-            MinecraftKey key = getSpawner().getSpawner().getMobName();
-            return key == null ? "PIG" : key.getKey();
-        }
-
-        @Override
         public void setCreatureTypeByName(String s) {
             EntityType entityType = EntityType.fromName(s);
             if(entityType != null && entityType != EntityType.UNKNOWN)
                 setSpawnedType(entityType);
+        }
+
+        @Override
+        public String getCreatureTypeName() {
+            MinecraftKey key = getSpawner().getSpawner().getMobName();
+            return key == null ? "PIG" : key.getKey();
         }
 
         @Override

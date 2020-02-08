@@ -29,9 +29,13 @@ import java.util.stream.Stream;
 
 public interface NMSAdapter {
 
-    Object getNBTTagCompound(LivingEntity livingEntity);
+    /*
+     *   Entity methods
+     */
 
-    void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound);
+    <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer);
+
+    Zombie spawnZombieVillager(Villager villager);
 
     void setInLove(Animals entity, Player breeder, boolean inLove);
 
@@ -49,18 +53,6 @@ public interface NMSAdapter {
 
     List<Entity> getNearbyEntities(Entity entity, int xRange, int yRange, int zRange, Predicate<? super Entity> predicate);
 
-    String serialize(ItemStack itemStack);
-
-    ItemStack deserialize(String serialized);
-
-    default Object getChatMessage(String message){
-        return message;
-    }
-
-    ItemStack setTag(ItemStack itemStack, String key, Object value);
-
-    <T> T getTag(ItemStack itemStack, String key, Class<T> valueType, Object def);
-
     int getEntityExp(LivingEntity livingEntity);
 
     boolean canDropExp(LivingEntity livingEntity);
@@ -71,9 +63,47 @@ public interface NMSAdapter {
 
     void setEntityDead(LivingEntity livingEntity, boolean dead);
 
-    int getNBTInteger(Object nbtTag);
-
     int getEggLayTime(Chicken chicken);
+
+    void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
+
+    void setKiller(LivingEntity livingEntity, Player killer);
+
+    default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
+        return entityEquipment.getItemInHandDropChance();
+    }
+
+    default float getItemInOffHandDropChance(EntityEquipment entityEquipment){
+        return entityEquipment.getItemInHandDropChance();
+    }
+
+    default void setItemInMainHand(EntityEquipment entityEquipment, ItemStack itemStack){
+        entityEquipment.setItemInHand(itemStack);
+    }
+
+    default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
+        entityEquipment.setItemInHand(itemStack);
+    }
+
+    /*
+     *   Spawner methods
+     */
+
+    SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
+
+    /*
+     *   Item methods
+     */
+
+    Item createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer);
+
+    Enchantment getGlowEnchant();
+
+    ItemStack getPlayerSkull(String texture);
+
+    /*
+     *   World methods
+     */
 
     Stream<BlockState> getTileEntities(Chunk chunk, Predicate<BlockState> condition);
 
@@ -91,44 +121,38 @@ public interface NMSAdapter {
 
     void playDeathSound(LivingEntity entity);
 
-    void setNerfedEntity(LivingEntity livingEntity, boolean nerfed);
-
     void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
 
     void playSpawnEffect(LivingEntity livingEntity);
 
-    Enchantment getGlowEnchant();
-
-    ItemStack getPlayerSkull(String texture);
-
-    SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
-
-    Zombie spawnZombieVillager(Villager villager);
-
-    <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer);
-
-    Item createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer);
-
-    void setKiller(LivingEntity livingEntity, Player killer);
-
     default Object getBlockData(Material type, short data){
-        throw new UnsupportedOperationException("Not supported in this minecraft version.");
+        throw new UnsupportedOperationException("Not supported in this Minecraft version.");
     }
 
-    default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
-        return entityEquipment.getItemInHandDropChance();
-    }
+    /*
+     *   Tag methods
+     */
 
-    default float getItemInOffHandDropChance(EntityEquipment entityEquipment){
-        return entityEquipment.getItemInHandDropChance();
-    }
+    Object getNBTTagCompound(LivingEntity livingEntity);
 
-    default void setItemInMainHand(EntityEquipment entityEquipment, ItemStack itemStack){
-        entityEquipment.setItemInHand(itemStack);
-    }
+    void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound);
 
-    default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
-        entityEquipment.setItemInHand(itemStack);
+    String serialize(ItemStack itemStack);
+
+    ItemStack deserialize(String serialized);
+
+    ItemStack setTag(ItemStack itemStack, String key, Object value);
+
+    <T> T getTag(ItemStack itemStack, String key, Class<T> valueType, Object def);
+
+    int getNBTInteger(Object nbtTag);
+
+    /*
+     *   Other methods
+     */
+
+    default Object getChatMessage(String message){
+        return message;
     }
 
 }
