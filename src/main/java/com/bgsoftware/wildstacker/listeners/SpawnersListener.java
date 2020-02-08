@@ -537,8 +537,7 @@ public final class SpawnersListener implements Listener {
             if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(player, amountToCharge);
 
-            //noinspection all
-            plugin.getProviders().dropOrGiveItem((Player) null, stackedSpawner.getSpawner(), removeAmount, false);
+            plugin.getProviders().dropOrGiveItem(player, stackedSpawner.getSpawner(), removeAmount, true);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 spawnerBlock.setType(Material.AIR);
