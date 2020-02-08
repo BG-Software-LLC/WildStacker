@@ -1,5 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -68,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -423,14 +426,6 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     }
 
     @Override
-    public Object[] createItemEntity(Location location, org.bukkit.inventory.ItemStack itemStack) {
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityItem entityItem = new EntityItem(world, location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
-        CraftItem craftItem = new CraftItem(world.getServer(), entityItem);
-        return new Object[] { entityItem, craftItem };
-    }
-
-    @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
@@ -454,6 +449,51 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
         entityVillager.world.a(null, 1016, new BlockPosition(entityVillager), 0);
 
         return (Zombie) entityZombie.getBukkitEntity();
+    }
+
+    @Override
+    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer) {
+        CraftWorld world = (CraftWorld) location.getWorld();
+
+        assert world != null;
+
+        Entity nmsEntity = EntityHelper_v1_8_R2.createEntity(location, type);
+        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
+
+        if(entityConsumer != null) {
+            //noinspection unchecked
+            entityConsumer.accept((T) bukkitEntity);
+        }
+
+        EntityHelper_v1_8_R2.addEntity(nmsEntity, spawnCause.toSpawnReason());
+
+        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
+
+        return type.cast(bukkitEntity);
+    }
+
+    @Override
+    public Item createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer) {
+        CraftWorld craftWorld = (CraftWorld) location.getWorld();
+
+        assert craftWorld != null;
+
+        EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
+        Item bukkitItem = (Item) entityItem.getBukkitEntity();
+
+        entityItem.pickupDelay = 10;
+
+        itemConsumer.accept(bukkitItem);
+
+        EntityHelper_v1_8_R2.addEntity(entityItem, spawnCause.toSpawnReason());
+
+        return bukkitItem;
+    }
+
+    @Override
+    public void setKiller(LivingEntity livingEntity, Player killer) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
     }
 
     @SuppressWarnings("deprecation")

@@ -1,5 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -35,6 +37,7 @@ import net.minecraft.server.v1_13_R2.World;
 import net.minecraft.server.v1_13_R2.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.advancement.Advancement;
@@ -46,6 +49,7 @@ import org.bukkit.craftbukkit.v1_13_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_13_R2.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAgeable;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftChicken;
@@ -55,6 +59,7 @@ import org.bukkit.craftbukkit.v1_13_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_13_R2.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Ageable;
@@ -68,6 +73,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.inventory.EntityEquipment;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -80,6 +86,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -472,14 +479,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
-    public Object[] createItemEntity(Location location, org.bukkit.inventory.ItemStack itemStack) {
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityItem entityItem = new EntityItem(world, location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
-        CraftItem craftItem = new CraftItem(world.getServer(), entityItem);
-        return new Object[] { entityItem, craftItem };
-    }
-
-    @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
@@ -509,6 +508,72 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
 
         return (Zombie) entityZombieVillager.getBukkitEntity();
+    }
+
+    @Override
+    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer) {
+        CraftWorld world = (CraftWorld) location.getWorld();
+
+        Entity nmsEntity = world.createEntity(location, type);
+        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
+
+        if(entityConsumer != null) {
+            //noinspection unchecked
+            entityConsumer.accept((T) bukkitEntity);
+        }
+
+        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
+
+        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
+
+        return type.cast(bukkitEntity);
+    }
+
+    @Override
+    public Item createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer) {
+        CraftWorld craftWorld = (CraftWorld) location.getWorld();
+
+        EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
+        Item bukkitItem = (Item) entityItem.getBukkitEntity();
+
+        entityItem.pickupDelay = 10;
+
+        itemConsumer.accept(bukkitItem);
+
+        craftWorld.addEntity(entityItem, spawnCause.toSpawnReason());
+
+        return bukkitItem;
+    }
+
+    @Override
+    public void setKiller(LivingEntity livingEntity, Player killer) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+    }
+
+    @Override
+    public Object getBlockData(Material type, short data) {
+        return CraftBlockData.fromData(CraftMagicNumbers.getBlock(type, (byte) data));
+    }
+
+    @Override
+    public float getItemInMainHandDropChance(EntityEquipment entityEquipment) {
+        return entityEquipment.getItemInMainHandDropChance();
+    }
+
+    @Override
+    public float getItemInOffHandDropChance(EntityEquipment entityEquipment) {
+        return entityEquipment.getItemInOffHandDropChance();
+    }
+
+    @Override
+    public void setItemInMainHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
+        entityEquipment.setItemInMainHand(itemStack);
+    }
+
+    @Override
+    public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
+        entityEquipment.setItemInOffHand(itemStack);
     }
 
     @SuppressWarnings("deprecation")

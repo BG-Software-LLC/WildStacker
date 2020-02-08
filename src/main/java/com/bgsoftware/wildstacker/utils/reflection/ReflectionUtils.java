@@ -1,11 +1,6 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,29 +12,19 @@ public final class ReflectionUtils {
     static Map<Fields, Field> fieldMap = new HashMap<>();
     static Map<Methods, Method> methodMap = new HashMap<>();
 
-    @SuppressWarnings({"unchecked", "JavaReflectionMemberAccess"})
+    @SuppressWarnings("unchecked")
     public static boolean init(){
         try{
             Class entityLivingClass = getNMSClass("EntityLiving"),
-                    craftWorldClass = getBukkitClass("CraftWorld"),
                     entityClass = getNMSClass("Entity"),
-                    entityItemClass = getNMSClass("EntityItem"),
-                    craftEntityClass = getBukkitClass("entity.CraftEntity"),
                     nmsTagClass = getNMSClass("NBTTagCompound"),
-                    entityInsentientClass = getNMSClass("EntityInsentient"),
-                    entityEquipmentClass = EntityEquipment.class;
+                    entityInsentientClass = getNMSClass("EntityInsentient");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" : "b_"));
-            fieldMap.put(Fields.ENTITY_KILLER, entityLivingClass.getDeclaredField("killer"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
-            fieldMap.put(Fields.ITEM_PICKUP_DELAY, entityItemClass.getDeclaredField("pickupDelay"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
-            methodMap.put(Methods.WORLD_CREATE_ENTITY, craftWorldClass.getDeclaredMethod("createEntity", Location.class, Class.class));
-            methodMap.put(Methods.ENTITY_GET_BUKKIT_ENTITY, entityClass.getDeclaredMethod("getBukkitEntity"));
-            methodMap.put(Methods.WORLD_ADD_ENTITY, craftWorldClass.getDeclaredMethod("addEntity", entityClass, CreatureSpawnEvent.SpawnReason.class));
-            methodMap.put(Methods.ENTITY_GET_HANDLE, craftEntityClass.getDeclaredMethod("getHandle"));
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cs" :
@@ -79,22 +64,6 @@ public final class ReflectionUtils {
                     ServerVersion.isEquals(ServerVersion.v1_8) ? ServerVersion.getBukkitVersion().contains("R1") ? "aZ" : "ba" : "isDropExperience"
             ));
 
-            try{
-                methodMap.put(Methods.BLOCK_GET_BY_COMBINED_ID, getNMSClass("Block").getMethod("getByCombinedId", int.class));
-                try {
-                    methodMap.put(Methods.MAGIC_GET_BLOCK, getBukkitClass("util.CraftMagicNumbers").getMethod("getBlock", Material.class, byte.class));
-                }catch (Throwable ignored) {
-                    methodMap.put(Methods.BLOCK_DATA_FROM_DATA, getBukkitClass("block.data.CraftBlockData").getMethod("fromData", getNMSClass("IBlockData")));
-                }
-            }catch(Throwable ignored){}
-
-            try{
-                methodMap.put(Methods.ENTITY_GET_ITEM_IN_MAIN_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInMainHandDropChance"));
-                methodMap.put(Methods.ENTITY_SET_ITEM_IN_MAIN_HAND, entityEquipmentClass.getMethod("setItemInMainHand", ItemStack.class));
-                methodMap.put(Methods.ENTITY_GET_ITEM_IN_OFF_HAND_DROP_CHANCE, entityEquipmentClass.getMethod("getItemInOffHandDropChance"));
-                methodMap.put(Methods.ENTITY_SET_ITEM_IN_OFF_HAND, entityEquipmentClass.getMethod("setItemInOffHand", ItemStack.class));
-            }catch(Throwable ignored){}
-
             fieldMap.values().forEach(field -> field.setAccessible(true));
             methodMap.values().forEach(method -> method.setAccessible(true));
 
@@ -117,14 +86,6 @@ public final class ReflectionUtils {
     private static Class getNMSClass(String className){
         try{
             return Class.forName("net.minecraft.server." + ServerVersion.getBukkitVersion() + "." + className);
-        }catch(ClassNotFoundException ex){
-            throw new NullPointerException(ex.getMessage());
-        }
-    }
-
-    private static Class getBukkitClass(String className){
-        try{
-            return Class.forName("org.bukkit.craftbukkit." + ServerVersion.getBukkitVersion() + "." + className);
         }catch(ClassNotFoundException ex){
             throw new NullPointerException(ex.getMessage());
         }

@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -196,20 +195,6 @@ public final class ItemUtils {
         typeName = ChatColor.stripColor(plugin.getSettings().customNames.getOrDefault(itemStack, typeName));
 
         return EntityUtils.getFormattedType(typeName);
-    }
-
-    @SuppressWarnings("deprecation")
-    public static Object getBlockData(Material type, byte data){
-        Object iBlockData;
-
-        try{
-            int combined = type.getId() + (data << 12);
-            iBlockData = Methods.BLOCK_GET_BY_COMBINED_ID.invoke(null, combined);
-        }catch(Exception ex){
-            iBlockData = Methods.MAGIC_GET_BLOCK.invoke(null, type, data);
-        }
-
-        return Methods.BLOCK_DATA_FROM_DATA.invoke(null, iBlockData);
     }
 
     public static void stackBucket(ItemStack bucket, Inventory inventory){

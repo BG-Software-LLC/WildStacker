@@ -1,9 +1,11 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
@@ -17,9 +19,11 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -97,10 +101,34 @@ public interface NMSAdapter {
 
     ItemStack getPlayerSkull(String texture);
 
-    Object[] createItemEntity(Location location, ItemStack itemStack);
-
     SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
 
     Zombie spawnZombieVillager(Villager villager);
+
+    <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer);
+
+    Item createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer);
+
+    void setKiller(LivingEntity livingEntity, Player killer);
+
+    default Object getBlockData(Material type, short data){
+        throw new UnsupportedOperationException("Not supported in this minecraft version.");
+    }
+
+    default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
+        return entityEquipment.getItemInHandDropChance();
+    }
+
+    default float getItemInOffHandDropChance(EntityEquipment entityEquipment){
+        return entityEquipment.getItemInHandDropChance();
+    }
+
+    default void setItemInMainHand(EntityEquipment entityEquipment, ItemStack itemStack){
+        entityEquipment.setItemInHand(itemStack);
+    }
+
+    default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
+        entityEquipment.setItemInHand(itemStack);
+    }
 
 }

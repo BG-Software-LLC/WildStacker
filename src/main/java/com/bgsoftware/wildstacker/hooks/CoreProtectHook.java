@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
-import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
@@ -13,6 +13,8 @@ import org.bukkit.plugin.Plugin;
 
 @SuppressWarnings("deprecation")
 public final class CoreProtectHook {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static Plugin coreProtect;
 
@@ -44,10 +46,10 @@ public final class CoreProtectHook {
         else if(coreProtectAPI.APIVersion() == 6) {
             if(!place)
                 coreProtectAPI.logRemoval(offlinePlayer.getName(), location, type,
-                        (org.bukkit.block.data.BlockData) ItemUtils.getBlockData(type, data));
+                        (org.bukkit.block.data.BlockData) plugin.getNMSAdapter().getBlockData(type, data));
             else
                 coreProtectAPI.logPlacement(offlinePlayer.getName(), location, type,
-                        (org.bukkit.block.data.BlockData) ItemUtils.getBlockData(type, data));
+                        (org.bukkit.block.data.BlockData) plugin.getNMSAdapter().getBlockData(type, data));
         }
     }
 

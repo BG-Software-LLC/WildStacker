@@ -5,8 +5,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.key.Key;
-import com.bgsoftware.wildstacker.utils.reflection.Fields;
-import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -82,9 +80,7 @@ public final class EntityUtils {
     }
 
     public static void setKiller(LivingEntity livingEntity, Player killer){
-        Object entityLiving = Methods.ENTITY_GET_HANDLE.invoke(livingEntity);
-        Object entityHuman = Methods.ENTITY_GET_HANDLE.invoke(killer);
-        Fields.ENTITY_KILLER.set(entityLiving, entityHuman);
+        plugin.getNMSAdapter().setKiller(livingEntity, killer);
         if(killer != null)
             plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
     }
