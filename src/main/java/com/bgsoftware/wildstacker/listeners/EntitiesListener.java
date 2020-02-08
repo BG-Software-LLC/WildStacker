@@ -184,6 +184,7 @@ public final class EntitiesListener implements Listener {
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
 
+            e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
             livingEntity.setLastDamageCause(e);
