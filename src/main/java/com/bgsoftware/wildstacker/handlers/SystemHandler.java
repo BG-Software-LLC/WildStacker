@@ -23,6 +23,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -465,6 +466,7 @@ public final class SystemHandler implements SystemManager {
         LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(),
                 stackedEntity.getType().getEntityClass(), SpawnCause.CUSTOM);
         if(livingEntity != null) {
+            EntityData.of(stackedEntity).applyEntityData(livingEntity);
             EntityStorage.setMetadata(livingEntity, "corpse", null);
             if(stackedEntity.getLivingEntity() instanceof Slime){
                 ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
