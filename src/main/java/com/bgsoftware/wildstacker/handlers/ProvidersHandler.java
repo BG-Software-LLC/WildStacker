@@ -78,7 +78,7 @@ public final class ProvidersHandler {
 
         Executor.sync(() -> {
             if(Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
-                    !Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R")){
+                    Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().stream().noneMatch(a -> a.contains("Ome_R"))){
                 WildStackerPlugin.log("&c#################################################################");
                 WildStackerPlugin.log("&c##                                                             ##");
                 WildStackerPlugin.log("&c## Seems like you're using ASkyBlock, but not the custom fork. ##");
@@ -193,9 +193,6 @@ public final class ProvidersHandler {
         }
         if(PluginHooks.isMergedSpawnersEnabled){
             messages.add("Detected MergedSpawner - Disabling spawners stacking...");
-        }
-        if(Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") && Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R")){
-            messages.add("Detected SuperiorSkyblock - Disabling barrels stacking...");
         }
         if(PluginHooks.isFastAsyncWorldEditEnabled && plugin.getSettings().itemsStackingEnabled){
             //WildStacker disabled the tick limiter for items.
