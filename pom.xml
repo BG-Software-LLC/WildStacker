@@ -25,6 +25,8 @@
     <modules>
         <module>API</module>
         <module>v1_15_R1</module>
+        <module>v1_7_R3</module>
+        <module>v1_7_R4</module>
     </modules>
 
     <repositories>
