@@ -366,6 +366,9 @@ entities:
   # Should vanilla equipment of entities get cleared after they unstack?
   clear-equipment: false
 
+  # Should corpses be spawned when entity dies ("death animations")?
+  spawn-corpses: true
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

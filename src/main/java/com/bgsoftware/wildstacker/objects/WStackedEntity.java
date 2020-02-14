@@ -389,7 +389,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         setStackAmount(newStackAmount, true);
 
         if(newStackAmount >= 1){
-            spawnCorpse();
+            if(plugin.getSettings().spawnCorpses)
+                spawnCorpse();
         }
 
         else {

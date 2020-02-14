@@ -60,7 +60,7 @@ public final class EditorHandler {
             ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names",
             ENTITIES_SLOT_28 = "entities.next-stack-knockback", ENTITIES_SLOT_29 = "entities.default-unstack",
             ENTITIES_SLOT_30 = "entities.auto-exp-pickup", ENTITIES_SLOT_31 = "entities.egg-lay-multiply",
-            ENTITIES_SLOT_32 = "entities.clear-equipment";
+            ENTITIES_SLOT_32 = "entities.clear-equipment", ENTITIES_SLOT_33 = "entities.spawn-corpses";
 
     public final static String BUCKETS_SLOT_0 = "buckets.enabled", BUCKETS_SLOT_1 = "buckets.name-blacklist",
             BUCKETS_SLOT_2 = "buckets.max-stack";
