@@ -53,6 +53,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -741,6 +742,9 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
+            if(e.getTransformReason() != EntityTransformEvent.TransformReason.DROWNED)
+                return;
+
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
             if(stackedEntity.getStackAmount() > 1){
