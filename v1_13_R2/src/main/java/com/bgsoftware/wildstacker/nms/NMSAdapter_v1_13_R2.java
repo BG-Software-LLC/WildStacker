@@ -616,9 +616,13 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
         @Override
         public EntityType getSpawnedType() {
-            MinecraftKey key = getSpawner().getSpawner().getMobName();
-            EntityType entityType = key == null ? EntityType.PIG : EntityType.fromName(key.getKey());
-            return entityType == null ? EntityType.PIG : entityType;
+            try {
+                MinecraftKey key = getSpawner().getSpawner().getMobName();
+                EntityType entityType = key == null ? EntityType.PIG : EntityType.fromName(key.getKey());
+                return entityType == null ? EntityType.PIG : entityType;
+            }catch(Exception ex){
+                return EntityType.PIG;
+            }
         }
 
         @Override

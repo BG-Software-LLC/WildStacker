@@ -536,7 +536,11 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
 
         @Override
         public EntityType getSpawnedType() {
-            return EntityType.fromName(getSpawner().getSpawner().getMobName());
+            try {
+                return EntityType.fromName(getSpawner().getSpawner().getMobName());
+            }catch(Exception ex){
+                return EntityType.PIG;
+            }
         }
 
         @Override
