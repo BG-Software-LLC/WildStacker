@@ -307,6 +307,8 @@ entities:
     # A list of worlds that entities can be nerfed in.
     # If you want entities to be nerfed inside all worlds, set this to [].
     worlds: []
+    # Should nerfed entities be able to teleport?
+    teleport: false
 
   # Stack-down is a feature that will force entities to stack to other entities that are below their y level.
   # This feature is great for flying entities, like blazes and ghasts.

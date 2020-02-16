@@ -54,13 +54,14 @@ public final class EditorHandler {
             ENTITIES_SLOT_14 = "entities.stack-split", ENTITIES_SLOT_15 = "entities.linked-entities.enabled",
             ENTITIES_SLOT_16 = "entities.linked-entities.max-distance", ENTITIES_SLOT_17 = "entities.instant-kill",
             ENTITIES_SLOT_18 = "entities.nerfed-entities.whitelist", ENTITIES_SLOT_19 = "entities.nerfed-entities.blacklist",
-            ENTITIES_SLOT_20 = "entities.nerfed-entities.worlds", ENTITIES_SLOT_21 = "entities.stack-down.enabled",
-            ENTITIES_SLOT_22 = "entities.stack-down.stack-down-types", ENTITIES_SLOT_23 = "entities.keep-fire",
-            ENTITIES_SLOT_24 = "entities.mythic-mobs-custom-name", ENTITIES_SLOT_25 = "entities.keep-lowest-health",
-            ENTITIES_SLOT_26 = "entities.stack-after-breed", ENTITIES_SLOT_27 = "entities.hide-names",
-            ENTITIES_SLOT_28 = "entities.next-stack-knockback", ENTITIES_SLOT_29 = "entities.default-unstack",
-            ENTITIES_SLOT_30 = "entities.auto-exp-pickup", ENTITIES_SLOT_31 = "entities.egg-lay-multiply",
-            ENTITIES_SLOT_32 = "entities.clear-equipment", ENTITIES_SLOT_33 = "entities.spawn-corpses";
+            ENTITIES_SLOT_20 = "entities.nerfed-entities.worlds", ENTITIES_SLOT_21 = "entities.nerfed-entities.teleport",
+            ENTITIES_SLOT_22 = "entities.stack-down.enabled", ENTITIES_SLOT_23 = "entities.stack-down.stack-down-types",
+            ENTITIES_SLOT_24 = "entities.keep-fire", ENTITIES_SLOT_25 = "entities.mythic-mobs-custom-name",
+            ENTITIES_SLOT_26 = "entities.keep-lowest-health", ENTITIES_SLOT_27 = "entities.stack-after-breed",
+            ENTITIES_SLOT_28 = "entities.hide-names", ENTITIES_SLOT_29 = "entities.next-stack-knockback",
+            ENTITIES_SLOT_30 = "entities.default-unstack", ENTITIES_SLOT_31 = "entities.auto-exp-pickup",
+            ENTITIES_SLOT_32 = "entities.egg-lay-multiply", ENTITIES_SLOT_33 = "entities.clear-equipment",
+            ENTITIES_SLOT_34 = "entities.spawn-corpses";
 
     public final static String BUCKETS_SLOT_0 = "buckets.enabled", BUCKETS_SLOT_1 = "buckets.name-blacklist",
             BUCKETS_SLOT_2 = "buckets.max-stack";

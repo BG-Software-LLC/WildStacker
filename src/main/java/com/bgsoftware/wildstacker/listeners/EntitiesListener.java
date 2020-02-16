@@ -158,6 +158,13 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityNerfTeleport(EntityTeleportEvent e){
+        if(!plugin.getSettings().nerfedEntitiesTeleport && EntityUtils.isStackable(e.getEntity()) &&
+                WStackedEntity.of(e.getEntity()).isNerfed())
+            e.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
         if(!EntityUtils.isStackable(e.getEntity()))

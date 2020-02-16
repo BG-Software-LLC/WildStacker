@@ -49,8 +49,8 @@ public final class SettingsHandler {
     public final List<ParticleWrapper> itemsParticles;
 
     //Entities settings
-    public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, stackDownEnabled,
-            keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
+    public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
+            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
             entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, entitiesClearEquipment,
             spawnCorpses;
     public final long entitiesStackInterval;
@@ -158,6 +158,7 @@ public final class SettingsHandler {
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
+        nerfedEntitiesTeleport = cfg.getBoolean("entities.nerfed-entities.teleport", false);
         linkedEntitiesMaxDistance = cfg.getInt("entities.linked-entities.max-distance", 10);
         blacklistedEntities = cfg.getStringList("entities.blacklist");
         whitelistedEntities = cfg.getStringList("entities.whitelist");
