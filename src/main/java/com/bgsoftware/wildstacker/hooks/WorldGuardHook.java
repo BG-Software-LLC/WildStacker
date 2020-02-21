@@ -25,7 +25,12 @@ public final class WorldGuardHook {
                     Location location = new Location(new BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
                     applicableRegionSet = regionQuery.getApplicableRegions(location);
                 } catch (Throwable ex) {
-                    com.sk89q.worldguard.bukkit.RegionContainer regionContainer = WorldGuardPlugin.inst().getRegionContainer();
+                    com.sk89q.worldguard.bukkit.RegionContainer regionContainer;
+
+                    //noinspection JavaReflectionMemberAccess
+                    regionContainer = (com.sk89q.worldguard.bukkit.RegionContainer)
+                            WorldGuardPlugin.class.getMethod("getRegionContainer").invoke(WorldGuardPlugin.inst());
+
                     com.sk89q.worldguard.bukkit.RegionQuery regionQuery = regionContainer.createQuery();
                     applicableRegionSet = regionQuery.getApplicableRegions(bukkitLocation);
                 }
