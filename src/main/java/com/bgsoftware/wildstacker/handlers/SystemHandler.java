@@ -494,8 +494,8 @@ public final class SystemHandler implements SystemManager {
                                     !GeneralUtils.contains(plugin.getSettings().killTaskBlacklist, WStackedEntity.of(entity)))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
-                        if(((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
-                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1)) && !stackedEntity.hasNameTag())
+                        if(!applyTaskFilter || (((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
+                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1)) && !stackedEntity.hasNameTag()))
                             stackedEntity.remove();
                     });
 
@@ -504,7 +504,7 @@ public final class SystemHandler implements SystemManager {
                         .filter(entity -> entity instanceof Item && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity))
                         .forEach(entity -> {
                             StackedItem stackedItem = WStackedItem.of(entity);
-                            if((plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||
+                            if(!applyTaskFilter || (plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||
                                     (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= 1))
                                 stackedItem.remove();
                         });
