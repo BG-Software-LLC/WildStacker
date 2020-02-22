@@ -25,6 +25,11 @@ public final class ReflectionUtils {
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
+            try{
+                fieldMap.put(Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER, entityClass.getField("spawnedViaMobSpawner"));
+                fieldMap.put(Fields.ENTITY_AWARE, entityInsentientClass.getField("aware"));
+            }catch(Throwable ignored){}
+
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cs" :
