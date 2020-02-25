@@ -85,7 +85,7 @@ public final class EntityData {
                 if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
                     return false;
                 if (map.containsKey("Variant")) {
-                    if (((getInteger(map.get("Age")) & 255) != (getInteger(otherMap.get("Age")) & 255)))
+                    if(getInteger(map.get("Variant")) != getInteger(otherMap.get("Variant")))
                         return false;
                 }
             }
@@ -94,7 +94,7 @@ public final class EntityData {
                 if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
                     return false;
                 if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Age")) >>> 8) != (getInteger(otherMap.get("Age")) >>> 8))
+                    if ((getInteger(map.get("Variant")) >>> 8) != (getInteger(otherMap.get("Variant")) >>> 8))
                         return false;
                 }
             }
@@ -103,7 +103,7 @@ public final class EntityData {
                 if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
                     return false;
                 if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Age")) >> 16 & 255) != (getInteger(otherMap.get("Age")) >> 16 & 255))
+                    if ((getInteger(map.get("Variant")) >> 16 & 255) != (getInteger(otherMap.get("Variant")) >> 16 & 255))
                         return false;
                 }
             }
@@ -112,7 +112,7 @@ public final class EntityData {
                 if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
                     return false;
                 if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Age")) >> 24 & 255) != (getInteger(otherMap.get("Age")) >> 24 & 255))
+                    if ((getInteger(map.get("Variant")) >> 24 & 255) != (getInteger(otherMap.get("Variant")) >> 24 & 255))
                         return false;
                 }
             }
