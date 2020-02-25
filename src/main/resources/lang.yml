@@ -17,6 +17,9 @@ BARREL_TOGGLE_OFF: '&6&lWildStacker &7Barrels placement has been disabled.'
 # Called when player places a barrel but has no permission.
 BARREL_NO_PERMISSION: '&6&lWildStacker &7You don''t have permission to use barrels.'
 
+# Called when the chunk limit is exceeded.
+CHUNK_LIMIT_EXCEEDED: '&6&lWildStacker &7You exceeded the chunk limit of {0} for this chunk.'
+
 # Called when a player runs a command not in the required usage
 COMMAND_USAGE: '&6&lWildStacker &7Usage: /{0}'
 

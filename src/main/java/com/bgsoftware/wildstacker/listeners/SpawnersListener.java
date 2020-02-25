@@ -146,6 +146,7 @@ public final class SpawnersListener implements Listener {
             if(!spawnerOptional.isPresent()){
                 if(isChunkLimit(chunk, spawnerType)) {
                     e.setCancelled(true);
+                    Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()) + " Spawners");
                     return;
                 }
 

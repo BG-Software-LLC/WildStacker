@@ -103,6 +103,7 @@ public final class BarrelsListener implements Listener {
         stackedBarrel.runStackAsync(blockOptional -> {
             if(!blockOptional.isPresent()) {
                 if(isChunkLimit(chunk)) {
+                    Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)) + " Barrels");
                     e.setCancelled(true);
                     return;
                 }
