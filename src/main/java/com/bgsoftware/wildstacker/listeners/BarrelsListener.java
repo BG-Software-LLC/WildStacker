@@ -55,19 +55,13 @@ public final class BarrelsListener implements Listener {
     private WildStackerPlugin plugin;
     private Set<UUID> barrelsToggleCommandPlayers;
 
+    private Map<UUID, Location> barrelPlaceInventory = new HashMap<>();
+
     public BarrelsListener(WildStackerPlugin plugin){
         this.plugin = plugin;
         this.barrelsToggleCommandPlayers = new HashSet<>();
         if(ServerVersion.isAtLeast(ServerVersion.v1_9))
             plugin.getServer().getPluginManager().registerEvents(new CauldronChangeListener(), plugin);
-    }
-
-    private boolean isBarrelBlock(Block block){
-        Key key = Key.of(ItemUtils.getFromBlock(block));
-        return (plugin.getSettings().whitelistedBarrels.isEmpty() ||
-                plugin.getSettings().whitelistedBarrels.contains(key)) &&
-                !plugin.getSettings().blacklistedBarrels.contains(key) &&
-                !plugin.getSettings().barrelsDisabledWorlds.contains(block.getWorld().getName());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -153,15 +147,6 @@ public final class BarrelsListener implements Listener {
         }
     }
 
-    private void revokeItem(Player player, ItemStack itemInHand){
-        if(player.getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = itemInHand.clone();
-            inHand.setAmount(inHand.getAmount() - 1);
-            //Using this method as remove() doesn't affect off hand
-            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelBreak(BlockBreakEvent e){
         if(!plugin.getSettings().barrelsStackingEnabled || e.getBlock().getType() != Material.CAULDRON)
@@ -194,7 +179,7 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(ItemUtils.isOffHand(e) || e.getItem() != null || e.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if(ItemUtils.isOffHand(e) || e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
         if(!plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
@@ -208,7 +193,7 @@ public final class BarrelsListener implements Listener {
                     plugin.getSettings().barrelsPlaceInventoryTitle.replace("{0}", EntityUtils.getFormattedType(stackedBarrel.getType().name()))));
         }
 
-        else {
+        else if(e.getItem() == null){
             stackedBarrel.runUnstack(1);
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
@@ -226,8 +211,6 @@ public final class BarrelsListener implements Listener {
                 e.getClickedBlock().setType(Material.AIR);
         }
     }
-
-    private Map<UUID, Location> barrelPlaceInventory = new HashMap<>();
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryPlaceMove(InventoryClickEvent e){
@@ -370,6 +353,23 @@ public final class BarrelsListener implements Listener {
                 break;
             }
         }
+    }
+
+    private void revokeItem(Player player, ItemStack itemInHand){
+        if(player.getGameMode() != GameMode.CREATIVE) {
+            ItemStack inHand = itemInHand.clone();
+            inHand.setAmount(inHand.getAmount() - 1);
+            //Using this method as remove() doesn't affect off hand
+            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
+        }
+    }
+
+    private boolean isBarrelBlock(Block block){
+        Key key = Key.of(ItemUtils.getFromBlock(block));
+        return (plugin.getSettings().whitelistedBarrels.isEmpty() ||
+                plugin.getSettings().whitelistedBarrels.contains(key)) &&
+                !plugin.getSettings().blacklistedBarrels.contains(key) &&
+                !plugin.getSettings().barrelsDisabledWorlds.contains(block.getWorld().getName());
     }
 
     private boolean isChunkLimit(Chunk chunk){
