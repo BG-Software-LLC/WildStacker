@@ -88,7 +88,7 @@ public final class EntitiesListener implements Listener {
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
-            plugin.getServer().getPluginManager().registerEvents(new TransformListener(), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
@@ -745,7 +745,13 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    static class TransformListener implements Listener {
+    private static class TransformListener implements Listener {
+
+        private WildStackerPlugin plugin;
+
+        TransformListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
@@ -755,8 +761,20 @@ public final class EntitiesListener implements Listener {
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
             if(stackedEntity.getStackAmount() > 1){
-                StackedEntity transformed = WStackedEntity.of(e.getTransformedEntity());
-                transformed.setStackAmount(stackedEntity.getStackAmount(), true);
+                StackedEntity transformedEntity = WStackedEntity.of(e.getTransformedEntity());
+                boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled || !transformedEntity.isWhitelisted() ||
+                        transformedEntity.isBlacklisted() || transformedEntity.isWorldDisabled();
+
+                if(multipleEntities){
+                    for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++){
+                        plugin.getSystemManager().spawnEntityWithoutStacking(e.getTransformedEntity().getLocation(), e.getTransformedEntity().getClass());
+                    }
+                }
+                else {
+                    StackedEntity transformed = WStackedEntity.of(e.getTransformedEntity());
+                    transformed.setStackAmount(stackedEntity.getStackAmount(), true);
+                }
+
                 stackedEntity.remove();
             }
         }
