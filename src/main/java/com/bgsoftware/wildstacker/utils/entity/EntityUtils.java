@@ -167,6 +167,9 @@ public final class EntityUtils {
                         .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
                         .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
             }
+            else{
+                return "";
+            }
         }
 
         String[] nameSections = customName.split("\n");
