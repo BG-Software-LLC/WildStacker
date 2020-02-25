@@ -102,17 +102,6 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        //Next Spawner Placement
-        if(!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
-            for (BlockFace blockFace : blockFaces) {
-                if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()){
-                    Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
-                    e.setCancelled(true);
-                    return;
-                }
-            }
-        }
-
         boolean replaceAir = false;
         ItemStack limitItem = null;
         int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
@@ -158,6 +147,17 @@ public final class SpawnersListener implements Listener {
                 if(isChunkLimit(chunk, spawnerType)) {
                     e.setCancelled(true);
                     return;
+                }
+
+                //Next Spawner Placement
+                if(!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
+                    for (BlockFace blockFace : blockFaces) {
+                        if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()){
+                            Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
+                            e.setCancelled(true);
+                            return;
+                        }
+                    }
                 }
 
                 if(plugin.getSettings().onlyOneSpawner){
