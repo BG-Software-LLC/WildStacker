@@ -67,6 +67,9 @@ NEXT_SPAWNER_PLACEMENT: '&6&lWildStacker &7You cannot place spawners next to oth
 # Called when running a stacker command without permission.
 NO_PERMISSION: '&fUnknown command. Type "/help" for help.'
 
+# Called when placing spawners but there's already a spawner in the merge-radius.
+ONLY_ONE_SPAWNER: '&6&lWildStacker &7You can only have one spawner in a radius of 1 block from other spawners.'
+
 # Called when a player successfully reloaded all configuration files.
 RELOAD_SUCCESS: '&6&lWildStacker &7Successfully reloaded the configuration files.'
 

@@ -47,6 +47,7 @@ public final class Locale {
     public static Locale KILL_ALL_OPS = new Locale("KILL_ALL_OPS");
     public static Locale NEXT_SPAWNER_PLACEMENT = new Locale("NEXT_SPAWNER_PLACEMENT");
     public static Locale NO_PERMISSION = new Locale("NO_PERMISSION");
+    public static Locale ONLY_ONE_SPAWNER = new Locale("ONLY_ONE_SPAWNER");
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");
     public static Locale SPAWNER_BREAK_NOT_ENOUGH_MONEY = new Locale("SPAWNER_BREAK_NOT_ENOUGH_MONEY");

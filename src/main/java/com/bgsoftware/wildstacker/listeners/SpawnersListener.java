@@ -164,6 +164,7 @@ public final class SpawnersListener implements Listener {
                 if(plugin.getSettings().onlyOneSpawner){
                     for(StackedSpawner nearbySpawner : stackedSpawner.getNearbySpawners()){
                         if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()) {
+                            Locale.ONLY_ONE_SPAWNER.send(e.getPlayer());
                             e.setCancelled(true);
                             return;
                         }
