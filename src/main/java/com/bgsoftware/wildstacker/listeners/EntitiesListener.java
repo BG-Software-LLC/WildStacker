@@ -430,8 +430,7 @@ public final class EntitiesListener implements Listener {
         if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!PluginHooks.isMergedSpawnersEnabled && plugin.getSettings().linkedEntitiesEnabled &&
-                e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
+        if (!PluginHooks.isMergedSpawnersEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
         Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
