@@ -413,6 +413,8 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         nbtTagCompound.remove("ArmorItem");
         nbtTagCompound.remove("Equipment");
         nbtTagCompound.remove("DropChances");
+        nbtTagCompound.remove("Leash");
+        nbtTagCompound.remove("Leashed");
         if(livingEntity instanceof Zombie)
             ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
 
