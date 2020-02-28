@@ -601,7 +601,7 @@ public final class EntitiesListener implements Listener {
             }else{
                 stackedEntity.runStackAsync(null);
             }
-        });
+        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
