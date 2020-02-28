@@ -161,7 +161,7 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
 
         StackService.execute(this, () -> {
             synchronized (stackingMutex) {
-                boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+                boolean chunkMerge = plugin.getSettings().chunkMergeBarrels;
                 Location blockLocation = getLocation();
 
                 Stream<StackedBarrel> barrelStream;
