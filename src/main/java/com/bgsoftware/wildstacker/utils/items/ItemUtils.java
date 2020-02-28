@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -59,7 +60,7 @@ public final class ItemUtils {
 
     public static void dropItem(ItemStack itemStack, Location location){
         if(!Bukkit.isPrimaryThread()){
-            Bukkit.getScheduler().runTask(plugin, () -> dropItem(itemStack, location));
+            Executor.sync(() -> dropItem(itemStack, location));
             return;
         }
 

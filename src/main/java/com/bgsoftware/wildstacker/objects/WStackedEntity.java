@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -168,6 +169,13 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
+
+        //Drop leash if exists
+        if(object.isLeashed()){
+            ItemUtils.dropItem(new ItemStack(Material.LEASH), getLocation());
+            object.setLeashHolder(null);
+        }
+
         //Should be triggered synced if it's a slime
         if(EntityTypes.fromEntity(object).isSlime())
             Executor.sync(object::remove);
