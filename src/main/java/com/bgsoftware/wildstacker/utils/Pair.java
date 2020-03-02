@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.utils;
 
-public final class Pair<K, V> {
+import java.util.Map;
+
+public final class Pair<K, V> implements Map.Entry<K, V> {
 
     private K key;
     private V value;
@@ -17,4 +19,11 @@ public final class Pair<K, V> {
     public V getValue() {
         return value;
     }
+
+
+    @Override
+    public V setValue(V value) {
+        throw new UnsupportedOperationException("Cannot use the setValue method of Pair");
+    }
+
 }
