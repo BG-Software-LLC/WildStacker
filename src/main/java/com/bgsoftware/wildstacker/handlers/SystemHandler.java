@@ -436,14 +436,21 @@ public final class SystemHandler implements SystemManager {
 
         itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
 
-        return WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM,
-                item -> WStackedItem.of(item).setStackAmount(amount, true)));
+        return WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
+            StackedItem stackedItem = WStackedItem.of(item);
+            stackedItem.setStackAmount(amount, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+        }));
     }
 
     @Override
     public void spawnCorpse(StackedEntity stackedEntity) {
-        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(),
-                stackedEntity.getType().getEntityClass(), SpawnCause.CUSTOM);
+        Class<? extends Entity> entityClass = stackedEntity.getType().getEntityClass();
+
+        if(entityClass == null)
+            return;
+
+        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(), entityClass, SpawnCause.CUSTOM);
+
         if(livingEntity != null) {
             EntityData.of(stackedEntity).applyEntityData(livingEntity);
             EntityStorage.setMetadata(livingEntity, "corpse", null);

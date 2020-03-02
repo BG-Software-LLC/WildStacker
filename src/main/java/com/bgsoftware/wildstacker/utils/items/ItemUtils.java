@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
@@ -69,7 +70,7 @@ public final class ItemUtils {
 
         int amount = itemStack.getAmount();
 
-        if(plugin.getSettings().itemsStackingEnabled){
+        if(plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())){
             ItemStack cloned = itemStack.clone();
             cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
             plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
@@ -400,6 +401,12 @@ public final class ItemUtils {
             default:
                 return false;
         }
+    }
+
+    private static boolean canBeStacked(ItemStack itemStack, World world){
+        return !plugin.getSettings().blacklistedItems.contains(itemStack) &&
+                (plugin.getSettings().whitelistedItems.isEmpty() || plugin.getSettings().whitelistedItems.contains(itemStack)) &&
+                !plugin.getSettings().itemsDisabledWorlds.contains(world.getName());
     }
 
 }
