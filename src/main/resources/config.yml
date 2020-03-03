@@ -150,6 +150,11 @@ items:
   # Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)
   max-pickup-delay: false
 
+  # How much time should be passed between auto-stacking? (in ticks)
+  # If you wish to disable the auto-stacking task, set the stack-interval to 0.
+  # By default, all items are stacked once, when they spawn.
+  stack-interval: 0
+
 # Here you can configurable all features related to stacked entities.
 entities:
   # Should entities get stacked on the server?

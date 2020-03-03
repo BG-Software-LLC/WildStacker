@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.menu.EditorMenu;
+import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -54,6 +55,7 @@ public final class CommandReload implements ICommand {
             Locale.reload();
             KillTask.start();
             StackTask.start();
+            ItemsMerger.start();
             EditorMenu.reloadConfiguration();
             Locale.RELOAD_SUCCESS.send(sender);
         });

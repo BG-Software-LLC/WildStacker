@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -68,6 +69,7 @@ public final class SystemHandler implements SystemManager {
         Executor.sync(() -> {
             KillTask.start();
             StackTask.start();
+            ItemsMerger.start();
         }, 1L);
 
         //Start the auto-clear

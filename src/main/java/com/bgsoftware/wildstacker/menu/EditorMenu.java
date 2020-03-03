@@ -49,7 +49,8 @@ public abstract class EditorMenu extends WildMenu {
             ITEMS_SLOT_10 = "items.fix-stack", ITEMS_SLOT_11 = "items.item-display",
             ITEMS_SLOT_12 = "items.names-toggle.enabled", ITEMS_SLOT_13 = "items.names-toggle.command",
             ITEMS_SLOT_14 = "items.pickup-sound.enabled", ITEMS_SLOT_15 = "items.pickup-sound.volume",
-            ITEMS_SLOT_16 = "items.pickup-sound.pitch", ITEMS_SLOT_17 = "items.max-pickup-delay";
+            ITEMS_SLOT_16 = "items.pickup-sound.pitch", ITEMS_SLOT_17 = "items.max-pickup-delay",
+            ITEMS_SLOT_18 = "items.stack-interval";
 
     public final static String ENTITIES_SLOT_0 = "entities.enabled", ENTITIES_SLOT_1 = "entities.merge-radius",
             ENTITIES_SLOT_2 = "entities.custom-name", ENTITIES_SLOT_3 = "entities.blacklist",

@@ -48,6 +48,7 @@ public final class SettingsHandler {
     public final KeyMap<Integer> itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
     public final List<ParticleWrapper> itemsParticles;
+    public final long itemsStackInterval;
 
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
@@ -148,6 +149,7 @@ public final class SettingsHandler {
         itemsSoundVolume = (float) cfg.getDouble("items.pickup-sound.volume");
         itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
         itemsMaxPickupDelay = cfg.getBoolean("items.max-pickup-delay", false);
+        itemsStackInterval = cfg.getLong("items.stack-interval", 0L);
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesParticlesEnabled = cfg.getBoolean("entities.particles", true);

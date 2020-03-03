@@ -20,7 +20,7 @@ public final class EditorItemsMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
+        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 27, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
         EditorItemsMenu editorItemsMenu = new EditorItemsMenu(inventory);
 
         buildInventory(editorItemsMenu, itemsFields, "items.");
