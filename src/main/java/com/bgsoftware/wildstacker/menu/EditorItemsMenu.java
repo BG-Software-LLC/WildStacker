@@ -8,7 +8,11 @@ import org.bukkit.inventory.Inventory;
 
 public final class EditorItemsMenu extends EditorMenu {
 
-    private static EditorItemsMenu NULL_HOLDER = new EditorItemsMenu(null);
+    private final static EditorItemsMenu NULL_HOLDER = new EditorItemsMenu(null);
+
+    private final static String[] sectionsPaths = new String[] {
+            "limits"
+    };
 
     private EditorItemsMenu(Inventory inventory){
         super(inventory, "ITEMS_SLOT_", "itemsEditor");
@@ -20,10 +24,8 @@ public final class EditorItemsMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 27, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
+        Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings", "items.", new String[0], sectionsPaths);
         EditorItemsMenu editorItemsMenu = new EditorItemsMenu(inventory);
-
-        buildInventory(editorItemsMenu, itemsFields, "items.");
 
         Executor.sync(() -> player.openInventory(editorItemsMenu.getInventory()));
     }

@@ -8,7 +8,11 @@ import org.bukkit.inventory.Inventory;
 
 public final class EditorGeneralMenu extends EditorMenu {
 
-    private static EditorGeneralMenu NULL_HOLDER = new EditorGeneralMenu(null);
+    private final static EditorGeneralMenu NULL_HOLDER = new EditorGeneralMenu(null);
+
+    private final static String[] ignorePaths = new String[] {
+            "inspect-tool", "simulate-tool", "items", "entities", "spawners", "barrels", "buckets", "stews"
+    };
 
     private EditorGeneralMenu(Inventory inventory){
         super(inventory, "GENERAL_SLOT_", "generalEditor");
@@ -20,10 +24,8 @@ public final class EditorGeneralMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings");
+        Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings", "", ignorePaths, new String[0]);
         EditorGeneralMenu editorGeneralMenu = new EditorGeneralMenu(inventory);
-
-        buildInventory(editorGeneralMenu, generalFields, "");
 
         Executor.sync(() -> player.openInventory(editorGeneralMenu.getInventory()));
     }

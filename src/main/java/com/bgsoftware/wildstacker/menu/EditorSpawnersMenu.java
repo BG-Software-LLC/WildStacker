@@ -8,7 +8,15 @@ import org.bukkit.inventory.Inventory;
 
 public final class EditorSpawnersMenu extends EditorMenu {
 
-    private static EditorSpawnersMenu NULL_HOLDER = new EditorSpawnersMenu(null);
+    private final static EditorSpawnersMenu NULL_HOLDER = new EditorSpawnersMenu(null);
+
+    private final static String[] ignorePaths = new String[] {
+            "break-menu", "break-charge", "place-charge"
+    };
+
+    private final static String[] sectionsPaths = new String[] {
+            "limits"
+    };
 
     private EditorSpawnersMenu(Inventory inventory){
         super(inventory, "SPAWNERS_SLOT_", "spawnersEditor");
@@ -20,10 +28,8 @@ public final class EditorSpawnersMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 9 * 5, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
+        Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings", "spawners.", ignorePaths, sectionsPaths);
         EditorSpawnersMenu editorSpawnersMenu = new EditorSpawnersMenu(inventory);
-
-        buildInventory(editorSpawnersMenu, spawnersFields, "spawners.");
 
         Executor.sync(() -> player.openInventory(editorSpawnersMenu.getInventory()));
     }

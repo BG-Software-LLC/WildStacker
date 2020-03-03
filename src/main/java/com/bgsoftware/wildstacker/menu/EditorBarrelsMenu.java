@@ -8,7 +8,11 @@ import org.bukkit.inventory.Inventory;
 
 public final class EditorBarrelsMenu extends EditorMenu {
 
-    private static EditorBarrelsMenu NULL_HOLDER = new EditorBarrelsMenu(null);
+    private final static EditorBarrelsMenu NULL_HOLDER = new EditorBarrelsMenu(null);
+
+    private final static String[] sectionsPaths = new String[] {
+            "limits"
+    };
 
     private EditorBarrelsMenu(Inventory inventory){
         super(inventory, "BARRELS_SLOT_", "barrelsEditor");
@@ -20,10 +24,8 @@ public final class EditorBarrelsMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 9 * 2, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings");
+        Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings", "barrels.", new String[0], sectionsPaths);
         EditorBarrelsMenu editorBarrelsMenu = new EditorBarrelsMenu(inventory);
-
-        buildInventory(editorBarrelsMenu, barrelsFields, "barrels.");
 
         Executor.sync(() -> player.openInventory(editorBarrelsMenu.getInventory()));
     }

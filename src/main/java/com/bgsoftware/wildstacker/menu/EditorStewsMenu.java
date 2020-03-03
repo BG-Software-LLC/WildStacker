@@ -8,7 +8,7 @@ import org.bukkit.inventory.Inventory;
 
 public final class EditorStewsMenu extends EditorMenu {
 
-    private static EditorStewsMenu NULL_HOLDER = new EditorStewsMenu(null);
+    private final static EditorStewsMenu NULL_HOLDER = new EditorStewsMenu(null);
 
     private EditorStewsMenu(Inventory inventory){
         super(inventory, "STEWS_SLOT_", "stewsEditor");
@@ -20,10 +20,8 @@ public final class EditorStewsMenu extends EditorMenu {
             return;
         }
 
-        Inventory inventory = Bukkit.createInventory(NULL_HOLDER, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings");
+        Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings", "stews.", new String[0], new String[0]);
         EditorStewsMenu editorStewsMenu = new EditorStewsMenu(inventory);
-
-        buildInventory(editorStewsMenu, stewsFields, "stews.");
 
         Executor.sync(() -> player.openInventory(editorStewsMenu.getInventory()));
     }
