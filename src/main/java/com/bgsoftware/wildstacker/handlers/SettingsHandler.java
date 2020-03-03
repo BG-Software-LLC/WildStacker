@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
+import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
 import com.bgsoftware.wildstacker.utils.Pair;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
@@ -214,7 +215,7 @@ public final class SettingsHandler {
         spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory.enabled", false);
         spawnersPlaceMenuTitle = ChatColor.translateAlternateColorCodes('&',
                 cfg.getString("spawners.place-inventory.title", "Add items here ({0})"));
-        plugin.getBreakMenuHandler().loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
+        SpawnersBreakMenu.loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
         spawnersBreakCharge = new KeyMap<>();

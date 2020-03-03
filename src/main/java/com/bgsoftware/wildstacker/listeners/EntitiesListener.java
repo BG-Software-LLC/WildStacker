@@ -426,6 +426,12 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
+        //Chunk Limit
+        Executor.sync(() -> {
+            if(isChunkLimit(e.getLocation().getChunk()))
+                stackedEntity.remove();
+        }, 5L);
+
         //EpicSpawners has it's own event
         if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
@@ -445,12 +451,6 @@ public final class EntitiesListener implements Listener {
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
-
-        //Chunk Limit
-        Executor.sync(() -> {
-            if(isChunkLimit(e.getLocation().getChunk()))
-                stackedEntity.remove();
-        }, 2L);
     }
 
     private int nextEntityStackAmount = -1;

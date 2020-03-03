@@ -5,9 +5,7 @@ import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
-import com.bgsoftware.wildstacker.handlers.BreakMenuHandler;
 import com.bgsoftware.wildstacker.handlers.DataHandler;
-import com.bgsoftware.wildstacker.handlers.EditorHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
@@ -15,15 +13,16 @@ import com.bgsoftware.wildstacker.handlers.SystemHandler;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
-import com.bgsoftware.wildstacker.listeners.EditorListener;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.listeners.ItemsListener;
+import com.bgsoftware.wildstacker.listeners.MenusListener;
 import com.bgsoftware.wildstacker.listeners.NoClaimConflictListener;
 import com.bgsoftware.wildstacker.listeners.PlayersListener;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
+import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -48,8 +47,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private SystemHandler systemManager;
     private DataHandler dataHandler;
     private ProvidersHandler providersHandler;
-    private EditorHandler editorHandler;
-    private BreakMenuHandler breakMenuHandler;
     private LootHandler lootHandler;
 
     private NMSAdapter nmsAdapter;
@@ -84,27 +81,27 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         GlowEnchantment.registerEnchantment();
 
-        breakMenuHandler = new BreakMenuHandler();
         settingsHandler = new SettingsHandler(this);
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);
         providersHandler = new ProvidersHandler(this);
-        editorHandler = new EditorHandler(this);
         lootHandler = new LootHandler(this);
+
+        EditorMenu.init(this);
 
         Locale.reload();
 
-        getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
+        getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
+        getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
         getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
         getServer().getPluginManager().registerEvents(new ItemsListener(this), this);
-        getServer().getPluginManager().registerEvents(new SpawnersListener(this), this);
-        getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
-        getServer().getPluginManager().registerEvents(new EditorListener(this), this);
-        getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
+        getServer().getPluginManager().registerEvents(new MenusListener(), this);
         getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
-        getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
+        getServer().getPluginManager().registerEvents(new SpawnersListener(this), this);
         getServer().getPluginManager().registerEvents(new StewListener(this), this);
+        getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
         EventsListener.register(this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);
@@ -183,14 +180,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public LootHandler getLootHandler() {
         return lootHandler;
-    }
-
-    public BreakMenuHandler getBreakMenuHandler() {
-        return breakMenuHandler;
-    }
-
-    public EditorHandler getEditor() {
-        return editorHandler;
     }
 
     public ProvidersHandler getProviders(){

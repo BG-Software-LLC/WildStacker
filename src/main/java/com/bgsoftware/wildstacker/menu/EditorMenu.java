@@ -1,32 +1,39 @@
-package com.bgsoftware.wildstacker.handlers;
+package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
+import com.bgsoftware.wildstacker.handlers.SettingsHandler;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
-public final class EditorHandler {
+public abstract class EditorMenu extends WildMenu {
 
-    private final Set<Field> generalFields = new HashSet<>(), itemsFields = new HashSet<>(), entitiesFields = new HashSet<>(),
+    protected static final Set<Field> generalFields = new HashSet<>(), itemsFields = new HashSet<>(), entitiesFields = new HashSet<>(),
             bucketsFields = new HashSet<>(), spawnersFields = new HashSet<>(), barrelsFields = new HashSet<>(), stewsFields = new HashSet<>();
 
-    private WildStackerPlugin plugin;
-    private ItemStack[] settingsEditor;
+    protected static final Set<UUID> noResetClose = new HashSet<>();
+    public static final Map<UUID, String> configValues = new HashMap<>();
+    public static final Map<UUID, String> lastInventories = new HashMap<>();
+    public static final Map<String, EditorMenu> editorMenus = new HashMap<>();
 
-    public CommentedConfiguration config;
+    public static CommentedConfiguration config;
 
     public final static String GENERAL_SLOT_0 = "give-item-name", GENERAL_SLOT_1 = "database.delete-invalid-worlds",
             GENERAL_SLOT_2 = "database.delete-invalid-blocks", GENERAL_SLOT_3 = "kill-task.interval",
@@ -96,15 +103,80 @@ public final class EditorHandler {
 
     public final static String STEWS_SLOT_0 = "stews.enabled", STEWS_SLOT_1 = "stews.max-stack";
 
-    public EditorHandler(WildStackerPlugin plugin){
-        this.plugin = plugin;
+    private final Inventory inventory;
+    private final String fieldPrefix, editorIdentifier;
 
+    protected EditorMenu(Inventory inventory, String fieldPrefix, String editorIdentifier){
+        this.inventory = inventory;
+        this.fieldPrefix = fieldPrefix;
+        this.editorIdentifier = editorIdentifier;
+        editorMenus.put(editorIdentifier, this);
+    }
+
+    public boolean onEditorClick(InventoryClickEvent e){
+        return false;
+    }
+
+    @Override
+    public void onButtonClick(InventoryClickEvent e) {
+        Player player = (Player) e.getWhoClicked();
+
+        e.setCancelled(true);
+
+        if(!onEditorClick(e)){
+            lastInventories.put(player.getUniqueId(), editorIdentifier);
+        }
+
+        try{
+            String value = (String) EditorMenu.class.getField(fieldPrefix + e.getRawSlot()).get(null);
+            configValues.put(player.getUniqueId(), value);
+            player.closeInventory();
+            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
+
+            if(config.isList(configValues.get(player.getUniqueId())) ||
+                    config.isConfigurationSection(configValues.get(player.getUniqueId()))){
+                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
+            }
+        }catch(Exception ignored){}
+    }
+
+    @Override
+    public void onMenuClose(InventoryCloseEvent e) {
+        if(configValues.containsKey(e.getPlayer().getUniqueId()))
+            return;
+
+        Player player = (Player) e.getPlayer();
+
+        Executor.sync(() -> {
+            if(e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")){
+                if(!noResetClose.contains(player.getUniqueId())) {
+                    Executor.async(EditorMenu::reloadConfiguration);
+                }
+            }
+
+            else {
+                Inventory topInventory = e.getView().getTopInventory();
+                InventoryHolder inventoryHolder = topInventory == null ? null : topInventory.getHolder();
+                if(inventoryHolder instanceof EditorMenu && !(inventoryHolder instanceof EditorMainMenu)){
+                    noResetClose.remove(player.getUniqueId());
+                    EditorMainMenu.open(player);
+                }
+            }
+        }, 1L);
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public static void init(WildStackerPlugin plugin){
         File file = new File(plugin.getDataFolder(), "config.yml");
 
-        this.config = CommentedConfiguration.loadConfiguration(file);
-        this.config.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
+        config = CommentedConfiguration.loadConfiguration(file);
+        config.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
 
-        for(Field field : getClass().getDeclaredFields()){
+        for(Field field : EditorMenu.class.getDeclaredFields()){
             if(field.getName().startsWith("GENERAL")){
                 generalFields.add(field);
             }
@@ -127,16 +199,40 @@ public final class EditorHandler {
                 stewsFields.add(field);
             }
         }
-
-        loadSettingsEditor();
     }
 
-    public void saveConfiguration(){
+    public static void open(Player player){
+        switch (lastInventories.getOrDefault(player.getUniqueId(), "")){
+            case "generalEditor":
+                EditorGeneralMenu.open(player);
+                break;
+            case "itemsEditor":
+                EditorItemsMenu.open(player);
+                break;
+            case "entitiesEditor":
+                EditorEntitiesMenu.open(player);
+                break;
+            case "spawnersEditor":
+                EditorSpawnersMenu.open(player);
+                break;
+            case "barrelsEditor":
+                EditorBarrelsMenu.open(player);
+                break;
+            case "bucketsEditor":
+                EditorBucketsMenu.open(player);
+                break;
+            case "stewsEditor":
+                EditorStewsMenu.open(player);
+                break;
+        }
+    }
+
+    protected static void saveConfiguration(){
         config.save(new File(plugin.getDataFolder(), "config.yml"));
         SettingsHandler.reload();
     }
 
-    public void reloadConfiguration(){
+    public static void reloadConfiguration(){
         try {
             config.load(new File(plugin.getDataFolder(), "config.yml"));
         }catch(Exception ex){
@@ -144,193 +240,22 @@ public final class EditorHandler {
         }
     }
 
-    public Inventory getSettingsEditor(){
-        Inventory editor = Bukkit.createInventory(null, settingsEditor.length, "" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker");
-        editor.setContents(settingsEditor);
-        return editor;
-    }
-
-    public void openGeneralEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openGeneralEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings");
-        buildInventory(editor, generalFields, "");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openItemsEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openItemsEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 18, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Items Settings");
-        buildInventory(editor, itemsFields, "items.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openEntitiesEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openEntitiesEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 9 * 4, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings");
-        buildInventory(editor, entitiesFields, "entities.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openBucketsEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openBucketsEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings");
-        buildInventory(editor, bucketsFields, "buckets.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openSpawnersEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openSpawnersEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 9 * 5, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings");
-        buildInventory(editor, spawnersFields, "spawners.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openBarrelsEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openBarrelsEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 9 * 2, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings");
-        buildInventory(editor, barrelsFields, "barrels.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openStewsEditor(Player player){
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> openStewsEditor(player));
-            return;
-        }
-
-        Inventory editor = Bukkit.createInventory(null, 9, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings");
-        buildInventory(editor, stewsFields, "stews.");
-
-        Executor.sync(() -> player.openInventory(editor));
-    }
-
-    public void openEditor(Player player, String editor){
-        switch (editor){
-            case "generalEditor":
-                openGeneralEditor(player);
-                break;
-            case "itemsEditor":
-                openItemsEditor(player);
-                break;
-            case "entitiesEditor":
-                openEntitiesEditor(player);
-                break;
-            case "bucketsEditor":
-                openBucketsEditor(player);
-                break;
-            case "spawnersEditor":
-                openSpawnersEditor(player);
-                break;
-            case "barrelsEditor":
-                openBarrelsEditor(player);
-                break;
-            case "stewsEditor":
-                openStewsEditor(player);
-        }
-    }
-
-    private void loadSettingsEditor(){
-        Inventory editor = Bukkit.createInventory(null, 9 * 6);
-
-        ItemStack glassPane = new ItemBuilder(Materials.BLACK_STAINED_GLASS_PANE).withName("&6").build();
-
-        for(int i = 0; i < 9; i++)
-            editor.setItem(i, glassPane);
-
-        for(int i = 45; i < 54; i++)
-            editor.setItem(i, glassPane);
-
-        editor.setItem(9, glassPane);
-        editor.setItem(17, glassPane);
-        editor.setItem(18, glassPane);
-        editor.setItem(26, glassPane);
-        editor.setItem(27, glassPane);
-        editor.setItem(35, glassPane);
-        editor.setItem(36, glassPane);
-        editor.setItem(44, glassPane);
-
-        editor.setItem(19, new ItemBuilder(Materials.MAP)
-                .withName("&6General Settings").withLore("&7Click to edit general settings.").build());
-
-        editor.setItem(21, new ItemBuilder(Material.GOLD_INGOT)
-                .withName("&6Items Settings").withLore("&7Click to edit items settings.").build());
-
-        editor.setItem(23, new ItemBuilder(Material.ROTTEN_FLESH)
-                .withName("&6Entities Settings").withLore("&7Click to edit entities settings.").build());
-
-        editor.setItem(25, new ItemBuilder(Material.BUCKET)
-                .withName("&6Buckets Settings").withLore("&7Click to edit buckets settings.").build());
-
-        editor.setItem(29, new ItemBuilder(Materials.SPAWNER)
-                .withName("&6Spawner Settings").withLore("&7Click to edit spawners settings.").build());
-
-        editor.setItem(31, new ItemBuilder(Materials.CAULDRON)
-                .withName("&6Barrels Settings").withLore("&7Click to edit barrels settings.").build());
-
-        editor.setItem(33, new ItemBuilder(Materials.MUSHROOM_STEW)
-                .withName("&6Stews Settings").withLore("&7Click to edit stews settings.").build());
-
-        editor.setItem(49, new ItemBuilder(Material.EMERALD)
-                .withName("&aSave Changes").withLore("&7Click to save all changes.").build());
-
-        settingsEditor = editor.getContents();
-    }
-
-    private String getFormattedName(String name){
-        StringBuilder stringBuilder = new StringBuilder();
-
-        name = name.replace("-", " ").replace(".", "_").replace(" ", "_");
-
-        for (String section : name.split("_")) {
-            stringBuilder.append(section.substring(0, 1).toUpperCase()).append(section.substring(1).toLowerCase()).append(" ");
-        }
-
-        return stringBuilder.substring(0, stringBuilder.length() - 1);
-    }
-
-    private void buildInventory(Inventory inventory, Set<Field> fields, String pathPrefix){
+    protected static void buildInventory(EditorMenu editorMenu, Set<Field> fields, String pathPrefix){
         for(Field field : fields){
             String path;
 
             try{
-                path = (String) field.get(this);
+                path = (String) field.get(editorMenu);
             }catch(Exception ex){
                 ex.printStackTrace();
                 continue;
             }
 
             int slot = Integer.parseInt(field.getName().split("_")[2]);
-            ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" + getFormattedName(path.replaceFirst(pathPrefix, "")));
+            ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" +
+                    EntityUtils.getFormattedType(path.replaceFirst(pathPrefix, "")
+                            .replace("-", "_").replace(".", "_").replace(" ", "_"))
+            );
 
             if(config.isBoolean(path))
                 itemBuilder.withLore("&7Value: " + config.getBoolean(path));
@@ -345,7 +270,7 @@ public final class EditorHandler {
             else if(config.isConfigurationSection(path))
                 itemBuilder.withLore("&7Value:", config.getConfigurationSection(path));
 
-            inventory.setItem(slot, itemBuilder.build());
+            editorMenu.inventory.setItem(slot, itemBuilder.build());
         }
     }
 
