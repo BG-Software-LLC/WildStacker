@@ -5,22 +5,24 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 public final class KillTask extends BukkitRunnable {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static int taskID = -1;
+    private static BukkitTask task = null;
     private long timeLeft;
 
     private KillTask(){
         timeLeft = plugin.getSettings().killTaskInterval;
-        taskID = runTaskTimerAsynchronously(plugin, 20L,20L).getTaskId();
+        task = runTaskTimerAsynchronously(plugin, 20L,20L);
     }
 
     public static void start(){
-        if(Bukkit.getScheduler().isCurrentlyRunning(taskID) || Bukkit.getScheduler().isQueued(taskID))
-            Bukkit.getScheduler().cancelTask(taskID);
+        if(task != null)
+            task.cancel();
+
         new KillTask();
     }
 

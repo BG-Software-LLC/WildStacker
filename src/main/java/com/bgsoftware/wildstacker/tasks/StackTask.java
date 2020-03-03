@@ -9,6 +9,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,16 +18,17 @@ public final class StackTask extends BukkitRunnable {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static int taskID = -1;
+    private static BukkitTask task;
 
     private StackTask(){
         if(plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
-            taskID = runTaskTimerAsynchronously(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval).getTaskId();
+            task = runTaskTimerAsynchronously(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
     }
 
     public static void start(){
-        if(Bukkit.getScheduler().isCurrentlyRunning(taskID) || Bukkit.getScheduler().isQueued(taskID))
-            Bukkit.getScheduler().cancelTask(taskID);
+        if(task != null)
+            task.cancel();
+        
         new StackTask();
     }
 
