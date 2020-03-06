@@ -51,7 +51,8 @@ public final class MenusListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMenuClickMonitor(InventoryClickEvent e){
-        if(e.getCurrentItem() != null && e.isCancelled() && e.getView().getTopInventory() instanceof WildMenu){
+        Inventory topInventory = e.getView().getTopInventory();
+        if(e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu){
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
