@@ -29,7 +29,8 @@ public enum Materials {
     WET_SPONGE("SPONGE", 1),
     NETHER_PORTAL("PORTAL"),
     PLAYER_HEAD("SKULL_ITEM", 3),
-    MUSHROOM_STEW("MUSHROOM_SOUP");
+    MUSHROOM_STEW("MUSHROOM_SOUP"),
+    LEAD("LEASH");
 
     Materials(String bukkitType){
         this(bukkitType, 0);

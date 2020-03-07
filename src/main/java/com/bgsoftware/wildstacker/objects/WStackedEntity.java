@@ -24,6 +24,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -172,7 +173,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         //Drop leash if exists
         if(object.isLeashed()){
-            ItemUtils.dropItem(new ItemStack(Material.LEASH), getLocation());
+            ItemUtils.dropItem(new ItemStack(Materials.LEAD.toBukkitType()), getLocation());
             object.setLeashHolder(null);
         }
 
