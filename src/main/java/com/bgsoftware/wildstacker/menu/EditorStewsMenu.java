@@ -22,6 +22,7 @@ public final class EditorStewsMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Stews Settings", "stews.", new String[0], new String[0]);
         EditorStewsMenu editorStewsMenu = new EditorStewsMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorStewsMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorStewsMenu.getInventory()));
     }

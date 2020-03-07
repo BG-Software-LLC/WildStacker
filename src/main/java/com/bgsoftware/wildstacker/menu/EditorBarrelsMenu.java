@@ -26,6 +26,7 @@ public final class EditorBarrelsMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Barrels Settings", "barrels.", new String[0], sectionsPaths);
         EditorBarrelsMenu editorBarrelsMenu = new EditorBarrelsMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorBarrelsMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorBarrelsMenu.getInventory()));
     }

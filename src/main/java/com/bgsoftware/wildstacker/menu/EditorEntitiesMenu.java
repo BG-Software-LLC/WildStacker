@@ -26,6 +26,7 @@ public final class EditorEntitiesMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Entities Settings", "entities.", new String[0], sectionsPaths);
         EditorEntitiesMenu editorEntitiesMenu = new EditorEntitiesMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorEntitiesMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorEntitiesMenu.getInventory()));
     }

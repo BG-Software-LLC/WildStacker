@@ -36,15 +36,13 @@ public abstract class EditorMenu extends WildMenu {
     public static final Map<String, EditorMenu> editorMenus = new HashMap<>();
 
     public static CommentedConfiguration config;
-
-    public final static String STEWS_SLOT_0 = "stews.enabled", STEWS_SLOT_1 = "stews.max-stack";
+    private final List<String> pathSlots = new ArrayList<>();
 
     private final Inventory inventory;
-    private final String fieldPrefix, editorIdentifier;
+    protected final String  editorIdentifier;
 
     protected EditorMenu(Inventory inventory, String fieldPrefix, String editorIdentifier){
         this.inventory = inventory;
-        this.fieldPrefix = fieldPrefix;
         this.editorIdentifier = editorIdentifier;
         editorMenus.put(editorIdentifier, this);
     }
@@ -60,20 +58,18 @@ public abstract class EditorMenu extends WildMenu {
         e.setCancelled(true);
 
         if(!onEditorClick(e)){
-            lastInventories.put(player.getUniqueId(), editorIdentifier);
+            try{
+                String value = pathSlots.get(e.getRawSlot());
+                configValues.put(player.getUniqueId(), value);
+                player.closeInventory();
+                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
+
+                if(config.isList(configValues.get(player.getUniqueId())) ||
+                        config.isConfigurationSection(configValues.get(player.getUniqueId()))){
+                    player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
+                }
+            }catch(Exception ignored){}
         }
-
-        try{
-            String value = (String) EditorMenu.class.getField(fieldPrefix + e.getRawSlot()).get(null);
-            configValues.put(player.getUniqueId(), value);
-            player.closeInventory();
-            player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Please enter a new value (-cancel to cancel):");
-
-            if(config.isList(configValues.get(player.getUniqueId())) ||
-                    config.isConfigurationSection(configValues.get(player.getUniqueId()))){
-                player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " If you enter a value that is already in the list, it will be removed.");
-            }
-        }catch(Exception ignored){}
     }
 
     @Override
@@ -151,7 +147,7 @@ public abstract class EditorMenu extends WildMenu {
         }
     }
 
-    private static void buildFromSection(List<ItemStack> itemStacks, ConfigurationSection section, String pathPrefix, String[] ignorePaths, String[] sectionsPaths){
+    private static void buildFromSection(List<ItemStack> itemStacks, List<String> pathSlots, ConfigurationSection section, String pathPrefix, String[] ignorePaths, String[] sectionsPaths){
         for(String path : section.getKeys(false)){
             String fullPath = section.getCurrentPath().isEmpty() ? path : section.getCurrentPath() + "." + path;
 
@@ -159,7 +155,7 @@ public abstract class EditorMenu extends WildMenu {
                 continue;
 
             if(section.isConfigurationSection(path) && Arrays.stream(sectionsPaths).noneMatch(fullPath::contains)){
-                buildFromSection(itemStacks, section.getConfigurationSection(path), pathPrefix, ignorePaths, sectionsPaths);
+                buildFromSection(itemStacks, pathSlots, section.getConfigurationSection(path), pathPrefix, ignorePaths, sectionsPaths);
             }
             else{
                 ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" +
@@ -180,6 +176,7 @@ public abstract class EditorMenu extends WildMenu {
                 else if(section.isConfigurationSection(path))
                     itemBuilder.withLore("&7Value:", section.getConfigurationSection(path));
 
+                pathSlots.add(fullPath);
                 itemStacks.add(itemBuilder.build());
             }
         }
@@ -187,7 +184,7 @@ public abstract class EditorMenu extends WildMenu {
 
     protected static Inventory buildInventory(EditorMenu holder, String title, String pathPrefix, String[] ignorePaths, String[] sectionsPaths){
         List<ItemStack> itemStacks = new ArrayList<>(54);
-        buildFromSection(itemStacks, config.getConfigurationSection(pathPrefix), pathPrefix, ignorePaths, sectionsPaths);
+        buildFromSection(itemStacks, holder.pathSlots, config.getConfigurationSection(pathPrefix), pathPrefix, ignorePaths, sectionsPaths);
 
         Inventory inventory = Bukkit.createInventory(holder, ((itemStacks.size() / 9) + 1) * 9, title);
         inventory.setContents(Arrays.copyOf(itemStacks.toArray(new ItemStack[0]), inventory.getSize()));

@@ -22,6 +22,7 @@ public final class EditorBucketsMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Buckets Settings", "buckets.", new String[0], new String[0]);
         EditorBucketsMenu editorBucketsMenu = new EditorBucketsMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorBucketsMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorBucketsMenu.getInventory()));
     }

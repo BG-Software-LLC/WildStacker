@@ -26,6 +26,7 @@ public final class EditorGeneralMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "General Settings", "", ignorePaths, new String[0]);
         EditorGeneralMenu editorGeneralMenu = new EditorGeneralMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorGeneralMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorGeneralMenu.getInventory()));
     }

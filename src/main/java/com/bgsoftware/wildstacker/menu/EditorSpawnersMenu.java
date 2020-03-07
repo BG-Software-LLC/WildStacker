@@ -30,6 +30,7 @@ public final class EditorSpawnersMenu extends EditorMenu {
 
         Inventory inventory = buildInventory(NULL_HOLDER, "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Spawners Settings", "spawners.", ignorePaths, sectionsPaths);
         EditorSpawnersMenu editorSpawnersMenu = new EditorSpawnersMenu(inventory);
+        lastInventories.put(player.getUniqueId(), editorSpawnersMenu.editorIdentifier);
 
         Executor.sync(() -> player.openInventory(editorSpawnersMenu.getInventory()));
     }
