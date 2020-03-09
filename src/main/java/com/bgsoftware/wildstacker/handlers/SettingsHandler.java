@@ -18,7 +18,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -449,14 +448,8 @@ public final class SettingsHandler {
     }
 
     public static void reload(){
-        try{
-            WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-            Field field = WildStackerPlugin.class.getDeclaredField("settingsHandler");
-            field.setAccessible(true);
-            field.set(plugin, new SettingsHandler(plugin));
-        }catch(NoSuchFieldException | IllegalAccessException ex){
-            ex.printStackTrace();
-        }
+        WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+        plugin.setSettings(new SettingsHandler(plugin));
     }
 
 }

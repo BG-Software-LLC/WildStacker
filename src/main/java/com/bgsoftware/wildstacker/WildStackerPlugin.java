@@ -182,6 +182,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return lootHandler;
     }
 
+    public void setLootHandler(LootHandler lootHandler){
+        this.lootHandler = lootHandler;
+    }
+
     public ProvidersHandler getProviders(){
         return providersHandler;
     }
@@ -196,6 +200,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public SettingsHandler getSettings(){
         return settingsHandler;
+    }
+
+    public void setSettings(SettingsHandler settingsHandler){
+        this.settingsHandler = settingsHandler;
     }
 
     public static void log(String message){

@@ -14,7 +14,6 @@ import org.bukkit.entity.Zombie;
 
 import java.io.File;
 import java.io.FileReader;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -167,14 +166,8 @@ public final class LootHandler {
     }
 
     public static void reload(){
-        try{
-            WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-            Field field = WildStackerPlugin.class.getDeclaredField("lootHandler");
-            field.setAccessible(true);
-            field.set(plugin, new LootHandler(plugin));
-        }catch(NoSuchFieldException | IllegalAccessException ex){
-            ex.printStackTrace();
-        }
+        WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+        plugin.setLootHandler(new LootHandler(plugin));
     }
 
 }
