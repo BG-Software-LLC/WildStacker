@@ -357,7 +357,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
             targetEntity.setStackAmount(newStackAmount, false);
-            targetEntity.setHealth(health);
+            targetEntity.setHealth(Math.max(health, 0.5D));
 
             Executor.sync(() -> {
                 if (targetEntity.getLivingEntity().isValid())
