@@ -160,10 +160,10 @@ public final class CommandGive implements ICommand {
         ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());
 
         if(!silence || !(sender instanceof Player))
-            Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), stackSize, typeName, args[2]);
+            Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), args[4], typeName, args[2]);
 
         if(!silence && !target.equals(sender))
-            Locale.STACK_RECEIVE.send(target, stackSize, typeName + " " + args[2], sender.getName());
+            Locale.STACK_RECEIVE.send(target, args[4], typeName + " " + args[2], sender.getName());
     }
 
     @Override
