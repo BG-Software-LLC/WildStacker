@@ -53,13 +53,14 @@ public final class SettingsHandler {
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
             entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, entitiesClearEquipment,
-            spawnCorpses;
+            spawnCorpses, entitiesOneShotEnabled;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
-            entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup;
+            entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup,
+            entitiesOneShotTools, entitiesOneShotWhitelist;
     public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
@@ -184,6 +185,9 @@ public final class SettingsHandler {
         eggLayMultiply = cfg.getBoolean("entities.egg-lay-multiply", true);
         entitiesClearEquipment = cfg.getBoolean("entities.clear-equipment", false);
         spawnCorpses = cfg.getBoolean("entities.spawn-corpses", true);
+        entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);
+        entitiesOneShotTools = cfg.getStringList("entities.one-shot.tools");
+        entitiesOneShotWhitelist = cfg.getStringList("entities.one-shot.whitelist");
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);

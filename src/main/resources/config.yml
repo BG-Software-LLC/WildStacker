@@ -376,6 +376,21 @@ entities:
   # Should corpses be spawned when entity dies ("death animations")?
   spawn-corpses: true
 
+  # When enabled, entities will be one shot by specific tools.
+  one-shot:
+    # Should this feature be enabled?
+    enabled: false
+    # A list of tools that can one shot entities.
+    tools:
+      - DIAMOND_SWORD
+      - DIAMOND_AXE
+    # A list of entities that will be one shot.
+    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+    # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
+    whitelist:
+      - ALL
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

@@ -178,8 +178,27 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
+        Player damager = null;
+
+        if (e instanceof EntityDamageByEntityEvent) {
+            if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
+                damager = (Player) ((EntityDamageByEntityEvent) e).getDamager();
+            }
+            else if(((EntityDamageByEntityEvent) e).getDamager() instanceof Projectile){
+                Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) e).getDamager();
+                if(projectile.getShooter() instanceof Player)
+                    damager = (Player) projectile.getShooter();
+            }
+        }
+
+        ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
+
+        boolean oneShot = damager != null && plugin.getSettings().entitiesOneShotEnabled &&
+                GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
+                plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
+
         //Checks that it's the last hit of the entity
-        if(stackedEntity.getHealth() - e.getFinalDamage() > 0)
+        if(stackedEntity.getHealth() - e.getFinalDamage() > 0 && !oneShot)
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
@@ -231,18 +250,7 @@ public final class EntitiesListener implements Listener {
             if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
-                if (e instanceof EntityDamageByEntityEvent) {
-                    if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
-                        EntityUtils.setKiller(livingEntity, (Player) ((EntityDamageByEntityEvent) e).getDamager());
-                    }
-                    else if(((EntityDamageByEntityEvent) e).getDamager() instanceof Projectile){
-                        Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) e).getDamager();
-                        if(projectile.getShooter() instanceof Player)
-                            EntityUtils.setKiller(livingEntity, (Player) projectile.getShooter());
-                    }
-                } else {
-                    EntityUtils.setKiller(livingEntity, null);
-                }
+                EntityUtils.setKiller(livingEntity, damager);
 
                 ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
 
