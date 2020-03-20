@@ -451,12 +451,16 @@ public final class SystemHandler implements SystemManager {
         if(entityClass == null)
             return;
 
-        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLivingEntity().getLocation(), entityClass, SpawnCause.CUSTOM);
+        LivingEntity livingEntity = (LivingEntity) plugin.getNMSAdapter().createEntity(stackedEntity.getLivingEntity().getLocation(),
+                entityClass, SpawnCause.CUSTOM, entity -> {
+            LivingEntity spawnedEntity = (LivingEntity) entity;
+            EntitiesListener.noStackEntities.add(spawnedEntity.getUniqueId());
+            EntityData.of(stackedEntity).applyEntityData(spawnedEntity);
+            EntityStorage.setMetadata(spawnedEntity, "corpse", null);
+        });
 
-        if(livingEntity != null) {
-            EntityData.of(stackedEntity).applyEntityData(livingEntity);
-            EntityStorage.setMetadata(livingEntity, "corpse", null);
-            if(stackedEntity.getLivingEntity() instanceof Slime){
+        if(livingEntity != null){
+            if(livingEntity instanceof Slime){
                 ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
             }
             plugin.getNMSAdapter().playDeathSound(livingEntity);
