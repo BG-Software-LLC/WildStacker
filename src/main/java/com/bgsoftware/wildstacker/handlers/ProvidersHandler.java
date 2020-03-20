@@ -153,7 +153,7 @@ public final class ProvidersHandler {
         if(enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
             CrazyEnchantmentsHook.register();
         if(enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss"))
-            pluginManager.registerEvents(new BossListener(), plugin);
+            BossListener.register(plugin);
 
         //Load plugin hooks
         if(isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO"))
