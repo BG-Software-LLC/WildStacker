@@ -30,8 +30,12 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ItemUtils {
 
@@ -96,7 +100,19 @@ public final class ItemUtils {
     }
 
     public static int getSpawnerItemAmount(ItemStack itemStack){
-        return Math.max(1, plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1));
+        int spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, -1);
+
+        if(spawnersAmount <= 0 && itemStack.getItemMeta().hasDisplayName()){
+            String displayName = itemStack.getItemMeta().getDisplayName();
+            Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
+            if(matcher.matches()) {
+                List<String> indexes = Stream.of("0", "1", "2")
+                        .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
+                spawnersAmount = Integer.parseInt(matcher.group(indexes.indexOf("0") + 1));
+            }
+        }
+
+        return Math.max(1, spawnersAmount);
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){

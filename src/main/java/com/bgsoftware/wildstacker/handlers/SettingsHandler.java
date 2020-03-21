@@ -21,10 +21,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
+
+    public final Pattern SPAWNERS_PATTERN;
 
     //Global settings
     public final String giveItemName;
@@ -110,7 +113,12 @@ public final class SettingsHandler {
 
         cfg.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
 
-        giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&e{0} &f{1} x{2}"));
+        giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&6x{0} &f&o{1} {2}"));
+        SPAWNERS_PATTERN = Pattern.compile(giveItemName
+                .replace("{0}", "(.*)")
+                .replace("{1}", "(.*)")
+                .replace("{2}", "(.*)")
+        );
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
                 .withName(cfg.getString("inspect-tool.name"))
                 .withLore(cfg.getStringList("inspect-tool.lore")).build();

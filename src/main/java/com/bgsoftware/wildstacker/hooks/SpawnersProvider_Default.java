@@ -16,8 +16,13 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SpawnersProvider_Default implements SpawnersProvider {
 
@@ -94,7 +99,19 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     @Override
     public EntityType getSpawnerType(ItemStack itemStack) {
         BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-        return ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
+        EntityType spawnType = ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
+
+        if((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemStack.getItemMeta().hasDisplayName()){
+            String displayName = itemStack.getItemMeta().getDisplayName();
+            Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
+            if(matcher.matches()) {
+                List<String> indexes = Stream.of("0", "1", "2")
+                        .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
+                spawnType = EntityType.valueOf(matcher.group(indexes.indexOf("1") + 1).toUpperCase().replace(" ", "_"));
+            }
+        }
+
+        return spawnType;
     }
 
     private boolean isValidAndHasSilkTouch(ItemStack itemStack){
