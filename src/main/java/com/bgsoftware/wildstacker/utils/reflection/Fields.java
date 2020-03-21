@@ -28,6 +28,10 @@ public enum Fields {
         }
     }
 
+    public boolean exists(){
+        return getField() != null;
+    }
+
     private Field getField(){
         return ReflectionUtils.fieldMap.get(this);
     }
