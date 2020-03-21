@@ -430,17 +430,33 @@ public final class SystemHandler implements SystemManager {
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         location = location.clone();
-        itemStack = itemStack.clone();
 
         location.setX(location.getX() + (random.nextFloat() * 0.5F) + 0.25D);
         location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
         location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
 
-        itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+        int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack, Integer.MAX_VALUE);
+        limit = limit < 1 ? Integer.MAX_VALUE : limit;
 
+        int amountOfItems = amount / limit;
+
+        int itemLimit = limit;
+
+        for(int i = 0; i < amountOfItems; i++) {
+            itemStack = itemStack.clone();
+            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
+            WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
+                StackedItem stackedItem = WStackedItem.of(item);
+                stackedItem.setStackAmount(itemLimit, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+            }));
+        }
+
+        int leftOvers = amount % limit;
+        itemStack = itemStack.clone();
+        itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
         return WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
             StackedItem stackedItem = WStackedItem.of(item);
-            stackedItem.setStackAmount(amount, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+            stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
         }));
     }
 
