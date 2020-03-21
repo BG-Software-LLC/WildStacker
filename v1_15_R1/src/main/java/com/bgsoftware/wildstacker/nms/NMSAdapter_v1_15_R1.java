@@ -259,13 +259,10 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        try {
-            entityLiving.fromMobSpawner = nerfed;
-        }catch(Throwable ex){
-            Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER.set(entityLiving, nerfed);
-            Fields.ENTITY_AWARE.set(entityLiving, !nerfed);
-        }
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        try { entityLiving.aware = !nerfed; } catch(Throwable ignored){ }
+        try { Fields.ENTITY_FROM_MOB_SPAWNER.set(entityLiving, nerfed); } catch(Throwable ignored){ }
+        try { Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER.set(entityLiving, nerfed); } catch(Throwable ignored){ }
     }
 
     @Override

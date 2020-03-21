@@ -8,7 +8,7 @@ public enum Fields {
     ENTITY_EXP,
     ENTITY_DEAD,
     ENTITY_SPAWNED_VIA_MOB_SPAWNER,
-    ENTITY_AWARE,
+    ENTITY_FROM_MOB_SPAWNER,
 
     NBT_TAG_MAP;
 
