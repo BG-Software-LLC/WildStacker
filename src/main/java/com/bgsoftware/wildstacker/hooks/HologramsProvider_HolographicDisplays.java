@@ -9,9 +9,13 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
+import java.util.function.Function;
+
 public final class HologramsProvider_HolographicDisplays implements HologramsProvider {
 
     private WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private Function<Location, Location> parseLocation = location -> location.add(0.5, 1.5, 0.5);
 
     public HologramsProvider_HolographicDisplays(){
         WildStackerPlugin.log(" - Using HolographicDisplays as HologramsProvider.");
@@ -19,7 +23,7 @@ public final class HologramsProvider_HolographicDisplays implements HologramsPro
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        createHologram(stackedObject.getLocation().add(0.5, 1.5, 0.5), line);
+        createHologram(parseLocation.apply(stackedObject.getLocation()), line);
     }
 
     @Override
@@ -30,7 +34,7 @@ public final class HologramsProvider_HolographicDisplays implements HologramsPro
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        deleteHologram(stackedObject.getLocation().add(0.5, 1.5, 0.5));
+        deleteHologram(parseLocation.apply(stackedObject.getLocation()));
     }
 
     @Override
@@ -45,7 +49,7 @@ public final class HologramsProvider_HolographicDisplays implements HologramsPro
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        changeLine(stackedObject.getLocation().add(0.5, 1.5, 0.5), newLine, createIfNull);
+        changeLine(parseLocation.apply(stackedObject.getLocation()), newLine, createIfNull);
     }
 
     @Override

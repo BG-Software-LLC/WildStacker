@@ -12,11 +12,14 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import java.util.Collections;
+import java.util.function.Function;
 
 public final class HologramsProvider_CMI implements HologramsProvider {
 
     private WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private HologramManager hologramManager = CMI.getInstance().getHologramManager();
+
+    private Function<Location, Location> parseLocation = location -> location.add(0.5, 1.2, 0.5);
 
     public HologramsProvider_CMI(){
         WildStackerPlugin.log(" - Using CMI as HologramsProvider.");
@@ -24,7 +27,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        createHologram(stackedObject.getLocation().add(0.5, 1.2, 0.5), line);
+        createHologram(parseLocation.apply(stackedObject.getLocation()), line);
     }
 
     @Override
@@ -37,7 +40,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        deleteHologram(stackedObject.getLocation().add(0.5, 1.2, 0.5));
+        deleteHologram(parseLocation.apply(stackedObject.getLocation()));
     }
 
     @Override
@@ -51,7 +54,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        changeLine(stackedObject.getLocation().add(0.5, 1.2, 0.5), newLine, createIfNull);
+        changeLine(parseLocation.apply(stackedObject.getLocation()), newLine, createIfNull);
     }
 
     @Override
