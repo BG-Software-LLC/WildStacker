@@ -24,7 +24,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void createHologram(StackedObject stackedObject, String line) {
-        createHologram(stackedObject.getLocation().add(0.5, -1, 0.5), line);
+        createHologram(stackedObject.getLocation().add(0.5, 1.2, 0.5), line);
     }
 
     @Override
@@ -37,7 +37,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void deleteHologram(StackedObject stackedObject) {
-        deleteHologram(stackedObject.getLocation().add(0.5, -1, 0.5));
+        deleteHologram(stackedObject.getLocation().add(0.5, 1.2, 0.5));
     }
 
     @Override
@@ -51,7 +51,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
 
     @Override
     public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull) {
-        changeLine(stackedObject.getLocation().add(0.5, -1, 0.5), newLine, createIfNull);
+        changeLine(stackedObject.getLocation().add(0.5, 1.2, 0.5), newLine, createIfNull);
     }
 
     @Override
@@ -73,7 +73,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
     public void clearHolograms() {
         for(CMIHologram hologram : hologramManager.getHolograms().values()){
             if(hologram.getName().startsWith("WS") && GeneralUtils.isChunkLoaded(hologram.getLocation())) {
-                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.UP);
+                Block underBlock = hologram.getLocation().getBlock().getRelative(BlockFace.DOWN);
                 if (!plugin.getSystemManager().isStackedSpawner(underBlock) && !plugin.getSystemManager().isStackedBarrel(underBlock)) {
                     hologramManager.removeHolo(hologram);
                     break;
