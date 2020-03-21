@@ -36,6 +36,8 @@ public enum SpawnCause {
     BED,
     EXPLOSION,
     PATROL,
+    RAID,
+    BEEHIVE,
 
     MYTHIC_MOBS,
     CUSTOM_BOSSES,

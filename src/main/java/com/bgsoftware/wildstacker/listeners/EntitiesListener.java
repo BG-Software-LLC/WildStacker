@@ -33,6 +33,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
+import org.bukkit.block.Beehive;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
@@ -52,6 +53,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityEnterBlockEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
@@ -69,8 +71,10 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -83,12 +87,15 @@ public final class EntitiesListener implements Listener {
 
     private WildStackerPlugin plugin;
 
-    public static Set<UUID> noStackEntities = new HashSet<>();
+    public final static Set<UUID> noStackEntities = new HashSet<>();
+    private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
+        if(ServerVersion.isAtLeast(ServerVersion.v1_15))
+            plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
@@ -418,12 +425,30 @@ public final class EntitiesListener implements Listener {
         if(!EntityUtils.isStackable(e.getEntity()) || EntityStorage.hasMetadata(e.getEntity(), "corpse"))
             return;
 
-        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
+        SpawnCause spawnCause = SpawnCause.valueOf(e.getSpawnReason());
+
+        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         if(mooshroomFlag != -1){
             stackedEntity.setStackAmount(mooshroomFlag, true);
             mooshroomFlag = -1;
+        }
+
+        if(spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(e.getEntity()) == EntityTypes.BEE){
+            org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) e.getEntity();
+            Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
+            if(beesAmount != null){
+                for(int i = beesAmount.length - 1; i >= 0; i--){
+                    if(beesAmount[i] != -1){
+                        stackedEntity.setStackAmount(beesAmount[i], true);
+                        beesAmount[i] = -1;
+                        break;
+                    }
+                    if(i == 0)
+                        EntitiesListener.beesAmount.remove(bee.getHive());
+                }
+            }
         }
 
         if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
@@ -788,4 +813,28 @@ public final class EntitiesListener implements Listener {
 
     }
 
+    private static class BeeListener implements Listener {
+
+        @EventHandler
+        public void onBee(EntityEnterBlockEvent e){
+            if(e.getBlock().getState() instanceof Beehive && EntityUtils.isStackable(e.getEntity())){
+                Beehive beehive = (Beehive) e.getBlock().getState();
+                StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+                Integer[] arr = beesAmount.computeIfAbsent(e.getBlock().getLocation(), l -> {
+                    Integer[] newArr = new Integer[beehive.getEntityCount()];
+                    Arrays.fill(newArr, -1);
+                    return newArr;
+                });
+
+                for(int i = 0; i < arr.length; i++){
+                    if(arr[i] == -1){
+                        arr[i] = stackedEntity.getStackAmount();
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
 }
