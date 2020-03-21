@@ -95,7 +95,7 @@ public final class EntitiesListener implements Listener {
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_15))
-            plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new BeeListener(plugin), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
     }
@@ -815,6 +815,12 @@ public final class EntitiesListener implements Listener {
 
     private static class BeeListener implements Listener {
 
+        private final WildStackerPlugin plugin;
+
+        BeeListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
         @EventHandler
         public void onBee(EntityEnterBlockEvent e){
             if(e.getBlock().getState() instanceof Beehive && EntityUtils.isStackable(e.getEntity())){
@@ -833,6 +839,8 @@ public final class EntitiesListener implements Listener {
                         break;
                     }
                 }
+
+                plugin.getSystemManager().removeStackObject(stackedEntity);
             }
         }
 
