@@ -183,6 +183,11 @@ public final class SystemHandler implements SystemManager {
         //Spawner wasn't found, creating a new object
         stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
 
+        if(dataHandler.CACHED_AMOUNT_SPAWNERS.containsKey(location)){
+            stackedSpawner.setStackAmount(dataHandler.CACHED_AMOUNT_SPAWNERS.get(location), true);
+            dataHandler.CACHED_AMOUNT_SPAWNERS.remove(location);
+        }
+
         //Checks if the spawner still exists after a few ticks
         Executor.sync(() -> {
             if(!isStackedSpawner(location.getBlock()))

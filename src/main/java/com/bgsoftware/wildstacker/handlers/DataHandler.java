@@ -50,6 +50,7 @@ public final class DataHandler {
 
     //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
     public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
+    public final Map<Location, Integer> CACHED_AMOUNT_SPAWNERS = new ConcurrentHashMap<>();
     public final Map<UUID, SpawnCause> CACHED_SPAWN_CAUSE_ENTITIES = new ConcurrentHashMap<>();
     public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
     public final Set<UUID> CACHED_DEAD_ENTITIES = Sets.newConcurrentHashSet();
@@ -223,6 +224,9 @@ public final class DataHandler {
         //Creating default barrels table
         SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
 
+        long startTime = System.currentTimeMillis();
+        WildStackerPlugin.log("Starting to load entities...");
+
         SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
             while (resultSet.next()) {
                 int stackAmount = resultSet.getInt("stackAmount");
@@ -233,6 +237,10 @@ public final class DataHandler {
             }
         });
 
+        WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+        startTime = System.currentTimeMillis();
+        WildStackerPlugin.log("Starting to load items...");
+
         SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
             while (resultSet.next()) {
                 int stackAmount = resultSet.getInt("stackAmount");
@@ -240,6 +248,10 @@ public final class DataHandler {
                 CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
             }
         });
+
+        WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+        startTime = System.currentTimeMillis();
+        WildStackerPlugin.log("Starting to load spawners...");
 
         SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
             while (resultSet.next()) {
@@ -257,17 +269,24 @@ public final class DataHandler {
                             Integer.valueOf(locationSections[3])
                     );
 
+
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
-                        Block spawnerBlock = blockLocation.getBlock();
 
-                        if (spawnerBlock.getState() instanceof CreatureSpawner) {
-                            StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                            CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
-                            continue;
+                        if(plugin.getSettings().checkInvalidBlocks) {
+                            Block spawnerBlock = blockLocation.getBlock();
+
+                            if (spawnerBlock.getState() instanceof CreatureSpawner) {
+                                StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
+                                CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                                continue;
+                            } else {
+                                exceptionReason = "Block doesn't exist anymore.";
+                            }
                         }
                         else{
-                            exceptionReason = "Block doesn't exist anymore.";
+                            CACHED_AMOUNT_SPAWNERS.put(blockLocation, stackAmount);
+                            continue;
                         }
                     }catch(Exception ex){
                         exceptionReason = "Exception was thrown.";
@@ -284,6 +303,10 @@ public final class DataHandler {
                 }
             }
         });
+
+        WildStackerPlugin.log("Loading spawners done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+        startTime = System.currentTimeMillis();
+        WildStackerPlugin.log("Starting to load barrels...");
 
         SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
             while (resultSet.next()) {
@@ -331,6 +354,8 @@ public final class DataHandler {
                 }
             }
         });
+
+        WildStackerPlugin.log("Loading barrels done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
 
         ChunksListener.loadedData = true;
     }

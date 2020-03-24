@@ -32,7 +32,7 @@ public final class SettingsHandler {
     //Global settings
     public final String giveItemName;
     public final ItemStack inspectTool, simulateTool;
-    public final boolean deleteInvalidWorlds, deleteInvalidBlocks, killTaskStackedEntities, killTaskUnstackedEntities,
+    public final boolean deleteInvalidWorlds, deleteInvalidBlocks, checkInvalidBlocks, killTaskStackedEntities, killTaskUnstackedEntities,
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
     public final KeyMap<String> customNames;
     public final long killTaskInterval;
@@ -126,6 +126,7 @@ public final class SettingsHandler {
                 .withName(cfg.getString("simulate-tool.name"))
                 .withLore(cfg.getStringList("simulate-tool.lore")).build();
         deleteInvalidWorlds = cfg.getBoolean("database.delete-invalid-worlds", false);
+        checkInvalidBlocks = cfg.getBoolean("database.check-invalid-blocks", true);
         deleteInvalidBlocks = cfg.getBoolean("database.delete-invalid-blocks", false);
         killTaskInterval = cfg.getLong("kill-task.interval", 300);
         killTaskStackedEntities = cfg.getBoolean("kill-task.stacked-entities", true);

@@ -32,6 +32,9 @@ simulate-tool:
 database:
   # Should data of worlds that no longer exist be deleted?
   delete-invalid-worlds: false
+  # Should the plugin check for invalid blocks when loaded?
+  # Turning this off can optimize loading times.
+  check-invalid-blocks: true
   # Should data of blocks that no longer exist be deleted?
   delete-invalid-blocks: false
 
