@@ -11,6 +11,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
@@ -20,6 +21,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     protected final T object;
     private int stackAmount;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
@@ -28,15 +30,21 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public int getStackAmount(){
-        synchronized (this) {
+        try {
+            lock.readLock().lock();
             return stackAmount;
+        }finally {
+            lock.readLock().unlock();
         }
     }
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName){
-        synchronized (this) {
+        try {
+            lock.writeLock().lock();
             this.stackAmount = stackAmount;
+        }finally {
+            lock.writeLock().unlock();
         }
 
         if(updateName)
