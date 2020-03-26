@@ -107,7 +107,11 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             if(matcher.matches()) {
                 List<String> indexes = Stream.of("0", "1", "2")
                         .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
-                spawnType = EntityType.valueOf(matcher.group(indexes.indexOf("1") + 1).toUpperCase().replace(" ", "_"));
+                try {
+                    spawnType = EntityType.valueOf(matcher.group(indexes.indexOf("1") + 1).toUpperCase().replace(" ", "_"));
+                }catch(Exception ex){
+                    spawnType = EntityType.PIG;
+                }
             }
         }
 
