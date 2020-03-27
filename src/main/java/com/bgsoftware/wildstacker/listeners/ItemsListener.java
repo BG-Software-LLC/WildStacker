@@ -153,22 +153,24 @@ public final class ItemsListener implements Listener {
                 e.getEntity().getEquipment().setItemInHandDropChance(2.0f);
             }
 
-            if(e.getPlayer() != null && stackAmount != stackedItem.getStackAmount() && plugin.getSettings().itemsSoundEnabled){
-                Sound pickUpItem;
+            if(stackAmount != stackedItem.getStackAmount()) {
+                if (e.getPlayer() != null && plugin.getSettings().itemsSoundEnabled) {
+                    Sound pickUpItem;
 
-                //Different name on 1.12
-                try {
-                    pickUpItem = Sound.valueOf("ITEM_PICKUP");
-                } catch (IllegalArgumentException ex) {
-                    pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
+                    //Different name on 1.12
+                    try {
+                        pickUpItem = Sound.valueOf("ITEM_PICKUP");
+                    } catch (IllegalArgumentException ex) {
+                        pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
+                    }
+
+                    e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
+                            plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
                 }
 
-                e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
-                        plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
+                //Pick up animation
+                plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
             }
-
-            //Pick up animation
-            plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
 
             if (stackedItem.getStackAmount() <= 0) {
                 e.getItem().setPickupDelay(400);
