@@ -29,7 +29,6 @@ import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -51,7 +50,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
@@ -64,8 +62,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     private EntityDamageEvent lastDamageCause;
 
     private boolean deadEntityFlag = false;
-
-    private String cachedRegexName = "";
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -88,11 +84,6 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
-        try{
-            cachedRegexName = EntityUtils.getEntityNameRegex(this);
-        }catch(Exception ex){
-            cachedRegexName = ChatColor.stripColor(object.getCustomName());
-        }
         super.setStackAmount(stackAmount, updateName);
         if(!isCached())
             plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(object.getUniqueId(), stackAmount);
@@ -645,17 +636,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean hasNameTag() {
-        String regexName = ChatColor.stripColor(object.getCustomName());
-
-        if(cachedRegexName.isEmpty()) {
-            try {
-                regexName = EntityUtils.getEntityNameRegex(this);
-            } catch (NullPointerException ignored) { }
-        }else{
-            regexName = cachedRegexName;
-        }
-
-        return object.getCustomName() != null && !object.isCustomNameVisible() && (regexName.isEmpty() || !Pattern.compile(regexName).matcher(object.getCustomName()).matches());
+        return object.getCustomName() != null && !object.isCustomNameVisible() &&
+                !plugin.getSettings().entitiesCustomNamePattern.matcher(object.getCustomName()).matches();
     }
 
     public boolean isCached(){

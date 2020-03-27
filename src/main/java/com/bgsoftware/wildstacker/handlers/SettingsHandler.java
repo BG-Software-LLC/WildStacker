@@ -59,6 +59,7 @@ public final class SettingsHandler {
             spawnCorpses, entitiesOneShotEnabled;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
+    public final Pattern entitiesCustomNamePattern;
     public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
@@ -166,6 +167,8 @@ public final class SettingsHandler {
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
+        entitiesCustomNamePattern = Pattern.compile(entitiesCustomName.replace("{0}", "([0-9]+)")
+                .replace("{1}", "(.*)").replace("{2}", "(.*)"));
         entitiesCheckRange = cfg.getInt("entities.merge-radius", 10);
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
