@@ -6,6 +6,8 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -21,7 +23,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,8 +30,6 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
 public class WStackedItem extends WStackedObject<Item> implements StackedItem {
-
-    private static final Object stackingMutex = new Object();
 
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
@@ -166,28 +165,27 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        synchronized (stackingMutex) {
-            if (!plugin.getSettings().itemsStackingEnabled)
-                return StackCheckResult.NOT_ENABLED;
+        if (!plugin.getSettings().itemsStackingEnabled)
+            return StackCheckResult.NOT_ENABLED;
 
-            StackCheckResult superResult = super.runStackCheck(stackedObject);
+        StackCheckResult superResult = super.runStackCheck(stackedObject);
 
-            if (superResult != StackCheckResult.SUCCESS)
-                return superResult;
+        if (superResult != StackCheckResult.SUCCESS)
+            return superResult;
 
-            if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(object))
-                return StackCheckResult.PICKUP_DELAY_EXCEEDED;
+        if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(object))
+            return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
-            if (object.isDead())
-                return StackCheckResult.ALREADY_DEAD;
+        if (object.isDead())
+            return StackCheckResult.ALREADY_DEAD;
 
-            StackedItem targetItem = (StackedItem) stackedObject;
+        StackedItem targetItem = (StackedItem) stackedObject;
 
-            if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(targetItem.getItem()))
-                return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
+        if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(targetItem.getItem()))
+            return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
 
-            if (targetItem.getItem().isDead())
-                return StackCheckResult.TARGET_ALREADY_DEAD;
+        if (targetItem.getItem().isDead())
+            return StackCheckResult.TARGET_ALREADY_DEAD;
 
 //            if (getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
 //                return StackCheckResult.INSIDE_PORTAL;
@@ -195,21 +193,19 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 //            if (targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
 //                return StackCheckResult.TARGET_INSIDE_PORTAL;
 
-            return StackCheckResult.SUCCESS;
-        }
+        return StackCheckResult.SUCCESS;
     }
 
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
-
-        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, entity -> entity instanceof Item);
-
-        StackService.execute(this, () -> {
-            synchronized (stackingMutex) {
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range).whenComplete((nearbyEntities, ex) ->
+            StackService.execute(this, () -> {
                 Location itemLocation = getItem().getLocation();
 
-                Optional<StackedItem> itemOptional = nearbyEntities.stream().map(WStackedItem::of)
+                Optional<StackedItem> itemOptional = nearbyEntities.stream()
+                        .filter(entity -> entity instanceof Item && EntityUtils.isNearby(object, entity, range))
+                        .map(WStackedItem::of)
                         .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
                         .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 
@@ -229,8 +225,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
                 if (result != null)
                     result.accept(Optional.empty());
-            }
-        });
+            }));
     }
 
     @Override

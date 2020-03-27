@@ -1,17 +1,15 @@
 package com.bgsoftware.wildstacker.listeners.events;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
-
-import java.util.List;
 
 @SuppressWarnings("unused")
 public final class EventsListener {
@@ -65,14 +63,12 @@ public final class EventsListener {
 
             Item egg = e.getEntity();
 
-            List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 2,
-                    entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0);
-
-            for(Entity entity : nearbyEntities){
-                EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) entity);
-                Bukkit.getPluginManager().callEvent(eggLayEvent);
-                break;
-            }
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2).whenComplete((nearbyEntities, ex) ->
+                nearbyEntities.stream().filter(entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
+                        .findFirst().ifPresent(chicken -> {
+                            EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
+                            Bukkit.getPluginManager().callEvent(eggLayEvent);
+                        }));
         }
 
     }

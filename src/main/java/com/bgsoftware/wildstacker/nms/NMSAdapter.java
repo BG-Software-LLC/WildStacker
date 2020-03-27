@@ -47,12 +47,6 @@ public interface NMSAdapter {
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 
-    default List<Entity> getNearbyEntities(Entity entity, int range, Predicate<? super Entity> predicate){
-        return getNearbyEntities(entity, range, range, range, predicate);
-    }
-
-    List<Entity> getNearbyEntities(Entity entity, int xRange, int yRange, int zRange, Predicate<? super Entity> predicate);
-
     int getEntityExp(LivingEntity livingEntity);
 
     boolean canDropExp(LivingEntity livingEntity);

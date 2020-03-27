@@ -89,8 +89,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -203,14 +201,6 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         }
 
         return equipment;
-    }
-
-    @Override
-    public List<org.bukkit.entity.Entity> getNearbyEntities(org.bukkit.entity.Entity bukkitEntity, int xRange, int yRange, int zRange, Predicate<? super org.bukkit.entity.Entity> predicate) {
-        Entity entityLiving = ((CraftEntity) bukkitEntity).getHandle();
-        Predicate<? super Entity> wrapper = entity -> predicate.test(entity.getBukkitEntity());
-        return entityLiving.world.getEntities(entityLiving, entityLiving.getBoundingBox().grow(xRange, yRange, zRange), wrapper)
-                .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 
     @Override

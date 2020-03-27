@@ -87,20 +87,22 @@ public final class EntityUtils {
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
     public static void removeParrotIfShoulder(Parrot parrot){
-        List<Entity> nearbyPlayers = plugin.getNMSAdapter().getNearbyEntities(parrot, 1, en -> en instanceof Player);
-
-        try {
-            for (Entity entity : nearbyPlayers) {
-                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))){
-                    HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
-                    break;
+        EntitiesGetter.getNearbyEntities(parrot.getLocation(), 1).whenComplete((nearbyEntities, ex) -> {
+            try {
+                for (Entity entity : nearbyEntities) {
+                    if(entity instanceof Player && EntityUtils.isNearby(parrot, entity, 1)) {
+                        if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {
+                            HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
+                            break;
+                        }
+                        if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))) {
+                            HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
+                            break;
+                        }
+                    }
                 }
-                if(parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))){
-                    HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
-                    break;
-                }
-            }
-        }catch(Exception ignored){}
+            }catch(Exception ignored){}
+        });
     }
 
     public static boolean isStackable(Entity entity){
@@ -148,35 +150,6 @@ public final class EntityUtils {
         return newName;
     }
 
-    public static String getEntityNameRegex(StackedEntity stackedEntity){
-        String customName;
-
-        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null) {
-            customName = stackedEntity.getLivingEntity().getCustomName().replace("{}", "\n");
-        }
-
-        else {
-            customName = plugin.getSettings().entitiesCustomName;
-
-            if (customName.isEmpty())
-                throw new NullPointerException();
-
-            if (stackedEntity.getStackAmount() > 1) {
-                customName = customName
-                        .replace("{0}", "\n")
-                        .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
-                        .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
-            }
-            else{
-                return "";
-            }
-        }
-
-        String[] nameSections = customName.split("\n");
-
-        return "(.*)" + (nameSections.length == 1 ? nameSections[0] : Pattern.quote(nameSections[0]) + "([0-9]+)" + Pattern.quote(nameSections[1])) + "(.*)";
-    }
-
     public static int getBadOmenAmplifier(Player player){
         int amplifier = 0;
 
@@ -196,6 +169,14 @@ public final class EntityUtils {
     public static boolean killedByZombie(LivingEntity livingEntity){
         EntityDamageEvent entityDamageEvent = livingEntity.getLastDamageCause();
         return entityDamageEvent instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) entityDamageEvent).getDamager() instanceof Zombie;
+    }
+
+    public static boolean isNearby(Entity source, Entity check, int range){
+        Location sourceLoc = source.getLocation(), checkLoc = check.getLocation();
+        return source.getWorld().equals(check.getWorld()) &&
+                Math.abs(sourceLoc.getBlockX() - checkLoc.getBlockX()) <= range &&
+                Math.abs(sourceLoc.getBlockY() - checkLoc.getBlockY()) <= range &&
+                Math.abs(sourceLoc.getBlockZ() - checkLoc.getBlockZ()) <= range;
     }
 
 }

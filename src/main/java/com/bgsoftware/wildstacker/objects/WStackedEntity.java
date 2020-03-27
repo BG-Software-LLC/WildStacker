@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -53,8 +54,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
-
-    private static final Object stackingMutex = new Object();
 
     private boolean ignoreDeathEvent = false;
     private SpawnCause spawnCause;
@@ -265,25 +264,14 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
-        if(!Bukkit.isPrimaryThread()){
-            Executor.sync(() -> runStackAsync(result));
-            return;
-        }
-
         int range = plugin.getSettings().entitiesCheckRange;
-
-        List<Entity> nearbyEntities = plugin.getNMSAdapter().getNearbyEntities(object, range, EntityUtils::isStackable);
-
-        //Cache data of entities
-        EntityData.cache(object);
-        nearbyEntities.forEach(entity -> EntityData.cache((LivingEntity) entity));
-
-        StackService.execute(this, () -> {
-            synchronized (stackingMutex) {
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range).whenComplete((nearbyEntities, ex) ->
+            StackService.execute(this, () -> {
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
 
                 Set<StackedEntity> filteredEntities = nearbyEntities.stream()
+                        .filter(entity -> EntityUtils.isStackable(entity) && EntityUtils.isNearby(object, entity, range))
                         .map(WStackedEntity::of)
                         .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                         .collect(Collectors.toSet());
@@ -317,18 +305,16 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
                             result.accept(Optional.empty());
                         return;
                     }
-
                 }
 
                 if (result != null)
                     result.accept(entityOptional.map(StackedEntity::getLivingEntity));
-            }
-        });
+            }));
     }
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        synchronized (stackingMutex) {
+        //synchronized (stackingMutex) {
             if (!StackService.canStackFromThread())
                 return StackResult.THREAD_CATCHER;
 
@@ -337,30 +323,32 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
             StackedEntity targetEntity = (StackedEntity) stackedObject;
 
-            EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
-            Bukkit.getPluginManager().callEvent(entityStackEvent);
+            //synchronized (((WStackedEntity) targetEntity).stackingMutex) {
+                EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
+                Bukkit.getPluginManager().callEvent(entityStackEvent);
 
-            if (entityStackEvent.isCancelled())
-                return StackResult.EVENT_CANCELLED;
+                if (entityStackEvent.isCancelled())
+                    return StackResult.EVENT_CANCELLED;
 
-            double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
-                    Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
-            int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
+                double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
+                        Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
+                int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
-            targetEntity.setStackAmount(newStackAmount, false);
-            targetEntity.setHealth(Math.max(health, 0.5D));
+                targetEntity.setStackAmount(newStackAmount, false);
+                targetEntity.setHealth(Math.max(health, 0.5D));
 
-            Executor.sync(() -> {
-                if (targetEntity.getLivingEntity().isValid())
-                    targetEntity.updateName();
-            }, 2L);
+                Executor.sync(() -> {
+                    if (targetEntity.getLivingEntity().isValid())
+                        targetEntity.updateName();
+                }, 2L);
 
-            plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
+                plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
-            if (object.getType().name().equals("PARROT"))
-                Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
+                if (object.getType().name().equals("PARROT"))
+                    Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
 
-            this.remove();
+                this.remove();
+            //}
 
             if (plugin.getSettings().entitiesParticlesEnabled) {
                 Location location = getLivingEntity().getLocation();
@@ -369,7 +357,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             }
 
             return StackResult.SUCCESS;
-        }
+        //}
     }
 
     @Override

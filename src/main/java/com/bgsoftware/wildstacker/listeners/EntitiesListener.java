@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -696,10 +697,11 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            plugin.getNMSAdapter().getNearbyEntities(e.getEntity(), 5, entity ->
-                    EntityUtils.isStackable(entity) && entity.isValid() &&
-                            (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)))
-                    .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5).whenComplete((nearbyEntities, ex) ->
+                nearbyEntities.stream().filter(entity -> EntityUtils.isStackable(entity) && entity.isValid() &&
+                        (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)) &&
+                        EntityUtils.isNearby(e.getEntity(), entity, 5))
+                        .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null)));
         }
     }
 
@@ -730,9 +732,9 @@ public final class EntitiesListener implements Listener {
         }
 
         //Refresh item names
-        plugin.getNMSAdapter().getNearbyEntities(e.getPlayer(), 50, 256, 50,
-                entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
-                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
+        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48).whenComplete((nearbyEntities, ex) ->
+            nearbyEntities.stream().filter(entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
+                    .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
     private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){

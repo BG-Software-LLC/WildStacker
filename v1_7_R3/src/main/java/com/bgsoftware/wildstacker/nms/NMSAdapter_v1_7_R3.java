@@ -17,7 +17,6 @@ import net.minecraft.server.v1_7_R3.EntityPlayer;
 import net.minecraft.server.v1_7_R3.EntityTracker;
 import net.minecraft.server.v1_7_R3.EntityVillager;
 import net.minecraft.server.v1_7_R3.EntityZombie;
-import net.minecraft.server.v1_7_R3.IEntitySelector;
 import net.minecraft.server.v1_7_R3.ItemStack;
 import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_7_R3.NBTTagCompound;
@@ -72,7 +71,6 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -181,15 +179,6 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
         }
 
         return equipment;
-    }
-
-    @Override
-    @SuppressWarnings("all")
-    public List<org.bukkit.entity.Entity> getNearbyEntities(org.bukkit.entity.Entity bukkitEntity, int xRange, int yRange, int zRange, Predicate<? super org.bukkit.entity.Entity> predicate) {
-        Entity entityLiving = ((CraftEntity) bukkitEntity).getHandle();
-        IEntitySelector wrapper = entity -> predicate.test(entity.getBukkitEntity());
-        return ((List<Entity>) entityLiving.world.getEntities(entityLiving, entityLiving.boundingBox.grow(xRange, yRange, zRange), wrapper))
-                .stream().map(Entity::getBukkitEntity).collect(Collectors.toList());
     }
 
     @Override
