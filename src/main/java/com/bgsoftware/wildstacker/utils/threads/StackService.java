@@ -46,7 +46,7 @@ public final class StackService {
 
     public static boolean isStackThread(){
         long threadId = Thread.currentThread().getId();
-        return stackServiceWorldMap.values().stream().anyMatch(stackServiceWorld -> stackServiceWorld.taskId == threadId);
+        return stackServiceWorldMap.values().stream().anyMatch(stackServiceWorld -> stackServiceWorld.taskId[0] == threadId || stackServiceWorld.taskId[1] == threadId);
     }
 
     public static boolean canStackFromThread(){
@@ -70,7 +70,7 @@ public final class StackService {
 
         @SuppressWarnings("unchecked")
         private final Queue<Runnable>[] asyncRunnables = new ConcurrentLinkedQueue[2];
-        private long taskId = -1;
+        private final long[] taskId = new long[] {-1, -1};
         private final Timer[] timers = new Timer[2];
 
         StackServiceWorld(String world){
@@ -86,9 +86,9 @@ public final class StackService {
                 @Override
                 public void run() {
                     try {
-                        if (taskId == -1) {
+                        if (taskId[type.id] == -1) {
                             Thread.currentThread().setName("WildStacker " + type + " Stacking Thread (" + world + ")");
-                            taskId = Thread.currentThread().getId();
+                            taskId[type.id] = Thread.currentThread().getId();
                         }
 
                         List<Runnable> runnableList = new ArrayList<>(asyncRunnables[type.id]);
