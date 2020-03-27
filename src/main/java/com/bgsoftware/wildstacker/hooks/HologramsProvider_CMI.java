@@ -69,7 +69,7 @@ public final class HologramsProvider_CMI implements HologramsProvider {
         }
 
         hologram.setLines(Collections.singletonList(newLine));
-        hologram.refresh();
+        hologram.update();
     }
 
     @Override
