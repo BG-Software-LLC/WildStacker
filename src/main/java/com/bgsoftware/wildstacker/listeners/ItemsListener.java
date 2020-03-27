@@ -138,11 +138,19 @@ public final class ItemsListener implements Listener {
             }else{
                 ItemStack itemStack = stackedItem.getItemStack();
                 int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
-                if(itemStack.getAmount() > maxStackSize){
+
+                if(itemStack.getAmount() > maxStackSize)
                     itemStack.setAmount(maxStackSize);
-                    stackedItem.setStackAmount(stackAmount - maxStackSize, true);
+
+                if(itemStack.getAmount() == stackedItem.getStackAmount()){
+                    stackedItem.remove();
                 }
+                else {
+                    stackedItem.setStackAmount(stackAmount - itemStack.getAmount(), true);
+                }
+
                 setItemInHand(e.getEntity(), itemStack);
+                e.getEntity().getEquipment().setItemInHandDropChance(2.0f);
             }
 
             if(e.getPlayer() != null && stackAmount != stackedItem.getStackAmount() && plugin.getSettings().itemsSoundEnabled){
