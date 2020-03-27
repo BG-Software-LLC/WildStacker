@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.threads;
 
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
@@ -9,9 +10,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
 public final class StackService {
@@ -29,20 +32,20 @@ public final class StackService {
             return;
         }
 
-        execute(stackedObject.getWorld(), runnable);
+        execute(stackedObject.getWorld(), StackType.fromObject(stackedObject), runnable);
     }
 
-    public static void execute(World world, Runnable runnable){
+    public static void execute(World world, StackType stackType, Runnable runnable){
         if(isStackThread()) {
             runnable.run();
             return;
         }
 
-        stackServiceWorldMap.computeIfAbsent(world.getName(), stackServiceWorld -> new StackServiceWorld(world.getName())).add(runnable);
+        stackServiceWorldMap.computeIfAbsent(world.getName(), stackServiceWorld -> new StackServiceWorld(world.getName())).add(stackType, runnable);
     }
 
     public static boolean isStackThread(){
-        long threadId =  Thread.currentThread().getId();
+        long threadId = Thread.currentThread().getId();
         return stackServiceWorldMap.values().stream().anyMatch(stackServiceWorld -> stackServiceWorld.taskId == threadId);
     }
 
@@ -65,26 +68,31 @@ public final class StackService {
 
     private static final class StackServiceWorld {
 
-        private final List<Runnable> asyncRunnables = new ArrayList<>();
+        @SuppressWarnings("unchecked")
+        private final Queue<Runnable>[] asyncRunnables = new ConcurrentLinkedQueue[2];
         private long taskId = -1;
-        private final Timer timer = new Timer(true);
+        private final Timer[] timers = new Timer[2];
 
         StackServiceWorld(String world){
+            for(StackType stackType : StackType.values())
+                timers[stackType.id] = startNewTimer(world, stackType);
+        }
+
+        private Timer startNewTimer(String world, StackType type){
+            Timer timer = new Timer(true);
+            asyncRunnables[type.id] = new ConcurrentLinkedQueue<>();
+
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
                     try {
                         if (taskId == -1) {
-                            Thread.currentThread().setName("WildStacker Stacking Thread (" + world + ")");
+                            Thread.currentThread().setName("WildStacker " + type + " Stacking Thread (" + world + ")");
                             taskId = Thread.currentThread().getId();
                         }
 
-                        List<Runnable> runnableList;
-
-                        synchronized (this) {
-                            runnableList = new ArrayList<>(asyncRunnables);
-                            asyncRunnables.clear();
-                        }
+                        List<Runnable> runnableList = new ArrayList<>(asyncRunnables[type.id]);
+                        asyncRunnables[type.id].clear();
 
                         runnableList.forEach(Runnable::run);
                     }catch(Exception ex){
@@ -92,19 +100,47 @@ public final class StackService {
                     }
                 }
             }, 250, 250);
+
+            return timer;
         }
 
-        void add(Runnable runnable){
-            synchronized (this) {
-                asyncRunnables.add(runnable);
-            }
+        void add(StackType type, Runnable runnable){
+            asyncRunnables[type.id].add(runnable);
         }
 
         void stop(){
-            timer.cancel();
-            synchronized (this) {
-                asyncRunnables.clear();
+            for(int i = 0; i < 2; i++) {
+                timers[i].cancel();
+                asyncRunnables[i].clear();
             }
+        }
+
+    }
+
+    public enum StackType{
+
+        ITEMS(0, "Items"),
+        ENTITIES(1, "Entities");
+
+        private final int id;
+        private final String name;
+
+        StackType(int id, String name){
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        static StackType fromObject(StackedObject stackedObject){
+            return stackedObject instanceof StackedItem ? ITEMS : ENTITIES;
         }
 
     }

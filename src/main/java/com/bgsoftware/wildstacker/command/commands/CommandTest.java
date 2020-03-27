@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.command.commands;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,6 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class CommandTest implements ICommand {
 
@@ -46,7 +49,30 @@ public final class CommandTest implements ICommand {
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         World world = sender instanceof Player ? ((Player) sender).getWorld() : Bukkit.getWorlds().get(0);
-        StackService.execute(world, () -> sender.sendMessage(ChatColor.YELLOW + "A message from the stacking thread of the world " + world.getName() + "!"));
+        //noinspection unchecked
+        CompletableFuture<Boolean>[] completableFutures = new CompletableFuture[2];
+
+        for(StackService.StackType stackType : StackService.StackType.values()){
+            completableFutures[stackType.getId()] = new CompletableFuture<>();
+            StackService.execute(world, stackType, () -> completableFutures[stackType.getId()].complete(true));
+        }
+
+        Executor.async(() -> {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for(StackService.StackType stackType : StackService.StackType.values()){
+                boolean success = false;
+
+                try {
+                    success = completableFutures[stackType.getId()].get(1, TimeUnit.SECONDS);
+                }catch(Exception ignored){}
+
+                stringBuilder.append("\n").append(ChatColor.YELLOW).append(stackType).append(" Stacking Thread Status: ")
+                        .append(success ? ChatColor.GREEN + "ACTIVE" : ChatColor.RED + "INACTIVE");
+            }
+
+            sender.sendMessage(stringBuilder.substring(1));
+        });
     }
 
     @Override
