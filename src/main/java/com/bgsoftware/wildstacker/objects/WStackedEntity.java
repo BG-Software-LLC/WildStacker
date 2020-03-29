@@ -624,7 +624,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean hasNameTag() {
-        return object.getCustomName() != null && !object.isCustomNameVisible() &&
+        return StackCheck.NAME_TAG.isEnabled() && object.getCustomName() != null && !object.isCustomNameVisible() &&
                 !plugin.getSettings().entitiesCustomNamePattern.matcher(object.getCustomName()).matches();
     }
 
