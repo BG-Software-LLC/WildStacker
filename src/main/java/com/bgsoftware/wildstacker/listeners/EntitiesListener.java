@@ -278,6 +278,7 @@ public final class EntitiesListener implements Listener {
                         stackedEntity.setStackAmount(stackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
+                        boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnedEntity(livingEntity);
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
 
@@ -289,6 +290,9 @@ public final class EntitiesListener implements Listener {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
 
                         stackedEntity.setStackAmount(currentStackAmount, false);
+
+                        if(isMcMMOSpawnedEntity)
+                            McMMOHook.updateSpawnedEntity(livingEntity);
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
                         entityDeathEvent.getDrops().clear();

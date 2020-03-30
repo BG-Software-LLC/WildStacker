@@ -8,6 +8,7 @@ public final class McMMOHook {
 
     private static final String CUSTOM_NAME_KEY = "mcMMO: Custom Name";
     private static final String CUSTOM_NAME_VISIBLE_KEY = "mcMMO: Name Visibility";
+    private static final String SPAWNED_ENTITY_KEY = "mcMMO: Spawned Entity";
 
     private static Plugin mcMMO;
 
@@ -22,6 +23,16 @@ public final class McMMOHook {
                 livingEntity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, livingEntity.isCustomNameVisible()));
             }
         }
+    }
+
+    public static void updateSpawnedEntity(LivingEntity livingEntity){
+        if(mcMMO != null){
+            livingEntity.setMetadata(SPAWNED_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
+        }
+    }
+
+    public static boolean isSpawnedEntity(LivingEntity livingEntity){
+        return mcMMO != null && livingEntity.hasMetadata(SPAWNED_ENTITY_KEY);
     }
 
     public static void setEnabled(boolean enabled){
