@@ -1,11 +1,11 @@
-package com.bgsoftware.wildstacker.utils;
+package com.bgsoftware.wildstacker.utils.pair;
 
 import java.util.Map;
 
 public final class Pair<K, V> implements Map.Entry<K, V> {
 
-    private K key;
-    private V value;
+    private final K key;
+    private final V value;
 
     public Pair(K key, V value){
         this.key = key;

@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -199,13 +198,11 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range).whenComplete((nearbyEntities, ex) ->
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range, entity -> entity instanceof Item).whenComplete((nearbyEntities, ex) ->
             StackService.execute(this, () -> {
                 Location itemLocation = getItem().getLocation();
 
-                Optional<StackedItem> itemOptional = nearbyEntities.stream()
-                        .filter(entity -> entity instanceof Item && EntityUtils.isNearby(object, entity, range))
-                        .map(WStackedItem::of)
+                Optional<StackedItem> itemOptional = nearbyEntities.map(WStackedItem::of)
                         .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
                         .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 

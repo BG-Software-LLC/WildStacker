@@ -265,14 +265,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
         int range = plugin.getSettings().entitiesCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range).whenComplete((nearbyEntities, ex) ->
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range, EntityUtils::isStackable).whenComplete((nearbyEntities, ex) ->
             StackService.execute(this, () -> {
                 int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                 Location entityLocation = getLivingEntity().getLocation();
 
-                Set<StackedEntity> filteredEntities = nearbyEntities.stream()
-                        .filter(entity -> EntityUtils.isStackable(entity) && EntityUtils.isNearby(object, entity, range))
-                        .map(WStackedEntity::of)
+                Set<StackedEntity> filteredEntities = nearbyEntities.map(WStackedEntity::of)
                         .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                         .collect(Collectors.toSet());
                 Optional<StackedEntity> entityOptional = filteredEntities.stream()

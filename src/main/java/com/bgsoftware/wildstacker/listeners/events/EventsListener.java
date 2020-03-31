@@ -63,12 +63,12 @@ public final class EventsListener {
 
             Item egg = e.getEntity();
 
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2).whenComplete((nearbyEntities, ex) ->
-                nearbyEntities.stream().filter(entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
-                        .findFirst().ifPresent(chicken -> {
-                            EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
-                            Bukkit.getPluginManager().callEvent(eggLayEvent);
-                        }));
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
+                    entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
+                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(chicken -> {
+                        EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
+                        Bukkit.getPluginManager().callEvent(eggLayEvent);
+                    }));
         }
 
     }

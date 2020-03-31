@@ -108,7 +108,11 @@ public final class ItemUtils {
             if(matcher.matches()) {
                 List<String> indexes = Stream.of("0", "1", "2")
                         .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
-                spawnersAmount = Integer.parseInt(matcher.group(indexes.indexOf("0") + 1));
+                try {
+                    spawnersAmount = Integer.parseInt(matcher.group(indexes.indexOf("0") + 1));
+                }catch(Throwable ex){
+                    spawnersAmount = 1;
+                }
             }
         }
 

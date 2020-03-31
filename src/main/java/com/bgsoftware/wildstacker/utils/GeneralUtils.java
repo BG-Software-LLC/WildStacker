@@ -50,4 +50,11 @@ public final class GeneralUtils {
         return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
+    public static boolean isNearby(Location source, Location check, int range){
+        return source.getWorld().equals(check.getWorld()) &&
+                Math.abs(source.getBlockX() - check.getBlockX()) <= range &&
+                Math.abs(source.getBlockY() - check.getBlockY()) <= range &&
+                Math.abs(source.getBlockZ() - check.getBlockZ()) <= range;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.command.commands;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -46,15 +47,17 @@ public final class CommandStats implements ICommand {
                 spawnersAmount = plugin.getSystemManager().getStackedSpawners().size(),
                 barrelsAmount = plugin.getSystemManager().getStackedBarrels().size(),
                 entitiesCachedAmounts = plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.size(),
-                itemsCachedAmount = plugin.getDataHandler().CACHED_AMOUNT_ITEMS.size();
+                itemsCachedAmount = plugin.getDataHandler().CACHED_AMOUNT_ITEMS.size(),
+                entityBoxCachedAmount = EntitiesGetter.cachedEntities.size();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: " + entitiesAmount +
                 "\n&e - Stacked Items: " + itemsAmount +
                 "\n&e - Stacked Spawners: " + spawnersAmount +
                 "\n&e - Stacked Barrels: " + barrelsAmount +
-                "\n&e - Cached Entities Amount (Not Objects): " + entitiesCachedAmounts +
-                "\n&e - Cached Items Amount (Not Objects): " + itemsCachedAmount;
+                "\n&e - Cached Entities Amount (Unloaded Chunks): " + entitiesCachedAmounts +
+                "\n&e - Cached Items Amount (Unloaded Chunks): " + itemsCachedAmount +
+                "\n&e - Cached EntityBox: " + entityBoxCachedAmount;
 
         Locale.sendMessage(sender, message);
     }

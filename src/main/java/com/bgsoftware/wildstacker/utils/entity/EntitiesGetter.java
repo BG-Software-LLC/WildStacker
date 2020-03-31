@@ -1,7 +1,8 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.BiPair;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.pair.MutablePair;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -10,14 +11,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class EntitiesGetter {
@@ -25,51 +24,33 @@ public final class EntitiesGetter {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int REMOVE_TIME = 40;
 
-    private static final ConcurrentLinkedQueue<BiPair<Location, Integer, CompletableFuture<Set<Entity>>>>
-            pendingRequests = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<EntityGetInformation> pendingRequests = new ConcurrentLinkedQueue<>();
 
-    private static Map<ChunkPosition, Set<Entity>> cachedEntities = new ConcurrentHashMap<>();
-    private static Map<Integer, Set<ChunkPosition>> toRemoveByTick = new ConcurrentHashMap<>();
-    private static Map<ChunkPosition, Integer> toRemoveByChunk = new ConcurrentHashMap<>();
+    public static final Map<ChunkPosition, MutablePair<EntityBox, Integer>> cachedEntities = new ConcurrentHashMap<>();
 
     private static BukkitTask currentTask = null;
     private static int currentTick = 0;
 
-    public static CompletableFuture<Set<Entity>> getNearbyEntities(Location location, int range){
+    public static CompletableFuture<EntityBox> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         ChunkPosition chunkPosition = new ChunkPosition(location);
-        CompletableFuture<Set<Entity>> completableFuture;
+        CompletableFuture<EntityBox> completableFuture;
 
         if(currentTask == null){
-            completableFuture = CompletableFuture.completedFuture(new HashSet<>());
+            completableFuture = CompletableFuture.completedFuture(EntityBox.EMPTY_BOX);
         }
 
         else if(cachedEntities.containsKey(chunkPosition)){
-            completableFuture = CompletableFuture.completedFuture(cachedEntities.get(chunkPosition).stream()
-                    .filter(entity -> entity.isValid() && !entity.isDead()).collect(Collectors.toSet()));
-            cacheChunk(chunkPosition);
+            MutablePair<EntityBox, Integer> pair = cachedEntities.get(chunkPosition);
+            pair.setValue(currentTick);
+            completableFuture = CompletableFuture.completedFuture(pair.getKey());
         }
 
         else {
             completableFuture = new CompletableFuture<>();
-            int nearbyChunks = range % 16 == 0 ? range / 16 : (range / 16) + 1;
-            pendingRequests.add(new BiPair<>(location, nearbyChunks, completableFuture));
+            pendingRequests.add(new EntityGetInformation(location, range, filter, completableFuture));
         }
 
         return completableFuture;
-    }
-
-    private static void cacheChunk(ChunkPosition chunkPosition){
-        int chunkTick = toRemoveByChunk.get(chunkPosition);
-
-        Set<ChunkPosition> chunkPositions = toRemoveByTick.get(chunkTick);
-        if(chunkPositions != null) {
-            chunkPositions.remove(chunkPosition);
-
-            if (chunkPositions.isEmpty())
-                toRemoveByTick.remove(chunkTick);
-        }
-
-        toRemoveByTick.computeIfAbsent(currentTick + REMOVE_TIME, s -> new HashSet<>()).add(chunkPosition);
     }
 
     private static BukkitTask createNewTask() {
@@ -77,40 +58,34 @@ public final class EntitiesGetter {
             currentTick++;
 
             while (!pendingRequests.isEmpty()){
-                BiPair<Location, Integer, CompletableFuture<Set<Entity>>> pair = pendingRequests.poll();
+                EntityGetInformation info = pendingRequests.poll();
 
-                if (pair == null)
+                if (info == null)
                     break;
 
-                Location location = pair.getX();
-                int nearbyChunks = pair.getY();
+                World world = info.location.getWorld();
+                int chunkX = info.location.getBlockX() >> 4, chunkZ = info.location.getBlockZ() >> 4;
 
-                World world = location.getWorld();
-                int chunkX = location.getBlockX() >> 4, chunkZ = location.getBlockZ() >> 4;
+                EntityBox entityBox = new EntityBox(info.filter);
 
-                Set<Entity> nearbyEntities = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                int nearbyChunks = info.range % 16 == 0 ? info.range / 16 : (info.range / 16) + 1;
 
                 for(int x = -nearbyChunks; x <= nearbyChunks; x++){
                     for(int z = -nearbyChunks; z <= nearbyChunks; z++){
                         Chunk chunk = world.getChunkAt(chunkX + x, chunkZ + z);
-                        nearbyEntities.addAll(Arrays.asList(chunk.getEntities()));
+                        entityBox.feed(Arrays.stream(chunk.getEntities()).filter(entity ->
+                                GeneralUtils.isNearby(info.location, entity.getLocation(), info.range)).collect(Collectors.toList()));
                     }
                 }
 
                 ChunkPosition chunkPosition = new ChunkPosition(world, chunkX, chunkZ);
-                cachedEntities.put(chunkPosition, nearbyEntities);
-                toRemoveByChunk.put(chunkPosition, currentTick + REMOVE_TIME);
-                toRemoveByTick.computeIfAbsent(currentTick + REMOVE_TIME, s -> new HashSet<>());
+                cachedEntities.put(chunkPosition, new MutablePair<>(entityBox, currentTick));
 
-                pair.getZ().complete(nearbyEntities);
+                info.completableFuture.complete(entityBox);
             }
 
-            if(toRemoveByTick.containsKey(currentTick)){
-                toRemoveByTick.get(currentTick).forEach(chunkPosition -> {
-                    cachedEntities.remove(chunkPosition);
-                    toRemoveByChunk.remove(chunkPosition);
-                });
-                toRemoveByTick.remove(currentTick);
+            if(currentTick % REMOVE_TIME == 0){
+                cachedEntities.entrySet().removeIf(entry -> currentTick - entry.getValue().getValue() <= REMOVE_TIME);
             }
 
         }, 5L, 5L);
@@ -161,6 +136,22 @@ public final class EntitiesGetter {
         public int hashCode() {
             return Objects.hash(world, x, z);
         }
+    }
+
+    private static final class EntityGetInformation {
+
+        private final Location location;
+        private final int range;
+        private final Predicate<Entity> filter;
+        private final CompletableFuture<EntityBox> completableFuture;
+
+        EntityGetInformation(Location location, int range, Predicate<Entity> filter, CompletableFuture<EntityBox> completableFuture){
+            this.location = location;
+            this.range = range;
+            this.filter = filter;
+            this.completableFuture = completableFuture;
+        }
+
     }
 
 }
