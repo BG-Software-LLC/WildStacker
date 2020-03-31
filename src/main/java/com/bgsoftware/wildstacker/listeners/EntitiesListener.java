@@ -701,9 +701,10 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) && entity.isValid() &&
-                    (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity))).whenComplete((nearbyEntities, ex) ->
-                    nearbyEntities.forEach(entity -> WStackedEntity.of(entity).runStackAsync(null)));
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) &&
+                    (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)) &&
+                    GeneralUtils.isNearby(e.getEntity().getLocation(), entity.getLocation(), 5))
+                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> WStackedEntity.of(entity).runStackAsync(null)));
         }
     }
 

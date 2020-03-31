@@ -11,6 +11,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
@@ -104,8 +105,12 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity){
-        return MythicMobsHook.isMythicMob(entity) ||
-                (entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC"));
+        return !entity.isDead() && (MythicMobsHook.isMythicMob(entity) ||
+                (entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC")));
+    }
+
+    public static boolean isItem(Entity entity){
+        return entity.isValid() && !entity.isDead() && entity instanceof Item;
     }
 
     public static void spawnExp(Location location, int amount){

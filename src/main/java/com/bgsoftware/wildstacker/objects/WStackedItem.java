@@ -6,7 +6,9 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -198,30 +200,31 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range, entity -> entity instanceof Item).whenComplete((nearbyEntities, ex) ->
-            StackService.execute(this, () -> {
-                Location itemLocation = getItem().getLocation();
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range,
+                entity -> EntityUtils.isItem(entity) && GeneralUtils.isNearby(object.getLocation(), entity.getLocation(), range))
+                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
+                    Location itemLocation = getItem().getLocation();
 
-                Optional<StackedItem> itemOptional = nearbyEntities.map(WStackedItem::of)
-                        .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                        .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
+                    Optional<StackedItem> itemOptional = nearbyEntities.map(WStackedItem::of)
+                            .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+                            .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
 
-                if (itemOptional.isPresent()) {
-                    StackedItem targetItem = itemOptional.get();
+                    if (itemOptional.isPresent()) {
+                        StackedItem targetItem = itemOptional.get();
 
-                    StackResult stackResult = runStack(targetItem);
+                        StackResult stackResult = runStack(targetItem);
 
-                    if (stackResult == StackResult.SUCCESS) {
-                        if (result != null)
-                            result.accept(itemOptional.map(StackedItem::getItem));
-                        return;
+                        if (stackResult == StackResult.SUCCESS) {
+                            if (result != null)
+                                result.accept(itemOptional.map(StackedItem::getItem));
+                            return;
+                        }
                     }
-                }
 
-                updateName();
+                    updateName();
 
-                if (result != null)
-                    result.accept(Optional.empty());
+                    if (result != null)
+                        result.accept(Optional.empty());
             }));
     }
 

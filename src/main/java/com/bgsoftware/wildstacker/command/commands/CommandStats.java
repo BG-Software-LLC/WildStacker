@@ -48,7 +48,7 @@ public final class CommandStats implements ICommand {
                 barrelsAmount = plugin.getSystemManager().getStackedBarrels().size(),
                 entitiesCachedAmounts = plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.size(),
                 itemsCachedAmount = plugin.getDataHandler().CACHED_AMOUNT_ITEMS.size(),
-                entityBoxCachedAmount = EntitiesGetter.cachedEntities.size();
+                entityBoxCachedAmount = EntitiesGetter.size();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: " + entitiesAmount +

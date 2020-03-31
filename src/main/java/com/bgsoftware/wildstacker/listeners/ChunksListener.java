@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -48,6 +49,8 @@ public final class ChunksListener implements Listener {
                         plugin.getSystemManager().removeStackObject(stackedEntity);
                     });
         });
+
+        EntitiesGetter.removeCache(e.getChunk());
     }
 
     @EventHandler
