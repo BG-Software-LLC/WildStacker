@@ -8,9 +8,16 @@ import java.util.Set;
 
 public enum StackCheck {
 
+    /**
+     * Custom stack checks.
+     */
     SPAWN_REASON(""),
     NERFED(""),
     NAME_TAG(""),
+
+    /**
+     * Vanilla stack checks.
+     */
     AGE(""),
     EXACT_AGE("Age"),
     CAN_BREED(""),

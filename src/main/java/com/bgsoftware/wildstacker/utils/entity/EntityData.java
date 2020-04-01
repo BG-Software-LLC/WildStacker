@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -41,99 +42,71 @@ public final class EntityData {
             EntityStorage.setMetadata(livingEntity, "ES", epicSpawners);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof EntityData){
-            EntityData other = (EntityData) obj;
+    public StackCheckResult match(EntityData other){
+        Map map = Fields.NBT_TAG_MAP.get(nbtTagCompound, Map.class);
+        Map otherMap = Fields.NBT_TAG_MAP.get(other.nbtTagCompound, Map.class);
 
-            Map map = Fields.NBT_TAG_MAP.get(nbtTagCompound, Map.class);
-            Map otherMap = Fields.NBT_TAG_MAP.get(other.nbtTagCompound, Map.class);
+        if(StackCheck.AGE.isEnabled() && map.containsKey("Age")){
+            if((getInteger(map, "Age") >= 0) != (getInteger(otherMap, "Age") >= 0)) //isAdult
+                return StackCheckResult.AGE;
+        }
 
-            if(StackCheck.AGE.isEnabled()){
-                if(map.containsKey("Age") != otherMap.containsKey("Age"))
-                    return false;
-                if(map.containsKey("Age")) {
-                    if((getInteger(map.get("Age")) >= 0) != (getInteger(otherMap.get("Age")) >= 0)) //isAdult
-                        return false;
-                }
+        if(StackCheck.ZOMBIE_PIGMAN_ANGRY.isEnabled() && StackCheck.ZOMBIE_PIGMAN_ANGRY.isTypeAllowed(entityType) && map.containsKey("Anger")){
+            if((getInteger(map, "Anger") >= 0) != (getInteger(otherMap, "Anger") >= 0)) //canBreed
+                return StackCheckResult.ZOMBIE_PIGMAN_ANGRY;
+        }
+
+        if(StackCheck.ENDERMAN_CARRIED_BLOCK.isEnabled() && StackCheck.ENDERMAN_CARRIED_BLOCK.isTypeAllowed(entityType)){
+            if(map.containsKey("carried")){
+                if(!get(map, "carried").equals(get(otherMap, "carried")))
+                    return StackCheckResult.ENDERMAN_CARRIED_BLOCK;
             }
-
-            if(StackCheck.ZOMBIE_PIGMAN_ANGRY.isEnabled() && StackCheck.ZOMBIE_PIGMAN_ANGRY.isTypeAllowed(entityType)){
-                if(map.containsKey("Anger") != otherMap.containsKey("Anger"))
-                    return false;
-                if(map.containsKey("Anger")) {
-                    if ((getInteger(map.get("Anger")) > 0) != (getInteger(otherMap.get("Anger")) > 0)) //canBreed
-                        return false;
-                }
+            if(map.containsKey("carriedData")){
+                if(!get(map, "carriedData").equals(get(otherMap, "carriedData")))
+                    return StackCheckResult.ENDERMAN_CARRIED_BLOCK;
             }
-
-            if(StackCheck.ENDERMAN_CARRIED_BLOCK.isEnabled() && StackCheck.ENDERMAN_CARRIED_BLOCK.isTypeAllowed(entityType)){
-                if(map.containsKey("carried") != otherMap.containsKey("carried") || map.containsKey("carriedData") != otherMap.containsKey("carriedData") ||
-                        map.containsKey("carriedBlockState") != otherMap.containsKey("carriedBlockState"))
-                    return false;
-                if(map.containsKey("carried")){
-                    if(!map.get("carried").equals(otherMap.get("carried")))
-                        return false;
-                }
-                if(map.containsKey("carriedData")){
-                    if(!map.get("carriedData").equals(otherMap.get("carriedData")))
-                        return false;
-                }
-                if(map.containsKey("carriedBlockState")){
-                    if(!map.get("carriedBlockState").equals(otherMap.get("carriedBlockState")))
-                        return false;
-                }
+            if(map.containsKey("carriedBlockState")){
+                if(!get(map, "carriedBlockState").equals(get(otherMap, "carriedBlockState")))
+                    return StackCheckResult.ENDERMAN_CARRIED_BLOCK;
             }
+        }
 
-            if (StackCheck.HORSE_COLOR.isEnabled() && StackCheck.HORSE_COLOR.isTypeAllowed(entityType)) {
-                if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
-                    return false;
-                if (map.containsKey("Variant")) {
-                    if(getInteger(map.get("Variant")) != getInteger(otherMap.get("Variant")))
-                        return false;
-                }
+        if(map.containsKey("Variant")){
+            int firstVariant = getInteger(map, "Variant"), secondVariant = getInteger(otherMap, "Variant");
+            if(StackCheck.HORSE_COLOR.isEnabled() && StackCheck.HORSE_COLOR.isTypeAllowed(entityType)){
+                if(firstVariant != secondVariant)
+                    return StackCheckResult.HORSE_COLOR;
             }
-
-            if (StackCheck.HORSE_STYLE.isEnabled() && StackCheck.HORSE_STYLE.isTypeAllowed(entityType)) {
-                if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
-                    return false;
-                if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Variant")) >>> 8) != (getInteger(otherMap.get("Variant")) >>> 8))
-                        return false;
-                }
+            if (StackCheck.HORSE_STYLE.isEnabled() && StackCheck.HORSE_STYLE.isTypeAllowed(entityType)){
+                if((firstVariant >>> 8) != (secondVariant >>> 8))
+                    return StackCheckResult.HORSE_STYLE;
             }
-
-            if (StackCheck.TROPICALFISH_BODY_COLOR.isEnabled() && StackCheck.TROPICALFISH_BODY_COLOR.isTypeAllowed(entityType)) {
-                if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
-                    return false;
-                if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Variant")) >> 16 & 255) != (getInteger(otherMap.get("Variant")) >> 16 & 255))
-                        return false;
-                }
+            if (StackCheck.TROPICALFISH_BODY_COLOR.isEnabled() && StackCheck.TROPICALFISH_BODY_COLOR.isTypeAllowed(entityType)){
+                if((firstVariant >> 16 & 255) != (secondVariant >> 16 & 255))
+                    return StackCheckResult.TROPICALFISH_BODY_COLOR;
             }
-
-            if (StackCheck.TROPICALFISH_TYPE_COLOR.isEnabled() && StackCheck.TROPICALFISH_TYPE_COLOR.isTypeAllowed(entityType)) {
-                if (map.containsKey("Variant") != otherMap.containsKey("Variant"))
-                    return false;
-                if (map.containsKey("Variant")) {
-                    if ((getInteger(map.get("Variant")) >> 24 & 255) != (getInteger(otherMap.get("Variant")) >> 24 & 255))
-                        return false;
-                }
+            if(StackCheck.TROPICALFISH_TYPE_COLOR.isEnabled() && StackCheck.TROPICALFISH_TYPE_COLOR.isTypeAllowed(entityType)){
+                if((firstVariant >> 24 & 255) != (secondVariant >> 24 & 255))
+                    return StackCheckResult.TROPICALFISH_BODY_COLOR;
             }
+        }
 
-            for(StackCheck stackCheck : StackCheck.values()){
-                if(stackCheck.isEnabled() && stackCheck.isTypeAllowed(entityType)){
-                    for(String key : stackCheck.getCompoundKeys()){
-                        if(!key.isEmpty() && !get(map, key).equals(get(otherMap, key))){
-                            return false;
-                        }
+        for(StackCheck stackCheck : StackCheck.values()){
+            if(stackCheck.isEnabled() && stackCheck.isTypeAllowed(entityType)){
+                for(String key : stackCheck.getCompoundKeys()){
+                    if(!key.isEmpty() && !get(map, key).equals(get(otherMap, key))){
+                        return StackCheckResult.valueOf(stackCheck.name());
                     }
                 }
             }
-
-            return true;
         }
-        return super.equals(obj);
+
+        return StackCheckResult.SUCCESS;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof EntityData && match((EntityData) obj) == StackCheckResult.SUCCESS;
     }
 
     private Object get(Map map, String key){
@@ -141,8 +114,9 @@ public final class EntityData {
         return value == null ? NULL : value;
     }
 
-    private int getInteger(Object object){
-        return object == null ? 0 : plugin.getNMSAdapter().getNBTInteger(object);
+    private int getInteger(Map map, String key){
+        Object value = get(map, key);
+        return value == NULL ? 0 : plugin.getNMSAdapter().getNBTInteger(value);
     }
 
     public static EntityData of(StackedEntity stackedEntity){

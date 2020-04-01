@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.key.Key;
@@ -30,19 +31,19 @@ public final class EntityUtils {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    public static boolean areEquals(StackedEntity en1, StackedEntity en2){
+    public static StackCheckResult areEquals(StackedEntity en1, StackedEntity en2){
         if(en1.getType() != en2.getType())
-            return false;
+            return StackCheckResult.NOT_SIMILAR;
 
         if(!MythicMobsHook.areSimilar(en1.getUniqueId(), en2.getUniqueId()))
-            return false;
+            return StackCheckResult.MYTHIC_MOB_TYPE;
 
         //EpicSpawners drops data
         if(EntityStorage.hasMetadata(en1.getLivingEntity(), "ES") !=
                 EntityStorage.hasMetadata(en2.getLivingEntity(), "ES"))
-            return false;
+            return StackCheckResult.EPIC_SPAWNERS_DROPS;
 
-        return EntityData.of(en1).equals(EntityData.of(en2));
+        return EntityData.of(en1).match(EntityData.of(en2));
     }
 
     public static String getFormattedType(String typeName) {

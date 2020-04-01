@@ -211,6 +211,11 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(superResult != StackCheckResult.SUCCESS)
             return superResult;
 
+        StackCheckResult similarResult = EntityUtils.areEquals(this, (StackedEntity) stackedObject);
+
+        if(similarResult != StackCheckResult.SUCCESS)
+            return similarResult;
+
         if(isNameBlacklisted())
             return StackCheckResult.BLACKLISTED_NAME;
 
@@ -393,12 +398,12 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        return stackedObject instanceof StackedEntity && EntityUtils.areEquals(this, (StackedEntity) stackedObject);
+        return stackedObject instanceof StackedEntity;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof StackedEntity ? getUniqueId().equals(((StackedEntity) obj).getUniqueId()) : super.equals(obj);
+        return obj instanceof StackedEntity && getUniqueId().equals(((StackedEntity) obj).getUniqueId());
     }
 
     @Override

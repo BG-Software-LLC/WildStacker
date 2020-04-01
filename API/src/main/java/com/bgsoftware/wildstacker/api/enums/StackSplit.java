@@ -2,12 +2,12 @@ package com.bgsoftware.wildstacker.api.enums;
 
 public enum StackSplit {
 
-    FEED,
-    NAME_TAG,
-    MUSHROOM_SHEAR,
-    SHEEP_SHEAR,
-    SHEEP_DYE,
     ENTITY_BREED,
+    FEED,
+    MUSHROOM_SHEAR,
+    NAME_TAG,
+    SHEEP_DYE,
+    SHEEP_SHEAR,
     VILLAGER_INFECTION;
 
     private boolean enabled;
