@@ -29,6 +29,8 @@ public enum StackCheck {
     WOLF_ANGRY(Sets.newHashSet(EntityTypes.WOLF), "Angry"),
     WOLF_COLLAR_COLOR(Sets.newHashSet(EntityTypes.WOLF), "CollarColor"),
     OCELOT_TYPE(Sets.newHashSet(EntityTypes.OCELOT), "CatType"),
+    CAT_TYPE(Sets.newHashSet(EntityTypes.CAT), "CatType"),
+    CAT_COLLAR_COLOR(Sets.newHashSet(EntityTypes.CAT), "CollarColor"),
     HORSE_TYPE(Sets.newHashSet(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE), "Type"),
     HORSE_COLOR(Sets.newHashSet(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE), ""),
     HORSE_STYLE(Sets.newHashSet(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE), ""),

@@ -9,12 +9,16 @@ import org.bukkit.entity.LivingEntity;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @SuppressWarnings("WeakerAccess")
 public final class EntityData {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final Map<UUID, EntityData> cachedData = new WeakHashMap<>();
+    private static final Object NULL = new Object();
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private Object nbtTagCompound = null;
     private Object epicSpawners = null;
@@ -120,11 +124,8 @@ public final class EntityData {
             for(StackCheck stackCheck : StackCheck.values()){
                 if(stackCheck.isEnabled() && stackCheck.isTypeAllowed(entityType)){
                     for(String key : stackCheck.getCompoundKeys()){
-                        if(!key.isEmpty()){
-                            if(map.containsKey(key) != otherMap.containsKey(key))
-                                return false;
-                            if(map.containsKey(key) && !map.get(key).equals(otherMap.get(key)))
-                                return false;
+                        if(!key.isEmpty() && !get(map, key).equals(get(otherMap, key))){
+                            return false;
                         }
                     }
                 }
@@ -133,6 +134,11 @@ public final class EntityData {
             return true;
         }
         return super.equals(obj);
+    }
+
+    private Object get(Map map, String key){
+        Object value = map.get(key);
+        return value == null ? NULL : value;
     }
 
     private int getInteger(Object object){
@@ -144,33 +150,43 @@ public final class EntityData {
     }
 
     public static EntityData of(LivingEntity livingEntity){
-        synchronized (cachedData){
-            if(cachedData.containsKey(livingEntity.getUniqueId()))
-                return cachedData.get(livingEntity.getUniqueId());
-        }
+        EntityData entityData = get(livingEntity.getUniqueId());
 
-        EntityData entityData = new EntityData();
+        if (entityData != null)
+            return entityData;
+
+        entityData = new EntityData();
         entityData.loadEntityData(livingEntity);
 
-        synchronized (cachedData){
-            cachedData.put(livingEntity.getUniqueId(), entityData);
-        }
+        put(livingEntity.getUniqueId(), entityData);
 
         return entityData;
     }
 
-    public static void cache(LivingEntity livingEntity){
-        EntityData entityData = new EntityData();
-        entityData.loadEntityData(livingEntity);
-
-        synchronized (cachedData){
-            cachedData.put(livingEntity.getUniqueId(), entityData);
+    public static void uncache(UUID uuid){
+        try{
+            lock.writeLock().lock();
+            cachedData.remove(uuid);
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
-    public static void uncache(UUID uuid){
-        synchronized (cachedData){
-            cachedData.remove(uuid);
+    private static EntityData get(UUID uuid){
+        try{
+            lock.readLock().lock();
+            return cachedData.get(uuid);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private static void put(UUID uuid, EntityData entityData){
+        try{
+            lock.writeLock().lock();
+            cachedData.put(uuid, entityData);
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 

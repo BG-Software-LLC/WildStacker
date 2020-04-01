@@ -254,6 +254,8 @@ entities:
     WOLF_ANGRY: false
     WOLF_COLLAR_COLOR: true
     OCELOT_TYPE: true
+    CAT_TYPE: true
+    CAT_COLLAR_COLOR: true
     HORSE_TYPE: true
     HORSE_COLOR: true
     HORSE_STYLE: true
