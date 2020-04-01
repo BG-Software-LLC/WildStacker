@@ -55,7 +55,7 @@ public final class SettingsHandler {
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
-            entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, entitiesClearEquipment,
+            entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply, entitiesClearEquipment,
             spawnCorpses, entitiesOneShotEnabled;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
@@ -195,6 +195,7 @@ public final class SettingsHandler {
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
         entitiesAutoExpPickup = cfg.getStringList("entities.auto-exp-pickup");
         eggLayMultiply = cfg.getBoolean("entities.egg-lay-multiply", true);
+        scuteMultiply = cfg.getBoolean("entities.scute-multiply", true);
         entitiesClearEquipment = cfg.getBoolean("entities.clear-equipment", false);
         spawnCorpses = cfg.getBoolean("entities.spawn-corpses", true);
         entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);

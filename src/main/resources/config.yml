@@ -375,6 +375,9 @@ entities:
   # Should eggs that are laid by stacked chickens be multiplied by it's stack size?
   egg-lay-multiply: true
 
+  # Should scout that are dropped by grown turtles by multiplied by it's stack size?
+  scute-multiply: true
+
   # Should vanilla equipment of entities get cleared after they unstack?
   clear-equipment: false
 
