@@ -233,54 +233,54 @@ entities:
 
   # A list of all checks that the plugin does before trying to stack two entities together.
   stack-checks:
-    SPAWN_REASON: false
-    NERFED: true
-    NAME_TAG: true
     AGE: true
-    EXACT_AGE: false
-    CAN_BREED: true
-    IS_TAMED: true
     ANIMAL_OWNER: true
-    SKELETON_TYPE: true
-    ZOMBIE_BABY: true
-    SLIME_SIZE: true
-    ZOMBIE_PIGMAN_ANGRY: false
-    ENDERMAN_CARRIED_BLOCK: true
     BAT_AWAKE: false
-    GUARDIAN_ELDER: true
-    PIG_SADDLE: true
-    SHEEP_SHEARED: true
-    SHEEP_COLOR: true
-    WOLF_ANGRY: false
-    WOLF_COLLAR_COLOR: true
-    OCELOT_TYPE: true
-    CAT_TYPE: true
+    CAN_BREED: true
     CAT_COLLAR_COLOR: true
-    HORSE_TYPE: true
-    HORSE_COLOR: true
-    HORSE_STYLE: true
+    CAT_TYPE: true
+    ENDERMAN_CARRIED_BLOCK: true
+    EXACT_AGE: false
+    GUARDIAN_ELDER: true
     HORSE_CARRYING_CHEST: true
-    HORSE_TAME_PROGRESS: true
-    HORSE_MAX_TAME_PROGRESS: true
+    HORSE_COLOR: true
     HORSE_JUMP: true
-    RABBIT_TYPE: true
-    VILLAGER_PROFESSION: true
+    HORSE_MAX_TAME_PROGRESS: true
+    HORSE_STYLE: true
+    HORSE_TAME_PROGRESS: true
+    HORSE_TYPE: true
+    IS_TAMED: true
     LLAMA_COLOR: true
     LLAMA_STRENGTH: true
+    NAME_TAG: true
+    NERFED: true
+    OCELOT_TYPE: true
     PARROT_TYPE: true
-    PUFFERFISH_STATE: true
-    TROPICALFISH_TYPE: true
-    TROPICALFISH_BODY_COLOR: true
-    TROPICALFISH_TYPE_COLOR: true
     PHANTOM_SIZE: true
+    PIG_SADDLE: true
+    PUFFERFISH_STATE: true
+    RABBIT_TYPE: true
+    SHEEP_COLOR: true
+    SHEEP_SHEARED: true
+    SKELETON_TYPE: true
+    SLIME_SIZE: true
+    SPAWN_REASON: false
+    TROPICALFISH_BODY_COLOR: true
+    TROPICALFISH_TYPE: true
+    TROPICALFISH_TYPE_COLOR: true
+    VILLAGER_PROFESSION: true
+    WOLF_ANGRY: false
+    WOLF_COLLAR_COLOR: true
+    ZOMBIE_BABY: true
+    ZOMBIE_PIGMAN_ANGRY: false
 
   # A list of all actions that the plugin check before unstacking an entity stack.
   stack-split:
-    NAME_TAG: true
-    MUSHROOM_SHEAR: true
-    SHEEP_SHEAR: true
-    SHEEP_DYE: true
     ENTITY_BREED: true
+    MUSHROOM_SHEAR: true
+    NAME_TAG: true
+    SHEEP_DYE: true
+    SHEEP_SHEAR: true
     VILLAGER_INFECTION: true
 
   # Linked-entities are entities that are linked to one spawner or more.
