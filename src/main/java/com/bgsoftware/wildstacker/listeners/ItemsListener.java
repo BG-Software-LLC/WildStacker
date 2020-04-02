@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.listeners.events.ScuteDropEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -42,6 +43,8 @@ public final class ItemsListener implements Listener {
 
     public ItemsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
+        if(ServerVersion.isAtLeast(ServerVersion.v1_13))
+            plugin.getServer().getPluginManager().registerEvents(new ScuteListener(plugin), plugin);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -92,17 +95,6 @@ public final class ItemsListener implements Listener {
         ItemStack eggItem = e.getEgg().getItemStack();
         eggItem.setAmount(stackedEntity.getStackAmount());
         e.getEgg().setItemStack(eggItem);
-    }
-
-    @EventHandler
-    public void onScoutDrop(ScuteDropEvent e){
-        if(!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(e.getTurtle()))
-            return;
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getTurtle());
-        ItemStack scuteItem = e.getScute().getItemStack();
-        scuteItem.setAmount(stackedEntity.getStackAmount());
-        e.getScute().setItemStack(scuteItem);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -255,6 +247,27 @@ public final class ItemsListener implements Listener {
         }catch(Exception ex){
             entity.getEquipment().setItemInHand(itemStack);
         }
+    }
+
+    private static class ScuteListener implements Listener{
+
+        private WildStackerPlugin plugin;
+
+        ScuteListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @EventHandler
+        public void onScoutDrop(ScuteDropEvent e){
+            if(!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(e.getTurtle()))
+                return;
+
+            StackedEntity stackedEntity = WStackedEntity.of(e.getTurtle());
+            ItemStack scuteItem = e.getScute().getItemStack();
+            scuteItem.setAmount(stackedEntity.getStackAmount());
+            e.getScute().setItemStack(scuteItem);
+        }
+
     }
 
 }
