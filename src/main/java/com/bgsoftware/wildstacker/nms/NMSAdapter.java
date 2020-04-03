@@ -63,6 +63,8 @@ public interface NMSAdapter {
 
     void setKiller(LivingEntity livingEntity, Player killer);
 
+    boolean canSpawnOn(Entity entity, Location location);
+
     default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
         return entityEquipment.getItemInHandDropChance();
     }

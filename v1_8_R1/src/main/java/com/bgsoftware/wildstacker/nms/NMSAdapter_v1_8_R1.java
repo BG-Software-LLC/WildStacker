@@ -15,6 +15,7 @@ import net.minecraft.server.v1_8_R1.EntityItem;
 import net.minecraft.server.v1_8_R1.EntityLiving;
 import net.minecraft.server.v1_8_R1.EntityPlayer;
 import net.minecraft.server.v1_8_R1.EntityTracker;
+import net.minecraft.server.v1_8_R1.EntityTypes;
 import net.minecraft.server.v1_8_R1.EntityVillager;
 import net.minecraft.server.v1_8_R1.EntityZombie;
 import net.minecraft.server.v1_8_R1.EnumParticle;
@@ -242,6 +243,14 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
     public void setKiller(LivingEntity livingEntity, Player killer) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+    }
+
+    @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        Entity entity = EntityTypes.a(bukkitEntity.getEntityId(), world);
+        entity.setPosition(location.getX(), location.getY(), location.getZ());
+        return !(entity instanceof EntityInsentient) || ((EntityInsentient) entity).canSpawn();
     }
 
     /*

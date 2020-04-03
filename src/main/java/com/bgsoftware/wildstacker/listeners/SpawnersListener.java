@@ -372,11 +372,18 @@ public final class SpawnersListener implements Listener {
                     Location location = e.getSpawner().getLocation();
                     ThreadLocalRandom random = ThreadLocalRandom.current();
                     for (int i = 0; i < stackedSpawner.getStackAmount() - 1; i++) {
-                        locationsToSpawn.add(new Location(location.getWorld(),
-                                location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
-                                location.getBlockY(),
-                                location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
-                        ));
+                        Location locationToSpawn = null;
+                        int tries = 0;
+
+                        while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(e.getEntity(), locationToSpawn)) && ++tries <= 5){
+                            locationToSpawn = new Location(location.getWorld(),
+                                    location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
+                                    location.getBlockY(),
+                                    location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
+                            );
+                        }
+
+                        locationsToSpawn.add(locationToSpawn);
                     }
                     Executor.sync(() -> {
                         listenToSpawnEvent = false;

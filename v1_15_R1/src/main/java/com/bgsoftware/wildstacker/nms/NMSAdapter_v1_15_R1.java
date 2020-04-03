@@ -18,10 +18,12 @@ import net.minecraft.server.v1_15_R1.EntityInsentient;
 import net.minecraft.server.v1_15_R1.EntityItem;
 import net.minecraft.server.v1_15_R1.EntityLiving;
 import net.minecraft.server.v1_15_R1.EntityPlayer;
+import net.minecraft.server.v1_15_R1.EntityPositionTypes;
 import net.minecraft.server.v1_15_R1.EntityTypes;
 import net.minecraft.server.v1_15_R1.EntityVillager;
 import net.minecraft.server.v1_15_R1.EntityZombieVillager;
 import net.minecraft.server.v1_15_R1.EnumItemSlot;
+import net.minecraft.server.v1_15_R1.EnumMobSpawn;
 import net.minecraft.server.v1_15_R1.GameRules;
 import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
@@ -284,6 +286,14 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
         entityEquipment.setItemInOffHand(itemStack);
+    }
+
+    @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        assert location.getWorld() != null;
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
+        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
     }
 
     /*

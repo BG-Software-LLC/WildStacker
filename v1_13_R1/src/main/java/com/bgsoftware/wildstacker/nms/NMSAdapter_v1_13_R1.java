@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -241,6 +242,20 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     public void setKiller(LivingEntity livingEntity, Player killer) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+    }
+
+    @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        Entity entity = ((CraftEntity) bukkitEntity).getHandle().P().a(world);
+
+        if(entity == null){
+            WildStackerPlugin.log("Failed to get entity type from " + bukkitEntity.getType());
+            return true;
+        }
+
+        entity.setPosition(location.getX(), location.getY(), location.getZ());
+        return !(entity instanceof EntityInsentient) || (((EntityInsentient) entity).M() && ((EntityInsentient) entity).canSpawn());
     }
 
     @Override
