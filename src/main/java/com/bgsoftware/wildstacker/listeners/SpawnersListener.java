@@ -129,6 +129,10 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
+        if(!e.getPlayer().hasPermission("wildstacker.stack.*") &&
+                !e.getPlayer().hasPermission("wildstacker.place." + spawnerType.name().toLowerCase()))
+            return;
+
         //Stacking spawner
         stackedSpawner.setStackAmount(spawnerItemAmount, false);
 

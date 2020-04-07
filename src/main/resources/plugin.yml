@@ -44,6 +44,9 @@ permissions:
   wildstacker.place.*:
     description: Gives access to place all spawner types
     default: true
+  wildstacker.stack.*:
+    description: Gives access to stack all spawner types
+    default: true
   wildstacker.nextplace:
     description: Gives access to place spawners next to others when the feature is disabled.
   wildstacker.stats:
