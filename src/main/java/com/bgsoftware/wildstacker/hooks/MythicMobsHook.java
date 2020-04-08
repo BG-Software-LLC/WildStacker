@@ -44,7 +44,11 @@ public final class MythicMobsHook {
     public static String getMythicName(LivingEntity livingEntity){
         if(PluginHooks.isMythicMobsEnabled){
             ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
-            return activeMob.getDisplayName();
+            try {
+                return activeMob.getDisplayName();
+            }catch(Throwable ex){
+                return activeMob.getLivingEntity().getCustomName();
+            }
         }
 
         return livingEntity.getCustomName();
