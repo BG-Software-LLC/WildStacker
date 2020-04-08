@@ -9,12 +9,24 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SQLHelper {
 
     private static Connection conn;
 
+    private static ReadWriteLock lock = new ReentrantReadWriteLock();
+
     private SQLHelper(){}
+
+    public static void waitForLock(){
+        lock.readLock().lock();
+    }
+
+    public static void releaseLock(){
+        lock.readLock().unlock();
+    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void init(File file) throws ClassNotFoundException, SQLException {
@@ -70,6 +82,13 @@ public class SQLHelper {
             conn.setAutoCommit(autoCommit);
         }catch(SQLException ex){
             ex.printStackTrace();
+        } finally {
+            if(autoCommit) {
+                lock.writeLock().unlock();
+            }
+            else{
+                lock.writeLock().lock();
+            }
         }
     }
 

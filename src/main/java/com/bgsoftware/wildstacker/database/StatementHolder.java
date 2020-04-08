@@ -85,30 +85,35 @@ public class StatementHolder {
             return;
         }
 
-        String errorQuery = query;
-        try(PreparedStatement preparedStatement = SQLHelper.buildStatement(query)){
-            if(!batches.isEmpty()){
-                for (Map<Integer, Object> values : batches) {
+        try {
+            SQLHelper.waitForLock();
+
+            String errorQuery = query;
+            try (PreparedStatement preparedStatement = SQLHelper.buildStatement(query)) {
+                if (!batches.isEmpty()) {
+                    for (Map<Integer, Object> values : batches) {
+                        for (Map.Entry<Integer, Object> entry : values.entrySet()) {
+                            preparedStatement.setObject(entry.getKey(), entry.getValue());
+                            errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
+                        }
+                        preparedStatement.addBatch();
+                    }
+                    preparedStatement.executeBatch();
+                    SQLHelper.commit();
+                    SQLHelper.setAutoCommit(true);
+                } else {
                     for (Map.Entry<Integer, Object> entry : values.entrySet()) {
                         preparedStatement.setObject(entry.getKey(), entry.getValue());
                         errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
                     }
-                    preparedStatement.addBatch();
+                    preparedStatement.executeUpdate();
                 }
-                preparedStatement.executeBatch();
-                SQLHelper.commit();
-                SQLHelper.setAutoCommit(true);
+            } catch (SQLException ex) {
+                WildStackerPlugin.log("Failed to execute query " + errorQuery);
+                ex.printStackTrace();
             }
-            else {
-                for (Map.Entry<Integer, Object> entry : values.entrySet()) {
-                    preparedStatement.setObject(entry.getKey(), entry.getValue());
-                    errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
-                }
-                preparedStatement.executeUpdate();
-            }
-        }catch(SQLException ex){
-            WildStackerPlugin.log("Failed to execute query " + errorQuery);
-            ex.printStackTrace();
+        } finally {
+            SQLHelper.releaseLock();
         }
     }
 
