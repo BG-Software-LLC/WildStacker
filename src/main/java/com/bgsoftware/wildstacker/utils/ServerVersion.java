@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 public enum ServerVersion {
 
+    v1_7(17),
     v1_8(18),
     v1_9(19),
     v1_10(110),
