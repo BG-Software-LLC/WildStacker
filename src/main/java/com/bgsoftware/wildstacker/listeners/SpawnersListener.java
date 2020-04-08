@@ -452,7 +452,8 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerInteract(PlayerInteractEvent e){
-        if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getClickedBlock().getType() != Materials.SPAWNER.toBukkitType())
+        if(e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getClickedBlock().getType() != Materials.SPAWNER.toBukkitType() ||
+                !plugin.getSettings().spawnersStackingEnabled)
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
