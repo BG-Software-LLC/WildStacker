@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.google.gson.JsonObject;
+import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -14,12 +14,14 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -157,23 +159,23 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getKiller();
     }
 
-    public static LootTable fromJson(JsonObject jsonObject, String lootTableName){
-        boolean dropEquipment = !jsonObject.has("dropEquipment") || jsonObject.get("dropEquipment").getAsBoolean();
+    public static LootTable fromJson(JSONObject jsonObject, String lootTableName){
+        boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
         boolean alwaysDropsExp = false;
-        int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : -1;
-        int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : -1;
+        int min = JsonUtils.getInt(jsonObject, "min", -1);
+        int max = JsonUtils.getInt(jsonObject, "max", -1);
         int minExp = -1, maxExp = -1;
 
-        if(jsonObject.has("exp")){
-            JsonObject expObject = jsonObject.getAsJsonObject("exp");
-            minExp = expObject.get("min").getAsInt();
-            maxExp = expObject.get("max").getAsInt();
-            alwaysDropsExp = expObject.has("always-drop") && expObject.get("always-drop").getAsBoolean();
+        if(jsonObject.containsKey("exp")){
+            JSONObject expObject = (JSONObject) jsonObject.get("exp");
+            minExp = (int) expObject.get("min");
+            maxExp = (int) expObject.get("max");
+            alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
         }
 
         List<LootPair> lootPairs = new ArrayList<>();
-        if(jsonObject.has("pairs")){
-            jsonObject.get("pairs").getAsJsonArray().forEach(element -> lootPairs.add(LootPair.fromJson(element.getAsJsonObject(), lootTableName)));
+        if(jsonObject.containsKey("pairs")){
+            ((JSONArray) jsonObject.get("pairs")).forEach(element -> lootPairs.add(LootPair.fromJson(((JSONObject) element), lootTableName)));
         }
 
         return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);

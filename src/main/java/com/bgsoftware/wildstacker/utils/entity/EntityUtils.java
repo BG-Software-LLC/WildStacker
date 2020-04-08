@@ -8,7 +8,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.key.Key;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.HumanEntity;
@@ -107,7 +106,7 @@ public final class EntityUtils {
 
     public static boolean isStackable(Entity entity){
         return !entity.isDead() && (MythicMobsHook.isMythicMob(entity) ||
-                (entity instanceof LivingEntity && !(entity instanceof ArmorStand) && !(entity instanceof Player) && !entity.hasMetadata("NPC")));
+                (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !entity.hasMetadata("NPC")));
     }
 
     public static boolean isItem(Entity entity){
@@ -115,8 +114,14 @@ public final class EntityUtils {
     }
 
     public static void spawnExp(Location location, int amount){
-        Optional<Entity> closestOrb = location.getWorld().getNearbyEntities(location, 2, 2 ,2)
-                .stream().filter(entity -> entity instanceof ExperienceOrb).findFirst();
+        Optional<Entity> closestOrb;
+
+        try{
+            closestOrb = location.getWorld().getNearbyEntities(location, 2, 2 ,2)
+                    .stream().filter(entity -> entity instanceof ExperienceOrb).findFirst();
+        }catch (Throwable ex){
+            closestOrb = Optional.empty();
+        }
 
         ExperienceOrb experienceOrb;
 

@@ -116,7 +116,7 @@ public enum  EntityTypes {
                 else
                     return EntityTypes.HORSE;
             }
-            if (livingEntity instanceof Guardian) {
+            if (livingEntity.getType().name().equals("GUARDIAN")) {
                 return ((Guardian) livingEntity).isElder() ? EntityTypes.ELDER_GUARDIAN : EntityTypes.GUARDIAN;
             }
             if (livingEntity instanceof Zombie && !(livingEntity instanceof PigZombie)) {

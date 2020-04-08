@@ -51,7 +51,7 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -318,7 +318,7 @@ public final class SpawnersListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onExplodableLight(PlayerInteractAtEntityEvent e){
+    public void onExplodableLight(PlayerInteractEntityEvent e){
         if(plugin.getSettings().explosionsDropToInventory && e.getRightClicked() instanceof Creeper &&
                 e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.FLINT_AND_STEEL)
             explodableSources.put(e.getRightClicked(), e.getPlayer().getUniqueId());
@@ -329,9 +329,13 @@ public final class SpawnersListener implements Listener {
         if(plugin.getSettings().explosionsDropToInventory && e.getClickedBlock() != null &&
                 e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)){
             Location location = e.getClickedBlock().getLocation();
-            Executor.sync(() -> location.getWorld().getNearbyEntities(location, 1, 1, 1).stream()
-                    .filter(entity -> entity instanceof TNTPrimed).findFirst()
-                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())), 2L);
+            Executor.sync(() -> {
+                try{
+                    location.getWorld().getNearbyEntities(location, 1, 1, 1).stream()
+                            .filter(entity -> entity instanceof TNTPrimed).findFirst()
+                            .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId()));
+                }catch(Throwable ignored){}
+            }, 2L);
         }
     }
 

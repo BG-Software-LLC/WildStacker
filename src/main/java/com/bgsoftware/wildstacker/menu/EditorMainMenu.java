@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.menu;
 
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -41,8 +42,13 @@ public final class EditorMainMenu extends EditorMenu {
                 EditorSpawnersMenu.open(player);
                 break;
             case 31:
-                noResetClose.add(player.getUniqueId());
-                EditorBarrelsMenu.open(player);
+                if(ServerVersion.isEquals(ServerVersion.v1_7)){
+                    player.sendMessage(ChatColor.RED + "Barrels are based on armor-stands, and therefore - disabled in 1.7");
+                }
+                else {
+                    noResetClose.add(player.getUniqueId());
+                    EditorBarrelsMenu.open(player);
+                }
                 break;
             case 25:
                 noResetClose.add(player.getUniqueId());

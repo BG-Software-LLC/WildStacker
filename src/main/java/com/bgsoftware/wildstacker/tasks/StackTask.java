@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -42,7 +41,7 @@ public final class StackTask extends BukkitRunnable {
 
                     for (LivingEntity livingEntity : livingEntities) {
                         try {
-                            if (!livingEntity.isValid() || livingEntity instanceof ArmorStand || livingEntity instanceof Player)
+                            if (!livingEntity.isValid() || livingEntity.getType().name().equals("ARMOR_STAND") || livingEntity instanceof Player)
                                 continue;
 
                             StackedEntity stackedEntity = WStackedEntity.of(livingEntity);

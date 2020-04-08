@@ -4,23 +4,22 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootItem {
 
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -79,87 +78,72 @@ public class LootItem {
         return "LootItem{item=" + itemStack + ",burnable=" + burnableItem + "}";
     }
 
-    public static LootItem fromJson(JsonObject jsonObject){
+    public static LootItem fromJson(JSONObject jsonObject){
         ItemStack itemStack = buildItemStack(jsonObject), burnableItem = null;
-        double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
-        int min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : 1;
-        int max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : 1;
-        boolean looting = jsonObject.has("looting") && jsonObject.get("looting").getAsBoolean();
-        String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
-        String spawnCauseFilter = jsonObject.has("spawn-cause") ? jsonObject.get("spawn-cause").getAsString() : "";
+        double chance = JsonUtils.getDouble(jsonObject, "chance", 100);
+        int min = JsonUtils.getInt(jsonObject, "min", 1);
+        int max = JsonUtils.getInt(jsonObject, "max", 1);
+        boolean looting = (boolean) jsonObject.getOrDefault("looting", false);
+        String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
+        String spawnCauseFilter = (String) jsonObject.getOrDefault("spawn-cause", "");
 
-        if(jsonObject.has("burnable")){
-            burnableItem = buildItemStack(jsonObject.get("burnable").getAsJsonObject());
+        if(jsonObject.containsKey("burnable")){
+            burnableItem = buildItemStack((JSONObject) jsonObject.get("burnable"));
         }
 
         return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter);
     }
 
-    private static ItemStack buildItemStack(JsonObject jsonObject){
+    private static ItemStack buildItemStack(JSONObject jsonObject){
         Material type;
 
         try{
-            type = Material.valueOf(jsonObject.get("type").getAsString());
+            type = Material.valueOf((String) jsonObject.get("type"));
         }catch(IllegalArgumentException ex){
-            throw new IllegalArgumentException("Couldn't load item with an invalid material " + jsonObject.get("type").getAsString() + ".");
+            throw new IllegalArgumentException("Couldn't load item with an invalid material " + jsonObject.get("type") + ".");
         }
 
-        short data = jsonObject.has("data") ? jsonObject.get("data").getAsShort() : 0;
+        short data = JsonUtils.getShort(jsonObject, "data", (short) 0);
 
         ItemStack itemStack = new ItemStack(type, 1, data);
 
-        if(jsonObject.has("skull"))
-            itemStack = plugin.getNMSAdapter().getPlayerSkull(jsonObject.get("skull").getAsString());
+        if(jsonObject.containsKey("skull"))
+            itemStack = plugin.getNMSAdapter().getPlayerSkull((String) jsonObject.get("skull"));
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        if(jsonObject.has("name"))
-            itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', jsonObject.get("name").getAsString()));
+        if(jsonObject.containsKey("name"))
+            itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', (String) jsonObject.get("name")));
 
-        if(jsonObject.has("lore")){
-            JsonArray jsonArray = jsonObject.getAsJsonArray("lore");
-            List<String> lore = new ArrayList<>();
-            jsonArray.forEach(jsonElement -> lore.add(ChatColor.translateAlternateColorCodes('&', jsonElement.getAsString())));
-            itemMeta.setLore(lore);
+        if(jsonObject.containsKey("lore")){
+            JSONArray jsonArray = (JSONArray) jsonObject.get("lore");
+            itemMeta.setLore(((Stream<String>) jsonArray.stream()).map(line ->
+                    ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList()));
         }
 
-        if(jsonObject.has("enchants")){
-            JsonObject enchants = jsonObject.getAsJsonObject("enchants");
-            for(Map.Entry<String, JsonElement> entry : enchants.entrySet()){
+        if(jsonObject.containsKey("enchants")){
+            JSONObject enchants = (JSONObject) jsonObject.get("enchants");
+            for(Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>) enchants.entrySet()){
                 try {
-                    itemMeta.addEnchant(Enchantment.getByName(entry.getKey()), entry.getValue().getAsInt(), true);
+                    itemMeta.addEnchant(Enchantment.getByName(entry.getKey()), (Integer) entry.getValue(), true);
                 }catch(Exception ignored){}
             }
         }
 
-        if(jsonObject.has("glow") && jsonObject.get("glow").getAsBoolean()){
+        if((Boolean) jsonObject.getOrDefault("glow", false)){
             itemMeta.addEnchant(GlowEnchantment.getGlowEnchant(), 1, true);
         }
 
         itemStack.setItemMeta(itemMeta);
 
-        if(jsonObject.has("nbt-data")){
-            JsonObject nbtData = jsonObject.getAsJsonObject("nbt-data");
-            for(Map.Entry<String, JsonElement> entry : nbtData.entrySet()){
-                if(entry.getValue().isJsonPrimitive())
-                    itemStack = plugin.getNMSAdapter().setTag(itemStack, entry.getKey(), getValue(entry.getValue().getAsJsonPrimitive()));
+        if(jsonObject.containsKey("nbt-data")){
+            JSONObject nbtData = (JSONObject) jsonObject.get("nbt-data");
+            for(Map.Entry<String, Object> entry : (Set<Map.Entry<String, Object>>) nbtData.entrySet()){
+                itemStack = plugin.getNMSAdapter().setTag(itemStack, entry.getKey(), entry.getValue());
             }
         }
 
         return itemStack;
-    }
-
-    private static Object getValue(JsonPrimitive jsonPrimitive){
-        try{
-            Field valueField = JsonPrimitive.class.getDeclaredField("value");
-            valueField.setAccessible(true);
-            Object value = valueField.get(jsonPrimitive);
-            valueField.setAccessible(false);
-            return value;
-        }catch(Exception ex){
-            ex.printStackTrace();
-            return null;
-        }
     }
 
 }

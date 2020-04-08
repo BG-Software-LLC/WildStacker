@@ -21,7 +21,8 @@ public final class ReflectionUtils {
                     entityInsentientClass = getNMSClass("EntityInsentient");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
-            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" : "b_"));
+            fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
+                    ServerVersion.isEquals(ServerVersion.v1_7) ? "b" : "b_"));
             fieldMap.put(Fields.ENTITY_DEAD, entityClass.getDeclaredField("dead"));
             fieldMap.put(Fields.NBT_TAG_MAP, nmsTagClass.getDeclaredField("map"));
 
@@ -35,9 +36,11 @@ public final class ReflectionUtils {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "bX" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "bW" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("R2") ? "bT" : "bS" :
-                            //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp"
+                        ServerVersion.getBukkitVersion().contains("R2") ? "bT" : "bS" :
+                    ServerVersion.isEquals(ServerVersion.v1_8) ?
+                        ServerVersion.getBukkitVersion().contains("R1") ? "bo" : "bp" :
+                    //Version 1.7
+                    ServerVersion.getBukkitVersion().contains("R3") ? "aT" : "aU"
             ));
             methodMap.put(Methods.ENTITY_SOUND_VOLUME, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isAtLeast(ServerVersion.v1_14) ? getValidMethod(entityLivingClass,"getSoundVolume", "cU") :
@@ -46,9 +49,11 @@ public final class ReflectionUtils {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "ci" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "ch" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("R2") ? "ce" : "cd" :
-                            //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("R1") ? "bA" : "bB"
+                        ServerVersion.getBukkitVersion().contains("R2") ? "ce" : "cd" :
+                    ServerVersion.isEquals(ServerVersion.v1_8) ?
+                        ServerVersion.getBukkitVersion().contains("R1") ? "bA" : "bB" :
+                    //1.7 Version
+                    ServerVersion.getBukkitVersion().contains("R3") ? "be" : "bf"
             ));
             methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isEquals(ServerVersion.v1_15) ? "dn" :
@@ -58,13 +63,20 @@ public final class ReflectionUtils {
                     ServerVersion.isEquals(ServerVersion.v1_11) ? "cj" :
                     ServerVersion.isEquals(ServerVersion.v1_10) ? "ci" :
                     ServerVersion.isEquals(ServerVersion.v1_9) ?
-                            ServerVersion.getBukkitVersion().contains("R2") ? "cf" : "ce" :
-                            //1.8 Version
-                            ServerVersion.getBukkitVersion().contains("R1") ? "bB" : "bC"
+                        ServerVersion.getBukkitVersion().contains("R2") ? "cf" : "ce" :
+                    ServerVersion.isEquals(ServerVersion.v1_8) ?
+                        ServerVersion.getBukkitVersion().contains("R1") ? "bB" : "bC" :
+                    //1.7 Version
+                            ServerVersion.getBukkitVersion().contains("R3") ? "bf" : "bg"
             ));
             methodMap.put(Methods.ENTITY_ALWAYS_GIVES_EXP, entityLivingClass.getDeclaredMethod("alwaysGivesExp"));
             methodMap.put(Methods.ENTITY_IS_DROP_EXPERIENCE, entityLivingClass.getDeclaredMethod(
-                    ServerVersion.isEquals(ServerVersion.v1_8) ? ServerVersion.getBukkitVersion().contains("R1") ? "aZ" : "ba" : "isDropExperience"
+                    ServerVersion.isEquals(ServerVersion.v1_7) ?
+                        ServerVersion.getBukkitVersion().contains("R3") ? "aF" : "aG" :
+                    ServerVersion.isEquals(ServerVersion.v1_8) ?
+                        ServerVersion.getBukkitVersion().contains("R1") ? "aZ" : "ba" :
+                    //1.9 and above
+                    "isDropExperience"
             ));
 
             fieldMap.values().forEach(field -> field.setAccessible(true));

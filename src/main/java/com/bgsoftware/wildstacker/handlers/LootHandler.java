@@ -5,12 +5,12 @@ import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
 import com.bgsoftware.wildstacker.utils.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.File;
 import java.io.FileReader;
@@ -22,7 +22,6 @@ import java.util.Map;
 public final class LootHandler {
 
     private final Map<String, LootTable> lootTables = new HashMap<>();
-    private final Gson gson = new Gson();
 
     public LootHandler(WildStackerPlugin plugin){
         WildStackerPlugin.log("Loading loot-tables started...");
@@ -39,10 +38,12 @@ public final class LootHandler {
 
         for(File file : folderFile.listFiles()){
             try {
-                JsonObject jsonObject = gson.fromJson(new FileReader(file), JsonObject.class);
+                JSONParser jsonParser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
                 String key = file.getName().replace(".json", "").toUpperCase();
                 lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject, file.getName()) : LootTable.fromJson(jsonObject, file.getName()));
             }catch(Exception ex){
+                ex.printStackTrace();
                 WildStackerPlugin.log("[" + file.getName() + "] Couldn't load loot table:");
                 WildStackerPlugin.log("    " + ex.getMessage());
             }

@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -57,7 +58,7 @@ public final class ChunksListener implements Listener {
     public void onChunkLoad(ChunkLoadEvent e){
         List<Entity> chunkEntities = Arrays.asList(e.getChunk().getEntities());
 
-        if(loadedData) {
+        if(loadedData && ServerVersion.isAtLeast(ServerVersion.v1_8)) {
             //Trying to remove all the corrupted stacked blocks
             Executor.async(() -> {
                 Stream<Entity> entityStream = chunkEntities.stream()

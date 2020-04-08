@@ -45,6 +45,8 @@ public final class ItemsListener implements Listener {
         this.plugin = plugin;
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteListener(plugin), plugin);
+        if(ServerVersion.isAtLeast(ServerVersion.v1_8))
+            plugin.getServer().getPluginManager().registerEvents(new MergeListener(plugin), plugin);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -95,27 +97,6 @@ public final class ItemsListener implements Listener {
         ItemStack eggItem = e.getEgg().getItemStack();
         eggItem.setAmount(stackedEntity.getStackAmount());
         e.getEgg().setItemStack(eggItem);
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onItemMerge(ItemMergeEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled)
-            return;
-
-        StackedItem stackedItem = WStackedItem.of(e.getEntity());
-
-        if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
-            return;
-
-        //We are overriding the merge system
-        e.setCancelled(true);
-
-        Executor.sync(() -> {
-            if(e.getEntity().isValid() && e.getTarget().isValid()){
-                StackedItem targetItem = WStackedItem.of(e.getTarget());
-                stackedItem.runStackAsync(targetItem, null);
-            }
-        }, 5L);
     }
 
     //This method will be fired even if stacking-drops is disabled.
@@ -247,6 +228,37 @@ public final class ItemsListener implements Listener {
         }catch(Exception ex){
             entity.getEquipment().setItemInHand(itemStack);
         }
+    }
+
+    private static class MergeListener implements Listener{
+
+        private WildStackerPlugin plugin;
+
+        private MergeListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onItemMerge(ItemMergeEvent e){
+            if(!plugin.getSettings().itemsStackingEnabled)
+                return;
+
+            StackedItem stackedItem = WStackedItem.of(e.getEntity());
+
+            if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
+                return;
+
+            //We are overriding the merge system
+            e.setCancelled(true);
+
+            Executor.sync(() -> {
+                if(e.getEntity().isValid() && e.getTarget().isValid()){
+                    StackedItem targetItem = WStackedItem.of(e.getTarget());
+                    stackedItem.runStackAsync(targetItem, null);
+                }
+            }, 5L);
+        }
+
     }
 
     private static class ScuteListener implements Listener{

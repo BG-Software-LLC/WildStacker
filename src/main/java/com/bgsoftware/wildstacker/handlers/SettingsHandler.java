@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import com.bgsoftware.wildstacker.key.KeySet;
 import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
@@ -260,7 +261,7 @@ public final class SettingsHandler {
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
 
-        barrelsStackingEnabled = cfg.getBoolean("barrels.enabled", true);
+        barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);
         barrelsParticles = getParticles(plugin, "barrels");
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");

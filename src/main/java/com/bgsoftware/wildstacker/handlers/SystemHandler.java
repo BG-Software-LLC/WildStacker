@@ -37,7 +37,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -116,7 +115,7 @@ public final class SystemHandler implements SystemManager {
         boolean shouldBeCached = ((WStackedEntity) stackedEntity).isCached();
 
         //A new entity was created. Let's see if we need to add him
-        if(!(livingEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && shouldBeCached)
+        if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
             dataHandler.CACHED_OBJECTS.put(stackedEntity.getUniqueId(), stackedEntity);
 
         if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())){

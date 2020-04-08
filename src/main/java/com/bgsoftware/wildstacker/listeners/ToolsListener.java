@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntityInspect(PlayerInteractAtEntityEvent e){
+    public void onEntityInspect(PlayerInteractEntityEvent e){
         if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
                 !EntityUtils.isStackable(e.getRightClicked()))
             return;
@@ -84,7 +84,7 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntitySimulate(PlayerInteractAtEntityEvent e){
+    public void onEntitySimulate(PlayerInteractEntityEvent e){
         if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
             return;
 

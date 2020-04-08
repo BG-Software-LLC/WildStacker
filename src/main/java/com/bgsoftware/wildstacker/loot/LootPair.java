@@ -3,16 +3,18 @@ package com.bgsoftware.wildstacker.loot;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootPair {
 
     private List<LootItem> lootItems = new ArrayList<>();
@@ -93,42 +95,43 @@ public class LootPair {
         return "LootPair{items=" + lootItems + "}";
     }
 
-    public static LootPair fromJson(JsonObject jsonObject, String lootTableName){
-        double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
-        double lootingChance = jsonObject.has("lootingChance") ? jsonObject.get("lootingChance").getAsDouble() : 0;
-        String requiredPermission = jsonObject.has("permission") ? jsonObject.get("permission").getAsString() : "";
-        String spawnCauseFilter = jsonObject.has("spawn-cause") ? jsonObject.get("spawn-cause").getAsString() : "";
+    public static LootPair fromJson(JSONObject jsonObject, String lootTableName){
+        double chance = JsonUtils.getDouble(jsonObject, "chance", 100);
+        double lootingChance = JsonUtils.getDouble(jsonObject, "lootingChance", 0);
+        String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
+        String spawnCauseFilter = (String) jsonObject.getOrDefault("spawn-cause", "");
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
         List<String> killer = new ArrayList<>();
 
-        if(jsonObject.has("items")){
-            jsonObject.get("items").getAsJsonArray().forEach(element -> {
+        if(jsonObject.containsKey("items")){
+            ((JSONArray) jsonObject.get("items")).forEach(element -> {
                 try {
-                    lootItems.add(LootItem.fromJson(element.getAsJsonObject()));
+                    lootItems.add(LootItem.fromJson((JSONObject) element));
                 }catch(IllegalArgumentException ex){
                     WildStackerPlugin.log("[" + lootTableName + "] " + ex.getMessage());
                 }
             });
         }
 
-        if(jsonObject.has("commands")){
-            jsonObject.get("commands").getAsJsonArray().forEach(element -> lootCommands.add(LootCommand.fromJson(element.getAsJsonObject())));
+        if(jsonObject.containsKey("commands")){
+            ((JSONArray) jsonObject.get("commands")).forEach(element -> lootCommands.add(LootCommand.fromJson((JSONObject) element)));
         }
 
-        if(jsonObject.has("killedByPlayer") && jsonObject.get("killedByPlayer").getAsBoolean()){
+        if((Boolean) jsonObject.getOrDefault("killedByPlayer", false)){
             killer.add("PLAYER");
         }
 
-        if(jsonObject.has("killedByCharged") && jsonObject.get("killedByCharged").getAsBoolean()){
+        if((Boolean) jsonObject.getOrDefault("killedByCharged", false)){
             killer.add("CHARGED_CREEPER");
         }
 
-        if(jsonObject.has("killer")){
-            if(jsonObject.get("killer").isJsonArray()){
-                jsonObject.getAsJsonArray("killer").forEach(type -> killer.add(type.getAsString().toUpperCase()));
+        if(jsonObject.containsKey("killer")){
+            Object killerObject = jsonObject.get("killer");
+            if(killerObject instanceof JSONArray){
+                ((JSONArray) killerObject).forEach(type -> killer.add(((String) type).toUpperCase()));
             }else{
-                killer.add(jsonObject.get("killer").getAsString().toUpperCase());
+                killer.add(((String) killerObject).toUpperCase());
             }
         }
 

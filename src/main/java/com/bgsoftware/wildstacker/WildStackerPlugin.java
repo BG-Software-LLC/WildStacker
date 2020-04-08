@@ -93,7 +93,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         Locale.reload();
         EntitiesGetter.start();
 
-        getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
+        if(ServerVersion.isAtLeast(ServerVersion.v1_8))
+            getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
         getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
         getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
         getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);

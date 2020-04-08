@@ -61,7 +61,6 @@ import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
@@ -643,7 +642,7 @@ public final class EntitiesListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onEntityNameTag(PlayerInteractAtEntityEvent e){
+    public void onEntityNameTag(PlayerInteractEntityEvent e){
         if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(e.getRightClicked()) || !StackSplit.NAME_TAG.isEnabled())
             return;
 

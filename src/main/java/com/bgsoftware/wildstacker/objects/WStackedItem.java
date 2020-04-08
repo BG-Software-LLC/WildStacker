@@ -288,54 +288,56 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public void giveItemStack(Inventory inventory) {
-        ItemStack itemStack = getItemStack();
+        synchronized (this) {
+            ItemStack itemStack = getItemStack();
 
-        int giveAmount = getStackAmount();
+            int giveAmount = getStackAmount();
 
-        if (giveAmount <= 0) {
-            remove();
-            return;
-        }
+            if (giveAmount <= 0) {
+                remove();
+                return;
+            }
 
-        /*
-         * I am not using ItemUtil#addItem so it won't drop the leftovers
-         * (If it will, the leftovers will get stacked again - infinite loop)
-         */
+            /*
+             * I am not using ItemUtil#addItem so it won't drop the leftovers
+             * (If it will, the leftovers will get stacked again - infinite loop)
+             */
 
-        int amountLeft = 0;
-        int maxStackAmount = itemStack.getMaxStackSize();
+            int amountLeft = 0;
+            int maxStackAmount = itemStack.getMaxStackSize();
 
-        if (maxStackAmount != 64 &&
-                (!plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")))
-            maxStackAmount = 64;
+            if (maxStackAmount != 64 &&
+                    (!plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")))
+                maxStackAmount = 64;
 
-        int amountOfStacks = giveAmount / maxStackAmount;
-        int leftOvers = giveAmount % maxStackAmount;
-        boolean inventoryFull = false;
+            int amountOfStacks = giveAmount / maxStackAmount;
+            int leftOvers = giveAmount % maxStackAmount;
+            boolean inventoryFull = false;
 
-        itemStack.setAmount(maxStackAmount);
+            itemStack.setAmount(maxStackAmount);
 
-        for (int i = 0; i < amountOfStacks; i++) {
-            if (inventoryFull) {
-                amountLeft += maxStackAmount;
-            } else {
-                int _amountLeft = giveItem(inventory, itemStack.clone());
-                if (_amountLeft > 0) {
-                    inventoryFull = true;
-                    amountLeft += _amountLeft;
+            for (int i = 0; i < amountOfStacks; i++) {
+                if (inventoryFull) {
+                    amountLeft += maxStackAmount;
+                } else {
+                    int _amountLeft = giveItem(inventory, itemStack.clone());
+                    if (_amountLeft > 0) {
+                        inventoryFull = true;
+                        amountLeft += _amountLeft;
+                    }
                 }
             }
-        }
 
-        if (leftOvers > 0) {
-            itemStack.setAmount(leftOvers);
-            amountLeft += giveItem(inventory, itemStack.clone());
-        }
+            if (leftOvers > 0) {
+                itemStack.setAmount(leftOvers);
+                amountLeft += giveItem(inventory, itemStack.clone());
+            }
 
-        setStackAmount(amountLeft, true);
+            setStackAmount(amountLeft, true);
 
-        if (amountLeft <= 0) {
-            remove();
+            if (amountLeft <= 0) {
+                remove();
+            }
         }
     }
 

@@ -242,6 +242,7 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public void setEntityDead(LivingEntity livingEntity, boolean dead) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.dead = dead;
         Fields.ENTITY_DEAD.set(entityLiving, dead);
     }
 

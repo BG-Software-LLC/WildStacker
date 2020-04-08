@@ -1,13 +1,14 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.utils.Random;
-import com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootCommand {
 
     private List<String> commands = new ArrayList<>();
@@ -38,14 +39,14 @@ public class LootCommand {
         return commands;
     }
 
-    public static LootCommand fromJson(JsonObject jsonObject){
-        double chance = jsonObject.has("chance") ? jsonObject.get("chance").getAsDouble() : 100;
-        Integer min = jsonObject.has("min") ? jsonObject.get("min").getAsInt() : null;
-        Integer max = jsonObject.has("max") ? jsonObject.get("max").getAsInt() : null;
+    public static LootCommand fromJson(JSONObject jsonObject){
+        double chance = (double) jsonObject.getOrDefault("chance", 100D);
+        Integer min = (Integer) jsonObject.get("min");
+        Integer max = (Integer) jsonObject.get("max");
 
         List<String> commands = new ArrayList<>();
-        if(jsonObject.has("commands")){
-            jsonObject.getAsJsonArray("commands").forEach(element -> commands.add(element.getAsString()));
+        if(jsonObject.containsKey("commands")){
+            ((JSONArray) jsonObject.get("commands")).forEach(element -> commands.add((String) element));
         }
 
         return new LootCommand(commands, chance, min, max);
