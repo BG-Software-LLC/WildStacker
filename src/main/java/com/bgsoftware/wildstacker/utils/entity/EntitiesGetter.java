@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.pair.MutablePair;
+import com.bgsoftware.wildstacker.utils.cache.TTLCache;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -10,24 +10,21 @@ import org.bukkit.entity.Entity;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 
 public final class EntitiesGetter {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static final int REMOVE_TIME = 40;
+    private static final int REMOVE_TIME = 5;
 
     private static final ConcurrentLinkedQueue<EntityGetInformation> pendingRequests = new ConcurrentLinkedQueue<>();
 
-    private static final Map<ChunkPosition, MutablePair<EntityBox, Integer>> cachedEntities = new ConcurrentHashMap<>();
+    private static final TTLCache<ChunkPosition, CompletableFuture<EntityBox>> cachedEntities = new TTLCache<>();
 
     private static BukkitTask currentTask = null;
-    private static int currentTick = 0;
 
     public static CompletableFuture<EntityBox> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         ChunkPosition chunkPosition = new ChunkPosition(location);
@@ -40,10 +37,11 @@ public final class EntitiesGetter {
         }
 
         else if(cachedEntities.containsKey(chunkPosition)){
-            MutablePair<EntityBox, Integer> pair = cachedEntities.get(chunkPosition);
-            if(pair.getKey().anyMatch(filter)) {
-                pair.setValue(currentTick);
-                completableFuture = CompletableFuture.completedFuture(pair.getKey());
+            CompletableFuture<EntityBox> entityBox = cachedEntities.get(chunkPosition);
+            assert entityBox != null;
+            if(!entityBox.isDone() || entityBox.getNow(null).anyMatch(filter)) {
+                cachedEntities.refreshTTL(chunkPosition, REMOVE_TIME);
+                completableFuture = entityBox;
                 generateNew = false;
             }
             else{
@@ -55,6 +53,7 @@ public final class EntitiesGetter {
             completableFuture = new CompletableFuture<>();
             int nearbyChunks = range % 16 == 0 ? range / 16 : (range / 16) + 1;
             pendingRequests.add(new EntityGetInformation(location, nearbyChunks, completableFuture));
+            cachedEntities.put(chunkPosition, completableFuture, -1);
         }
 
         return completableFuture.thenApply(nearbyEntities -> nearbyEntities.withFilter(filter));
@@ -80,15 +79,13 @@ public final class EntitiesGetter {
 
     public static void removeCache(Chunk chunk){
         ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        MutablePair<EntityBox, Integer> pair = cachedEntities.remove(chunkPosition);
-        if(pair != null)
-            pair.getKey().clear();
+        CompletableFuture<EntityBox> completableFuture = cachedEntities.remove(chunkPosition);
+        if(completableFuture != null)
+            completableFuture.whenComplete((entityBox, throwable) -> entityBox.clear());
     }
 
     private static BukkitTask createNewTask() {
         return Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            currentTick++;
-
             while (!pendingRequests.isEmpty()){
                 EntityGetInformation info = pendingRequests.poll();
 
@@ -108,15 +105,10 @@ public final class EntitiesGetter {
                 }
 
                 ChunkPosition chunkPosition = new ChunkPosition(world, chunkX, chunkZ);
-                cachedEntities.put(chunkPosition, new MutablePair<>(entityBox, currentTick));
+                cachedEntities.put(chunkPosition, info.completableFuture, REMOVE_TIME);
 
                 info.completableFuture.complete(entityBox);
             }
-
-            if(currentTick % REMOVE_TIME == 0){
-                cachedEntities.entrySet().removeIf(entry -> currentTick - entry.getValue().getValue() <= REMOVE_TIME);
-            }
-
         }, 5L, 5L);
     }
 
