@@ -105,7 +105,7 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity){
-        return !entity.isDead() && (MythicMobsHook.isMythicMob(entity) ||
+        return (MythicMobsHook.isMythicMob(entity) ||
                 (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !entity.hasMetadata("NPC")));
     }
 
