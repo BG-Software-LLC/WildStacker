@@ -61,6 +61,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     private EntityDamageEvent lastDamageCause;
 
     private boolean deadEntityFlag = false;
+    private boolean removed = false;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -166,6 +167,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             ItemUtils.dropItem(new ItemStack(Materials.LEAD.toBukkitType()), getLocation());
             object.setLeashHolder(null);
         }
+
+        removed = true;
 
         //Should be triggered synced if it's a slime
         if(EntityTypes.fromEntity(object).isSlime())
@@ -649,6 +652,10 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
     public boolean hasDeadFlag(){
         return deadEntityFlag;
+    }
+
+    public boolean wasRemoved(){
+        return removed;
     }
 
     public static StackedEntity of(Entity entity){

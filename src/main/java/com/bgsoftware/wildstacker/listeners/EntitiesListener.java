@@ -98,6 +98,8 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BeeListener(plugin), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
+        if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent"))
+            plugin.getServer().getPluginManager().registerEvents(new EntityRemoveListener(plugin), plugin);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -776,6 +778,26 @@ public final class EntitiesListener implements Listener {
                     Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
 
             onEntityLastDamage(entityDamageEvent);
+        }
+
+    }
+
+    private static class EntityRemoveListener implements Listener {
+
+        private final WildStackerPlugin plugin;
+
+        private EntityRemoveListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @EventHandler
+        public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent e){
+            WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(e.getEntity());
+
+            if(stackedEntity.wasRemoved())
+                return;
+
+            plugin.getSystemManager().removeStackObject(stackedEntity);
         }
 
     }
