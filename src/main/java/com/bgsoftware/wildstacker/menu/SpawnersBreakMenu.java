@@ -69,7 +69,7 @@ public final class SpawnersBreakMenu extends WildMenu {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? removeAmount : 1);
 
-        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < amountToCharge) {
+        if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(player, amountToCharge);
             e.setCancelled(true);
             return;

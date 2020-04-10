@@ -123,7 +123,7 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
 
-        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
+        if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
             return;
@@ -247,7 +247,7 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? stackAmount : 1);
 
-        if (PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
+        if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
             return;
