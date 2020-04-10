@@ -107,10 +107,11 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityPickup(EntityPickupItemEvent e) {
-        StackedItem stackedItem = WStackedItem.of(e.getItem());
+        StackedItem stackedItem = WStackedItem.ofCache(e.getItem());
 
         //Should run only if the item is 1 (stacked item)
-        if(stackedItem.getStackAmount() > 1 || e.getItem().getItemStack().getType().name().contains("BUCKET")) {
+        if(stackedItem != null && (stackedItem.getStackAmount() > 1 || (plugin.getSettings().bucketsStackerEnabled &&
+                e.getItem().getItemStack().getType().name().contains("BUCKET")))) {
             e.setCancelled(true);
 
             //Causes too many issues
