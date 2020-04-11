@@ -225,31 +225,39 @@ public final class DataHandler {
         SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
 
         long startTime = System.currentTimeMillis();
-        WildStackerPlugin.log("Starting to load entities...");
 
-        SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
-            while (resultSet.next()) {
-                int stackAmount = resultSet.getInt("stackAmount");
-                SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
-                CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
-            }
-        });
+        if(plugin.getSettings().storeEntities) {
+            WildStackerPlugin.log("Starting to load entities...");
 
-        WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+            SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
+                while (resultSet.next()) {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
+                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
+                    CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
+                }
+            });
+
+            WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+        }
+
         startTime = System.currentTimeMillis();
-        WildStackerPlugin.log("Starting to load items...");
 
-        SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
-            while (resultSet.next()) {
-                int stackAmount = resultSet.getInt("stackAmount");
-                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
-            }
-        });
+        if(plugin.getSettings().storeItems) {
+            WildStackerPlugin.log("Starting to load items...");
 
-        WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+            SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
+                while (resultSet.next()) {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                    CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
+                }
+            });
+
+            WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+        }
+
         startTime = System.currentTimeMillis();
         WildStackerPlugin.log("Starting to load spawners...");
 

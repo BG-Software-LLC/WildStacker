@@ -329,66 +329,71 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
-        Map<UUID, Integer> entityAmounts = new HashMap<>(), itemAmounts = new HashMap<>();
-        Map<UUID, SpawnCause> entitySpawnCauses = new HashMap<>();
-
         SQLHelper.executeUpdate("DELETE FROM entities;");
-        SQLHelper.executeUpdate("DELETE FROM items;");
 
-        getStackedEntities().forEach(stackedEntity -> {
-            if(stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())){
-                entityAmounts.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
-                entitySpawnCauses.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
-            }else{
-                removeStackObject(stackedEntity);
-            }
-        });
+        if(plugin.getSettings().storeEntities) {
+            Map<UUID, Integer> entityAmounts = new HashMap<>();
+            Map<UUID, SpawnCause> entitySpawnCauses = new HashMap<>();
 
-        new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).keySet().forEach(uuid ->{
-            int stackAmount = dataHandler.CACHED_AMOUNT_ENTITIES.get(uuid);
-            SpawnCause spawnCause = dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-            if(stackAmount > 1 || hasValidSpawnCause(spawnCause)) {
-                entityAmounts.put(uuid, Math.max(entityAmounts.getOrDefault(uuid, 1), stackAmount));
-                entitySpawnCauses.put(uuid, spawnCause);
-            }else{
-                dataHandler.CACHED_AMOUNT_ENTITIES.remove(uuid);
-                dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(uuid);
-            }
-        });
-
-        getStackedItems().forEach(stackedItem -> {
-          if(stackedItem.getStackAmount() > 1){
-              itemAmounts.put(stackedItem.getUniqueId(), stackedItem.getStackAmount());
-          }
-          else{
-              removeStackObject(stackedItem);
-          }
-        });
-
-        new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).keySet().forEach(uuid -> {
-            int stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.get(uuid);
-            if(stackAmount > 1){
-                itemAmounts.put(uuid, stackAmount);
-            }
-            else{
-                dataHandler.CACHED_AMOUNT_ITEMS.remove(uuid);
-            }
-        });
-
-        if(entityAmounts.size() > 0) {
-            StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
-            entityAmounts.forEach((uuid, stackAmount) -> {
-                SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-                entityHolder.setString(uuid.toString()).setInt(stackAmount).setString(spawnCause.name()).addBatch();
+            getStackedEntities().forEach(stackedEntity -> {
+                if (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
+                    entityAmounts.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
+                    entitySpawnCauses.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+                } else {
+                    removeStackObject(stackedEntity);
+                }
             });
-            entityHolder.execute(false);
+
+            new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).keySet().forEach(uuid -> {
+                int stackAmount = dataHandler.CACHED_AMOUNT_ENTITIES.get(uuid);
+                SpawnCause spawnCause = dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
+                if (stackAmount > 1 || hasValidSpawnCause(spawnCause)) {
+                    entityAmounts.put(uuid, Math.max(entityAmounts.getOrDefault(uuid, 1), stackAmount));
+                    entitySpawnCauses.put(uuid, spawnCause);
+                } else {
+                    dataHandler.CACHED_AMOUNT_ENTITIES.remove(uuid);
+                    dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(uuid);
+                }
+            });
+
+            if(entityAmounts.size() > 0) {
+                StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
+                entityAmounts.forEach((uuid, stackAmount) -> {
+                    SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
+                    entityHolder.setString(uuid.toString()).setInt(stackAmount).setString(spawnCause.name()).addBatch();
+                });
+                entityHolder.execute(false);
+            }
         }
 
-        if(itemAmounts.size() > 0) {
-            StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
-            itemAmounts.forEach((uuid, stackAmount) ->
-                    itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch());
-            itemHolder.execute(false);
+        SQLHelper.executeUpdate("DELETE FROM items;");
+
+        if(plugin.getSettings().storeItems) {
+            Map<UUID, Integer> itemAmounts = new HashMap<>();
+
+            getStackedItems().forEach(stackedItem -> {
+                if (stackedItem.getStackAmount() > 1) {
+                    itemAmounts.put(stackedItem.getUniqueId(), stackedItem.getStackAmount());
+                } else {
+                    removeStackObject(stackedItem);
+                }
+            });
+
+            new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).keySet().forEach(uuid -> {
+                int stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.get(uuid);
+                if (stackAmount > 1) {
+                    itemAmounts.put(uuid, stackAmount);
+                } else {
+                    dataHandler.CACHED_AMOUNT_ITEMS.remove(uuid);
+                }
+            });
+
+            if(itemAmounts.size() > 0) {
+                StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
+                itemAmounts.forEach((uuid, stackAmount) ->
+                        itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch());
+                itemHolder.execute(false);
+            }
         }
     }
 

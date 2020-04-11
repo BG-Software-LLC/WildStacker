@@ -158,6 +158,9 @@ items:
   # By default, all items are stacked once, when they spawn.
   stack-interval: 0
 
+  # Should entities get stored into the database?
+  store-items: true
+
 # Here you can configurable all features related to stacked entities.
 entities:
   # Should entities get stacked on the server?
@@ -398,6 +401,9 @@ entities:
     # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
     whitelist:
       - ALL
+
+  # Should entities get stored into the database?
+  store-entities: true
 
 # Here you can configurable all features related to stacked spawners.
 spawners:

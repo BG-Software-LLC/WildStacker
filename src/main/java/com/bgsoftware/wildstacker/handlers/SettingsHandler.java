@@ -43,7 +43,7 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
-            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay;
+            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems;
     public final List<String> itemsDisabledWorlds;
     public final KeySet blacklistedItems, whitelistedItems;
     public final int itemsCheckRange, itemsChunkLimit;
@@ -57,7 +57,7 @@ public final class SettingsHandler {
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
             entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply, entitiesClearEquipment,
-            spawnCorpses, entitiesOneShotEnabled;
+            spawnCorpses, entitiesOneShotEnabled, storeEntities;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final Pattern entitiesCustomNamePattern;
@@ -161,6 +161,7 @@ public final class SettingsHandler {
         itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
         itemsMaxPickupDelay = cfg.getBoolean("items.max-pickup-delay", false);
         itemsStackInterval = cfg.getLong("items.stack-interval", 0L);
+        storeItems = cfg.getBoolean("items.store-items", true);
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
         entitiesParticlesEnabled = cfg.getBoolean("entities.particles", true);
@@ -202,6 +203,7 @@ public final class SettingsHandler {
         entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);
         entitiesOneShotTools = cfg.getStringList("entities.one-shot.tools");
         entitiesOneShotWhitelist = cfg.getStringList("entities.one-shot.whitelist");
+        storeEntities = cfg.getBoolean("entities.store-entities", true);
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);
