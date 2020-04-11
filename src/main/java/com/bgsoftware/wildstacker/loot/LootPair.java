@@ -22,9 +22,11 @@ public class LootPair {
     private List<LootCommand> lootCommands = new ArrayList<>();
     private List<String> killer = new ArrayList<>();
     private double chance, lootingChance;
-    private String requiredPermission, spawnCauseFilter;
+    private String requiredPermission;
+    private final List<String> spawnCauseFilter, deathCauseFilter;
 
-    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance, String requiredPermission, String spawnCauseFilter){
+    private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance,
+                     String requiredPermission, List<String> spawnCauseFilter, List<String> deathCauseFilter){
         this.lootItems.addAll(lootItems);
         this.lootCommands.addAll(lootCommands);
         this.killer.addAll(killer);
@@ -32,6 +34,7 @@ public class LootPair {
         this.lootingChance = lootingChance;
         this.requiredPermission = requiredPermission;
         this.spawnCauseFilter = spawnCauseFilter;
+        this.deathCauseFilter = deathCauseFilter;
     }
 
     public List<ItemStack> getItems(StackedEntity stackedEntity, int amountOfPairs, int lootBonusLevel){
@@ -45,9 +48,7 @@ public class LootPair {
             if(!GeneralUtils.containsOrEmpty(lootItem.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()))
                 continue;
 
-            String deathCause = LootTable.getDeathCause(stackedEntity);
-
-            if(!deathCause.isEmpty() && !GeneralUtils.containsOrEmpty(lootItem.getDeathCauseFilter(), deathCause))
+            if(!GeneralUtils.containsOrEmpty(lootItem.getDeathCauseFilter(), LootTable.getDeathCause(stackedEntity)))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
@@ -93,8 +94,12 @@ public class LootPair {
         return requiredPermission;
     }
 
-    public String getSpawnCauseFilter() {
+    public List<String> getSpawnCauseFilter() {
         return spawnCauseFilter;
+    }
+
+    public List<String> getDeathCauseFilter() {
+        return deathCauseFilter;
     }
 
     @Override
@@ -106,10 +111,22 @@ public class LootPair {
         double chance = JsonUtils.getDouble(jsonObject, "chance", 100);
         double lootingChance = JsonUtils.getDouble(jsonObject, "lootingChance", 0);
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
-        String spawnCauseFilter = (String) jsonObject.getOrDefault("spawn-cause", "");
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
         List<String> killer = new ArrayList<>();
+        List<String> spawnCauseFilter = new ArrayList<>(), deathCauseFilter = new ArrayList<>();
+
+        Object spawnCauseFilterObject = jsonObject.get("spawn-cause");
+        if(spawnCauseFilterObject instanceof String)
+            spawnCauseFilter.add(spawnCauseFilterObject + "");
+        else if(spawnCauseFilterObject instanceof JSONArray)
+            ((JSONArray) spawnCauseFilterObject).forEach(element -> spawnCauseFilter.add(element + ""));
+
+        Object deathCauseFilterObject = jsonObject.get("death-cause");
+        if(deathCauseFilterObject instanceof String)
+            deathCauseFilter.add(deathCauseFilterObject + "");
+        else if(deathCauseFilterObject instanceof JSONArray)
+            ((JSONArray) deathCauseFilterObject).forEach(element -> deathCauseFilter.add(element + ""));
 
         if(jsonObject.containsKey("items")){
             ((JSONArray) jsonObject.get("items")).forEach(element -> {
@@ -142,7 +159,7 @@ public class LootPair {
             }
         }
 
-        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission, spawnCauseFilter);
+        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission, spawnCauseFilter, deathCauseFilter);
     }
 
 }

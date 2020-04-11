@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
@@ -47,7 +48,8 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
             (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
             (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
-            (lootPair.getSpawnCauseFilter().isEmpty() || stackedEntity.getSpawnCause().name().equals(lootPair.getSpawnCauseFilter()))
+            GeneralUtils.containsOrEmpty(lootPair.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()) &&
+            GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : max == min ? max : Random.nextInt(max - min + 1) + min;
