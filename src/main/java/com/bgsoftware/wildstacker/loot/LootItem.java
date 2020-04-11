@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,9 +30,11 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
-    private final String requiredPermission, spawnCauseFilter;
+    private final String requiredPermission;
+    private final List<String> spawnCauseFilter, deathCauseFilter;
 
-    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting, String requiredPermission, String spawnCauseFilter){
+    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting,
+                     String requiredPermission, List<String> spawnCauseFilter, List<String> deathCauseFilter){
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
@@ -39,6 +43,7 @@ public class LootItem {
         this.looting = looting;
         this.requiredPermission = requiredPermission;
         this.spawnCauseFilter = spawnCauseFilter;
+        this.deathCauseFilter = deathCauseFilter;
     }
 
     public double getChance(int lootBonusLevel, double lootMultiplier) {
@@ -49,8 +54,12 @@ public class LootItem {
         return requiredPermission;
     }
 
-    public String getSpawnCauseFilter() {
+    public List<String> getSpawnCauseFilter() {
         return spawnCauseFilter;
+    }
+
+    public List<String> getDeathCauseFilter() {
+        return deathCauseFilter;
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel){
@@ -85,13 +94,25 @@ public class LootItem {
         int max = JsonUtils.getInt(jsonObject, "max", 1);
         boolean looting = (boolean) jsonObject.getOrDefault("looting", false);
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
-        String spawnCauseFilter = (String) jsonObject.getOrDefault("spawn-cause", "");
+        List<String> spawnCauseFilter = new ArrayList<>(), deathCauseFilter = new ArrayList<>();
+
+        Object spawnCauseFilterObject = jsonObject.get("spawn-cause");
+        if(spawnCauseFilterObject instanceof String)
+            spawnCauseFilter.add(spawnCauseFilterObject + "");
+        else if(spawnCauseFilterObject instanceof JSONArray)
+            ((JSONArray) spawnCauseFilterObject).forEach(element -> spawnCauseFilter.add(element + ""));
+
+        Object deathCauseFilterObject = jsonObject.get("death-cause");
+        if(deathCauseFilterObject instanceof String)
+            deathCauseFilter.add(deathCauseFilterObject + "");
+        else if(deathCauseFilterObject instanceof JSONArray)
+            ((JSONArray) deathCauseFilterObject).forEach(element -> deathCauseFilter.add(element + ""));
 
         if(jsonObject.containsKey("burnable")){
             burnableItem = buildItemStack((JSONObject) jsonObject.get("burnable"));
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter);
+        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter, deathCauseFilter);
     }
 
     private static ItemStack buildItemStack(JSONObject jsonObject){

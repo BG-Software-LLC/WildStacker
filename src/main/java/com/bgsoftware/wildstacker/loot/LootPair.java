@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -41,7 +42,12 @@ public class LootPair {
                     !LootTable.getKiller(stackedEntity).hasPermission(lootItem.getRequiredPermission()))
                 continue;
 
-            if(!lootItem.getSpawnCauseFilter().isEmpty() && !stackedEntity.getSpawnCause().name().equals(lootItem.getSpawnCauseFilter()))
+            if(!GeneralUtils.containsOrEmpty(lootItem.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()))
+                continue;
+
+            String deathCause = LootTable.getDeathCause(stackedEntity);
+
+            if(!deathCause.isEmpty() && !GeneralUtils.containsOrEmpty(lootItem.getDeathCauseFilter(), deathCause))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
@@ -51,6 +57,7 @@ public class LootPair {
             }
 
             ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
+
             if(itemStack != null)
                 items.add(itemStack);
         }

@@ -159,6 +159,11 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getKiller();
     }
 
+    static String getDeathCause(StackedEntity stackedEntity){
+        EntityDamageEvent lastCause = stackedEntity.getLivingEntity().getLastDamageCause();
+        return lastCause == null ? "" : lastCause.getCause().name();
+    }
+
     public static LootTable fromJson(JSONObject jsonObject, String lootTableName){
         boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
         boolean alwaysDropsExp = false;
