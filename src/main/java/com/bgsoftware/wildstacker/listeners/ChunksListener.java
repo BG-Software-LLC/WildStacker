@@ -43,12 +43,15 @@ public final class ChunksListener implements Listener {
         Executor.async(() -> {
             Arrays.stream(entityList).forEach(entity -> EntityData.uncache(entity.getUniqueId()));
 
-            entityStream.filter(stackedEntity -> stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))
-                    .forEach(stackedEntity -> {
-                        plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
-                        plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
-                        plugin.getSystemManager().removeStackObject(stackedEntity);
-                    });
+            entityStream.forEach(stackedEntity -> {
+                if(stackedEntity.getStackAmount() > 1) {
+                    plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
+                }
+                if(hasValidSpawnCause(stackedEntity.getSpawnCause())){
+                    plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+                }
+                plugin.getSystemManager().removeStackObject(stackedEntity);
+            });
         });
 
         EntitiesGetter.removeCache(e.getChunk());
