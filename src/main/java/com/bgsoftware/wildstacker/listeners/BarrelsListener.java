@@ -161,8 +161,14 @@ public final class BarrelsListener implements Listener {
 
         ItemStack dropStack = stackedBarrel.getBarrelItem(stackSize);
 
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
-            ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
+        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            if(plugin.getSettings().barrelsAutoPickup) {
+                ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getBlock().getLocation());
+            }
+            else {
+                ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
+            }
+        }
 
         e.setCancelled(true);
 
