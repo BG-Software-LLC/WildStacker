@@ -175,8 +175,8 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
         if(jsonObject.containsKey("exp")){
             JSONObject expObject = (JSONObject) jsonObject.get("exp");
-            minExp = (int) expObject.get("min");
-            maxExp = (int) expObject.get("max");
+            minExp = JsonUtils.getInt(expObject, "min", -1);
+            maxExp = JsonUtils.getInt(expObject, "max", -1);
             alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
         }
 
