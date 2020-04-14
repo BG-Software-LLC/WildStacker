@@ -75,6 +75,11 @@ public final class BarrelsListener implements Listener {
         if(!isBarrelBlock(e.getBlock()))
             return;
 
+        if(ItemUtils.isOffHand(e)){
+            e.setCancelled(true);
+            return;
+        }
+
         if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
                 !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
             e.setCancelled(true);
