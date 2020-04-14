@@ -37,9 +37,8 @@ public final class SettingsHandler {
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
     public final KeyMap<String> customNames;
     public final long killTaskInterval;
-    public final List<String> killTaskWhitelist;
-    public final List<String> killTaskBlacklist;
-    public final List<String> killTaskWorlds;
+    public final List<String> killTaskEntitiesWhitelist, killTaskItemsWhitelist, killTaskEntitiesBlacklist,
+            killTaskItemsBlacklist, killTaskEntitiesWorlds, killTaskItemsWorlds;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
@@ -136,9 +135,12 @@ public final class SettingsHandler {
         killTaskStackedItems = cfg.getBoolean("kill-task.stacked-items", true);
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
-        killTaskWhitelist = cfg.getStringList("kill-task.whitelist");
-        killTaskBlacklist = cfg.getStringList("kill-task.blacklist");
-        killTaskWorlds = cfg.getStringList("kill-task.worlds");
+        killTaskEntitiesWhitelist = cfg.getStringList("kill-task.entities.whitelist");
+        killTaskEntitiesBlacklist = cfg.getStringList("kill-task.entities.blacklist");
+        killTaskEntitiesWorlds = cfg.getStringList("kill-task.entities.worlds");
+        killTaskItemsWhitelist = cfg.getStringList("kill-task.items.whitelist");
+        killTaskItemsBlacklist = cfg.getStringList("kill-task.items.blacklist");
+        killTaskItemsWorlds = cfg.getStringList("kill-task.items.worlds");
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 
@@ -397,6 +399,12 @@ public final class SettingsHandler {
             cfg.set("kill-task.interval", cfg.getLong("entities.kill-all.interval"));
         if(cfg.contains("entities.kill-all.clear-lagg"))
             cfg.set("kill-task.sync-clear-lagg", cfg.getBoolean("entities.kill-all.clear-lagg"));
+        if(cfg.contains("kill-task.whitelist"))
+            cfg.set("kill-task.entities.whitelist", cfg.getStringList("kill-task.whitelist"));
+        if(cfg.contains("kill-task.blacklist"))
+            cfg.set("kill-task.entities.blacklist", cfg.getStringList("kill-task.blacklist"));
+        if(cfg.contains("kill-task.worlds"))
+            cfg.set("kill-task.entities.worlds", cfg.getStringList("kill-task.worlds"));
         if(cfg.isBoolean("entities.keep-lowest-health")){
             if(cfg.getBoolean("entities.keep-lowest-health"))
                 cfg.set("entities.keep-lowest-health", Collections.singletonList("all"));

@@ -518,9 +518,18 @@ public final class SystemHandler implements SystemManager {
         List<Entity> entityList = new ArrayList<>();
 
         for(World world : Bukkit.getWorlds()){
-            if(!applyTaskFilter || plugin.getSettings().killTaskWorlds.isEmpty() || plugin.getSettings().killTaskWorlds.contains(world.getName())) {
+            if(!applyTaskFilter || plugin.getSettings().killTaskEntitiesWorlds.isEmpty() ||
+                    plugin.getSettings().killTaskEntitiesWorlds.contains(world.getName())) {
                 for (Chunk chunk : world.getLoadedChunks()) {
-                    entityList.addAll(Arrays.asList(chunk.getEntities()));
+                    entityList.addAll(Arrays.stream(chunk.getEntities())
+                            .filter(entity -> entity instanceof LivingEntity).collect(Collectors.toList()));
+                }
+            }
+            if(!applyTaskFilter || plugin.getSettings().killTaskItemsWorlds.isEmpty() ||
+                    plugin.getSettings().killTaskItemsWorlds.contains(world.getName())) {
+                for (Chunk chunk : world.getLoadedChunks()) {
+                    entityList.addAll(Arrays.stream(chunk.getEntities())
+                            .filter(entity -> entity instanceof Item).collect(Collectors.toList()));
                 }
             }
         }
@@ -528,8 +537,8 @@ public final class SystemHandler implements SystemManager {
         Executor.async(() -> {
             entityList.stream()
                     .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity) &&
-                            (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskWhitelist, WStackedEntity.of(entity)) &&
-                                    !GeneralUtils.contains(plugin.getSettings().killTaskBlacklist, WStackedEntity.of(entity)))))
+                            (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskEntitiesWhitelist, WStackedEntity.of(entity)) &&
+                                    !GeneralUtils.contains(plugin.getSettings().killTaskEntitiesBlacklist, WStackedEntity.of(entity)))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
                         if(!applyTaskFilter || (((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
@@ -539,7 +548,9 @@ public final class SystemHandler implements SystemManager {
 
             if(plugin.getSettings().killTaskStackedItems) {
                 entityList.stream()
-                        .filter(entity -> entity instanceof Item && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity))
+                        .filter(entity -> entity instanceof Item && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity) &&
+                                (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskItemsWhitelist, ((Item) entity).getItemStack().getType().name()) &&
+                                        !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType().name()))))
                         .forEach(entity -> {
                             StackedItem stackedItem = WStackedItem.of(entity);
                             if(!applyTaskFilter || (plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||

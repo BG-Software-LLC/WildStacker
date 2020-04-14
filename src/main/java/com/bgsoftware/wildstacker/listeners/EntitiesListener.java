@@ -304,7 +304,9 @@ public final class EntitiesListener implements Listener {
                         subtract(drops, entityDeathEvent.getDrops())
                                 .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
 
-                        entityDeathEvent.getDrops().forEach(itemStack -> ItemUtils.dropItem(itemStack, livingEntity.getLocation()));
+                        Location dropLocation = livingEntity.getLocation().add(0.5, 0, 0.5);
+
+                        entityDeathEvent.getDrops().forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
 
                         if (entityDeathEvent.getDroppedExp() > 0) {
                             if(GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {

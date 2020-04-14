@@ -54,21 +54,36 @@ kill-task:
   # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
   # This feature will work if the interval is set to 0 - these are two different features!
   sync-clear-lagg: true
-  # A list of entities that will be cleared.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
-  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
-  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
-  # If you want all entities to be killed, set this to []
-  whitelist: []
-  # A list of entities that won't be cleared.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
-  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
-  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
-  # If you wish to disable blacklisted entities, use "blacklist: []"
-  blacklist: []
-  # A list of worlds that entities will be cleared inside.
-  # If you want all worlds, set this to []
-  worlds: []
+  # All settings related to the kill-all task of entities.
+  entities:
+    # A list of entities that will be cleared.
+    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+    # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
+    # If you want all entities to be killed, set this to []
+    whitelist: []
+    # A list of entities that won't be cleared.
+    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+    # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
+    # If you wish to disable blacklisted entities, use "blacklist: []"
+    blacklist: []
+    # A list of worlds that entities will be cleared inside.
+    # If you want all worlds, set this to []
+    worlds: []
+    # All settings related to the kill-all task of entities.
+  items:
+    # A list of items that will be cleared.
+    # Material list: https://bg-software.com/files/materials/
+    # If you want all items to be killed, set this to []
+    whitelist: []
+    # A list of items that won't be cleared.
+    # Material list: https://bg-software.com/files/materials/
+    # If you wish to disable blacklisted items, use "blacklist: []"
+    blacklist: []
+    # A list of worlds that items will be cleared inside.
+    # If you want all worlds, set this to []
+    worlds: []
 
 # Here you can configurable all features related to stacked items.
 items:
