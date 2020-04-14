@@ -568,6 +568,7 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicate.getLivingEntity()).setColor(e.getColor());
+                EntityData.of(duplicate).loadEntityData(duplicate.getLivingEntity());
                 duplicate.runStackAsync(null);
             }else{
                 stackedEntity.runStackAsync(null);
