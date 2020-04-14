@@ -254,7 +254,7 @@ public final class SettingsHandler {
             ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.place-charge." + key);
             double amount = mobSection.getDouble("price", 0.0);
             if(amount > 0) {
-                spawnersBreakCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersPlaceCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
