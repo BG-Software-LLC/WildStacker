@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -118,6 +119,15 @@ public final class BucketsListener implements Listener {
             if (humanEntity instanceof Player)
                 ((Player) humanEntity).updateInventory();
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void g(PlayerItemConsumeEvent e){
+        if(!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET)
+            return;
+
+        if(e.getItem().getAmount() > 1)
+            e.getPlayer().getInventory().addItem(new ItemStack(Material.BUCKET));
     }
 
 }
