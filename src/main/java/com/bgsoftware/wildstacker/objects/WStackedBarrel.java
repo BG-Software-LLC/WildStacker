@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -22,7 +23,6 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -184,9 +184,8 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
                             });
                 }
 
-                Optional<StackedBarrel> barrelOptional = barrelStream
-                        .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS)
-                        .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
+                Optional<StackedBarrel> barrelOptional = GeneralUtils.getClosest(blockLocation, barrelStream
+                        .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS));
 
                 if (barrelOptional.isPresent()) {
                     StackedBarrel targetBarrel = barrelOptional.get();

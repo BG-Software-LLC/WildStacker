@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
@@ -26,7 +27,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -202,9 +202,8 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
                             });
                 }
 
-                Optional<StackedSpawner> spawnerOptional = spawnerStream
-                        .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS)
-                        .min(Comparator.comparingDouble(o -> o.getLocation().distanceSquared(blockLocation)));
+                Optional<StackedSpawner> spawnerOptional = GeneralUtils.getClosest(blockLocation, spawnerStream
+                        .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS));
 
                 if (spawnerOptional.isPresent()) {
                     StackedSpawner targetSpawner = spawnerOptional.get();

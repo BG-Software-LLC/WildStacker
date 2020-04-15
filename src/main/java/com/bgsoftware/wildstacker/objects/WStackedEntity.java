@@ -44,7 +44,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -273,19 +272,16 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
         int range = plugin.getSettings().entitiesCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range,
-                entity -> EntityUtils.isStackable(entity) && GeneralUtils.isNearby(object.getLocation(), entity.getLocation(), range))
-                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
-                    int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
-                    Location entityLocation = getLivingEntity().getLocation();
+        Location entityLocation = getLivingEntity().getLocation();
 
-                    Set<StackedEntity> filteredEntities = nearbyEntities.map(WStackedEntity::of)
-                            .filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
-                            .collect(Collectors.toSet());
-                    Optional<StackedEntity> entityOptional = filteredEntities.stream()
-                            .min(Comparator.comparingDouble(o -> o.getLivingEntity().getLocation().distanceSquared(entityLocation)));
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range,
+                entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
+                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
+                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of).collect(Collectors.toSet());
+                    Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 
                     if (entityOptional.isPresent()) {
+                        int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
                         StackedEntity targetEntity = entityOptional.get();
 
                         if (minimumStackSize > 2) {
@@ -316,7 +312,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
                     if (result != null)
                         result.accept(entityOptional.map(StackedEntity::getLivingEntity));
-                }));
+        }));
     }
 
     @Override

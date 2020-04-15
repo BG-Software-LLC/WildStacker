@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.cache.TTLCache;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -11,9 +12,11 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class EntitiesGetter {
 
@@ -26,10 +29,12 @@ public final class EntitiesGetter {
 
     private static BukkitTask currentTask = null;
 
-    public static CompletableFuture<EntityBox> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+    public static CompletableFuture<Set<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         ChunkPosition chunkPosition = new ChunkPosition(location);
         CompletableFuture<EntityBox> completableFuture = null;
         boolean generateNew = true;
+
+        Predicate<Entity> wrapperFilter = entity -> GeneralUtils.isNearby(location, entity.getLocation(), range) && filter.test(entity);
 
         if(currentTask == null){
             completableFuture = CompletableFuture.completedFuture(EntityBox.EMPTY_BOX);
@@ -39,7 +44,7 @@ public final class EntitiesGetter {
         else if(cachedEntities.containsKey(chunkPosition)){
             CompletableFuture<EntityBox> entityBox = cachedEntities.get(chunkPosition);
             assert entityBox != null;
-            if(!entityBox.isDone() || entityBox.getNow(null).anyMatch(filter)) {
+            if(!entityBox.isDone() || entityBox.getNow(null).anyMatch(wrapperFilter)) {
                 cachedEntities.refreshTTL(chunkPosition, REMOVE_TIME);
                 completableFuture = entityBox;
                 generateNew = false;
@@ -56,7 +61,7 @@ public final class EntitiesGetter {
             cachedEntities.put(chunkPosition, completableFuture, -1);
         }
 
-        return completableFuture.thenApply(nearbyEntities -> nearbyEntities.withFilter(filter));
+        return completableFuture.thenApply(nearbyEntities -> nearbyEntities.filter(wrapperFilter).collect(Collectors.toSet()));
     }
 
     public static void start(){

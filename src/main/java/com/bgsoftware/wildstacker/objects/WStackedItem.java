@@ -23,7 +23,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -200,14 +199,12 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range,
-                entity -> EntityUtils.isItem(entity) && GeneralUtils.isNearby(object.getLocation(), entity.getLocation(), range))
-                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
+        EntitiesGetter.getNearbyEntities(object.getLocation(), range, EntityUtils::isItem).whenComplete((nearbyEntities, ex) ->
+                StackService.execute(this, () -> {
                     Location itemLocation = getItem().getLocation();
 
-                    Optional<StackedItem> itemOptional = nearbyEntities.map(WStackedItem::of)
-                            .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                            .min(Comparator.comparingDouble(o -> o.getItem().getLocation().distanceSquared(itemLocation)));
+                    Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation, nearbyEntities.stream()
+                            .map(WStackedItem::of).filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS));
 
                     if (itemOptional.isPresent()) {
                         StackedItem targetItem = itemOptional.get();

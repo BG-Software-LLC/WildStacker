@@ -1,12 +1,18 @@
 package com.bgsoftware.wildstacker.utils;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.key.KeyMap;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class GeneralUtils {
 
@@ -59,6 +65,22 @@ public final class GeneralUtils {
                 Math.abs(source.getBlockX() - check.getBlockX()) <= range &&
                 Math.abs(source.getBlockY() - check.getBlockY()) <= range &&
                 Math.abs(source.getBlockZ() - check.getBlockZ()) <= range;
+    }
+
+    public static <T extends StackedObject> Optional<T> getClosest(Location origin, Collection<T> objects){
+        return getClosest(origin, objects.stream());
+    }
+
+    public static <T extends StackedObject> Optional<T> getClosest(Location origin, Stream<T> objects){
+        Map<T, Double> distances = new HashMap<>();
+        return objects.min((o1, o2) -> {
+            if(!distances.containsKey(o1))
+                distances.put(o1, o1.getLocation().distanceSquared(origin));
+            if(!distances.containsKey(o2))
+                distances.put(o2, o2.getLocation().distanceSquared(origin));
+
+            return distances.get(o1).compareTo(distances.get(o2));
+        });
     }
 
 }
