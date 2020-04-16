@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -85,6 +86,26 @@ public final class DataHandler {
 
     public void clearDatabase(){
         SQLHelper.close();
+    }
+
+    public void insertSpawner(StackedSpawner stackedSpawner){
+        Executor.data(() -> {
+            if(!containsSpawner(stackedSpawner)){
+                Query.SPAWNER_INSERT.getStatementHolder()
+                        .setLocation(stackedSpawner.getLocation())
+                        .setInt(stackedSpawner.getStackAmount())
+                        .execute(false);
+            }else {
+                Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
+                        .setInt(stackedSpawner.getStackAmount())
+                        .setLocation(stackedSpawner.getLocation())
+                        .execute(false);
+            }
+        });
+    }
+
+    private boolean containsSpawner(StackedSpawner stackedSpawner){
+        return SQLHelper.doesConditionExist(String.format("SELECT * FROM spawners WHERE location = '%s';", SQLHelper.getLocation(stackedSpawner.getLocation())));
     }
 
     private void loadOldFiles(){

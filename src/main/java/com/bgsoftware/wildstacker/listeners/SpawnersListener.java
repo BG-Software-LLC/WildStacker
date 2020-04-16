@@ -7,8 +7,6 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -180,14 +178,7 @@ public final class SpawnersListener implements Listener {
                     return;
                 }
 
-                Location location = stackedSpawner.getLocation();
-
-                SQLHelper.runIfConditionNotExist("SELECT * FROM spawners WHERE location ='" + SQLHelper.getLocation(location) + "';", () ->
-                        Query.SPAWNER_INSERT.getStatementHolder()
-                                .setLocation(location)
-                                .setInt(stackedSpawner.getStackAmount())
-                                .execute(false)
-                );
+                plugin.getDataHandler().insertSpawner(stackedSpawner);
             }
             else{
                 e.setCancelled(true);
