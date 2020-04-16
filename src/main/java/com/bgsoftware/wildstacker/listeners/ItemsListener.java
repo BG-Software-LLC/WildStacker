@@ -109,6 +109,18 @@ public final class ItemsListener implements Listener {
     public void onEntityPickup(EntityPickupItemEvent e) {
         StackedItem stackedItem = WStackedItem.ofCache(e.getItem());
 
+        if(EntityStorage.hasMetadata(e.getItem(), "pickup")){
+            EntityStorage.removeMetadata(e.getItem(), "pickup");
+            if(stackedItem != null)
+                stackedItem.remove();
+            else
+                e.getItem().remove();
+
+            e.setCancelled(true);
+
+            return;
+        }
+
         //Should run only if the item is 1 (stacked item)
         if(stackedItem != null && (stackedItem.getStackAmount() > 1 || (plugin.getSettings().bucketsStackerEnabled &&
                 e.getItem().getItemStack().getType().name().contains("BUCKET")))) {
@@ -160,7 +172,8 @@ public final class ItemsListener implements Listener {
             }
 
             if (stackedItem.getStackAmount() <= 0) {
-                e.getItem().setPickupDelay(400);
+                e.getItem().setPickupDelay(5);
+                EntityStorage.setMetadata(e.getItem(), "pickup", true);
 
                 Executor.sync(() -> {
                     e.getItem().remove();
