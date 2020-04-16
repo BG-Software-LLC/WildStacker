@@ -199,13 +199,16 @@ public final class BarrelsListener implements Listener {
 
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
 
+        if(e.getItem() != null)
+            return;
+
         if(e.getPlayer().isSneaking() && plugin.getSettings().barrelsPlaceInventory){
             barrelPlaceInventory.put(e.getPlayer().getUniqueId(), stackedBarrel.getLocation());
             e.getPlayer().openInventory(Bukkit.createInventory(null, 9 * 4,
                     plugin.getSettings().barrelsPlaceInventoryTitle.replace("{0}", EntityUtils.getFormattedType(stackedBarrel.getType().name()))));
         }
 
-        else if(e.getItem() == null){
+        else{
             stackedBarrel.runUnstack(1);
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
