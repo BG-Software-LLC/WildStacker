@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,9 +41,9 @@ public class LootCommand {
     }
 
     public static LootCommand fromJson(JSONObject jsonObject){
-        double chance = (double) jsonObject.getOrDefault("chance", 100D);
-        Integer min = (Integer) jsonObject.get("min");
-        Integer max = (Integer) jsonObject.get("max");
+        double chance = JsonUtils.getDouble(jsonObject, "chance", 100D);
+        Integer min = JsonUtils.getInt(jsonObject, "min", -1);
+        Integer max = JsonUtils.getInt(jsonObject, "max", -1);
 
         List<String> commands = new ArrayList<>();
         if(jsonObject.containsKey("commands")){
