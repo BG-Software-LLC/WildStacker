@@ -6,10 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class EntityBox implements Iterable<Entity> {
@@ -29,7 +31,7 @@ public final class EntityBox implements Iterable<Entity> {
     }
 
     public void feed(Collection<Entity> entities){
-        this.entities.addAll(entities);
+        this.entities.addAll(entities.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     public EntityBox withFilter(Predicate<Entity> filter){
