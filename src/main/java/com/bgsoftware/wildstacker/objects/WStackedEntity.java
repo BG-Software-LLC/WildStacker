@@ -18,7 +18,6 @@ import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
-import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
@@ -210,7 +209,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         if(superResult != StackCheckResult.SUCCESS)
             return superResult;
 
-        StackCheckResult similarResult = EntityUtils.areEquals(this, (StackedEntity) stackedObject);
+        StackCheckResult similarResult = EntityUtils.areSimilar(object, ((StackedEntity) stackedObject).getLivingEntity());
 
         if(similarResult != StackCheckResult.SUCCESS)
             return similarResult;
@@ -466,8 +465,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass(), getSpawnCause()));
         duplicate.setStackAmount(amount, true);
 
-        EntityData entityData = EntityData.of(this);
-        entityData.applyEntityData(duplicate.getLivingEntity());
+//        EntityData entityData = EntityData.of(this);
+//        entityData.applyEntityData(duplicate.getLivingEntity());
         //EntityUtil.applyEntityData(object, duplicate.getLivingEntity());
 
         if(plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)

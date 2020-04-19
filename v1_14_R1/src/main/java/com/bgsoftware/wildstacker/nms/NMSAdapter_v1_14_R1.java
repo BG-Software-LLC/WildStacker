@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -49,6 +50,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_14_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_14_R1.CraftParticle;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
@@ -69,6 +71,7 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -287,6 +290,12 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     @Override
     public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
         entityEquipment.setItemInOffHand(itemStack);
+    }
+
+    @Override
+    public Key getEndermanCarried(Enderman enderman) {
+        BlockData blockData = enderman.getCarriedBlock();
+        return blockData == null ? Key.of("AIR:0") : Key.of(blockData.getMaterial(), (short) 0);
     }
 
     /*

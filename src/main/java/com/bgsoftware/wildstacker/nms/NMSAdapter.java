@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Chunk;
@@ -12,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -21,6 +23,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -79,6 +82,12 @@ public interface NMSAdapter {
 
     default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
         entityEquipment.setItemInHand(itemStack);
+    }
+
+    default Key getEndermanCarried(Enderman enderman){
+        MaterialData materialData = enderman.getCarriedMaterial();
+        //noinspection deprecation
+        return Key.of(materialData.getItemType(), materialData.getData());
     }
 
     /*

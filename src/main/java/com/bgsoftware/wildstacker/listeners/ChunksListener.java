@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
-import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Material;
@@ -41,7 +40,7 @@ public final class ChunksListener implements Listener {
                 .filter(EntityUtils::isStackable).map(WStackedEntity::of);
 
         Executor.async(() -> {
-            Arrays.stream(entityList).forEach(entity -> EntityData.uncache(entity.getUniqueId()));
+            //Arrays.stream(entityList).forEach(entity -> EntityData.uncache(entity.getUniqueId()));
 
             entityStream.forEach(stackedEntity -> {
                 if(stackedEntity.getStackAmount() > 1) {

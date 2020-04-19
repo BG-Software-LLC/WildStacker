@@ -14,7 +14,6 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
-import com.bgsoftware.wildstacker.utils.entity.EntityData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -415,8 +414,8 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnLow(CreatureSpawnEvent e){
         //Cache the data for the entity.
-        if(EntityUtils.isStackable(e.getEntity()))
-            EntityData.of(e.getEntity());
+//        if(EntityUtils.isStackable(e.getEntity()))
+//            EntityData.of(e.getEntity());
 
         if(EntityTypes.fromEntity(e.getEntity()).isSlime()){
             int originalSize = ((Slime) e.getEntity()).getSize();
@@ -430,31 +429,43 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChunkLoad(ChunkLoadEvent e){
-        Arrays.stream(e.getChunk().getEntities())
-                .filter(EntityUtils::isStackable)
-                .forEach(entity -> EntityData.of((LivingEntity) entity));
+//        Arrays.stream(e.getChunk().getEntities())
+//                .filter(EntityUtils::isStackable)
+//                .forEach(entity -> EntityData.of((LivingEntity) entity));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onNewChunkLoad(ChunkLoadEvent e){
+        if(e.isNewChunk()){
+            Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity).forEach(entity ->
+                handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e){
+        handleEntitySpawn(e.getEntity(), e.getSpawnReason());
+    }
+
+    private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason){
         if(!plugin.getSettings().entitiesStackingEnabled)
             return;
 
-        if(!EntityUtils.isStackable(e.getEntity()) || EntityStorage.hasMetadata(e.getEntity(), "corpse"))
+        if(!EntityUtils.isStackable(entity) || EntityStorage.hasMetadata(entity, "corpse"))
             return;
 
-        SpawnCause spawnCause = SpawnCause.valueOf(e.getSpawnReason());
+        SpawnCause spawnCause = SpawnCause.valueOf(spawnReason);
 
-        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", spawnCause);
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+        EntityStorage.setMetadata(entity, "spawn-cause", spawnCause);
+        StackedEntity stackedEntity = WStackedEntity.of(entity);
 
         if(mooshroomFlag != -1){
             stackedEntity.setStackAmount(mooshroomFlag, true);
             mooshroomFlag = -1;
         }
 
-        if(spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(e.getEntity()) == EntityTypes.BEE){
-            org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) e.getEntity();
+        if(spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(entity) == EntityTypes.BEE){
+            org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) entity;
             Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
             if(beesAmount != null){
                 for(int i = beesAmount.length - 1; i >= 0; i--){
@@ -472,14 +483,14 @@ public final class EntitiesListener implements Listener {
         if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
             return;
 
-        if(noStackEntities.contains(e.getEntity().getUniqueId())) {
-            noStackEntities.remove(e.getEntity().getUniqueId());
+        if(noStackEntities.contains(entity.getUniqueId())) {
+            noStackEntities.remove(entity.getUniqueId());
             return;
         }
 
         //Chunk Limit
         Executor.sync(() -> {
-            if(isChunkLimit(e.getLocation().getChunk()))
+            if(isChunkLimit(entity.getLocation().getChunk()))
                 stackedEntity.remove();
         }, 5L);
 
@@ -487,7 +498,7 @@ public final class EntitiesListener implements Listener {
         if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!PluginHooks.isMergedSpawnersEnabled && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER)
+        if (!PluginHooks.isMergedSpawnersEnabled && spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
         Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
@@ -496,8 +507,8 @@ public final class EntitiesListener implements Listener {
         };
 
         //Need to add a delay so eggs will get removed from inventory
-        if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || e.getEntityType() == EntityType.WITHER ||
-                e.getEntityType() == EntityType.IRON_GOLEM || e.getEntityType() == EntityType.SNOWMAN ||
+        if(spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || entity.getType() == EntityType.WITHER ||
+                entity.getType() == EntityType.IRON_GOLEM || entity.getType() == EntityType.SNOWMAN ||
                 PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
@@ -578,7 +589,7 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.setStackAmount(amount - 1, true);
                 StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicate.getLivingEntity()).setColor(e.getColor());
-                EntityData.of(duplicate).loadEntityData(duplicate.getLivingEntity());
+                //EntityData.of(duplicate).loadEntityData(duplicate.getLivingEntity());
                 duplicate.runStackAsync(null);
             }else{
                 stackedEntity.runStackAsync(null);

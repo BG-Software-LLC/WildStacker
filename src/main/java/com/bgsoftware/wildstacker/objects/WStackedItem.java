@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -127,7 +128,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
 
     @Override
     public void updateName() {
-        if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object))
+        if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
             return;
 
         String customName = plugin.getSettings().itemsCustomName;
