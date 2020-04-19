@@ -44,6 +44,7 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -416,6 +417,15 @@ public final class EntitiesListener implements Listener {
         //Cache the data for the entity.
         if(EntityUtils.isStackable(e.getEntity()))
             EntityData.of(e.getEntity());
+
+        if(EntityTypes.fromEntity(e.getEntity()).isSlime()){
+            int originalSize = ((Slime) e.getEntity()).getSize();
+            e.getEntity().getNearbyEntities(2, 2, 2).stream().filter(entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize())
+                    .forEach(entity -> {
+                        int entitySize = EntityStorage.getMetadata(entity, "original-amount", Integer.class);
+                        WStackedEntity.of(e.getEntity()).setStackAmount(entitySize, true);
+                    });
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

@@ -24,7 +24,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -169,11 +168,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
 
         removed = true;
 
-        //Should be triggered synced if it's a slime
-        if(EntityTypes.fromEntity(object).isSlime())
-            Executor.sync(object::remove);
-        else
-            object.remove();
+        object.remove();
 
         EntityStorage.clearMetadata(object);
     }
@@ -279,7 +274,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         EntitiesGetter.getNearbyEntities(object.getLocation(), range,
                 entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
                 .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
-                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().map(WStackedEntity::of).collect(Collectors.toSet());
+                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid).map(WStackedEntity::of).collect(Collectors.toSet());
                     Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 
                     if (entityOptional.isPresent()) {
@@ -389,6 +384,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         else {
             Executor.sync(() -> {
                 EntityStorage.setMetadata(object, "corpse", null);
+                EntityStorage.setMetadata(object, "original-amount", stackAmount);
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
                 plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);
