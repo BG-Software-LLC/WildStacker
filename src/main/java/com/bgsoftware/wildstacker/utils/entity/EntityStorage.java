@@ -35,6 +35,11 @@ public final class EntityStorage {
             entityStorage.get(uuid).remove(key);
     }
 
+    public static void clearMetadata(Entity entity){
+        Map<?, ?> map = entityStorage.remove(entity.getUniqueId());
+        map.clear();
+    }
+
     public static void clearCache(){
         for(Map map : entityStorage.values())
             map.clear();

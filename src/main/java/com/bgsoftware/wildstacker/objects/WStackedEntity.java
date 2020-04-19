@@ -174,6 +174,8 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
             Executor.sync(object::remove);
         else
             object.remove();
+
+        EntityStorage.clearMetadata(object);
     }
 
     @Override
