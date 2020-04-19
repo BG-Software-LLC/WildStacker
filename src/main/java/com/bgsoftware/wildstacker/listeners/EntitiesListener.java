@@ -104,7 +104,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
-        if(EntityStorage.hasMetadata(e.getEntity(), "corpse")){
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse") && !((WStackedEntity) WStackedEntity.of(e.getEntity())).hasDeadFlag()){
             try {
                 e.getDrops().clear();
                 e.setDroppedExp(0);
