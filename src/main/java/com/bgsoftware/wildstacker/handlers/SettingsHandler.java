@@ -83,7 +83,7 @@ public final class SettingsHandler {
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
-            barrelsToggleCommand, barrelsPlaceInventory, forceCauldron, barrelsAutoPickup;
+            barrelsToggleCommand, barrelsPlaceInventory, forceCauldron, barrelsAutoPickup, dropStackedItem;
     public final int barrelsCheckRange, barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle, barrelsRequiredPermission;
     public final List<String> barrelsDisabledWorlds;
@@ -284,6 +284,7 @@ public final class SettingsHandler {
         forceCauldron = cfg.getBoolean("barrels.force-cauldron", false);
         barrelsRequiredPermission = cfg.getString("barrels.required-permission", "");
         barrelsAutoPickup = cfg.getBoolean("barrels.auto-pickup", false);
+        dropStackedItem = cfg.getBoolean("barrels.drop-stacked-item", false);
 
         bucketsStackerEnabled = cfg.getBoolean("buckets.enabled", true);
         bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist");

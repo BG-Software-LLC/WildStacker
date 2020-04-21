@@ -171,6 +171,11 @@ public final class BarrelsListener implements Listener {
                 ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getBlock().getLocation());
             }
             else {
+                if(plugin.getSettings().dropStackedItem) {
+                    dropStack = ItemUtils.setSpawnerItemAmount(dropStack, stackSize);
+                    dropStack.setAmount(1);
+                }
+
                 ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
             }
         }
