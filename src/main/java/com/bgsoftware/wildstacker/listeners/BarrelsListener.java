@@ -40,6 +40,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,6 +175,15 @@ public final class BarrelsListener implements Listener {
                 if(plugin.getSettings().dropStackedItem) {
                     dropStack = ItemUtils.setSpawnerItemAmount(dropStack, stackSize);
                     dropStack.setAmount(1);
+
+                    ItemMeta itemMeta = dropStack.getItemMeta();
+                    itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+                            .replace("{0}", stackSize + "")
+                            .replace("{1}", ItemUtils.getFormattedType(new ItemStack(stackedBarrel.getType())))
+                            .replace("{2}", "Barrel")
+                    );
+                    dropStack.setItemMeta(itemMeta);
+
                 }
 
                 ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
