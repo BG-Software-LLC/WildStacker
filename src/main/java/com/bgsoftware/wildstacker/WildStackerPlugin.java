@@ -125,9 +125,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     @Override
     public void onDisable() {
-        if(!shouldEnable)
-            return;
-
         EntitiesGetter.stop();
 
         try{
@@ -138,18 +135,20 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             } catch (Exception ignored) { }
         }
 
-        //We need to save the entire database
-        systemManager.performCacheSave();
+        if(shouldEnable) {
+            //We need to save the entire database
+            systemManager.performCacheSave();
 
-        //We need to close the connection
-        dataHandler.clearDatabase();
+            //We need to close the connection
+            dataHandler.clearDatabase();
 
-        for(StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-            providersHandler.deleteHologram(stackedSpawner);
-        for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-            providersHandler.deleteHologram(stackedBarrel);
-            stackedBarrel.getLocation().getChunk().load(true);
-            stackedBarrel.removeDisplayBlock();
+            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
+                providersHandler.deleteHologram(stackedSpawner);
+            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
+                providersHandler.deleteHologram(stackedBarrel);
+                stackedBarrel.getLocation().getChunk().load(true);
+                stackedBarrel.removeDisplayBlock();
+            }
         }
 
         EntityStorage.clearCache();
