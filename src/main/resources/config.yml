@@ -720,6 +720,10 @@ barrels:
   # Should a stacked item be dropped when a barrel is broken?
   drop-stacked-item: false
 
+  # When enabled and player is placing a barrel while sneaking, all of the barrel the player
+  # is holding will be placed instead of only 1.
+  shift-place-stack: false
+
 # Here you can configurable all features related to stacked buckets
 buckets:
   # Should buckets get stacked on the server?

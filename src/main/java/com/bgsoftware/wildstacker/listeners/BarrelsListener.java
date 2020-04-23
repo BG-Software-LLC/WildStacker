@@ -100,9 +100,17 @@ public final class BarrelsListener implements Listener {
 
         ItemStack inHand = e.getItemInHand().clone();
         int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
+        boolean replaceAir = false;
+
+        if(plugin.getSettings().barrelsShiftPlaceStack){
+            toPlace *= inHand.getAmount();
+            replaceAir = true;
+        }
+
         stackedBarrel.setStackAmount(toPlace, false);
 
         Chunk chunk = e.getBlock().getChunk();
+        boolean REPLACE_AIR = replaceAir;
 
         //Stacking barrel
         StackService.runOnMain(stackedBarrel);
@@ -145,6 +153,10 @@ public final class BarrelsListener implements Listener {
                 StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
             }
+
+            //Removing item from player's inventory
+            if(e.getPlayer().getGameMode() != GameMode.CREATIVE && REPLACE_AIR)
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, new ItemStack(Material.AIR));
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
         });
