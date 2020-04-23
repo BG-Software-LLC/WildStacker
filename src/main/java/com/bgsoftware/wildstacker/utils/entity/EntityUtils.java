@@ -37,6 +37,7 @@ import org.bukkit.entity.TropicalFish;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
@@ -339,8 +340,13 @@ public final class EntityUtils {
         }
 
         if(StackCheck.VILLAGER_PROFESSION.isEnabled() && StackCheck.VILLAGER_PROFESSION.isTypeAllowed(entityType)){
-            if(((Villager) en1).getProfession() != ((Villager) en2).getProfession())
-                return StackCheckResult.VILLAGER_PROFESSION;
+            if(en1 instanceof Villager) {
+                if (((Villager) en1).getProfession() != ((Villager) en2).getProfession())
+                    return StackCheckResult.VILLAGER_PROFESSION;
+            }else if(en1 instanceof ZombieVillager){
+                if (((ZombieVillager) en1).getVillagerProfession() != ((ZombieVillager) en2).getVillagerProfession())
+                    return StackCheckResult.VILLAGER_PROFESSION;
+            }
         }
 
         if(StackCheck.LLAMA_COLOR.isEnabled() && StackCheck.LLAMA_COLOR.isTypeAllowed(entityType)){
