@@ -419,8 +419,9 @@ public final class EntitiesListener implements Listener {
 
         if(EntityUtils.isStackable(e.getEntity()) && EntityTypes.fromEntity(e.getEntity()).isSlime()){
             int originalSize = ((Slime) e.getEntity()).getSize();
-            e.getEntity().getNearbyEntities(2, 2, 2).stream().filter(entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize())
-                    .forEach(entity -> {
+            e.getEntity().getNearbyEntities(2, 2, 2).stream()
+                    .filter(entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize() && EntityStorage.hasMetadata(entity, "original-amount"))
+                    .findFirst().ifPresent(entity -> {
                         int entitySize = EntityStorage.getMetadata(entity, "original-amount", Integer.class);
                         WStackedEntity.of(e.getEntity()).setStackAmount(entitySize, true);
                     });
