@@ -66,7 +66,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class SpawnersListener implements Listener {
 
     private static final BlockFace[] blockFaces = new BlockFace[] {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
-    private WildStackerPlugin plugin;
+
+    private final Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
+    private final Map<Entity, UUID> explodableSources = new WeakHashMap<>();
+
+    private final WildStackerPlugin plugin;
 
     public SpawnersListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -260,8 +264,6 @@ public final class SpawnersListener implements Listener {
             Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, amountToCharge);
         }
     }
-
-    private Map<Entity, UUID> explodableSources = new WeakHashMap<>();
 
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
@@ -481,26 +483,26 @@ public final class SpawnersListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent e){
-        if(!plugin.getSettings().inventoryTweaksEnabled)
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (!plugin.getSettings().inventoryTweaksEnabled)
             return;
 
         String permission = plugin.getSettings().inventoryTweaksPermission;
 
-        if(!permission.isEmpty() && e.getWhoClicked().hasPermission(permission))
+        if (!permission.isEmpty() && e.getWhoClicked().hasPermission(permission))
             return;
 
-        if(!plugin.getSettings().inventoryTweaksCommand.isEmpty() &&
+        if (!plugin.getSettings().inventoryTweaksCommand.isEmpty() &&
                 !inventoryTweaksToggleCommandPlayers.contains(e.getWhoClicked().getUniqueId()))
             return;
 
         InventoryAction action = e.getAction();
 
-        switch (action){
+        switch (action) {
             case PICKUP_HALF:
-                if(e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType()) {
+                if (e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType()) {
                     int spawnersAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem());
-                    if(spawnersAmount > 1 && e.getCurrentItem().getAmount() == 1) {
+                    if (spawnersAmount > 1 && e.getCurrentItem().getAmount() == 1) {
                         e.setCancelled(true);
                         EntityType entityType = plugin.getProviders().getSpawnerType(e.getCurrentItem());
                         e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, spawnersAmount / 2));
@@ -510,11 +512,10 @@ public final class SpawnersListener implements Listener {
                 break;
             case PLACE_ALL:
             case PLACE_ONE:
-                if(e.getCurrentItem() != null) {
+                if (e.getCurrentItem() != null) {
                     action = InventoryAction.SWAP_WITH_CURSOR;
-                }
-                else {
-                    if(e.getCursor().getType() == Materials.SPAWNER.toBukkitType()){
+                } else {
+                    if (e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
                         int cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
                         if (cursorAmount > 1 && e.getCursor().getAmount() == 1) {
                             e.setCancelled(true);
@@ -526,11 +527,11 @@ public final class SpawnersListener implements Listener {
                     break;
                 }
             case SWAP_WITH_CURSOR:
-                if(e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType() && e.getCursor().getType() == Materials.SPAWNER.toBukkitType()){
+                if (e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType() && e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
                     int currentAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem()) * e.getCurrentItem().getAmount(),
                             cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor()) * e.getCursor().getAmount();
                     EntityType currentType = plugin.getProviders().getSpawnerType(e.getCurrentItem()), cursorType = plugin.getProviders().getSpawnerType(e.getCursor());
-                    if(currentType == cursorType){
+                    if (currentType == cursorType) {
                         e.setCancelled(true);
                         e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
                         e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType, currentAmount + cursorAmount));
@@ -538,12 +539,12 @@ public final class SpawnersListener implements Listener {
                 }
                 break;
             case COLLECT_TO_CURSOR:
-                if(e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
+                if (e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
                     int newCursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
                     if (e.getCursor().getAmount() == 1) {
                         e.setCancelled(true);
                         EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
-                        for(int i = 0; i < e.getClickedInventory().getSize(); i++) {
+                        for (int i = 0; i < e.getClickedInventory().getSize(); i++) {
                             ItemStack itemStack = e.getClickedInventory().getItem(i);
                             if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
                                 if (plugin.getProviders().getSpawnerType(itemStack) == entityType) {
@@ -558,8 +559,6 @@ public final class SpawnersListener implements Listener {
                 break;
         }
     }
-
-    private Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
