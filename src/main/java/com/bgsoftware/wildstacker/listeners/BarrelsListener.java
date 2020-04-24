@@ -6,8 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -53,14 +51,12 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public final class BarrelsListener implements Listener {
 
-    private WildStackerPlugin plugin;
-    private Set<UUID> barrelsToggleCommandPlayers;
-
-    private Map<UUID, Location> barrelPlaceInventory = new HashMap<>();
+    private final Set<UUID> barrelsToggleCommandPlayers = new HashSet<>();
+    private final Map<UUID, Location> barrelPlaceInventory = new HashMap<>();
+    private final WildStackerPlugin plugin;
 
     public BarrelsListener(WildStackerPlugin plugin){
         this.plugin = plugin;
-        this.barrelsToggleCommandPlayers = new HashSet<>();
         if(ServerVersion.isAtLeast(ServerVersion.v1_9))
             plugin.getServer().getPluginManager().registerEvents(new CauldronChangeListener(), plugin);
     }
@@ -130,15 +126,7 @@ public final class BarrelsListener implements Listener {
                     return;
                 }
 
-                Location location = stackedBarrel.getLocation();
-
-                SQLHelper.runIfConditionNotExist("SELECT * FROM barrels WHERE location = '" + SQLHelper.getLocation(location) + "';", () ->
-                        Query.BARREL_INSERT.getStatementHolder()
-                                .setLocation(location)
-                                .setInt(stackedBarrel.getStackAmount())
-                                .setItemStack(stackedBarrel.getBarrelItem(1))
-                                .execute(true)
-                );
+                plugin.getDataHandler().insertBarrel(stackedBarrel);
 
                 e.getBlockPlaced().setType(Material.CAULDRON);
                 stackedBarrel.createDisplayBlock();
