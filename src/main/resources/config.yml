@@ -57,13 +57,13 @@ kill-task:
   # All settings related to the kill-all task of entities.
   entities:
     # A list of entities that will be cleared.
-    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # EntityType list: https://bg-software.com/entities/
     # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
     # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
     # If you want all entities to be killed, set this to []
     whitelist: []
     # A list of entities that won't be cleared.
-    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # EntityType list: https://bg-software.com/entities/
     # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
     # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
     # If you wish to disable blacklisted entities, use "blacklist: []"
@@ -74,11 +74,11 @@ kill-task:
     # All settings related to the kill-all task of entities.
   items:
     # A list of items that will be cleared.
-    # Material list: https://bg-software.com/files/materials/
+    # Material list: https://bg-software.com/materials/
     # If you want all items to be killed, set this to []
     whitelist: []
     # A list of items that won't be cleared.
-    # Material list: https://bg-software.com/files/materials/
+    # Material list: https://bg-software.com/materials/
     # If you wish to disable blacklisted items, use "blacklist: []"
     blacklist: []
     # A list of worlds that items will be cleared inside.
@@ -101,14 +101,14 @@ items:
   custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted items are items that won't get stacked.
-  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable blacklisted items, use "blacklist: []"
   blacklist:
     - EXAMPLE_ITEM
 
   # Whitelisted items are items that will get stacked.
-  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable whitelisted items, use "whitelist: []"
   whitelist: []
@@ -192,7 +192,7 @@ entities:
   custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted entities are entities that won't get stacked.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you wish to disable blacklisted entities, use "blacklist: []"
@@ -200,7 +200,7 @@ entities:
     - EXAMPLE_MOB
 
   # Whitelisted entities are entities that will get stacked.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   # If you wish to disable whitelisted entities, use "whitelist: []"
@@ -314,7 +314,7 @@ entities:
 
   # Instant-kill will kill the entire stack instead of unstack it by one.
   # When an entire stack dies, their drops are getting multiplied.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # DamageCause list:  https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
   # You can combine both filters using "ENTITY_TYPE:DAMAGE_CAUSE" or "ENTITY_TYPE:SPAWN_REASON"
   # If you don't want instant-kill, use "instant-kill: []"
@@ -322,7 +322,7 @@ entities:
     - FALL
 
   # Nerfed entities are entities that cannot attack / target other entities and players.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
   nerfed-entities:
@@ -356,7 +356,7 @@ entities:
   mythic-mobs-custom-name: true
 
   # A list of entities that should keep the lowest health when stacking.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine filters using "ENTITY_TYPE:SPAWN_REASON"
   keep-lowest-health: []
@@ -385,7 +385,7 @@ entities:
     all: 1
 
   # Should exp get added directly to killer instead of dropped to ground?
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   auto-exp-pickup: []
@@ -411,7 +411,7 @@ entities:
       - DIAMOND_SWORD
       - DIAMOND_AXE
     # A list of entities that will be one shot.
-    # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+    # EntityType list: https://bg-software.com/entities/
     # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
     # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
     whitelist:
@@ -437,13 +437,13 @@ spawners:
   custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted spawners are spawners that won't get stacked.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # If you wish to disable blacklisted spawners, use "blacklist: []"
   blacklist:
     - BLAZE
 
   # Whitelisted spawners are spawners that will get stacked.
-  # EntityType list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html
+  # EntityType list: https://bg-software.com/entities/
   # If you wish to disable whitelisted spawners, use "whitelist: []"
   whitelist: []
 
@@ -653,13 +653,13 @@ barrels:
   custom-name: '&6x{0} &f&o{1}'
 
   # Blacklisted barrels are barrels that won't get stacked.
-  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable blacklisted spawners, use "blacklist: []"
   blacklist: []
 
   # Whitelisted blocks are blocks that will get stacked.
-  # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+  # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable whitelisted spawners, use "whitelist: []"
   whitelist:
