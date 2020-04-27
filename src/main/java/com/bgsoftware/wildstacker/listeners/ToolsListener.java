@@ -27,8 +27,8 @@ import java.util.UUID;
 @SuppressWarnings("unused")
 public final class ToolsListener implements Listener {
 
-    private Map<UUID, StackedObject> simulateObjects = new HashMap<>();
-    private WildStackerPlugin plugin;
+    private final Map<UUID, StackedObject> simulateObjects = new HashMap<>();
+    private final WildStackerPlugin plugin;
 
     public ToolsListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -107,14 +107,15 @@ public final class ToolsListener implements Listener {
     }
 
     private void handleSimulate(Player player, StackedObject stackedObject){
-        if(!simulateObjects.containsKey(player.getUniqueId())){
+        StackedObject firstObject = simulateObjects.get(player.getUniqueId());
+
+        if(firstObject == null){
             simulateObjects.put(player.getUniqueId(), stackedObject);
             Bukkit.getScheduler().runTaskLater(plugin, () -> simulateObjects.remove(player.getUniqueId()), 1200L);
             Locale.OBJECT_SIMULATE_CHOOSE_SECOND.send(player);
         }
 
-        else{
-            StackedObject firstObject = simulateObjects.get(player.getUniqueId());
+        else if(stackedObject != firstObject){
             simulateObjects.remove(player.getUniqueId());
 
             StackCheckResult stackCheckResult = firstObject.runStackCheck(stackedObject);
