@@ -343,6 +343,9 @@ public final class EntityUtils {
             if(en1 instanceof Villager) {
                 if (((Villager) en1).getProfession() != ((Villager) en2).getProfession())
                     return StackCheckResult.VILLAGER_PROFESSION;
+            }else if(en1 instanceof Zombie){
+                if (((Zombie) en1).isVillager() != ((Zombie) en2).isVillager())
+                    return StackCheckResult.NOT_SIMILAR;
             }else if(en1 instanceof ZombieVillager){
                 if (((ZombieVillager) en1).getVillagerProfession() != ((ZombieVillager) en2).getVillagerProfession())
                     return StackCheckResult.VILLAGER_PROFESSION;
