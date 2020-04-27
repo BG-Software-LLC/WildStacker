@@ -346,9 +346,12 @@ public final class EntityUtils {
             }else if(en1 instanceof Zombie){
                 if (((Zombie) en1).isVillager() != ((Zombie) en2).isVillager())
                     return StackCheckResult.NOT_SIMILAR;
-            }else if(en1 instanceof ZombieVillager){
-                if (((ZombieVillager) en1).getVillagerProfession() != ((ZombieVillager) en2).getVillagerProfession())
-                    return StackCheckResult.VILLAGER_PROFESSION;
+                try{
+                    if(en1 instanceof ZombieVillager){
+                        if (((ZombieVillager) en1).getVillagerProfession() != ((ZombieVillager) en2).getVillagerProfession())
+                            return StackCheckResult.VILLAGER_PROFESSION;
+                    }
+                }catch(Exception ignored){}
             }
         }
 
