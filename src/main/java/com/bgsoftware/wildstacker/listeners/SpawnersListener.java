@@ -131,17 +131,17 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
+        stackedSpawner.setStackAmount(spawnerItemAmount, false);
+
         if(!e.getPlayer().hasPermission("wildstacker.stack.*") &&
                 !e.getPlayer().hasPermission("wildstacker.stack." + spawnerType.name().toLowerCase()))
             return;
-
-        //Stacking spawner
-        stackedSpawner.setStackAmount(spawnerItemAmount, false);
 
         final boolean REPLACE_AIR = replaceAir;
         final ItemStack LIMIT_ITEM = limitItem;
         Chunk chunk = e.getBlock().getChunk();
 
+        //Stacking spawner
         StackService.runOnMain(stackedSpawner);
         stackedSpawner.runStackAsync(spawnerOptional -> {
             int stackAmount = stackedSpawner.getStackAmount();
