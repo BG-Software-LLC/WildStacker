@@ -38,8 +38,8 @@ public final class ProtocolLibHook {
                 public void onPacketSending(PacketEvent event) {
                     if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
                         PacketContainer packetContainer = event.getPacket();
-                        StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
                         try {
+                            StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
                             if (entityModifier.size() > 0) {
                                 if ((itemsDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof Item) ||
                                         (entitiesDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof LivingEntity)) {
