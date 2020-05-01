@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cat;
@@ -300,8 +301,14 @@ public final class EntityUtils {
         }
 
         if(StackCheck.HORSE_TYPE.isEnabled() && StackCheck.HORSE_TYPE.isTypeAllowed(entityType)){
-            if(((Horse) en1).getVariant() != ((Horse) en2).getVariant())
-                return StackCheckResult.HORSE_TYPE;
+            if(en1 instanceof Horse) {
+                if (((Horse) en1).getVariant() != ((Horse) en2).getVariant())
+                    return StackCheckResult.HORSE_TYPE;
+            }
+            else{
+                if (((AbstractHorse) en1).getVariant() != ((AbstractHorse) en2).getVariant())
+                    return StackCheckResult.HORSE_TYPE;
+            }
         }
 
         if(StackCheck.HORSE_COLOR.isEnabled() && StackCheck.HORSE_COLOR.isTypeAllowed(entityType)){
