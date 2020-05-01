@@ -35,8 +35,6 @@ import java.util.stream.Stream;
 
 public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
 
-    private static final Object stackingMutex = new Object();
-
     private final List<Inventory> linkedInventories = new ArrayList<>();
 
     private LivingEntity linkedEntity = null;
@@ -178,84 +176,80 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
         Chunk chunk = getChunk();
 
         StackService.execute(this, () -> {
-            synchronized (stackingMutex) {
-                boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
-                Location blockLocation = getLocation();
+            boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+            Location blockLocation = getLocation();
 
-                Stream<StackedSpawner> spawnerStream;
+            Stream<StackedSpawner> spawnerStream;
 
-                if (chunkMerge) {
-                    spawnerStream = plugin.getSystemManager().getStackedSpawners(chunk).stream();
-                } else {
-                    int range = plugin.getSettings().spawnersCheckRange;
-                    Location location = getLocation();
+            if (chunkMerge) {
+                spawnerStream = plugin.getSystemManager().getStackedSpawners(chunk).stream();
+            } else {
+                int range = plugin.getSettings().spawnersCheckRange;
+                Location location = getLocation();
 
-                    int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-                    int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+                int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
+                int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
 
-                    spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
-                            .filter(stackedSpawner -> {
-                                Location loc = stackedSpawner.getLocation();
-                                return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                        loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                        loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                            });
-                }
-
-                Optional<StackedSpawner> spawnerOptional = GeneralUtils.getClosest(blockLocation, spawnerStream
-                        .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS));
-
-                if (spawnerOptional.isPresent()) {
-                    StackedSpawner targetSpawner = spawnerOptional.get();
-
-                    StackResult stackResult = runStack(targetSpawner);
-
-                    if (stackResult == StackResult.SUCCESS) {
-                        if (result != null)
-                            result.accept(spawnerOptional.map(StackedSpawner::getSpawner));
-                        return;
-                    }
-                }
-
-                updateName();
-
-                if (result != null)
-                    result.accept(Optional.empty());
+                spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
+                        .filter(stackedSpawner -> {
+                            Location loc = stackedSpawner.getLocation();
+                            return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
+                                    loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
+                                    loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
+                        });
             }
+
+            Optional<StackedSpawner> spawnerOptional = GeneralUtils.getClosest(blockLocation, spawnerStream
+                    .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS));
+
+            if (spawnerOptional.isPresent()) {
+                StackedSpawner targetSpawner = spawnerOptional.get();
+
+                StackResult stackResult = runStack(targetSpawner);
+
+                if (stackResult == StackResult.SUCCESS) {
+                    if (result != null)
+                        result.accept(spawnerOptional.map(StackedSpawner::getSpawner));
+                    return;
+                }
+            }
+
+            updateName();
+
+            if (result != null)
+                result.accept(Optional.empty());
         });
         StackService.runAsync(this);
     }
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        synchronized (stackingMutex) {
-            if (!StackService.canStackFromThread())
-                return StackResult.THREAD_CATCHER;
+        if (!StackService.canStackFromThread())
+            return StackResult.THREAD_CATCHER;
 
-            if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
-                return StackResult.NOT_SIMILAR;
+        if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
+            return StackResult.NOT_SIMILAR;
 
-            StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-            int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
+        StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
+        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
 
-            SpawnerStackEvent spawnerStackEvent = new SpawnerStackEvent(targetSpawner, this);
-            Bukkit.getPluginManager().callEvent(spawnerStackEvent);
+        SpawnerStackEvent spawnerStackEvent = new SpawnerStackEvent(targetSpawner, this);
+        Bukkit.getPluginManager().callEvent(spawnerStackEvent);
 
-            if (spawnerStackEvent.isCancelled())
-                return StackResult.EVENT_CANCELLED;
+        if (spawnerStackEvent.isCancelled())
+            return StackResult.EVENT_CANCELLED;
 
-            targetSpawner.setStackAmount(newStackAmount, true);
+        targetSpawner.setStackAmount(newStackAmount, true);
 
-            this.remove();
+        this.remove();
 
-            if (plugin.getSettings().spawnersParticlesEnabled) {
-                Location location = getLocation();
-                for (ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
-                    particleWrapper.spawnParticle(location);
-            }
-
-            return StackResult.SUCCESS;
+        if (plugin.getSettings().spawnersParticlesEnabled) {
+            Location location = getLocation();
+            for (ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
+                particleWrapper.spawnParticle(location);
         }
+
+        return StackResult.SUCCESS;
     }
 
     @Override
@@ -297,18 +291,14 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public LivingEntity getLinkedEntity(){
-        synchronized (stackingMutex) {
-            if (linkedEntity != null && (linkedEntity.isDead() || !linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
-                linkedEntity = null;
-            return linkedEntity;
-        }
+        if (linkedEntity != null && (linkedEntity.isDead() || !linkedEntity.isValid() || linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
+            linkedEntity = null;
+        return linkedEntity;
     }
 
     @Override
     public void setLinkedEntity(LivingEntity linkedEntity){
-        synchronized (stackingMutex) {
-            this.linkedEntity = linkedEntity;
-        }
+        this.linkedEntity = linkedEntity;
     }
 
     @Override
