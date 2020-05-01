@@ -20,6 +20,10 @@ public final class Pair<K, V> implements Map.Entry<K, V> {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return "Pair{" + key + "=" + value + '}';
+    }
 
     @Override
     public V setValue(V value) {
