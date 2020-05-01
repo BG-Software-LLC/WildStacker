@@ -311,34 +311,52 @@ public final class EntityUtils {
             }
         }
 
-        if(StackCheck.HORSE_COLOR.isEnabled() && StackCheck.HORSE_COLOR.isTypeAllowed(entityType)){
+        if(StackCheck.HORSE_COLOR.isEnabled() && en1 instanceof Horse){
             if(((Horse) en1).getColor() != ((Horse) en2).getColor())
                 return StackCheckResult.HORSE_COLOR;
         }
 
-        if(StackCheck.HORSE_STYLE.isEnabled() && StackCheck.HORSE_STYLE.isTypeAllowed(entityType)){
+        if(StackCheck.HORSE_STYLE.isEnabled() && en1 instanceof Horse){
             if(((Horse) en1).getStyle() != ((Horse) en2).getStyle())
                 return StackCheckResult.HORSE_STYLE;
         }
 
-        if(StackCheck.HORSE_CARRYING_CHEST.isEnabled() && StackCheck.HORSE_CARRYING_CHEST.isTypeAllowed(entityType)){
-            if(((Horse) en1).isCarryingChest() != ((Horse) en2).isCarryingChest())
+        if(StackCheck.HORSE_CARRYING_CHEST.isEnabled() && en1 instanceof Horse){
+            if (((Horse) en1).isCarryingChest() != ((Horse) en2).isCarryingChest())
                 return StackCheckResult.HORSE_CARRYING_CHEST;
         }
 
         if(StackCheck.HORSE_TAME_PROGRESS.isEnabled() && StackCheck.HORSE_TAME_PROGRESS.isTypeAllowed(entityType)){
-            if(((Horse) en1).getDomestication() != ((Horse) en2).getDomestication())
-                return StackCheckResult.HORSE_TAME_PROGRESS;
+            if(en1 instanceof Horse) {
+                if (((Horse) en1).getDomestication() != ((Horse) en2).getDomestication())
+                    return StackCheckResult.HORSE_TAME_PROGRESS;
+            }
+            else{
+                if (((AbstractHorse) en1).getDomestication() != ((AbstractHorse) en2).getDomestication())
+                    return StackCheckResult.HORSE_TAME_PROGRESS;
+            }
         }
 
         if(StackCheck.HORSE_MAX_TAME_PROGRESS.isEnabled() && StackCheck.HORSE_MAX_TAME_PROGRESS.isTypeAllowed(entityType)){
-            if(((Horse) en1).getMaxDomestication() != ((Horse) en2).getMaxDomestication())
-                return StackCheckResult.HORSE_MAX_TAME_PROGRESS;
+            if(en1 instanceof Horse) {
+                if (((Horse) en1).getMaxDomestication() != ((Horse) en2).getMaxDomestication())
+                    return StackCheckResult.HORSE_MAX_TAME_PROGRESS;
+            }
+            else{
+                if (((AbstractHorse) en1).getMaxDomestication() != ((AbstractHorse) en2).getMaxDomestication())
+                    return StackCheckResult.HORSE_MAX_TAME_PROGRESS;
+            }
         }
 
         if(StackCheck.HORSE_JUMP.isEnabled() && StackCheck.HORSE_JUMP.isTypeAllowed(entityType)){
-            if(((Horse) en1).getJumpStrength() != ((Horse) en2).getJumpStrength())
-                return StackCheckResult.HORSE_JUMP;
+            if(en1 instanceof Horse) {
+                if (((Horse) en1).getJumpStrength() != ((Horse) en2).getJumpStrength())
+                    return StackCheckResult.HORSE_JUMP;
+            }
+            else{
+                if (((AbstractHorse) en1).getJumpStrength() != ((AbstractHorse) en2).getJumpStrength())
+                    return StackCheckResult.HORSE_JUMP;
+            }
         }
 
         if(StackCheck.RABBIT_TYPE.isEnabled() && StackCheck.RABBIT_TYPE.isTypeAllowed(entityType)){
