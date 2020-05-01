@@ -243,6 +243,10 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
         World world = ((CraftWorld) location.getWorld()).getHandle();
         Entity entity = EntityTypes.a(bukkitEntity.getEntityId(), world);
+
+        if(entity == null)
+            return false;
+
         entity.setPosition(location.getX(), location.getY(), location.getZ());
         return !(entity instanceof EntityInsentient) || (((EntityInsentient) entity).bR() && ((EntityInsentient) entity).canSpawn());
     }
