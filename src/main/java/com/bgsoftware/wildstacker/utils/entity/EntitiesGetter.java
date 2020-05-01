@@ -104,8 +104,10 @@ public final class EntitiesGetter {
 
                 for(int x = -info.nearbyChunks; x <= info.nearbyChunks; x++){
                     for(int z = -info.nearbyChunks; z <= info.nearbyChunks; z++){
-                        Chunk chunk = world.getChunkAt(chunkX + x, chunkZ + z);
-                        entityBox.feed(Arrays.asList(chunk.getEntities()));
+                        if(world.isChunkLoaded(x, z)) {
+                            Chunk chunk = world.getChunkAt(chunkX + x, chunkZ + z);
+                            entityBox.feed(Arrays.asList(chunk.getEntities()));
+                        }
                     }
                 }
 
