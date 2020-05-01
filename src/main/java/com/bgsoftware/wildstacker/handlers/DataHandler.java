@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
@@ -10,6 +12,7 @@ import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -32,10 +35,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -47,7 +52,12 @@ public final class DataHandler {
 
     private WildStackerPlugin plugin;
 
-    public final Map<Object, StackedObject> CACHED_OBJECTS = new ConcurrentHashMap<>();
+    public final Map<UUID, StackedItem> CACHED_ITEMS = new ConcurrentHashMap<>();
+    public final Map<UUID, StackedEntity> CACHED_ENTITIES = new ConcurrentHashMap<>();
+    public final Map<Location, StackedSpawner> CACHED_SPAWNERS = new ConcurrentHashMap<>();
+    public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
+    public final Map<Location, StackedBarrel> CACHED_BARRELS = new ConcurrentHashMap<>();
+    public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
 
     //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
     public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
@@ -117,6 +127,32 @@ public final class DataHandler {
         return SQLHelper.doesConditionExist(String.format("SELECT * FROM spawners WHERE location = '%s';", SQLHelper.getLocation(stackedSpawner.getLocation())));
     }
 
+    public void addStackedSpawner(StackedSpawner stackedSpawner){
+        CACHED_SPAWNERS.put(stackedSpawner.getLocation(), stackedSpawner);
+        CACHED_SPAWNERS_BY_CHUNKS.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()),
+                s -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(stackedSpawner);
+    }
+
+    public void removeStackedSpawner(StackedSpawner stackedSpawner){
+        CACHED_SPAWNERS.remove(stackedSpawner.getLocation());
+        Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(stackedSpawner.getLocation()));
+        if(chunkSpawners != null)
+            chunkSpawners.remove(stackedSpawner);
+    }
+
+    public void addStackedBarrel(StackedBarrel stackedBarrel){
+        CACHED_BARRELS.put(stackedBarrel.getLocation(), stackedBarrel);
+        CACHED_BARRELS_BY_CHUNKS.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()),
+                s -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(stackedBarrel);
+    }
+
+    public void removeStackedBarrel(StackedBarrel stackedBarrel){
+        CACHED_BARRELS.remove(stackedBarrel.getLocation());
+        Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
+        if(chunkBarrels != null)
+            chunkBarrels.remove(stackedBarrel);
+    }
+
     private void loadOldFiles(){
         File dataFile = new File(plugin.getDataFolder(), "data");
 
@@ -154,6 +190,15 @@ public final class DataHandler {
             }
         }
 
+    }
+
+    public List<StackedObject> getStackedObjects(){
+        List<StackedObject> stackedObjects = new ArrayList<>();
+        stackedObjects.addAll(CACHED_ITEMS.values());
+        stackedObjects.addAll(CACHED_ENTITIES.values());
+        stackedObjects.addAll(CACHED_SPAWNERS.values());
+        stackedObjects.addAll(CACHED_BARRELS.values());
+        return stackedObjects;
     }
 
     private void loadOldSQL(){
@@ -202,7 +247,7 @@ public final class DataHandler {
                                 if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
                                     System.out.println(blockLocation + ": " + stackAmount);
                                     StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                                    CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
+                                    addStackedSpawner(stackedSpawner);
                                 }
                             }
                         }
@@ -223,7 +268,7 @@ public final class DataHandler {
                                 if (barrelBlock.getType() == Material.CAULDRON) {
                                     ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
                                     StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                                    CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                                    addStackedBarrel(stackedBarrel);
                                 }
                             }
                         }
@@ -316,7 +361,7 @@ public final class DataHandler {
 
                             if (spawnerBlock.getState() instanceof CreatureSpawner) {
                                 StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                                CACHED_OBJECTS.put(spawnerBlock.getLocation(), stackedSpawner);
+                                addStackedSpawner(stackedSpawner);
                                 continue;
                             } else {
                                 exceptionReason = "Block doesn't exist anymore.";
@@ -371,7 +416,7 @@ public final class DataHandler {
                             ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
                                     plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
                             StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                            CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                            addStackedBarrel(stackedBarrel);
                             continue;
                         }
                         else{
@@ -469,13 +514,13 @@ public final class DataHandler {
 
                     while(stackedSpawnersIterator.hasNext()) {
                         StackedSpawner stackedSpawner = stackedSpawnersIterator.next().create();
-                        CACHED_OBJECTS.put(stackedSpawner.getLocation(), stackedSpawner);
+                        addStackedSpawner(stackedSpawner);
                         stackedSpawner.updateName();
                     }
 
                     while(stackedBarrelsIterator.hasNext()){
                         StackedBarrel stackedBarrel = stackedBarrelsIterator.next().create();
-                        CACHED_OBJECTS.put(stackedBarrel.getLocation(), stackedBarrel);
+                        addStackedBarrel(stackedBarrel);
                         stackedBarrel.updateName();
                         stackedBarrel.createDisplayBlock();
                     }

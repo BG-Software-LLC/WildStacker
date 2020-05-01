@@ -361,8 +361,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     }
 
     public static StackedItem ofCache(Item item){
-        StackedObject stackedObject = plugin.getDataHandler().CACHED_OBJECTS.get(item.getUniqueId());
-        return stackedObject == null ? null : (StackedItem) stackedObject;
+        return plugin.getDataHandler().CACHED_ITEMS.get(item.getUniqueId());
     }
 
 }
