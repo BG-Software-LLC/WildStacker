@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
+import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV5;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
@@ -121,11 +122,15 @@ public final class ProvidersHandler {
                 claimsProviders.add(new ClaimsProvider_MassiveFactions());
         }
         if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
-            try {
-                Class.forName("com.intellectualcrafters.plot.api.PlotAPI");
-                claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
-            }catch(Throwable ex){
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
+            if(plugin.getDescription().getVersion().startsWith("5.")){
+                claimsProviders.add(new ClaimsProvider_PlotSquaredV5());
+            }
+            else if(plugin.getDescription().getMain().contains("com.github")){
                 claimsProviders.add(new ClaimsProvider_PlotSquared());
+            }
+            else{
+                claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
             }
         }
         if(Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
