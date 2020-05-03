@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -85,10 +84,11 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class EntitiesListener implements Listener {
 
-    private WildStackerPlugin plugin;
+    private final WildStackerPlugin plugin;
 
     public final static Set<UUID> noStackEntities = new HashSet<>();
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
+    private final Set<UUID> noDeathEvent = new HashSet<>();
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -121,8 +121,6 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
         }
     }
-
-    private Set<UUID> noDeathEvent = new HashSet<>();
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCustomEntityDeath(EntityDeathEvent e){
@@ -413,33 +411,22 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnLow(CreatureSpawnEvent e){
-        //Cache the data for the entity.
-//        if(EntityUtils.isStackable(e.getEntity()))
-//            EntityData.of(e.getEntity());
-
         if(EntityUtils.isStackable(e.getEntity()) && EntityTypes.fromEntity(e.getEntity()).isSlime()){
             int originalSize = ((Slime) e.getEntity()).getSize();
-            e.getEntity().getNearbyEntities(2, 2, 2).stream()
-                    .filter(entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize() && EntityStorage.hasMetadata(entity, "original-amount"))
-                    .findFirst().ifPresent(entity -> {
+            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
+                    entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize() && EntityStorage.hasMetadata(entity, "original-amount"))
+                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(entity -> {
                         int entitySize = EntityStorage.getMetadata(entity, "original-amount", Integer.class);
                         WStackedEntity.of(e.getEntity()).setStackAmount(entitySize, true);
-                    });
+                    }));
         }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onChunkLoad(ChunkLoadEvent e){
-//        Arrays.stream(e.getChunk().getEntities())
-//                .filter(EntityUtils::isStackable)
-//                .forEach(entity -> EntityData.of((LivingEntity) entity));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onNewChunkLoad(ChunkLoadEvent e){
         if(e.isNewChunk()){
-            Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity).forEach(entity ->
-                handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL));
+            Executor.sync(() -> Arrays.stream(e.getChunk().getEntities()).filter(entity -> entity instanceof LivingEntity).forEach(entity ->
+                        handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL)), 60L);
         }
     }
 
@@ -727,7 +714,7 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e){
         if(e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed){
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) &&
+            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) &&
                     (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)))
                     .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> WStackedEntity.of(entity).runStackAsync(null)));
         }
@@ -760,7 +747,7 @@ public final class EntitiesListener implements Listener {
         }
 
         //Refresh item names
-        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
+        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
                 .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
@@ -828,7 +815,7 @@ public final class EntitiesListener implements Listener {
 
     private static class TransformListener implements Listener {
 
-        private WildStackerPlugin plugin;
+        private final WildStackerPlugin plugin;
 
         TransformListener(WildStackerPlugin plugin){
             this.plugin = plugin;

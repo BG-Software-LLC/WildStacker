@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.listeners.events;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
@@ -67,7 +67,7 @@ public final class EventsListener {
 
             Item egg = e.getEntity();
 
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
+            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
                     entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
                     .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(chicken -> {
                         EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
@@ -86,7 +86,7 @@ public final class EventsListener {
 
             Item scute = e.getEntity();
 
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
+            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
                     entity -> entity instanceof org.bukkit.entity.Turtle)
                     .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(turtle -> {
                         ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);

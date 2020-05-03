@@ -3,12 +3,14 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_14_R1.BlockPosition;
 import net.minecraft.server.v1_14_R1.ChatMessage;
+import net.minecraft.server.v1_14_R1.Chunk;
 import net.minecraft.server.v1_14_R1.ChunkProviderServer;
 import net.minecraft.server.v1_14_R1.DynamicOpsNBT;
 import net.minecraft.server.v1_14_R1.EnchantmentManager;
@@ -90,10 +92,14 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -270,6 +276,30 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         World world = ((CraftWorld) location.getWorld()).getHandle();
         EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
         return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    }
+
+    @Override
+    public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
+        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
+        int chunkRange = range % 16 == 0 ? range / 16 : (range / 16) + 1;
+
+        org.bukkit.World world = location.getWorld();
+        int chunkX = location.getBlockX() >> 4, chunkZ = location.getBlockZ() >> 4;
+
+        assert world != null;
+
+        for(int x = -chunkRange; x <= chunkRange; x++){
+            for(int z = -chunkRange; z <= chunkRange; z++){
+                Chunk chunk = ((CraftChunk) world.getChunkAt(chunkX + x, chunkZ + z)).getHandle();
+                for(List<Entity> entity : chunk.entitySlices){
+                    if(entity != null)
+                        entities.addAll(entity.stream().map(Entity::getBukkitEntity).collect(Collectors.toList()));
+                }
+            }
+        }
+
+        return entities.stream().filter(entity -> GeneralUtils.isNearby(location, entity.getLocation(), range) &&
+                (filter == null || filter.test(entity))).collect(Collectors.toSet());
     }
 
     @Override

@@ -98,6 +98,7 @@ public final class SpawnersListener implements Listener {
                 !e.getPlayer().hasPermission("wildstacker.place." + spawnerType.name().toLowerCase())) {
             Locale.SPAWNER_PLACE_BLOCKED.send(e.getPlayer(), "wildstacker.place." + spawnerType.name().toLowerCase());
             e.setCancelled(true);
+            stackedSpawner.remove();
             return;
         }
 
@@ -128,6 +129,7 @@ public final class SpawnersListener implements Listener {
         if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
             e.setCancelled(true);
+            stackedSpawner.remove();
             return;
         }
 
@@ -150,6 +152,7 @@ public final class SpawnersListener implements Listener {
                 if(isChunkLimit(chunk, spawnerType)) {
                     e.setCancelled(true);
                     Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()) + " Spawners");
+                    stackedSpawner.remove();
                     return;
                 }
 
@@ -159,6 +162,7 @@ public final class SpawnersListener implements Listener {
                         if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()){
                             Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
                             e.setCancelled(true);
+                            stackedSpawner.remove();
                             return;
                         }
                     }
@@ -169,6 +173,7 @@ public final class SpawnersListener implements Listener {
                         if(nearbySpawner.getStackAmount() >= nearbySpawner.getStackLimit()) {
                             Locale.ONLY_ONE_SPAWNER.send(e.getPlayer());
                             e.setCancelled(true);
+                            stackedSpawner.remove();
                             return;
                         }
                     }
@@ -179,6 +184,7 @@ public final class SpawnersListener implements Listener {
 
                 if(spawnerPlaceEvent.isCancelled()) {
                     e.setCancelled(true);
+                    stackedSpawner.remove();
                     return;
                 }
 
@@ -324,9 +330,9 @@ public final class SpawnersListener implements Listener {
             Location location = e.getClickedBlock().getLocation();
             Executor.sync(() -> {
                 try{
-                    location.getWorld().getNearbyEntities(location, 1, 1, 1).stream()
-                            .filter(entity -> entity instanceof TNTPrimed).findFirst()
-                            .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId()));
+                    EntityUtils.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
+                            .whenComplete((nearbyEntities,  ex) -> nearbyEntities.stream().findFirst()
+                                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())));
                 }catch(Throwable ignored){}
             }, 2L);
         }

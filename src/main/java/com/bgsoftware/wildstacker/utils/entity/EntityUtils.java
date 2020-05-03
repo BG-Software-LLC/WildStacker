@@ -5,8 +5,11 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.PaperHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractHorse;
@@ -46,6 +49,9 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -97,7 +103,7 @@ public final class EntityUtils {
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
     public static void removeParrotIfShoulder(Parrot parrot){
-        EntitiesGetter.getNearbyEntities(parrot.getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
+        getNearbyEntities(parrot.getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
             try {
                 for (Entity entity : nearbyEntities) {
                     if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {
@@ -123,25 +129,20 @@ public final class EntityUtils {
     }
 
     public static void spawnExp(Location location, int amount){
-        Optional<Entity> closestOrb;
+        EntityUtils.getNearbyEntities(location, 2, entity -> entity instanceof ExperienceOrb).whenComplete((nearbyEntities, ex) -> {
+            Optional<Entity> closestOrb = nearbyEntities.stream().findFirst();
 
-        try{
-            closestOrb = location.getWorld().getNearbyEntities(location, 2, 2 ,2)
-                    .stream().filter(entity -> entity instanceof ExperienceOrb).findFirst();
-        }catch (Throwable ex){
-            closestOrb = Optional.empty();
-        }
+            ExperienceOrb experienceOrb;
 
-        ExperienceOrb experienceOrb;
-
-        if(closestOrb.isPresent()){
-            experienceOrb = (ExperienceOrb) closestOrb.get();
-            experienceOrb.setExperience(experienceOrb.getExperience() + amount);
-        }
-        else{
-            experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
-            experienceOrb.setExperience(amount);
-        }
+            if(closestOrb.isPresent()){
+                experienceOrb = (ExperienceOrb) closestOrb.get();
+                experienceOrb.setExperience(experienceOrb.getExperience() + amount);
+            }
+            else{
+                experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+                experienceOrb.setExperience(amount);
+            }
+        });
     }
 
     public static String getEntityName(StackedEntity stackedEntity){
@@ -421,6 +422,29 @@ public final class EntityUtils {
         }
 
         return StackCheckResult.SUCCESS;
+    }
+
+    public static CompletableFuture<Set<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+        CompletableFuture<Set<Entity>> completableFuture = new CompletableFuture<>();
+
+        if(PaperHook.hasAsyncChunkSupport()){
+            if(Bukkit.isPrimaryThread()){
+                Executor.async(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
+            }
+            else{
+                completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
+            }
+        }
+        else{
+            if(Bukkit.isPrimaryThread()){
+                completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
+            }
+            else{
+                Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
+            }
+        }
+
+        return completableFuture;
     }
 
     private static Object requireNotNull(Object obj){

@@ -27,7 +27,6 @@ import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
@@ -92,7 +91,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         EditorMenu.init(this);
 
         Locale.reload();
-        EntitiesGetter.start();
 
         if(ServerVersion.isAtLeast(ServerVersion.v1_8))
             getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
@@ -125,8 +123,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     @Override
     public void onDisable() {
-        EntitiesGetter.stop();
-
         try{
             Bukkit.getScheduler().cancelAllTasks();
         }catch(Throwable ex){

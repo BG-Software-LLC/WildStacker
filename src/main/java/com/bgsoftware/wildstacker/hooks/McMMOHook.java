@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
@@ -29,6 +31,10 @@ public final class McMMOHook {
         if(mcMMO != null){
             livingEntity.setMetadata(SPAWNED_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
         }
+    }
+
+    public static void handleCombat(Player attacker, LivingEntity target, double finalDamage, EntityDamageEvent.DamageCause damageCause){
+
     }
 
     public static boolean isSpawnedEntity(LivingEntity livingEntity){

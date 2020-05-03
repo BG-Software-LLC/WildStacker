@@ -12,7 +12,6 @@ import com.bgsoftware.wildstacker.listeners.events.ScuteDropEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -39,7 +38,7 @@ import java.util.Arrays;
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
 
-    private WildStackerPlugin plugin;
+    private final WildStackerPlugin plugin;
 
     public ItemsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -222,7 +221,7 @@ public final class ItemsListener implements Listener {
         }
 
         //Refresh item names
-        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> entity instanceof Item && entity.isCustomNameVisible())
+        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> entity instanceof Item && entity.isCustomNameVisible())
                 .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
@@ -246,7 +245,7 @@ public final class ItemsListener implements Listener {
 
     private static class MergeListener implements Listener{
 
-        private WildStackerPlugin plugin;
+        private final WildStackerPlugin plugin;
 
         private MergeListener(WildStackerPlugin plugin){
             this.plugin = plugin;
@@ -277,7 +276,7 @@ public final class ItemsListener implements Listener {
 
     private static class ScuteListener implements Listener{
 
-        private WildStackerPlugin plugin;
+        private final WildStackerPlugin plugin;
 
         ScuteListener(WildStackerPlugin plugin){
             this.plugin = plugin;

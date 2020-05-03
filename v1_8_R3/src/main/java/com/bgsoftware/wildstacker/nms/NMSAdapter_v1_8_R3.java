@@ -2,11 +2,13 @@ package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.Chunk;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAgeable;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
@@ -68,11 +70,14 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -249,6 +254,28 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
         entity.setPosition(location.getX(), location.getY(), location.getZ());
         return !(entity instanceof EntityInsentient) || (((EntityInsentient) entity).bR() && ((EntityInsentient) entity).canSpawn());
+    }
+
+    @Override
+    public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
+        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
+
+        org.bukkit.World world = location.getWorld();
+        int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
+        int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
+
+        for(int x = minX; x <= maxX; x++){
+            for(int z = minZ; z <= maxZ; z++){
+                Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
+                for (List<Entity> entity : chunk.entitySlices) {
+                    if(entity != null)
+                        entities.addAll(entity.stream().map(Entity::getBukkitEntity).collect(Collectors.toList()));
+                }
+            }
+        }
+
+        return entities.stream().filter(entity -> GeneralUtils.isNearby(location, entity.getLocation(), range) &&
+                (filter == null || filter.test(entity))).collect(Collectors.toSet());
     }
 
     /*

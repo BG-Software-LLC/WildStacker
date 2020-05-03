@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
@@ -270,7 +269,7 @@ public class WStackedEntity extends WStackedObject<LivingEntity> implements Stac
         int range = plugin.getSettings().entitiesCheckRange;
         Location entityLocation = getLivingEntity().getLocation();
 
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range,
+        EntityUtils.getNearbyEntities(object.getLocation(), range,
                 entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
                 .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
                     Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid).map(WStackedEntity::of).collect(Collectors.toSet());

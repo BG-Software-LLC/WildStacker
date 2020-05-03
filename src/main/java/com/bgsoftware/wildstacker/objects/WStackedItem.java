@@ -8,7 +8,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -200,7 +199,7 @@ public class WStackedItem extends WStackedObject<Item> implements StackedItem {
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
-        EntitiesGetter.getNearbyEntities(object.getLocation(), range, EntityUtils::isItem).whenComplete((nearbyEntities, ex) ->
+        EntityUtils.getNearbyEntities(object.getLocation(), range, EntityUtils::isItem).whenComplete((nearbyEntities, ex) ->
                 StackService.execute(this, () -> {
                     Location itemLocation = getItem().getLocation();
 
