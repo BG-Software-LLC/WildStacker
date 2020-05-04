@@ -323,7 +323,7 @@ public final class SystemHandler implements SystemManager {
         SQLHelper.executeUpdate("DELETE FROM entities;");
 
         if(plugin.getSettings().storeEntities) {
-            WildStackerPlugin.log("Collecting entities...");
+            //WildStackerPlugin.log("Collecting entities...");
             Map<UUID, Integer> entityAmounts = new HashMap<>();
             Map<UUID, SpawnCause> entitySpawnCauses = new HashMap<>();
 
@@ -348,7 +348,7 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            WildStackerPlugin.log("Saving entities...");
+            //WildStackerPlugin.log("Saving entities...");
 
             if(entityAmounts.size() > 0) {
                 StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
@@ -359,13 +359,13 @@ public final class SystemHandler implements SystemManager {
                 entityHolder.execute(false);
             }
 
-            WildStackerPlugin.log("Saving entities done!");
+            //WildStackerPlugin.log("Saving entities done!");
         }
 
         SQLHelper.executeUpdate("DELETE FROM items;");
 
         if(plugin.getSettings().storeItems) {
-            WildStackerPlugin.log("Collecting items...");
+            //WildStackerPlugin.log("Collecting items...");
             Map<UUID, Integer> itemAmounts = new HashMap<>();
 
             getStackedItems().forEach(stackedItem -> {
@@ -385,7 +385,7 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            WildStackerPlugin.log("Saving items...");
+            //WildStackerPlugin.log("Saving items...");
 
             if(itemAmounts.size() > 0) {
                 StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
@@ -394,15 +394,15 @@ public final class SystemHandler implements SystemManager {
                 itemHolder.execute(false);
             }
 
-            WildStackerPlugin.log("Saving items done!");
+            //WildStackerPlugin.log("Saving items done!");
         }
 
         {
             SQLHelper.executeUpdate("DELETE FROM spawners;");
-            WildStackerPlugin.log("Collecting spawners...");
+            //WildStackerPlugin.log("Collecting spawners...");
             List<StackedSpawner> stackedSpawners = getStackedSpawners();
 
-            WildStackerPlugin.log("Saving spawners...");
+            //WildStackerPlugin.log("Saving spawners...");
 
             if(!stackedSpawners.isEmpty()) {
                 StatementHolder spawnersHolder = Query.SPAWNER_INSERT.getStatementHolder();
@@ -411,15 +411,15 @@ public final class SystemHandler implements SystemManager {
                 spawnersHolder.execute(false);
             }
 
-            WildStackerPlugin.log("Saving spawners done!");
+            //WildStackerPlugin.log("Saving spawners done!");
         }
 
         {
             SQLHelper.executeUpdate("DELETE FROM barrels;");
-            WildStackerPlugin.log("Collecting barrels...");
+            //WildStackerPlugin.log("Collecting barrels...");
             List<StackedBarrel> stackedBarrels = getStackedBarrels();
 
-            WildStackerPlugin.log("Saving barrels...");
+            //WildStackerPlugin.log("Saving barrels...");
 
             if(!stackedBarrels.isEmpty()) {
                 StatementHolder barrelsHolder = Query.BARREL_INSERT.getStatementHolder();
@@ -429,7 +429,7 @@ public final class SystemHandler implements SystemManager {
                 barrelsHolder.execute(false);
             }
 
-            WildStackerPlugin.log("Saving barrels done!");
+           // WildStackerPlugin.log("Saving barrels done!");
         }
     }
 
