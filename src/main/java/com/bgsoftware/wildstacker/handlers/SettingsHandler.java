@@ -75,8 +75,8 @@ public final class SettingsHandler {
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled;
     public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
             silkTouchBreakChance, spawnersChunkLimit;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, silkCustomLore, silkWorlds;
-    public final String hologramCustomName, silkCustomName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
+    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, spawnerItemLore, silkWorlds, explosionsWorlds;
+    public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
     public final KeyMap<Integer> spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
     public final KeyMap<Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
@@ -218,21 +218,22 @@ public final class SettingsHandler {
         whitelistedSpawners = cfg.getStringList("spawners.whitelist");
         spawnersChunkLimit = cfg.getInt("spawners.chunk-limit", 0);
         hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
-        explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
-        explosionsBreakChance = cfg.getInt("spawners.explosions-break-chance", 100);
-        explosionsAmountPercentage = cfg.getInt("spawners.explosions-amount-percentage", 100);
-        explosionsDropToInventory = cfg.getBoolean("spawners.explosions-drop-to-inventory", false);
-        silkTouchBreakChance = cfg.getInt("spawners.silk-touch-break-chance", 100);
-        dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
-        silkTouchSpawners = cfg.getBoolean("spawners.silk-spawners.enabled", true);
-        silkCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.silk-spawners.custom-name", "&e{0} &fSpawner"));
-        silkCustomLore = cfg.getStringList("spawners.silk-spawners.custom-lore").stream().map(line ->
+        spawnerItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.spawner-item.name", "&e{0} &fSpawner"));
+        spawnerItemLore = cfg.getStringList("spawners.spawner-item.lore").stream().map(line ->
                 ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
-        explosionsDropSpawner = cfg.getBoolean("spawners.silk-spawners.explosions-drop-spawner", true);
-        dropToInventory = cfg.getBoolean("spawners.silk-spawners.drop-to-inventory", true);
-        silkWorlds = cfg.getStringList("spawners.silk-spawners.worlds");
+        silkTouchSpawners = cfg.getBoolean("spawners.silk-touch.enabled", true);
+        dropToInventory = cfg.getBoolean("spawners.silk-touch.drop-to-inventory", true);
+        silkWorlds = cfg.getStringList("spawners.silk-touch.worlds");
+        dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
+        silkTouchBreakChance = cfg.getInt("spawners.silk-touch.break-chance", 100);
+        explosionsDropSpawner = cfg.getBoolean("spawners.explosions.enabled", true);
+        explosionsDropToInventory = cfg.getBoolean("spawners.explosions.drop-to-inventory", false);
+        explosionsWorlds = cfg.getStringList("spawners.explosions.worlds");
+        explosionsBreakChance = cfg.getInt("spawners.explosions.break-chance", 100);
+        explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
+        explosionsAmountPercentage = cfg.getInt("spawners.explosions-amount-percentage", 100);
         shiftGetWholeSpawnerStack = cfg.getBoolean("spawners.shift-get-whole-stack", true);
-        getStackedItem = cfg.getBoolean("spawners.get-stacked-item", true);
+        getStackedItem = cfg.getBoolean("spawners.drop-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
         spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
         spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory.enabled", false);
@@ -475,6 +476,32 @@ public final class SettingsHandler {
             cfg.set("spawners.place-charge.multiply-stack-amount", null);
             cfg.set("spawners.place-charge.whitelist", null);
         }
+        if(cfg.contains("spawners.silk-spawners")) {
+            cfg.set("spawners.silk-touch", cfg.getConfigurationSection("spawners.silk-spawners"));
+            cfg.set("spawners.silk-spawners", null);
+        }
+        if(cfg.contains("spawners.silk-spawners.custom-name"))
+            cfg.set("spawners.spawner-item.name", cfg.getString("spawners.silk-spawners.custom-name"));
+        if(cfg.contains("spawners.silk-spawners.custom-lore"))
+            cfg.set("spawners.spawner-item.lore", cfg.getStringList("spawners.silk-spawners.custom-lore"));
+        if(cfg.contains("spawners.get-stacked-item"))
+            cfg.set("drop-stacked-item", cfg.getBoolean("spawners.get-stacked-item"));
+        if(cfg.contains("spawners.drop-without-silk"))
+            cfg.set("spawners.silk-touch.drop-without-silk", cfg.getBoolean("spawners.drop-without-silk"));
+        if(cfg.contains("spawners.silk-touch-break-chance"))
+            cfg.set("spawners.silk-touch.break-chance", cfg.getInt("spawners.silk-touch-break-chance"));
+        if(cfg.contains("spawners.silk-spawners.explosions-drop-spawner"))
+            cfg.set("spawners.explosions.enabled", cfg.getBoolean("spawners.silk-spawners.explosions-drop-spawner"));
+        if(cfg.contains("spawners.explosions-drop-to-inventory"))
+            cfg.set("spawners.explosions.drop-to-inventory", cfg.getBoolean("spawners.explosions-drop-to-inventory"));
+        if(cfg.contains("spawners.explosions-break-chance"))
+            cfg.set("spawners.explosions.break-chance", cfg.getBoolean("spawners.explosions-break-chance"));
+        if(cfg.contains("spawners.explosions-break-chance"))
+            cfg.set("spawners.explosions.break-chance", cfg.getBoolean("spawners.explosions-break-chance"));
+        if(cfg.contains("kill-task.entities"))
+            cfg.set("kill-task.kill-entities", cfg.getConfigurationSection("kill-task.entities"));
+        if(cfg.contains("kill-task.items"))
+            cfg.set("kill-task.kill-items", cfg.getConfigurationSection("kill-task.items"));
     }
 
     public static void reload(){

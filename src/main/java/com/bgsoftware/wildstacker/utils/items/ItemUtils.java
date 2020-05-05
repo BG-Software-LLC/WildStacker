@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
+import com.bgsoftware.wildstacker.hooks.WildToolsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -13,8 +13,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -24,7 +24,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
@@ -120,46 +119,10 @@ public final class ItemUtils {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount){
-        if(SpawnersProvider_SilkSpawners.isRegisered()){
-            return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
-        }
-
-        ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
-
-        if(!plugin.getSettings().silkTouchSpawners)
-            return itemStack;
-
-        if(plugin.getSettings().getStackedItem) {
-            itemStack.setAmount(1);
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
-        }
-
-        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-        CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
-
-        creatureSpawner.setSpawnedType(entityType);
-
-        blockStateMeta.setBlockState(creatureSpawner);
-
-        String customName = plugin.getSettings().silkCustomName;
-
-        if(!customName.equals(""))
-            blockStateMeta.setDisplayName(customName.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
-                    .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
-
-        List<String> customLore = plugin.getSettings().silkCustomLore;
-
-        if(!customLore.isEmpty()){
-            List<String> lore = new ArrayList<>();
-            for(String line : customLore)
-                lore.add(line.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
-                        .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
-            blockStateMeta.setLore(lore);
-        }
-
-        itemStack.setItemMeta(blockStateMeta);
-
-        return itemStack;
+//        if(SpawnersProvider_SilkSpawners.isRegisered()){
+//            return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
+//        }
+        return plugin.getProviders().getSpawnerItem(entityType, amount);
     }
 
     @SuppressWarnings("deprecation")
@@ -422,6 +385,15 @@ public final class ItemUtils {
                 return false;
         }
     }
+
+    public static boolean isPickaxeAndHasSilkTouch(ItemStack itemStack){
+        if(itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
+            return false;
+
+        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= 1;
+    }
+
+
 
     private static boolean canBeStacked(ItemStack itemStack, World world){
         return !plugin.getSettings().blacklistedItems.contains(itemStack) &&

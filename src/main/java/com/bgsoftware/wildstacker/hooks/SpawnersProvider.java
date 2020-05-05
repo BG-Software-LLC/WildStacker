@@ -1,23 +1,24 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.UUID;
-
 public interface SpawnersProvider {
 
-    ItemStack getSpawnerItem(CreatureSpawner spawner, int amount);
-
-    void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource);
-
-    void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource);
-
-    void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName);
+    ItemStack getSpawnerItem(EntityType entityType, int amount);
 
     EntityType getSpawnerType(ItemStack itemStack);
+
+    void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount);
+
+    void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu);
+
+    void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack);
+
+    void dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount);
 
 }

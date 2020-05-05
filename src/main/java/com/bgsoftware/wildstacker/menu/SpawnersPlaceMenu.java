@@ -62,7 +62,7 @@ public final class SpawnersPlaceMenu extends WildMenu {
             int newStackAmount = stackedSpawner.getStackAmount() + amount;
 
             if(stackedSpawner.getStackAmount() + amount > limit){
-                ItemStack toAdd = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(),stackedSpawner.getStackAmount() + amount - limit);
+                ItemStack toAdd = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(),stackedSpawner.getStackAmount() + amount - limit);
                 ItemUtils.addItem(toAdd, e.getPlayer().getInventory(), stackedSpawner.getLocation());
                 newStackAmount = limit;
             }

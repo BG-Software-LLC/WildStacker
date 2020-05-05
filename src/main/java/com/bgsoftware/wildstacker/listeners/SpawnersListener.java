@@ -87,9 +87,10 @@ public final class SpawnersListener implements Listener {
             return;
 
         ItemStack itemInHand = e.getItemInHand().clone();
+
+        plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), e.getPlayer().getItemInHand());
         EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
-        plugin.getProviders().setSpawnerType(stackedSpawner.getSpawner(), itemInHand, true);
         stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
 
         int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
@@ -115,7 +116,7 @@ public final class SpawnersListener implements Listener {
             int limit = stackedSpawner.getStackLimit();
             //If the spawnerItemAmount is larger than the spawner limit, we want to give to the player the leftovers
             if(limit < spawnerItemAmount){
-                limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner(), spawnerItemAmount - limit);
+                limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(), spawnerItemAmount - limit);
                 //Adding the item to the inventory after the spawner is placed
                 spawnerItemAmount = limit;
             }
@@ -257,7 +258,7 @@ public final class SpawnersListener implements Listener {
         if(stackedSpawner.runUnstack(stackAmount) == UnstackResult.SUCCESS){
             CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
-            plugin.getProviders().dropOrGiveItem(e.getPlayer(), creatureSpawner, stackAmount, false);
+            plugin.getProviders().handleSpawnerBreak(stackedSpawner, e.getPlayer(), stackAmount, false);
 
             EntityType entityType = stackedSpawner.getSpawnedType();
 
@@ -274,7 +275,7 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent e){
-        if(!plugin.getSettings().spawnersStackingEnabled || plugin.getSettings().explosionsBreakChance <= 0)
+        if(!plugin.getSettings().spawnersStackingEnabled)
             return;
 
         List<Block> blockList = new ArrayList<>(e.blockList());
@@ -287,27 +288,28 @@ public final class SpawnersListener implements Listener {
             StackedSpawner stackedSpawner = WStackedSpawner.of(block);
             CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
 
-            int amount;
+            UUID explodeSource = explodableSources.get(e.getEntity());
+            Player sourcePlayer = null;
 
-            //Explosions can break the whole stack
-            if (plugin.getSettings().explosionsBreakSpawnerStack) {
-                amount = stackedSpawner.getStackAmount();
-                stackedSpawner.runUnstack(stackedSpawner.getStackAmount());
-            } else {
-                amount = 1;
-                stackedSpawner.runUnstack(1);
+            if(e.getEntity() instanceof TNTPrimed){
+                Entity igniter = ((TNTPrimed) e.getEntity()).getSource();
+                if (igniter instanceof Player) {
+                    sourcePlayer = (Player) igniter;
+                }
+            }
+            else{
+                sourcePlayer = explodeSource == null ? null : Bukkit.getPlayer(explodeSource);
             }
 
-            if(ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance) {
-                amount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * amount);
-                plugin.getProviders().dropOrGiveItem(e.getEntity(), creatureSpawner, amount, explodableSources.get(e.getEntity()));
-            }
+            int breakAmount = plugin.getSettings().explosionsBreakSpawnerStack ? stackedSpawner.getStackAmount() : 1;
+            breakAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
 
-            if(stackedSpawner.getStackAmount() <= 0)
-                block.setType(Material.AIR);
+            plugin.getProviders().handleSpawnerExplode(stackedSpawner, e.getEntity(), sourcePlayer, breakAmount);
 
-            //If the amount of the spawner is more than 1, we don't need to destroy it
-            e.blockList().remove(block);
+            stackedSpawner.runUnstack(breakAmount);
+
+            if(stackedSpawner.getStackAmount() > 0)
+                e.blockList().remove(block);
         }
     }
 

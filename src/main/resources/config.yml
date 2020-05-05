@@ -55,7 +55,7 @@ kill-task:
   # This feature will work if the interval is set to 0 - these are two different features!
   sync-clear-lagg: true
   # All settings related to the kill-all task of entities.
-  entities:
+  kill-entities:
     # A list of entities that will be cleared.
     # EntityType list: https://bg-software.com/entities/
     # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
@@ -71,8 +71,8 @@ kill-task:
     # A list of worlds that entities will be cleared inside.
     # If you want all worlds, set this to []
     worlds: []
-    # All settings related to the kill-all task of entities.
-  items:
+  # All settings related to the kill-all task of entities.
+  kill-items:
     # A list of items that will be cleared.
     # Material list: https://bg-software.com/materials/
     # If you want all items to be killed, set this to []
@@ -475,46 +475,25 @@ spawners:
   # as a y-level range only.
   chunk-merge: false
 
-  # Should explosions break the entire stack, or just reducing it by one?
-  explosions-break-stack: true
-
-  # Chance of spawners to be dropped after an explosion.
-  explosions-break-chance: 100
-
-  # Set the percentage amount that will be dropped from explosions.
-  explosions-amount-percentage: 100
-
-  # Should exploded spawners get dropped to inventory.
-  explosions-drop-to-inventory: false
-
-  # Chance of spawners to be dropped after break of silk touch.
-  silk-touch-break-chance: 100
-
-  # Should spawners get dropped without silktouch?
-  # If enabled, only players with wildstacker.nosilkdrop will be able to get the spawners.
-  # This feature will not work with other spawner-providers, such as SilkSpawners
-  drop-without-silk: false
-
-  # Here you can configurable all features related to silk-touch enchantment.
-  silk-spawners:
-    # Should spawners get dropped when mining them using a silk-touch pickaxe?
-    # If another similar plugin to this feature is enabled, it will override this feature.
-    enabled: true
-
+  # All settings related to the spawner items.
+  spawner-item:
     # Custom name for the item.
     # If you don't want a custom name, use "custom-name: ''"
     # {0} represents stack amount
     # {1} represents entity type
-    custom-name: '&6x{0} &f&o{1} Spawners'
+    name: '&6x{0} &f&o{1} Spawners'
 
     # Custom lore for the item.
     # If you don't want a custom lore, use "custom-lore: []"
     # {0} represents stack amount
     # {1} represents entity type
-    custom-lore: []
+    lore: []
 
-    # Should explosions act like silk-touch and drop the spawner?
-    explosions-drop-spawner: true
+  # Here you can configurable all features related to silk-touch enchantment.
+  # Other spawner plugins, such as SilkSpawners and MineableSpawners, will override this section.
+  silk-touch:
+    # Should spawners get dropped when mining them using a silk-touch pickaxe?
+    enabled: true
 
     # Should the spawner item go straight into the player's inventory instead of dropping on ground?
     drop-to-inventory: true
@@ -523,12 +502,41 @@ spawners:
     # If you want silk touch to work inside all the worlds, use "worlds: []"
     worlds: []
 
+    # Should spawners get dropped without silktouch?
+    # If enabled, only players with wildstacker.nosilkdrop will be able to get the spawners.
+    drop-without-silk: false
+
+    # Chance of spawners to be dropped after break of silk touch.
+    break-chance: 100
+
+  # Here you can configurable all features related to exploded spawners.
+  # Other spawner plugins, such as SilkSpawners, will override this section.
+  explosions:
+    # Should spawners get dropped when exploded by TNT or Creepers?
+    enabled: true
+
+    # Should the spawner item go straight into the player's inventory instead of dropping on ground?
+    drop-to-inventory: true
+
+    # A list of worlds that explosions will work in.
+    # If you want explosions to work inside all the worlds, use "worlds: []"
+    worlds: []
+
+    # Chance of spawners to be dropped after exploded.
+    break-chance: 100
+
+  # Should explosions break the entire stack, or just reducing it by one?
+  explosions-break-stack: true
+
+  # Set the percentage amount that will be dropped from explosions.
+  explosions-amount-percentage: 100
+
   # Should sneaking while mining break the entire stack instead of reducing it by one?
   shift-get-whole-stack: true
 
   # Should one item be dropped for a stacked spawner instead of multiple items?
   # This feature will not work with other spawner-providers, such as SilkSpawners
-  get-stacked-item: true
+  drop-stacked-item: true
 
   # When enabled, holograms will only be displayed when clicking on spawners.
   # They will be displayed for 3 seconds.

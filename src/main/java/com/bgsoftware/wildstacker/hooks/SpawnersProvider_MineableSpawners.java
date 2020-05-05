@@ -3,134 +3,145 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.dnyferguson.mineablespawners.MineableSpawners;
-import com.dnyferguson.mineablespawners.utils.Chat;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class SpawnersProvider_MineableSpawners implements SpawnersProvider {
 
-    private boolean compatibility, requirePerm, requireSilk, dropInInventory, enableLore;
-    private List<String> itemLore, blacklistedWorlds;
-    private String mobNameColor;
-    private double dropChance;
-
+    private final Map<String, Double> permissionChances = new HashMap<>();
+    private final MineableSpawners plugin;
 
     public SpawnersProvider_MineableSpawners(){
         WildStackerPlugin.log(" - Using MineableSpawners as SpawnersProvider.");
-        MineableSpawners mineableSpawners = JavaPlugin.getPlugin(MineableSpawners.class);
-        FileConfiguration config = mineableSpawners.getConfig();
-        compatibility = config.getBoolean("enable-compatibility");
-        requirePerm = config.getBoolean("mining.require-permission");
-        requireSilk = config.getBoolean("mining.require-silktouch");
-        dropInInventory = config.getBoolean("mining.drop-in-inventory");
-        mobNameColor = config.getString("mob-name-color");
-        itemLore = config.getStringList("lore");
-        enableLore = config.getBoolean("enable-lore");
-        dropChance = config.getDouble("mining.drop-chance");
-        blacklistedWorlds = config.getStringList("blacklisted-worlds");
-    }
-
-    @Override
-    public ItemStack getSpawnerItem(CreatureSpawner spawner, int amount) {
-        ItemStack spawnerItem = new ItemStack(Materials.SPAWNER.toBukkitType(), amount);
-        ItemMeta itemMeta = spawnerItem.getItemMeta();
-        String mobType = spawner.getSpawnedType().toString().replace("_", " ");
-        String mobFormatted = mobType.substring(0, 1).toUpperCase() + mobType.substring(1).toLowerCase();
-        itemMeta.setDisplayName(Chat.format("&8[" + this.mobNameColor + "%mob% &7Spawner&8]".replace("%mob%", mobFormatted)));
-
-        if (itemLore != null && this.enableLore) {
-            List<String> newLore = itemLore.stream().map(line -> Chat.format(line).replace("%mob%", mobFormatted)).collect(Collectors.toList());
-            itemMeta.setLore(newLore);
-        }
-
-        spawnerItem.setItemMeta(itemMeta);
-
-        return spawnerItem;
-    }
-
-    @Override
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource) {
-        //There's no official support for explosions in MineableSpawners.
-    }
-
-    @Override
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
-        if (blacklistedWorlds.contains(spawner.getWorld().getName())) {
-            return;
-        }
-
-        if (this.requirePerm && !player.hasPermission("mineablespawners.break")) {
-            return;
-        }
-
-        if (this.requireSilk && !player.getInventory().getItemInHand().containsEnchantment(Enchantment.SILK_TOUCH) &&
-                !player.hasPermission("mineablespawners.nosilk")) {
-            return;
-        }
-
-        if (dropChance != 1.0 && (dropChance <= 0 || Math.random() <= dropChance)) {
-            return;
-        }
-
-        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
-        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-
-        if (!dropInInventory) {
-            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
-        }
-        else{
-            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
+        plugin = JavaPlugin.getPlugin(MineableSpawners.class);
+        for (String line : plugin.getConfigurationHandler().getList("mining", "perm-based-chances")) {
+            String[] args = line.split(":");
+            try {
+                String permission = args[0];
+                double chance = Double.parseDouble(args[1]);
+                permissionChances.put(permission, chance);
+            } catch (Exception ignored) {}
         }
     }
 
     @Override
-    public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName) {
-        EntityType entityType = getSpawnerType(itemStack);
-
-        spawner.setSpawnedType(entityType);
-        spawner.update();
-
-        StackedSpawner stackedSpawner = WStackedSpawner.of(spawner);
-
-        int spawnerItemAmount = Math.max(ItemUtils.getSpawnerItemAmount(itemStack), stackedSpawner.getStackLimit());
-
-        stackedSpawner.setStackAmount(spawnerItemAmount, updateName);
+    public ItemStack getSpawnerItem(EntityType entityType, int amount) {
+        ItemStack itemStack = MineableSpawners.getApi().getSpawnerFromEntityType(entityType);
+        itemStack.setAmount(amount);
+        return itemStack;
     }
 
     @Override
     public EntityType getSpawnerType(ItemStack itemStack) {
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        EntityType entityType = null;
+        return MineableSpawners.getApi().getEntityTypeFromItemStack(itemStack);
+    }
 
-        if (this.compatibility) {
-            try {
-                entityType = EntityType.valueOf(itemMeta.getLore().toString().split(": §7")[1].split("]")[0].toUpperCase());
-            } catch (Exception ignored) {}
+    @Override
+    public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
+        if (!plugin.getConfigurationHandler().getBoolean("explode", "drop"))
+            return;
+
+        double dropChance = plugin.getConfigurationHandler().getDouble("explode", "chance") / 100.0;
+
+        if (dropChance != 1.0) {
+            double random = Math.random();
+            if (random >= dropChance)
+                return;
         }
 
-        if(entityType == null){
-            String entityName = ChatColor.stripColor(itemMeta.getDisplayName()).split(" Spawner")[0].replace("[", "").replace(" ", "_").toUpperCase();
-            entityType = EntityType.valueOf(entityName);
+        dropSpawner(stackedSpawner, ignite, brokenAmount);
+    }
+
+    @Override
+    public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
+        EntityType entityType = stackedSpawner.getSpawnedType();
+        boolean bypassing = player.getGameMode().equals(GameMode.CREATIVE) || player.hasPermission("mineablespawners.bypass");
+
+        if(!bypassing){
+            if (plugin.getConfigurationHandler().getList("mining", "blacklisted-worlds").contains(player.getWorld().getName()))
+                return;
+
+            if (plugin.getConfigurationHandler().getBoolean("mining", "require-permission") && !player.hasPermission("mineablespawners.mine"))
+                return;
+
+            if (plugin.getConfigurationHandler().getBoolean("mining", "require-individual-permission") && !player.hasPermission("mineablespawners.mine." + entityType.name().toLowerCase()))
+                return;
+
+            ItemStack heldItem = player.getItemInHand();
+
+            if (heldItem != null && !plugin.getConfigurationHandler().getList("mining", "tools").contains(heldItem.getType().name()))
+                return;
+
+            if (plugin.getConfigurationHandler().getBoolean("mining", "require-silktouch") && !player.hasPermission("mineablespawners.nosilk")) {
+                int silkTouchLevel = 0;
+
+                if (heldItem != null && heldItem.containsEnchantment(Enchantment.SILK_TOUCH))
+                    silkTouchLevel = heldItem.getEnchantmentLevel(Enchantment.SILK_TOUCH);
+
+                if (this.plugin.getConfigurationHandler().getBoolean("mining", "require-silktouch-level")) {
+                    int requiredLevel = plugin.getConfigurationHandler().getInteger("mining", "required-level");
+                    if (silkTouchLevel < requiredLevel && !WildToolsHook.hasSilkTouch(heldItem))
+                        return;
+                }
+
+                else if (silkTouchLevel < 1)
+                    return;
+            }
+
+            double dropChance = 1.0;
+            if (plugin.getConfigurationHandler().getBoolean("mining", "use-perm-based-chances") && permissionChances.size() > 0) {
+                for (String perm : permissionChances.keySet()) {
+                    if (player.hasPermission(perm)) {
+                        dropChance = permissionChances.get(perm) / 100.0;
+                        break;
+                    }
+                }
+            }
+            else {
+                dropChance = plugin.getConfigurationHandler().getDouble("mining", "chance") / 100.0;
+            }
+
+            if (dropChance != 1.0) {
+                double random = Math.random();
+                if (random >= dropChance)
+                    return;
+            }
         }
 
-        return entityType;
+        dropSpawner(stackedSpawner, player, brokenAmount);
+    }
+
+    @Override
+    public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack) {
+
+    }
+
+    @Override
+    public void dropSpawner(StackedSpawner stackedSpawner, Player player, int amount) {
+        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), amount));
+        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
+
+        Location toDrop = stackedSpawner.getLocation().add(0, 0.5, 0);
+
+        if (plugin.getConfigurationHandler().getBoolean("mining", "drop-to-inventory")) {
+            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);
+        }
+        else{
+            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), toDrop);
+        }
     }
 
 }

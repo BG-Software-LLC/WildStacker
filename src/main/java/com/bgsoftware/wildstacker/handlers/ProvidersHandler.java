@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
@@ -51,7 +52,6 @@ import org.bukkit.plugin.PluginManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class ProvidersHandler {
@@ -220,24 +220,24 @@ public final class ProvidersHandler {
      * Spawners Provider
      */
 
-    public ItemStack getSpawnerItem(CreatureSpawner spawner, int amount){
-        return spawnersProvider.getSpawnerItem(spawner, amount);
-    }
-
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource){
-        spawnersProvider.dropOrGiveItem(entity, spawner, amount, explodeSource);
-    }
-
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource){
-        spawnersProvider.dropOrGiveItem(player, spawner, amount, isExplodeSource);
-    }
-
-    public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName){
-        spawnersProvider.setSpawnerType(spawner, itemStack, updateName);
+    public ItemStack getSpawnerItem(EntityType entityType, int amount){
+        return spawnersProvider.getSpawnerItem(entityType, amount);
     }
 
     public EntityType getSpawnerType(ItemStack itemStack){
         return spawnersProvider.getSpawnerType(itemStack);
+    }
+
+    public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount){
+        spawnersProvider.handleSpawnerExplode(stackedSpawner, entity, ignite, brokenAmount);
+    }
+
+    public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu){
+        spawnersProvider.handleSpawnerBreak(stackedSpawner, player, brokenAmount, breakMenu);
+    }
+
+    public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack){
+        spawnersProvider.handleSpawnerPlace(creatureSpawner, itemStack);
     }
 
     /*

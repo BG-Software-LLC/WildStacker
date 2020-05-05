@@ -332,7 +332,7 @@ public class WStackedSpawner extends WStackedObject<CreatureSpawner> implements 
 
     @Override
     public ItemStack getDropItem() {
-        return plugin.getProviders().getSpawnerItem(object, getStackAmount());
+        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), getStackAmount());
     }
 
     public LivingEntity getRawLinkedEntity(){

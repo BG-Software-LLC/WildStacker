@@ -84,6 +84,8 @@ public final class CommandGive implements ICommand {
             return;
         }
 
+        boolean reformatItem = true;
+
         if(args[2].equalsIgnoreCase("egg") ){
             EntityType entityType;
 
@@ -117,9 +119,16 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = ItemUtils.getSpawnerItem(entityType, stackSize);
-            if(itemStack.getAmount() != 1)
-                stackSize = 1;
+            itemStack = plugin.getProviders().getSpawnerItem(entityType, 1);
+
+            if(plugin.getSettings().getStackedItem){
+                itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
+            }
+            else{
+                itemStack.setAmount(stackSize);
+            }
+
+            reformatItem = false;
         }
 
         else if(args[2].equalsIgnoreCase("barrel")){
@@ -147,15 +156,17 @@ public final class CommandGive implements ICommand {
             return;
         }
 
-        args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
+        if(reformatItem) {
+            args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
 
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
-                .replace("{0}", stackSize + "")
-                .replace("{1}", typeName)
-                .replace("{2}", args[2])
-        );
-        itemStack.setItemMeta(itemMeta);
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+                    .replace("{0}", stackSize + "")
+                    .replace("{1}", typeName)
+                    .replace("{2}", args[2])
+            );
+            itemStack.setItemMeta(itemMeta);
+        }
 
         ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());
 

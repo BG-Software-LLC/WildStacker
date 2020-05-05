@@ -2,130 +2,47 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Method;
-import java.util.UUID;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("SameParameterValue")
 public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
-    private WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static SpawnersProvider_SilkSpawners instance = null;
-
-    private SilkSpawners ss;
-    private SilkUtil silkUtil;
+    private final SilkSpawners ss;
+    private final SilkUtil silkUtil;
 
     public SpawnersProvider_SilkSpawners(){
-        instance = this;
         WildStackerPlugin.log(" - Using SilkSpawners as SpawnersProvider.");
         ss = JavaPlugin.getPlugin(SilkSpawners.class);
         silkUtil = SilkUtil.hookIntoSilkSpanwers();
     }
 
     @Override
-    public ItemStack getSpawnerItem(CreatureSpawner spawner, int amount) {
-        Object entityId = getSpawnerEntityID(spawner);
-        String mobName = getCreatureName(entityId).toLowerCase().replace(" ", "");
-
-        ItemStack itemStack = newSpawnerItem(entityId, silkUtil.getCustomSpawnerName(mobName), amount, false);
-
-        if(plugin.getSettings().getStackedItem) {
-            itemStack.setAmount(1);
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
+    public ItemStack getSpawnerItem(EntityType entityType, int amount) {
+        try {
+            //noinspection deprecation
+            String entityID = silkUtil.getDisplayNameToMobID().get(entityType.getName());
+            return silkUtil.newSpawnerItem(entityID, silkUtil.getCustomSpawnerName(entityID), amount, false);
+        }catch(Throwable ex){
+            //noinspection deprecation
+            short entityID = entityType.getTypeId();
+            return newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
         }
-
-        if(itemStack.hasItemMeta()) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            if (itemMeta.hasDisplayName())
-                itemMeta.setDisplayName(itemMeta.getDisplayName().replace("{}", ItemUtils.getSpawnerItemAmount(itemStack) + ""));
-            itemStack.setItemMeta(itemMeta);
-        }
-
-        return itemStack;
-    }
-
-    //Called when was broken by an explosion
-    @Override
-    public void dropOrGiveItem(Entity entity, CreatureSpawner spawner, int amount, UUID explodeSource) {
-        boolean drop = true;
-        if (ss.config.getBoolean("permissionExplode", false) && entity instanceof TNTPrimed) {
-            Entity igniter = ((TNTPrimed) entity).getSource();
-            if (igniter instanceof Player) {
-                Player sourcePlayer = (Player) igniter;
-                drop = sourcePlayer.hasPermission("silkspawners.explodedrop");
-            }
-        }
-
-        if(drop)
-            dropOrGiveItem(explodeSource == null ? null : Bukkit.getPlayer(explodeSource), spawner, amount, explodeSource != null);
-    }
-
-    //Code was taken from SilkSpawners's code.
-    @Override
-    public void dropOrGiveItem(Player player, CreatureSpawner spawner, int amount, boolean isExplodeSource) {
-        Object entityId = getSpawnerEntityID(spawner);
-        String mobName = getCreatureName(entityId).toLowerCase().replace(" ", "");
-        int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
-
-        //If player is null, it broke by an explosion.
-        if(player == null){
-            if(isExplodeSource) {
-                if (ss.mobs.contains("creatures." + entityId + ".explosionDropChance")) {
-                    dropChance = ss.mobs.getInt("creatures." + entityId + ".explosionDropChance", 100);
-                } else {
-                    dropChance = ss.config.getInt("explosionDropChance", 100);
-                }
-            }
-            else{
-                dropChance = 100;
-            }
-            if (randomNumber < dropChance) {
-                SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
-                Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-                ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
-            }
-            return;
-        }
-
-        if (silkUtil.isValidItemAndHasSilkTouch(player.getInventory().getItemInHand()) &&
-                player.hasPermission("silkspawners.silkdrop." + mobName)) {
-            if (ss.mobs.contains("creatures." + entityId + ".silkDropChance")) {
-                dropChance = ss.mobs.getInt("creatures." + entityId + ".silkDropChance", 100);
-            } else {
-                dropChance = ss.config.getInt("silkDropChance", 100);
-            }
-
-            if (randomNumber < dropChance) {
-                SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(WStackedSpawner.of(spawner), player, getSpawnerItem(spawner, amount));
-                Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-                if (ss.config.getBoolean("dropSpawnerToInventory", false)) {
-                    ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), spawner.getLocation());
-                } else {
-                    ItemUtils.dropItem(spawnerDropEvent.getItemStack(), spawner.getLocation());
-                }
-            }
-        }
-    }
-
-    @Override
-    public void setSpawnerType(CreatureSpawner spawner, ItemStack itemStack, boolean updateName) {
-        setSpawnerEntityID(spawner.getBlock(), getStoredSpawnerItemEntityID(itemStack));
-        WStackedSpawner.of(spawner).setStackAmount(ItemUtils.getSpawnerItemAmount(itemStack), updateName);
     }
 
     @Override
@@ -135,15 +52,59 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         return entityType instanceof String ? EntityType.fromName((String) entityType) : EntityType.fromId((short) entityType);
     }
 
-    @SuppressWarnings("deprecation")
-    public static ItemStack getSpawnerItem(EntityType entityType, int amount){
-        try {
-            SilkUtil.class.getMethod("getCreatureName", String.class);
-            String mobName = instance.getCreatureName(entityType.name()).toLowerCase().replace(" ", "");
-            return instance.newSpawnerItem(entityType.name(), instance.silkUtil.getCustomSpawnerName(mobName), amount, false);
-        }catch(Throwable ex){
-            String mobName = instance.getCreatureName(entityType.getTypeId()).toLowerCase().replace(" ", "");
-            return instance.newSpawnerItem(entityType.getTypeId(), instance.silkUtil.getCustomSpawnerName(mobName), amount, false);
+    @Override
+    public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
+        if(stackedSpawner.getStackAmount() <= brokenAmount)
+            brokenAmount = brokenAmount - 1;
+
+        Object entityId = getSpawnerEntityID(stackedSpawner.getSpawner());
+        int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
+
+        if (ss.mobs.contains("creatures." + entityId + ".explosionDropChance")) {
+            dropChance = ss.mobs.getInt("creatures." + entityId + ".explosionDropChance", 100);
+        } else {
+            dropChance = ss.config.getInt("explosionDropChance", 100);
+        }
+
+        if (randomNumber < dropChance)
+            dropSpawner(stackedSpawner, ignite, brokenAmount);
+    }
+
+    @Override
+    public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
+        Object entityId = getSpawnerEntityID(stackedSpawner.getSpawner());
+        String mobName = Objects.requireNonNull(getCreatureName(entityId)).toLowerCase().replace(" ", "");
+        int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
+
+        if (silkUtil.isValidItemAndHasSilkTouch(player.getInventory().getItemInHand()) &&
+                player.hasPermission("silkspawners.silkdrop." + mobName)) {
+            if (ss.mobs.contains("creatures." + entityId + ".silkDropChance")) {
+                dropChance = ss.mobs.getInt("creatures." + entityId + ".silkDropChance", 100);
+            } else {
+                dropChance = ss.config.getInt("silkDropChance", 100);
+            }
+
+            if (randomNumber < dropChance)
+                dropSpawner(stackedSpawner, player, brokenAmount);
+        }
+    }
+
+    @Override
+    public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack) {
+
+    }
+
+    @Override
+    public void dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount) {
+        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), brokenAmount));
+        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
+
+        Location toDrop = stackedSpawner.getLocation().add(0, 0.5, 0);
+
+        if (ss.config.getBoolean("dropSpawnerToInventory", false) && player != null) {
+            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);
+        } else {
+            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), toDrop);
         }
     }
 
@@ -186,19 +147,6 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         }catch(Exception ex){
             throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
         }
-    }
-
-    private void setSpawnerEntityID(Block block, Object entityId){
-        Class objectClass = entityId instanceof String ? String.class : short.class;
-        try{
-            SilkUtil.class.getMethod("setSpawnerEntityID", Block.class, objectClass).invoke(silkUtil, block, entityId);
-        }catch(Exception ex){
-            throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
-        }
-    }
-
-    public static boolean isRegisered(){
-        return instance != null;
     }
 
 }

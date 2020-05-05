@@ -81,7 +81,7 @@ public final class SpawnersBreakMenu extends WildMenu {
             if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(player, amountToCharge);
 
-            plugin.getProviders().dropOrGiveItem(player, stackedSpawner.getSpawner(), removeAmount, true);
+            plugin.getProviders().handleSpawnerBreak(stackedSpawner, player, removeAmount, true);
 
             if(stackedSpawner.getStackAmount() <= 0)
                 spawnerBlock.setType(Material.AIR);
