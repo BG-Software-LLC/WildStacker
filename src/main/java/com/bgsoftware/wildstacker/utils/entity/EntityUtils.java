@@ -377,7 +377,7 @@ public final class EntityUtils {
                         if (((ZombieVillager) en1).getVillagerProfession() != ((ZombieVillager) en2).getVillagerProfession())
                             return StackCheckResult.VILLAGER_PROFESSION;
                     }
-                }catch(Exception ignored){}
+                }catch(Throwable ignored){}
             }
         }
 
