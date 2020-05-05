@@ -14,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,17 +44,21 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
         }
 
-        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-        CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
+        ItemMeta itemMeta = itemStack.getItemMeta();
 
-        creatureSpawner.setSpawnedType(entityType);
+        try {
+            BlockStateMeta blockStateMeta = (BlockStateMeta) itemMeta;
+            CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
 
-        blockStateMeta.setBlockState(creatureSpawner);
+            creatureSpawner.setSpawnedType(entityType);
+
+            blockStateMeta.setBlockState(creatureSpawner);
+        }catch(Throwable ignored){}
 
         String customName = plugin.getSettings().spawnerItemName;
 
         if(!customName.equals(""))
-            blockStateMeta.setDisplayName(customName.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
+            itemMeta.setDisplayName(customName.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
 
         List<String> customLore = plugin.getSettings().spawnerItemLore;
@@ -63,21 +68,26 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             for(String line : customLore)
                 lore.add(line.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
                         .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
-            blockStateMeta.setLore(lore);
+            itemMeta.setLore(lore);
         }
 
-        itemStack.setItemMeta(blockStateMeta);
+        itemStack.setItemMeta(itemMeta);
 
         return itemStack;
     }
 
     @Override
     public EntityType getSpawnerType(ItemStack itemStack) {
-        BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-        EntityType spawnType = ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        EntityType spawnType = EntityType.UNKNOWN;
 
-        if((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemStack.getItemMeta().hasDisplayName()){
-            String displayName = itemStack.getItemMeta().getDisplayName();
+        try {
+            BlockStateMeta blockStateMeta = (BlockStateMeta) itemMeta;
+            spawnType = ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
+        }catch(Throwable ignored){}
+
+        if((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemMeta.hasDisplayName()){
+            String displayName = itemMeta.getDisplayName();
             Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
             if(matcher.matches()) {
                 List<String> indexes = Stream.of("0", "1", "2")
