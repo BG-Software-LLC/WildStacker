@@ -4,9 +4,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class Key {
+import java.util.Objects;
 
-    private String key;
+public final class Key {
+
+    private final String key;
 
     private Key(String key){
         this.key = key;
@@ -15,6 +17,19 @@ public class Key {
     @Override
     public String toString() {
         return key;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Key key1 = (Key) o;
+        return key.equals(key1.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key);
     }
 
     public static Key of(EntityType entityType){
