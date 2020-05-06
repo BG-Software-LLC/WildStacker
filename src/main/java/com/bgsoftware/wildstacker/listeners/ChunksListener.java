@@ -72,9 +72,12 @@ public final class ChunksListener implements Listener {
             });
         }
 
-        //Update all nerf status to all entities
-        Executor.async(() -> chunkEntities.stream().filter(EntityUtils::isStackable)
-                .forEach(entity -> WStackedEntity.of(entity).updateNerfed()));
+        //Update nerf status & names to all entities
+        Executor.async(() -> chunkEntities.stream().filter(EntityUtils::isStackable).forEach(entity -> {
+            StackedEntity stackedEntity = WStackedEntity.of(entity);
+            stackedEntity.updateNerfed();
+            stackedEntity.updateName();
+        }));
     }
 
     private boolean hasValidSpawnCause(SpawnCause spawnCause){
