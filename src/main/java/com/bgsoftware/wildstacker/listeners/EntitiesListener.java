@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
@@ -295,6 +296,8 @@ public final class EntitiesListener implements Listener {
 
                         if(isMcMMOSpawnedEntity)
                             McMMOHook.updateSpawnedEntity(livingEntity);
+
+                        JobsHook.updateSpawnReason(livingEntity, stackedEntity.getSpawnCause());
 
                         List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
                         entityDeathEvent.getDrops().clear();

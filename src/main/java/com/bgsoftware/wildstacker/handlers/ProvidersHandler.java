@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.hooks.HologramsProvider_CMI;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Default;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_Holograms;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_HolographicDisplays;
+import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -185,6 +186,8 @@ public final class ProvidersHandler {
             PluginHook_Novucs.setEnabled(plugin);
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
             ShopGUIPlusHook.setEnabled();
+        if(isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
+            JobsHook.setEnabled(enable);
     }
 
     private boolean isPlugin(Plugin plugin, String pluginName){
