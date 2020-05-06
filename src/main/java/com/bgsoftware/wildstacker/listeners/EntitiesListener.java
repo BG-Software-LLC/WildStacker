@@ -218,6 +218,9 @@ public final class EntitiesListener implements Listener {
             if(!plugin.getSettings().nextStackKnockback)
                 e.setCancelled(true);
 
+            if(damager != null)
+                McMMOHook.handleCombat(damager, livingEntity, e.getFinalDamage());
+
             e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
