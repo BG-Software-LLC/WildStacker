@@ -29,6 +29,13 @@ public final class McMMOHook {
     private static Plugin mcMMO;
     private static Method gainXPMethod = null;
 
+    static {
+        try{
+            //noinspection JavaReflectionMemberAccess
+            gainXPMethod = McMMOPlayer.class.getMethod("beginXpGain", SkillType.class, float.class, com.gmail.nossr50.datatypes.skills.XPGainReason.class);
+        }catch(Throwable ignored){ }
+    }
+
     public static void updateCachedName(LivingEntity livingEntity){
         if(mcMMO != null){
             if(livingEntity.hasMetadata(CUSTOM_NAME_KEY)) {
@@ -40,15 +47,12 @@ public final class McMMOHook {
                 livingEntity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, livingEntity.isCustomNameVisible()));
             }
         }
-
-        try{
-            //noinspection JavaReflectionMemberAccess
-            gainXPMethod = McMMOPlayer.class.getMethod("beginXpGain", SkillType.class, float.class, com.gmail.nossr50.datatypes.skills.XPGainReason.class);
-        }catch(Throwable ignored){ }
-
     }
 
     public static void handleCombat(Player attacker, LivingEntity target, double finalDamage){
+        if(mcMMO == null)
+            return;
+
         ItemStack heldItem = attacker.getItemInHand();
 
         McMMOPlayer mcMMOPlayer = UserManager.getPlayer(attacker);
@@ -61,7 +65,7 @@ public final class McMMOHook {
             }
 
             if (getPermissions(attacker, "SWORDS")) {
-                skillType = PrimarySkillType.SWORDS;
+                skillType = getSkill("SWORDS");
             }
         }
 
@@ -71,7 +75,7 @@ public final class McMMOHook {
             }
 
             if (getPermissions(attacker, "AXES")) {
-                skillType = PrimarySkillType.AXES;
+                skillType = getSkill("AXES");
             }
         }
 
@@ -81,7 +85,7 @@ public final class McMMOHook {
             }
 
             if (getPermissions(attacker, "UNARMED")) {
-                skillType = PrimarySkillType.UNARMED;
+                skillType = getSkill("UNARMED");
             }
         }
 
@@ -116,8 +120,9 @@ public final class McMMOHook {
 
         if(baseXp > 0) {
             try {
-                gainXPMethod.invoke(mcMMOPlayer, skillType, (float) ((int) (finalDamage * baseXp)), XPGainReason.PVE);
+                gainXPMethod.invoke(mcMMOPlayer, skillType, (float) ((int) (finalDamage * baseXp)), com.gmail.nossr50.datatypes.skills.XPGainReason.PVE);
             }catch(Throwable ex){
+                ex.printStackTrace();
                 mcMMOPlayer.beginXpGain((PrimarySkillType) skillType, (float) ((int) (finalDamage * baseXp)), XPGainReason.PVE, XPGainSource.SELF);
             }
         }
@@ -150,6 +155,14 @@ public final class McMMOHook {
             return SkillType.valueOf(type).getPermissions(attacker);
         }catch(Throwable ex){
             return PrimarySkillType.valueOf(type).getPermissions(attacker);
+        }
+    }
+
+    private static Object getSkill(String type){
+        try{
+            return SkillType.valueOf(type);
+        }catch(Throwable ex){
+            return PrimarySkillType.valueOf(type);
         }
     }
 
