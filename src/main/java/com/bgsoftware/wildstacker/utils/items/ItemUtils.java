@@ -38,9 +38,9 @@ import java.util.stream.Stream;
 
 public final class ItemUtils {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private final static int MAX_PICKUP_DELAY = 32767;
+    private static final int MAX_PICKUP_DELAY = 32767;
 
     public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location){
         Arrays.stream(itemStacks)
@@ -234,10 +234,10 @@ public final class ItemUtils {
     }
 
     public static ItemStack getFromBlock(Block block){
-        if(ServerVersion.isLegacy())
-            return block.getState().getData().toItemStack(1);
-        else
-            return new ItemStack(block.getType());
+        ItemStack itemStack = ServerVersion.isLegacy() ? block.getState().getData().toItemStack(1) : new ItemStack(block.getType());
+        if(plugin.getNMSAdapter().isRotatable(block))
+            itemStack.setDurability((short) 0);
+        return itemStack;
     }
 
     private static void updateInventory(Inventory inventory){

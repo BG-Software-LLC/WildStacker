@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_13_R1.BlockPosition;
+import net.minecraft.server.v1_13_R1.BlockRotatable;
 import net.minecraft.server.v1_13_R1.ChatMessage;
 import net.minecraft.server.v1_13_R1.Chunk;
 import net.minecraft.server.v1_13_R1.EnchantmentManager;
@@ -324,6 +325,12 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @Override
+    public boolean isRotatable(Block block) {
+        World world = ((CraftWorld) block.getWorld()).getHandle();
+        return world.getType(new BlockPosition(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockRotatable;
     }
 
     /*

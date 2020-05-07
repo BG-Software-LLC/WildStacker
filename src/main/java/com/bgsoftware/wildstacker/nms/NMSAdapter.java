@@ -7,6 +7,7 @@ import org.bukkit.Achievement;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
@@ -98,6 +99,8 @@ public interface NMSAdapter {
      */
 
     SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
+
+    boolean isRotatable(Block block);
 
     /*
      *   Item methods
