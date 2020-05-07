@@ -49,7 +49,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class WStackedEntity extends WStackedObject<LivingEntity> implements StackedEntity {
+public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> implements StackedEntity {
 
     private boolean ignoreDeathEvent = false;
     private SpawnCause spawnCause;

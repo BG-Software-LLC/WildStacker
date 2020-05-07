@@ -24,10 +24,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
+public final class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
 
     private final ItemStack barrelItem;
     private ArmorStand blockDisplay;
@@ -154,54 +153,48 @@ public class WStackedBarrel extends WStackedObject<Block> implements StackedBarr
     }
 
     @Override
-    public void runStackAsync(Consumer<Optional<Block>> result) {
+    public Optional<Block> runStack() {
         Chunk chunk = getChunk();
 
-        StackService.execute(this, () -> {
-            boolean chunkMerge = plugin.getSettings().chunkMergeBarrels;
-            Location blockLocation = getLocation();
+        boolean chunkMerge = plugin.getSettings().chunkMergeBarrels;
+        Location blockLocation = getLocation();
 
-            Stream<StackedBarrel> barrelStream;
+        Stream<StackedBarrel> barrelStream;
 
-            if (chunkMerge) {
-                barrelStream = plugin.getSystemManager().getStackedBarrels(chunk).stream();
-            } else {
-                int range = plugin.getSettings().barrelsCheckRange;
-                Location location = getLocation();
+        if (chunkMerge) {
+            barrelStream = plugin.getSystemManager().getStackedBarrels(chunk).stream();
+        } else {
+            int range = plugin.getSettings().barrelsCheckRange;
+            Location location = getLocation();
 
-                int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-                int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
+            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
 
-                barrelStream = plugin.getSystemManager().getStackedBarrels().stream()
-                        .filter(stackedBarrel -> {
-                            Location loc = stackedBarrel.getLocation();
-                            return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                    loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                    loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                        });
+            barrelStream = plugin.getSystemManager().getStackedBarrels().stream()
+                    .filter(stackedBarrel -> {
+                        Location loc = stackedBarrel.getLocation();
+                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
+                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
+                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
+                    });
+        }
+
+        Optional<StackedBarrel> barrelOptional = GeneralUtils.getClosest(blockLocation, barrelStream
+                .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS));
+
+        if (barrelOptional.isPresent()) {
+            StackedBarrel targetBarrel = barrelOptional.get();
+
+            StackResult stackResult = runStack(targetBarrel);
+
+            if (stackResult == StackResult.SUCCESS) {
+                return barrelOptional.map(StackedBarrel::getBlock);
             }
+        }
 
-            Optional<StackedBarrel> barrelOptional = GeneralUtils.getClosest(blockLocation, barrelStream
-                    .filter(stackedBarrel -> runStackCheck(stackedBarrel) == StackCheckResult.SUCCESS));
+        updateName();
 
-            if (barrelOptional.isPresent()) {
-                StackedBarrel targetBarrel = barrelOptional.get();
-
-                StackResult stackResult = runStack(targetBarrel);
-
-                if (stackResult == StackResult.SUCCESS) {
-                    if (result != null)
-                        result.accept(barrelOptional.map(StackedBarrel::getBlock));
-                    return;
-                }
-            }
-
-            updateName();
-
-            if (result != null)
-                result.accept(Optional.empty());
-        });
-        StackService.runAsync(this);
+        return Optional.empty();
     }
 
     @Override

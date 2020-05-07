@@ -6,13 +6,10 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class WStackedObject<T> implements StackedObject<T> {
@@ -118,22 +115,9 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     }
 
     @Override
-    public abstract void runStackAsync(Consumer<Optional<T>> result);
-
-    @Override
     public T tryStack(){
         new UnsupportedOperationException("tryStack method is no longer supported.").printStackTrace();
-        runStackAsync(null);
-        return null;
-    }
-
-    @Override
-    public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
-        StackService.execute(stackedObject, () -> {
-            StackResult _stackResult = runStack(stackedObject);
-            if(stackResult != null)
-                stackResult.accept(_stackResult);
-        });
+        return runStack().orElse(null);
     }
 
     @Override

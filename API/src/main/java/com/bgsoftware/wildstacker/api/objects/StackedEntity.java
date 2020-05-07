@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public interface StackedEntity extends StackedObject<LivingEntity> {
+public interface StackedEntity extends AsyncStackedObject<LivingEntity> {
 
     /**
      * Get the living-entity object of bukkit.

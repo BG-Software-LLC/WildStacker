@@ -29,7 +29,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
-public class WStackedItem extends WStackedObject<Item> implements StackedItem {
+public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
 
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
