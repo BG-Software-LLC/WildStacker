@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface StackedObject<T> {
 
@@ -82,6 +83,16 @@ public interface StackedObject<T> {
      * @return The result for the operation.
      */
     StackCheckResult runStackCheck(StackedObject stackedObject);
+
+    /**
+     * Stack this object into other objects around it.
+     * @param result The object that this object was stacked into.
+     *
+     * @deprecated This object is not async. The async methods were moved to AsyncStackedObject.
+     *             You can use runStack() as a replacement.
+     */
+    @Deprecated
+    void runStackAsync(Consumer<Optional<T>> result);
 
     /**
      * Stack this object into other objects around it.

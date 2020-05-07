@@ -9,7 +9,9 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class WStackedObject<T> implements StackedObject<T> {
@@ -115,6 +117,17 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     }
 
     @Override
+    @Deprecated
+    public void runStackAsync(Consumer<Optional<T>> result) {
+        Optional<T> stackResult = runStack();
+        if(result != null)
+            result.accept(stackResult);
+    }
+
+    @Override
+    public abstract Optional<T> runStack();
+
+    @Override
     public T tryStack(){
         new UnsupportedOperationException("tryStack method is no longer supported.").printStackTrace();
         return runStack().orElse(null);
@@ -128,7 +141,6 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         new UnsupportedOperationException("tryStackInto method is no longer supported.").printStackTrace();
         return runStack(stackedObject) == StackResult.SUCCESS;
     }
-
 
     @Override
     public abstract UnstackResult runUnstack(int amount);
