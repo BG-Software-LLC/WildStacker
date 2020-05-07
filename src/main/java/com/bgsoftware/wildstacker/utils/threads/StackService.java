@@ -7,11 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,18 +18,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public final class StackService {
 
     private static final Map<String, StackServiceWorld> stackServiceWorldMap = Maps.newConcurrentMap();
-    private static final Set<StackedObject> mainThreadObjects = new HashSet<>();
 
     public static void execute(StackedObject stackedObject, Runnable runnable){
-        if(mainThreadObjects.contains(stackedObject)){
-            if(Bukkit.isPrimaryThread())
-                runnable.run();
-            else
-                Executor.sync(runnable);
-
-            return;
-        }
-
         execute(stackedObject.getWorld(), StackType.fromObject(stackedObject), runnable);
     }
 
@@ -51,14 +39,6 @@ public final class StackService {
 
     public static boolean canStackFromThread(){
         return isStackThread() || Bukkit.isPrimaryThread();
-    }
-
-    public synchronized static void runOnMain(StackedObject stackedObject) {
-        mainThreadObjects.add(stackedObject);
-    }
-
-    public synchronized static void runAsync(StackedObject stackedObject) {
-        mainThreadObjects.remove(stackedObject);
     }
 
     public static void stop(){
