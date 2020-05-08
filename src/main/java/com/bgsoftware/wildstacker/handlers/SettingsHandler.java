@@ -65,7 +65,7 @@ public final class SettingsHandler {
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
             entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup,
             entitiesOneShotTools, entitiesOneShotWhitelist;
-    public final KeyMap<Integer> entitiesLimits, minimumEntitiesLimit, defaultUnstack;
+    public final KeyMap<Integer> entitiesLimits, minimumRequiredEntities, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
@@ -306,7 +306,7 @@ public final class SettingsHandler {
 
         loadLimits((itemsLimits = new KeyMap<>()), cfg.getConfigurationSection("items.limits"));
         loadLimits((entitiesLimits = new KeyMap<>()), cfg.getConfigurationSection("entities.limits"));
-        loadLimits((minimumEntitiesLimit = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-limits"));
+        loadLimits((minimumRequiredEntities = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-required"));
         loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
         loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
         loadLimits((defaultUnstack = new KeyMap<>()), cfg.getConfigurationSection("entities.default-unstack"));
@@ -502,6 +502,8 @@ public final class SettingsHandler {
             cfg.set("kill-task.kill-entities", cfg.getConfigurationSection("kill-task.entities"));
         if(cfg.contains("kill-task.items"))
             cfg.set("kill-task.kill-items", cfg.getConfigurationSection("kill-task.items"));
+        if(cfg.contains("entities.minimum-limits"))
+            cfg.set("entities.minimum-required", cfg.getConfigurationSection("entities.minimum-limits"));
     }
 
     public static void reload(){

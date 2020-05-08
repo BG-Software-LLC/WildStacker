@@ -118,8 +118,7 @@ items:
   # You can use 'all' as a global limit (all: 20 will set all items to be limited to 20 per stack)
   # If you don't want any limits, you can set a random type.
   limits:
-    STONE: 1024
-    'LOG:1': 1024
+    EXAMPLE_ITEM: 1024
 
   # A list of worlds items won't get stacked inside them (case-sensitive)
   disabled-worlds:
@@ -211,16 +210,14 @@ entities:
   # You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)
   # If you don't want any limits, you can set a random type.
   limits:
-    PIG: 10
-    ZOMBIE: 50
+    EXAMPLE_ENTITY: 10
 
-  # Set a minimum stack for specific entities.
+  # Set a minimum required entities to stack for specific entities.
   # Make sure you follow the "ENTITY-TYPE" format.
-  # You can use 'all' as a global limit (all: 20 will set all entities to be limited to 20 per stack)
+  # You can use 'all' as a global limit (all: 20 will set all entities to must have at least 20 entities around before stacking)
   # If you don't want any limits, you can set a random type.
-  minimum-limits:
-    PIG: 10
-    ZOMBIE: 50
+  minimum-required:
+    EXAMPLE_ENTITY: 10
 
   # A list of worlds entities won't get stacked inside them (case-sensitive)
   disabled-worlds:
@@ -452,8 +449,7 @@ spawners:
   # You can use 'all' as a global limit (all: 20 will set all spawners to be limited to 20 per stack)
   # If you don't want any limits, you can set a random type.
   limits:
-    PIG: 10
-    ZOMBIE: 50
+    EXAMPLE_ENTITY: 10
 
   # A list of worlds spawners won't get stacked inside them (case-sensitive)
   disabled-worlds:
@@ -671,14 +667,14 @@ barrels:
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # If you wish to disable whitelisted spawners, use "whitelist: []"
   whitelist:
-    - DIAMOND_BLOCK
+    - EXAMPLE_BARREL
 
   # Set a maximum stack for a specific barrel.
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
   # You can use 'all' as a global limit (all: 20 will set all barrels to be limited to 20 per stack)
   # If you don't want any limits, you can set a random type.
   limits:
-    DIAMOND_BLOCK: 100
+    EXAMPLE_BARREL: 100
 
   # A list of worlds barrels won't get stacked inside them (case-sensitive)
   disabled-worlds:

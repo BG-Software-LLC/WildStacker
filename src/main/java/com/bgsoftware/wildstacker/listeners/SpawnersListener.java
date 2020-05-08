@@ -365,9 +365,9 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
-        int minimumEntityLimit = plugin.getSettings().minimumEntitiesLimit.getOrDefault(stackedEntity.getType().name(), 1);
+        int minimumEntityRequirement = plugin.getSettings().minimumRequiredEntities.getOrDefault(stackedEntity.getType().name(), 1);
 
-        multipleEntities = multipleEntities || minimumEntityLimit > stackedSpawner.getStackAmount();
+        multipleEntities = multipleEntities || minimumEntityRequirement > stackedSpawner.getStackAmount();
 
         if(multipleEntities) {
             if(stackedSpawner.getStackAmount() > 1) {
@@ -516,6 +516,7 @@ public final class SpawnersListener implements Listener {
             case PLACE_ALL:
             case PLACE_ONE:
                 if (e.getCurrentItem() != null) {
+                    //noinspection all
                     action = InventoryAction.SWAP_WITH_CURSOR;
                 } else {
                     if (e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {

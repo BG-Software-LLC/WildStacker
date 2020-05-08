@@ -276,7 +276,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                     Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 
                     if (entityOptional.isPresent()) {
-                        int minimumStackSize = plugin.getSettings().minimumEntitiesLimit.getOrDefault(getType().name(), 1);
+                        int minimumStackSize = plugin.getSettings().minimumRequiredEntities.getOrDefault(getType().name(), 1);
                         StackedEntity targetEntity = entityOptional.get();
 
                         if (minimumStackSize > 2) {
