@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -42,11 +43,8 @@ public final class ChunksListener implements Listener {
             //Arrays.stream(entityList).forEach(entity -> EntityData.uncache(entity.getUniqueId()));
 
             entityStream.forEach(stackedEntity -> {
-                if(stackedEntity.getStackAmount() > 1) {
-                    plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
-                }
-                if(hasValidSpawnCause(stackedEntity.getSpawnCause())){
-                    plugin.getDataHandler().CACHED_SPAWN_CAUSE_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+                if(stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
+                    plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(stackedEntity.getUniqueId(), new Pair<>(stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()));
                 }
                 plugin.getSystemManager().removeStackObject(stackedEntity);
             });
@@ -57,19 +55,25 @@ public final class ChunksListener implements Listener {
     public void onChunkLoad(ChunkLoadEvent e){
         List<Entity> chunkEntities = Arrays.asList(e.getChunk().getEntities());
 
-        if(loadedData && ServerVersion.isAtLeast(ServerVersion.v1_8)) {
-            //Trying to remove all the corrupted stacked blocks
-            Executor.async(() -> {
-                Stream<Entity> entityStream = chunkEntities.stream()
-                        .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
-                                entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()));
-                Executor.sync(() -> entityStream.forEach(entity -> {
-                    Block block = entity.getLocation().getBlock();
-                    if (block.getType() == Material.CAULDRON)
-                        block.setType(Material.AIR);
-                    entity.remove();
-                }));
-            });
+        if(loadedData) {
+            if(ServerVersion.isAtLeast(ServerVersion.v1_8)) {
+                //Trying to remove all the corrupted stacked blocks
+                Executor.async(() -> {
+                    Stream<Entity> entityStream = chunkEntities.stream()
+                            .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
+                                    entity.getCustomName().equals("BlockDisplay") && !plugin.getSystemManager().isStackedBarrel(entity.getLocation().getBlock()));
+                    Executor.sync(() -> entityStream.forEach(entity -> {
+                        Block block = entity.getLocation().getBlock();
+                        if (block.getType() == Material.CAULDRON)
+                            block.setType(Material.AIR);
+                        entity.remove();
+                    }));
+                });
+
+                plugin.getSystemManager().loadBarrels(e.getChunk());
+            }
+
+            plugin.getSystemManager().loadSpawners(e.getChunk());
         }
 
         //Update nerf status & names to all entities

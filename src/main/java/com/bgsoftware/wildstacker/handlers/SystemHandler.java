@@ -29,6 +29,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -48,6 +49,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,23 +121,19 @@ public final class SystemHandler implements SystemManager {
         if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
             dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
 
-        if(dataHandler.CACHED_AMOUNT_ENTITIES.containsKey(livingEntity.getUniqueId())){
-            stackedEntity.setStackAmount(dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId()), true);
-            if(shouldBeCached)
-                dataHandler.CACHED_AMOUNT_ENTITIES.remove(stackedEntity.getUniqueId());
+        Pair<Integer, SpawnCause> entityData = shouldBeCached ? dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId()) :
+                dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId());
+
+        if(entityData != null){
+            stackedEntity.setStackAmount(entityData.getKey(), true);
+            stackedEntity.setSpawnCause(entityData.getValue());
         }
 
-        if(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.containsKey(livingEntity.getUniqueId())){
-            stackedEntity.setSpawnCause(dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.get(livingEntity.getUniqueId()));
-            if(shouldBeCached)
-                dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(stackedEntity.getUniqueId());
-        }
+        boolean deadFlag = shouldBeCached ? dataHandler.CACHED_DEAD_ENTITIES.remove(livingEntity.getUniqueId()) :
+                dataHandler.CACHED_DEAD_ENTITIES.contains(livingEntity.getUniqueId());
 
-        if(dataHandler.CACHED_DEAD_ENTITIES.contains(livingEntity.getUniqueId())){
+        if(deadFlag)
             ((WStackedEntity) stackedEntity).setDeadFlag(true);
-            if(shouldBeCached)
-                dataHandler.CACHED_DEAD_ENTITIES.remove(stackedEntity.getUniqueId());
-        }
 
         return stackedEntity;
     }
@@ -160,13 +158,34 @@ public final class SystemHandler implements SystemManager {
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
             dataHandler.CACHED_ITEMS.put(stackedItem.getUniqueId(), stackedItem);
 
-        if(dataHandler.CACHED_AMOUNT_ITEMS.containsKey(item.getUniqueId())){
-            stackedItem.setStackAmount(dataHandler.CACHED_AMOUNT_ITEMS.get(item.getUniqueId()), true);
-            dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
-        }
+        Integer stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
+
+        if(stackAmount != null)
+            stackedItem.setStackAmount(stackAmount, true);
 
         return stackedItem;
     }
+
+    public void loadSpawners(Chunk chunk){
+        Iterator<Map.Entry<Location, Integer>> spawnersIterator =
+                dataHandler.CACHED_AMOUNT_SPAWNERS.entrySet().iterator();
+
+        while(spawnersIterator.hasNext()){
+            Map.Entry<Location, Integer> entry = spawnersIterator.next();
+            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
+                Block block = entry.getKey().getBlock();
+
+                if(block.getType() == Materials.SPAWNER.toBukkitType()){
+                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                    stackedSpawner.setStackAmount(entry.getValue(), true);
+                    dataHandler.addStackedSpawner(stackedSpawner);
+                }
+
+                spawnersIterator.remove();
+            }
+        }
+    }
+
 
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
@@ -183,11 +202,6 @@ public final class SystemHandler implements SystemManager {
         //Spawner wasn't found, creating a new object
         stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
 
-        if(dataHandler.CACHED_AMOUNT_SPAWNERS.containsKey(location)){
-            stackedSpawner.setStackAmount(dataHandler.CACHED_AMOUNT_SPAWNERS.get(location), true);
-            dataHandler.CACHED_AMOUNT_SPAWNERS.remove(location);
-        }
-
         StackedSpawner STACKED_SPAWNER = stackedSpawner;
 
         //Checks if the spawner still exists after a few ticks
@@ -203,6 +217,26 @@ public final class SystemHandler implements SystemManager {
         return stackedSpawner;
     }
 
+    public void loadBarrels(Chunk chunk){
+        Iterator<Map.Entry<Location, Pair<Integer, ItemStack>>> barrelsIterator =
+                dataHandler.CACHED_AMOUNT_BARRELS.entrySet().iterator();
+
+        while(barrelsIterator.hasNext()){
+            Map.Entry<Location, Pair<Integer, ItemStack>> entry = barrelsIterator.next();
+            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
+                Block block = entry.getKey().getBlock();
+
+                if(block.getType() == Material.CAULDRON){
+                    StackedBarrel stackedBarrel = new WStackedBarrel(block, entry.getValue().getValue());
+                    stackedBarrel.setStackAmount(entry.getValue().getKey(), true);
+                    stackedBarrel.createDisplayBlock();
+                    dataHandler.addStackedBarrel(stackedBarrel);
+                }
+
+                barrelsIterator.remove();
+            }
+        }
+    }
     @Override
     public StackedBarrel getStackedBarrel(Block block) {
         return getStackedBarrel(block == null ? null : block.getLocation());
@@ -323,49 +357,35 @@ public final class SystemHandler implements SystemManager {
         SQLHelper.executeUpdate("DELETE FROM entities;");
 
         if(plugin.getSettings().storeEntities) {
-            //WildStackerPlugin.log("Collecting entities...");
-            Map<UUID, Integer> entityAmounts = new HashMap<>();
-            Map<UUID, SpawnCause> entitySpawnCauses = new HashMap<>();
+            Map<UUID, Pair<Integer, SpawnCause>> entityAmounts = new HashMap<>();
 
             getStackedEntities().forEach(stackedEntity -> {
                 if (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
-                    entityAmounts.put(stackedEntity.getUniqueId(), stackedEntity.getStackAmount());
-                    entitySpawnCauses.put(stackedEntity.getUniqueId(), stackedEntity.getSpawnCause());
+                    entityAmounts.put(stackedEntity.getUniqueId(), new Pair<>(stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()));
                 } else {
                     removeStackObject(stackedEntity);
                 }
             });
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).keySet().forEach(uuid -> {
-                int stackAmount = dataHandler.CACHED_AMOUNT_ENTITIES.get(uuid);
-                SpawnCause spawnCause = dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-                if (stackAmount > 1 || hasValidSpawnCause(spawnCause)) {
-                    entityAmounts.put(uuid, Math.max(entityAmounts.getOrDefault(uuid, 1), stackAmount));
-                    entitySpawnCauses.put(uuid, spawnCause);
+            new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).forEach((uuid, pair) -> {
+                if (pair.getKey() > 1 || hasValidSpawnCause(pair.getValue())) {
+                    entityAmounts.put(uuid, new Pair<>(Math.max(entityAmounts.getOrDefault(uuid, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue()));
                 } else {
                     dataHandler.CACHED_AMOUNT_ENTITIES.remove(uuid);
-                    dataHandler.CACHED_SPAWN_CAUSE_ENTITIES.remove(uuid);
                 }
             });
 
-            //WildStackerPlugin.log("Saving entities...");
-
             if(entityAmounts.size() > 0) {
                 StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
-                entityAmounts.forEach((uuid, stackAmount) -> {
-                    SpawnCause spawnCause = entitySpawnCauses.getOrDefault(uuid, SpawnCause.CHUNK_GEN);
-                    entityHolder.setString(uuid.toString()).setInt(stackAmount).setString(spawnCause.name()).addBatch();
-                });
+                entityAmounts.forEach((uuid, pair) ->
+                    entityHolder.setString(uuid.toString()).setInt(pair.getKey()).setString(pair.getValue().name()).addBatch());
                 entityHolder.execute(false);
             }
-
-            //WildStackerPlugin.log("Saving entities done!");
         }
 
         SQLHelper.executeUpdate("DELETE FROM items;");
 
         if(plugin.getSettings().storeItems) {
-            //WildStackerPlugin.log("Collecting items...");
             Map<UUID, Integer> itemAmounts = new HashMap<>();
 
             getStackedItems().forEach(stackedItem -> {
@@ -376,16 +396,13 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).keySet().forEach(uuid -> {
-                int stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.get(uuid);
+            new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).forEach((uuid, stackAmount) -> {
                 if (stackAmount > 1) {
-                    itemAmounts.put(uuid, stackAmount);
+                    itemAmounts.put(uuid, Math.max(itemAmounts.getOrDefault(uuid, 1), stackAmount));
                 } else {
                     dataHandler.CACHED_AMOUNT_ITEMS.remove(uuid);
                 }
             });
-
-            //WildStackerPlugin.log("Saving items...");
 
             if(itemAmounts.size() > 0) {
                 StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
@@ -393,43 +410,55 @@ public final class SystemHandler implements SystemManager {
                         itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch());
                 itemHolder.execute(false);
             }
-
-            //WildStackerPlugin.log("Saving items done!");
         }
 
+        SQLHelper.executeUpdate("DELETE FROM spawners;");
+
         {
-            SQLHelper.executeUpdate("DELETE FROM spawners;");
-            //WildStackerPlugin.log("Collecting spawners...");
-            List<StackedSpawner> stackedSpawners = getStackedSpawners();
+            Map<Location, Integer> spawnerAmounts = new HashMap<>();
 
-            //WildStackerPlugin.log("Saving spawners...");
+            getStackedSpawners().forEach(stackedSpawner -> {
+                if (stackedSpawner.getStackAmount() > 1) {
+                    spawnerAmounts.put(stackedSpawner.getLocation(), stackedSpawner.getStackAmount());
+                } else {
+                    removeStackObject(stackedSpawner);
+                }
+            });
 
-            if(!stackedSpawners.isEmpty()) {
+            new HashMap<>(dataHandler.CACHED_AMOUNT_SPAWNERS).forEach((location, stackAmount) -> {
+                if (stackAmount > 1) {
+                    spawnerAmounts.put(location, Math.max(spawnerAmounts.getOrDefault(location, 1), stackAmount));
+                } else {
+                    dataHandler.CACHED_AMOUNT_SPAWNERS.remove(location);
+                }
+            });
+
+            if(spawnerAmounts.size() > 0) {
                 StatementHolder spawnersHolder = Query.SPAWNER_INSERT.getStatementHolder();
-                stackedSpawners.forEach(stackedSpawner ->
-                        spawnersHolder.setLocation(stackedSpawner.getLocation()).setInt(stackedSpawner.getStackAmount()).addBatch());
+                spawnerAmounts.forEach((location, stackAmount) ->
+                        spawnersHolder.setLocation(location).setInt(stackAmount).addBatch());
                 spawnersHolder.execute(false);
             }
-
-            //WildStackerPlugin.log("Saving spawners done!");
         }
 
+        SQLHelper.executeUpdate("DELETE FROM barrels;");
+
         {
-            SQLHelper.executeUpdate("DELETE FROM barrels;");
-            //WildStackerPlugin.log("Collecting barrels...");
-            List<StackedBarrel> stackedBarrels = getStackedBarrels();
+            Map<Location, Pair<Integer, ItemStack>> barrelAmounts = new HashMap<>();
 
-            //WildStackerPlugin.log("Saving barrels...");
+            getStackedBarrels().forEach(stackedBarrel ->
+                barrelAmounts.put(stackedBarrel.getLocation(),
+                        new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1))));
 
-            if(!stackedBarrels.isEmpty()) {
+            new HashMap<>(dataHandler.CACHED_AMOUNT_BARRELS).forEach((location, pair) ->
+                barrelAmounts.put(location, new Pair<>(Math.max(barrelAmounts.getOrDefault(location, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue())));
+
+            if(barrelAmounts.size() > 0) {
                 StatementHolder barrelsHolder = Query.BARREL_INSERT.getStatementHolder();
-                stackedBarrels.forEach(stackedBarrel ->
-                        barrelsHolder.setLocation(stackedBarrel.getLocation()).setInt(stackedBarrel.getStackAmount())
-                                .setItemStack(stackedBarrel.getBarrelItem(1)).addBatch());
+                barrelAmounts.forEach((location, pair) ->
+                        barrelsHolder.setLocation(location).setInt(pair.getKey()).setItemStack(pair.getValue()).addBatch());
                 barrelsHolder.execute(false);
             }
-
-           // WildStackerPlugin.log("Saving barrels done!");
         }
     }
 

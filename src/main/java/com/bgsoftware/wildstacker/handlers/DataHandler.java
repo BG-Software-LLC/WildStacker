@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -59,11 +60,12 @@ public final class DataHandler {
     public final Map<Location, StackedBarrel> CACHED_BARRELS = new ConcurrentHashMap<>();
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
 
-    //Here because we can't get the bukkit entity from an uuid if the chunk isn't loaded
-    public final Map<UUID, Integer> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
-    public final Map<Location, Integer> CACHED_AMOUNT_SPAWNERS = new ConcurrentHashMap<>();
-    public final Map<UUID, SpawnCause> CACHED_SPAWN_CAUSE_ENTITIES = new ConcurrentHashMap<>();
+    //References for all the data from database
     public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
+    public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
+    public final Map<Location, Integer> CACHED_AMOUNT_SPAWNERS = new ConcurrentHashMap<>();
+    public final Map<Location, Pair<Integer, ItemStack>> CACHED_AMOUNT_BARRELS = new ConcurrentHashMap<>();
+
     public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public DataHandler(WildStackerPlugin plugin){
@@ -76,16 +78,16 @@ public final class DataHandler {
                 loadOldFiles();
                 loadOldSQL();
 
-                //Set all holograms of spawners
-                for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners())
-                    stackedSpawner.updateName();
-
-                //Set all holograms and block displays of barrlels
-                for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels()) {
-                    stackedBarrel.updateName();
-                    stackedBarrel.getLocation().getChunk().load(true);
-                    stackedBarrel.createDisplayBlock();
-                }
+//                //Set all holograms of spawners
+//                for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners())
+//                    stackedSpawner.updateName();
+//
+//                //Set all holograms and block displays of barrlels
+//                for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels()) {
+//                    stackedBarrel.updateName();
+//                    stackedBarrel.getLocation().getChunk().load(true);
+//                    stackedBarrel.createDisplayBlock();
+//                }
             }catch(Exception ex){
                 ex.printStackTrace();
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
@@ -218,8 +220,7 @@ public final class DataHandler {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
                                 SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawn_reason"));
-                                CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
-                                CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
+                                CACHED_AMOUNT_ENTITIES.put(uuid, new Pair<>(stackAmount, spawnCause));
                             }
                         }
 
@@ -309,8 +310,7 @@ public final class DataHandler {
                     int stackAmount = resultSet.getInt("stackAmount");
                     SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    CACHED_AMOUNT_ENTITIES.put(uuid, stackAmount);
-                    CACHED_SPAWN_CAUSE_ENTITIES.put(uuid, spawnCause);
+                    CACHED_AMOUNT_ENTITIES.put(uuid, new Pair<>(stackAmount, spawnCause));
                 }
             });
 
@@ -355,22 +355,8 @@ public final class DataHandler {
 
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
-
-                        if(plugin.getSettings().checkInvalidBlocks) {
-                            Block spawnerBlock = blockLocation.getBlock();
-
-                            if (spawnerBlock.getState() instanceof CreatureSpawner) {
-                                StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                                addStackedSpawner(stackedSpawner);
-                                continue;
-                            } else {
-                                exceptionReason = "Block doesn't exist anymore.";
-                            }
-                        }
-                        else{
-                            CACHED_AMOUNT_SPAWNERS.put(blockLocation, stackAmount);
-                            continue;
-                        }
+                        CACHED_AMOUNT_SPAWNERS.put(blockLocation, stackAmount);
+                        continue;
                     }catch(Exception ex){
                         exceptionReason = "Exception was thrown.";
                     }
@@ -379,8 +365,7 @@ public final class DataHandler {
                 WildStackerPlugin.log("Couldn't load spawner: " + location);
                 WildStackerPlugin.log(exceptionReason);
 
-                if((exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) ||
-                        (exceptionReason.contains("Block") && plugin.getSettings().deleteInvalidBlocks)) {
+                if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
                     SQLHelper.executeUpdate("DELETE FROM spawners WHERE location = '" + location + "';");
                     WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
                 }
@@ -409,19 +394,10 @@ public final class DataHandler {
 
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
-                        Block barrelBlock = blockLocation.getBlock();
-                        if(barrelBlock.getType() != Material.CAULDRON && plugin.getSettings().forceCauldron)
-                            barrelBlock.setType(Material.CAULDRON);
-                        if (barrelBlock.getType() == Material.CAULDRON) {
-                            ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
-                                    plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                            StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                            addStackedBarrel(stackedBarrel);
-                            continue;
-                        }
-                        else{
-                            exceptionReason = "Block doesn't exist anymore.";
-                        }
+                        ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
+                                plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                        CACHED_AMOUNT_BARRELS.put(blockLocation, new Pair<>(stackAmount, barrelItem));
+                        continue;
                     } catch (Exception ex) {
                         exceptionReason = "Exception was thrown.";
                     }
@@ -430,8 +406,7 @@ public final class DataHandler {
                 WildStackerPlugin.log("Couldn't load barrel: " + location);
                 WildStackerPlugin.log(exceptionReason);
 
-                if((exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) ||
-                        (exceptionReason.contains("Block") && plugin.getSettings().deleteInvalidBlocks)) {
+                if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
                     SQLHelper.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
                     WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
                 }
@@ -468,8 +443,7 @@ public final class DataHandler {
                         int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
                         SpawnCause spawnCause = SpawnCause.matchCause(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
                         UUID _uuid = UUID.fromString(uuid);
-                        CACHED_AMOUNT_ENTITIES.put(_uuid, stackAmount);
-                        CACHED_SPAWN_CAUSE_ENTITIES.put(_uuid, spawnCause);
+                        CACHED_AMOUNT_ENTITIES.put(_uuid, new Pair<>(stackAmount, spawnCause));
                     }
                 }
 
