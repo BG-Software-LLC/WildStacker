@@ -24,6 +24,7 @@ import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -38,6 +39,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -57,6 +59,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SystemHandler implements SystemManager {
 
@@ -121,8 +124,8 @@ public final class SystemHandler implements SystemManager {
         if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
             dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
 
-        Pair<Integer, SpawnCause> entityData = shouldBeCached ? dataHandler.CACHED_AMOUNT_ENTITIES.remove(livingEntity.getUniqueId()) :
-                dataHandler.CACHED_AMOUNT_ENTITIES.get(livingEntity.getUniqueId());
+        Pair<Integer, SpawnCause> entityData = shouldBeCached ? dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId()) :
+                dataHandler.CACHED_ENTITIES_RAW.get(livingEntity.getUniqueId());
 
         if(entityData != null){
             stackedEntity.setStackAmount(entityData.getKey(), true);
@@ -158,34 +161,13 @@ public final class SystemHandler implements SystemManager {
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
             dataHandler.CACHED_ITEMS.put(stackedItem.getUniqueId(), stackedItem);
 
-        Integer stackAmount = dataHandler.CACHED_AMOUNT_ITEMS.remove(item.getUniqueId());
+        Integer stackAmount = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
 
         if(stackAmount != null)
             stackedItem.setStackAmount(stackAmount, true);
 
         return stackedItem;
     }
-
-    public void loadSpawners(Chunk chunk){
-        Iterator<Map.Entry<Location, Integer>> spawnersIterator =
-                dataHandler.CACHED_AMOUNT_SPAWNERS.entrySet().iterator();
-
-        while(spawnersIterator.hasNext()){
-            Map.Entry<Location, Integer> entry = spawnersIterator.next();
-            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
-                Block block = entry.getKey().getBlock();
-
-                if(block.getType() == Materials.SPAWNER.toBukkitType()){
-                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                    stackedSpawner.setStackAmount(entry.getValue(), true);
-                    dataHandler.addStackedSpawner(stackedSpawner);
-                }
-
-                spawnersIterator.remove();
-            }
-        }
-    }
-
 
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
@@ -217,26 +199,6 @@ public final class SystemHandler implements SystemManager {
         return stackedSpawner;
     }
 
-    public void loadBarrels(Chunk chunk){
-        Iterator<Map.Entry<Location, Pair<Integer, ItemStack>>> barrelsIterator =
-                dataHandler.CACHED_AMOUNT_BARRELS.entrySet().iterator();
-
-        while(barrelsIterator.hasNext()){
-            Map.Entry<Location, Pair<Integer, ItemStack>> entry = barrelsIterator.next();
-            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
-                Block block = entry.getKey().getBlock();
-
-                if(block.getType() == Material.CAULDRON){
-                    StackedBarrel stackedBarrel = new WStackedBarrel(block, entry.getValue().getValue());
-                    stackedBarrel.setStackAmount(entry.getValue().getKey(), true);
-                    stackedBarrel.createDisplayBlock();
-                    dataHandler.addStackedBarrel(stackedBarrel);
-                }
-
-                barrelsIterator.remove();
-            }
-        }
-    }
     @Override
     public StackedBarrel getStackedBarrel(Block block) {
         return getStackedBarrel(block == null ? null : block.getLocation());
@@ -367,11 +329,11 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_ENTITIES).forEach((uuid, pair) -> {
+            new HashMap<>(dataHandler.CACHED_ENTITIES_RAW).forEach((uuid, pair) -> {
                 if (pair.getKey() > 1 || hasValidSpawnCause(pair.getValue())) {
                     entityAmounts.put(uuid, new Pair<>(Math.max(entityAmounts.getOrDefault(uuid, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue()));
                 } else {
-                    dataHandler.CACHED_AMOUNT_ENTITIES.remove(uuid);
+                    dataHandler.CACHED_ENTITIES_RAW.remove(uuid);
                 }
             });
 
@@ -396,11 +358,11 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_ITEMS).forEach((uuid, stackAmount) -> {
+            new HashMap<>(dataHandler.CACHED_ITEMS_RAW).forEach((uuid, stackAmount) -> {
                 if (stackAmount > 1) {
                     itemAmounts.put(uuid, Math.max(itemAmounts.getOrDefault(uuid, 1), stackAmount));
                 } else {
-                    dataHandler.CACHED_AMOUNT_ITEMS.remove(uuid);
+                    dataHandler.CACHED_ITEMS_RAW.remove(uuid);
                 }
             });
 
@@ -425,11 +387,11 @@ public final class SystemHandler implements SystemManager {
                 }
             });
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_SPAWNERS).forEach((location, stackAmount) -> {
+            new HashMap<>(dataHandler.CACHED_SPAWNERS_RAW).forEach((location, stackAmount) -> {
                 if (stackAmount > 1) {
                     spawnerAmounts.put(location, Math.max(spawnerAmounts.getOrDefault(location, 1), stackAmount));
                 } else {
-                    dataHandler.CACHED_AMOUNT_SPAWNERS.remove(location);
+                    dataHandler.CACHED_SPAWNERS_RAW.remove(location);
                 }
             });
 
@@ -450,7 +412,7 @@ public final class SystemHandler implements SystemManager {
                 barrelAmounts.put(stackedBarrel.getLocation(),
                         new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1))));
 
-            new HashMap<>(dataHandler.CACHED_AMOUNT_BARRELS).forEach((location, pair) ->
+            new HashMap<>(dataHandler.CACHED_BARRELS_RAW).forEach((location, pair) ->
                 barrelAmounts.put(location, new Pair<>(Math.max(barrelAmounts.getOrDefault(location, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue())));
 
             if(barrelAmounts.size() > 0) {
@@ -472,6 +434,113 @@ public final class SystemHandler implements SystemManager {
             LivingEntity linkedEntity = ((WStackedSpawner) stackedSpawner).getRawLinkedEntity();
             if(linkedEntity != null && linkedEntity.equals(livingEntity))
                 stackedSpawner.setLinkedEntity(newLivingEntity);
+        }
+    }
+
+    public void loadSpawners(Chunk chunk){
+        Iterator<Map.Entry<Location, Integer>> spawnersIterator =
+                dataHandler.CACHED_SPAWNERS_RAW.entrySet().iterator();
+
+        while(spawnersIterator.hasNext()){
+            Map.Entry<Location, Integer> entry = spawnersIterator.next();
+            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
+                Block block = entry.getKey().getBlock();
+
+                if(block.getType() == Materials.SPAWNER.toBukkitType()){
+                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                    stackedSpawner.setStackAmount(entry.getValue(), true);
+                    dataHandler.addStackedSpawner(stackedSpawner);
+                }
+
+                spawnersIterator.remove();
+            }
+        }
+    }
+
+    public void loadBarrels(Chunk chunk){
+        Iterator<Map.Entry<Location, Pair<Integer, ItemStack>>> barrelsIterator =
+                dataHandler.CACHED_BARRELS_RAW.entrySet().iterator();
+
+        while(barrelsIterator.hasNext()){
+            Map.Entry<Location, Pair<Integer, ItemStack>> entry = barrelsIterator.next();
+            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
+                Block block = entry.getKey().getBlock();
+
+                if(block.getType() == Material.CAULDRON){
+                    StackedBarrel stackedBarrel = new WStackedBarrel(block, entry.getValue().getValue());
+                    stackedBarrel.setStackAmount(entry.getValue().getKey(), true);
+                    stackedBarrel.createDisplayBlock();
+                    dataHandler.addStackedBarrel(stackedBarrel);
+                }
+
+                barrelsIterator.remove();
+            }
+        }
+    }
+
+    public void handleChunkLoad(Chunk chunk){
+        Entity[] entities = chunk.getEntities();
+
+        if(ServerVersion.isAtLeast(ServerVersion.v1_8)) {
+            //Trying to remove all the corrupted stacked blocks
+            Executor.async(() -> {
+                Stream<Entity> entityStream = Arrays.stream(entities)
+                        .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
+                                entity.getCustomName().equals("BlockDisplay") && !isStackedBarrel(entity.getLocation().getBlock()));
+                Executor.sync(() -> entityStream.forEach(entity -> {
+                    Block block = entity.getLocation().getBlock();
+                    if (block.getType() == Material.CAULDRON)
+                        block.setType(Material.AIR);
+                    entity.remove();
+                }));
+            });
+
+            loadBarrels(chunk);
+        }
+
+        loadSpawners(chunk);
+
+        //Update nerf status & names to all entities
+        Executor.async(() -> Arrays.stream(entities).filter(EntityUtils::isStackable).forEach(entity -> {
+            StackedEntity stackedEntity = WStackedEntity.of(entity);
+            stackedEntity.updateNerfed();
+            stackedEntity.updateName();
+        }));
+    }
+
+    public void handleChunkUnload(Chunk chunk){
+        Entity[] entities = chunk.getEntities();
+
+        Executor.async(() -> {
+            for(Entity entity : entities){
+                if(EntityUtils.isStackable(entity)){
+                    StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
+                    if(stackedEntity != null && (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))){
+                        dataHandler.CACHED_ENTITIES_RAW.put(entity.getUniqueId(), new Pair<>(stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()));
+                    }
+                }
+                else if(entity instanceof Item){
+                    StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
+                    if(stackedItem != null && stackedItem.getStackAmount() > 1){
+                        dataHandler.CACHED_ITEMS_RAW.put(entity.getUniqueId(), stackedItem.getStackAmount());
+                    }
+                }
+            }
+        });
+
+        for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
+            dataHandler.removeStackedSpawner(stackedSpawner);
+            if(stackedSpawner.getStackAmount() > 1) {
+                dataHandler.CACHED_SPAWNERS_RAW.put(stackedSpawner.getLocation(), stackedSpawner.getStackAmount());
+                plugin.getProviders().deleteHologram(stackedSpawner);
+            }
+        }
+
+        for(StackedBarrel stackedBarrel : getStackedBarrels(chunk)){
+            dataHandler.removeStackedBarrel(stackedBarrel);
+            dataHandler.CACHED_BARRELS_RAW.put(stackedBarrel.getLocation(), new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+            plugin.getProviders().deleteHologram(stackedBarrel);
+            stackedBarrel.removeDisplayBlock();
         }
     }
 
@@ -638,6 +707,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk) {
+        chunk.load(false);
         return new WStackedSnapshot(chunk);
     }
 

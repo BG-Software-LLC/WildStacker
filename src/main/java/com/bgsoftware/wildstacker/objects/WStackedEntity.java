@@ -83,7 +83,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
         if(!isCached())
-            plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(object.getUniqueId(), new Pair<>(stackAmount, getSpawnCause()));
+            plugin.getDataHandler().CACHED_ENTITIES_RAW.put(object.getUniqueId(), new Pair<>(stackAmount, getSpawnCause()));
     }
 
     /*
@@ -584,7 +584,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
         if(!isCached())
-            plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.put(object.getUniqueId(), new Pair<>(getStackAmount(), this.spawnCause));
+            plugin.getDataHandler().CACHED_ENTITIES_RAW.put(object.getUniqueId(), new Pair<>(getStackAmount(), this.spawnCause));
     }
 
     @Override

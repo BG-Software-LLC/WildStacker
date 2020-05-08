@@ -61,10 +61,10 @@ public final class DataHandler {
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
 
     //References for all the data from database
-    public final Map<UUID, Integer> CACHED_AMOUNT_ITEMS = new ConcurrentHashMap<>();
-    public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_AMOUNT_ENTITIES = new ConcurrentHashMap<>();
-    public final Map<Location, Integer> CACHED_AMOUNT_SPAWNERS = new ConcurrentHashMap<>();
-    public final Map<Location, Pair<Integer, ItemStack>> CACHED_AMOUNT_BARRELS = new ConcurrentHashMap<>();
+    public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
+    public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
+    public final Map<Location, Integer> CACHED_SPAWNERS_RAW = new ConcurrentHashMap<>();
+    public final Map<Location, Pair<Integer, ItemStack>> CACHED_BARRELS_RAW = new ConcurrentHashMap<>();
 
     public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -77,17 +77,6 @@ public final class DataHandler {
                 loadDatabase();
                 loadOldFiles();
                 loadOldSQL();
-
-//                //Set all holograms of spawners
-//                for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners())
-//                    stackedSpawner.updateName();
-//
-//                //Set all holograms and block displays of barrlels
-//                for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels()) {
-//                    stackedBarrel.updateName();
-//                    stackedBarrel.getLocation().getChunk().load(true);
-//                    stackedBarrel.createDisplayBlock();
-//                }
             }catch(Exception ex){
                 ex.printStackTrace();
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
@@ -220,7 +209,7 @@ public final class DataHandler {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
                                 SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawn_reason"));
-                                CACHED_AMOUNT_ENTITIES.put(uuid, new Pair<>(stackAmount, spawnCause));
+                                CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
                             }
                         }
 
@@ -228,7 +217,7 @@ public final class DataHandler {
                             while (resultSet.next()) {
                                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                                 int stackAmount = resultSet.getInt("amount");
-                                CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
+                                CACHED_ITEMS_RAW.put(uuid, stackAmount);
                             }
                         }
 
@@ -310,7 +299,7 @@ public final class DataHandler {
                     int stackAmount = resultSet.getInt("stackAmount");
                     SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    CACHED_AMOUNT_ENTITIES.put(uuid, new Pair<>(stackAmount, spawnCause));
+                    CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
                 }
             });
 
@@ -326,7 +315,7 @@ public final class DataHandler {
                 while (resultSet.next()) {
                     int stackAmount = resultSet.getInt("stackAmount");
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    CACHED_AMOUNT_ITEMS.put(uuid, stackAmount);
+                    CACHED_ITEMS_RAW.put(uuid, stackAmount);
                 }
             });
 
@@ -355,7 +344,7 @@ public final class DataHandler {
 
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
-                        CACHED_AMOUNT_SPAWNERS.put(blockLocation, stackAmount);
+                        CACHED_SPAWNERS_RAW.put(blockLocation, stackAmount);
                         continue;
                     }catch(Exception ex){
                         exceptionReason = "Exception was thrown.";
@@ -396,7 +385,7 @@ public final class DataHandler {
                         int stackAmount = resultSet.getInt("stackAmount");
                         ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
                                 plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                        CACHED_AMOUNT_BARRELS.put(blockLocation, new Pair<>(stackAmount, barrelItem));
+                        CACHED_BARRELS_RAW.put(blockLocation, new Pair<>(stackAmount, barrelItem));
                         continue;
                     } catch (Exception ex) {
                         exceptionReason = "Exception was thrown.";
@@ -443,7 +432,7 @@ public final class DataHandler {
                         int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
                         SpawnCause spawnCause = SpawnCause.matchCause(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
                         UUID _uuid = UUID.fromString(uuid);
-                        CACHED_AMOUNT_ENTITIES.put(_uuid, new Pair<>(stackAmount, spawnCause));
+                        CACHED_ENTITIES_RAW.put(_uuid, new Pair<>(stackAmount, spawnCause));
                     }
                 }
 
@@ -451,7 +440,7 @@ public final class DataHandler {
                     for (String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
                         int stackAmount = cfg.getInt("items." + uuid, 1);
                         UUID _uuid = UUID.fromString(uuid);
-                        CACHED_AMOUNT_ITEMS.put(_uuid, stackAmount);
+                        CACHED_ITEMS_RAW.put(_uuid, stackAmount);
                     }
                 }
 

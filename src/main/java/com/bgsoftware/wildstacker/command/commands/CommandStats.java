@@ -41,20 +41,20 @@ public final class CommandStats implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        int entitiesAmount = plugin.getSystemManager().getStackedEntities().size(),
-                itemsAmount = plugin.getSystemManager().getStackedItems().size(),
-                spawnersAmount = plugin.getSystemManager().getStackedSpawners().size(),
-                barrelsAmount = plugin.getSystemManager().getStackedBarrels().size(),
-                entitiesCachedAmounts = plugin.getDataHandler().CACHED_AMOUNT_ENTITIES.size(),
-                itemsCachedAmount = plugin.getDataHandler().CACHED_AMOUNT_ITEMS.size();
+        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size(),
+                entitiesUnloadedAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size(),
+                itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size(),
+                itemsUnloadedAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size(),
+                spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size(),
+                spawnersUnloadedAmount = plugin.getDataHandler().CACHED_SPAWNERS_RAW.size(),
+                barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size(),
+                barrelsUnloadedAmount = plugin.getDataHandler().CACHED_BARRELS_RAW.size();
 
         String message = "&eWildStacker Stats:" +
-                "\n&e - Stacked Entities: " + entitiesAmount +
-                "\n&e - Stacked Items: " + itemsAmount +
-                "\n&e - Stacked Spawners: " + spawnersAmount +
-                "\n&e - Stacked Barrels: " + barrelsAmount +
-                "\n&e - Cached Entities Amount (Unloaded Chunks): " + entitiesCachedAmounts +
-                "\n&e - Cached Items Amount (Unloaded Chunks): " + itemsCachedAmount;
+                "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + entitiesUnloadedAmount + ")" +
+                "\n&e - Stacked Items: (Loaded: " + itemsAmount + ", Unloaded: " + itemsUnloadedAmount + ")" +
+                "\n&e - Stacked Spawners: (Loaded: " + spawnersAmount + ", Unloaded: " + spawnersUnloadedAmount + ")" +
+                "\n&e - Stacked Barrels: (Loaded: " + barrelsAmount + ", Unloaded: " + barrelsUnloadedAmount + ")";
 
         Locale.sendMessage(sender, message);
     }
