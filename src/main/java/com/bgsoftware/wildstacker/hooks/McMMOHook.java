@@ -97,7 +97,7 @@ public final class McMMOHook {
         double baseXp = 0;
 
         if (target instanceof Animals) {
-            baseXp = ExperienceConfig.getInstance().getAnimalsXP(type);
+            baseXp = getAnimalsXP(type);
         } else if (target instanceof Monster) {
             baseXp = ExperienceConfig.getInstance().getCombatXP(type);
         } else if (type == EntityType.IRON_GOLEM) {
@@ -122,7 +122,6 @@ public final class McMMOHook {
             try {
                 gainXPMethod.invoke(mcMMOPlayer, skillType, (float) ((int) (finalDamage * baseXp)), com.gmail.nossr50.datatypes.skills.XPGainReason.PVE);
             }catch(Throwable ex){
-                ex.printStackTrace();
                 mcMMOPlayer.beginXpGain((PrimarySkillType) skillType, (float) ((int) (finalDamage * baseXp)), XPGainReason.PVE, XPGainSource.SELF);
             }
         }
@@ -163,6 +162,14 @@ public final class McMMOHook {
             return SkillType.valueOf(type);
         }catch(Throwable ex){
             return PrimarySkillType.valueOf(type);
+        }
+    }
+
+    private static double getAnimalsXP(EntityType type){
+        try{
+            return ExperienceConfig.getInstance().getAnimalsXP(type);
+        }catch(Throwable ex){
+            return ExperienceConfig.getInstance().getAnimalsXP();
         }
     }
 
