@@ -613,8 +613,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public boolean isInstantKill(EntityDamageEvent.DamageCause damageCause) {
         return GeneralUtils.contains(plugin.getSettings().entitiesInstantKills, this) ||
                 (damageCause != null && (plugin.getSettings().entitiesInstantKills.contains(damageCause.name()) ||
-                        plugin.getSettings().entitiesInstantKills.contains(getType().name() + ":" + damageCause.name()))) ||
-                getLivingEntity().getHealth() <= 0;
+                        plugin.getSettings().entitiesInstantKills.contains(getType().name() + ":" + damageCause.name())));
     }
 
     @Override
