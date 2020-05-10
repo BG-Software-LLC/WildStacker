@@ -428,20 +428,13 @@ public final class EntityUtils {
         CompletableFuture<Set<Entity>> completableFuture = new CompletableFuture<>();
 
         if(PaperHook.hasAsyncChunkSupport()){
-            if(Bukkit.isPrimaryThread()){
-                Executor.async(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
-            }
-            else{
-                completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-            }
+            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
+        }
+        else if(Bukkit.isPrimaryThread()){
+            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
         }
         else{
-            if(Bukkit.isPrimaryThread()){
-                completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-            }
-            else{
-                Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
-            }
+            Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
         }
 
         return completableFuture;
