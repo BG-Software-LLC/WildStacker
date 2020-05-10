@@ -222,7 +222,7 @@ public final class SettingsHandler {
         silkTouchSpawners = cfg.getBoolean("spawners.silk-touch.enabled", true);
         dropToInventory = cfg.getBoolean("spawners.silk-touch.drop-to-inventory", true);
         silkWorlds = cfg.getStringList("spawners.silk-touch.worlds");
-        dropSpawnerWithoutSilk = cfg.getBoolean("spawners.drop-without-silk", false);
+        dropSpawnerWithoutSilk = cfg.getBoolean("spawners.silk-touch.drop-without-silk", false);
         silkTouchBreakChance = cfg.getInt("spawners.silk-touch.break-chance", 100);
         explosionsDropSpawner = cfg.getBoolean("spawners.explosions.enabled", true);
         explosionsDropToInventory = cfg.getBoolean("spawners.explosions.drop-to-inventory", false);
