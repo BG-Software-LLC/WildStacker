@@ -36,9 +36,6 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     public ItemStack getSpawnerItem(EntityType entityType, int amount) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
 
-        if(!plugin.getSettings().silkTouchSpawners)
-            return itemStack;
-
         if(plugin.getSettings().getStackedItem) {
             itemStack.setAmount(1);
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
@@ -58,7 +55,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         String customName = plugin.getSettings().spawnerItemName;
 
         if(!customName.equals(""))
-            itemMeta.setDisplayName(customName.replace("{0}", ItemUtils.getSpawnerItemAmount(itemStack) + "")
+            itemMeta.setDisplayName(customName.replace("{0}", amount + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
 
         List<String> customLore = plugin.getSettings().spawnerItemLore;
