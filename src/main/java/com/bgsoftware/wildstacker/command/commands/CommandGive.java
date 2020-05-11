@@ -119,7 +119,7 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = plugin.getProviders().getSpawnerItem(entityType, 1);
+            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize);
 
             if(plugin.getSettings().getStackedItem){
                 itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
