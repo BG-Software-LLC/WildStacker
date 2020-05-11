@@ -412,7 +412,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
      */
 
     @Override
-    public synchronized void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result) {
+    public void runSpawnerStackAsync(StackedSpawner stackedSpawner, Consumer<Optional<LivingEntity>> result) {
         if (!plugin.getSettings().linkedEntitiesEnabled) {
             runStackAsync(result);
             return;
