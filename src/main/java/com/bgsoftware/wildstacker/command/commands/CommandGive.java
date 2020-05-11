@@ -123,6 +123,7 @@ public final class CommandGive implements ICommand {
 
             if(plugin.getSettings().getStackedItem){
                 itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
+                itemStack.setAmount(1);
             }
             else{
                 itemStack.setAmount(stackSize);
