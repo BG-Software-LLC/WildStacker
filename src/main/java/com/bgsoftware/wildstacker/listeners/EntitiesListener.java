@@ -308,7 +308,7 @@ public final class EntitiesListener implements Listener {
                         subtract(drops, entityDeathEvent.getDrops())
                                 .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
 
-                        Location dropLocation = livingEntity.getLocation().add(0, 1, 0);
+                        Location dropLocation = livingEntity.getLocation();
 
                         entityDeathEvent.getDrops().forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
 
