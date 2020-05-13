@@ -133,12 +133,12 @@ public final class SettingsHandler {
         killTaskStackedItems = cfg.getBoolean("kill-task.stacked-items", true);
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
-        killTaskEntitiesWhitelist = cfg.getStringList("kill-task.entities.whitelist");
-        killTaskEntitiesBlacklist = cfg.getStringList("kill-task.entities.blacklist");
-        killTaskEntitiesWorlds = cfg.getStringList("kill-task.entities.worlds");
-        killTaskItemsWhitelist = cfg.getStringList("kill-task.items.whitelist");
-        killTaskItemsBlacklist = cfg.getStringList("kill-task.items.blacklist");
-        killTaskItemsWorlds = cfg.getStringList("kill-task.items.worlds");
+        killTaskEntitiesWhitelist = cfg.getStringList("kill-task.kill-entities.whitelist");
+        killTaskEntitiesBlacklist = cfg.getStringList("kill-task.kill-entities.blacklist");
+        killTaskEntitiesWorlds = cfg.getStringList("kill-task.kill-entities.worlds");
+        killTaskItemsWhitelist = cfg.getStringList("kill-task.kill-items.whitelist");
+        killTaskItemsBlacklist = cfg.getStringList("kill-task.kill-items.blacklist");
+        killTaskItemsWorlds = cfg.getStringList("kill-task.kill-items.worlds");
         customNames = new KeyMap<>();
         loadCustomNames(plugin);
 
