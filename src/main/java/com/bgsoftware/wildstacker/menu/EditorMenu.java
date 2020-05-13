@@ -151,7 +151,7 @@ public abstract class EditorMenu extends WildMenu {
         for(String path : section.getKeys(false)){
             String fullPath = section.getCurrentPath().isEmpty() ? path : section.getCurrentPath() + "." + path;
 
-            if(Arrays.stream(ignorePaths).anyMatch(fullPath::contains))
+            if(Arrays.asList(ignorePaths).contains(fullPath))
                 continue;
 
             if(section.isConfigurationSection(path) && Arrays.stream(sectionsPaths).noneMatch(fullPath::contains)){
