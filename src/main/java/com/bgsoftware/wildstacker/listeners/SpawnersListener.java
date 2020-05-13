@@ -236,7 +236,8 @@ public final class SpawnersListener implements Listener {
 
         e.setCancelled(true);
 
-        if(plugin.getSettings().spawnersMineRequireSilk && !ItemUtils.isPickaxeAndHasSilkTouch(e.getPlayer().getItemInHand())){
+        if(e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().spawnersMineRequireSilk &&
+                !ItemUtils.isPickaxeAndHasSilkTouch(e.getPlayer().getItemInHand())){
             Locale.SPAWNER_BREAK_WITHOUT_SILK.send(e.getPlayer());
             return;
         }
