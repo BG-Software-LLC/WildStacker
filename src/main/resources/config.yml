@@ -522,6 +522,9 @@ spawners:
   # Set the percentage amount that will be dropped from explosions.
   explosions-amount-percentage: 100
 
+  # Should silk touch must be required to mine spawners?
+  mine-require-silk: false
+
   # Should sneaking while mining break the entire stack instead of reducing it by one?
   shift-get-whole-stack: true
 

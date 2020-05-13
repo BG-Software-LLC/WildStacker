@@ -236,6 +236,11 @@ public final class SpawnersListener implements Listener {
 
         e.setCancelled(true);
 
+        if(plugin.getSettings().spawnersMineRequireSilk && !ItemUtils.isPickaxeAndHasSilkTouch(e.getPlayer().getItemInHand())){
+            Locale.SPAWNER_BREAK_WITHOUT_SILK.send(e.getPlayer());
+            return;
+        }
+
         int originalAmount = stackedSpawner.getStackAmount();
         int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().shiftGetWholeSpawnerStack ? originalAmount : 1;
 
@@ -246,7 +251,6 @@ public final class SpawnersListener implements Listener {
 
         if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
-            e.setCancelled(true);
             return;
         }
 

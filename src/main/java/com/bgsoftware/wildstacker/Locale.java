@@ -12,8 +12,8 @@ import java.util.Map;
 @SuppressWarnings("WeakerAccess")
 public final class Locale {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static Map<String, Locale> localeMap = new HashMap<>();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final Map<String, Locale> localeMap = new HashMap<>();
 
     public static Locale BARREL_BREAK = new Locale("BARREL_BREAK");
     public static Locale BARREL_PLACE = new Locale("BARREL_PLACE");
@@ -51,6 +51,7 @@ public final class Locale {
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");
     public static Locale SPAWNER_BREAK_NOT_ENOUGH_MONEY = new Locale("SPAWNER_BREAK_NOT_ENOUGH_MONEY");
+    public static Locale SPAWNER_BREAK_WITHOUT_SILK = new Locale("SPAWNER_BREAK_WITHOUT_SILK");
     public static Locale SPAWNER_PLACE = new Locale("SPAWNER_PLACE");
     public static Locale SPAWNER_PLACE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_PLACE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_PLACE_BLOCKED = new Locale("SPAWNER_PLACE_BLOCKED");

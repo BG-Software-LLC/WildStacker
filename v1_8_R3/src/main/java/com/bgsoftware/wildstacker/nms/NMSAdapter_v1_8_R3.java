@@ -71,7 +71,6 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -259,7 +258,7 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
     @Override
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
+        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
         org.bukkit.World world = location.getWorld();
         int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
