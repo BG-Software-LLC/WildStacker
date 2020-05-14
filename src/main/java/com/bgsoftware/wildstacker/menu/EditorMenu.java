@@ -186,7 +186,9 @@ public abstract class EditorMenu extends WildMenu {
         List<ItemStack> itemStacks = new ArrayList<>(54);
         buildFromSection(itemStacks, holder.pathSlots, config.getConfigurationSection(pathPrefix), pathPrefix, ignorePaths, sectionsPaths);
 
-        Inventory inventory = Bukkit.createInventory(holder, ((itemStacks.size() / 9) + 1) * 9, title);
+        int size = Math.min(((itemStacks.size() / 9) + 1) * 9, 54);
+
+        Inventory inventory = Bukkit.createInventory(holder, size, title);
         inventory.setContents(Arrays.copyOf(itemStacks.toArray(new ItemStack[0]), inventory.getSize()));
 
         return inventory;

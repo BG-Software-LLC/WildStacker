@@ -11,7 +11,7 @@ public final class EditorSpawnersMenu extends EditorMenu {
     private final static EditorSpawnersMenu NULL_HOLDER = new EditorSpawnersMenu(null);
 
     private final static String[] ignorePaths = new String[] {
-            "break-menu", "break-charge", "place-charge"
+            "spawners.break-menu", "spawners.break-charge", "spawners.place-charge"
     };
 
     private final static String[] sectionsPaths = new String[] {
