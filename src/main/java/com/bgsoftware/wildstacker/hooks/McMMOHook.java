@@ -57,6 +57,9 @@ public final class McMMOHook {
 
         McMMOPlayer mcMMOPlayer = UserManager.getPlayer(attacker);
 
+        if(mcMMOPlayer == null)
+            return;
+
         Object skillType = null;
 
         if (ItemUtils.isSword(heldItem)) {
