@@ -76,8 +76,8 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         String mobName = Objects.requireNonNull(getCreatureName(entityId)).toLowerCase().replace(" ", "");
         int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
 
-        if (silkUtil.isValidItemAndHasSilkTouch(player.getInventory().getItemInHand()) &&
-                player.hasPermission("silkspawners.silkdrop." + mobName)) {
+        if (breakMenu || (silkUtil.isValidItemAndHasSilkTouch(player.getInventory().getItemInHand()) &&
+                player.hasPermission("silkspawners.silkdrop." + mobName))) {
             if (ss.mobs.contains("creatures." + entityId + ".silkDropChance")) {
                 dropChance = ss.mobs.getInt("creatures." + entityId + ".silkDropChance", 100);
             } else {

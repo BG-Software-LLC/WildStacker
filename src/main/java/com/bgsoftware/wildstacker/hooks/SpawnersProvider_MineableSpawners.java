@@ -68,7 +68,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     @Override
     public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
         EntityType entityType = stackedSpawner.getSpawnedType();
-        boolean bypassing = player.getGameMode().equals(GameMode.CREATIVE) || player.hasPermission("mineablespawners.bypass");
+        boolean bypassing = breakMenu || player.getGameMode().equals(GameMode.CREATIVE) || player.hasPermission("mineablespawners.bypass");
 
         if(!bypassing){
             if (plugin.getConfigurationHandler().getList("mining", "blacklisted-worlds").contains(player.getWorld().getName()))
