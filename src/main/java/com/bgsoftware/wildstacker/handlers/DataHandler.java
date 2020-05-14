@@ -405,6 +405,11 @@ public final class DataHandler {
         WildStackerPlugin.log("Loading barrels done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
 
         ChunksListener.loadedData = true;
+
+        for(World world : Bukkit.getWorlds()){
+            for(Chunk chunk : world.getLoadedChunks())
+                plugin.getSystemManager().handleChunkLoad(chunk);
+        }
     }
 
     private void loadOldChunkFile(Chunk chunk){
