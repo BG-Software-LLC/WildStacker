@@ -107,7 +107,10 @@ public final class SpawnersListener implements Listener {
         ItemStack limitItem = null;
         int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
 
-        if(e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
+        boolean stackPermission = e.getPlayer().hasPermission("wildstacker.stack.*") ||
+                e.getPlayer().hasPermission("wildstacker.stack." + spawnerType.name().toLowerCase());
+
+        if(stackPermission && e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack){
             replaceAir = true;
             spawnerItemAmount *= itemInHand.getAmount();
         }
@@ -139,8 +142,7 @@ public final class SpawnersListener implements Listener {
         Chunk chunk = e.getBlock().getChunk();
 
         //Stacking spawner
-        Optional<CreatureSpawner> spawnerOptional = e.getPlayer().hasPermission("wildstacker.stack.*") ||
-                e.getPlayer().hasPermission("wildstacker.stack." + spawnerType.name().toLowerCase()) ?
+        Optional<CreatureSpawner> spawnerOptional = stackPermission ?
                 stackedSpawner.runStack() : Optional.empty();
 
         if (!spawnerOptional.isPresent()) {
