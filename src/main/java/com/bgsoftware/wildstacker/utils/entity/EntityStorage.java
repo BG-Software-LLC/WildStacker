@@ -9,14 +9,11 @@ import java.util.WeakHashMap;
 
 public final class EntityStorage {
 
-    private static WeakHashMap<UUID, Map<String, Object>> entityStorage = new WeakHashMap<>();
+    private static final WeakHashMap<UUID, Map<String, Object>> entityStorage = new WeakHashMap<>();
 
     public static void setMetadata(Entity entity, String key, Object value){
         UUID uuid = entity.getUniqueId();
-        if(!entityStorage.containsKey(uuid))
-            entityStorage.put(uuid, new HashMap<>());
-
-        entityStorage.get(uuid).put(key, value);
+        entityStorage.computeIfAbsent(uuid, s -> new HashMap<>()).put(key, value);
     }
 
     public static boolean hasMetadata(Entity entity, String key){
