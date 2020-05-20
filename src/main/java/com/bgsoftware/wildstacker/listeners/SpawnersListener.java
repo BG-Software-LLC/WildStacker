@@ -369,39 +369,9 @@ public final class SpawnersListener implements Listener {
 
         multipleEntities = multipleEntities || minimumEntityRequirement > stackedSpawner.getStackAmount();
 
-        if(multipleEntities) {
-            if(stackedSpawner.getStackAmount() > 1) {
-                Executor.async(() -> {
-                    Set<Location> locationsToSpawn = new HashSet<>();
-                    Location location = e.getSpawner().getLocation();
-                    ThreadLocalRandom random = ThreadLocalRandom.current();
-                    for (int i = 0; i < stackedSpawner.getStackAmount() - 1; i++) {
-                        Location locationToSpawn = null;
-                        int tries = 0;
-
-                        while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(e.getEntity(), locationToSpawn)) && ++tries <= 5){
-                            locationToSpawn = new Location(location.getWorld(),
-                                    location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
-                                    location.getBlockY(),
-                                    location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
-                            );
-                        }
-
-                        locationsToSpawn.add(locationToSpawn);
-                    }
-                    Executor.sync(() -> {
-                        listenToSpawnEvent = false;
-                        for (Location toSpawn : locationsToSpawn) {
-                            StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, e.getEntityType().getEntityClass()));
-                            plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
-                            if(!callSpawnerSpawnEvent(targetEntity, stackedSpawner))
-                                stackedEntity.remove();
-                            targetEntity.updateNerfed();
-                        }
-                        listenToSpawnEvent = true;
-                    });
-                });
-            }
+        if(multipleEntities || stackedSpawner.getStackAmount() > stackedEntity.getStackLimit()) {
+            if(stackedSpawner.getStackAmount() > 1)
+                spawnEntities(stackedSpawner, stackedEntity, stackedSpawner.getStackAmount(), multipleEntities ? 1 : stackedEntity.getStackLimit());
         }
 
         else{
@@ -422,6 +392,58 @@ public final class SpawnersListener implements Listener {
         Bukkit.getPluginManager().callEvent(new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner));
 
         return true;
+    }
+
+    private void spawnEntities(StackedSpawner stackedSpawner, StackedEntity stackedEntity, int amountToSpawn, int limit){
+        Executor.async(() -> {
+            Location location = stackedSpawner.getLocation();
+            Entity entity = stackedEntity.getLivingEntity();
+
+            Set<Location> locationsToSpawn = new HashSet<>();
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            int entitiesToSpawn = (amountToSpawn / limit) + (amountToSpawn % limit != 0 ? 1 : 0);
+
+            stackedEntity.setStackAmount(limit, true);
+
+            if(entitiesToSpawn > 1) {
+                for (int i = 0; i < entitiesToSpawn - 1; i++) {
+                    Location locationToSpawn = null;
+                    int tries = 0;
+
+                    while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(entity, locationToSpawn)) && ++tries <= 5) {
+                        locationToSpawn = new Location(location.getWorld(),
+                                location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
+                                location.getBlockY(),
+                                location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
+                        );
+                    }
+
+                    locationsToSpawn.add(locationToSpawn);
+                }
+
+                Executor.sync(() -> {
+                    int leftEntities = amountToSpawn - limit;
+                    listenToSpawnEvent = false;
+                    for (Location toSpawn : locationsToSpawn) {
+                        if (leftEntities <= 0)
+                            break;
+
+                        StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
+                        plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
+
+                        if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {
+                            targetEntity.remove();
+                        } else {
+                            targetEntity.updateNerfed();
+                            targetEntity.setStackAmount(Math.min(leftEntities, limit), true);
+                        }
+
+                        leftEntities -= limit;
+                    }
+                    listenToSpawnEvent = true;
+                });
+            }
+        });
     }
 
     //Same as SilkSpawnersSpawnerChangeEvent, but will only work if SilkSpawners is disabled
