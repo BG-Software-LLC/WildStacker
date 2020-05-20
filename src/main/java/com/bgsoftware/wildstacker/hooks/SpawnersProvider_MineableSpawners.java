@@ -134,7 +134,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
         SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), amount));
         Bukkit.getPluginManager().callEvent(spawnerDropEvent);
 
-        Location toDrop = stackedSpawner.getLocation().add(0, 0.5, 0);
+        Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
         if (plugin.getConfigurationHandler().getBoolean("mining", "drop-to-inventory")) {
             ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);

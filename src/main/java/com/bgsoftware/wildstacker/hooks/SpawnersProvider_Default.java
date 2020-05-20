@@ -136,7 +136,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), brokenAmount));
         Bukkit.getPluginManager().callEvent(spawnerDropEvent);
 
-        Location toDrop = stackedSpawner.getLocation().add(0, 1, 0);
+        Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
         if (plugin.getSettings().dropToInventory && player != null) {
             ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);

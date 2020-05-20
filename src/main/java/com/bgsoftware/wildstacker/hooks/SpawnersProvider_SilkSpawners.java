@@ -99,7 +99,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), brokenAmount));
         Bukkit.getPluginManager().callEvent(spawnerDropEvent);
 
-        Location toDrop = stackedSpawner.getLocation().add(0, 0.5, 0);
+        Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
         if (ss.config.getBoolean("dropSpawnerToInventory", false) && player != null) {
             ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);

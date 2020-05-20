@@ -393,7 +393,16 @@ public final class ItemUtils {
         return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= 1;
     }
 
+    public static Location getSafeDropLocation(Location origin){
+        Location location;
 
+        if((location = origin.clone().add(0, 0.5, 0)).getBlock().getType() == Material.AIR)
+            return location;
+        else if((location = origin.clone().subtract(0, 0.5, 0)).getBlock().getType() == Material.AIR)
+            return location;
+
+        return origin;
+    }
 
     private static boolean canBeStacked(ItemStack itemStack, World world){
         return !plugin.getSettings().blacklistedItems.contains(itemStack) &&
