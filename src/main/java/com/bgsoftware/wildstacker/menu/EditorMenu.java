@@ -105,7 +105,7 @@ public abstract class EditorMenu extends WildMenu {
     public static void init(WildStackerPlugin plugin){
         File file = new File(plugin.getDataFolder(), "config.yml");
         config = CommentedConfiguration.loadConfiguration(file);
-        config.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
+        config.syncWithConfig(file, plugin.getResource("config.yml"), plugin.getSettings().CONFIG_IGNORED_SECTIONS);
     }
 
     public static void open(Player player){

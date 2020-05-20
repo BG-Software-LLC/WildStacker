@@ -11,7 +11,7 @@ public final class EditorEntitiesMenu extends EditorMenu {
     private final static EditorEntitiesMenu NULL_HOLDER = new EditorEntitiesMenu(null);
 
     private final static String[] sectionsPaths = new String[] {
-            "limits", "minimum-limits", "stack-checks", "stack-split", "default-unstack"
+            "limits", "minimum-required", "stack-checks", "stack-split", "default-unstack"
     };
 
     private EditorEntitiesMenu(Inventory inventory){

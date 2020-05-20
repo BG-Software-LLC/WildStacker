@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
+    public final String[] CONFIG_IGNORED_SECTIONS = {
+            "limits", "minimum-required", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge" };
 
     //Global settings
     public final String giveItemName;
@@ -113,7 +115,7 @@ public final class SettingsHandler {
 
         dataConvertor(cfg);
 
-        cfg.syncWithConfig(file, plugin.getResource("config.yml"), "limits", "minimum-limits", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge");
+        cfg.syncWithConfig(file, plugin.getResource("config.yml"), CONFIG_IGNORED_SECTIONS);
 
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&6x{0} &f&o{1} {2}"));
         SPAWNERS_PATTERN = Pattern.compile(giveItemName
