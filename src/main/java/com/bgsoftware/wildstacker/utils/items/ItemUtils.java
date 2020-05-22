@@ -68,7 +68,7 @@ public final class ItemUtils {
             return;
         }
 
-        if(itemStack.getType() == Material.AIR)
+        if(itemStack.getType() == Material.AIR || itemStack.getAmount() <= 0)
             return;
 
         int amount = itemStack.getAmount();
