@@ -286,10 +286,12 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
         int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
 
+        assert world != null;
+
         for(int x = minX; x <= maxX; x++){
             for(int z = minZ; z <= maxZ; z++){
-                Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
                 if(world.isChunkLoaded(x, z)) {
+                    Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
                     for (List<Entity> entitySlice : chunk.entitySlices) {
                         if (entitySlice != null) {
                             try {

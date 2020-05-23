@@ -265,8 +265,8 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
 
         for(int x = minX; x <= maxX; x++){
             for(int z = minZ; z <= maxZ; z++){
-                Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
                 if(world.isChunkLoaded(x, z)) {
+                    Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
                     for (List<Entity> entitySlice : chunk.entitySlices) {
                         if (entitySlice != null) {
                             try {
