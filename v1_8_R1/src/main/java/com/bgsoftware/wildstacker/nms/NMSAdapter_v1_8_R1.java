@@ -78,7 +78,6 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -261,29 +260,34 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
 
     @Override
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
-        int chunkRange = range % 16 == 0 ? range / 16 : (range / 16) + 1;
+        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
         org.bukkit.World world = location.getWorld();
-        int chunkX = location.getBlockX() >> 4, chunkZ = location.getBlockZ() >> 4;
+        int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
+        int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
 
-        for(int x = -chunkRange; x <= chunkRange; x++){
-            for(int z = -chunkRange; z <= chunkRange; z++){
-                Chunk chunk = ((CraftChunk) world.getChunkAt(chunkX + x, chunkZ + z)).getHandle();
-                //noinspection unchecked
-                for(List<Entity> entitySlice : chunk.entitySlices){
-                    if(entitySlice != null) {
-                        try {
-                            for (Entity entity : entitySlice)
-                                entities.add(entity.getBukkitEntity());
-                        }catch(Exception ignored){}
+        for(int x = minX; x <= maxX; x++){
+            for(int z = minZ; z <= maxZ; z++){
+                Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
+                if(world.isChunkLoaded(x, z)) {
+                    //noinspection unchecked
+                    for (List<Entity> entitySlice : chunk.entitySlices) {
+                        if (entitySlice != null) {
+                            try {
+                                for (Entity entity : entitySlice) {
+                                    if (GeneralUtils.isNearby(location, entity.getBukkitEntity().getLocation(), range) &&
+                                            (filter == null || filter.test(entity.getBukkitEntity()))) {
+                                        entities.add(entity.getBukkitEntity());
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        }
                     }
                 }
             }
         }
 
-        return entities.stream().filter(entity -> GeneralUtils.isNearby(location, entity.getLocation(), range) &&
-                (filter == null || filter.test(entity))).collect(Collectors.toSet());
+        return new HashSet<>(entities);
     }
 
     /*

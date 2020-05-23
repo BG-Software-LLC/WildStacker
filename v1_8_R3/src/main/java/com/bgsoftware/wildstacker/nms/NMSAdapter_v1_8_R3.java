@@ -71,13 +71,13 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -267,19 +267,24 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
         for(int x = minX; x <= maxX; x++){
             for(int z = minZ; z <= maxZ; z++){
                 Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
-                for(List<Entity> entitySlice : chunk.entitySlices){
-                    if(entitySlice != null) {
-                        try {
-                            for (Entity entity : entitySlice)
-                                entities.add(entity.getBukkitEntity());
-                        }catch(Exception ignored){}
+                if(world.isChunkLoaded(x, z)) {
+                    for (List<Entity> entitySlice : chunk.entitySlices) {
+                        if (entitySlice != null) {
+                            try {
+                                for (Entity entity : entitySlice) {
+                                    if (GeneralUtils.isNearby(location, entity.getBukkitEntity().getLocation(), range) &&
+                                            (filter == null || filter.test(entity.getBukkitEntity()))) {
+                                        entities.add(entity.getBukkitEntity());
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        }
                     }
                 }
             }
         }
 
-        return entities.stream().filter(entity -> GeneralUtils.isNearby(location, entity.getLocation(), range) &&
-                (filter == null || filter.test(entity))).collect(Collectors.toSet());
+        return new HashSet<>(entities);
     }
 
     /*
