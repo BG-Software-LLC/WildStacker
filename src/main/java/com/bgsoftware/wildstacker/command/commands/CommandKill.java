@@ -5,8 +5,8 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -64,7 +64,7 @@ public final class CommandKill implements ICommand {
         Set<EntityTypes> entityTypes = new HashSet<>();
         Set<SpawnCause> spawnCauses = new HashSet<>();
         IntegerValue integerValue = new IntegerValue(-1);
-        boolean applyTaskFilter = false;
+        boolean applyTaskFilter = true;
 
         if(args.length > 1){
             for(int i = 1; i < args.length; i++){
