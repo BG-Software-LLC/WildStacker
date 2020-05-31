@@ -619,7 +619,7 @@ spawners:
   # a spawner would be the same as the stack size of the spawner.
   eggs-stack-multiply: true
 
-  # Should there be the ablity to place spawners next to each other?
+  # Should there be the ability to place spawners next to each other?
   next-spawner-placement: true
 
   # Should there be only one spawner in the merge radius?
