@@ -829,7 +829,8 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
-            if(e.getTransformReason() != EntityTransformEvent.TransformReason.DROWNED)
+            if(e.getTransformReason() != EntityTransformEvent.TransformReason.DROWNED &&
+                    e.getTransformReason() != EntityTransformEvent.TransformReason.CURED)
                 return;
 
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
