@@ -144,9 +144,7 @@ public interface NMSAdapter {
      *   Tag methods
      */
 
-    Object getNBTTagCompound(LivingEntity livingEntity);
-
-    void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound);
+    void updateEntity(LivingEntity source, LivingEntity target);
 
     String serialize(ItemStack itemStack);
 

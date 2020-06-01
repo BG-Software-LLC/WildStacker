@@ -98,7 +98,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
     /*
@@ -513,20 +513,12 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
      */
 
     @Override
-    public Object getNBTTagCompound(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+    public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {
+        EntityLiving source = ((CraftLivingEntity) sourceBukkit).getHandle();
+        EntityLiving target = ((CraftLivingEntity) targetBukkit).getHandle();
+
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
-        entityLiving.b(nbtTagCompound);
-        return nbtTagCompound;
-    }
-
-    @Override
-    public void setNBTTagCompound(LivingEntity livingEntity, Object _nbtTagCompound) {
-        if(!(_nbtTagCompound instanceof NBTTagCompound))
-            return;
-
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        NBTTagCompound nbtTagCompound = (NBTTagCompound) _nbtTagCompound;
+        source.b(nbtTagCompound);
 
         nbtTagCompound.setFloat("Health", 20);
         nbtTagCompound.remove("SaddleItem");
@@ -535,10 +527,10 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         nbtTagCompound.remove("HandItems");
         nbtTagCompound.remove("Leash");
         nbtTagCompound.remove("Leashed");
-        if(livingEntity instanceof Zombie)
-            ((Zombie) livingEntity).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
+        if(targetBukkit instanceof Zombie)
+            ((Zombie) targetBukkit).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
 
-        entityLiving.a(nbtTagCompound);
+        target.a(nbtTagCompound);
     }
 
     @Override
@@ -660,9 +652,9 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @SuppressWarnings("deprecation")
     private static class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityMobSpawner> implements SyncedCreatureSpawner {
 
-        private World world;
-        private BlockPosition blockPosition;
-        private Location blockLocation;
+        private final World world;
+        private final BlockPosition blockPosition;
+        private final Location blockLocation;
 
         SyncedCreatureSpawnerImpl(Block block){
             super(block, TileEntityMobSpawner.class);
