@@ -59,6 +59,7 @@ public final class CommandTest implements ICommand {
 
         Executor.async(() -> {
             StringBuilder stringBuilder = new StringBuilder();
+            boolean shouldRestart = false;
 
             for(StackService.StackType stackType : StackService.StackType.values()){
                 boolean success = false;
@@ -67,8 +68,17 @@ public final class CommandTest implements ICommand {
                     success = completableFutures[stackType.getId()].get(1, TimeUnit.SECONDS);
                 }catch(Exception ignored){}
 
+                
                 stringBuilder.append("\n").append(ChatColor.YELLOW).append(stackType).append(" Stacking Thread Status: ")
                         .append(success ? ChatColor.GREEN + "ACTIVE" : ChatColor.RED + "INACTIVE");
+
+                if(!success)
+                    shouldRestart = true;
+            }
+
+            if(shouldRestart){
+                stringBuilder.append("\n").append(ChatColor.YELLOW).append("Performing thread restart...");
+                StackService.restart(world);
             }
 
             sender.sendMessage(stringBuilder.substring(1));
