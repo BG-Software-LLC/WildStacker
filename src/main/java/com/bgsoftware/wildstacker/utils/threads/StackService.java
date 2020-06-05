@@ -32,6 +32,13 @@ public final class StackService {
         stackServiceWorldMap.computeIfAbsent(world.getName(), stackServiceWorld -> new StackServiceWorld(world.getName())).add(stackType, runnable);
     }
 
+    public static void restart(World world){
+        StackServiceWorld stackServiceWorld = stackServiceWorldMap.get(world.getName());
+        if(stackServiceWorld != null)
+            stackServiceWorld.stop();
+        stackServiceWorldMap.put(world.getName(), new StackServiceWorld(world.getName()));
+    }
+
     public static boolean isStackThread(){
         long threadId = Thread.currentThread().getId();
         return stackServiceWorldMap.values().stream().anyMatch(stackServiceWorld -> stackServiceWorld.taskId[0] == threadId || stackServiceWorld.taskId[1] == threadId);

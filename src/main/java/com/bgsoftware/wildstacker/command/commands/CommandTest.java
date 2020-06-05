@@ -68,7 +68,7 @@ public final class CommandTest implements ICommand {
                     success = completableFutures[stackType.getId()].get(1, TimeUnit.SECONDS);
                 }catch(Exception ignored){}
 
-                
+
                 stringBuilder.append("\n").append(ChatColor.YELLOW).append(stackType).append(" Stacking Thread Status: ")
                         .append(success ? ChatColor.GREEN + "ACTIVE" : ChatColor.RED + "INACTIVE");
 
