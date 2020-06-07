@@ -123,6 +123,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     @Override
     public void onDisable() {
+        log("Cancelling tasks...");
+
         try{
             Bukkit.getScheduler().cancelAllTasks();
         }catch(Throwable ex){
@@ -131,15 +133,21 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             } catch (Exception ignored) { }
         }
 
+        StackService.stop();
+        Executor.stop();
+
         if(shouldEnable) {
             //We need to save the entire database
             systemManager.performCacheSave();
 
+            log("Clearing database...");
             //We need to close the connection
             dataHandler.clearDatabase();
 
+            log("Deleting spawner holograms...");
             for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
                 providersHandler.deleteHologram(stackedSpawner);
+            log("Deleting barrel holograms...");
             for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
                 providersHandler.deleteHologram(stackedBarrel);
                 stackedBarrel.getLocation().getChunk().load(true);
@@ -148,10 +156,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         EntityStorage.clearCache();
-
-        log("Terminating all database threads...");
-        Executor.stop();
-        StackService.stop();
     }
 
     private void loadAPI(){

@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -316,14 +315,13 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
-        SQLHelper.executeUpdate("DELETE FROM entities;");
-
         if(plugin.getSettings().storeEntities) {
-            Map<UUID, Pair<Integer, SpawnCause>> entityAmounts = new HashMap<>();
+            StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
 
             getStackedEntities().forEach(stackedEntity -> {
                 if (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
-                    entityAmounts.put(stackedEntity.getUniqueId(), new Pair<>(stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()));
+                    entityHolder.setString(stackedEntity.getUniqueId().toString()).setInt(stackedEntity.getStackAmount())
+                            .setString(stackedEntity.getSpawnCause().name()).addBatch();
                 } else {
                     removeStackObject(stackedEntity);
                 }
@@ -331,28 +329,27 @@ public final class SystemHandler implements SystemManager {
 
             new HashMap<>(dataHandler.CACHED_ENTITIES_RAW).forEach((uuid, pair) -> {
                 if (pair.getKey() > 1 || hasValidSpawnCause(pair.getValue())) {
-                    entityAmounts.put(uuid, new Pair<>(Math.max(entityAmounts.getOrDefault(uuid, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue()));
+                    entityHolder.setString(uuid.toString()).setInt(pair.getKey()).setString(pair.getValue().name()).addBatch();
                 } else {
                     dataHandler.CACHED_ENTITIES_RAW.remove(uuid);
                 }
             });
 
-            if(entityAmounts.size() > 0) {
-                StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
-                entityAmounts.forEach((uuid, pair) ->
-                    entityHolder.setString(uuid.toString()).setInt(pair.getKey()).setString(pair.getValue().name()).addBatch());
+            if(entityHolder.getBatchesSize() > 0) {
+                SQLHelper.executeUpdate("DELETE FROM entities;");
                 entityHolder.execute(false);
             }
         }
-
-        SQLHelper.executeUpdate("DELETE FROM items;");
+        else{
+            SQLHelper.executeUpdate("DELETE FROM entities;");
+        }
 
         if(plugin.getSettings().storeItems) {
-            Map<UUID, Integer> itemAmounts = new HashMap<>();
+            StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
 
             getStackedItems().forEach(stackedItem -> {
                 if (stackedItem.getStackAmount() > 1) {
-                    itemAmounts.put(stackedItem.getUniqueId(), stackedItem.getStackAmount());
+                    itemHolder.setString(stackedItem.getUniqueId().toString()).setInt(stackedItem.getStackAmount()).addBatch();
                 } else {
                     removeStackObject(stackedItem);
                 }
@@ -360,28 +357,27 @@ public final class SystemHandler implements SystemManager {
 
             new HashMap<>(dataHandler.CACHED_ITEMS_RAW).forEach((uuid, stackAmount) -> {
                 if (stackAmount > 1) {
-                    itemAmounts.put(uuid, Math.max(itemAmounts.getOrDefault(uuid, 1), stackAmount));
+                    itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch();
                 } else {
                     dataHandler.CACHED_ITEMS_RAW.remove(uuid);
                 }
             });
 
-            if(itemAmounts.size() > 0) {
-                StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
-                itemAmounts.forEach((uuid, stackAmount) ->
-                        itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch());
+            if(itemHolder.getBatchesSize() > 0) {
+                SQLHelper.executeUpdate("DELETE FROM items;");
                 itemHolder.execute(false);
             }
         }
-
-        SQLHelper.executeUpdate("DELETE FROM spawners;");
+        else{
+            SQLHelper.executeUpdate("DELETE FROM items;");
+        }
 
         {
-            Map<Location, Integer> spawnerAmounts = new HashMap<>();
+            StatementHolder spawnersHolder = Query.SPAWNER_INSERT.getStatementHolder();
 
             getStackedSpawners().forEach(stackedSpawner -> {
                 if (stackedSpawner.getStackAmount() > 1) {
-                    spawnerAmounts.put(stackedSpawner.getLocation(), stackedSpawner.getStackAmount());
+                    spawnersHolder.setLocation(stackedSpawner.getLocation()).setInt(stackedSpawner.getStackAmount()).addBatch();
                 } else {
                     removeStackObject(stackedSpawner);
                 }
@@ -389,36 +385,30 @@ public final class SystemHandler implements SystemManager {
 
             new HashMap<>(dataHandler.CACHED_SPAWNERS_RAW).forEach((location, stackAmount) -> {
                 if (stackAmount > 1) {
-                    spawnerAmounts.put(location, Math.max(spawnerAmounts.getOrDefault(location, 1), stackAmount));
+                    spawnersHolder.setLocation(location).setInt(stackAmount).addBatch();
                 } else {
                     dataHandler.CACHED_SPAWNERS_RAW.remove(location);
                 }
             });
 
-            if(spawnerAmounts.size() > 0) {
-                StatementHolder spawnersHolder = Query.SPAWNER_INSERT.getStatementHolder();
-                spawnerAmounts.forEach((location, stackAmount) ->
-                        spawnersHolder.setLocation(location).setInt(stackAmount).addBatch());
+            if(spawnersHolder.getBatchesSize() > 0) {
+                SQLHelper.executeUpdate("DELETE FROM spawners;");
                 spawnersHolder.execute(false);
             }
         }
 
-        SQLHelper.executeUpdate("DELETE FROM barrels;");
-
         {
-            Map<Location, Pair<Integer, ItemStack>> barrelAmounts = new HashMap<>();
+            StatementHolder barrelsHolder = Query.BARREL_INSERT.getStatementHolder();
 
             getStackedBarrels().forEach(stackedBarrel ->
-                barrelAmounts.put(stackedBarrel.getLocation(),
-                        new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1))));
+                    barrelsHolder.setLocation(stackedBarrel.getLocation()).setInt(stackedBarrel.getStackAmount())
+                    .setItemStack(stackedBarrel.getBarrelItem(1)).addBatch());
 
             new HashMap<>(dataHandler.CACHED_BARRELS_RAW).forEach((location, pair) ->
-                barrelAmounts.put(location, new Pair<>(Math.max(barrelAmounts.getOrDefault(location, new Pair<>(1, null)).getKey(), pair.getKey()), pair.getValue())));
+                    barrelsHolder.setLocation(location).setInt(pair.getKey()).setItemStack(pair.getValue()).addBatch());
 
-            if(barrelAmounts.size() > 0) {
-                StatementHolder barrelsHolder = Query.BARREL_INSERT.getStatementHolder();
-                barrelAmounts.forEach((location, pair) ->
-                        barrelsHolder.setLocation(location).setInt(pair.getKey()).setItemStack(pair.getValue()).addBatch());
+            if(barrelsHolder.getBatchesSize() > 0) {
+                SQLHelper.executeUpdate("DELETE FROM barrels;");
                 barrelsHolder.execute(false);
             }
         }
@@ -590,7 +580,7 @@ public final class SystemHandler implements SystemManager {
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
             WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
                 StackedItem stackedItem = WStackedItem.of(item);
-                stackedItem.setStackAmount(itemLimit, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+                stackedItem.setStackAmount(itemLimit, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
             }));
         }
 
@@ -599,7 +589,7 @@ public final class SystemHandler implements SystemManager {
         itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
         return WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
             StackedItem stackedItem = WStackedItem.of(item);
-            stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && !stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+            stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
         }));
     }
 

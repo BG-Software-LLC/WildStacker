@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class StatementHolder {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final List<Map<Integer, Object>> batches = new ArrayList<>();
 
@@ -72,11 +72,13 @@ public class StatementHolder {
     }
 
     public void addBatch(){
-        if(batches.isEmpty())
-            SQLHelper.setAutoCommit(false);
         batches.add(new HashMap<>(values));
         values.clear();
         currentIndex = 1;
+    }
+
+    public int getBatchesSize(){
+        return batches.size();
     }
 
     public void execute(boolean async) {
@@ -85,35 +87,30 @@ public class StatementHolder {
             return;
         }
 
-        try {
-            SQLHelper.waitForLock();
-
-            String errorQuery = query;
-            try (PreparedStatement preparedStatement = SQLHelper.buildStatement(query)) {
-                if (!batches.isEmpty()) {
-                    for (Map<Integer, Object> values : batches) {
-                        for (Map.Entry<Integer, Object> entry : values.entrySet()) {
-                            preparedStatement.setObject(entry.getKey(), entry.getValue());
-                            errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
-                        }
-                        preparedStatement.addBatch();
-                    }
-                    preparedStatement.executeBatch();
-                    SQLHelper.commit();
-                    SQLHelper.setAutoCommit(true);
-                } else {
+        String errorQuery = query;
+        try (PreparedStatement preparedStatement = SQLHelper.buildStatement(query)) {
+            if (!batches.isEmpty()) {
+                SQLHelper.setAutoCommit(false);
+                for (Map<Integer, Object> values : batches) {
                     for (Map.Entry<Integer, Object> entry : values.entrySet()) {
                         preparedStatement.setObject(entry.getKey(), entry.getValue());
                         errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
                     }
-                    preparedStatement.executeUpdate();
+                    preparedStatement.addBatch();
                 }
-            } catch (SQLException ex) {
-                WildStackerPlugin.log("Failed to execute query " + errorQuery);
-                ex.printStackTrace();
+                preparedStatement.executeBatch();
+                SQLHelper.commit();
+                SQLHelper.setAutoCommit(true);
+            } else {
+                for (Map.Entry<Integer, Object> entry : values.entrySet()) {
+                    preparedStatement.setObject(entry.getKey(), entry.getValue());
+                    errorQuery = errorQuery.replaceFirst("\\?", entry.getValue() + "");
+                }
+                preparedStatement.executeUpdate();
             }
-        } finally {
-            SQLHelper.releaseLock();
+        } catch (SQLException ex) {
+            WildStackerPlugin.log("Failed to execute query " + errorQuery);
+            ex.printStackTrace();
         }
     }
 
