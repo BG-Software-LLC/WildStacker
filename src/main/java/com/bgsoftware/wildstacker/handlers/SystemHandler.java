@@ -117,14 +117,18 @@ public final class SystemHandler implements SystemManager {
                 dataHandler.CACHED_ENTITIES.remove(livingEntity.getUniqueId());
         }, 10L);
 
+        Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.get(livingEntity.getUniqueId());
+        if(entityData != null)
+            stackedEntity.setSpawnCause(entityData.getValue());
+
         boolean shouldBeCached = ((WStackedEntity) stackedEntity).isCached();
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
             dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
 
-        Pair<Integer, SpawnCause> entityData = shouldBeCached ? dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId()) :
-                dataHandler.CACHED_ENTITIES_RAW.get(livingEntity.getUniqueId());
+        if(shouldBeCached)
+            dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
 
         if(entityData != null){
             stackedEntity.setStackAmount(entityData.getKey(), true);
@@ -370,47 +374,6 @@ public final class SystemHandler implements SystemManager {
         }
         else{
             SQLHelper.executeUpdate("DELETE FROM items;");
-        }
-
-        {
-            StatementHolder spawnersHolder = Query.SPAWNER_INSERT.getStatementHolder();
-
-            getStackedSpawners().forEach(stackedSpawner -> {
-                if (stackedSpawner.getStackAmount() > 1) {
-                    spawnersHolder.setLocation(stackedSpawner.getLocation()).setInt(stackedSpawner.getStackAmount()).addBatch();
-                } else {
-                    removeStackObject(stackedSpawner);
-                }
-            });
-
-            new HashMap<>(dataHandler.CACHED_SPAWNERS_RAW).forEach((location, stackAmount) -> {
-                if (stackAmount > 1) {
-                    spawnersHolder.setLocation(location).setInt(stackAmount).addBatch();
-                } else {
-                    dataHandler.CACHED_SPAWNERS_RAW.remove(location);
-                }
-            });
-
-            if(spawnersHolder.getBatchesSize() > 0) {
-                SQLHelper.executeUpdate("DELETE FROM spawners;");
-                spawnersHolder.execute(false);
-            }
-        }
-
-        {
-            StatementHolder barrelsHolder = Query.BARREL_INSERT.getStatementHolder();
-
-            getStackedBarrels().forEach(stackedBarrel ->
-                    barrelsHolder.setLocation(stackedBarrel.getLocation()).setInt(stackedBarrel.getStackAmount())
-                    .setItemStack(stackedBarrel.getBarrelItem(1)).addBatch());
-
-            new HashMap<>(dataHandler.CACHED_BARRELS_RAW).forEach((location, pair) ->
-                    barrelsHolder.setLocation(location).setInt(pair.getKey()).setItemStack(pair.getValue()).addBatch());
-
-            if(barrelsHolder.getBatchesSize() > 0) {
-                SQLHelper.executeUpdate("DELETE FROM barrels;");
-                barrelsHolder.execute(false);
-            }
         }
     }
 
