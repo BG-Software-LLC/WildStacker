@@ -49,10 +49,7 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
-                .setInt(getStackAmount())
-                .setLocation(getLocation())
-                .execute(true);
+        plugin.getDataHandler().updateSpawner(this);
     }
 
     @Override

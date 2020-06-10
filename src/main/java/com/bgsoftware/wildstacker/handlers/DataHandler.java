@@ -101,6 +101,23 @@ public final class DataHandler {
         });
     }
 
+    public void updateSpawner(StackedSpawner stackedSpawner){
+        Executor.data(() -> {
+            if(containsSpawner(stackedSpawner)){
+                Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
+                        .setInt(stackedSpawner.getStackAmount())
+                        .setLocation(stackedSpawner.getLocation())
+                        .execute(false);
+            }
+            else{
+                Query.SPAWNER_INSERT.getStatementHolder()
+                        .setLocation(stackedSpawner.getLocation())
+                        .setInt(stackedSpawner.getStackAmount())
+                        .execute(false);
+            }
+        });
+    }
+
     public void insertBarrel(StackedBarrel stackedBarrel){
         Executor.data(() -> {
             Query.BARREL_DELETE.getStatementHolder()
@@ -114,8 +131,22 @@ public final class DataHandler {
         });
     }
 
-    private boolean containsSpawner(StackedSpawner stackedSpawner){
-        return SQLHelper.doesConditionExist(String.format("SELECT * FROM spawners WHERE location = '%s';", SQLHelper.getLocation(stackedSpawner.getLocation())));
+    public void updateBarrel(StackedBarrel stackedBarrel){
+        Executor.data(() -> {
+            if(containsBarrel(stackedBarrel)){
+                Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
+                        .setInt(stackedBarrel.getStackAmount())
+                        .setLocation(stackedBarrel.getLocation())
+                        .execute(false);
+            }
+            else{
+                Query.BARREL_INSERT.getStatementHolder()
+                        .setLocation(stackedBarrel.getLocation())
+                        .setInt(stackedBarrel.getStackAmount())
+                        .setItemStack(stackedBarrel.getBarrelItem(1))
+                        .execute(false);
+            }
+        });
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner){
@@ -142,6 +173,14 @@ public final class DataHandler {
         Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
         if(chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
+    }
+
+    private boolean containsSpawner(StackedSpawner stackedSpawner){
+        return SQLHelper.doesConditionExist(String.format("SELECT * FROM spawners WHERE location = '%s';", SQLHelper.getLocation(stackedSpawner.getLocation())));
+    }
+
+    private boolean containsBarrel(StackedBarrel stackedBarrel){
+        return SQLHelper.doesConditionExist(String.format("SELECT * FROM barrels WHERE location = '%s';", SQLHelper.getLocation(stackedBarrel.getLocation())));
     }
 
     private void loadOldFiles(){

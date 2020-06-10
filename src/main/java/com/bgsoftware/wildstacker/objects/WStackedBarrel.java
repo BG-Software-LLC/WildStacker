@@ -43,10 +43,7 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
-                .setInt(getStackAmount())
-                .setLocation(getLocation())
-                .execute(true);
+        plugin.getDataHandler().updateBarrel(this);
     }
 
     @Override
