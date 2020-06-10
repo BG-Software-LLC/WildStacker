@@ -1,13 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,29 +9,53 @@ import java.util.stream.Collectors;
 
 public final class WorldGuardHook {
 
-    public static List<String> getRegionsName(org.bukkit.Location bukkitLocation){
-        if(PluginHooks.isWorldGuardEnabled) {
-            try {
-                ApplicableRegionSet applicableRegionSet;
-                try {
-                    RegionContainer regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
-                    RegionQuery regionQuery = regionContainer.createQuery();
-                    Location location = new Location(new BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
-                    applicableRegionSet = regionQuery.getApplicableRegions(location);
-                } catch (Throwable ex) {
-                    com.sk89q.worldguard.bukkit.RegionContainer regionContainer;
+    private static final WorldGuardProvider worldGuardProvider;
 
-                    //noinspection JavaReflectionMemberAccess
-                    regionContainer = (com.sk89q.worldguard.bukkit.RegionContainer)
-                            WorldGuardPlugin.class.getMethod("getRegionContainer").invoke(WorldGuardPlugin.inst());
-
-                    com.sk89q.worldguard.bukkit.RegionQuery regionQuery = regionContainer.createQuery();
-                    applicableRegionSet = regionQuery.getApplicableRegions(bukkitLocation);
-                }
-                return applicableRegionSet.getRegions().stream().map(ProtectedRegion::getId).collect(Collectors.toList());
-            }catch(Throwable ignored){}
+    static {
+        if(ReflectionUtils.isPluginEnabled("com.sk89q.worldguard.protection.regions.RegionContainer")){
+            worldGuardProvider = new WorldGuardProvider() {};
         }
-        return new ArrayList<>();
+        else{
+            worldGuardProvider = newOldInstance();
+        }
+    }
+
+    public static List<String> getRegionsName(org.bukkit.Location bukkitLocation){
+        return PluginHooks.isWorldGuardEnabled ? worldGuardProvider.getRegionNames(bukkitLocation) : new ArrayList<>();
+    }
+
+    public static boolean hasClaimAccess(Player player, org.bukkit.Location bukkitLocation){
+        return !PluginHooks.isWorldGuardEnabled || worldGuardProvider.hasClaimAccess(player, bukkitLocation);
+    }
+
+    public interface WorldGuardProvider{
+
+        default List<String> getRegionNames(org.bukkit.Location bukkitLocation){
+            com.sk89q.worldguard.protection.regions.RegionContainer regionContainer = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getRegionContainer();
+            com.sk89q.worldguard.protection.regions.RegionQuery regionQuery = regionContainer.createQuery();
+            com.sk89q.worldedit.util.Location location = new com.sk89q.worldedit.util.Location(new com.sk89q.worldedit.bukkit.BukkitWorld(bukkitLocation.getWorld()), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
+            com.sk89q.worldguard.protection.ApplicableRegionSet applicableRegionSet = regionQuery.getApplicableRegions(location);
+            return applicableRegionSet.getRegions().stream().map(com.sk89q.worldguard.protection.regions.ProtectedRegion::getId)
+                    .collect(Collectors.toList());
+        }
+
+        default boolean hasClaimAccess(Player player, org.bukkit.Location bukkitLocation){
+            com.sk89q.worldguard.internal.platform.WorldGuardPlatform worldGuardPlatform = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform();
+            com.sk89q.worldguard.protection.regions.RegionContainer regionContainer = worldGuardPlatform.getRegionContainer();
+            com.sk89q.worldguard.protection.regions.RegionQuery regionQuery = regionContainer.createQuery();
+            com.sk89q.worldguard.LocalPlayer localPlayer = com.sk89q.worldguard.bukkit.WorldGuardPlugin.inst().wrapPlayer(player);
+            com.sk89q.worldedit.util.Location location = new com.sk89q.worldedit.util.Location(localPlayer.getExtent(), bukkitLocation.getX(), bukkitLocation.getY(), bukkitLocation.getZ());
+            return worldGuardPlatform.getSessionManager().hasBypass(localPlayer, com.sk89q.worldedit.bukkit.BukkitAdapter.adapt(bukkitLocation.getWorld())) || regionQuery.testBuild(location, localPlayer);
+        }
+
+    }
+
+    private static WorldGuardProvider newOldInstance(){
+        try{
+            return (WorldGuardProvider) Class.forName("com.bgsoftware.wildstacker.hooks.WorldGuardHook_Old").newInstance();
+        }catch(Throwable ex){
+            return new WorldGuardProvider() {};
+        }
     }
 
 }

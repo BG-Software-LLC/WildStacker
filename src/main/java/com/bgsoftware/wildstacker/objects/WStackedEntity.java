@@ -247,7 +247,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 plugin.getNMSAdapter().canBeBred((Ageable) object) != plugin.getNMSAdapter().canBeBred((Ageable) targetEntity.getLivingEntity()))
             return StackCheckResult.BREED_STATUS;
 
-        if(PluginHooks.isWorldGuardEnabled) {
+        if(PluginHooks.isWorldGuardEnabled && !plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
             Set<String> regions = new HashSet<>();
             regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
             regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
