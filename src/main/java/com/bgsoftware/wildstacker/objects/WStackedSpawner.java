@@ -207,8 +207,6 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
             }
         }
 
-        updateName();
-
         return Optional.empty();
     }
 

@@ -189,8 +189,6 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
             }
         }
 
-        updateName();
-
         return Optional.empty();
     }
 

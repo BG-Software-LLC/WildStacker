@@ -192,7 +192,7 @@ public final class SystemHandler implements SystemManager {
         //Checks if the spawner still exists after a few ticks
         Executor.sync(() -> {
             if(!isStackedSpawner(location.getBlock()))
-                dataHandler.removeStackedSpawner(STACKED_SPAWNER);
+                STACKED_SPAWNER.remove();
         }, 10L);
 
         //A new spawner was created. Let's see if we need to add him
@@ -217,18 +217,18 @@ public final class SystemHandler implements SystemManager {
         //Barrel wasn't found, creating a new object
         stackedBarrel = new WStackedBarrel(location.getBlock(), ItemUtils.getFromBlock(location.getBlock()));
 
-        //Checks if the barrel still exists after a few ticks
-        Executor.sync(() -> {
-            if(isStackedBarrel(location.getBlock()))
-                WStackedBarrel.of(location.getBlock()).createDisplayBlock();
-        }, 2L);
-
         StackedBarrel STACKED_BARREL = stackedBarrel;
 
         //Checks if the barrel still exists after a few ticks
         Executor.sync(() -> {
+            if(isStackedBarrel(location.getBlock()))
+                STACKED_BARREL.createDisplayBlock();
+        }, 2L);
+
+        //Checks if the barrel still exists after a few ticks
+        Executor.sync(() -> {
             if(!isStackedBarrel(location.getBlock()))
-                dataHandler.removeStackedBarrel(STACKED_BARREL);
+                STACKED_BARREL.remove();
         }, 10L);
 
         //A new barrel was created. Let's see if we need to add him

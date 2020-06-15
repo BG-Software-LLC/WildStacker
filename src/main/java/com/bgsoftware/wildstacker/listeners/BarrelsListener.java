@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -134,8 +135,21 @@ public final class BarrelsListener implements Listener {
             plugin.getDataHandler().insertBarrel(stackedBarrel);
 
             e.getBlockPlaced().setType(Material.CAULDRON);
-            stackedBarrel.createDisplayBlock();
 
+            if(ServerVersion.isLessThan(ServerVersion.v1_9)){
+                Executor.sync(() -> {
+                    if(e.getBlockPlaced().getType() != Material.CAULDRON)
+                        return;
+
+                    stackedBarrel.updateName();
+                    Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+
+                    finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+                }, 1L);
+                return;
+            }
+
+            stackedBarrel.updateName();
             Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
         }
         else {
@@ -147,11 +161,15 @@ public final class BarrelsListener implements Listener {
             Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
         }
 
-        //Removing item from player's inventory
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE && REPLACE_AIR)
-            ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, new ItemStack(Material.AIR));
+        finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+    }
 
-        CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
+    private void finishBarrelPlace(Player player, ItemStack inHand, StackedBarrel stackedBarrel, boolean replaceAir){
+        //Removing item from player's inventory
+        if(player.getGameMode() != GameMode.CREATIVE && replaceAir)
+            ItemUtils.setItemInHand(player.getInventory(), inHand, new ItemStack(Material.AIR));
+
+        CoreProtectHook.recordBlockChange(player, stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

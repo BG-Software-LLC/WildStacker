@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -186,6 +187,25 @@ public final class SpawnersListener implements Listener {
             }
 
             plugin.getDataHandler().insertSpawner(stackedSpawner);
+
+            if(ServerVersion.isLessThan(ServerVersion.v1_9)){
+                boolean REPLACE_AIR = replaceAir;
+                ItemStack LIMIT_ITEM = limitItem;
+                int SPAWNER_ITEM_AMOUNT = spawnerItemAmount;
+
+                Executor.sync(() -> {
+                    if(e.getBlockPlaced().getType() != Materials.SPAWNER.toBukkitType())
+                        return;
+
+                    stackedSpawner.updateName();
+
+                    finishSpawnerPlace(e.getPlayer(), amountToCharge, REPLACE_AIR, itemInHand, LIMIT_ITEM, spawnerType, SPAWNER_ITEM_AMOUNT);
+                }, 1L);
+
+                return;
+            }
+
+            stackedSpawner.updateName();
         } else {
             e.setCancelled(true);
 
@@ -198,17 +218,7 @@ public final class SpawnersListener implements Listener {
             spawnerItemAmount = targetSpawner.getStackAmount();
         }
 
-        if(amountToCharge > 0)
-            EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
-
-        //Removing item from player's inventory
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE && replaceAir)
-            ItemUtils.setItemInHand(e.getPlayer().getInventory(), itemInHand, new ItemStack(Material.AIR));
-
-        if(limitItem != null)
-            ItemUtils.addItem(limitItem, e.getPlayer().getInventory(), e.getPlayer().getLocation());
-
-        Locale.SPAWNER_PLACE.send(e.getPlayer(), EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, amountToCharge);
+        finishSpawnerPlace(e.getPlayer(), amountToCharge, replaceAir, itemInHand, limitItem, spawnerType, spawnerItemAmount);
     }
 
     private void revokeItem(Player player, ItemStack itemInHand){
@@ -218,6 +228,20 @@ public final class SpawnersListener implements Listener {
             //Using this method as remove() doesn't affect off hand
             ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
         }
+    }
+
+    private void finishSpawnerPlace(Player player, double amountToCharge, boolean replaceAir, ItemStack itemInHand, ItemStack limitItem, EntityType spawnerType, int spawnerItemAmount){
+        if(amountToCharge > 0)
+            EconomyHook.withdrawMoney(player, amountToCharge);
+
+        //Removing item from player's inventory
+        if(player.getGameMode() != GameMode.CREATIVE && replaceAir)
+            ItemUtils.setItemInHand(player.getInventory(), itemInHand, new ItemStack(Material.AIR));
+
+        if(limitItem != null)
+            ItemUtils.addItem(limitItem, player.getInventory(), player.getLocation());
+
+        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, amountToCharge);
     }
 
     //Priority is high so it can be fired before SilkSpawners
