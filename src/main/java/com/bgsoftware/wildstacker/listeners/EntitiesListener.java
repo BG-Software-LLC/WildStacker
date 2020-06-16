@@ -37,6 +37,7 @@ import org.bukkit.block.Beehive;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -186,9 +187,11 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
+        Entity entityDamager = null;
         Player damager = null;
 
         if (e instanceof EntityDamageByEntityEvent) {
+            entityDamager = ((EntityDamageByEntityEvent) e).getDamager();
             if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
                 damager = (Player) ((EntityDamageByEntityEvent) e).getDamager();
             }
@@ -220,7 +223,7 @@ public final class EntitiesListener implements Listener {
                 e.setCancelled(true);
 
             if(damager != null)
-                McMMOHook.handleCombat(damager, livingEntity, e.getFinalDamage());
+                McMMOHook.handleCombat(damager, entityDamager, livingEntity, e.getFinalDamage());
 
             e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());

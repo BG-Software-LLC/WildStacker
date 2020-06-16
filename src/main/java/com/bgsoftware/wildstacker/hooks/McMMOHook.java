@@ -9,11 +9,14 @@ import com.gmail.nossr50.datatypes.skills.SkillType;
 import com.gmail.nossr50.util.ItemUtils;
 import com.gmail.nossr50.util.player.UserManager;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -49,7 +52,7 @@ public final class McMMOHook {
         }
     }
 
-    public static void handleCombat(Player attacker, LivingEntity target, double finalDamage){
+    public static void handleCombat(Player attacker, Entity entityAttacker, LivingEntity target, double finalDamage){
         if(mcMMO == null)
             return;
 
@@ -62,7 +65,27 @@ public final class McMMOHook {
 
         Object skillType = null;
 
-        if (ItemUtils.isSword(heldItem)) {
+        if(entityAttacker instanceof Wolf){
+            if (!shouldProcess(target, "TAMING")) {
+                return;
+            }
+
+            if (getPermissions(attacker, "TAMING")) {
+                skillType = getSkill("TAMING");
+            }
+        }
+
+        else if(entityAttacker instanceof Arrow){
+            if (!shouldProcess(target, "ARCHERY")) {
+                return;
+            }
+
+            if (getPermissions(attacker, "ARCHERY")) {
+                skillType = getSkill("ARCHERY");
+            }
+        }
+
+        else if (ItemUtils.isSword(heldItem)) {
             if (!shouldProcess(target, "SWORDS")) {
                 return;
             }
