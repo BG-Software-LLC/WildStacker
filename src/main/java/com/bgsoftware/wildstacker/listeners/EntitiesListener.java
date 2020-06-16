@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
+import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
@@ -371,8 +372,8 @@ public final class EntitiesListener implements Listener {
                     Player killer = livingEntity.getKiller();
 
                     try {
-                        killer.incrementStatistic(Statistic.MOB_KILLS, stackAmount);
-                        killer.incrementStatistic(Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, stackAmount);
+                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
                     } catch (IllegalArgumentException ignored) { }
 
                     //Achievements
