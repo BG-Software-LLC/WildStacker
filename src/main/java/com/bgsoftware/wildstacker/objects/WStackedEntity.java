@@ -622,7 +622,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public boolean hasNameTag() {
         String name = object.getCustomName();
-        return StackCheck.NAME_TAG.isEnabled() && name != null &&
+        return StackCheck.NAME_TAG.isEnabled() && name != null && !name.isEmpty() &&
                 !plugin.getSettings().entitiesCustomNamePattern.matcher(name).matches();
     }
 
