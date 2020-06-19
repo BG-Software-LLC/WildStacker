@@ -2,19 +2,17 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import net.brcdev.shopgui.ShopGuiPlusApi;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
 public final class ShopGUIPlusHook {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static void setEnabled(){
         if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
@@ -32,20 +30,12 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(EntityType entityType) {
-            return ItemUtils.getSpawnerItem(entityType, 1);
+            return plugin.getProviders().getSpawnerItem(entityType, 1);
         }
 
         @Override
         public EntityType getSpawnerEntityType(ItemStack itemStack) {
-            EntityType entityType = EntityType.UNKNOWN;
-
-            if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
-                BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-                CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
-                entityType = creatureSpawner.getSpawnedType();
-            }
-
-            return entityType;
+            return plugin.getProviders().getSpawnerType(itemStack);
         }
 
         boolean register(){
@@ -70,21 +60,12 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(String entityId, String customName) {
-            return ItemUtils.getSpawnerItem(EntityType.valueOf(entityId), 1);
+            return plugin.getProviders().getSpawnerItem(EntityType.valueOf(entityId), 1);
         }
 
         @Override
         public String getSpawnerEntityId(ItemStack itemStack) {
-            String entityId = EntityType.PIG.name();
-
-            if(itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
-                BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
-                CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
-
-                entityId = creatureSpawner.getSpawnedType().name();
-            }
-
-            return entityId;
+            return plugin.getProviders().getSpawnerType(itemStack).name();
         }
 
         @Override
