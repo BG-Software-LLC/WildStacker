@@ -289,10 +289,14 @@ public final class EntitiesListener implements Listener {
 
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
 
+                        boolean spawnDuplicate = false;
+
                         if(!noDeathEvent.contains(e.getEntity().getUniqueId()))
                             Bukkit.getPluginManager().callEvent(entityDeathEvent);
-                        else
+                        else {
+                            spawnDuplicate = true;
                             noDeathEvent.remove(e.getEntity().getUniqueId());
+                        }
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
 
@@ -362,6 +366,12 @@ public final class EntitiesListener implements Listener {
                         }
 
                         ((WStackedEntity) stackedEntity).setDeadFlag(false);
+
+                        if(spawnDuplicate && stackedEntity.getStackAmount() > 1){
+                            stackedEntity.spawnDuplicate(stackedEntity.getStackAmount());
+                            stackedEntity.remove();
+                        }
+
                     });
                 });
 
