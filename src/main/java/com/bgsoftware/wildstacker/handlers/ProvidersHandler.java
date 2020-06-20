@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.hooks.HologramsProvider_Holograms;
 import com.bgsoftware.wildstacker.hooks.HologramsProvider_HolographicDisplays;
 import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
+import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
@@ -188,6 +189,8 @@ public final class ProvidersHandler {
             ShopGUIPlusHook.setEnabled();
         if(isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
             JobsHook.setEnabled(enable);
+        if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
+            PluginHook_FabledSkyblock.register(plugin);
     }
 
     private boolean isPlugin(Plugin plugin, String pluginName){
