@@ -599,7 +599,7 @@ public final class SpawnersListener implements Listener {
                             ItemStack itemStack = e.getClickedInventory().getItem(i);
                             if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
                                 if (plugin.getProviders().getSpawnerType(itemStack) == entityType) {
-                                    newCursorAmount += ItemUtils.getSpawnerItemAmount(itemStack);
+                                    newCursorAmount += ItemUtils.getSpawnerItemAmount(itemStack) * itemStack.getAmount();
                                     e.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
                                 }
                             }
