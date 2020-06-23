@@ -23,6 +23,7 @@ import net.minecraft.server.v1_14_R1.EntityItem;
 import net.minecraft.server.v1_14_R1.EntityLiving;
 import net.minecraft.server.v1_14_R1.EntityPlayer;
 import net.minecraft.server.v1_14_R1.EntityPositionTypes;
+import net.minecraft.server.v1_14_R1.EntityRaider;
 import net.minecraft.server.v1_14_R1.EntityTypes;
 import net.minecraft.server.v1_14_R1.EntityVillager;
 import net.minecraft.server.v1_14_R1.EntityZombieVillager;
@@ -516,6 +517,13 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     @Override
     public Object getBlockData(Material type, short data) {
         return CraftBlockData.fromData(CraftMagicNumbers.getBlock(type, (byte) data));
+    }
+
+    @Override
+    public void attemptJoinRaid(Player player, org.bukkit.entity.Entity raider) {
+        EntityRaider entityRaider = (EntityRaider) ((CraftEntity) raider).getHandle();
+        if(entityRaider.ek())
+            entityRaider.ej().a((Entity) ((CraftPlayer) player).getHandle());
     }
 
     /*

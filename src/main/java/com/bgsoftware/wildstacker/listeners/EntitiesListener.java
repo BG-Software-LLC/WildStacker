@@ -343,6 +343,8 @@ public final class EntitiesListener implements Listener {
                                         false
                                 ));
                             }
+
+                            plugin.getNMSAdapter().attemptJoinRaid(livingEntity.getKiller(), raider);
                         }
 
                         //Decrease durability when next-stack-knockback is false

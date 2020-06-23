@@ -140,6 +140,10 @@ public interface NMSAdapter {
         throw new UnsupportedOperationException("Not supported in this Minecraft version.");
     }
 
+    default void attemptJoinRaid(Player player, Entity raider){
+
+    }
+
     /*
      *   Tag methods
      */
