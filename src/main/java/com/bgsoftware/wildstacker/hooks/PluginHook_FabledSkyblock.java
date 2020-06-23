@@ -13,7 +13,13 @@ import com.songoda.skyblock.levelling.rework.IslandScan;
 import com.songoda.skyblock.levelling.rework.amount.BlockAmount;
 import com.songoda.skyblock.levelling.rework.calculator.Calculator;
 import com.songoda.skyblock.levelling.rework.calculator.CalculatorRegistry;
+import com.songoda.skyblock.permission.BasicPermission;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -71,6 +77,23 @@ public final class PluginHook_FabledSkyblock implements Calculator {
         PluginHook_FabledSkyblock calculator = new PluginHook_FabledSkyblock(plugin);
         CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.SPAWNER);
         CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.CAULDRON);
+        Bukkit.getPluginManager().registerEvents(new FabledListener(), plugin);
+    }
+
+    private static final class FabledListener implements Listener{
+
+        @EventHandler(priority = EventPriority.LOW)
+        public void onCauldronInteract(PlayerInteractEvent e){
+            if(e.getClickedBlock() == null || !e.getClickedBlock().getType().name().contains("CAULDRON"))
+                return;
+
+            Island island = SkyBlock.getInstance().getIslandManager().getIslandAtLocation(e.getClickedBlock().getLocation());
+            BasicPermission destroyPermission = SkyBlock.getInstance().getPermissionManager().getPermission("Destroy");
+
+            if(island != null && !island.hasPermission(island.getRole(e.getPlayer()), destroyPermission))
+                e.setCancelled(true);
+        }
+
     }
 
 }
