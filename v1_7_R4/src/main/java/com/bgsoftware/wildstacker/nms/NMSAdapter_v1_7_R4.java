@@ -254,14 +254,14 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
         List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
-        org.bukkit.World world = location.getWorld();
+        World world = ((CraftWorld) location.getWorld()).getHandle();
         int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
         int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
 
         for(int x = minX; x <= maxX; x++){
             for(int z = minZ; z <= maxZ; z++){
-                if(world.isChunkLoaded(x, z)) {
-                    Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
+                Chunk chunk = world.getChunkIfLoaded(x, z);
+                if(chunk != null) {
                     //noinspection unchecked
                     for (List<Entity> entitySlice : (List<Entity>[]) chunk.entitySlices) {
                         if (entitySlice != null) {

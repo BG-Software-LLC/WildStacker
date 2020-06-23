@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_7_R3.BlockRotatable;
 import net.minecraft.server.v1_7_R3.Chunk;
 import net.minecraft.server.v1_7_R3.ChunkPosition;
+import net.minecraft.server.v1_7_R3.ChunkProviderServer;
 import net.minecraft.server.v1_7_R3.Entity;
 import net.minecraft.server.v1_7_R3.EntityAgeable;
 import net.minecraft.server.v1_7_R3.EntityAnimal;
@@ -49,6 +50,7 @@ import org.bukkit.craftbukkit.v1_7_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_7_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_7_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_7_R3.util.LongHash;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Ageable;
@@ -254,14 +256,14 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
         List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
-        org.bukkit.World world = location.getWorld();
+        World world = ((CraftWorld) location.getWorld()).getHandle();
         int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
         int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
 
         for(int x = minX; x <= maxX; x++){
             for(int z = minZ; z <= maxZ; z++){
-                if(world.isChunkLoaded(x, z)) {
-                    Chunk chunk = ((CraftChunk) world.getChunkAt(x, z)).getHandle();
+                Chunk chunk = ((ChunkProviderServer) world.chunkProvider).chunks.get(LongHash.toLong(x, z));
+                if(chunk != null) {
                     //noinspection unchecked
                     for (List<Entity> entitySlice : (List<Entity>[]) chunk.entitySlices) {
                         if (entitySlice != null) {
