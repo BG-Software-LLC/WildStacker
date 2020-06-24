@@ -187,8 +187,6 @@ public final class SpawnersListener implements Listener {
                 return;
             }
 
-            plugin.getDataHandler().insertSpawner(stackedSpawner);
-
             if(ServerVersion.isLessThan(ServerVersion.v1_9)){
                 boolean REPLACE_AIR = replaceAir;
                 ItemStack LIMIT_ITEM = limitItem;

@@ -89,18 +89,6 @@ public final class DataHandler {
         SQLHelper.close();
     }
 
-    public void insertSpawner(StackedSpawner stackedSpawner){
-        Executor.data(() -> {
-            Query.SPAWNER_DELETE.getStatementHolder()
-                    .setLocation(stackedSpawner.getLocation())
-                    .execute(false);
-            Query.SPAWNER_INSERT.getStatementHolder()
-                    .setLocation(stackedSpawner.getLocation())
-                    .setInt(stackedSpawner.getStackAmount())
-                    .execute(false);
-        });
-    }
-
     public void updateSpawner(StackedSpawner stackedSpawner){
         Executor.data(() -> {
             if(containsSpawner(stackedSpawner)){
@@ -115,19 +103,6 @@ public final class DataHandler {
                         .setInt(stackedSpawner.getStackAmount())
                         .execute(false);
             }
-        });
-    }
-
-    public void insertBarrel(StackedBarrel stackedBarrel){
-        Executor.data(() -> {
-            Query.BARREL_DELETE.getStatementHolder()
-                    .setLocation(stackedBarrel.getLocation())
-                    .execute(false);
-            Query.BARREL_INSERT.getStatementHolder()
-                    .setLocation(stackedBarrel.getLocation())
-                    .setInt(stackedBarrel.getStackAmount())
-                    .setItemStack(stackedBarrel.getBarrelItem(1))
-                    .execute(false);
         });
     }
 

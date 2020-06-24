@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.database;
 
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
 
 import java.io.File;
@@ -16,17 +15,9 @@ public class SQLHelper {
 
     private static Connection conn;
 
-    private static ReadWriteLock lock = new ReentrantReadWriteLock();
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private SQLHelper(){}
-
-    public static void waitForLock(){
-        lock.readLock().lock();
-    }
-
-    public static void releaseLock(){
-        lock.readLock().unlock();
-    }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void init(File file) throws ClassNotFoundException, SQLException {
@@ -64,13 +55,6 @@ public class SQLHelper {
         }
 
         return ret;
-    }
-
-    public static void runIfConditionNotExist(String statement, Runnable runnable){
-        Executor.data(() -> {
-            if(!doesConditionExist(statement))
-                runnable.run();
-        });
     }
 
     public static String getLocation(Location loc){

@@ -132,8 +132,6 @@ public final class BarrelsListener implements Listener {
                 return;
             }
 
-            plugin.getDataHandler().insertBarrel(stackedBarrel);
-
             e.getBlockPlaced().setType(Material.CAULDRON);
 
             if(ServerVersion.isLessThan(ServerVersion.v1_9)){
