@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -241,7 +242,7 @@ public final class SpawnersListener implements Listener {
         if(limitItem != null)
             ItemUtils.addItem(limitItem, player.getInventory(), player.getLocation());
 
-        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, amountToCharge);
+        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, GeneralUtils.format(amountToCharge));
     }
 
     //Priority is high so it can be fired before SilkSpawners
@@ -287,7 +288,7 @@ public final class SpawnersListener implements Listener {
             if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(e.getPlayer(), amountToCharge);
 
-            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, amountToCharge);
+            Locale.SPAWNER_BREAK.send(e.getPlayer(), EntityUtils.getFormattedType(entityType.name()), stackAmount, GeneralUtils.format(amountToCharge));
         }
     }
 

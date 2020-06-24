@@ -7,6 +7,8 @@ import com.bgsoftware.wildstacker.key.KeyMap;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class GeneralUtils {
+
+    private static final NumberFormat numberFormant = DecimalFormat.getNumberInstance();
 
     public static boolean contains(List<String> list, StackedEntity stackedEntity){
         return list.contains(stackedEntity.getType().name()) ||  list.contains(stackedEntity.getSpawnCause().name()) ||
@@ -81,6 +85,10 @@ public final class GeneralUtils {
 
             return distances.get(o1).compareTo(distances.get(o2));
         });
+    }
+
+    public static String format(double number){
+        return numberFormant.format(number);
     }
 
 }
