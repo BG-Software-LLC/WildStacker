@@ -67,9 +67,6 @@ public final class BarrelsListener implements Listener {
         if(!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if(plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
-            return;
-
         if(!isBarrelBlock(e.getBlock()))
             return;
 
@@ -85,6 +82,12 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
+        ItemStack inHand = e.getItemInHand().clone();
+        int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
+
+        if(toPlace > 1 || (plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId())))
+            return;
+
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
         if(stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled()) {
@@ -98,8 +101,6 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        ItemStack inHand = e.getItemInHand().clone();
-        int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
         boolean replaceAir = false;
 
         if(plugin.getSettings().barrelsShiftPlaceStack){
