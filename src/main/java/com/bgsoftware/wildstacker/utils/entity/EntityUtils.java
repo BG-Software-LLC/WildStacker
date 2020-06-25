@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Enderman;
@@ -103,7 +104,7 @@ public final class EntityUtils {
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
     public static void removeParrotIfShoulder(Parrot parrot){
-        getNearbyEntities(parrot.getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
+        getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
             try {
                 for (Entity entity : nearbyEntities) {
                     if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {

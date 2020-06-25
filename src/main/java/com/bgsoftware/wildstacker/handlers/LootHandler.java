@@ -81,6 +81,8 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/ghast.json");
         FileUtils.saveResource("loottables/giant.json");
         FileUtils.saveResource("loottables/guardian.json");
+        if(containsEntity("HOGLIN"))
+            FileUtils.saveResource("loottables/hoglin.json");
         FileUtils.saveResource("loottables/horse.json");
         if(containsEntity("HUSK"))
             FileUtils.saveResource("loottables/husk.json");
@@ -100,6 +102,8 @@ public final class LootHandler {
         if(containsEntity("PHANTOM"))
             FileUtils.saveResource("loottables/phantom.json");
         FileUtils.saveResource("loottables/pig.json");
+        if(containsEntity("PIGLIN"))
+            FileUtils.saveResource("loottables/piglin.json");
         if(containsEntity("PILLAGER"))
             FileUtils.saveResource("loottables/pillager.json");
         if(containsEntity("POLAR_BEAR"))
@@ -123,6 +127,8 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/squid.json");
         if(containsEntity("STRAY"))
             FileUtils.saveResource("loottables/stray.json");
+        if(containsEntity("STRIDER"))
+            FileUtils.saveResource("loottables/strider.json");
         if(containsEntity("TRADER_LLAMA"))
             FileUtils.saveResource("loottables/trader_llama.json");
         if(containsEntity("TROPICAL_FISH"))
@@ -140,6 +146,8 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/wither_skeleton.json");
         FileUtils.saveResource("loottables/wither.json");
         FileUtils.saveResource("loottables/wolf.json");
+        if(containsEntity("ZOGLIN"))
+            FileUtils.saveResource("loottables/zoglin.json");
         FileUtils.saveResource("loottables/zombie.json");
         FileUtils.saveResource("loottables/zombie_horse.json");
         FileUtils.saveResource("loottables/zombie_pigman.json");

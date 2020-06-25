@@ -32,6 +32,7 @@ public enum  EntityTypes {
     GHAST,
     GIANT,
     GUARDIAN,
+    HOGLIN,
     HORSE,
     HUSK,
     ILLUSIONER,
@@ -45,6 +46,7 @@ public enum  EntityTypes {
     PARROT,
     PHANTOM,
     PIG,
+    PIGLIN,
     POLAR_BEAR,
     PILLAGER,
     PUFFERFISH,
@@ -61,6 +63,7 @@ public enum  EntityTypes {
     SPIDER,
     SQUID,
     STRAY,
+    STRIDER,
     TRADER_LLAMA,
     TROPICAL_FISH,
     TURTLE,
@@ -73,6 +76,7 @@ public enum  EntityTypes {
     WITHER,
     WITHER_SKELETON("SKELETON"),
     WOLF,
+    ZOGLIN,
     ZOMBIE,
     ZOMBIE_HORSE("HORSE"),
     ZOMBIE_PIGMAN("PIG_ZOMBIE"),
@@ -86,7 +90,7 @@ public enum  EntityTypes {
         this.bukkitEntityType = bukkitEntityType;
     }
 
-    private String bukkitEntityType;
+    private final String bukkitEntityType;
 
     public static EntityTypes fromName(String name){
         try{
@@ -129,9 +133,6 @@ public enum  EntityTypes {
 
         if(livingEntity instanceof MushroomCow)
             return EntityTypes.MOOSHROOM;
-
-//        if(livingEntity.getType() == EntityType.UNKNOWN)
-//            new IllegalArgumentException("The entity " + livingEntity.getUniqueId() + " has a unknown type. Check that.").printStackTrace();
 
         return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
     }

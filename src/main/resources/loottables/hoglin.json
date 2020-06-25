@@ -1,0 +1,31 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "PORKCHOP",
+          "chance": 100,
+          "min": 2,
+          "max": 4,
+          "looting": true,
+          "burnable": {
+            "type": "COOKED_PORKCHOP"
+          }
+        }
+      ]
+    },
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "LEATHER",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    }
+  ]
+}

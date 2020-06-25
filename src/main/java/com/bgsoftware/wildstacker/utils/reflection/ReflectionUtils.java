@@ -56,6 +56,7 @@ public final class ReflectionUtils {
                     ServerVersion.getBukkitVersion().contains("R3") ? "be" : "bf"
             ));
             methodMap.put(Methods.ENTITY_SOUND_PITCH, entityLivingClass.getDeclaredMethod(
+                    ServerVersion.isEquals(ServerVersion.v1_16) ? "dG" :
                     ServerVersion.isEquals(ServerVersion.v1_15) ? "dn" :
                     ServerVersion.isEquals(ServerVersion.v1_14) ? "cV" :
                     ServerVersion.isEquals(ServerVersion.v1_13) ? "cE" :
