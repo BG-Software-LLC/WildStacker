@@ -6,11 +6,8 @@ public enum Fields {
 
     ENTITY_LAST_DAMAGE_BY_PLAYER_TIME,
     ENTITY_EXP,
-    ENTITY_DEAD,
     ENTITY_SPAWNED_VIA_MOB_SPAWNER,
-    ENTITY_FROM_MOB_SPAWNER,
-
-    NBT_TAG_MAP;
+    ENTITY_FROM_MOB_SPAWNER;
 
     public <T> T get(Object object, Class<T> clazz){
         try {
