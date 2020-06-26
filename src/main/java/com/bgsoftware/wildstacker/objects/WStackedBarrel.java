@@ -151,6 +151,9 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
     @Override
     public Optional<Block> runStack() {
+        if(getStackLimit() <= 1)
+            return Optional.empty();
+
         Chunk chunk = getChunk();
 
         boolean chunkMerge = plugin.getSettings().chunkMergeBarrels;

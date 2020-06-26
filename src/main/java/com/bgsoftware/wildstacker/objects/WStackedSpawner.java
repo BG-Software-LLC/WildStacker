@@ -169,6 +169,9 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
 
     @Override
     public Optional<CreatureSpawner> runStack() {
+        if(getStackLimit() <= 1)
+            return Optional.empty();
+
         Chunk chunk = getChunk();
 
         boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;

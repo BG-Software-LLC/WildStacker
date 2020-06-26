@@ -199,6 +199,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
         int range = plugin.getSettings().itemsCheckRange;
+
+        if(getStackLimit() <= 1){
+            if (result != null)
+                result.accept(Optional.empty());
+            return;
+        }
+
         EntityUtils.getNearbyEntities(object.getLocation(), range, EntityUtils::isItem).whenComplete((nearbyEntities, ex) ->
                 StackService.execute(this, () -> {
                     Location itemLocation = getItem().getLocation();

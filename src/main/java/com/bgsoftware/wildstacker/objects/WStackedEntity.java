@@ -270,6 +270,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         int range = plugin.getSettings().entitiesCheckRange;
         Location entityLocation = getLivingEntity().getLocation();
 
+        if(getStackLimit() <= 1){
+            if (result != null)
+                result.accept(Optional.empty());
+            return;
+        }
+
         EntityUtils.getNearbyEntities(object.getLocation(), range,
                 entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
                 .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
