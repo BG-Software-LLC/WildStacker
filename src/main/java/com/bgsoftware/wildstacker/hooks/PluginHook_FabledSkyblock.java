@@ -84,7 +84,8 @@ public final class PluginHook_FabledSkyblock implements Calculator {
 
         @EventHandler(priority = EventPriority.LOW)
         public void onCauldronInteract(PlayerInteractEvent e){
-            if(e.getClickedBlock() == null || !e.getClickedBlock().getType().name().contains("CAULDRON"))
+            if(e.getClickedBlock() == null || (!e.getClickedBlock().getType().name().contains("CAULDRON") &&
+                    !e.getClickedBlock().getType().name().contains("SPAWNER")))
                 return;
 
             Island island = SkyBlock.getInstance().getIslandManager().getIslandAtLocation(e.getClickedBlock().getLocation());
