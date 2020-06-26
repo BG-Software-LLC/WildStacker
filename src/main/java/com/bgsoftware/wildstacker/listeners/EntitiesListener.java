@@ -153,6 +153,10 @@ public final class EntitiesListener implements Listener {
                 ((WStackedEntity) WStackedEntity.of(e.getEntity())).hasDeadFlag()) {
             e.setDamage(0);
         }
+        if(EntityStorage.hasMetadata(e.getEntity(), "corpse")) {
+            e.setCancelled(true);
+            e.getEntity().remove();
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
