@@ -23,6 +23,7 @@ import net.minecraft.server.v1_7_R3.EntityTypes;
 import net.minecraft.server.v1_7_R3.EntityVillager;
 import net.minecraft.server.v1_7_R3.EntityZombie;
 import net.minecraft.server.v1_7_R3.ItemStack;
+import net.minecraft.server.v1_7_R3.MathHelper;
 import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_7_R3.NBTTagCompound;
 import net.minecraft.server.v1_7_R3.NBTTagInt;
@@ -254,34 +255,43 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
 
     @Override
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
+        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
 
         World world = ((CraftWorld) location.getWorld()).getHandle();
-        int minX = (location.getBlockX() - range) >> 4, minZ = (location.getBlockZ() - range) >> 4;
-        int maxX = (location.getBlockX() + range) >> 4, maxZ = (location.getBlockZ() + range) >> 4;
 
-        for(int x = minX; x <= maxX; x++){
-            for(int z = minZ; z <= maxZ; z++){
+        range += 2.0;
+
+        int minX = MathHelper.floor((location.getBlockX() - range) / 16.0D);
+        int minY = MathHelper.floor((location.getBlockY() - range) / 16.0D);
+        int minZ = MathHelper.floor((location.getBlockZ() - range) / 16.0D);
+        int maxX = MathHelper.floor((location.getBlockX() + range) / 16.0D);
+        int maxY = MathHelper.floor((location.getBlockY() + range) / 16.0D);
+        int maxZ = MathHelper.floor((location.getBlockZ() + range) / 16.0D);
+
+        for(int x = minX; x <= maxX; x++) {
+            for(int z = minZ; z <= maxZ; z++) {
                 Chunk chunk = ((ChunkProviderServer) world.chunkProvider).chunks.get(LongHash.toLong(x, z));
                 if(chunk != null) {
-                    //noinspection unchecked
-                    for (List<Entity> entitySlice : (List<Entity>[]) chunk.entitySlices) {
-                        if (entitySlice != null) {
-                            try {
-                                for (Entity entity : entitySlice) {
-                                    if (GeneralUtils.isNearby(location, entity.getBukkitEntity().getLocation(), range) &&
-                                            (filter == null || filter.test(entity.getBukkitEntity()))) {
-                                        entities.add(entity.getBukkitEntity());
-                                    }
+                    int chunkMinY = MathHelper.a(minY, 0, chunk.entitySlices.length - 1);
+                    int chunkMaxY = MathHelper.a(maxY, 0, chunk.entitySlices.length - 1);
+
+                    for(int y = chunkMinY; y <= chunkMaxY; y++){
+                        //noinspection unchecked
+                        List<Entity> entitySlice = (List<Entity>) chunk.entitySlices[y];
+                        try{
+                            for (Entity entity : entitySlice) {
+                                if (GeneralUtils.isNearby(location, entity.getBukkitEntity().getLocation(), range) &&
+                                        (filter == null || filter.test(entity.getBukkitEntity()))) {
+                                    entities.add(entity.getBukkitEntity());
                                 }
-                            } catch (Exception ignored) {}
-                        }
+                            }
+                        }catch (Exception ignored){}
                     }
                 }
             }
         }
 
-        return new HashSet<>(entities);
+        return entities;
     }
 
     /*
