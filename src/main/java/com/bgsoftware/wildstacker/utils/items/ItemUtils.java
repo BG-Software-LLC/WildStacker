@@ -177,7 +177,7 @@ public final class ItemUtils {
     public static String getFormattedType(ItemStack itemStack){
         String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 
-        typeName = ChatColor.stripColor(plugin.getSettings().customNames.getOrDefault(itemStack, typeName));
+        typeName = plugin.getSettings().customNames.getOrDefault(itemStack, typeName);
 
         return EntityUtils.getFormattedType(typeName);
     }
