@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("WeakerAccess")
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
 
+    private String mmoItemName = null;
+
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
     }
@@ -130,18 +132,23 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
             return;
 
-        String customName = plugin.getSettings().itemsCustomName;
-
         ItemStack itemStack = getItemStack();
+
+        boolean mmoItem = !plugin.getNMSAdapter().getTag(itemStack, "MMOITEMS_ITEM_TYPE", String.class, "NULL").equals("NULL");
+
+        if(mmoItem && mmoItemName == null)
+            mmoItemName = object.getCustomName();
+
+        String customName = plugin.getSettings().itemsCustomName;
 
         if (customName.isEmpty())
             return;
 
         int amount = getStackAmount();
-        boolean updateName = plugin.getSettings().itemsUnstackedCustomName || amount > 1;
+        boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
-            String itemType = ItemUtils.getFormattedType(itemStack);
+            String itemType = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemType;
 
             if(plugin.getSettings().itemsDisplayEnabled)
