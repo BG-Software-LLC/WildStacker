@@ -209,7 +209,7 @@ public final class BarrelsListener implements Listener {
 
         e.setCancelled(true);
 
-        if(stackedBarrel.runUnstack(stackedBarrel.getStackAmount()) == UnstackResult.SUCCESS){
+        if(stackedBarrel.runUnstack(stackedBarrel.getStackAmount(), e.getPlayer()) == UnstackResult.SUCCESS){
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
             e.getBlock().setType(Material.AIR);
@@ -241,7 +241,7 @@ public final class BarrelsListener implements Listener {
         }
 
         else{
-            stackedBarrel.runUnstack(1);
+            stackedBarrel.runUnstack(1, e.getPlayer());
 
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
@@ -345,7 +345,7 @@ public final class BarrelsListener implements Listener {
             int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
 
             ItemUtils.dropItem(stackedBarrel.getBarrelItem(amount), block.getLocation());
-            stackedBarrel.runUnstack(amount);
+            stackedBarrel.runUnstack(amount, e.getEntity());
         }
     }
 

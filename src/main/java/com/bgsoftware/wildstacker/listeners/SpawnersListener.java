@@ -273,7 +273,7 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if(stackedSpawner.runUnstack(stackAmount) == UnstackResult.SUCCESS){
+        if(stackedSpawner.runUnstack(stackAmount, e.getPlayer()) == UnstackResult.SUCCESS){
             CoreProtectHook.recordBlockChange(e.getPlayer(), e.getBlock(), false);
 
             plugin.getProviders().handleSpawnerBreak(stackedSpawner, e.getPlayer(), stackAmount, false);
@@ -324,7 +324,7 @@ public final class SpawnersListener implements Listener {
 
             plugin.getProviders().handleSpawnerExplode(stackedSpawner, e.getEntity(), sourcePlayer, breakAmount);
 
-            stackedSpawner.runUnstack(breakAmount);
+            stackedSpawner.runUnstack(breakAmount, e.getEntity());
 
             if(stackedSpawner.getStackAmount() > 0)
                 e.blockList().remove(block);

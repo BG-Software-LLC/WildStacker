@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -132,6 +133,14 @@ public interface StackedObject<T> {
      * @return The result for the unstacking operation.
      */
     UnstackResult runUnstack(int amount);
+
+    /**
+     * Unstack this object.
+     * @param amount unstack by this amount
+     * @param entity The entity that caused the unstack of the object.
+     * @return The result for the unstacking operation.
+     */
+    UnstackResult runUnstack(int amount, Entity entity);
 
     /**
      * Unstack this object.

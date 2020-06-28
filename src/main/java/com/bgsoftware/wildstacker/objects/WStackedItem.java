@@ -275,7 +275,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
-    public UnstackResult runUnstack(int amount) {
+    public UnstackResult runUnstack(int amount, Entity entity) {
         throw new UnsupportedOperationException("Cannot unstack stacked items. Use giveItemStack() method.");
     }
 

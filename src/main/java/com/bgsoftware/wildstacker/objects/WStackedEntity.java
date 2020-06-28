@@ -366,11 +366,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
-    public UnstackResult runUnstack(int amount) {
+    public UnstackResult runUnstack(int amount, Entity entity) {
         if(hasDeadFlag())
             return UnstackResult.ALREADY_DEAD;
 
-        EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(this, amount);
+        EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(this, entity, amount);
         Bukkit.getPluginManager().callEvent(entityUnstackEvent);
 
         if(entityUnstackEvent.isCancelled())

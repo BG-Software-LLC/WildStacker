@@ -20,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -244,8 +245,8 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
     }
 
     @Override
-    public UnstackResult runUnstack(int amount) {
-        SpawnerUnstackEvent spawnerUnstackEvent = new SpawnerUnstackEvent(this, amount);
+    public UnstackResult runUnstack(int amount, Entity entity) {
+        SpawnerUnstackEvent spawnerUnstackEvent = new SpawnerUnstackEvent(this, entity, amount);
         Bukkit.getPluginManager().callEvent(spawnerUnstackEvent);
 
         if(spawnerUnstackEvent.isCancelled())

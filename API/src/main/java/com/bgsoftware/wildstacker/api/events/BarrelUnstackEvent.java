@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.events;
 
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -13,10 +14,11 @@ public class BarrelUnstackEvent extends UnstackEvent {
     /**
      * The constructor for the event.
      * @param barrel The barrel object.
+     * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the barrel is unstacked by.
      */
-    public BarrelUnstackEvent(StackedBarrel barrel, int unstackAmount){
-        super(barrel, unstackAmount);
+    public BarrelUnstackEvent(StackedBarrel barrel, Entity unstackSource, int unstackAmount){
+        super(barrel, unstackSource, unstackAmount);
     }
 
     /**

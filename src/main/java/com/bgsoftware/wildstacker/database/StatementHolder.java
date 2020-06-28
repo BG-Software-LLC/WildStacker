@@ -21,9 +21,15 @@ public class StatementHolder {
     private final String query;
     private final Map<Integer, Object> values = new HashMap<>();
     private int currentIndex = 1;
+    private Exception originalStackTrace = null;
 
     StatementHolder(Query query){
         this.query = query.getStatement();
+    }
+
+    public StatementHolder setOriginalStackTrace(Exception originalStackTrace){
+        this.originalStackTrace = originalStackTrace;
+        return this;
     }
 
     public StatementHolder setString(String value){
@@ -110,6 +116,8 @@ public class StatementHolder {
             }
         } catch (SQLException ex) {
             WildStackerPlugin.log("Failed to execute query " + errorQuery);
+            if(originalStackTrace != null)
+                ex.initCause(originalStackTrace);
             ex.printStackTrace();
         }
     }

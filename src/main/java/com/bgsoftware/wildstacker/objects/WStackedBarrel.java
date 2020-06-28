@@ -226,8 +226,8 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
     }
 
     @Override
-    public UnstackResult runUnstack(int amount) {
-        BarrelUnstackEvent barrelUnstackEvent = new BarrelUnstackEvent(this, amount);
+    public UnstackResult runUnstack(int amount, Entity entity) {
+        BarrelUnstackEvent barrelUnstackEvent = new BarrelUnstackEvent(this, entity, amount);
         Bukkit.getPluginManager().callEvent(barrelUnstackEvent);
 
         if(barrelUnstackEvent.isCancelled())

@@ -253,7 +253,7 @@ public final class EntitiesListener implements Listener {
                     if(zombieVillager != null) {
                         StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
                         if (StackSplit.VILLAGER_INFECTION.isEnabled()) {
-                            stackedEntity.runUnstack(1);
+                            stackedEntity.runUnstack(1, entityDamager);
                         } else {
                             stackedZombie.setStackAmount(stackedEntity.getStackAmount(), true);
                             stackedEntity.remove();
@@ -266,7 +266,7 @@ public final class EntitiesListener implements Listener {
                 return;
             }
 
-            if(stackedEntity.runUnstack(stackAmount) == UnstackResult.SUCCESS) {
+            if(stackedEntity.runUnstack(stackAmount, entityDamager) == UnstackResult.SUCCESS) {
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 EntityUtils.setKiller(livingEntity, damager);

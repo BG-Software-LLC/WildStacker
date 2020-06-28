@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.events;
 
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -13,10 +14,11 @@ public class SpawnerUnstackEvent extends UnstackEvent {
     /**
      * The constructor for the event.
      * @param spawner The spawner object.
+     * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the spawner is unstacked by.
      */
-    public SpawnerUnstackEvent(StackedSpawner spawner, int unstackAmount){
-        super(spawner, unstackAmount);
+    public SpawnerUnstackEvent(StackedSpawner spawner, Entity unstackSource, int unstackAmount){
+        super(spawner, unstackSource, unstackAmount);
     }
 
     /**

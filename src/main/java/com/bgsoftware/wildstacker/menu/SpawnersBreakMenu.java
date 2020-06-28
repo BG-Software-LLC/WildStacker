@@ -75,7 +75,7 @@ public final class SpawnersBreakMenu extends WildMenu {
             return;
         }
 
-        if(stackedSpawner.runUnstack(removeAmount) == UnstackResult.SUCCESS){
+        if(stackedSpawner.runUnstack(removeAmount, player) == UnstackResult.SUCCESS){
             CoreProtectHook.recordBlockChange(player, spawnerBlock, false);
 
             if(amountToCharge > 0)

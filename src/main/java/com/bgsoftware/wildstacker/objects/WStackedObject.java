@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -143,12 +144,17 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     }
 
     @Override
-    public abstract UnstackResult runUnstack(int amount);
+    public UnstackResult runUnstack(int amount){
+        return runUnstack(amount, null);
+    }
+
+    @Override
+    public abstract UnstackResult runUnstack(int amount, Entity entity);
 
     @Override
     public boolean tryUnstack(int amount){
         new UnsupportedOperationException("tryUnstack method is no longer supported.").printStackTrace();
-        return runUnstack(amount) == UnstackResult.SUCCESS;
+        return runUnstack(amount, null) == UnstackResult.SUCCESS;
     }
 
     @Override

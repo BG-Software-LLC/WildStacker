@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.events;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -13,10 +14,11 @@ public class EntityUnstackEvent extends UnstackEvent {
     /**
      * The constructor for the event.
      * @param entity The entity object.
+     * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the entity is unstacked by.
      */
-    public EntityUnstackEvent(StackedEntity entity, int unstackAmount){
-        super(entity, unstackAmount);
+    public EntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount){
+        super(entity, unstackSource, unstackAmount);
     }
 
     /**
