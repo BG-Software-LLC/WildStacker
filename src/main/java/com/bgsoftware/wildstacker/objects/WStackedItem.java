@@ -165,7 +165,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         String CUSTOM_NAME = customName;
 
         Executor.sync(() -> {
-            object.setCustomName(CUSTOM_NAME);
+            if(updateName)
+                object.setCustomName(CUSTOM_NAME);
             object.setCustomNameVisible(updateName);
         });
     }
