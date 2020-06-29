@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,17 +20,12 @@ public class StatementHolder {
     private final List<Map<Integer, Object>> batches = new ArrayList<>();
 
     private final String query;
+    private StackTraceElement[] originalStackTrace = new StackTraceElement[0];
     private final Map<Integer, Object> values = new HashMap<>();
     private int currentIndex = 1;
-    private Exception originalStackTrace = null;
 
     StatementHolder(Query query){
         this.query = query.getStatement();
-    }
-
-    public StatementHolder setOriginalStackTrace(Exception originalStackTrace){
-        this.originalStackTrace = originalStackTrace;
-        return this;
     }
 
     public StatementHolder setString(String value){
@@ -89,6 +85,8 @@ public class StatementHolder {
 
     public void execute(boolean async) {
         if(async){
+            StackTraceElement[] stackTraceElements = new Exception().getStackTrace();
+            this.originalStackTrace = Arrays.copyOfRange(stackTraceElements, 1, stackTraceElements.length);
             Executor.data(() -> execute(false));
             return;
         }
@@ -116,8 +114,14 @@ public class StatementHolder {
             }
         } catch (SQLException ex) {
             WildStackerPlugin.log("Failed to execute query " + errorQuery);
-            if(originalStackTrace != null)
-                ex.initCause(originalStackTrace);
+            if(originalStackTrace.length > 0){
+                StackTraceElement[] stackTraceElements = ex.getStackTrace();
+                StackTraceElement[] newStackTrace = Arrays.copyOf(stackTraceElements, stackTraceElements.length + originalStackTrace.length - 4);
+                //noinspection all
+                for(int i = stackTraceElements.length - 4; i < newStackTrace.length; i++)
+                    newStackTrace[i] = originalStackTrace[i - stackTraceElements.length + 4];
+                ex.setStackTrace(newStackTrace);
+            }
             ex.printStackTrace();
         }
     }
