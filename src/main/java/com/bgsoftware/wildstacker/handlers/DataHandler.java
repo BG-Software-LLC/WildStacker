@@ -90,44 +90,18 @@ public final class DataHandler {
     }
 
     public void updateSpawner(StackedSpawner stackedSpawner){
-        Exception stackTrace = new Exception();
-        Executor.data(() -> {
-            if(containsSpawner(stackedSpawner)){
-                Query.SPAWNER_UPDATE_STACK_AMOUNT.getStatementHolder()
-                        .setOriginalStackTrace(stackTrace)
-                        .setInt(stackedSpawner.getStackAmount())
-                        .setLocation(stackedSpawner.getLocation())
-                        .execute(false);
-            }
-            else{
-                Query.SPAWNER_INSERT.getStatementHolder()
-                        .setOriginalStackTrace(stackTrace)
-                        .setLocation(stackedSpawner.getLocation())
-                        .setInt(stackedSpawner.getStackAmount())
-                        .execute(false);
-            }
-        });
+        Query.SPAWNER_INSERT.getStatementHolder()
+                .setLocation(stackedSpawner.getLocation())
+                .setInt(stackedSpawner.getStackAmount())
+                .execute(true);
     }
 
     public void updateBarrel(StackedBarrel stackedBarrel){
-        Exception stackTrace = new Exception();
-        Executor.data(() -> {
-            if(containsBarrel(stackedBarrel)){
-                Query.BARREL_UPDATE_STACK_AMOUNT.getStatementHolder()
-                        .setOriginalStackTrace(stackTrace)
-                        .setInt(stackedBarrel.getStackAmount())
-                        .setLocation(stackedBarrel.getLocation())
-                        .execute(false);
-            }
-            else{
-                Query.BARREL_INSERT.getStatementHolder()
-                        .setOriginalStackTrace(stackTrace)
-                        .setLocation(stackedBarrel.getLocation())
-                        .setInt(stackedBarrel.getStackAmount())
-                        .setItemStack(stackedBarrel.getBarrelItem(1))
-                        .execute(false);
-            }
-        });
+        Query.BARREL_INSERT.getStatementHolder()
+                .setLocation(stackedBarrel.getLocation())
+                .setInt(stackedBarrel.getStackAmount())
+                .setItemStack(stackedBarrel.getBarrelItem(1))
+                .execute(true);
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner){
