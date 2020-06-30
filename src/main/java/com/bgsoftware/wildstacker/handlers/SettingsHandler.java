@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
 
-    private static final Pattern BRACKET_PATTERN = Pattern.compile("(\\{|\\(|\\[)([^0-9])");
+    private static final Pattern BRACKET_PATTERN = Pattern.compile("([\\(\\[\\{\\}\\)\\]])");
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = {
@@ -175,12 +175,19 @@ public final class SettingsHandler {
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
+
         String entitiesCustomName = this.entitiesCustomName;
         Matcher bracketsMatcher = BRACKET_PATTERN.matcher(entitiesCustomName);
+
         if(bracketsMatcher.find())
             entitiesCustomName = bracketsMatcher.replaceAll("\\\\$0");
-        entitiesCustomNamePattern = Pattern.compile(entitiesCustomName.replace("{0}", "([0-9]+)")
-                .replace("{1}", "(.*)").replace("{2}", "(.*)"));
+
+        entitiesCustomNamePattern = Pattern.compile(entitiesCustomName
+                .replace("\\{0\\}", "([0-9]+)")
+                .replace("\\{1\\}", "(.*)")
+                .replace("\\{2\\}", "(.*)")
+        );
+
         entitiesCheckRange = cfg.getInt("entities.merge-radius", 10);
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
