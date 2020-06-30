@@ -353,7 +353,7 @@ public final class EntitiesListener implements Listener {
                         }
 
                         //Decrease durability when next-stack-knockback is false
-                        if(e.isCancelled() && itemInHand != null && creativeMode) {
+                        if(e.isCancelled() && itemInHand != null && !creativeMode) {
                             int damage = ItemUtils.isSword(itemInHand.getType()) ? 1 : ItemUtils.isTool(itemInHand.getType()) ? 2 : 0;
                             ThreadLocalRandom random = ThreadLocalRandom.current();
                             if(damage > 0) {
