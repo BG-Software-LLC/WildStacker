@@ -35,7 +35,7 @@ database:
 
 # Settings related to the automatic kill all
 kill-task:
-  # How much time should be passed between auto-killing? (in ticks)
+  # How much time should be passed between auto-killing? (in seconds)
   # If you wish to disable the auto-killing task, set the interval to 0.
   interval: 300
   # Should the kill task remove stacked entities?
