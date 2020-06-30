@@ -208,6 +208,7 @@ public final class EntitiesListener implements Listener {
         }
 
         ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
+        boolean creativeMode = damager != null && damager.getGameMode() == GameMode.CREATIVE;
 
         boolean oneShot = damager != null && plugin.getSettings().entitiesOneShotEnabled &&
                 GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
@@ -352,7 +353,7 @@ public final class EntitiesListener implements Listener {
                         }
 
                         //Decrease durability when next-stack-knockback is false
-                        if(e.isCancelled() && itemInHand != null) {
+                        if(e.isCancelled() && itemInHand != null && creativeMode) {
                             int damage = ItemUtils.isSword(itemInHand.getType()) ? 1 : ItemUtils.isTool(itemInHand.getType()) ? 2 : 0;
                             ThreadLocalRandom random = ThreadLocalRandom.current();
                             if(damage > 0) {
