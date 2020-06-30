@@ -85,7 +85,7 @@ public final class BarrelsListener implements Listener {
         ItemStack inHand = e.getItemInHand().clone();
         int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
 
-        if(toPlace > 1 || (plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId())))
+        if(toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
             return;
 
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
