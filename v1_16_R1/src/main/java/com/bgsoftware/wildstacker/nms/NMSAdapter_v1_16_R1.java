@@ -182,7 +182,7 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
     @Override
     public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
         EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
-        return itemStack != null && nmsEntity.i(CraftItemStack.asNMSCopy(itemStack));
+        return itemStack != null && nmsEntity.k(CraftItemStack.asNMSCopy(itemStack));
     }
 
     @Override
