@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+import com.bgsoftware.wildstacker.api.events.BarrelDropEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
@@ -185,6 +186,11 @@ public final class BarrelsListener implements Listener {
         ItemStack dropStack = stackedBarrel.getBarrelItem(stackSize);
 
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, e.getPlayer(), dropStack);
+            Bukkit.getPluginManager().callEvent(barrelDropEvent);
+
+            dropStack = barrelDropEvent.getItemStack();
+
             if(plugin.getSettings().barrelsAutoPickup) {
                 ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getBlock().getLocation());
             }
@@ -200,7 +206,6 @@ public final class BarrelsListener implements Listener {
                             .replace("{2}", "Barrel")
                     );
                     dropStack.setItemMeta(itemMeta);
-
                 }
 
                 ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
@@ -246,11 +251,16 @@ public final class BarrelsListener implements Listener {
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, e.getPlayer(), stackedBarrel.getBarrelItem(1));
+                Bukkit.getPluginManager().callEvent(barrelDropEvent);
+
+                ItemStack dropStack = barrelDropEvent.getItemStack();
+
                 if(plugin.getSettings().barrelsAutoPickup) {
-                    ItemUtils.addItem(stackedBarrel.getBarrelItem(1), e.getPlayer().getInventory(), e.getClickedBlock().getLocation());
+                    ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getClickedBlock().getLocation());
                 }
                 else {
-                    ItemUtils.dropItem(stackedBarrel.getBarrelItem(1), e.getClickedBlock().getLocation());
+                    ItemUtils.dropItem(dropStack, e.getClickedBlock().getLocation());
                 }
             }
 
@@ -344,7 +354,10 @@ public final class BarrelsListener implements Listener {
 
             int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
 
-            ItemUtils.dropItem(stackedBarrel.getBarrelItem(amount), block.getLocation());
+            BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, null, stackedBarrel.getBarrelItem(amount));
+            Bukkit.getPluginManager().callEvent(barrelDropEvent);
+
+            ItemUtils.dropItem(barrelDropEvent.getItemStack(), block.getLocation());
             stackedBarrel.runUnstack(amount, e.getEntity());
         }
     }
