@@ -893,6 +893,9 @@ public final class EntitiesListener implements Listener {
                 Beehive beehive = (Beehive) e.getBlock().getState();
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
+                if(!stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled())
+                    return;
+
                 Integer[] arr = beesAmount.computeIfAbsent(e.getBlock().getLocation(), l -> {
                     Integer[] newArr = new Integer[beehive.getEntityCount()];
                     Arrays.fill(newArr, -1);
