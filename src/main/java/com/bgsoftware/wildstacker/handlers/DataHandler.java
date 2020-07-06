@@ -14,8 +14,10 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.pair.MultiPair;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -63,8 +65,8 @@ public final class DataHandler {
     //References for all the data from database
     public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
     public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
-    public final Map<Location, Integer> CACHED_SPAWNERS_RAW = new ConcurrentHashMap<>();
-    public final Map<Location, Pair<Integer, ItemStack>> CACHED_BARRELS_RAW = new ConcurrentHashMap<>();
+    public final Map<ChunkPosition, Set<Pair<Location, Integer>>> CACHED_SPAWNERS_RAW = new ConcurrentHashMap<>();
+    public final Map<ChunkPosition, Set<MultiPair<Location, Integer, ItemStack>>> CACHED_BARRELS_RAW = new ConcurrentHashMap<>();
 
     public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -338,7 +340,8 @@ public final class DataHandler {
 
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
-                        CACHED_SPAWNERS_RAW.put(blockLocation, stackAmount);
+                        CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(blockLocation), s -> Sets.newConcurrentHashSet())
+                                .add(new Pair<>(blockLocation, stackAmount));
                         continue;
                     }catch(Exception ex){
                         exceptionReason = "Exception was thrown.";
@@ -379,7 +382,8 @@ public final class DataHandler {
                         int stackAmount = resultSet.getInt("stackAmount");
                         ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
                                 plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                        CACHED_BARRELS_RAW.put(blockLocation, new Pair<>(stackAmount, barrelItem));
+                        CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(blockLocation), s -> Sets.newConcurrentHashSet())
+                            .add(new MultiPair<>(blockLocation, stackAmount, barrelItem));
                         continue;
                     } catch (Exception ex) {
                         exceptionReason = "Exception was thrown.";

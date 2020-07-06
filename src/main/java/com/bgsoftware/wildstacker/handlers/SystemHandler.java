@@ -30,8 +30,10 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.pair.MultiPair;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -50,9 +52,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -390,43 +390,45 @@ public final class SystemHandler implements SystemManager {
     }
 
     public void loadSpawners(Chunk chunk){
-        Iterator<Map.Entry<Location, Integer>> spawnersIterator =
-                dataHandler.CACHED_SPAWNERS_RAW.entrySet().iterator();
+        ChunkPosition chunkPosition = new ChunkPosition(chunk);
+        Set<Pair<Location, Integer>> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
 
-        while(spawnersIterator.hasNext()){
-            Map.Entry<Location, Integer> entry = spawnersIterator.next();
-            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
-                Block block = entry.getKey().getBlock();
+        if(spawnersToLoad != null){
+            for (Pair<Location, Integer> pair : spawnersToLoad) {
+                if (GeneralUtils.isSameChunk(pair.getKey(), chunk)) {
+                    Block block = pair.getKey().getBlock();
 
-                if(block.getType() == Materials.SPAWNER.toBukkitType()){
-                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                    stackedSpawner.setStackAmount(entry.getValue(), true);
-                    dataHandler.addStackedSpawner(stackedSpawner);
+                    if (block.getType() == Materials.SPAWNER.toBukkitType()) {
+                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                        stackedSpawner.setStackAmount(pair.getValue(), true);
+                        dataHandler.addStackedSpawner(stackedSpawner);
+                    }
                 }
-
-                spawnersIterator.remove();
             }
+
+            spawnersToLoad.clear();
         }
     }
 
     public void loadBarrels(Chunk chunk){
-        Iterator<Map.Entry<Location, Pair<Integer, ItemStack>>> barrelsIterator =
-                dataHandler.CACHED_BARRELS_RAW.entrySet().iterator();
+        ChunkPosition chunkPosition = new ChunkPosition(chunk);
+        Set<MultiPair<Location, Integer, ItemStack>> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
 
-        while(barrelsIterator.hasNext()){
-            Map.Entry<Location, Pair<Integer, ItemStack>> entry = barrelsIterator.next();
-            if(GeneralUtils.isSameChunk(entry.getKey(), chunk)){
-                Block block = entry.getKey().getBlock();
+        if(barrelsToLoad != null){
+            for (MultiPair<Location, Integer, ItemStack> pair : barrelsToLoad) {
+                if(GeneralUtils.isSameChunk(pair.getX(), chunk)){
+                    Block block = pair.getX().getBlock();
 
-                if(block.getType() == Material.CAULDRON){
-                    StackedBarrel stackedBarrel = new WStackedBarrel(block, entry.getValue().getValue());
-                    stackedBarrel.setStackAmount(entry.getValue().getKey(), true);
-                    stackedBarrel.createDisplayBlock();
-                    dataHandler.addStackedBarrel(stackedBarrel);
+                    if(block.getType() == Material.CAULDRON){
+                        StackedBarrel stackedBarrel = new WStackedBarrel(block, pair.getZ());
+                        stackedBarrel.setStackAmount(pair.getY(), true);
+                        stackedBarrel.createDisplayBlock();
+                        dataHandler.addStackedBarrel(stackedBarrel);
+                    }
                 }
-
-                barrelsIterator.remove();
             }
+
+            barrelsToLoad.clear();
         }
     }
 
@@ -483,14 +485,16 @@ public final class SystemHandler implements SystemManager {
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);
             if(stackedSpawner.getStackAmount() > 1) {
-                dataHandler.CACHED_SPAWNERS_RAW.put(stackedSpawner.getLocation(), stackedSpawner.getStackAmount());
+                dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Sets.newConcurrentHashSet())
+                        .add(new Pair<>(stackedSpawner.getLocation(), stackedSpawner.getStackAmount()));
                 plugin.getProviders().deleteHologram(stackedSpawner);
             }
         }
 
         for(StackedBarrel stackedBarrel : getStackedBarrels(chunk)){
             dataHandler.removeStackedBarrel(stackedBarrel);
-            dataHandler.CACHED_BARRELS_RAW.put(stackedBarrel.getLocation(), new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+            dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Sets.newConcurrentHashSet())
+                    .add(new MultiPair<>(stackedBarrel.getLocation(), stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
             plugin.getProviders().deleteHologram(stackedBarrel);
             stackedBarrel.removeDisplayBlock();
         }
