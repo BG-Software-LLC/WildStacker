@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public final class Key {
 
+    private static final Key ALL_KEY = new Key("all");
+
     private final String key;
 
     private Key(String key){
@@ -45,7 +47,7 @@ public final class Key {
     }
 
     public static Key of(String key){
-        return new Key(key);
+        return key.equalsIgnoreCase("all") ? ALL_KEY : new Key(key);
     }
 
 }
