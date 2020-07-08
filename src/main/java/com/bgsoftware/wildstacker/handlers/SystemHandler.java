@@ -452,6 +452,13 @@ public final class SystemHandler implements SystemManager {
             loadBarrels(chunk);
         }
 
+        for(Entity entity : entities){
+            if(entity.getCustomName() != null && entity.getCustomName().endsWith("<|NT|>")){
+                entity.setCustomName(entity.getCustomName().replace("<|NT|>", ""));
+                EntityStorage.setMetadata(entity, "nameTag", true);
+            }
+        }
+
         loadSpawners(chunk);
 
         //Update nerf status & names to all entities
@@ -481,6 +488,11 @@ public final class SystemHandler implements SystemManager {
                 }
             }
         });
+
+        for(Entity entity : entities){
+            if(EntityStorage.hasMetadata(entity, "nameTag"))
+                entity.setCustomName(entity.getName() + "<|NT|>");
+        }
 
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);
