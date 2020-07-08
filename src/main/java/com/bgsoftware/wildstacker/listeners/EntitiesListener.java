@@ -650,7 +650,7 @@ public final class EntitiesListener implements Listener {
                     }
                 }, 0L);
             }
-            else{
+            else if(stackAmount > 1){
                 int woolAmount = ThreadLocalRandom.current().nextInt(2 * (stackAmount - 1)) + stackAmount - 1;
                 ItemStack woolItem = Materials.getWool((((Sheep) e.getEntity()).getColor()));
                 woolItem.setAmount(woolAmount);
