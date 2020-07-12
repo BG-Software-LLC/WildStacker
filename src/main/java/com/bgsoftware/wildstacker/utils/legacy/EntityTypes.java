@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.google.common.collect.Sets;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -8,6 +9,8 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
+
+import java.util.Set;
 
 public enum  EntityTypes {
 
@@ -79,18 +82,18 @@ public enum  EntityTypes {
     ZOGLIN,
     ZOMBIE,
     ZOMBIE_HORSE("HORSE"),
-    ZOMBIE_PIGMAN("PIG_ZOMBIE"),
+    ZOMBIE_PIGMAN("PIG_ZOMBIE", "ZOMBIFIED_PIGLIN"),
     ZOMBIE_VILLAGER("ZOMBIE");
 
     EntityTypes(){
-        this.bukkitEntityType = name();
+        this.bukkitEntityType = Sets.newHashSet(name());
     }
 
-    EntityTypes(String bukkitEntityType){
-        this.bukkitEntityType = bukkitEntityType;
+    EntityTypes(String... bukkitEntityType){
+        this.bukkitEntityType = Sets.newHashSet(bukkitEntityType);
     }
 
-    private final String bukkitEntityType;
+    private final Set<String> bukkitEntityType;
 
     public static EntityTypes fromName(String name){
         try{
@@ -98,7 +101,7 @@ public enum  EntityTypes {
         }catch(IllegalArgumentException ignored){}
 
         for(EntityTypes entityType : values()){
-            if(entityType.bukkitEntityType.equals(name))
+            if(entityType.bukkitEntityType.contains(name))
                 return entityType;
         }
 
