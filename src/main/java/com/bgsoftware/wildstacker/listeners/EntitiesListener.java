@@ -262,9 +262,9 @@ public final class EntitiesListener implements Listener {
                         stackedZombie.updateName();
                         stackedZombie.runStackAsync(null);
                     }
-                }
 
-                return;
+                    return;
+                }
             }
 
             if(stackedEntity.runUnstack(stackAmount, entityDamager) == UnstackResult.SUCCESS) {
