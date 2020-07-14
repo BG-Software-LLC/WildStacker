@@ -318,8 +318,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             int amountLeft = 0;
             int maxStackAmount = itemStack.getMaxStackSize();
 
-            if (maxStackAmount != 64 &&
-                    (!plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX")))
+            if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled &&
+                    !itemStack.getType().name().contains("SHULKER_BOX"))
                 maxStackAmount = 64;
 
             int amountOfStacks = giveAmount / maxStackAmount;
