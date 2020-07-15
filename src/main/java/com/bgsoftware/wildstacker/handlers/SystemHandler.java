@@ -46,6 +46,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -583,6 +584,10 @@ public final class SystemHandler implements SystemManager {
             LivingEntity spawnedEntity = (LivingEntity) entity;
             EntitiesListener.noStackEntities.add(spawnedEntity.getUniqueId());
             plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), spawnedEntity);
+
+            if(spawnedEntity instanceof Slime)
+                ((Slime) spawnedEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
+
             EntityStorage.setMetadata(spawnedEntity, "corpse", null);
         });
 
