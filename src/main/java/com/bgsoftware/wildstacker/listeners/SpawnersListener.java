@@ -291,7 +291,7 @@ public final class SpawnersListener implements Listener {
     }
 
     //Priority is high so it can be fired before SilkSpawners
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent e){
         if(!plugin.getSettings().spawnersStackingEnabled)
             return;
