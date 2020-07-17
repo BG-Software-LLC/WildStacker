@@ -102,10 +102,25 @@ public interface SystemManager {
     boolean isStackedSpawner(Block block);
 
     /**
+     * Checks if a block is a stacked spawner.
+     * @param location The location of the spawner.
+     * @return True if block is a stacked spawner, otherwise false
+     */
+    boolean isStackedSpawner(Location location);
+
+    /**
      * Checks if a block is a stacked barrel.
+     * Unlike isStackedBlock(Location), this will also check if the block is a cauldron.
      * @return True if block is a stacked barrel, otherwise false
      */
     boolean isStackedBarrel(Block block);
+
+    /**
+     * Checks if a block is a stacked barrel.
+     * @param location The location of the block.
+     * @return True if block is a stacked barrel, otherwise false
+     */
+    boolean isStackedBarrel(Location location);
 
     /**
      * Performs a cache clear.

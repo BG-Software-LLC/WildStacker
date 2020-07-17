@@ -270,12 +270,22 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public boolean isStackedSpawner(Block block) {
-        return block != null && block.getType() == Materials.SPAWNER.toBukkitType() && dataHandler.CACHED_SPAWNERS.containsKey(block.getLocation());
+        return block != null && block.getType() == Materials.SPAWNER.toBukkitType() && isStackedSpawner(block.getLocation());
+    }
+
+    @Override
+    public boolean isStackedSpawner(Location location) {
+        return location != null && dataHandler.CACHED_SPAWNERS.containsKey(location);
     }
 
     @Override
     public boolean isStackedBarrel(Block block) {
-        return block != null && block.getType() == Material.CAULDRON && dataHandler.CACHED_BARRELS.containsKey(block.getLocation());
+        return block != null && block.getType() == Material.CAULDRON && isStackedBarrel(block.getLocation());
+    }
+
+    @Override
+    public boolean isStackedBarrel(Location location) {
+        return dataHandler.CACHED_BARRELS.containsKey(location);
     }
 
     @Override
@@ -584,15 +594,14 @@ public final class SystemHandler implements SystemManager {
             LivingEntity spawnedEntity = (LivingEntity) entity;
             EntitiesListener.noStackEntities.add(spawnedEntity.getUniqueId());
             plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), spawnedEntity);
-
-            if(spawnedEntity instanceof Slime)
-                ((Slime) spawnedEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
-
             EntityStorage.setMetadata(spawnedEntity, "corpse", null);
         });
 
         if(livingEntity != null){
             Executor.sync(() -> {
+                if(livingEntity instanceof Slime)
+                    ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
+
                 plugin.getNMSAdapter().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
             }, 2L);
