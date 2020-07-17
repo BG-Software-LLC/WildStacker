@@ -454,8 +454,12 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onNewChunkLoad(ChunkLoadEvent e){
         if(e.isNewChunk()) {
-            Executor.sync(() -> Arrays.stream(e.getChunk().getEntities()).filter(EntityUtils::isStackable).forEach(entity ->
-                    handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL)), 100L);
+            Executor.sync(() -> {
+                if(e.getChunk().isLoaded()){
+                    Arrays.stream(e.getChunk().getEntities()).filter(EntityUtils::isStackable).forEach(entity ->
+                            handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL));
+                }
+            }, 100L);
         }
     }
 
