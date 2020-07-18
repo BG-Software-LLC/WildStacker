@@ -31,6 +31,7 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
+import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
@@ -191,6 +192,8 @@ public final class ProvidersHandler {
             JobsHook.setEnabled(enable);
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
             PluginHook_FabledSkyblock.register(plugin);
+        if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
+            SuperiorSkyblockHook.register(plugin);
     }
 
     private boolean isPlugin(Plugin plugin, String pluginName){
@@ -286,7 +289,6 @@ public final class ProvidersHandler {
      * Claims Provider
      */
 
-    @SuppressWarnings("all")
     public boolean hasClaimAccess(Player player, Location location){
         for(ClaimsProvider claimsProvider : claimsProviders) {
             if (!claimsProvider.hasClaimAccess(player, location))

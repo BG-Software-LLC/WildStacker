@@ -412,6 +412,10 @@ entities:
   # Should entities get stored into the database?
   store-entities: true
 
+  # Should WildStacker add a custom entities-stacking setting to SuperiorSkyblock?
+  # When enabling, make sure you add "entities_stacking" section to the settings menu.
+  superiorskyblock-hook: false
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

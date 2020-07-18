@@ -66,7 +66,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -448,18 +447,6 @@ public final class EntitiesListener implements Listener {
                         int entitySize = EntityStorage.getMetadata(entity, "original-amount", Integer.class);
                         WStackedEntity.of(e.getEntity()).setStackAmount(entitySize, true);
                     }));
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onNewChunkLoad(ChunkLoadEvent e){
-        if(e.isNewChunk()) {
-            Executor.sync(() -> {
-                if(e.getChunk().isLoaded()){
-                    Arrays.stream(e.getChunk().getEntities()).filter(EntityUtils::isStackable).forEach(entity ->
-                            handleEntitySpawn((LivingEntity) entity, CreatureSpawnEvent.SpawnReason.NATURAL));
-                }
-            }, 100L);
         }
     }
 
