@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.hooks.PaperHook;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -428,10 +427,7 @@ public final class EntityUtils {
     public static CompletableFuture<Set<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         CompletableFuture<Set<Entity>> completableFuture = new CompletableFuture<>();
 
-        if(PaperHook.hasAsyncChunkSupport()){
-            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-        }
-        else if(Bukkit.isPrimaryThread()){
+        if(Bukkit.isPrimaryThread()){
             completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
         }
         else{

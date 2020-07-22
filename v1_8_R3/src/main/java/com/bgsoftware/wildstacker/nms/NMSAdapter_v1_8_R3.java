@@ -2,11 +2,11 @@ package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.BlockRotatable;
 import net.minecraft.server.v1_8_R3.Chunk;
@@ -262,14 +262,15 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
         World world = ((CraftWorld) location.getWorld()).getHandle();
 
-        range += 2.0;
+        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(location.getX() - range, location.getY() - range,
+                location.getZ() - range, location.getX() + range, location.getY() + range, location.getZ() + range);
 
-        int minX = MathHelper.floor((location.getBlockX() - range) / 16.0D);
-        int minY = MathHelper.floor((location.getBlockY() - range) / 16.0D);
-        int minZ = MathHelper.floor((location.getBlockZ() - range) / 16.0D);
-        int maxX = MathHelper.floor((location.getBlockX() + range) / 16.0D);
-        int maxY = MathHelper.floor((location.getBlockY() + range) / 16.0D);
-        int maxZ = MathHelper.floor((location.getBlockZ() + range) / 16.0D);
+        int minX = MathHelper.floor((axisAlignedBB.a - 2) / 16.0D);
+        int minY = MathHelper.floor((axisAlignedBB.b - 2) / 16.0D);
+        int minZ = MathHelper.floor((axisAlignedBB.c - 2) / 16.0D);
+        int maxX = MathHelper.floor((axisAlignedBB.d + 2) / 16.0D);
+        int maxY = MathHelper.floor((axisAlignedBB.e + 2) / 16.0D);
+        int maxZ = MathHelper.floor((axisAlignedBB.f + 2) / 16.0D);
 
         for(int x = minX; x <= maxX; x++) {
             for(int z = minZ; z <= maxZ; z++) {
@@ -280,14 +281,14 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
                     for(int y = chunkMinY; y <= chunkMaxY; y++){
                         List<Entity> entitySlice = chunk.entitySlices[y];
-                        try{
-                            for (Entity entity : entitySlice) {
-                                if (GeneralUtils.isNearby(location, entity.getBukkitEntity().getLocation(), range) &&
-                                        (filter == null || filter.test(entity.getBukkitEntity()))) {
-                                    entities.add(entity.getBukkitEntity());
-                                }
+                        for (Entity entity : entitySlice) {
+                            if(entity.locX >= axisAlignedBB.a && entity.locX < axisAlignedBB.d &&
+                                    entity.locY >= axisAlignedBB.b && entity.locY < axisAlignedBB.e &&
+                                    entity.locZ >= axisAlignedBB.c && entity.locZ < axisAlignedBB.f &&
+                                    (filter == null || filter.test(entity.getBukkitEntity()))){
+                                entities.add(entity.getBukkitEntity());
                             }
-                        }catch (Exception ignored){}
+                        }
                     }
                 }
             }
