@@ -320,9 +320,9 @@ public final class SpawnersListener implements Listener {
             }
 
             int breakAmount = plugin.getSettings().explosionsBreakSpawnerStack ? stackedSpawner.getStackAmount() : 1;
-            breakAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
+            int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
 
-            plugin.getProviders().handleSpawnerExplode(stackedSpawner, e.getEntity(), sourcePlayer, breakAmount);
+            plugin.getProviders().handleSpawnerExplode(stackedSpawner, e.getEntity(), sourcePlayer, dropAmount);
 
             stackedSpawner.runUnstack(breakAmount, e.getEntity());
 
