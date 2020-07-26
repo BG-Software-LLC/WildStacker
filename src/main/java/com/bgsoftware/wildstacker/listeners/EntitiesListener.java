@@ -370,8 +370,12 @@ public final class EntitiesListener implements Listener {
 
                                 damage -= damageDecrease;
 
-                                if(damage > 0)
-                                    itemInHand.setDurability((short) (itemInHand.getDurability() + damage));
+                                if(damage > 0) {
+                                    if(itemInHand.getDurability() + damage > itemInHand.getType().getMaxDurability())
+                                        livingEntity.getKiller().setItemInHand(new ItemStack(Material.AIR));
+                                    else
+                                        itemInHand.setDurability((short) (itemInHand.getDurability() + damage));
+                                }
                             }
                         }
 
