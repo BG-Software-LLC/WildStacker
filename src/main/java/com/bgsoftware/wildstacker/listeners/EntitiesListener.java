@@ -67,7 +67,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -219,7 +218,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            e.getEntity().setMetadata("WS-Damage", new FixedMetadataValue(plugin, e));
+            livingEntity.setLastDamageCause(e);
 
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
@@ -309,7 +308,7 @@ public final class EntitiesListener implements Listener {
 
                         stackedEntity.setStackAmount(currentStackAmount, false);
 
-                        e.getEntity().removeMetadata("WS-Damage", plugin);
+                        livingEntity.setLastDamageCause(null);
 
                         if(isMcMMOSpawnedEntity)
                             McMMOHook.updateSpawnedEntity(livingEntity);
