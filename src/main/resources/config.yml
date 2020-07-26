@@ -661,13 +661,13 @@ barrels:
   # Blacklisted barrels are barrels that won't get stacked.
   # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
-  # If you wish to disable blacklisted spawners, use "blacklist: []"
+  # If you wish to disable blacklisted barrels, use "blacklist: []"
   blacklist: []
 
   # Whitelisted blocks are blocks that will get stacked.
   # Material list: https://bg-software.com/materials/
   # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
-  # If you wish to disable whitelisted spawners, use "whitelist: []"
+  # If you wish to disable whitelisted barrels, use "whitelist: []"
   whitelist:
     - EXAMPLE_BARREL
 
