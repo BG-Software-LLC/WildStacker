@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -86,11 +87,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class EntitiesListener implements Listener {
 
-    private final WildStackerPlugin plugin;
+    private static final Map<EntityDamageEvent.DamageModifier, ? extends Function<? super Double, Double>> damageModifiersFunctions =
+            Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
+    private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
 
     public final static Set<UUID> noStackEntities = new HashSet<>();
-    private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
+
     private final Set<UUID> noDeathEvent = new HashSet<>();
+    private final WildStackerPlugin plugin;
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -135,15 +139,10 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        //Calling the onEntityLastDamage function with default parameters.
-
-        EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
-
         noDeathEvent.add(e.getEntity().getUniqueId());
 
-        onEntityLastDamage(entityDamageEvent);
+        //Calling the onEntityLastDamage function with default parameters.
+        onEntityLastDamage(createDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM, e.getEntity().getHealth(), null));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -186,16 +185,17 @@ public final class EntitiesListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
+        Entity entityDamager = e instanceof EntityDamageByEntityEvent ? ((EntityDamageByEntityEvent) e).getDamager() : null;
+        EntityDamageEvent clonedEvent = createDamageEvent(e.getEntity(), e.getCause(), e.getDamage(), entityDamager);
+
         if(((WStackedEntity) stackedEntity).hasDeadFlag()){
             e.setDamage(0);
             return;
         }
 
-        Entity entityDamager = null;
         Player damager = null;
 
         if (e instanceof EntityDamageByEntityEvent) {
-            entityDamager = ((EntityDamageByEntityEvent) e).getDamager();
             if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
                 damager = (Player) ((EntityDamageByEntityEvent) e).getDamager();
             }
@@ -235,7 +235,7 @@ public final class EntitiesListener implements Listener {
             e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
-            livingEntity.setLastDamageCause(e);
+            livingEntity.setLastDamageCause(clonedEvent);
 
             //Villager was killed by a zombie - should be turned into a zombie villager.
             if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){
@@ -814,11 +814,7 @@ public final class EntitiesListener implements Listener {
 
             e.setCancelled(true);
 
-            EntityDamageEvent entityDamageEvent = new EntityDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, e.getEntity().getHealth())),
-                    Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D))));
-
-            onEntityLastDamage(entityDamageEvent);
+            onEntityLastDamage(createDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM, e.getEntity().getHealth(), null));
         }
 
     }
@@ -841,6 +837,16 @@ public final class EntitiesListener implements Listener {
             plugin.getSystemManager().removeStackObject(stackedEntity);
         }
 
+    }
+
+    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager){
+        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
+        if(damager == null){
+            return new EntityDamageEvent(entity, damageCause, damageModifiers, damageModifiersFunctions);
+        }
+        else{
+            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
+        }
     }
 
     private static class TransformListener implements Listener {
