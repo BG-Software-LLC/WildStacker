@@ -18,7 +18,8 @@ public final class ReflectionUtils {
             Class entityLivingClass = getNMSClass("EntityLiving"),
                     entityClass = getNMSClass("Entity"),
                     nmsTagClass = getNMSClass("NBTTagCompound"),
-                    entityInsentientClass = getNMSClass("EntityInsentient");
+                    entityInsentientClass = getNMSClass("EntityInsentient"),
+                    worldClass = getNMSClass("World");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
@@ -77,6 +78,10 @@ public final class ReflectionUtils {
                     //1.9 and above
                     "isDropExperience"
             ));
+
+            try{
+                methodMap.put(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER, worldClass.getMethod("getChunkIfLoaded",int.class, int.class));
+            }catch (Throwable ignored){}
 
             fieldMap.values().forEach(field -> field.setAccessible(true));
             methodMap.values().forEach(method -> method.setAccessible(true));

@@ -296,7 +296,15 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
 
         for(int x = minX; x <= maxX; x++) {
             for(int z = minZ; z <= maxZ; z++) {
-                Chunk chunk = world.getChunkProvider().getChunkAt(x, z, false);
+                Chunk chunk;
+
+                if(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.isValid()){
+                    chunk = (Chunk) Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.invoke(world, x, z);
+                }
+                else{
+                    chunk = world.getChunkProvider().getChunkAt(x, z, false);
+                }
+
                 if(chunk != null) {
                     int chunkMinY = MathHelper.clamp(minY, 0, chunk.entitySlices.length - 1);
                     int chunkMaxY = MathHelper.clamp(maxY, 0, chunk.entitySlices.length - 1);
