@@ -118,10 +118,11 @@ public final class BarrelsListener implements Listener {
         //Stacking barrel
         Optional<Block> blockOptional = stackedBarrel.runStack();
 
+        e.setCancelled(true);
+
         if(!blockOptional.isPresent()) {
             if(isChunkLimit(chunk)) {
                 Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)) + " Barrels");
-                e.setCancelled(true);
                 stackedBarrel.remove();
                 return;
             }
@@ -130,12 +131,14 @@ public final class BarrelsListener implements Listener {
             Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
 
             if(barrelPlaceEvent.isCancelled()) {
-                e.setCancelled(true);
                 stackedBarrel.remove();
                 return;
             }
 
-            e.getBlockPlaced().setType(Material.CAULDRON);
+            revokeItem(e.getPlayer(), inHand);
+
+            //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
+            Executor.sync(() -> e.getBlock().setType(Material.CAULDRON), 1L);
 
             if(ServerVersion.isLessThan(ServerVersion.v1_9)){
                 Executor.sync(() -> {
@@ -154,8 +157,6 @@ public final class BarrelsListener implements Listener {
             Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
         }
         else {
-            e.setCancelled(true);
-
             revokeItem(e.getPlayer(), inHand);
 
             StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
