@@ -57,7 +57,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if(stackAmount > 0) {
             ItemStack itemStack = object.getItemStack().clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), stackAmount));
-            object.setItemStack(itemStack);
+            if(itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
+                object.setItemStack(itemStack);
         }
     }
 
