@@ -55,7 +55,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private boolean ignoreDeathEvent = false;
     private SpawnCause spawnCause;
     private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
-    private EntityDamageEvent lastDamageCause;
 
     private boolean deadEntityFlag = false;
     private boolean removed = false;
@@ -501,9 +500,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         ItemStackList drops = new ItemStackList();
 
-        if(lastDamageCause != null)
-            object.setLastDamageCause(lastDamageCause);
-
         if(tempLootTable != null){
             drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
             tempLootTable = null;
@@ -635,10 +631,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public boolean isCached(){
         return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
-    }
-
-    public void setLastDamageCause(EntityDamageEvent lastDamageCause){
-        this.lastDamageCause = lastDamageCause;
     }
 
     public void setDeadFlag(boolean deadEntityFlag){

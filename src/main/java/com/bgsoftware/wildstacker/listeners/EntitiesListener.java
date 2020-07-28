@@ -185,22 +185,21 @@ public final class EntitiesListener implements Listener {
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
-        Entity entityDamager = e instanceof EntityDamageByEntityEvent ? ((EntityDamageByEntityEvent) e).getDamager() : null;
-        EntityDamageEvent clonedEvent = createDamageEvent(e.getEntity(), e.getCause(), e.getDamage(), entityDamager);
-
         if(((WStackedEntity) stackedEntity).hasDeadFlag()){
             e.setDamage(0);
             return;
         }
 
+        Entity entityDamager = null;
         Player damager = null;
 
         if (e instanceof EntityDamageByEntityEvent) {
-            if(((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
-                damager = (Player) ((EntityDamageByEntityEvent) e).getDamager();
+            entityDamager = ((EntityDamageByEntityEvent) e).getDamager();
+            if(entityDamager instanceof Player) {
+                damager = (Player) entityDamager;
             }
-            else if(((EntityDamageByEntityEvent) e).getDamager() instanceof Projectile){
-                Projectile projectile = (Projectile) ((EntityDamageByEntityEvent) e).getDamager();
+            else if(entityDamager instanceof Projectile){
+                Projectile projectile = (Projectile) entityDamager;
                 if(projectile.getShooter() instanceof Player)
                     damager = (Player) projectile.getShooter();
             }
@@ -218,8 +217,6 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            livingEntity.setLastDamageCause(e);
-
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount = Math.min(stackedEntity.getStackAmount(),
                     stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
@@ -232,10 +229,10 @@ public final class EntitiesListener implements Listener {
             if(damager != null)
                 McMMOHook.handleCombat(damager, entityDamager, livingEntity, e.getFinalDamage());
 
+            EntityDamageEvent clonedEvent = createDamageEvent(e.getEntity(), e.getCause(), e.getDamage(), entityDamager);
+
             e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
-
-            livingEntity.setLastDamageCause(clonedEvent);
 
             //Villager was killed by a zombie - should be turned into a zombie villager.
             if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){
@@ -278,11 +275,12 @@ public final class EntitiesListener implements Listener {
                 int lootBonusLevel = getFortuneLevel(livingEntity);
 
                 Executor.async(() -> {
+                    livingEntity.setLastDamageCause(clonedEvent);
                     livingEntity.setFireTicks(fireTicks);
-                    ((WStackedEntity) stackedEntity).setLastDamageCause(e);
+
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
-                    ((WStackedEntity) stackedEntity).setLastDamageCause(null);
                     int droppedExp = stackedEntity.getExp(stackAmount, 0);
+
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
 
