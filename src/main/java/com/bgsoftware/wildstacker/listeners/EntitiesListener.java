@@ -41,6 +41,7 @@ import org.bukkit.entity.Animals;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fish;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
@@ -535,25 +536,29 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
         if(!plugin.getSettings().entitiesStackingEnabled || e.getItem() == null || e.getAction() != Action.RIGHT_CLICK_BLOCK ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") || !Materials.isValidAndSpawnEgg(e.getItem()))
+                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") ||
+                (!Materials.isValidAndSpawnEgg(e.getItem()) && !Materials.isFishBucket(e.getItem())))
             return;
 
         nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(e.getItem());
-        nextEntityType = ItemUtils.getEntityType(e.getItem());
 
-        if(nextEntityType == null) {
-            nextEntityStackAmount = -1;
-            return;
-        }
+        if(Materials.isValidAndSpawnEgg(e.getItem())) {
+            nextEntityType = ItemUtils.getEntityType(e.getItem());
 
-        EntityType nmsEntityType = ItemUtils.getNMSEntityType(e.getItem());
-        if(nmsEntityType != null){
-            e.setCancelled(true);
-            nextEntityType = EntityTypes.fromName(nmsEntityType.name());
-            Location toSpawn = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(0.5, 0, 0.5);
-            if(toSpawn.getBlock().getType() != Material.AIR)
-                toSpawn = toSpawn.add(0, 1, 0);
-            plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
+            if (nextEntityType == null) {
+                nextEntityStackAmount = -1;
+                return;
+            }
+
+            EntityType nmsEntityType = ItemUtils.getNMSEntityType(e.getItem());
+            if (nmsEntityType != null) {
+                e.setCancelled(true);
+                nextEntityType = EntityTypes.fromName(nmsEntityType.name());
+                Location toSpawn = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(0.5, 0, 0.5);
+                if (toSpawn.getBlock().getType() != Material.AIR)
+                    toSpawn = toSpawn.add(0, 1, 0);
+                plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
+            }
         }
     }
 
@@ -563,7 +568,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
-                EntityTypes.fromEntity(e.getEntity()) != nextEntityType)
+                (nextEntityType != null && EntityTypes.fromEntity(e.getEntity()) != nextEntityType))
             return;
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.valueOf(e.getSpawnReason()));
@@ -578,6 +583,54 @@ public final class EntitiesListener implements Listener {
 
         nextEntityStackAmount = -1;
         nextEntityType = null;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerCatchFishWithBucket(PlayerInteractEntityEvent e){
+        ItemStack inHand = e.getPlayer().getItemInHand();
+
+        //noinspection deprecation
+        if(!(e.getRightClicked() instanceof Fish) || ServerVersion.isLegacy() || inHand == null || inHand.getType() != Material.WATER_BUCKET)
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+
+        if(stackedEntity.getStackAmount() <= 1)
+            return;
+
+        Material fishBucketType = null;
+
+        try {
+            switch (EntityTypes.fromEntity((LivingEntity) e.getRightClicked())) {
+                case COD:
+                    fishBucketType = Material.valueOf("COD_BUCKET");
+                    break;
+                case PUFFERFISH:
+                    fishBucketType = Material.valueOf("PUFFERFISH_BUCKET");
+                    break;
+                case SALMON:
+                    fishBucketType = Material.valueOf("SALMON_BUCKET");
+                    break;
+                case TROPICAL_FISH:
+                    fishBucketType = Material.valueOf("TROPICAL_FISH_BUCKET");
+                    break;
+            }
+        }catch (Exception ignored){}
+
+        if(fishBucketType == null)
+            return;
+
+        e.setCancelled(true);
+
+        ItemStack fishBucketItem = ItemUtils.setSpawnerItemAmount(new ItemStack(fishBucketType), stackedEntity.getStackAmount());
+
+        stackedEntity.remove();
+
+        inHand = inHand.clone();
+        inHand.setAmount(1);
+        ItemUtils.removeItem(inHand, e);
+
+        ItemUtils.addItem(fishBucketItem, e.getPlayer().getInventory(), e.getRightClicked().getLocation());
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

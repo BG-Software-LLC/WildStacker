@@ -19,6 +19,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -279,6 +280,23 @@ public final class ItemUtils {
     public static void removeItem(ItemStack itemStack, PlayerInteractEvent event){
         try{
             EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEvent.class.getMethod("getHand").invoke(event);
+            if(equipmentSlot.name().equals("OFF_HAND")){
+                ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
+                if(offHand.isSimilar(itemStack)){
+                    offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
+                    PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
+                            .invoke(event.getPlayer().getInventory(), offHand);
+                }
+            }
+        }catch(Exception ignored){}
+
+        event.getPlayer().getInventory().removeItem(itemStack);
+    }
+
+    @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
+    public static void removeItem(ItemStack itemStack, PlayerInteractEntityEvent event){
+        try{
+            EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEntityEvent.class.getMethod("getHand").invoke(event);
             if(equipmentSlot.name().equals("OFF_HAND")){
                 ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
                 if(offHand.isSimilar(itemStack)){

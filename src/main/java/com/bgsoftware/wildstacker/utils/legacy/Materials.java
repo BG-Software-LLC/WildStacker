@@ -41,8 +41,8 @@ public enum Materials {
         this.bukkitData = (short) bukkitData;
     }
 
-    private String bukkitType;
-    private short bukkitData;
+    private final String bukkitType;
+    private final short bukkitData;
 
     public Material toBukkitType(){
         try {
@@ -74,6 +74,18 @@ public enum Materials {
 
     public static ItemStack getWool(DyeColor dyeColor){
         return ServerVersion.isLegacy() ? new ItemStack(Material.matchMaterial("WOOL"), 1, dyeColor.getWoolData()) : new ItemStack(Material.matchMaterial(dyeColor.name() + "_WOOL"));
+    }
+
+    public static boolean isFishBucket(ItemStack itemStack){
+        switch (itemStack.getType().name()){
+            case "COD_BUCKET":
+            case "PUFFERFISH_BUCKET":
+            case "SALMON_BUCKET":
+            case "TROPICAL_FISH_BUCKET":
+                return true;
+            default:
+                return false;
+        }
     }
 
 }
