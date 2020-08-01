@@ -8,19 +8,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class KeySet extends AbstractSet<Key> implements Set<Key> {
+public final class KeySet extends AbstractSet<Key> implements Set<Key> {
 
     private final Set<String> set = new HashSet<>();
-    private final Set<Key> keySet = new HashSet<>();
 
     public KeySet(List<String> keys){
         this.set.addAll(keys);
-        keys.forEach(key -> keySet.add(Key.of(key)));
     }
 
     @Override
-    @SuppressWarnings("NullableProblems")
     public Iterator<Key> iterator() {
         return asKeySet().iterator();
     }
@@ -44,29 +42,16 @@ public class KeySet extends AbstractSet<Key> implements Set<Key> {
 
     @Override
     public boolean contains(Object o) {
-        if(o instanceof Key){
-            String key = o.toString();
-            if(set.contains(key))
-                return true;
-            else if(key.contains(":") && set.contains(key.split(":")[0]))
-                return true;
-            else if(key.contains(";") && set.contains(key.split(";")[0]))
-                return true;
-            else if(set.contains("all") || set.contains("ALL"))
-                return true;
-        }
-        return super.contains(o);
+        return o instanceof Key && (set.contains(o.toString()) || (!((Key) o).getSubKey().isEmpty() && set.contains(((Key) o).getGlobalKey())));
     }
 
     @Override
     public boolean add(Key key) {
-        keySet.add(key);
         return set.add(key.toString());
     }
 
     @Override
     public boolean remove(Object o) {
-        keySet.remove(o);
         return set.remove(o);
     }
 
@@ -75,7 +60,7 @@ public class KeySet extends AbstractSet<Key> implements Set<Key> {
     }
 
     private Set<Key> asKeySet(){
-        return new HashSet<>(keySet);
+        return set.stream().map(Key::of).collect(Collectors.toSet());
     }
 
 }

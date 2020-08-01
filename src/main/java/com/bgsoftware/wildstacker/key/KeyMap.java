@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> {
+public final class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> {
 
-    private Map<String, V> map;
+    private final Map<String, V> map;
 
     public KeyMap(){
         this.map = new HashMap<>();
@@ -32,18 +32,7 @@ public class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> {
 
     @Override
     public boolean containsKey(Object o) {
-        if(o instanceof Key) {
-            String key = o.toString();
-            if(map.containsKey(key))
-                return true;
-            else if(key.contains(":") && map.containsKey(key.split(":")[0]))
-                return true;
-            else if(key.contains(";") && map.containsKey(key.split(";")[0]))
-                return true;
-            else if(map.containsKey("all"))
-                return true;
-        }
-        return super.containsKey(o);
+        return get(o) != null;
     }
 
     public V put(String key, V value) {
@@ -74,18 +63,12 @@ public class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> {
 
     @Override
     public V get(Object o) {
-        if(o instanceof Key) {
-            String key = o.toString();
-            if(map.containsKey(key))
-                return map.get(key);
-            else if(key.contains(":") && map.containsKey(key.split(":")[0]))
-                return map.get(key.split(":")[0]);
-            else if(key.contains(";") && map.containsKey(key.split(";")[0]))
-                return map.get(key.split(";")[0]);
-            else if(map.containsKey("all"))
-                return map.get("all");
+        if(o instanceof Key){
+            V returnValue = map.get(o.toString());
+            return returnValue == null && !((Key) o).getSubKey().isEmpty() ? map.get(((Key) o).getGlobalKey()) : returnValue;
         }
-        return super.get(o);
+
+        return null;
     }
 
     public V getOrDefault(ItemStack itemStack, V defaultValue) {

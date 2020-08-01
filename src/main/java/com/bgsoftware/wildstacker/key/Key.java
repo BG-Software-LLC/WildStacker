@@ -10,15 +10,26 @@ public final class Key {
 
     private static final Key ALL_KEY = new Key("all");
 
-    private final String key;
+    private final String globalKey;
+    private final String subKey;
 
     private Key(String key){
-        this.key = key;
+        String[] keySections = key.split(":");
+        this.globalKey = keySections[0];
+        this.subKey = keySections.length == 2 ? keySections[1] : "";
+    }
+
+    public String getGlobalKey() {
+        return globalKey;
+    }
+
+    public String getSubKey() {
+        return subKey;
     }
 
     @Override
     public String toString() {
-        return key;
+        return globalKey + ":" + subKey;
     }
 
     @Override
@@ -26,12 +37,12 @@ public final class Key {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Key key1 = (Key) o;
-        return key.equals(key1.key);
+        return toString().equals(key1.toString());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return Objects.hash(globalKey, subKey);
     }
 
     public static Key of(EntityType entityType){
@@ -47,7 +58,7 @@ public final class Key {
     }
 
     public static Key of(String key){
-        return key.equalsIgnoreCase("all") ? ALL_KEY : new Key(key);
+        return key.equalsIgnoreCase("all") ? ALL_KEY : new Key(key.replace(";", ":"));
     }
 
 }
