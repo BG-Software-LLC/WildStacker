@@ -54,6 +54,7 @@ import java.util.UUID;
 public final class BarrelsListener implements Listener {
 
     private final Set<UUID> barrelsToggleCommandPlayers = new HashSet<>();
+    private final Set<UUID> alreadyBarrelsPlacedPlayers = new HashSet<>();
     private final Map<UUID, Location> barrelPlaceInventory = new HashMap<>();
     private final WildStackerPlugin plugin;
 
@@ -76,94 +77,103 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        ItemStack inHand = e.getItemInHand().clone();
-        int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
-
-        if(toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
-            return;
-
-
-        if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+        if(!alreadyBarrelsPlacedPlayers.add(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
-            Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
             return;
         }
 
-        StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
+        try {
+            ItemStack inHand = e.getItemInHand().clone();
+            int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
 
-        if(stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled()) {
-            stackedBarrel.remove();
-            return;
-        }
+            if (toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
+                return;
 
-        if(e.getBlockPlaced().getY() > e.getBlockAgainst().getY() && plugin.getSystemManager().isStackedBarrel(e.getBlockAgainst())){
-            e.setCancelled(true);
-            stackedBarrel.remove();
-            return;
-        }
 
-        boolean replaceAir = false;
+            if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                    !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
+                e.setCancelled(true);
+                Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
+                return;
+            }
 
-        if(plugin.getSettings().barrelsShiftPlaceStack){
-            toPlace *= inHand.getAmount();
-            replaceAir = true;
-        }
+            StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
-        stackedBarrel.setStackAmount(toPlace, false);
-
-        Chunk chunk = e.getBlock().getChunk();
-        boolean REPLACE_AIR = replaceAir;
-
-        //Stacking barrel
-        Optional<Block> blockOptional = stackedBarrel.runStack();
-
-        e.setCancelled(true);
-
-        if(!blockOptional.isPresent()) {
-            if(isChunkLimit(chunk)) {
-                Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)) + " Barrels");
+            if (stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled()) {
                 stackedBarrel.remove();
                 return;
             }
 
-            BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel, inHand);
-            Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
-
-            if(barrelPlaceEvent.isCancelled()) {
+            if (e.getBlockPlaced().getY() > e.getBlockAgainst().getY() && plugin.getSystemManager().isStackedBarrel(e.getBlockAgainst())) {
+                e.setCancelled(true);
                 stackedBarrel.remove();
                 return;
             }
 
-            revokeItem(e.getPlayer(), inHand);
+            boolean replaceAir = false;
 
-            //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
-            Executor.sync(() -> e.getBlock().setType(Material.CAULDRON), 1L);
-
-            if(ServerVersion.isLessThan(ServerVersion.v1_9)){
-                Executor.sync(() -> {
-                    if(e.getBlockPlaced().getType() != Material.CAULDRON)
-                        return;
-
-                    stackedBarrel.updateName();
-                    Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
-
-                    finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
-                }, 1L);
-                return;
+            if (plugin.getSettings().barrelsShiftPlaceStack) {
+                toPlace *= inHand.getAmount();
+                replaceAir = true;
             }
 
-            stackedBarrel.updateName();
-            Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
-        }
-        else {
-            revokeItem(e.getPlayer(), inHand);
+            stackedBarrel.setStackAmount(toPlace, false);
 
-            StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
-            Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
-        }
+            Chunk chunk = e.getBlock().getChunk();
+            boolean REPLACE_AIR = replaceAir;
 
-        finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+            //Stacking barrel
+            Optional<Block> blockOptional = stackedBarrel.runStack();
+
+            e.setCancelled(true);
+
+            if (!blockOptional.isPresent()) {
+                if (isChunkLimit(chunk)) {
+                    Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)) + " Barrels");
+                    stackedBarrel.remove();
+                    return;
+                }
+
+                BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel, inHand);
+                Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
+
+                if (barrelPlaceEvent.isCancelled()) {
+                    stackedBarrel.remove();
+                    return;
+                }
+
+                revokeItem(e.getPlayer(), inHand);
+
+                //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
+                Executor.sync(() -> e.getBlock().setType(Material.CAULDRON), 1L);
+
+                if (ServerVersion.isLessThan(ServerVersion.v1_9)) {
+                    Executor.sync(() -> {
+                        if (e.getBlockPlaced().getType() != Material.CAULDRON)
+                            return;
+
+                        stackedBarrel.updateName();
+                        Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+
+                        finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+                    }, 1L);
+                    return;
+                }
+
+                stackedBarrel.updateName();
+                Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+            } else {
+                revokeItem(e.getPlayer(), inHand);
+
+                StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
+                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
+            }
+
+            finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+        }catch (Exception ex){
+            alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId());
+            throw ex;
+        }
     }
 
     private void finishBarrelPlace(Player player, ItemStack inHand, StackedBarrel stackedBarrel, boolean replaceAir){
@@ -172,6 +182,8 @@ public final class BarrelsListener implements Listener {
             ItemUtils.setItemInHand(player.getInventory(), inHand, new ItemStack(Material.AIR));
 
         CoreProtectHook.recordBlockChange(player, stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
+
+        alreadyBarrelsPlacedPlayers.remove(player.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
