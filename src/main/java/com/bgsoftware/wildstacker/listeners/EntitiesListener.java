@@ -736,30 +736,32 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityNameTag(PlayerInteractEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(e.getRightClicked()) || !StackSplit.NAME_TAG.isEnabled())
-            return;
-
         ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
-        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
         if(inHand == null || inHand.getType() != Material.NAME_TAG || !inHand.hasItemMeta() || !inHand.getItemMeta().hasDisplayName()
                 || e.getRightClicked() instanceof EnderDragon || e.getRightClicked() instanceof Player)
                 return;
 
-        int amount = stackedEntity.getStackAmount();
+        if(plugin.getSettings().entitiesStackingEnabled && EntityUtils.isStackable(e.getRightClicked()) && StackSplit.NAME_TAG.isEnabled()) {
+            StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+            int amount = stackedEntity.getStackAmount();
 
-        Executor.sync(() -> {
-            if(amount > 1){
-                stackedEntity.setCustomName("");
-                stackedEntity.setStackAmount(amount - 1, true);
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-                duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
-                EntityStorage.setMetadata(duplicated.getLivingEntity(), "nameTag", true);
-            }else{
-                EntityStorage.setMetadata(stackedEntity.getLivingEntity(), "nameTag", true);
-                stackedEntity.runStackAsync(null);
-            }
-        }, 2L);
+            Executor.sync(() -> {
+                if (amount > 1) {
+                    stackedEntity.setCustomName("");
+                    stackedEntity.setStackAmount(amount - 1, true);
+                    StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                    duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
+                    EntityStorage.setMetadata(duplicated.getLivingEntity(), "nameTag", true);
+                } else {
+                    EntityStorage.setMetadata(stackedEntity.getLivingEntity(), "nameTag", true);
+                    stackedEntity.runStackAsync(null);
+                }
+            }, 2L);
+        }
+        else{
+            EntityStorage.setMetadata(e.getRightClicked(), "nameTag", true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
