@@ -273,7 +273,7 @@ public final class EntitiesListener implements Listener {
 
                 ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
 
-                int lootBonusLevel = getFortuneLevel(livingEntity);
+                int lootBonusLevel = itemInHand == null ? 0 : itemInHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
 
                 Executor.async(() -> {
                     livingEntity.setLastDamageCause(clonedEvent);
@@ -834,10 +834,6 @@ public final class EntitiesListener implements Listener {
                 .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
-    private EntityDamageEvent.DamageCause getLastDamage(LivingEntity livingEntity){
-        return livingEntity.getLastDamageCause() == null ? EntityDamageEvent.DamageCause.CUSTOM : livingEntity.getLastDamageCause().getCause();
-    }
-
     private boolean isChunkLimit(Chunk chunk){
         int chunkLimit = plugin.getSettings().entitiesChunkLimit;
 
@@ -845,17 +841,6 @@ public final class EntitiesListener implements Listener {
             return false;
 
         return (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count() > chunkLimit;
-    }
-
-    private int getFortuneLevel(LivingEntity livingEntity){
-        int fortuneLevel = 0;
-
-        if(getLastDamage(livingEntity) == EntityDamageEvent.DamageCause.ENTITY_ATTACK &&
-                livingEntity.getKiller() != null && livingEntity.getKiller().getItemInHand() != null){
-            fortuneLevel = livingEntity.getKiller().getItemInHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-        }
-
-        return fortuneLevel;
     }
 
     class EntityKillListener implements Listener {
