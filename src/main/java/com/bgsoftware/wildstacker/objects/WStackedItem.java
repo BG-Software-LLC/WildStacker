@@ -376,7 +376,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     public static StackedItem ofCache(Item item){
-        return plugin.getDataHandler().CACHED_ITEMS.get(item.getUniqueId());
+        return plugin.getSystemManager().getStackedItemFromCache(item);
     }
 
 }

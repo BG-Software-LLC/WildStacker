@@ -172,6 +172,19 @@ public final class SystemHandler implements SystemManager {
         return stackedItem;
     }
 
+    public StackedItem getStackedItemFromCache(Item item){
+        StackedItem stackedItem = plugin.getDataHandler().CACHED_ITEMS.get(item.getUniqueId());
+        Integer stackAmount = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
+
+        if(stackAmount != null) {
+            if(stackedItem == null)
+                stackedItem = new WStackedItem(item);
+            stackedItem.setStackAmount(stackAmount, true);
+        }
+
+        return stackedItem;
+    }
+
     @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
         return getStackedSpawner(spawner.getLocation());
