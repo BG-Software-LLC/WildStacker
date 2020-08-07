@@ -29,7 +29,7 @@ public final class Key {
 
     @Override
     public String toString() {
-        return globalKey + ":" + subKey;
+        return globalKey + (subKey.isEmpty() ? "" : ":" + subKey);
     }
 
     @Override

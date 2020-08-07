@@ -65,7 +65,11 @@ public final class KeyMap<V> extends AbstractMap<Key, V> implements Map<Key, V> 
     public V get(Object o) {
         if(o instanceof Key){
             V returnValue = map.get(o.toString());
-            return returnValue == null && !((Key) o).getSubKey().isEmpty() ? map.get(((Key) o).getGlobalKey()) : returnValue;
+
+            if(returnValue == null && !((Key) o).getSubKey().isEmpty())
+                returnValue = map.get(((Key) o).getGlobalKey());
+
+            return returnValue == null ? map.get("all") : returnValue;
         }
 
         return null;
