@@ -11,6 +11,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
+import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.database.StatementHolder;
@@ -20,6 +22,8 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
+import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
@@ -30,10 +34,9 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.MultiPair;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -54,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -272,6 +276,16 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
+    public List<UnloadedStackedSpawner> getAllStackedSpawners() {
+        List<UnloadedStackedSpawner> spawners = new ArrayList<>();
+
+        dataHandler.CACHED_SPAWNERS.values().forEach(stackedSpawner -> spawners.add(new WUnloadedStackedSpawner(stackedSpawner)));
+        dataHandler.CACHED_SPAWNERS_RAW.values().forEach(map -> spawners.addAll(map.values()));
+
+        return spawners;
+    }
+
+    @Override
     public List<StackedBarrel> getStackedBarrels(){
         return new ArrayList<>(dataHandler.CACHED_BARRELS.values());
     }
@@ -279,6 +293,16 @@ public final class SystemHandler implements SystemManager {
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
         Set<StackedBarrel> chunkBarrels = dataHandler.CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(chunk));
         return chunkBarrels == null ? new ArrayList<>() : new ArrayList<>(chunkBarrels);
+    }
+
+    @Override
+    public List<UnloadedStackedBarrel> getAllStackedBarrels() {
+        List<UnloadedStackedBarrel> barrels = new ArrayList<>();
+
+        dataHandler.CACHED_BARRELS.values().forEach(stackedBarrel -> barrels.add(new WUnloadedStackedBarrel(stackedBarrel)));
+        dataHandler.CACHED_BARRELS_RAW.values().forEach(map -> barrels.addAll(map.values()));
+
+        return barrels;
     }
 
     @Override
@@ -415,16 +439,17 @@ public final class SystemHandler implements SystemManager {
 
     public void loadSpawners(Chunk chunk){
         ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Set<Pair<Location, Integer>> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
+        Map<Location, UnloadedStackedSpawner> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
 
         if(spawnersToLoad != null){
-            for (Pair<Location, Integer> pair : spawnersToLoad) {
-                if (GeneralUtils.isSameChunk(pair.getKey(), chunk)) {
-                    Block block = pair.getKey().getBlock();
+            for (UnloadedStackedSpawner unloadedStackedSpawner : spawnersToLoad.values()) {
+                Location location = unloadedStackedSpawner.getLocation();
+                if (GeneralUtils.isSameChunk(location, chunk)) {
+                    Block block = location.getBlock();
 
                     if (block.getType() == Materials.SPAWNER.toBukkitType()) {
                         StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                        stackedSpawner.setStackAmount(pair.getValue(), true);
+                        stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
                         dataHandler.addStackedSpawner(stackedSpawner);
                     }
                 }
@@ -436,16 +461,17 @@ public final class SystemHandler implements SystemManager {
 
     public void loadBarrels(Chunk chunk){
         ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Set<MultiPair<Location, Integer, ItemStack>> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
+        Map<Location, UnloadedStackedBarrel> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
 
         if(barrelsToLoad != null){
-            for (MultiPair<Location, Integer, ItemStack> pair : barrelsToLoad) {
-                if(GeneralUtils.isSameChunk(pair.getX(), chunk)){
-                    Block block = pair.getX().getBlock();
+            for (UnloadedStackedBarrel unloadedStackedBarrel : barrelsToLoad.values()) {
+                Location location = unloadedStackedBarrel.getLocation();
+                if(GeneralUtils.isSameChunk(location, chunk)){
+                    Block block = location.getBlock();
 
                     if(block.getType() == Material.CAULDRON){
-                        StackedBarrel stackedBarrel = new WStackedBarrel(block, pair.getZ());
-                        stackedBarrel.setStackAmount(pair.getY(), true);
+                        StackedBarrel stackedBarrel = new WStackedBarrel(block, unloadedStackedBarrel.getBarrelItem(1));
+                        stackedBarrel.setStackAmount(unloadedStackedBarrel.getStackAmount(), true);
                         stackedBarrel.createDisplayBlock();
                         dataHandler.addStackedBarrel(stackedBarrel);
                     }
@@ -521,16 +547,16 @@ public final class SystemHandler implements SystemManager {
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);
             if(stackedSpawner.getStackAmount() > 1) {
-                dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Sets.newConcurrentHashSet())
-                        .add(new Pair<>(stackedSpawner.getLocation(), stackedSpawner.getStackAmount()));
+                dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
+                        .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
                 plugin.getProviders().deleteHologram(stackedSpawner);
             }
         }
 
         for(StackedBarrel stackedBarrel : getStackedBarrels(chunk)){
             dataHandler.removeStackedBarrel(stackedBarrel);
-            dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Sets.newConcurrentHashSet())
-                    .add(new MultiPair<>(stackedBarrel.getLocation(), stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+            dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Maps.newConcurrentMap())
+                    .put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
             plugin.getProviders().deleteHologram(stackedBarrel);
             stackedBarrel.removeDisplayBlock();
         }

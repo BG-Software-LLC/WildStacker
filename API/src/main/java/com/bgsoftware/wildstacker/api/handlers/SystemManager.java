@@ -8,6 +8,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
+import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -90,10 +92,22 @@ public interface SystemManager {
     List<StackedSpawner> getStackedSpawners();
 
     /**
+     * Get all the stacked spawners on the server.
+     * @return A list of pairs for locations and stack amounts of the spawners.
+     */
+    List<UnloadedStackedSpawner> getAllStackedSpawners();
+
+    /**
      * Get all the stacked barrels from cache.
      * @return A list of stacked barrels
      */
     List<StackedBarrel> getStackedBarrels();
+
+    /**
+     * Get all the stacked barrels on the server.
+     * @return A list of pairs for locations and stack amounts of the barrels.
+     */
+    List<UnloadedStackedBarrel> getAllStackedBarrels();
 
     /**
      * Checks if a block is a stacked spawner.

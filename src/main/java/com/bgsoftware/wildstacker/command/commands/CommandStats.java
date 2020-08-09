@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.command.ICommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public final class CommandStats implements ICommand {
 
@@ -51,11 +51,11 @@ public final class CommandStats implements ICommand {
 
         int spawnersUnloadedAmount = 0, barrelsUnloadedAmount = 0;
 
-        for(Set<?> set : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
-            spawnersUnloadedAmount += set.size();
+        for(Map<?, ?> map : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
+            spawnersUnloadedAmount += map.size();
 
-        for(Set<?> set : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
-            barrelsUnloadedAmount += set.size();
+        for(Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
+            barrelsUnloadedAmount += map.size();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + entitiesUnloadedAmount + ")" +
