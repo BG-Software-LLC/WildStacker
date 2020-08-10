@@ -89,6 +89,8 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
+        Executor.sync(() -> alreadySpawnersPlacedPlayers.remove(e.getPlayer().getUniqueId()), 10L);
+
         try {
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());
 

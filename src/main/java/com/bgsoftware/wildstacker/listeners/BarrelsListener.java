@@ -82,6 +82,8 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
+        Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 10L);
+
         try {
             ItemStack inHand = e.getItemInHand().clone();
             int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
