@@ -437,6 +437,10 @@ public final class EntityUtils {
         return completableFuture;
     }
 
+    public static boolean canBeBred(Animals animal) {
+        return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);
+    }
+
     private static Object requireNotNull(Object obj){
         return obj == null ? NULL : obj;
     }

@@ -11,7 +11,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
@@ -47,8 +46,6 @@ public interface NMSAdapter {
     boolean isInLove(Animals entity);
 
     boolean isAnimalFood(Animals animal, ItemStack itemStack);
-
-    boolean canBeBred(Ageable entity);
 
     List<ItemStack> getEquipment(LivingEntity livingEntity);
 

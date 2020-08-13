@@ -11,7 +11,6 @@ import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.BlockRotatable;
 import net.minecraft.server.v1_8_R3.Chunk;
 import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityAgeable;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityItem;
@@ -42,7 +41,6 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlockState;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAgeable;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -53,7 +51,6 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.CreatureType;
@@ -147,12 +144,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
         EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
         return itemStack != null && nmsEntity.d(CraftItemStack.asNMSCopy(itemStack));
-    }
-
-    @Override
-    public boolean canBeBred(Ageable entity) {
-        EntityAgeable nmsEntity = ((CraftAgeable) entity).getHandle();
-        return nmsEntity.getAge() == 0 && entity instanceof Animals && !isInLove((Animals) entity);
     }
 
     @Override

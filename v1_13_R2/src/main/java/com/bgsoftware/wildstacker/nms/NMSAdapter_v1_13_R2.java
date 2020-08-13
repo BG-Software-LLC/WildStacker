@@ -15,7 +15,6 @@ import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.Chunk;
 import net.minecraft.server.v1_13_R2.EnchantmentManager;
 import net.minecraft.server.v1_13_R2.Entity;
-import net.minecraft.server.v1_13_R2.EntityAgeable;
 import net.minecraft.server.v1_13_R2.EntityAnimal;
 import net.minecraft.server.v1_13_R2.EntityInsentient;
 import net.minecraft.server.v1_13_R2.EntityItem;
@@ -56,7 +55,6 @@ import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_13_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAgeable;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
@@ -68,7 +66,6 @@ import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_13_R2.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
@@ -171,12 +168,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
         EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
         return itemStack != null && nmsEntity.f(CraftItemStack.asNMSCopy(itemStack));
-    }
-
-    @Override
-    public boolean canBeBred(Ageable entity) {
-        EntityAgeable nmsEntity = ((CraftAgeable) entity).getHandle();
-        return nmsEntity.getAge() == 0 && entity instanceof Animals && !isInLove((Animals) entity);
     }
 
     @Override

@@ -772,7 +772,7 @@ public final class EntitiesListener implements Listener {
         if(!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
             return;
 
-        if(!plugin.getNMSAdapter().canBeBred((Animals) e.getRightClicked()))
+        if(!EntityUtils.canBeBred((Animals) e.getRightClicked()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
