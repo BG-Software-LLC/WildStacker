@@ -1,0 +1,15 @@
+{
+  "pairs": [
+    {
+      "chance": 15.5,
+      "items": [
+        {
+          "type": "GOLDEN_AXE",
+          "chance": 100,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

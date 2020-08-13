@@ -104,6 +104,8 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/pig.json");
         if(containsEntity("PIGLIN"))
             FileUtils.saveResource("loottables/piglin.json");
+        if(containsEntity("PIGLIN_BRUTE"))
+            FileUtils.saveResource("loottables/piglin_brute.json");
         if(containsEntity("PILLAGER"))
             FileUtils.saveResource("loottables/pillager.json");
         if(containsEntity("POLAR_BEAR"))

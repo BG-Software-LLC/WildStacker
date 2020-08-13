@@ -50,6 +50,7 @@ public enum  EntityTypes {
     PHANTOM,
     PIG,
     PIGLIN,
+    PIGLIN_BRUTE,
     POLAR_BEAR,
     PILLAGER,
     PUFFERFISH,
