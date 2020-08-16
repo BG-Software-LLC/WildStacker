@@ -86,7 +86,10 @@ items:
   enabled: true
 
   # How many blocks from the item should be checked for other items to stack into?
-  merge-radius: 5
+  # Material list: https://bg-software.com/materials/
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  merge-radius:
+    all: 5
 
   # Custom display-name for the items on ground.
   # If you don't want a display-name, use "custom-name: ''"
@@ -176,7 +179,11 @@ entities:
   enabled: true
 
   # How many blocks from the entity should be checked for other entities to stack into?
-  merge-radius: 10
+  # EntityType list: https://bg-software.com/entities/
+  # SpawnReason list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
+  merge-radius:
+    all: 10
 
   # Custom display-name for the entities.
   # If you don't want a display-name, use "custom-name: ''"
@@ -422,7 +429,9 @@ spawners:
   enabled: true
 
   # How many blocks from the spawner should be checked for other spawners to stack into?
-  merge-radius: 1
+  # EntityType list: https://bg-software.com/entities/
+  merge-radius:
+    all: 1
 
   # Custom hologram for the spawners.
   # Holograms will be displayed only if one of the following plugins is enabled: HolographicDisplay, Holograms, Arconix
@@ -648,7 +657,10 @@ barrels:
   enabled: true
 
   # How many blocks from the barrel should be checked for other blocks to stack into?
-  merge-radius: 1
+  # Material list: https://bg-software.com/materials/
+  # Make sure you follow the "TYPE" and "TYPE:DATA" formats.
+  merge-radius:
+    all: 1
 
   # Custom hologram for the barrels.
   # Holograms will be displayed only if one of the following plugins is enabled: HolographicDisplay, Holograms, Arconix

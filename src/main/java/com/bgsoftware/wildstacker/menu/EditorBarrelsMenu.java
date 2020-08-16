@@ -10,9 +10,7 @@ public final class EditorBarrelsMenu extends EditorMenu {
 
     private final static EditorBarrelsMenu NULL_HOLDER = new EditorBarrelsMenu(null);
 
-    private final static String[] sectionsPaths = new String[] {
-            "limits"
-    };
+    private final static String[] sectionsPaths = new String[] { "merge-radius", "limits" };
 
     private EditorBarrelsMenu(Inventory inventory){
         super(inventory, "BARRELS_SLOT_", "barrelsEditor");

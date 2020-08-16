@@ -60,6 +60,9 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract int getStackLimit();
 
     @Override
+    public abstract int getMergeRadius();
+
+    @Override
     public abstract boolean isBlacklisted();
 
     @Override

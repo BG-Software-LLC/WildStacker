@@ -83,6 +83,12 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
     }
 
     @Override
+    public int getMergeRadius() {
+        int radius = plugin.getSettings().barrelsMergeRadius.getOrDefault(getBarrelItem(1), 0);
+        return radius < 1 ? 0 : radius;
+    }
+
+    @Override
     public boolean isBlacklisted() {
         return plugin.getSettings().blacklistedBarrels.contains(getBarrelItem(1));
     }
@@ -164,7 +170,11 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
         if (chunkMerge) {
             barrelStream = plugin.getSystemManager().getStackedBarrels(chunk).stream();
         } else {
-            int range = plugin.getSettings().barrelsCheckRange;
+            int range = getMergeRadius();
+
+            if(range <= 0)
+                return Optional.empty();
+
             Location location = getLocation();
 
             int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;

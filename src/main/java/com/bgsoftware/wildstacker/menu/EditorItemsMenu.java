@@ -10,9 +10,7 @@ public final class EditorItemsMenu extends EditorMenu {
 
     private final static EditorItemsMenu NULL_HOLDER = new EditorItemsMenu(null);
 
-    private final static String[] sectionsPaths = new String[] {
-            "limits"
-    };
+    private final static String[] sectionsPaths = new String[] { "merge-radius", "limits" };
 
     private EditorItemsMenu(Inventory inventory){
         super(inventory, "ITEMS_SLOT_", "itemsEditor");

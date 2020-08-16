@@ -91,6 +91,12 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
     }
 
     @Override
+    public int getMergeRadius() {
+        int radius = plugin.getSettings().spawnersMergeRadius.getOrDefault(getSpawnedType().name(), 0);
+        return radius < 1 ? 0 : radius;
+    }
+
+    @Override
     public boolean isBlacklisted() {
         return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType().name());
     }
@@ -183,7 +189,11 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
         if (chunkMerge) {
             spawnerStream = plugin.getSystemManager().getStackedSpawners(chunk).stream();
         } else {
-            int range = plugin.getSettings().spawnersCheckRange;
+            int range = getMergeRadius();
+
+            if(range <= 0)
+                return Optional.empty();
+
             Location location = getLocation();
 
             int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
@@ -304,7 +314,7 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
         }
 
         else{
-            int range = plugin.getSettings().spawnersCheckRange;
+            int range = getMergeRadius();
             Location location = getLocation();
 
             int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;

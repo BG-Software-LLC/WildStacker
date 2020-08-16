@@ -32,8 +32,8 @@ public final class SettingsHandler {
     private static final Pattern BRACKET_PATTERN = Pattern.compile("([\\(\\[\\{\\}\\)\\]])");
 
     public final Pattern SPAWNERS_PATTERN;
-    public final String[] CONFIG_IGNORED_SECTIONS = {
-            "limits", "minimum-required", "default-unstack", "break-slots", "fill-items", "break-charge", "place-charge" };
+    public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
+            "break-slots", "fill-items", "break-charge", "place-charge" };
 
     //Global settings
     public final String giveItemName;
@@ -50,9 +50,9 @@ public final class SettingsHandler {
             itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems;
     public final List<String> itemsDisabledWorlds;
     public final KeySet blacklistedItems, whitelistedItems;
-    public final int itemsCheckRange, itemsChunkLimit;
+    public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
-    public final KeyMap<Integer> itemsLimits;
+    public final KeyMap<Integer> itemsMergeRadius, itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
@@ -65,12 +65,12 @@ public final class SettingsHandler {
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final Pattern entitiesCustomNamePattern;
-    public final int entitiesCheckRange, linkedEntitiesMaxDistance, entitiesChunkLimit;
+    public final int linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
             blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
             entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup,
             entitiesOneShotTools, entitiesOneShotWhitelist;
-    public final KeyMap<Integer> entitiesLimits, minimumRequiredEntities, defaultUnstack;
+    public final KeyMap<Integer> entitiesMergeRadius, entitiesLimits, minimumRequiredEntities, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
@@ -79,22 +79,21 @@ public final class SettingsHandler {
             dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu,
             spawnersPlacementPermission, spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement,
             onlyOneSpawner, inventoryTweaksEnabled;
-    public final int spawnersCheckRange, explosionsBreakChance, explosionsAmountPercentage,
-            silkTouchBreakChance, spawnersChunkLimit;
+    public final int explosionsBreakChance, explosionsAmountPercentage, silkTouchBreakChance, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, spawnerItemLore, silkWorlds, explosionsWorlds;
     public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
-    public final KeyMap<Integer> spawnersLimits;
+    public final KeyMap<Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
     public final KeyMap<Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
             barrelsToggleCommand, barrelsPlaceInventory, forceCauldron, barrelsAutoPickup, dropStackedItem, barrelsShiftPlaceStack;
-    public final int barrelsCheckRange, barrelsChunkLimit;
+    public final int barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle, barrelsRequiredPermission;
     public final List<String> barrelsDisabledWorlds;
     public final KeySet blacklistedBarrels, whitelistedBarrels;
-    public final KeyMap<Integer> barrelsLimits;
+    public final KeyMap<Integer> barrelsMergeRadius, barrelsLimits;
     public final List<ParticleWrapper> barrelsParticles;
 
     //Buckets settings
@@ -156,7 +155,6 @@ public final class SettingsHandler {
         itemsFixStackEnabled = cfg.getBoolean("items.fix-stack", false);
         blacklistedItems = new KeySet(cfg.getStringList("items.blacklist"));
         whitelistedItems = new KeySet(cfg.getStringList("items.whitelist"));
-        itemsCheckRange = cfg.getInt("items.merge-radius", 5);
         itemsChunkLimit = cfg.getInt("items.chunk-limit", 0);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
@@ -188,7 +186,6 @@ public final class SettingsHandler {
                 .replace("\\{2\\}", "(.*)")
         );
 
-        entitiesCheckRange = cfg.getInt("entities.merge-radius", 10);
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
@@ -228,7 +225,6 @@ public final class SettingsHandler {
         spawnersParticlesEnabled = cfg.getBoolean("spawners.particles", true);
         spawnersParticles = getParticles(plugin, "spawners");
         spawnersDisabledWorlds = cfg.getStringList("spawners.disabled-worlds");
-        spawnersCheckRange = cfg.getInt("spawners.merge-radius", 1);
         chunkMergeSpawners = cfg.getBoolean("spawners.chunk-merge", false);
         blacklistedSpawners = cfg.getStringList("spawners.blacklist");
         whitelistedSpawners = cfg.getStringList("spawners.whitelist");
@@ -287,7 +283,6 @@ public final class SettingsHandler {
         barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);
         barrelsParticles = getParticles(plugin, "barrels");
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
-        barrelsCheckRange = cfg.getInt("barrels.merge-radius", 1);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
         barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
         blacklistedBarrels = new KeySet(cfg.getStringList("barrels.blacklist"));
@@ -321,12 +316,16 @@ public final class SettingsHandler {
         }
 
 
+        loadLimits((itemsMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("items.merge-radius"));
         loadLimits((itemsLimits = new KeyMap<>()), cfg.getConfigurationSection("items.limits"));
+        loadLimits((entitiesMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("entities.merge-radius"));
         loadLimits((entitiesLimits = new KeyMap<>()), cfg.getConfigurationSection("entities.limits"));
         loadLimits((minimumRequiredEntities = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-required"));
-        loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
-        loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
         loadLimits((defaultUnstack = new KeyMap<>()), cfg.getConfigurationSection("entities.default-unstack"));
+        loadLimits((spawnersMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("spawners.merge-radius"));
+        loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
+        loadLimits((barrelsMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("barrels.merge-radius"));
+        loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
 
         WildStackerPlugin.log(" - Stacking drops is " + getBoolean(itemsStackingEnabled));
         WildStackerPlugin.log(" - Stacking entities is " + getBoolean(entitiesStackingEnabled));
@@ -521,6 +520,14 @@ public final class SettingsHandler {
             cfg.set("kill-task.kill-items", cfg.getConfigurationSection("kill-task.items"));
         if(cfg.contains("entities.minimum-limits"))
             cfg.set("entities.minimum-required", cfg.getConfigurationSection("entities.minimum-limits"));
+        if(cfg.isInt("items.merge-radius"))
+            cfg.set("items.merge-radius.all", cfg.getInt("items.merge-radius"));
+        if(cfg.isInt("entities.merge-radius"))
+            cfg.set("entities.merge-radius.all", cfg.getInt("entities.merge-radius"));
+        if(cfg.isInt("spawners.merge-radius"))
+            cfg.set("spawners.merge-radius.all", cfg.getInt("spawners.merge-radius"));
+        if(cfg.isInt("barrels.merge-radius"))
+            cfg.set("barrels.merge-radius.all", cfg.getInt("barrels.merge-radius"));
     }
 
     public static void reload(){

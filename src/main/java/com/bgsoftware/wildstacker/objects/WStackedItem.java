@@ -107,6 +107,12 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
+    public int getMergeRadius() {
+        int radius = plugin.getSettings().itemsMergeRadius.getOrDefault(getItemStack(), 0);
+        return radius < 1 ? 0 : radius;
+    }
+
+    @Override
     public boolean isBlacklisted() {
         return plugin.getSettings().blacklistedItems.contains(getItemStack());
     }
@@ -207,9 +213,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
-        int range = plugin.getSettings().itemsCheckRange;
+        int range = getMergeRadius();
 
-        if(getStackLimit() <= 1){
+        if(range <= 0 || getStackLimit() <= 1){
             if (result != null)
                 result.accept(Optional.empty());
             return;

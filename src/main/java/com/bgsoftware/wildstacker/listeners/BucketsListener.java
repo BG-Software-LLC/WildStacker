@@ -6,6 +6,8 @@ import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,7 +26,7 @@ import org.bukkit.inventory.PlayerInventory;
 @SuppressWarnings("unused")
 public final class BucketsListener implements Listener {
 
-    private WildStackerPlugin plugin;
+    private final WildStackerPlugin plugin;
 
     public BucketsListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -37,18 +39,24 @@ public final class BucketsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
         if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            e.setCancelled(true);
+
             PlayerInventory inventory = e.getPlayer().getInventory();
             int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
             ItemStack itemInHand = inventory.getItem(heldItemSlot).clone();
             ItemStack itemToGive = itemInHand.clone();
             itemToGive.setAmount(itemToGive.getAmount() - 1);
-            Executor.sync(() -> {
-                inventory.setItem(heldItemSlot, itemToGive);
-                inventory.addItem(e.getItemStack());
-            }, 1L);
+
+            if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER){
+                Block waterBlock = e.getBlockClicked().getRelative(e.getBlockFace());
+                waterBlock.setType(Material.WATER);
+            }
+
+            inventory.setItem(heldItemSlot, itemToGive);
+            inventory.addItem(e.getItemStack());
         }
     }
 

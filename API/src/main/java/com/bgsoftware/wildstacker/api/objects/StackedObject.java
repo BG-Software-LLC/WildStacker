@@ -42,6 +42,12 @@ public interface StackedObject<T> {
     int getStackLimit();
 
     /**
+     * Get the merge radius of the object.
+     * @return merge radius
+     */
+    int getMergeRadius();
+
+    /**
      * Checks if an object is blacklisted.
      * @return True if the object is blacklisted, otherwise false.
      */

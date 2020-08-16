@@ -140,6 +140,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
+    public int getMergeRadius() {
+        int radius = GeneralUtils.get(plugin.getSettings().entitiesMergeRadius, this, 0);
+        return radius < 1 ? 0 : radius;
+    }
+
+    @Override
     public boolean isBlacklisted() {
         return GeneralUtils.contains(plugin.getSettings().blacklistedEntities, this);
     }
@@ -266,10 +272,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
-        int range = plugin.getSettings().entitiesCheckRange;
+        int range = getMergeRadius();
         Location entityLocation = getLivingEntity().getLocation();
 
-        if(getStackLimit() <= 1){
+        if(range <= 0 || getStackLimit() <= 1){
             if (result != null)
                 result.accept(Optional.empty());
             return;
