@@ -91,6 +91,10 @@ public interface NMSAdapter {
         return Key.of(materialData.getItemType(), materialData.getData());
     }
 
+    default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage){
+
+    }
+
     /*
      *   Spawner methods
      */

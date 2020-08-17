@@ -13,10 +13,13 @@ import net.minecraft.server.v1_15_R1.BlockRotatable;
 import net.minecraft.server.v1_15_R1.ChatMessage;
 import net.minecraft.server.v1_15_R1.Chunk;
 import net.minecraft.server.v1_15_R1.ChunkProviderServer;
+import net.minecraft.server.v1_15_R1.DamageSource;
 import net.minecraft.server.v1_15_R1.DynamicOpsNBT;
 import net.minecraft.server.v1_15_R1.EnchantmentManager;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EntityAnimal;
+import net.minecraft.server.v1_15_R1.EntityArmorStand;
+import net.minecraft.server.v1_15_R1.EntityHuman;
 import net.minecraft.server.v1_15_R1.EntityInsentient;
 import net.minecraft.server.v1_15_R1.EntityItem;
 import net.minecraft.server.v1_15_R1.EntityLiving;
@@ -30,6 +33,7 @@ import net.minecraft.server.v1_15_R1.EnumItemSlot;
 import net.minecraft.server.v1_15_R1.EnumMobSpawn;
 import net.minecraft.server.v1_15_R1.GameRules;
 import net.minecraft.server.v1_15_R1.ItemStack;
+import net.minecraft.server.v1_15_R1.ItemSword;
 import net.minecraft.server.v1_15_R1.MathHelper;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.NBTCompressedStreamTools;
@@ -41,6 +45,7 @@ import net.minecraft.server.v1_15_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_15_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_15_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_15_R1.SoundEffect;
+import net.minecraft.server.v1_15_R1.SoundEffects;
 import net.minecraft.server.v1_15_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_15_R1.World;
 import net.minecraft.server.v1_15_R1.WorldServer;
@@ -347,6 +352,28 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         World world = ((CraftWorld) location.getWorld()).getHandle();
         EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
         return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    }
+
+    @Override
+    public void handleSweepingEdge(Player attacker, org.bukkit.inventory.ItemStack usedItem, LivingEntity target, double damage) {
+        EntityLiving targetLiving = ((CraftLivingEntity) target).getHandle();
+        EntityHuman entityHuman = ((CraftPlayer) attacker).getHandle();
+
+        // Making sure the player used a sword.
+        if(usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
+            return;
+
+        float sweepDamage = 1.0F + EnchantmentManager.a(entityHuman) * (float) damage;
+        List<EntityLiving> nearbyEntities = targetLiving.world.a(EntityLiving.class, targetLiving.getBoundingBox().grow(1.0D, 0.25D, 1.0D));
+
+        for(EntityLiving nearby : nearbyEntities){
+            if(nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D){
+                nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
+            }
+        }
+
+        entityHuman.world.playSound(null, entityHuman.locX(), entityHuman.locY(), entityHuman.locZ(), SoundEffects.ENTITY_PLAYER_ATTACK_SWEEP, entityHuman.getSoundCategory(), 1.0F, 1.0F);
+        entityHuman.ea();
     }
 
     /*

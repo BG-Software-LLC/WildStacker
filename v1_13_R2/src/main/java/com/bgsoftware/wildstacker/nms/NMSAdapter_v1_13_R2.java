@@ -13,9 +13,12 @@ import net.minecraft.server.v1_13_R2.BlockPosition;
 import net.minecraft.server.v1_13_R2.BlockRotatable;
 import net.minecraft.server.v1_13_R2.ChatMessage;
 import net.minecraft.server.v1_13_R2.Chunk;
+import net.minecraft.server.v1_13_R2.DamageSource;
 import net.minecraft.server.v1_13_R2.EnchantmentManager;
 import net.minecraft.server.v1_13_R2.Entity;
 import net.minecraft.server.v1_13_R2.EntityAnimal;
+import net.minecraft.server.v1_13_R2.EntityArmorStand;
+import net.minecraft.server.v1_13_R2.EntityHuman;
 import net.minecraft.server.v1_13_R2.EntityInsentient;
 import net.minecraft.server.v1_13_R2.EntityItem;
 import net.minecraft.server.v1_13_R2.EntityLiving;
@@ -26,6 +29,7 @@ import net.minecraft.server.v1_13_R2.EntityVillager;
 import net.minecraft.server.v1_13_R2.EntityZombieVillager;
 import net.minecraft.server.v1_13_R2.EnumItemSlot;
 import net.minecraft.server.v1_13_R2.ItemStack;
+import net.minecraft.server.v1_13_R2.ItemSword;
 import net.minecraft.server.v1_13_R2.MathHelper;
 import net.minecraft.server.v1_13_R2.MinecraftKey;
 import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
@@ -37,6 +41,7 @@ import net.minecraft.server.v1_13_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R2.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_13_R2.SoundEffect;
+import net.minecraft.server.v1_13_R2.SoundEffects;
 import net.minecraft.server.v1_13_R2.TileEntityMobSpawner;
 import net.minecraft.server.v1_13_R2.World;
 import net.minecraft.server.v1_13_R2.WorldServer;
@@ -327,6 +332,28 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public Key getEndermanCarried(Enderman enderman) {
         return Key.of(enderman.getCarriedBlock().getMaterial(), (short) 0);
+    }
+
+    @Override
+    public void handleSweepingEdge(Player attacker, org.bukkit.inventory.ItemStack usedItem, LivingEntity target, double damage) {
+        EntityLiving targetLiving = ((CraftLivingEntity) target).getHandle();
+        EntityHuman entityHuman = ((CraftPlayer) attacker).getHandle();
+
+        // Making sure the player used a sword.
+        if(usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
+            return;
+
+        float sweepDamage = 1.0F + EnchantmentManager.a(entityHuman) * (float) damage;
+        List<EntityLiving> nearbyEntities = targetLiving.world.a(EntityLiving.class, targetLiving.getBoundingBox().grow(1.0D, 0.25D, 1.0D));
+
+        for(EntityLiving nearby : nearbyEntities){
+            if(nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D){
+                nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
+            }
+        }
+
+        entityHuman.world.a(null, entityHuman.locX, entityHuman.locY, entityHuman.locZ, SoundEffects.ENTITY_PLAYER_ATTACK_SWEEP, entityHuman.bV(), 1.0F, 1.0F);
+        entityHuman.dl();
     }
 
     /*

@@ -232,6 +232,8 @@ public final class EntitiesListener implements Listener {
 
             EntityDamageEvent clonedEvent = createDamageEvent(e.getEntity(), e.getCause(), e.getDamage(), entityDamager);
 
+            double originalDamage = e.getDamage();
+
             e.setDamage(0);
             livingEntity.setHealth(livingEntity.getMaxHealth());
 
@@ -272,6 +274,7 @@ public final class EntitiesListener implements Listener {
                 EntityUtils.setKiller(livingEntity, damager);
 
                 ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
+                Player DAMAGER = damager;
 
                 int lootBonusLevel = itemInHand == null ? 0 : itemInHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
 
@@ -353,6 +356,10 @@ public final class EntitiesListener implements Listener {
 
                             plugin.getNMSAdapter().attemptJoinRaid(livingEntity.getKiller(), raider);
                         }
+
+                        // Handle sweeping edge enchantment
+                        if(e.isCancelled() && itemInHand != null)
+                            plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, itemInHand, stackedEntity.getLivingEntity(), originalDamage);
 
                         //Decrease durability when next-stack-knockback is false
                         if(e.isCancelled() && itemInHand != null && !creativeMode) {

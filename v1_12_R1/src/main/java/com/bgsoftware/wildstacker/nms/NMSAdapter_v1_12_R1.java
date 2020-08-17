@@ -11,9 +11,12 @@ import net.minecraft.server.v1_12_R1.AxisAlignedBB;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.BlockRotatable;
 import net.minecraft.server.v1_12_R1.Chunk;
+import net.minecraft.server.v1_12_R1.DamageSource;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
 import net.minecraft.server.v1_12_R1.Entity;
 import net.minecraft.server.v1_12_R1.EntityAnimal;
+import net.minecraft.server.v1_12_R1.EntityArmorStand;
+import net.minecraft.server.v1_12_R1.EntityHuman;
 import net.minecraft.server.v1_12_R1.EntityInsentient;
 import net.minecraft.server.v1_12_R1.EntityItem;
 import net.minecraft.server.v1_12_R1.EntityLiving;
@@ -25,6 +28,7 @@ import net.minecraft.server.v1_12_R1.EntityZombieVillager;
 import net.minecraft.server.v1_12_R1.EnumItemSlot;
 import net.minecraft.server.v1_12_R1.EnumParticle;
 import net.minecraft.server.v1_12_R1.ItemStack;
+import net.minecraft.server.v1_12_R1.ItemSword;
 import net.minecraft.server.v1_12_R1.MathHelper;
 import net.minecraft.server.v1_12_R1.MinecraftKey;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
@@ -36,10 +40,12 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_12_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_12_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_12_R1.SoundEffect;
+import net.minecraft.server.v1_12_R1.SoundEffects;
 import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_12_R1.World;
 import net.minecraft.server.v1_12_R1.WorldServer;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
@@ -305,6 +311,28 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
     @Override
     public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
         entityEquipment.setItemInOffHand(itemStack);
+    }
+
+    @Override
+    public void handleSweepingEdge(Player attacker, org.bukkit.inventory.ItemStack usedItem, LivingEntity target, double damage) {
+        EntityLiving targetLiving = ((CraftLivingEntity) target).getHandle();
+        EntityHuman entityHuman = ((CraftPlayer) attacker).getHandle();
+
+        // Making sure the player used a sword.
+        if(usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
+            return;
+
+        float sweepDamage = 1.0F + EnchantmentManager.a(entityHuman) * (float) damage;
+        List<EntityLiving> nearbyEntities = targetLiving.world.a(EntityLiving.class, targetLiving.getBoundingBox().grow(1.0D, 0.25D, 1.0D));
+
+        for(EntityLiving nearby : nearbyEntities){
+            if(nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D){
+                nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
+            }
+        }
+
+        entityHuman.world.a(null, entityHuman.locX, entityHuman.locY, entityHuman.locZ, SoundEffects.fz, entityHuman.bK(), 1.0F, 1.0F);
+        entityHuman.cX();
     }
 
     /*
