@@ -52,7 +52,10 @@ public final class BucketsListener implements Listener {
 
             if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER){
                 Block waterBlock = e.getBlockClicked().getRelative(e.getBlockFace());
-                waterBlock.setType(Material.WATER);
+                if(itemInHand.getType().name().contains("WATER"))
+                    waterBlock.setType(Material.WATER);
+                else
+                    waterBlock.setType(Material.LAVA);
             }
 
             inventory.setItem(heldItemSlot, itemToGive);
