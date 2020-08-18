@@ -29,7 +29,6 @@ import net.minecraft.server.v1_15_R1.EntityRaider;
 import net.minecraft.server.v1_15_R1.EntityTypes;
 import net.minecraft.server.v1_15_R1.EntityVillager;
 import net.minecraft.server.v1_15_R1.EntityZombieVillager;
-import net.minecraft.server.v1_15_R1.EnumItemSlot;
 import net.minecraft.server.v1_15_R1.EnumMobSpawn;
 import net.minecraft.server.v1_15_R1.GameRules;
 import net.minecraft.server.v1_15_R1.ItemStack;
@@ -95,13 +94,11 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -184,32 +181,6 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
         EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
         return itemStack != null && nmsEntity.i(CraftItemStack.asNMSCopy(itemStack));
-    }
-
-    @Override
-    public List<org.bukkit.inventory.ItemStack> getEquipment(LivingEntity livingEntity) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        List<org.bukkit.inventory.ItemStack> equipment = new ArrayList<>();
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-
-        EnumItemSlot[] enumItemSlots = EnumItemSlot.values();
-
-        for(int i = 0; i < enumItemSlots.length; i++){
-            try {
-                EnumItemSlot slot = enumItemSlots[i];
-                ItemStack itemStack = entityLiving.getEquipment(slot);
-                float dropChance = slot.a() == EnumItemSlot.Function.HAND ? entityLiving.dropChanceHand[slot.b()] : entityLiving.dropChanceArmor[slot.b()];
-
-                if (!itemStack.isEmpty() && !EnchantmentManager.shouldNotDrop(itemStack) && (livingEntity.getKiller() != null || dropChance > 1) &&
-                        random.nextFloat() - (float) i * 0.01F < dropChance) {
-                    if (dropChance <= 1 && itemStack.e())
-                        itemStack.setDamage(itemStack.h() - random.nextInt(1 + random.nextInt(Math.max(itemStack.h() - 3, 1))));
-                    equipment.add(CraftItemStack.asBukkitCopy(itemStack));
-                }
-            }catch(Exception ignored){}
-        }
-
-        return equipment;
     }
 
     @Override
@@ -338,6 +309,17 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
         entityEquipment.setItemInOffHand(itemStack);
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack getItemInOffHand(EntityEquipment entityEquipment) {
+        return entityEquipment.getItemInOffHand();
+    }
+
+    @Override
+    public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        return nmsItem != null && nmsItem.e();
     }
 
     @Override

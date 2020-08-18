@@ -4,16 +4,14 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
-import org.bukkit.Material;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final List<LootPair> lootPairs = new ArrayList<>();
     private final int min, max, minExp, maxExp;
@@ -76,31 +74,12 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         }while(chosenPairs != amountOfDifferentPairs && amountOfDifferentPairs != -1);
 
         if(dropEquipment) {
-            drops.addAll(plugin.getNMSAdapter().getEquipment(stackedEntity.getLivingEntity()));
+            drops.addAll(EntityUtils.getEquipment(stackedEntity.getLivingEntity(), lootBonusLevel));
         }
 
-        clearEquipment(stackedEntity.getLivingEntity().getEquipment());
+        EntityUtils.clearEquipment(stackedEntity.getLivingEntity());
 
         return drops;
-    }
-
-    private void clearEquipment(EntityEquipment entityEquipment){
-        if(plugin.getSettings().entitiesClearEquipment || plugin.getNMSAdapter().getItemInMainHandDropChance(entityEquipment) >= 2.0F)
-            plugin.getNMSAdapter().setItemInMainHand(entityEquipment, new ItemStack(Material.AIR));
-
-        if(ServerVersion.isAtLeast(ServerVersion.v1_9)) {
-            if(plugin.getSettings().entitiesClearEquipment || plugin.getNMSAdapter().getItemInOffHandDropChance(entityEquipment) >= 2.0F)
-                plugin.getNMSAdapter().setItemInOffHand(entityEquipment, new ItemStack(Material.AIR));
-        }
-
-        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getHelmetDropChance() >= 2.0F)
-            entityEquipment.setHelmet(new ItemStack(Material.AIR));
-        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getChestplateDropChance() >= 2.0F)
-            entityEquipment.setChestplate(new ItemStack(Material.AIR));
-        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getLeggingsDropChance() >= 2.0F)
-            entityEquipment.setLeggings(new ItemStack(Material.AIR));
-        if(plugin.getSettings().entitiesClearEquipment || entityEquipment.getBootsDropChance() >= 2.0F)
-            entityEquipment.setBoots(new ItemStack(Material.AIR));
     }
 
     @Override

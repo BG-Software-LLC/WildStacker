@@ -19,13 +19,13 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Strider;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -46,8 +46,6 @@ public interface NMSAdapter {
     boolean isInLove(Animals entity);
 
     boolean isAnimalFood(Animals animal, ItemStack itemStack);
-
-    List<ItemStack> getEquipment(LivingEntity livingEntity);
 
     int getEntityExp(LivingEntity livingEntity);
 
@@ -83,6 +81,20 @@ public interface NMSAdapter {
 
     default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
         entityEquipment.setItemInHand(itemStack);
+    }
+
+    default ItemStack getItemInOffHand(EntityEquipment entityEquipment){
+        return entityEquipment.getItemInHand();
+    }
+
+    boolean shouldArmorBeDamaged(ItemStack itemStack);
+
+    default boolean doesStriderHaveSaddle(Strider strider){
+        return false;
+    }
+
+    default void removeStriderSaddle(Strider strider){
+
     }
 
     default Key getEndermanCarried(Enderman enderman){

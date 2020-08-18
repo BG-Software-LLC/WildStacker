@@ -6,11 +6,14 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.key.Key;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
@@ -44,13 +47,20 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -59,6 +69,8 @@ public final class EntityUtils {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final Object NULL = new Object();
+    private static final Enchantment CURSE_OF_VANISH = Arrays.stream(Enchantment.values())
+            .filter(enchantment -> enchantment.getName().equals("VANISHING_CURSE")).findFirst().orElse(null);
 
     public static String getFormattedType(String typeName) {
         if(typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
@@ -439,6 +451,148 @@ public final class EntityUtils {
 
     public static boolean canBeBred(Animals animal) {
         return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);
+    }
+
+    public static List<ItemStack> getEquipment(LivingEntity livingEntity, int lootBonusLevel){
+        List<ItemStack> drops = new ArrayList<>();
+
+        EntityEquipment entityEquipment = livingEntity.getEquipment();
+
+        addDropArmor(drops, livingEntity, entityEquipment.getItemInHand(), lootBonusLevel,
+                plugin.getNMSAdapter().getItemInMainHandDropChance(entityEquipment));
+
+        if(ServerVersion.isAtLeast(ServerVersion.v1_9)) {
+            addDropArmor(drops, livingEntity, plugin.getNMSAdapter().getItemInOffHand(entityEquipment), lootBonusLevel,
+                    plugin.getNMSAdapter().getItemInOffHandDropChance(entityEquipment));
+        }
+
+        addDropArmor(drops, livingEntity, entityEquipment.getHelmet(), lootBonusLevel, entityEquipment.getHelmetDropChance());
+        addDropArmor(drops, livingEntity, entityEquipment.getChestplate(), lootBonusLevel, entityEquipment.getChestplateDropChance());
+        addDropArmor(drops, livingEntity, entityEquipment.getLeggings(), lootBonusLevel, entityEquipment.getLeggingsDropChance());
+        addDropArmor(drops, livingEntity, entityEquipment.getBoots(), lootBonusLevel, entityEquipment.getBootsDropChance());
+
+        switch (EntityTypes.fromEntity(livingEntity)){
+            case PIG:
+                if(((Pig) livingEntity).hasSaddle())
+                    drops.add(new ItemStack(Material.SADDLE));
+                break;
+            case STRIDER:
+                if(plugin.getNMSAdapter().doesStriderHaveSaddle((org.bukkit.entity.Strider) livingEntity))
+                    drops.add(new ItemStack(Material.SADDLE));
+                break;
+            case HORSE:
+            case DONKEY:
+            case MULE:
+            case SKELETON_HORSE:
+            case ZOMBIE_HORSE:
+            case LLAMA:
+            case TRADER_LLAMA: {
+                Inventory inventory;
+
+                if (livingEntity instanceof Horse) {
+                    inventory = ((Horse) livingEntity).getInventory();
+                } else {
+                    inventory = ((InventoryHolder) livingEntity).getInventory();
+                }
+
+                for(ItemStack itemStack : inventory.getContents()){
+                    if(itemStack != null && itemStack.getType() != Material.AIR &&
+                            (CURSE_OF_VANISH == null || itemStack.getEnchantmentLevel(CURSE_OF_VANISH) <= 0))
+                        drops.add(itemStack);
+                }
+
+                try{
+                    if(livingEntity instanceof org.bukkit.entity.ChestedHorse && ((org.bukkit.entity.ChestedHorse) livingEntity).isCarryingChest())
+                        drops.add(new ItemStack(Material.CHEST));
+                }catch (Throwable ex){
+                    if(livingEntity instanceof Horse && ((Horse) livingEntity).isCarryingChest())
+                        drops.add(new ItemStack(Material.CHEST));
+                }
+
+                break;
+            }
+        }
+
+        return drops;
+    }
+
+    public static void clearEquipment(LivingEntity livingEntity){
+        boolean clearEquipment = plugin.getSettings().entitiesClearEquipment;
+        EntityEquipment entityEquipment = livingEntity.getEquipment();
+
+        if(clearEquipment || plugin.getNMSAdapter().getItemInMainHandDropChance(entityEquipment) >= 2.0F)
+            plugin.getNMSAdapter().setItemInMainHand(entityEquipment, new ItemStack(Material.AIR));
+
+        if(ServerVersion.isAtLeast(ServerVersion.v1_9) && (clearEquipment || plugin.getNMSAdapter().getItemInOffHandDropChance(entityEquipment) >= 2.0F))
+                plugin.getNMSAdapter().setItemInOffHand(entityEquipment, new ItemStack(Material.AIR));
+
+        if(clearEquipment || entityEquipment.getHelmetDropChance() >= 2.0F)
+            entityEquipment.setHelmet(new ItemStack(Material.AIR));
+
+        if(clearEquipment || entityEquipment.getChestplateDropChance() >= 2.0F)
+            entityEquipment.setChestplate(new ItemStack(Material.AIR));
+
+        if(clearEquipment || entityEquipment.getLeggingsDropChance() >= 2.0F)
+            entityEquipment.setLeggings(new ItemStack(Material.AIR));
+
+        if(clearEquipment || entityEquipment.getBootsDropChance() >= 2.0F)
+            entityEquipment.setBoots(new ItemStack(Material.AIR));
+
+        switch (EntityTypes.fromEntity(livingEntity)){
+            case PIG:
+                ((Pig) livingEntity).setSaddle(false);
+                break;
+            case STRIDER:
+                plugin.getNMSAdapter().removeStriderSaddle((org.bukkit.entity.Strider) livingEntity);
+                break;
+            case HORSE:
+            case DONKEY:
+            case MULE:
+            case SKELETON_HORSE:
+            case ZOMBIE_HORSE:
+            case LLAMA:
+            case TRADER_LLAMA: {
+                Inventory inventory;
+
+                if (livingEntity instanceof Horse) {
+                    inventory = ((Horse) livingEntity).getInventory();
+                } else {
+                    inventory = ((InventoryHolder) livingEntity).getInventory();
+                }
+
+                for(int i = 0; i < inventory.getSize(); i++)
+                    inventory.setItem(i, new ItemStack(Material.AIR));
+
+                try{
+                    if(livingEntity instanceof org.bukkit.entity.ChestedHorse)
+                        ((org.bukkit.entity.ChestedHorse) livingEntity).setCarryingChest(false);
+                }catch (Throwable ex){
+                    if(livingEntity instanceof Horse)
+                        ((Horse) livingEntity).setCarryingChest(false);
+                }
+
+                break;
+            }
+        }
+
+    }
+
+    private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance){
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        if(itemStack != null && itemStack.getType() != Material.AIR &&
+                (CURSE_OF_VANISH == null || itemStack.getEnchantmentLevel(CURSE_OF_VANISH) <= 0) &&
+                (livingEntity.getKiller() != null || dropChance > 1) &&
+                random.nextFloat() - (float) lootBonusLevel * 0.01F < dropChance){
+            ItemStack toDrop = itemStack.clone();
+            int maxDurability = toDrop.getType().getMaxDurability();
+
+            if (dropChance <= 1 && plugin.getNMSAdapter().shouldArmorBeDamaged(itemStack)) {
+                int maxDur = ServerVersion.isAtLeast(ServerVersion.v1_11) ? 3 : 25;
+                toDrop.setDurability((short) (maxDurability - random.nextInt(1 + random.nextInt(Math.max(maxDurability - maxDur, 1)))));
+            }
+
+            drops.add(toDrop);
+        }
     }
 
     private static Object requireNotNull(Object obj){

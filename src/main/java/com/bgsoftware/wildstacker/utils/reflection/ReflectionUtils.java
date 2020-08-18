@@ -17,7 +17,6 @@ public final class ReflectionUtils {
         try{
             Class entityLivingClass = getNMSClass("EntityLiving"),
                     entityClass = getNMSClass("Entity"),
-                    nmsTagClass = getNMSClass("NBTTagCompound"),
                     entityInsentientClass = getNMSClass("EntityInsentient"),
                     worldClass = getNMSClass("World");
 
@@ -27,6 +26,11 @@ public final class ReflectionUtils {
 
             try{ fieldMap.put(Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER, entityClass.getField("spawnedViaMobSpawner")); }catch(Throwable ignored){}
             try{ fieldMap.put(Fields.ENTITY_FROM_MOB_SPAWNER, entityClass.getField("fromMobSpawner")); }catch(Throwable ignored){}
+
+            try{
+                Class<?> entityStriderClass = getNMSClass("EntityStrider");
+                fieldMap.put(Fields.STRIDER_SADDLE_STORAGE, entityStriderClass.getDeclaredField("bA"));
+            }catch (Throwable ignored){}
 
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :
