@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,6 +24,8 @@ public final class SpawnersPlaceMenu extends WildMenu {
     private final Inventory inventory;
     private final Location location;
 
+    private boolean closeFlag = false;
+
     private SpawnersPlaceMenu(Location location, EntityType spawnedType){
         this.location = location;
         this.inventory = Bukkit.createInventory(this, 9 * 4,
@@ -33,17 +36,39 @@ public final class SpawnersPlaceMenu extends WildMenu {
     public void onButtonClick(InventoryClickEvent e) {
         StackedSpawner stackedSpawner = WStackedSpawner.of(location.getBlock());
 
+        ItemStack spawnerItem = null;
+
         if(e.getCurrentItem() != null && (e.getCurrentItem().getType() != Materials.SPAWNER.toBukkitType() ||
-                plugin.getProviders().getSpawnerType(e.getCurrentItem()) != stackedSpawner.getSpawnedType()))
+                plugin.getProviders().getSpawnerType(e.getCurrentItem()) != stackedSpawner.getSpawnedType())) {
             e.setCancelled(true);
+            spawnerItem = e.getCurrentItem();
+        }
 
-        if(e.getAction() == InventoryAction.HOTBAR_SWAP)
+        if(e.getAction() == InventoryAction.HOTBAR_SWAP) {
             e.setCancelled(true);
+            spawnerItem = e.getWhoClicked().getInventory().getItem(e.getHotbarButton());
+        }
+
+        if(spawnerItem != null) {
+            ItemStack SPAWNER_ITEM = spawnerItem;
+            Executor.sync(() -> {
+                if (closeFlag) {
+                    for(ItemStack itemStack : e.getWhoClicked().getInventory().getContents()){
+                        if(SPAWNER_ITEM.equals(itemStack))
+                            return;
+                    }
+
+                    ItemUtils.addItem(SPAWNER_ITEM, e.getWhoClicked().getInventory(), stackedSpawner.getLocation());
+                }
+            }, 5L);
+        }
+
     }
-
 
     @Override
     public void onMenuClose(InventoryCloseEvent e) {
+        closeFlag = true;
+
         WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(location.getBlock());
         int amount = 0;
 
@@ -85,6 +110,18 @@ public final class SpawnersPlaceMenu extends WildMenu {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    private static int countSpawners(Inventory inventory, StackedSpawner stackedSpawner){
+        int amount = 0;
+
+        for(ItemStack itemStack : inventory.getContents()) {
+            if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType() &&
+                    plugin.getProviders().getSpawnerType(itemStack) == stackedSpawner.getSpawnedType())
+                amount += ItemUtils.getSpawnerItemAmount(itemStack) * itemStack.getAmount();
+        }
+
+        return amount;
     }
 
     public static void open(Player player, StackedSpawner stackedSpawner){
