@@ -8,6 +8,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,16 +51,28 @@ public final class BucketsListener implements Listener {
             ItemStack itemToGive = itemInHand.clone();
             itemToGive.setAmount(itemToGive.getAmount() - 1);
 
-            if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER){
-                Block waterBlock = e.getBlockClicked().getRelative(e.getBlockFace());
-                if(itemInHand.getType().name().contains("WATER"))
-                    waterBlock.setType(Material.WATER);
-                else
-                    waterBlock.setType(Material.LAVA);
+            Block fluidBlock = e.getBlockClicked().getRelative(e.getBlockFace());
+
+            if(itemInHand.getType().name().contains("LAVA")) {
+                fluidBlock.setType(Material.LAVA);
+            }
+            else{
+                if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER)
+                    fluidBlock.setType(Material.WATER);
+
+                try{
+                    String entityType = itemInHand.getType().name().replace("_BUCKET", "");
+                    fluidBlock.getWorld().spawnEntity(fluidBlock.getLocation(), EntityType.valueOf(entityType));
+                }catch (Exception ignored){}
             }
 
-            inventory.setItem(heldItemSlot, itemToGive);
-            inventory.addItem(e.getItemStack());
+            if(itemToGive.getAmount() <= 0){
+                inventory.setItem(heldItemSlot, e.getItemStack().clone());
+            }
+            else {
+                inventory.setItem(heldItemSlot, itemToGive);
+                inventory.addItem(e.getItemStack().clone());
+            }
         }
     }
 
