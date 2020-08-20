@@ -47,6 +47,12 @@ public final class CommentedConfiguration extends YamlConfiguration {
     private final Map<String, String> configComments = new HashMap<>();
 
     /**
+     * Flag to determine if the config failed to load.
+     * When this flag is true, syncWithConfig will not reset the config.
+     */
+    private boolean creationFailure = false;
+
+    /**
      * Sync the config with another resource.
      * This method can be used as an auto updater for your config files.
      * @param file The file to save changes into if there are any.
@@ -56,6 +62,8 @@ public final class CommentedConfiguration extends YamlConfiguration {
      *                        config, they will be synced with the resource's config.
      */
     public void syncWithConfig(File file, InputStream resource, String... ignoredSections){
+        if(creationFailure) return;
+
         CommentedConfiguration cfg = loadConfiguration(resource);
         if(syncConfigurationSection(cfg, cfg.getConfigurationSection(""), Arrays.asList(ignoredSections)) && file != null) {
             try {
@@ -105,6 +113,13 @@ public final class CommentedConfiguration extends YamlConfiguration {
      */
     public boolean containsComment(String path){
         return getComment(path) != null;
+    }
+
+    /**
+     * Check if the config has failed to load.
+     */
+    public boolean hasFailed(){
+        return creationFailure;
     }
 
     /**
@@ -262,6 +277,14 @@ public final class CommentedConfiguration extends YamlConfiguration {
     }
 
     /**
+     * Flag this config as failed to load.
+     */
+    private CommentedConfiguration flagAsFailed(){
+        creationFailure = true;
+        return this;
+    }
+
+    /**
      * Load a config from a file.
      * @param file The file to load the config from.
      * @return A new instance of CommentedConfiguration contains all the data (keys, values and comments).
@@ -272,7 +295,7 @@ public final class CommentedConfiguration extends YamlConfiguration {
             return loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
         }catch(FileNotFoundException ex){
             Bukkit.getLogger().warning("File " + file.getName() + " doesn't exist.");
-            return new CommentedConfiguration();
+            return new CommentedConfiguration().flagAsFailed();
         }
     }
 
@@ -305,6 +328,7 @@ public final class CommentedConfiguration extends YamlConfiguration {
 
             config.loadFromString(contents.toString());
         } catch (IOException | InvalidConfigurationException ex) {
+            config.flagAsFailed();
             ex.printStackTrace();
         }
 
