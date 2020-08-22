@@ -535,6 +535,11 @@ spawners:
   # Set the percentage amount that will be dropped from explosions.
   explosions-amount-percentage: 100
 
+  # The minimum amount of spawners that will be dropped.
+  # It's used to fix small amounts of spawners not being dropped by explosions when having
+  # `explosions-amount-percentage` below 100.
+  explosions-amount-minimum: 1
+
   # Should silk touch must be required to mine spawners?
   mine-require-silk: false
 
