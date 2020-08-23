@@ -334,9 +334,11 @@ public final class SpawnersListener implements Listener {
                 sourcePlayer = explodeSource == null ? null : Bukkit.getPlayer(explodeSource);
             }
 
-            int breakAmount = plugin.getSettings().explosionsBreakSpawnerStack ? stackedSpawner.getStackAmount() : 1;
-            int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
+            int breakAmount = (int) Math.round((plugin.getSettings().explosionsBreakPercentage / 100.0) * stackedSpawner.getStackAmount());
+            // Should fix issues with amount-percentage being below 100 on low stack sizes.
+            breakAmount = Math.max(breakAmount, plugin.getSettings().explosionsBreakMinimum);
 
+            int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
             // Should fix issues with amount-percentage being below 100 on low stack sizes.
             dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
 

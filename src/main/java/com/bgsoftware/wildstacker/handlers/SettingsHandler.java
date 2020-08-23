@@ -74,12 +74,12 @@ public final class SettingsHandler {
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
-    public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners, explosionsBreakSpawnerStack,
+    public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
             dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu,
             spawnersPlacementPermission, spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement,
             onlyOneSpawner, inventoryTweaksEnabled;
-    public final int explosionsBreakChance, explosionsAmountPercentage, explosionsAmountMinimum, silkTouchBreakChance, spawnersChunkLimit;
+    public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage, explosionsAmountMinimum, silkTouchBreakChance, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, spawnerItemLore, silkWorlds, explosionsWorlds;
     public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
     public final KeyMap<Integer> spawnersMergeRadius, spawnersLimits;
@@ -242,7 +242,8 @@ public final class SettingsHandler {
         explosionsDropToInventory = cfg.getBoolean("spawners.explosions.drop-to-inventory", false);
         explosionsWorlds = cfg.getStringList("spawners.explosions.worlds");
         explosionsBreakChance = cfg.getInt("spawners.explosions.break-chance", 100);
-        explosionsBreakSpawnerStack = cfg.getBoolean("spawners.explosions-break-stack", true);
+        explosionsBreakPercentage = cfg.getInt("spawners.explosions-break-percentage", 100);
+        explosionsBreakMinimum = cfg.getInt("spawners.explosions-break-minimum", 1);
         explosionsAmountPercentage = cfg.getInt("spawners.explosions-amount-percentage", 100);
         explosionsAmountMinimum = cfg.getInt("spawners.explosions-amount-minimum", 1);
         spawnersMineRequireSilk = cfg.getBoolean("spawners.mine-require-silk", false);
@@ -529,6 +530,8 @@ public final class SettingsHandler {
             cfg.set("spawners.merge-radius.all", cfg.getInt("spawners.merge-radius"));
         if(cfg.isInt("barrels.merge-radius"))
             cfg.set("barrels.merge-radius.all", cfg.getInt("barrels.merge-radius"));
+        if(cfg.isBoolean("spawners.explosions-break-stack"))
+            cfg.set("spawners.explosions-break-percentage", cfg.getBoolean("spawners.explosions-break-stack") ? 100 : -1);
     }
 
     public static void reload(){

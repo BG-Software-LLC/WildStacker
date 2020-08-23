@@ -135,10 +135,17 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             } catch (Exception ignored) { }
         }
 
+        log("Shutting down stacking service...");
+
         StackService.stop();
+
+        log("Stopping executor...");
+
         Executor.stop();
 
         if(shouldEnable) {
+            log("Performing entity&items save");
+
             //We need to save the entire database
             systemManager.performCacheSave();
 

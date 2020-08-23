@@ -529,8 +529,14 @@ spawners:
     # Chance of spawners to be dropped after exploded.
     break-chance: 100
 
-  # Should explosions break the entire stack, or just reducing it by one?
-  explosions-break-stack: true
+  # Set the percentage amount that will be unstacked from explosions.
+  # You can set this value to -1 and only one spawner will be broken everytime.
+  explosions-break-percentage: 100
+
+  # The minimum amount of spawners that will be unstacked.
+  # It's used to fix small amounts of spawners not being unstacked by explosions when having
+  # `explosions-break-percentage` below 100.
+  explosions-break-minimum: 1
 
   # Set the percentage amount that will be dropped from explosions.
   explosions-amount-percentage: 100
