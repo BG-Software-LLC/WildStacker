@@ -99,7 +99,7 @@ public final class SpawnersListener implements Listener {
 
             ItemStack itemInHand = e.getItemInHand().clone();
 
-            plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), e.getPlayer().getItemInHand());
+            plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
             EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
             stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
