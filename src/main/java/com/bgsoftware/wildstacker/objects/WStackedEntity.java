@@ -474,6 +474,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         }
 
         StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(object.getLocation(), getType().getEntityClass(), getSpawnCause()));
+
         duplicate.setStackAmount(amount, true);
 
         plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());

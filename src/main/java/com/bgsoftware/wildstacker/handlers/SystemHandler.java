@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -578,8 +579,14 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause) {
-        return plugin.getNMSAdapter().createEntity(location, type, spawnCause,
-                entity -> EntitiesListener.noStackEntities.add(entity.getUniqueId()));
+        return spawnEntityWithoutStacking(location, type, spawnCause, null);
+    }
+
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> consumer){
+        return plugin.getNMSAdapter().createEntity(location, type, spawnCause, entity -> {
+            EntitiesListener.noStackEntities.add(entity.getUniqueId());
+            if(consumer != null) consumer.accept(entity);
+        });
     }
 
     @Override
@@ -628,16 +635,13 @@ public final class SystemHandler implements SystemManager {
         if(entityClass == null)
             return;
 
-        LivingEntity livingEntity = (LivingEntity) plugin.getNMSAdapter().createEntity(stackedEntity.getLivingEntity().getLocation(),
-                entityClass, SpawnCause.CUSTOM, entity -> {
-            LivingEntity spawnedEntity = (LivingEntity) entity;
-            EntitiesListener.noStackEntities.add(spawnedEntity.getUniqueId());
-            plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), spawnedEntity);
-            EntityStorage.setMetadata(spawnedEntity, "corpse", null);
-        });
+        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass, SpawnCause.CUSTOM,
+                entity -> EntityStorage.setMetadata(entity, "corpse", null));
 
         if(livingEntity != null){
             Executor.sync(() -> {
+                plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), livingEntity);
+
                 if(livingEntity instanceof Slime)
                     ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
 
