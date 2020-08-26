@@ -36,6 +36,7 @@ import net.minecraft.server.v1_16_R2.ItemSword;
 import net.minecraft.server.v1_16_R2.MathHelper;
 import net.minecraft.server.v1_16_R2.MinecraftKey;
 import net.minecraft.server.v1_16_R2.NBTCompressedStreamTools;
+import net.minecraft.server.v1_16_R2.NBTReadLimiter;
 import net.minecraft.server.v1_16_R2.NBTTagCompound;
 import net.minecraft.server.v1_16_R2.NBTTagInt;
 import net.minecraft.server.v1_16_R2.NBTTagList;
@@ -92,6 +93,7 @@ import org.bukkit.inventory.EntityEquipment;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
@@ -609,7 +611,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
 
         try {
-            NBTTagCompound nbtTagCompoundRoot = NBTCompressedStreamTools.a(inputStream);
+            NBTTagCompound nbtTagCompoundRoot = NBTCompressedStreamTools.a(new DataInputStream(inputStream), NBTReadLimiter.a);
 
             ItemStack nmsItem = ItemStack.a(nbtTagCompoundRoot);
 
