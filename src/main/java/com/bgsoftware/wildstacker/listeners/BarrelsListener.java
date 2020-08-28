@@ -82,7 +82,7 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 10L);
+        Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
 
         try {
             ItemStack inHand = e.getItemInHand().clone();
