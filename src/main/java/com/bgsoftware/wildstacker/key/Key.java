@@ -8,15 +8,14 @@ import java.util.Objects;
 
 public final class Key {
 
-    private static final Key ALL_KEY = new Key("all");
+    private static final Key ALL_KEY = new Key(new String[] { "all" });
 
     private final String globalKey;
     private final String subKey;
 
-    private Key(String key){
-        String[] keySections = key.split(":");
-        this.globalKey = keySections[0];
-        this.subKey = keySections.length == 2 ? keySections[1] : "";
+    private Key(String[] keys){
+        this.globalKey = keys[0];
+        this.subKey = keys.length == 2 ? keys[1] : "";
     }
 
     public String getGlobalKey() {
@@ -54,11 +53,15 @@ public final class Key {
     }
 
     public static Key of(Material material, short data){
-        return of(material + ":" + data);
+        return of(new String[] {material + "", data + ""});
     }
 
     public static Key of(String key){
-        return key.equalsIgnoreCase("all") ? ALL_KEY : new Key(key.replace(";", ":"));
+        return key.contains(":") ? new Key(key.split(":")) : new Key(new String[]{ key });
+    }
+
+    public static Key of(String[] keys){
+        return keys[0].equalsIgnoreCase("all") ? ALL_KEY : new Key(keys);
     }
 
 }

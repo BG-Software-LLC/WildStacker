@@ -70,7 +70,8 @@ public final class EntityUtils {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final Object NULL = new Object();
     private static final Enchantment CURSE_OF_VANISH = Arrays.stream(Enchantment.values())
-            .filter(enchantment -> enchantment.getName().equals("VANISHING_CURSE")).findFirst().orElse(null);
+            .filter(enchantment -> enchantment.getName() != null && enchantment.getName().equals("VANISHING_CURSE"))
+            .findFirst().orElse(null);
 
     public static String getFormattedType(String typeName) {
         if(typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
