@@ -19,10 +19,15 @@ public final class StatisticsUtils {
     }
 
     private static boolean callPlayerStatisticIncrement(Player player, Statistic statistic, int newValue, EntityType entityType){
-        int currentValue = entityType == null ? player.getStatistic(statistic) : player.getStatistic(statistic, entityType);
-        PlayerStatisticIncrementEvent playerStatisticIncrementEvent = new PlayerStatisticIncrementEvent(player, statistic, currentValue, currentValue + newValue, entityType);
-        Bukkit.getPluginManager().callEvent(playerStatisticIncrementEvent);
-        return !playerStatisticIncrementEvent.isCancelled();
+        try {
+            int currentValue = entityType == null ? player.getStatistic(statistic) : player.getStatistic(statistic, entityType);
+            PlayerStatisticIncrementEvent playerStatisticIncrementEvent = new PlayerStatisticIncrementEvent(player, statistic, currentValue, currentValue + newValue, entityType);
+            Bukkit.getPluginManager().callEvent(playerStatisticIncrementEvent);
+            return !playerStatisticIncrementEvent.isCancelled();
+        }catch (Exception ex){
+            // Can happen with invalid entity-types (MyPet, for example)
+            return false;
+        }
     }
 
 }
