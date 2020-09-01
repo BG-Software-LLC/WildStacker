@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.listeners.plugins;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import me.minebuilders.clearlag.events.EntityRemoveEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,19 +9,20 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class ClearLaggListener implements Listener {
 
-    private WildStackerPlugin instance;
+    private final WildStackerPlugin plugin;
 
     private long lastTime = 0;
 
-    public ClearLaggListener(WildStackerPlugin instance){
-        this.instance = instance;
+    public ClearLaggListener(WildStackerPlugin plugin){
+        this.plugin = plugin;
     }
 
     @EventHandler
     public void onClearLaggTask(EntityRemoveEvent e){
-        if (instance.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {
+        e.getEntityList().forEach(entity -> WStackedEntity.of(entity).remove());
+        if (plugin.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {
             lastTime = System.currentTimeMillis();
-            instance.getSystemManager().performKillAll(true);
+            plugin.getSystemManager().performKillAll(true);
         }
     }
 
