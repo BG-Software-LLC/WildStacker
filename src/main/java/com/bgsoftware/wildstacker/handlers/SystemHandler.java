@@ -14,8 +14,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
-import com.bgsoftware.wildstacker.database.StatementHolder;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -367,13 +365,16 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
-        if(plugin.getSettings().storeEntities) {
-            StatementHolder entityHolder = Query.ENTITY_INSERT.getStatementHolder();
+        Query.ENTITIES_DELETE.insertParameters().queue(this);
 
+        if(plugin.getSettings().storeEntities) {
             getStackedEntities().forEach(stackedEntity -> {
                 if (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
-                    entityHolder.setString(stackedEntity.getUniqueId().toString()).setInt(stackedEntity.getStackAmount())
-                            .setString(stackedEntity.getSpawnCause().name()).addBatch();
+                    Query.ENTITY_INSERT.insertParameters()
+                            .setObject(stackedEntity.getUniqueId().toString())
+                            .setObject(stackedEntity.getStackAmount())
+                            .setObject(stackedEntity.getSpawnCause().name())
+                            .queue(stackedEntity.getUniqueId());
                 } else {
                     removeStackObject(stackedEntity);
                 }
@@ -381,27 +382,21 @@ public final class SystemHandler implements SystemManager {
 
             new HashMap<>(dataHandler.CACHED_ENTITIES_RAW).forEach((uuid, pair) -> {
                 if (pair.getKey() > 1 || hasValidSpawnCause(pair.getValue())) {
-                    entityHolder.setString(uuid.toString()).setInt(pair.getKey()).setString(pair.getValue().name()).addBatch();
+                    Query.ENTITY_INSERT.insertParameters().setObject(uuid.toString()).setObject(pair.getKey())
+                            .setObject(pair.getValue().name()).queue(uuid);
                 } else {
                     dataHandler.CACHED_ENTITIES_RAW.remove(uuid);
                 }
             });
+        }
 
-            if(entityHolder.getBatchesSize() > 0) {
-                SQLHelper.executeUpdate("DELETE FROM entities;");
-                entityHolder.execute(false);
-            }
-        }
-        else{
-            SQLHelper.executeUpdate("DELETE FROM entities;");
-        }
+        Query.ITEMS_DELETE.insertParameters().queue(this);
 
         if(plugin.getSettings().storeItems) {
-            StatementHolder itemHolder = Query.ITEM_INSERT.getStatementHolder();
-
             getStackedItems().forEach(stackedItem -> {
                 if (stackedItem.getStackAmount() > 1) {
-                    itemHolder.setString(stackedItem.getUniqueId().toString()).setInt(stackedItem.getStackAmount()).addBatch();
+                    Query.ITEM_INSERT.insertParameters().setObject(stackedItem.getUniqueId().toString())
+                            .setObject(stackedItem.getStackAmount()).queue(stackedItem.getUniqueId());
                 } else {
                     removeStackObject(stackedItem);
                 }
@@ -409,19 +404,11 @@ public final class SystemHandler implements SystemManager {
 
             new HashMap<>(dataHandler.CACHED_ITEMS_RAW).forEach((uuid, stackAmount) -> {
                 if (stackAmount > 1) {
-                    itemHolder.setString(uuid.toString()).setInt(stackAmount).addBatch();
+                    Query.ITEM_INSERT.insertParameters().setObject(uuid.toString()).setObject(stackAmount).queue(uuid);
                 } else {
                     dataHandler.CACHED_ITEMS_RAW.remove(uuid);
                 }
             });
-
-            if(itemHolder.getBatchesSize() > 0) {
-                SQLHelper.executeUpdate("DELETE FROM items;");
-                itemHolder.execute(false);
-            }
-        }
-        else{
-            SQLHelper.executeUpdate("DELETE FROM items;");
         }
     }
 

@@ -43,7 +43,11 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        plugin.getDataHandler().updateBarrel(this);
+        Query.BARREL_INSERT.insertParameters()
+                .setLocation(getLocation())
+                .setObject(getStackAmount())
+                .setItemStack(getBarrelItem(1))
+                .queue(getLocation());
     }
 
     @Override
@@ -113,9 +117,7 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
         plugin.getSystemManager().removeStackObject(this);
 
-        Query.BARREL_DELETE.getStatementHolder()
-                .setLocation(getLocation())
-                .execute(true);
+        Query.BARREL_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
 
         plugin.getProviders().deleteHologram(this);
         removeDisplayBlock();

@@ -9,8 +9,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.database.Database;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
@@ -78,7 +78,7 @@ public final class DataHandler {
 
         Executor.sync(() -> {
             try {
-                SQLHelper.init(new File(plugin.getDataFolder(), "database.db"));
+                Database.start(new File(plugin.getDataFolder(), "database.db"));
                 loadDatabase();
                 loadOldFiles();
                 loadOldSQL();
@@ -91,22 +91,7 @@ public final class DataHandler {
     }
 
     public void clearDatabase(){
-        SQLHelper.close();
-    }
-
-    public void updateSpawner(StackedSpawner stackedSpawner){
-        Query.SPAWNER_INSERT.getStatementHolder()
-                .setLocation(stackedSpawner.getLocation())
-                .setInt(stackedSpawner.getStackAmount())
-                .execute(true);
-    }
-
-    public void updateBarrel(StackedBarrel stackedBarrel){
-        Query.BARREL_INSERT.getStatementHolder()
-                .setLocation(stackedBarrel.getLocation())
-                .setInt(stackedBarrel.getStackAmount())
-                .setItemStack(stackedBarrel.getBarrelItem(1))
-                .execute(true);
+        Database.stop();
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner){
@@ -133,14 +118,6 @@ public final class DataHandler {
         Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
         if(chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
-    }
-
-    private boolean containsSpawner(StackedSpawner stackedSpawner){
-        return SQLHelper.doesConditionExist(String.format("SELECT * FROM spawners WHERE location = '%s';", SQLHelper.getLocation(stackedSpawner.getLocation())));
-    }
-
-    private boolean containsBarrel(StackedBarrel stackedBarrel){
-        return SQLHelper.doesConditionExist(String.format("SELECT * FROM barrels WHERE location = '%s';", SQLHelper.getLocation(stackedBarrel.getLocation())));
     }
 
     private void loadOldFiles(){
@@ -277,23 +254,23 @@ public final class DataHandler {
 
     private void loadDatabase(){
         //Creating default entities table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS entities (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER, spawnCause VARCHAR);");
+        Database.executeUpdate("CREATE TABLE IF NOT EXISTS entities (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER, spawnCause VARCHAR);");
 
         //Creating default items table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS items (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER);");
+        Database.executeUpdate("CREATE TABLE IF NOT EXISTS items (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER);");
 
         //Creating default spawners table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER);");
+        Database.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER);");
 
         //Creating default barrels table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
+        Database.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
 
         long startTime = System.currentTimeMillis();
 
         if(plugin.getSettings().storeEntities) {
             WildStackerPlugin.log("Starting to load entities...");
 
-            SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
+            Database.executeQuery("SELECT * FROM entities;", resultSet -> {
                 while (resultSet.next()) {
                     int stackAmount = resultSet.getInt("stackAmount");
                     SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
@@ -310,7 +287,7 @@ public final class DataHandler {
         if(plugin.getSettings().storeItems) {
             WildStackerPlugin.log("Starting to load items...");
 
-            SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
+            Database.executeQuery("SELECT * FROM items;", resultSet -> {
                 while (resultSet.next()) {
                     int stackAmount = resultSet.getInt("stackAmount");
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
@@ -324,7 +301,7 @@ public final class DataHandler {
         startTime = System.currentTimeMillis();
         WildStackerPlugin.log("Starting to load spawners...");
 
-        SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
+        Database.executeQuery("SELECT * FROM spawners;", resultSet -> {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -355,7 +332,7 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    SQLHelper.executeUpdate("DELETE FROM spawners WHERE location = '" + location + "';");
+                    Query.SPAWNER_DELETE.insertParameters().setObject(location).queue(location);
                     WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
                 }
             }
@@ -365,7 +342,7 @@ public final class DataHandler {
         startTime = System.currentTimeMillis();
         WildStackerPlugin.log("Starting to load barrels...");
 
-        SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
+        Database.executeQuery("SELECT * FROM barrels;", resultSet -> {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -397,7 +374,7 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    SQLHelper.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
+                    Database.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
                     WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
                 }
             }

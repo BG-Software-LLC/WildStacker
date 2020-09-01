@@ -25,9 +25,7 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
         if(cachedSpawners != null)
             cachedSpawners.remove(location);
 
-        Query.SPAWNER_DELETE.getStatementHolder()
-                .setLocation(getLocation())
-                .execute(true);
+        Query.SPAWNER_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
     }
 
 }

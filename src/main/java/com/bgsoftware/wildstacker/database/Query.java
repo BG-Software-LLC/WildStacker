@@ -2,34 +2,36 @@ package com.bgsoftware.wildstacker.database;
 
 public enum Query {
 
-    ENTITY_UPDATE_STACK_AMOUNT("UPDATE entities SET stackAmount=? WHERE uuid=?;"),
-    ENTITY_UPDATE_SPAWN_CAUSE("UPDATE entities SET spawnCause=? WHERE uuid=?;"),
-    ENTITY_INSERT("REPLACE INTO entities VALUES(?, ?, ?);"),
-    ENTITY_DELETE("DELETE FROM entities WHERE uuid=?;"),
+    ENTITY_INSERT("REPLACE INTO entities VALUES(?, ?, ?);", 3),
+    ENTITIES_DELETE("DELETE FROM entities;", 0),
 
-    ITEM_UPDATE_STACK_AMOUNT("UPDATE items SET stackAmount=? WHERE uuid=?;"),
-    ITEM_INSERT("REPLACE INTO items VALUES(?, ?);"),
-    ITEM_DELETE("DELETE FROM items WHERE uuid=?;"),
+    ITEM_INSERT("REPLACE INTO items VALUES(?, ?);", 2),
+    ITEMS_DELETE("DELETE FROM items;", 0),
 
-    SPAWNER_UPDATE_STACK_AMOUNT("UPDATE spawners SET stackAmount=? WHERE location=?;"),
-    SPAWNER_INSERT("REPLACE INTO spawners VALUES(?, ?);"),
-    SPAWNER_DELETE("DELETE FROM spawners WHERE location=?;"),
+    SPAWNER_INSERT("REPLACE INTO spawners VALUES(?, ?);", 2),
+    SPAWNER_DELETE("DELETE FROM spawners WHERE location=?;", 1),
 
-    BARREL_UPDATE_STACK_AMOUNT("UPDATE barrels SET stackAmount=? WHERE location=?;"),
-    BARREL_INSERT("REPLACE INTO barrels VALUES(?, ?, ?);"),
-    BARREL_DELETE("DELETE FROM barrels WHERE location=?;");
+    BARREL_INSERT("REPLACE INTO barrels VALUES(?, ?, ?);", 3),
+    BARREL_DELETE("DELETE FROM barrels WHERE location=?;", 1);
 
-    private String query;
+    private final String query;
+    private final int parametersCount;
 
-    Query(String query) {
+    Query(String query, int parametersCount) {
         this.query = query;
+        this.parametersCount = parametersCount;
     }
 
-    public String getStatement(){
+    String getStatement(){
         return query;
     }
 
-    public StatementHolder getStatementHolder(){
-        return new StatementHolder(this);
+    int getParametersCount() {
+        return parametersCount;
     }
+
+    public QueryParameters insertParameters(){
+        return new QueryParameters(this);
+    }
+
 }
