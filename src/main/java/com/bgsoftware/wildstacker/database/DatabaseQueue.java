@@ -51,25 +51,28 @@ public final class DatabaseQueue {
             Connection connection = Database.getConnection();
 
             for(int i = 0; i < currentIndex; i++){
-                QueryParameters parameters = queuedCalls.get(i);
+                try {
+                    QueryParameters parameters = queuedCalls.get(i);
 
-                PreparedStatement preparedStatement = preparedStatementMap.computeIfAbsent(parameters.getQuery(), q -> {
-                    try{
-                        return connection.prepareStatement(q.getStatement());
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                        return null;
-                    }
-                });
+                    if (parameters == null)
+                        continue;
 
-                if(preparedStatement != null){
-                    try {
+                    PreparedStatement preparedStatement = preparedStatementMap.computeIfAbsent(parameters.getQuery(), q -> {
+                        try {
+                            return connection.prepareStatement(q.getStatement());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            return null;
+                        }
+                    });
+
+                    if (preparedStatement != null) {
                         parameters.executeQuery(preparedStatement);
                         preparedStatement.executeUpdate();
                         preparedStatement.clearParameters();
-                    }catch (Exception ex){
-                        ex.printStackTrace();
                     }
+                }catch (Exception ex){
+                    ex.printStackTrace();
                 }
             }
 
