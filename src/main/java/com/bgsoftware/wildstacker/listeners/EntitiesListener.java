@@ -282,7 +282,7 @@ public final class EntitiesListener implements Listener {
                     livingEntity.setLastDamageCause(clonedEvent);
                     livingEntity.setFireTicks(fireTicks);
 
-                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
+                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? stackAmount : 1);
                     int droppedExp = stackedEntity.getExp(stackAmount, 0);
 
                     Executor.sync(() -> {
@@ -323,8 +323,10 @@ public final class EntitiesListener implements Listener {
                                 .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR).collect(Collectors.toList()));
 
                         //Multiply items that weren't added in the first place
-                        subtract(drops, entityDeathEvent.getDrops())
-                                .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
+                        if(plugin.getSettings().multiplyDrops) {
+                            subtract(drops, entityDeathEvent.getDrops())
+                                    .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
+                        }
 
                         Location dropLocation = livingEntity.getLocation();
 

@@ -61,7 +61,7 @@ public final class SettingsHandler {
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
             entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply, entitiesClearEquipment,
-            spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook;
+            spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook, multiplyDrops;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final Pattern entitiesCustomNamePattern;
@@ -219,6 +219,7 @@ public final class SettingsHandler {
         entitiesOneShotWhitelist = cfg.getStringList("entities.one-shot.whitelist");
         storeEntities = cfg.getBoolean("entities.store-entities", true);
         superiorSkyblockHook = cfg.getBoolean("entities.superiorskyblock-hook", false);
+        multiplyDrops = cfg.getBoolean("entities.multiply-drops", true);
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);

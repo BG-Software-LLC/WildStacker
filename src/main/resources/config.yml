@@ -423,6 +423,9 @@ entities:
   # When enabling, make sure you add "entities_stacking" section to the settings menu.
   superiorskyblock-hook: false
 
+  # Should drops get calculated in relation to the amount of mobs that died?
+  multiply-drops: true
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?
