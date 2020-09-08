@@ -157,6 +157,10 @@ public interface NMSAdapter {
 
     }
 
+    default boolean attemptToWaterLog(Block block){
+        return false;
+    }
+
     /*
      *   Tag methods
      */

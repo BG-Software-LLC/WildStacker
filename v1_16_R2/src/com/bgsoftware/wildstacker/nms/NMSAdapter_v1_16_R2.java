@@ -30,7 +30,10 @@ import net.minecraft.server.v1_16_R2.EntityTypes;
 import net.minecraft.server.v1_16_R2.EntityVillager;
 import net.minecraft.server.v1_16_R2.EntityZombieVillager;
 import net.minecraft.server.v1_16_R2.EnumMobSpawn;
+import net.minecraft.server.v1_16_R2.FluidTypes;
 import net.minecraft.server.v1_16_R2.GameRules;
+import net.minecraft.server.v1_16_R2.IBlockData;
+import net.minecraft.server.v1_16_R2.IFluidContainer;
 import net.minecraft.server.v1_16_R2.ItemStack;
 import net.minecraft.server.v1_16_R2.ItemSword;
 import net.minecraft.server.v1_16_R2.MathHelper;
@@ -63,6 +66,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_16_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_16_R2.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_16_R2.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftAnimals;
@@ -558,6 +562,20 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         EntityRaider entityRaider = (EntityRaider) ((CraftEntity) raider).getHandle();
         if(entityRaider.fb())
             entityRaider.fa().a((Entity) ((CraftPlayer) player).getHandle());
+    }
+
+    @Override
+    public boolean attemptToWaterLog(Block block) {
+        World world = ((CraftWorld) block.getWorld()).getHandle();
+        BlockPosition blockPosition = ((CraftBlock) block).getPosition();
+        IBlockData blockData = ((CraftBlock) block).getNMS();
+
+        if(blockData.getBlock() instanceof IFluidContainer) {
+            ((IFluidContainer) blockData.getBlock()).place(world, blockPosition, blockData, FluidTypes.WATER.a(false));
+            return true;
+        }
+
+        return false;
     }
 
     /*

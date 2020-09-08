@@ -57,8 +57,10 @@ public final class BucketsListener implements Listener {
                 fluidBlock.setType(Material.LAVA);
             }
             else{
-                if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER)
-                    fluidBlock.setType(Material.WATER);
+                if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER) {
+                    if(!plugin.getNMSAdapter().attemptToWaterLog(fluidBlock))
+                        fluidBlock.setType(Material.WATER);
+                }
 
                 try{
                     String entityType = itemInHand.getType().name().replace("_BUCKET", "");
