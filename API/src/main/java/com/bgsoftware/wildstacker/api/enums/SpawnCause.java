@@ -2,58 +2,71 @@ package com.bgsoftware.wildstacker.api.enums;
 
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import java.util.Arrays;
+
 public enum SpawnCause {
 
     /**
      * Vanilla spawn causes.
      */
-    BED,BEEHIVE,
-    BREEDING,
-    BUILD_IRONGOLEM,
-    BUILD_SNOWMAN,
-    BUILD_WITHER,
-    CHUNK_GEN,
-    CURED,
-    CUSTOM,
-    DEFAULT,
-    DISPENSE_EGG,
-    DROWNED,
-    EGG,
-    ENDER_PEARL,
-    EXPLOSION,
-    INFECTION,
-    JOCKEY,
-    LIGHTNING,
-    MOUNT,
-    NATURAL,
-    NETHER_PORTAL,
-    OCELOT_BABY,
-    PATROL,
-    RAID,
-    REINFORCEMENTS,
-    SHEARED,
-    SHOULDER_ENTITY,
-    SILVERFISH_BLOCK,
-    SLIME_SPLIT,
-    SPAWNER,
-    SPAWNER_EGG,
-    TRAP,
-    VILLAGE_DEFENSE,
-    VILLAGE_INVASION,
+    BED(0),
+    BEEHIVE(1),
+    BREEDING(2),
+    BUILD_IRONGOLEM(3),
+    BUILD_SNOWMAN(4),
+    BUILD_WITHER(5),
+    CHUNK_GEN(6),
+    CURED(7),
+    CUSTOM(8),
+    DEFAULT(9),
+    DISPENSE_EGG(10),
+    DROWNED(11),
+    EGG(12),
+    ENDER_PEARL(13),
+    EXPLOSION(14),
+    INFECTION(15),
+    JOCKEY(16),
+    LIGHTNING(17),
+    MOUNT(18),
+    NATURAL(19),
+    NETHER_PORTAL(20),
+    OCELOT_BABY(21),
+    PATROL(22),
+    RAID(23),
+    REINFORCEMENTS(24),
+    SHEARED(25),
+    SHOULDER_ENTITY(26),
+    SILVERFISH_BLOCK(27),
+    SLIME_SPLIT(28),
+    SPAWNER(29),
+    SPAWNER_EGG(30),
+    TRAP(31),
+    VILLAGE_DEFENSE(32),
+    VILLAGE_INVASION(33),
 
     /**
      * Custom spawn causes.
      */
-    MYTHIC_MOBS,
-    CUSTOM_BOSSES,
-    BOSS,
-    EPIC_BOSSES,
-    EPIC_BOSSES_MINION,
-    EPIC_SPAWNERS,
-    MY_PET;
+    MYTHIC_MOBS(101),
+    CUSTOM_BOSSES(102),
+    BOSS(103),
+    EPIC_BOSSES(104),
+    EPIC_BOSSES_MINION(105),
+    EPIC_SPAWNERS(106),
+    MY_PET(107);
+
+    private final int id;
+
+    SpawnCause(int id){
+        this.id = id;
+    }
 
     public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason){
         return matchCause(spawnReason.name());
+    }
+
+    public static SpawnCause valueOf(int id){
+        return Arrays.stream(values()).filter(spawnCause -> spawnCause.getId() == id).findFirst().orElse(DEFAULT);
     }
 
     /**
@@ -74,6 +87,10 @@ public enum SpawnCause {
         }catch(Exception ex){
             return CreatureSpawnEvent.SpawnReason.CUSTOM;
         }
+    }
+
+    public int getId() {
+        return id;
     }
 
 }

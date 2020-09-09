@@ -748,11 +748,12 @@ public final class EntitiesListener implements Listener {
         ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
 
         if(inHand == null || inHand.getType() != Material.NAME_TAG || !inHand.hasItemMeta() || !inHand.getItemMeta().hasDisplayName()
-                || e.getRightClicked() instanceof EnderDragon || e.getRightClicked() instanceof Player)
+                || e.getRightClicked() instanceof EnderDragon || !EntityUtils.isStackable(e.getRightClicked()))
                 return;
 
-        if(plugin.getSettings().entitiesStackingEnabled && EntityUtils.isStackable(e.getRightClicked()) && StackSplit.NAME_TAG.isEnabled()) {
-            StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+        StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
+
+        if(plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
             int amount = stackedEntity.getStackAmount();
 
             Executor.sync(() -> {
@@ -762,14 +763,17 @@ public final class EntitiesListener implements Listener {
                     StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                     duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
                     EntityStorage.setMetadata(duplicated.getLivingEntity(), "nameTag", true);
+                    plugin.getDataHandler().saveEntity(duplicated);
                 } else {
                     EntityStorage.setMetadata(stackedEntity.getLivingEntity(), "nameTag", true);
+                    plugin.getDataHandler().saveEntity(stackedEntity);
                     stackedEntity.runStackAsync(null);
                 }
             }, 2L);
         }
         else{
             EntityStorage.setMetadata(e.getRightClicked(), "nameTag", true);
+            plugin.getDataHandler().saveEntity(stackedEntity);
         }
     }
 

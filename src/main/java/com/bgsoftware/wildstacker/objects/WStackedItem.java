@@ -59,6 +59,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), stackAmount));
             if(itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
                 object.setItemStack(itemStack);
+            plugin.getDataHandler().saveItem(this);
         }
     }
 
@@ -172,8 +173,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         String CUSTOM_NAME = customName;
 
         Executor.sync(() -> {
-            if(updateName)
+            if(updateName) {
                 object.setCustomName(CUSTOM_NAME);
+                plugin.getDataHandler().saveItem(this);
+            }
             object.setCustomNameVisible(updateName);
         });
     }
@@ -379,10 +382,6 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     public static StackedItem of(Item item){
         return plugin.getSystemManager().getStackedItem(item);
-    }
-
-    public static StackedItem ofCache(Item item){
-        return plugin.getSystemManager().getStackedItemFromCache(item);
     }
 
 }

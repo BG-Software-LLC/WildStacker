@@ -17,41 +17,27 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"WeakerAccess", "all"})
 public final class DataHandler {
@@ -80,8 +66,6 @@ public final class DataHandler {
             try {
                 Database.start(new File(plugin.getDataFolder(), "database.db"));
                 loadDatabase();
-                loadOldFiles();
-                loadOldSQL();
             }catch(Exception ex){
                 ex.printStackTrace();
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
@@ -120,43 +104,25 @@ public final class DataHandler {
             chunkBarrels.remove(stackedBarrel);
     }
 
-    private void loadOldFiles(){
-        File dataFile = new File(plugin.getDataFolder(), "data");
+    public void saveEntity(StackedEntity stackedEntity){
+        int stackAmount = stackedEntity.getStackAmount();
+        SpawnCause spawnCause = stackedEntity.getSpawnCause();
+        boolean nameTag = stackedEntity.hasNameTag();
+        saveObject(stackedEntity.getLivingEntity(), DataSerializer.serializeData(stackAmount + "-" + spawnCause.getId() + "-" + (nameTag ? 1 : 0)));
+    }
 
-        if(dataFile.exists()) {
-            boolean save = false;
+    public void saveItem(StackedItem stackedItem){
+        saveObject(stackedItem.getItem(), DataSerializer.serializeData(stackedItem.getStackAmount() + ""));
+    }
 
-            for (File worldFolder : dataFile.listFiles()) {
-                if (worldFolder.isDirectory()) {
-                    if (worldFolder.listFiles().length == 0) {
-                        worldFolder.delete();
-                    }else{
-                        save = true;
-                    }
-                }
-            }
+    public void saveObject(Entity entity, String data){
+        String customName = entity.getCustomName();
+        if(customName == null)
+            customName = "";
 
-            if (save) {
-                WildStackerPlugin.log("Fetching old data files...");
-                plugin.getServer().getPluginManager().registerEvents(new Listener() {
-
-                    @EventHandler
-                    public void onChunkLoad(ChunkLoadEvent e) {
-                        loadOldChunkFile(e.getChunk());
-                    }
-
-                }, plugin);
-
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    for(World world : Bukkit.getWorlds()){
-                        for(Chunk chunk : world.getLoadedChunks())
-                            loadOldChunkFile(chunk);
-                    }
-                }, 20L);
-
-            }
-        }
-
+        entity.setCustomName(data + customName);
+        if(customName.isEmpty())
+            entity.setCustomNameVisible(false);
     }
 
     public List<StackedObject> getStackedObjects(){
@@ -168,96 +134,12 @@ public final class DataHandler {
         return stackedObjects;
     }
 
-    private void loadOldSQL(){
-        File dataFolder = new File(plugin.getDataFolder(), "data");
-
-        if(dataFolder.exists()) {
-            for (File databaseFile : dataFolder.listFiles()) {
-                if (!databaseFile.isDirectory() && databaseFile.getName().endsWith(".db")) {
-                    World world = Bukkit.getWorld(databaseFile.getName().replace(".db", ""));
-                    String sqlURL = "jdbc:sqlite:" + databaseFile.getAbsolutePath().replace("\\", "/");
-                    boolean delete = false;
-
-                    try (Connection conn = DriverManager.getConnection(sqlURL)) {
-
-                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM entities;").executeQuery()) {
-                            while (resultSet.next()) {
-                                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                                int stackAmount = resultSet.getInt("amount");
-                                SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawn_reason"));
-                                CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
-                            }
-                        }
-
-                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM items;").executeQuery()) {
-                            while (resultSet.next()) {
-                                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                                int stackAmount = resultSet.getInt("amount");
-                                CACHED_ITEMS_RAW.put(uuid, stackAmount);
-                            }
-                        }
-
-                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM spawners;").executeQuery()) {
-                            while (resultSet.next()) {
-                                String chunk = resultSet.getString("chunk");
-                                int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
-
-                                String[] locationSections = resultSet.getString("location").split(",");
-                                int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
-                                        z = Integer.valueOf(locationSections[2]);
-                                Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
-
-                                int stackAmount = resultSet.getInt("amount");
-                                Block spawnerBlock = blockLocation.getBlock();
-
-                                if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                                    System.out.println(blockLocation + ": " + stackAmount);
-                                    StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) spawnerBlock.getState(), stackAmount);
-                                    addStackedSpawner(stackedSpawner);
-                                }
-                            }
-                        }
-
-                        try (ResultSet resultSet = conn.prepareStatement("SELECT * FROM barrels;").executeQuery()) {
-                            while (resultSet.next()) {
-                                String chunk = resultSet.getString("chunk");
-                                int chunkX = Integer.valueOf(chunk.split(",")[0]), chunkZ = Integer.valueOf(chunk.split(",")[1]);
-
-                                String[] locationSections = resultSet.getString("location").split(",");
-                                int x = Integer.valueOf(locationSections[0]), y = Integer.valueOf(locationSections[1]),
-                                        z = Integer.valueOf(locationSections[2]);
-                                Location blockLocation = new Location(world, chunkX << 4 | x & 15, y, chunkZ << 4 | z & 15);
-
-                                int stackAmount = resultSet.getInt("amount");
-                                Block barrelBlock = blockLocation.getBlock();
-
-                                if (barrelBlock.getType() == Material.CAULDRON) {
-                                    ItemStack barrelItem = plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                                    StackedBarrel stackedBarrel = new WStackedBarrel(barrelBlock, barrelItem, stackAmount);
-                                    addStackedBarrel(stackedBarrel);
-                                }
-                            }
-                        }
-
-                        delete = true;
-                    } catch (SQLException ex) {
-                        WildStackerPlugin.log("Couldn't load old db file " + databaseFile.getName());
-                        ex.printStackTrace();
-                    }
-
-                    if (delete)
-                        databaseFile.delete();
-                }
-            }
-        }
-    }
-
     private void loadDatabase(){
         //Creating default entities table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS entities (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER, spawnCause VARCHAR);");
+        //Database.executeUpdate("CREATE TABLE IF NOT EXISTS entities (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER, spawnCause VARCHAR);");
 
         //Creating default items table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS items (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER);");
+        //Database.executeUpdate("CREATE TABLE IF NOT EXISTS items (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER);");
 
         //Creating default spawners table
         Database.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER);");
@@ -388,95 +270,6 @@ public final class DataHandler {
             for(Chunk chunk : world.getLoadedChunks())
                 plugin.getSystemManager().handleChunkLoad(chunk);
         }
-    }
-
-    private void loadOldChunkFile(Chunk chunk){
-        Stream<LivingEntity> livingEntityList = Arrays.stream(chunk.getEntities())
-                .filter(entity -> entity instanceof LivingEntity)
-                .map(entity -> (LivingEntity) entity);
-        Stream<Item> itemList = Arrays.stream(chunk.getEntities())
-                .filter(item -> item instanceof Item)
-                .map(item -> (Item) item);
-
-        Set<RawStackedSpawner> stackedSpawners = new HashSet<>();
-        Set<RawStackedBarrel> stackedBarrels = new HashSet<>();
-
-        Executor.async(() -> {
-            try {
-                File file = new File(plugin.getDataFolder(), "data/" + chunk.getWorld().getName() + "/" + chunk.getX() + "," + chunk.getZ() + ".yml");
-
-                if (!file.exists())
-                    return;
-
-                YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-
-                if (cfg.contains("entities")) {
-                    for (String uuid : cfg.getConfigurationSection("entities").getKeys(false)) {
-                        int stackAmount = cfg.getInt("entities." + uuid + ".amount", 1);
-                        SpawnCause spawnCause = SpawnCause.matchCause(cfg.getString("entities." + uuid + ".spawn-reason", "CHUNK_GEN"));
-                        UUID _uuid = UUID.fromString(uuid);
-                        CACHED_ENTITIES_RAW.put(_uuid, new Pair<>(stackAmount, spawnCause));
-                    }
-                }
-
-                if (cfg.contains("items")) {
-                    for (String uuid : cfg.getConfigurationSection("items").getKeys(false)) {
-                        int stackAmount = cfg.getInt("items." + uuid, 1);
-                        UUID _uuid = UUID.fromString(uuid);
-                        CACHED_ITEMS_RAW.put(_uuid, stackAmount);
-                    }
-                }
-
-                if (cfg.contains("spawners")) {
-                    for (String location : cfg.getConfigurationSection("spawners").getKeys(false)) {
-                        String[] locationSections = location.split(",");
-                        int stackAmount = cfg.getInt("spawners." + location, 1);
-                        Block spawnerBlock = chunk.getBlock(Integer.valueOf(locationSections[0]),
-                                Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                        if (spawnerBlock.getType() == Materials.SPAWNER.toBukkitType()) {
-                            stackedSpawners.add(new RawStackedSpawner(spawnerBlock, stackAmount));
-                        }
-                    }
-                }
-
-                if (cfg.contains("barrels")) {
-                    for (String location : cfg.getConfigurationSection("barrels").getKeys(false)) {
-                        String[] locationSections = location.split(",");
-                        int stackAmount = cfg.getInt("barrels." + location + ".amount", 1);
-                        Block barrelBlock = chunk.getBlock(Integer.valueOf(locationSections[0]),
-                                Integer.valueOf(locationSections[1]), Integer.valueOf(locationSections[2]));
-                        if (barrelBlock.getType() == Material.CAULDRON) {
-                            ItemStack barrelItem = cfg.getItemStack("barrels." + location + ".item");
-                            stackedBarrels.add(new RawStackedBarrel(barrelBlock, barrelItem, stackAmount));
-                        }
-                    }
-                }
-
-                file.delete();
-
-                Executor.sync(() -> {
-                    Iterator<RawStackedBarrel> stackedBarrelsIterator = stackedBarrels.iterator();
-                    Iterator<RawStackedSpawner> stackedSpawnersIterator = stackedSpawners.iterator();
-
-                    while(stackedSpawnersIterator.hasNext()) {
-                        StackedSpawner stackedSpawner = stackedSpawnersIterator.next().create();
-                        addStackedSpawner(stackedSpawner);
-                        stackedSpawner.updateName();
-                    }
-
-                    while(stackedBarrelsIterator.hasNext()){
-                        StackedBarrel stackedBarrel = stackedBarrelsIterator.next().create();
-                        addStackedBarrel(stackedBarrel);
-                        stackedBarrel.updateName();
-                        stackedBarrel.createDisplayBlock();
-                    }
-                });
-
-            }catch(IllegalStateException ex){
-                ex.printStackTrace();
-            }
-        });
-
     }
 
     private class RawStackedSpawner{

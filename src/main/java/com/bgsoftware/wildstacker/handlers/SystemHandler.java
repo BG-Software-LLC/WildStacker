@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
-import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -28,6 +27,7 @@ import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
+import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -53,7 +53,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -120,23 +119,33 @@ public final class SystemHandler implements SystemManager {
                 dataHandler.CACHED_ENTITIES.remove(livingEntity.getUniqueId());
         }, 10L);
 
-        Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.get(livingEntity.getUniqueId());
-        if(entityData != null)
+        Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
+        if(entityData != null) {
             stackedEntity.setSpawnCause(entityData.getValue());
+        }
+        else{
+            String cachedData = DataSerializer.deserializeData(livingEntity.getCustomName());
+
+            if(!cachedData.isEmpty()){
+                String[] dataSections = cachedData.split("-");
+                try{
+                    stackedEntity.setStackAmount(Integer.parseInt(dataSections[0]), false);
+                }catch (Exception ignored){}
+                try{
+                    stackedEntity.setSpawnCause(SpawnCause.valueOf(Integer.parseInt(dataSections[1])));
+                }catch (Exception ignored){}
+                try{
+                    if(dataSections[2].equals("1"))
+                        EntityStorage.setMetadata(stackedEntity.getLivingEntity(), "nameTag", true);
+                }catch (Exception ignored){}
+            }
+        }
 
         boolean shouldBeCached = ((WStackedEntity) stackedEntity).isCached();
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
             dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
-
-        if(shouldBeCached)
-            dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
-
-        if(entityData != null){
-            stackedEntity.setStackAmount(entityData.getKey(), true);
-            stackedEntity.setSpawnCause(entityData.getValue());
-        }
 
         boolean deadFlag = shouldBeCached ? dataHandler.CACHED_DEAD_ENTITIES.remove(livingEntity.getUniqueId()) :
                 dataHandler.CACHED_DEAD_ENTITIES.contains(livingEntity.getUniqueId());
@@ -167,22 +176,18 @@ public final class SystemHandler implements SystemManager {
         if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
             dataHandler.CACHED_ITEMS.put(stackedItem.getUniqueId(), stackedItem);
 
-        Integer stackAmount = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
+        Integer entityData = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
+        if(entityData != null) {
+            stackedItem.setStackAmount(entityData, false);
+        }
+        else{
+            String cachedData = DataSerializer.deserializeData(item.getCustomName());
 
-        if(stackAmount != null)
-            stackedItem.setStackAmount(stackAmount, true);
-
-        return stackedItem;
-    }
-
-    public StackedItem getStackedItemFromCache(Item item){
-        StackedItem stackedItem = plugin.getDataHandler().CACHED_ITEMS.get(item.getUniqueId());
-        Integer stackAmount = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
-
-        if(stackAmount != null) {
-            if(stackedItem == null)
-                stackedItem = new WStackedItem(item);
-            stackedItem.setStackAmount(stackAmount, true);
+            if(!cachedData.isEmpty()){
+                try{
+                    stackedItem.setStackAmount(Integer.parseInt(cachedData), false);
+                }catch (Exception ignored){}
+            }
         }
 
         return stackedItem;
@@ -365,55 +370,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
-        Query.ENTITIES_DELETE.insertParameters().queue(this);
-
-        if(plugin.getSettings().storeEntities) {
-            getStackedEntities().forEach(stackedEntity -> {
-                if (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause())) {
-                    Query.ENTITY_INSERT.insertParameters()
-                            .setObject(stackedEntity.getUniqueId().toString())
-                            .setObject(stackedEntity.getStackAmount())
-                            .setObject(stackedEntity.getSpawnCause().name())
-                            .queue(stackedEntity.getUniqueId());
-                } else {
-                    removeStackObject(stackedEntity);
-                }
-            });
-
-            new HashMap<>(dataHandler.CACHED_ENTITIES_RAW).forEach((uuid, pair) -> {
-                if (pair.getKey() > 1 || hasValidSpawnCause(pair.getValue())) {
-                    Query.ENTITY_INSERT.insertParameters().setObject(uuid.toString()).setObject(pair.getKey())
-                            .setObject(pair.getValue().name()).queue(uuid);
-                } else {
-                    dataHandler.CACHED_ENTITIES_RAW.remove(uuid);
-                }
-            });
-        }
-
-        Query.ITEMS_DELETE.insertParameters().queue(this);
-
-        if(plugin.getSettings().storeItems) {
-            getStackedItems().forEach(stackedItem -> {
-                if (stackedItem.getStackAmount() > 1) {
-                    Query.ITEM_INSERT.insertParameters().setObject(stackedItem.getUniqueId().toString())
-                            .setObject(stackedItem.getStackAmount()).queue(stackedItem.getUniqueId());
-                } else {
-                    removeStackObject(stackedItem);
-                }
-            });
-
-            new HashMap<>(dataHandler.CACHED_ITEMS_RAW).forEach((uuid, stackAmount) -> {
-                if (stackAmount > 1) {
-                    Query.ITEM_INSERT.insertParameters().setObject(uuid.toString()).setObject(stackAmount).queue(uuid);
-                } else {
-                    dataHandler.CACHED_ITEMS_RAW.remove(uuid);
-                }
-            });
-        }
-    }
-
-    private boolean hasValidSpawnCause(SpawnCause spawnCause){
-        return spawnCause != SpawnCause.CHUNK_GEN && spawnCause != SpawnCause.NATURAL;
     }
 
     @Override
@@ -490,13 +446,6 @@ public final class SystemHandler implements SystemManager {
             loadBarrels(chunk);
         }
 
-        for(Entity entity : entities){
-            if(entity.getCustomName() != null && entity.getCustomName().endsWith("<|NT|>")){
-                entity.setCustomName(entity.getCustomName().replace("<|NT|>", ""));
-                EntityStorage.setMetadata(entity, "nameTag", true);
-            }
-        }
-
         loadSpawners(chunk);
 
         //Update nerf status & names to all entities
@@ -513,24 +462,13 @@ public final class SystemHandler implements SystemManager {
         Executor.async(() -> {
             for(Entity entity : entities){
                 if(EntityUtils.isStackable(entity)){
-                    StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
-                    if(stackedEntity != null && (stackedEntity.getStackAmount() > 1 || hasValidSpawnCause(stackedEntity.getSpawnCause()))){
-                        dataHandler.CACHED_ENTITIES_RAW.put(entity.getUniqueId(), new Pair<>(stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()));
-                    }
+                    dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
                 }
                 else if(entity instanceof Item){
-                    StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
-                    if(stackedItem != null && stackedItem.getStackAmount() > 1){
-                        dataHandler.CACHED_ITEMS_RAW.put(entity.getUniqueId(), stackedItem.getStackAmount());
-                    }
+                    dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
                 }
             }
         });
-
-        for(Entity entity : entities){
-            if(EntityStorage.hasMetadata(entity, "nameTag"))
-                entity.setCustomName(entity.getName() + "<|NT|>");
-        }
 
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);

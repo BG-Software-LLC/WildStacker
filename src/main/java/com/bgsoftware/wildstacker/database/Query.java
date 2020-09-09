@@ -2,12 +2,6 @@ package com.bgsoftware.wildstacker.database;
 
 public enum Query {
 
-    ENTITY_INSERT("REPLACE INTO entities VALUES(?, ?, ?);", 3),
-    ENTITIES_DELETE("DELETE FROM entities;", 0),
-
-    ITEM_INSERT("REPLACE INTO items VALUES(?, ?);", 2),
-    ITEMS_DELETE("DELETE FROM items;", 0),
-
     SPAWNER_INSERT("REPLACE INTO spawners VALUES(?, ?);", 2),
     SPAWNER_DELETE("DELETE FROM spawners WHERE location=?;", 1),
 

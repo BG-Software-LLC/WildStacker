@@ -23,7 +23,6 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -81,8 +80,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        if(!isCached())
-            plugin.getDataHandler().CACHED_ENTITIES_RAW.put(object.getUniqueId(), new Pair<>(stackAmount, getSpawnCause()));
+        plugin.getDataHandler().saveEntity(this);
     }
 
     /*
@@ -197,6 +195,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 object.setCustomName(customName);
                 object.setCustomNameVisible(nameVisible);
+                plugin.getDataHandler().saveEntity(this);
 
                 //We update cached values of mcmmo
                 McMMOHook.updateCachedName(object);
@@ -590,8 +589,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
-        if(!isCached())
-            plugin.getDataHandler().CACHED_ENTITIES_RAW.put(object.getUniqueId(), new Pair<>(getStackAmount(), this.spawnCause));
+        plugin.getDataHandler().saveEntity(this);
     }
 
     @Override
