@@ -15,8 +15,8 @@ public final class DataSerializer {
         StringBuilder result = new StringBuilder();
 
         for(char ch : str.toCharArray()) {
-            if(isBetween(ch, 'a', 'f') || isBetween(ch, 'A', 'F') || isBetween(ch, '0', '9'))
-                result.append(COLOR_CHAR);
+//            if(isBetween(ch, 'a', 'f') || isBetween(ch, 'A', 'F') || isBetween(ch, '0', '9'))
+//                result.append(COLOR_CHAR);
             result.append(COLOR_CHAR).append(ch);
         }
 
