@@ -70,24 +70,27 @@ public final class ItemUtils {
 
         int amount = itemStack.getAmount();
 
-        if(plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())){
-            ItemStack cloned = itemStack.clone();
-            cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
-            plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
-        }
-
-        else {
-            for (int i = 0; i < amount / 64; i++) {
+        try {
+            if (plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())) {
                 ItemStack cloned = itemStack.clone();
-                cloned.setAmount(64);
-                plugin.getSystemManager().spawnItemWithAmount(location, cloned, 64);
-            }
+                cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+                plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
+            } else {
+                for (int i = 0; i < amount / 64; i++) {
+                    ItemStack cloned = itemStack.clone();
+                    cloned.setAmount(64);
+                    plugin.getSystemManager().spawnItemWithAmount(location, cloned, 64);
+                }
 
-            if (amount % 64 > 0) {
-                ItemStack cloned = itemStack.clone();
-                cloned.setAmount(amount % 64);
-                plugin.getSystemManager().spawnItemWithAmount(location, cloned);
+                if (amount % 64 > 0) {
+                    ItemStack cloned = itemStack.clone();
+                    cloned.setAmount(amount % 64);
+                    plugin.getSystemManager().spawnItemWithAmount(location, cloned);
+                }
             }
+        }catch (Exception ex){
+            System.out.println("Error while dropping " + itemStack + ":");
+            ex.printStackTrace();
         }
     }
 
