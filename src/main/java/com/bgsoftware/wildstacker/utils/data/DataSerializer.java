@@ -21,7 +21,7 @@ public final class DataSerializer {
         }
 
         // Marks end of data segment
-        result.append(COLOR_CHAR).append('|');
+        result.append(COLOR_CHAR).append('|').append(COLOR_CHAR).append('r');
 
         return result.toString();
     }
