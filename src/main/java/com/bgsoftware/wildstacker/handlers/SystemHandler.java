@@ -136,7 +136,7 @@ public final class SystemHandler implements SystemManager {
                 }catch (Exception ignored){}
                 try{
                     if(dataSections[2].equals("1"))
-                        EntityStorage.setMetadata(stackedEntity.getLivingEntity(), "nameTag", true);
+                        ((WStackedEntity) stackedEntity).setNameTag(false);
                 }catch (Exception ignored){}
             }
         }

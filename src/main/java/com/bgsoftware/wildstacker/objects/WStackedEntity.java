@@ -634,6 +634,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         return EntityStorage.hasMetadata(object, "nameTag");
     }
 
+    public void setNameTag(boolean save){
+        EntityStorage.setMetadata(object, "nameTag", true);
+        if(save)
+            plugin.getDataHandler().saveEntity(this);
+    }
+
     public boolean isCached(){
         return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
     }

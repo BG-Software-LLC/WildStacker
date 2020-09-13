@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -23,6 +25,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
 @SuppressWarnings("unused")
 public final class BucketsListener implements Listener {
@@ -42,12 +45,12 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
-        if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+        if(plugin.getSettings().bucketsStackerEnabled) {
             e.setCancelled(true);
 
             PlayerInventory inventory = e.getPlayer().getInventory();
             int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
-            ItemStack itemInHand = inventory.getItem(heldItemSlot).clone();
+            ItemStack itemInHand = inventory.getItem(heldItemSlot);
             ItemStack itemToGive = itemInHand.clone();
             itemToGive.setAmount(itemToGive.getAmount() - 1);
 
@@ -64,7 +67,20 @@ public final class BucketsListener implements Listener {
 
                 try{
                     String entityType = itemInHand.getType().name().replace("_BUCKET", "");
-                    fluidBlock.getWorld().spawnEntity(fluidBlock.getLocation(), EntityType.valueOf(entityType));
+
+                    int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
+                    ItemMeta itemMeta = itemInHand.getItemMeta();
+                    String fishName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "";
+
+                    StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
+                            fluidBlock.getLocation().add(0.5, 0, 0.5), EntityType.valueOf(entityType).getEntityClass()));
+
+                    if(!fishName.isEmpty()){
+                        stackedEntity.setCustomName(fishName);
+                        ((WStackedEntity) stackedEntity).setNameTag(true);
+                    }
+
+                    stackedEntity.setStackAmount(amount, true);
                 }catch (Exception ignored){}
             }
 
