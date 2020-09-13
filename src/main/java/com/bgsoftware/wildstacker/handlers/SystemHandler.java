@@ -535,22 +535,29 @@ public final class SystemHandler implements SystemManager {
 
         int itemLimit = limit;
 
+        StackedItem lastDroppedItem = null;
+
         for(int i = 0; i < amountOfItems; i++) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
-            WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
+            lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
                 StackedItem stackedItem = WStackedItem.of(item);
                 stackedItem.setStackAmount(itemLimit, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
             }));
         }
 
         int leftOvers = amount % limit;
-        itemStack = itemStack.clone();
-        itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
-        return WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
-            StackedItem stackedItem = WStackedItem.of(item);
-            stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
-        }));
+
+        if(leftOvers > 0) {
+            itemStack = itemStack.clone();
+            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
+            lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
+                StackedItem stackedItem = WStackedItem.of(item);
+                stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+            }));
+        }
+
+        return lastDroppedItem;
     }
 
     @Override
