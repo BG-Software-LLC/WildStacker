@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -45,52 +46,50 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
-        if(plugin.getSettings().bucketsStackerEnabled) {
-            e.setCancelled(true);
+        e.setCancelled(true);
 
-            PlayerInventory inventory = e.getPlayer().getInventory();
-            int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
-            ItemStack itemInHand = inventory.getItem(heldItemSlot);
-            ItemStack itemToGive = itemInHand.clone();
-            itemToGive.setAmount(itemToGive.getAmount() - 1);
+        PlayerInventory inventory = e.getPlayer().getInventory();
+        int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
+        ItemStack itemInHand = inventory.getItem(heldItemSlot);
+        ItemStack itemToGive = itemInHand.clone();
+        itemToGive.setAmount(itemToGive.getAmount() - 1);
 
-            Block fluidBlock = e.getBlockClicked().getRelative(e.getBlockFace());
+        Block fluidBlock = e.getBlockClicked().getRelative(e.getBlockFace());
 
-            if(itemInHand.getType().name().contains("LAVA")) {
-                fluidBlock.setType(Material.LAVA);
+        if(itemInHand.getType().name().contains("LAVA")) {
+            fluidBlock.setType(Material.LAVA);
+        }
+        else{
+            if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER) {
+                if(!plugin.getNMSAdapter().attemptToWaterLog(fluidBlock))
+                    fluidBlock.setType(Material.WATER);
             }
-            else{
-                if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER) {
-                    if(!plugin.getNMSAdapter().attemptToWaterLog(fluidBlock))
-                        fluidBlock.setType(Material.WATER);
+
+            try{
+                String entityType = itemInHand.getType().name().replace("_BUCKET", "");
+
+                int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
+                ItemMeta itemMeta = itemInHand.getItemMeta();
+                String fishName = DataSerializer.stripData(itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "");
+
+                StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
+                        fluidBlock.getLocation().add(0.5, 0, 0.5), EntityType.valueOf(entityType).getEntityClass()));
+
+                if(!fishName.isEmpty()){
+                    stackedEntity.setCustomName(fishName);
+                    ((WStackedEntity) stackedEntity).setNameTag(true);
                 }
 
-                try{
-                    String entityType = itemInHand.getType().name().replace("_BUCKET", "");
+                stackedEntity.setStackAmount(amount, true);
+            }catch (Exception ignored){}
+        }
 
-                    int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
-                    ItemMeta itemMeta = itemInHand.getItemMeta();
-                    String fishName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "";
-
-                    StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
-                            fluidBlock.getLocation().add(0.5, 0, 0.5), EntityType.valueOf(entityType).getEntityClass()));
-
-                    if(!fishName.isEmpty()){
-                        stackedEntity.setCustomName(fishName);
-                        ((WStackedEntity) stackedEntity).setNameTag(true);
-                    }
-
-                    stackedEntity.setStackAmount(amount, true);
-                }catch (Exception ignored){}
-            }
-
-            if(itemToGive.getAmount() <= 0){
-                inventory.setItem(heldItemSlot, e.getItemStack().clone());
-            }
-            else {
-                inventory.setItem(heldItemSlot, itemToGive);
-                inventory.addItem(e.getItemStack().clone());
-            }
+        if(itemToGive.getAmount() <= 0){
+            inventory.setItem(heldItemSlot, e.getItemStack().clone());
+        }
+        else {
+            inventory.setItem(heldItemSlot, itemToGive);
+            inventory.addItem(e.getItemStack().clone());
         }
     }
 

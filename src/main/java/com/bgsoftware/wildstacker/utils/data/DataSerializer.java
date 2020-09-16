@@ -21,7 +21,7 @@ public final class DataSerializer {
         }
 
         // Marks end of data segment
-        result.append(COLOR_CHAR).append('|').append(COLOR_CHAR).append('r');
+        result.append(COLOR_CHAR).append("|").append(COLOR_CHAR).append("r");
 
         return result.toString();
     }
@@ -47,6 +47,12 @@ public final class DataSerializer {
         }
 
         return hasEndTag ? result.toString() : "";
+    }
+
+    public static String stripData(String str){
+        str = ensureNotNull(str);
+        String[] sections = str.split(COLOR_CHAR + "\\|" + COLOR_CHAR + "r");
+        return sections[sections.length - 1];
     }
 
     private static String ensureNotNull(String str){
