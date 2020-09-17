@@ -426,6 +426,9 @@ entities:
   # Should drops get calculated in relation to the amount of mobs that died?
   multiply-drops: true
 
+  # Should exp get calculated in relation to the amount of mobs that died?
+  multiply-exp: true
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

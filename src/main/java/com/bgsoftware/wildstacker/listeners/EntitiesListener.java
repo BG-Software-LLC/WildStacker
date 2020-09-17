@@ -283,7 +283,7 @@ public final class EntitiesListener implements Listener {
                     livingEntity.setFireTicks(fireTicks);
 
                     List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? stackAmount : 1);
-                    int droppedExp = stackedEntity.getExp(stackAmount, 0);
+                    int droppedExp = stackedEntity.getExp(plugin.getSettings().multiplyExp ? stackAmount : 1, 0);
 
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
