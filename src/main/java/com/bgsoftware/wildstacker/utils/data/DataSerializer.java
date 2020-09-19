@@ -15,13 +15,11 @@ public final class DataSerializer {
         StringBuilder result = new StringBuilder();
 
         for(char ch : str.toCharArray()) {
-//            if(isBetween(ch, 'a', 'f') || isBetween(ch, 'A', 'F') || isBetween(ch, '0', '9'))
-//                result.append(COLOR_CHAR);
             result.append(COLOR_CHAR).append(ch);
         }
 
         // Marks end of data segment
-        result.append(COLOR_CHAR).append("|").append(COLOR_CHAR).append("r");
+        result.append(COLOR_CHAR).append("|").append(COLOR_CHAR).append("f");
 
         return result.toString();
     }
@@ -51,16 +49,12 @@ public final class DataSerializer {
 
     public static String stripData(String str){
         str = ensureNotNull(str);
-        String[] sections = str.split(COLOR_CHAR + "\\|" + COLOR_CHAR + "r");
+        String[] sections = str.split(COLOR_CHAR + "\\|");
         return sections[sections.length - 1];
     }
 
     private static String ensureNotNull(String str){
         return str == null ? "" : str;
-    }
-
-    private static boolean isBetween(char ch, char min, char max){
-        return ch >= min && ch <= max;
     }
 
 }

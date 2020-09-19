@@ -34,8 +34,6 @@ import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -161,13 +159,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 providersHandler.deleteHologram(stackedBarrel);
                 stackedBarrel.getLocation().getChunk().load(true);
                 stackedBarrel.removeDisplayBlock();
-            }
-        }
-
-        for(World world : Bukkit.getWorlds()){
-            for(Entity entity : world.getEntities()){
-                if(EntityStorage.hasMetadata(entity, "nameTag"))
-                    entity.setCustomName(entity.getName() + "<|NT|>");
             }
         }
 

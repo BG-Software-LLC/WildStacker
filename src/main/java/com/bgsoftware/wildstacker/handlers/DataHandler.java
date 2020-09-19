@@ -120,7 +120,7 @@ public final class DataHandler {
         if(customName == null)
             customName = "";
 
-        entity.setCustomName(data + customName);
+        entity.setCustomName(data + DataSerializer.stripData(customName));
         if(customName.isEmpty())
             entity.setCustomNameVisible(false);
     }
