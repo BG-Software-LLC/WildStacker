@@ -67,9 +67,10 @@ public final class SettingsHandler {
     public final Pattern entitiesCustomNamePattern;
     public final int linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
-            blacklistedEntitiesSpawnReasons, blacklistedEntitiesNames, entitiesInstantKills, entitiesNerfedWhitelist,
+            blacklistedEntitiesSpawnReasons, entitiesInstantKills, entitiesNerfedWhitelist,
             entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup,
             entitiesOneShotTools, entitiesOneShotWhitelist;
+    public final List<Pattern> blacklistedEntitiesNames;
     public final KeyMap<Integer> entitiesMergeRadius, entitiesLimits, minimumRequiredEntities, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
@@ -194,7 +195,9 @@ public final class SettingsHandler {
         blacklistedEntities = cfg.getStringList("entities.blacklist");
         whitelistedEntities = cfg.getStringList("entities.whitelist");
         blacklistedEntitiesSpawnReasons = cfg.getStringList("entities.spawn-blacklist");
-        blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist");
+        blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist").stream()
+                .map(line -> Pattern.compile(ChatColor.translateAlternateColorCodes('&', line)))
+                .collect(Collectors.toList());
         entitiesInstantKills = cfg.getStringList("entities.instant-kill");
         entitiesNerfedWhitelist = cfg.getStringList("entities.nerfed-entities.whitelist");
         entitiesNerfedBlacklist = cfg.getStringList("entities.nerfed-entities.blacklist");

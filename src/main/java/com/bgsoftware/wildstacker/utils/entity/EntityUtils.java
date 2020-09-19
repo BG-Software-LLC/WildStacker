@@ -98,10 +98,10 @@ public final class EntityUtils {
         if(ChatColor.getLastColors(name).isEmpty())
             name = ChatColor.WHITE + name;
 
-        List<String> blacklistedNames = plugin.getSettings().blacklistedEntitiesNames;
+        List<Pattern> blacklistedNames = plugin.getSettings().blacklistedEntitiesNames;
 
-        for(String _name : blacklistedNames){
-            if(Pattern.compile(ChatColor.translateAlternateColorCodes('&', _name)).matcher(name).matches())
+        for(Pattern pattern : blacklistedNames){
+            if(pattern.matcher(name).matches())
                 return true;
         }
 
