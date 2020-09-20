@@ -429,6 +429,10 @@ public final class SystemHandler implements SystemManager {
     public void handleChunkLoad(Chunk chunk){
         Entity[] entities = chunk.getEntities();
 
+        // We substring names if necessary
+        Arrays.stream(entities).filter(entity -> entity.getCustomName() != null && entity.getCustomName().length() > 256)
+                .forEach(entity -> entity.setCustomName(entity.getCustomName().substring(0, 256)));
+
         if(ServerVersion.isAtLeast(ServerVersion.v1_8)) {
             //Trying to remove all the corrupted stacked blocks
             Executor.async(() -> {
