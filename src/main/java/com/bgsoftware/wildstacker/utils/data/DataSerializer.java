@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.data;
 public final class DataSerializer {
 
     private static final char COLOR_CHAR = '§';
+    private static final char NUMBERS_SPACER = '~';
 
     private DataSerializer() { }
 
@@ -15,6 +16,8 @@ public final class DataSerializer {
         StringBuilder result = new StringBuilder();
 
         for(char ch : str.toCharArray()) {
+            if(isNumber(ch))
+                result.append(COLOR_CHAR).append(NUMBERS_SPACER);
             result.append(COLOR_CHAR).append(ch);
         }
 
@@ -39,7 +42,7 @@ public final class DataSerializer {
             if(curr == '|' && i > 0 && str.charAt(i - 1) == COLOR_CHAR) {
                 hasEndTag = true;
             }
-            else if(curr != COLOR_CHAR) {
+            else if(curr != COLOR_CHAR && curr != NUMBERS_SPACER) {
                 result.append(curr);
             }
         }
@@ -55,6 +58,10 @@ public final class DataSerializer {
 
     private static String ensureNotNull(String str){
         return str == null ? "" : str;
+    }
+
+    private static boolean isNumber(char ch){
+        return ch >= '0' && ch <= '9';
     }
 
 }
