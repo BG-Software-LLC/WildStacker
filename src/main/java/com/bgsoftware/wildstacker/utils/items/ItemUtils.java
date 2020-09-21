@@ -260,21 +260,23 @@ public final class ItemUtils {
         ItemStack itemStack = new ItemStack(type, 1, data);
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        if(section.contains("name")){
-            itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
-        }
-
-        if(section.contains("lore")){
-            List<String> lore = new ArrayList<>();
-
-            for(String line : section.getStringList("lore")){
-                lore.add(ChatColor.translateAlternateColorCodes('&', line));
+        if(itemMeta != null) {
+            if (section.contains("name")) {
+                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
             }
 
-            itemMeta.setLore(lore);
-        }
+            if (section.contains("lore")) {
+                List<String> lore = new ArrayList<>();
 
-        itemStack.setItemMeta(itemMeta);
+                for (String line : section.getStringList("lore")) {
+                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
+                }
+
+                itemMeta.setLore(lore);
+            }
+
+            itemStack.setItemMeta(itemMeta);
+        }
 
         return itemStack;
     }
