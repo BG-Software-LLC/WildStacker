@@ -108,20 +108,25 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
      */
 
     @Override
-    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer) {
+    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
         CraftWorld world = (CraftWorld) location.getWorld();
 
         Entity nmsEntity = world.createEntity(location, type);
         org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
 
-        if(entityConsumer != null) {
+        if(beforeSpawnConsumer != null) {
             //noinspection unchecked
-            entityConsumer.accept((T) bukkitEntity);
+            beforeSpawnConsumer.accept((T) bukkitEntity);
         }
 
         world.addEntity(nmsEntity, spawnCause.toSpawnReason());
 
         WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
+
+        if(afterSpawnConsumer != null) {
+            //noinspection unchecked
+            afterSpawnConsumer.accept((T) bukkitEntity);
+        }
 
         return type.cast(bukkitEntity);
     }

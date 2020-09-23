@@ -47,7 +47,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -508,14 +507,15 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause) {
-        return spawnEntityWithoutStacking(location, type, spawnCause, null);
+        return spawnEntityWithoutStacking(location, type, spawnCause, null, null);
     }
 
-    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> consumer){
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer){
         return plugin.getNMSAdapter().createEntity(location, type, spawnCause, entity -> {
             EntitiesListener.noStackEntities.add(entity.getUniqueId());
-            if(consumer != null) consumer.accept(entity);
-        });
+            if(beforeSpawnConsumer != null)
+                beforeSpawnConsumer.accept(entity);
+        }, afterSpawnConsumer);
     }
 
     @Override
@@ -571,16 +571,13 @@ public final class SystemHandler implements SystemManager {
         if(entityClass == null)
             return;
 
-        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass, SpawnCause.CUSTOM,
-                entity -> EntityStorage.setMetadata(entity, "corpse", null));
+        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass,
+                SpawnCause.CUSTOM, null, entity -> {
+            plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), (LivingEntity) entity);
+        });
 
         if(livingEntity != null){
             Executor.sync(() -> {
-                plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), livingEntity);
-
-                if(livingEntity instanceof Slime)
-                    ((Slime) livingEntity).setSize(((Slime) stackedEntity.getLivingEntity()).getSize());
-
                 plugin.getNMSAdapter().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
             }, 2L);

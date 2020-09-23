@@ -37,7 +37,7 @@ public interface NMSAdapter {
      *   Entity methods
      */
 
-    <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> entityConsumer);
+    <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer);
 
     Zombie spawnZombieVillager(Villager villager);
 
