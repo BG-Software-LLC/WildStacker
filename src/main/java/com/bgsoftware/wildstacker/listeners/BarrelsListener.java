@@ -77,13 +77,6 @@ public final class BarrelsListener implements Listener {
             return;
         }
 
-        if(!alreadyBarrelsPlacedPlayers.add(e.getPlayer().getUniqueId())) {
-            e.setCancelled(true);
-            return;
-        }
-
-        Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
-
         try {
             ItemStack inHand = e.getItemInHand().clone();
             int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
@@ -91,13 +84,19 @@ public final class BarrelsListener implements Listener {
             if (toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
                 return;
 
-
             if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
                     !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
                 e.setCancelled(true);
                 Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
                 return;
             }
+
+            if(!alreadyBarrelsPlacedPlayers.add(e.getPlayer().getUniqueId())) {
+                e.setCancelled(true);
+                return;
+            }
+
+            Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
 
             StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
