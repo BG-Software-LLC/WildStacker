@@ -57,6 +57,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_13_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
@@ -322,7 +323,8 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
 
     @Override
     public Key getEndermanCarried(Enderman enderman) {
-        return Key.of(enderman.getCarriedBlock().getMaterial(), (short) 0);
+        BlockData carriedData = enderman.getCarriedBlock();
+        return carriedData == null ? Key.of("AIR") : Key.of(carriedData.getMaterial(), (short) 0);
     }
 
     @Override

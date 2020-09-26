@@ -335,8 +335,8 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
 
     @Override
     public Key getEndermanCarried(Enderman enderman) {
-        BlockData blockData = enderman.getCarriedBlock();
-        return blockData == null ? Key.of("AIR:0") : Key.of(blockData.getMaterial(), (short) 0);
+        BlockData carriedData = enderman.getCarriedBlock();
+        return carriedData == null ? Key.of("AIR") : Key.of(carriedData.getMaterial(), (short) 0);
     }
 
     @Override
