@@ -93,9 +93,11 @@ public final class ItemsListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getChicken());
-        ItemStack eggItem = e.getEgg().getItemStack();
-        eggItem.setAmount(stackedEntity.getStackAmount());
-        e.getEgg().setItemStack(eggItem);
+        if(stackedEntity.getStackAmount() > 1) {
+            ItemStack eggItem = e.getEgg().getItemStack();
+            eggItem.setAmount(stackedEntity.getStackAmount());
+            e.getEgg().setItemStack(eggItem);
+        }
     }
 
     //This method will be fired even if stacking-drops is disabled.
