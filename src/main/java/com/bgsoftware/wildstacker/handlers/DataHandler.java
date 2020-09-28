@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.database.Database;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
@@ -105,14 +106,17 @@ public final class DataHandler {
     }
 
     public void saveEntity(StackedEntity stackedEntity){
-        int stackAmount = stackedEntity.getStackAmount();
-        SpawnCause spawnCause = stackedEntity.getSpawnCause();
-        boolean nameTag = stackedEntity.hasNameTag();
-        saveObject(stackedEntity.getLivingEntity(), DataSerializer.serializeData(stackAmount + "-" + spawnCause.getId() + "-" + (nameTag ? 1 : 0)));
+        if(((WStackedEntity) stackedEntity).isCached()) {
+            int stackAmount = stackedEntity.getStackAmount();
+            SpawnCause spawnCause = stackedEntity.getSpawnCause();
+            boolean nameTag = stackedEntity.hasNameTag();
+            saveObject(stackedEntity.getLivingEntity(), DataSerializer.serializeData(stackAmount + "-" + spawnCause.getId() + "-" + (nameTag ? 1 : 0)));
+        }
     }
 
     public void saveItem(StackedItem stackedItem){
-        saveObject(stackedItem.getItem(), DataSerializer.serializeData(stackedItem.getStackAmount() + ""));
+        if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
+            saveObject(stackedItem.getItem(), DataSerializer.serializeData(stackedItem.getStackAmount() + ""));
     }
 
     public void saveObject(Entity entity, String data){
