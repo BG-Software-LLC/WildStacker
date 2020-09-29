@@ -28,9 +28,7 @@ import net.minecraft.server.v1_10_R1.ItemStack;
 import net.minecraft.server.v1_10_R1.MathHelper;
 import net.minecraft.server.v1_10_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_10_R1.NBTTagCompound;
-import net.minecraft.server.v1_10_R1.NBTTagInt;
 import net.minecraft.server.v1_10_R1.NBTTagList;
-import net.minecraft.server.v1_10_R1.NBTTagShort;
 import net.minecraft.server.v1_10_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_10_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_10_R1.PacketPlayOutSpawnEntity;
@@ -40,9 +38,7 @@ import net.minecraft.server.v1_10_R1.World;
 import net.minecraft.server.v1_10_R1.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.v1_10_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_10_R1.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_10_R1.entity.CraftAnimals;
@@ -78,7 +74,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
@@ -396,13 +391,6 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
      */
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
-        return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
-                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
-                .filter(condition);
-    }
-
-    @Override
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
@@ -556,11 +544,6 @@ public final class NMSAdapter_v1_10_R1 implements NMSAdapter {
         }
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
-    }
-
-    @Override
-    public int getNBTInteger(Object nbtTag) {
-        return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).e() : ((NBTTagInt) nbtTag).e();
     }
 
     @SuppressWarnings("deprecation")

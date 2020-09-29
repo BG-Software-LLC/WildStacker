@@ -36,9 +36,7 @@ import net.minecraft.server.v1_13_R2.MathHelper;
 import net.minecraft.server.v1_13_R2.MinecraftKey;
 import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
-import net.minecraft.server.v1_13_R2.NBTTagInt;
 import net.minecraft.server.v1_13_R2.NBTTagList;
-import net.minecraft.server.v1_13_R2.NBTTagShort;
 import net.minecraft.server.v1_13_R2.PacketPlayOutCollect;
 import net.minecraft.server.v1_13_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R2.PacketPlayOutSpawnEntity;
@@ -55,10 +53,8 @@ import org.bukkit.Particle;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_13_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlock;
@@ -101,7 +97,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
@@ -461,13 +456,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
      */
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, java.util.function.Predicate<BlockState> condition) {
-        return ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream()
-                .map(blockPosition -> chunk.getWorld().getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()).getState())
-                .filter(condition);
-    }
-
-    @Override
     public void grandAchievement(Player player, EntityType victim, String name) {
         //noinspection deprecation
         grandAchievement(player, NamespacedKey.minecraft(victim.getName()).toString(), name);
@@ -661,20 +649,6 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
         }
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
-    }
-
-    @Override
-    public int getNBTInteger(Object nbtTag) {
-        try {
-            return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).asInt() : ((NBTTagInt) nbtTag).asInt();
-        }catch(Throwable ex){
-            try{
-                return (int) nbtTag.getClass().getMethod("e").invoke(nbtTag);
-            }catch(Exception ex1){
-                ex1.printStackTrace();
-                return 0;
-            }
-        }
     }
 
     /*

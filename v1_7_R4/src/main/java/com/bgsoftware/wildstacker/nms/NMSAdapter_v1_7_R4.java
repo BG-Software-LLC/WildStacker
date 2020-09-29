@@ -9,7 +9,6 @@ import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_7_R4.AxisAlignedBB;
 import net.minecraft.server.v1_7_R4.BlockRotatable;
 import net.minecraft.server.v1_7_R4.Chunk;
-import net.minecraft.server.v1_7_R4.ChunkPosition;
 import net.minecraft.server.v1_7_R4.Entity;
 import net.minecraft.server.v1_7_R4.EntityAnimal;
 import net.minecraft.server.v1_7_R4.EntityInsentient;
@@ -24,9 +23,7 @@ import net.minecraft.server.v1_7_R4.ItemStack;
 import net.minecraft.server.v1_7_R4.MathHelper;
 import net.minecraft.server.v1_7_R4.NBTCompressedStreamTools;
 import net.minecraft.server.v1_7_R4.NBTTagCompound;
-import net.minecraft.server.v1_7_R4.NBTTagInt;
 import net.minecraft.server.v1_7_R4.NBTTagList;
-import net.minecraft.server.v1_7_R4.NBTTagShort;
 import net.minecraft.server.v1_7_R4.PacketPlayOutCollect;
 import net.minecraft.server.v1_7_R4.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_7_R4.PacketPlayOutSpawnEntity;
@@ -35,9 +32,7 @@ import net.minecraft.server.v1_7_R4.World;
 import net.minecraft.server.v1_7_R4.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.v1_7_R4.CraftChunk;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R4.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftAnimals;
@@ -73,7 +68,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
@@ -364,14 +358,6 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
      */
 
     @Override
-    public Stream<BlockState> getTileEntities(org.bukkit.Chunk chunk, Predicate<BlockState> condition) {
-        //noinspection unchecked
-        return ((Stream<ChunkPosition>) ((CraftChunk) chunk).getHandle().tileEntities.keySet().stream())
-                .map(chunkPosition -> chunk.getWorld().getBlockAt(chunkPosition.x, chunkPosition.y, chunkPosition.z).getState())
-                .filter(condition);
-    }
-
-    @Override
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
@@ -514,11 +500,6 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
             return valueType.cast(tagCompound.getLong(key));
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
-    }
-
-    @Override
-    public int getNBTInteger(Object nbtTag) {
-        return nbtTag instanceof NBTTagShort ? ((NBTTagShort) nbtTag).d() : ((NBTTagInt) nbtTag).d();
     }
 
     @SuppressWarnings("deprecation")

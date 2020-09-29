@@ -4,11 +4,9 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
@@ -29,7 +27,6 @@ import org.bukkit.material.MaterialData;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public interface NMSAdapter {
 
@@ -129,8 +126,6 @@ public interface NMSAdapter {
      *   World methods
      */
 
-    Stream<BlockState> getTileEntities(Chunk chunk, Predicate<BlockState> condition);
-
     default void grandAchievement(Player player, EntityType victim, String name){
         grandAchievement(player, "", name);
     }
@@ -174,8 +169,6 @@ public interface NMSAdapter {
     ItemStack setTag(ItemStack itemStack, String key, Object value);
 
     <T> T getTag(ItemStack itemStack, String key, Class<T> valueType, Object def);
-
-    int getNBTInteger(Object nbtTag);
 
     /*
      *   Other methods
