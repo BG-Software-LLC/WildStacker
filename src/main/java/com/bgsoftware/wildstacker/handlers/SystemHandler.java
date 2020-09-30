@@ -152,7 +152,7 @@ public final class SystemHandler implements SystemManager {
             }
         }
 
-        boolean shouldBeCached = ((WStackedEntity) stackedEntity).isCached();
+        boolean shouldBeCached = stackedEntity.isCached();
 
         //A new entity was created. Let's see if we need to add him
         if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
@@ -184,7 +184,7 @@ public final class SystemHandler implements SystemManager {
         }, 10L);
 
         //A new item was created. Let's see if we need to add him
-        if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
+        if(stackedItem.isCached())
             dataHandler.CACHED_ITEMS.put(stackedItem.getUniqueId(), stackedItem);
 
         Integer entityData = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
@@ -238,7 +238,7 @@ public final class SystemHandler implements SystemManager {
         }, 10L);
 
         //A new spawner was created. Let's see if we need to add him
-        if(plugin.getSettings().spawnersStackingEnabled && stackedSpawner.isWhitelisted() && !stackedSpawner.isBlacklisted() && !stackedSpawner.isWorldDisabled())
+        if(stackedSpawner.isCached())
             dataHandler.addStackedSpawner(stackedSpawner);
 
         return stackedSpawner;
@@ -274,7 +274,7 @@ public final class SystemHandler implements SystemManager {
         }, 10L);
 
         //A new barrel was created. Let's see if we need to add him
-        if(plugin.getSettings().barrelsStackingEnabled && stackedBarrel.isWhitelisted() && !stackedBarrel.isBlacklisted() && !stackedBarrel.isWorldDisabled())
+        if(stackedBarrel.isCached())
             dataHandler.addStackedBarrel(stackedBarrel);
 
         return stackedBarrel;
@@ -568,7 +568,7 @@ public final class SystemHandler implements SystemManager {
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
             lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
                 StackedItem stackedItem = WStackedItem.of(item);
-                stackedItem.setStackAmount(itemLimit, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+                stackedItem.setStackAmount(itemLimit, stackedItem.isCached());
             }));
         }
 
@@ -579,7 +579,7 @@ public final class SystemHandler implements SystemManager {
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
             lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
                 StackedItem stackedItem = WStackedItem.of(item);
-                stackedItem.setStackAmount(leftOvers, !stackedItem.isBlacklisted() && stackedItem.isWhitelisted() && !stackedItem.isWorldDisabled());
+                stackedItem.setStackAmount(leftOvers, stackedItem.isCached());
             }));
         }
 

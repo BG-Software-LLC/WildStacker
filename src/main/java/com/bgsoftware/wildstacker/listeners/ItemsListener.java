@@ -55,7 +55,7 @@ public final class ItemsListener implements Listener {
 
         StackedItem stackedItem = WStackedItem.of(e.getEntity());
 
-        if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
+        if(!stackedItem.isCached())
             return;
 
         int limit = stackedItem.getStackLimit();
@@ -257,7 +257,7 @@ public final class ItemsListener implements Listener {
 
             StackedItem stackedItem = WStackedItem.of(e.getEntity());
 
-            if(stackedItem.isBlacklisted() || !stackedItem.isWhitelisted() || stackedItem.isWorldDisabled())
+            if(!stackedItem.isCached())
                 return;
 
             //We are overriding the merge system

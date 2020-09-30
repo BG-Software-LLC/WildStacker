@@ -161,6 +161,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
+    public boolean isCached() {
+        return plugin.getSettings().entitiesStackingEnabled && super.isCached();
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
 
@@ -187,7 +192,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(EntityUtils.isNameBlacklisted(object.getCustomName()) || hasNameTag())
             return;
 
-        if(isBlacklisted() || !isWhitelisted() || isWorldDisabled())
+        if(!isCached())
             return;
 
         try {
@@ -639,10 +644,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         EntityStorage.setMetadata(object, "nameTag", true);
         if(saveEntity)
             plugin.getNMSAdapter().saveEntity(this);
-    }
-
-    public boolean isCached(){
-        return plugin.getSettings().entitiesStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
     }
 
     public void setDeadFlag(boolean deadEntityFlag){

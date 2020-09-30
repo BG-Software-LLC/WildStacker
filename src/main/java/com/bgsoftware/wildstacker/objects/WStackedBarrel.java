@@ -109,6 +109,11 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
     }
 
     @Override
+    public boolean isCached() {
+        return plugin.getSettings().barrelsStackingEnabled && super.isCached();
+    }
+
+    @Override
     public void remove() {
         if(!Bukkit.isPrimaryThread()){
             Executor.sync(this::remove);

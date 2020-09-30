@@ -72,6 +72,11 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract boolean isWorldDisabled();
 
     @Override
+    public boolean isCached(){
+        return !isBlacklisted() && isWhitelisted() && !isWorldDisabled();
+    }
+
+    @Override
     public abstract void remove();
 
     @Override

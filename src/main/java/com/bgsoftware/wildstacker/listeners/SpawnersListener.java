@@ -94,7 +94,7 @@ public final class SpawnersListener implements Listener {
         try {
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());
 
-            if (stackedSpawner.isBlacklisted() || !stackedSpawner.isWhitelisted() || stackedSpawner.isWorldDisabled())
+            if (!stackedSpawner.isCached())
                 return;
 
             ItemStack itemInHand = e.getItemInHand().clone();
@@ -404,7 +404,7 @@ public final class SpawnersListener implements Listener {
         boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
 
         if(!multipleEntities){
-            multipleEntities = !stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled();
+            multipleEntities = !stackedEntity.isCached();
         }
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());

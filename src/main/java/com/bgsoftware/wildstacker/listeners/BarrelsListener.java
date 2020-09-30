@@ -100,7 +100,7 @@ public final class BarrelsListener implements Listener {
 
             StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
-            if (stackedBarrel.isBlacklisted() || !stackedBarrel.isWhitelisted() || stackedBarrel.isWorldDisabled()) {
+            if (!stackedBarrel.isCached()) {
                 stackedBarrel.remove();
                 return;
             }

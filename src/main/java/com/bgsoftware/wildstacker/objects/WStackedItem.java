@@ -132,6 +132,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
+    public boolean isCached() {
+        return plugin.getSettings().itemsStackingEnabled && super.isCached();
+    }
+
+    @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
         object.remove();
@@ -367,7 +372,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     public void setSaveItem(boolean saveItem){
-        this.saveItem = saveItem && plugin.getSettings().itemsStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
+        this.saveItem = saveItem && isCached();
     }
 
     private int giveItem(Inventory inventory, ItemStack itemStack){

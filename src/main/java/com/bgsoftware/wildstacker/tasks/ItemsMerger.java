@@ -45,7 +45,7 @@ public final class ItemsMerger extends BukkitRunnable {
 
                             StackedItem stackedItem = WStackedItem.of(item);
 
-                            if (!stackedItem.isWhitelisted() || stackedItem.isBlacklisted() || stackedItem.isWorldDisabled())
+                            if (!stackedItem.isCached())
                                 continue;
 
                             stackedItem.runStackAsync(null);

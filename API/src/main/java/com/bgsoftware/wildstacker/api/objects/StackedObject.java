@@ -66,6 +66,16 @@ public interface StackedObject<T> {
     boolean isWorldDisabled();
 
     /**
+     * Whether or not the object is cached.
+     * The object will be cached if:
+     * 1) The system of stacking is not disabled in the config
+     * 2) The object is not blacklisted.
+     * 3) The object is whitelisted.
+     * 4) The object is not in a disabled world.
+     */
+    boolean isCached();
+
+    /**
      * Remove the stack object from cache and the server
      */
     void remove();

@@ -113,6 +113,11 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
     }
 
     @Override
+    public boolean isCached() {
+        return plugin.getSettings().spawnersStackingEnabled && super.isCached();
+    }
+
+    @Override
     public void remove() {
         if(!Bukkit.isPrimaryThread()){
             Executor.sync(this::remove);

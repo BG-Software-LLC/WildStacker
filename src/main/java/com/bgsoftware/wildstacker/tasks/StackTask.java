@@ -46,7 +46,7 @@ public final class StackTask extends BukkitRunnable {
 
                             StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
-                            if (!stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled())
+                            if (!stackedEntity.isCached())
                                 continue;
 
                             stackedEntity.runStackAsync(null);

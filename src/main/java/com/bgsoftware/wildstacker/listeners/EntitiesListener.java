@@ -504,7 +504,7 @@ public final class EntitiesListener implements Listener {
             }
         }
 
-        if(stackedEntity.isBlacklisted() || !stackedEntity.isWhitelisted() || stackedEntity.isWorldDisabled())
+        if(!stackedEntity.isCached())
             return;
 
         if(noStackEntities.contains(entity.getUniqueId())) {
@@ -915,8 +915,7 @@ public final class EntitiesListener implements Listener {
 
             if(stackedEntity.getStackAmount() > 1){
                 StackedEntity transformedEntity = WStackedEntity.of(e.getTransformedEntity());
-                boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled || !transformedEntity.isWhitelisted() ||
-                        transformedEntity.isBlacklisted() || transformedEntity.isWorldDisabled();
+                boolean multipleEntities = !transformedEntity.isCached();
 
                 if(multipleEntities){
                     for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++){
@@ -948,7 +947,7 @@ public final class EntitiesListener implements Listener {
                 Beehive beehive = (Beehive) e.getBlock().getState();
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
-                if(!stackedEntity.isWhitelisted() || stackedEntity.isBlacklisted() || stackedEntity.isWorldDisabled())
+                if(!stackedEntity.isCached())
                     return;
 
                 Integer[] arr = beesAmount.computeIfAbsent(e.getBlock().getLocation(), l -> {
