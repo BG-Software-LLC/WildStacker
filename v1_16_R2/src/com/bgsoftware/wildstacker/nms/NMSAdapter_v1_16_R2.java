@@ -99,6 +99,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -282,14 +283,14 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
                 }
 
                 if(chunk != null) {
-                    int chunkMinY = MathHelper.clamp(minY, 0, chunk.entitySlices.length - 1);
-                    int chunkMaxY = MathHelper.clamp(maxY, 0, chunk.entitySlices.length - 1);
+                    int chunkMinY = MathHelper.clamp(minY, 0, 15);
+                    int chunkMaxY = MathHelper.clamp(maxY, 0, 15);
 
                     for(int y = chunkMinY; y <= chunkMaxY; y++){
-                        List<Entity> entitySlice = chunk.entitySlices[y];
+                        Collection<Entity> entitySlice = chunk.entitySlices[y];
                         for (Entity entity : entitySlice) {
-                            if(axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
-                                    (filter == null || filter.test(entity.getBukkitEntity()))){
+                            if (axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
+                                    (filter == null || filter.test(entity.getBukkitEntity()))) {
                                 entities.add(entity.getBukkitEntity());
                             }
                         }
@@ -888,6 +889,20 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         @Override
         public void setSpawnRange(int i) {
             getSpawner().getSpawner().spawnRange = i;
+        }
+
+        public boolean isActivated() {
+            try{
+                return getSpawner().getSpawner().isActivated();
+            }catch (Throwable ex) {
+                return false;
+            }
+        }
+
+        public void resetTimer() {
+            try{
+                getSpawner().getSpawner().resetTimer();
+            }catch (Throwable ignored){}
         }
 
         @Override
