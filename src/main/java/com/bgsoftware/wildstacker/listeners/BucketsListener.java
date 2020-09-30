@@ -46,11 +46,16 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
-        e.setCancelled(true);
-
         PlayerInventory inventory = e.getPlayer().getInventory();
         int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
         ItemStack itemInHand = inventory.getItem(heldItemSlot);
+        ItemMeta itemMeta = itemInHand.getItemMeta();
+
+        if(itemMeta.hasDisplayName() && plugin.getSettings().bucketsBlacklistedNames.contains(itemMeta.getDisplayName()))
+            return;
+
+        e.setCancelled(true);
+
         ItemStack itemToGive = itemInHand.clone();
         itemToGive.setAmount(itemToGive.getAmount() - 1);
 
@@ -69,7 +74,6 @@ public final class BucketsListener implements Listener {
                 String entityType = itemInHand.getType().name().replace("_BUCKET", "");
 
                 int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
-                ItemMeta itemMeta = itemInHand.getItemMeta();
                 String fishName = DataSerializer.stripData(itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "");
 
                 StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
