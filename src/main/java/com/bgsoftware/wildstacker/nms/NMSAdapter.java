@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
@@ -177,5 +179,17 @@ public interface NMSAdapter {
     default Object getChatMessage(String message){
         return message;
     }
+
+    /*
+     *   Data methods
+     */
+
+    void saveEntity(StackedEntity stackedEntity);
+
+    void loadEntity(StackedEntity stackedEntity);
+
+    void saveItem(StackedItem stackedItem);
+
+    void loadItem(StackedItem stackedItem);
 
 }

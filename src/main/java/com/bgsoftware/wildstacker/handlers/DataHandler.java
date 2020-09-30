@@ -13,12 +13,10 @@ import com.bgsoftware.wildstacker.database.Database;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.collect.Maps;
@@ -28,7 +26,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -103,30 +100,6 @@ public final class DataHandler {
         Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
         if(chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
-    }
-
-    public void saveEntity(StackedEntity stackedEntity){
-        if(((WStackedEntity) stackedEntity).isCached()) {
-            int stackAmount = stackedEntity.getStackAmount();
-            SpawnCause spawnCause = stackedEntity.getSpawnCause();
-            boolean nameTag = stackedEntity.hasNameTag();
-            saveObject(stackedEntity.getLivingEntity(), DataSerializer.serializeData(stackAmount + "-" + spawnCause.getId() + "-" + (nameTag ? 1 : 0)));
-        }
-    }
-
-    public void saveItem(StackedItem stackedItem){
-        if(plugin.getSettings().itemsStackingEnabled && stackedItem.isWhitelisted() && !stackedItem.isBlacklisted() && !stackedItem.isWorldDisabled())
-            saveObject(stackedItem.getItem(), DataSerializer.serializeData(stackedItem.getStackAmount() + ""));
-    }
-
-    public void saveObject(Entity entity, String data){
-        String customName = entity.getCustomName();
-        if(customName == null)
-            customName = "";
-
-        entity.setCustomName(data + DataSerializer.stripData(customName));
-        if(customName.isEmpty())
-            entity.setCustomNameVisible(false);
     }
 
     public List<StackedObject> getStackedObjects(){

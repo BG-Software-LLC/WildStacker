@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -20,6 +22,7 @@ import net.minecraft.server.v1_7_R3.EntityTracker;
 import net.minecraft.server.v1_7_R3.EntityTypes;
 import net.minecraft.server.v1_7_R3.EntityVillager;
 import net.minecraft.server.v1_7_R3.EntityZombie;
+import net.minecraft.server.v1_7_R3.IScoreboardCriteria;
 import net.minecraft.server.v1_7_R3.ItemStack;
 import net.minecraft.server.v1_7_R3.MathHelper;
 import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
@@ -28,6 +31,8 @@ import net.minecraft.server.v1_7_R3.NBTTagList;
 import net.minecraft.server.v1_7_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_7_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_7_R3.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_7_R3.Scoreboard;
+import net.minecraft.server.v1_7_R3.ScoreboardObjective;
 import net.minecraft.server.v1_7_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_7_R3.World;
 import net.minecraft.server.v1_7_R3.WorldServer;
@@ -502,6 +507,74 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
             return valueType.cast(tagCompound.getLong(key));
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
+    }
+
+    /*
+     *   Data methods
+     */
+
+    @Override
+    public void saveEntity(StackedEntity stackedEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+        Scoreboard worldScoreboard = entityLiving.world.getScoreboard();
+
+        saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-amount", stackedEntity.getStackAmount());
+        saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-cause", stackedEntity.getSpawnCause().getId());
+        if(stackedEntity.hasNameTag())
+            saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:name-tag", 1);
+    }
+
+    @Override
+    public void loadEntity(StackedEntity stackedEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+        Scoreboard worldScoreboard = entityLiving.world.getScoreboard();
+
+        int stackAmount = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-amount");
+        int spawnCause = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-cause");
+        int nameTag = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:name-tag");
+
+        if(stackAmount > 0)
+            stackedEntity.setStackAmount(stackAmount, false);
+
+        if(spawnCause > 0)
+            stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
+
+        if(nameTag == 1)
+            ((WStackedEntity) stackedEntity).setNameTag();
+    }
+
+    @Override
+    public void saveItem(StackedItem stackedItem) {
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        Scoreboard worldScoreboard = entityItem.world.getScoreboard();
+        saveData(worldScoreboard, entityItem.getUniqueID(), "ws:stack-amount", stackedItem.getStackAmount());
+    }
+
+    @Override
+    public void loadItem(StackedItem stackedItem) {
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        Scoreboard worldScoreboard = entityItem.world.getScoreboard();
+
+        int stackAmount = getData(worldScoreboard, entityItem.getUniqueID(), "ws:stack-amount");
+        if(stackAmount > 0)
+            stackedItem.setStackAmount(stackAmount, false);
+    }
+
+    private static void saveData(Scoreboard scoreboard, UUID entity, String key, int value){
+        ScoreboardObjective objective = scoreboard.getObjective(key);
+        if(objective == null)
+            objective = scoreboard.registerObjective(key, IScoreboardCriteria.b);
+
+        scoreboard.getPlayerScoreForObjective(entity + "", objective).setScore(value);
+    }
+
+    private static int getData(Scoreboard scoreboard, UUID entity, String key){
+        ScoreboardObjective objective = scoreboard.getObjective(key);
+
+        if(objective == null || !scoreboard.getPlayers().contains(entity + ""))
+            return -1;
+
+        return scoreboard.getPlayerScoreForObjective(entity + "", objective).getScore();
     }
 
     @SuppressWarnings("deprecation")

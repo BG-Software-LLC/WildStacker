@@ -762,16 +762,15 @@ public final class EntitiesListener implements Listener {
                     stackedEntity.setStackAmount(amount - 1, true);
                     StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                     duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
-                    ((WStackedEntity) duplicated).setNameTag(true);
+                    ((WStackedEntity) duplicated).setNameTag();
                 } else {
-                    ((WStackedEntity) stackedEntity).setNameTag(true);
+                    ((WStackedEntity) stackedEntity).setNameTag();
                     stackedEntity.runStackAsync(null);
                 }
             }, 2L);
         }
         else{
-            EntityStorage.setMetadata(e.getRightClicked(), "nameTag", true);
-            plugin.getDataHandler().saveEntity(stackedEntity);
+            ((WStackedEntity) stackedEntity).setNameTag();
         }
     }
 

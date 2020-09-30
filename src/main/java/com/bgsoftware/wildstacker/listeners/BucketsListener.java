@@ -77,7 +77,7 @@ public final class BucketsListener implements Listener {
 
                 if(!fishName.isEmpty()){
                     stackedEntity.setCustomName(fishName);
-                    ((WStackedEntity) stackedEntity).setNameTag(true);
+                    ((WStackedEntity) stackedEntity).setNameTag();
                 }
 
                 stackedEntity.setStackAmount(amount, true);

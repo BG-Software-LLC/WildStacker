@@ -57,6 +57,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     private boolean deadEntityFlag = false;
     private boolean removed = false;
+    private boolean saveEntity = true;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -80,7 +81,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        plugin.getDataHandler().saveEntity(this);
+        if(saveEntity)
+            plugin.getNMSAdapter().saveEntity(this);
     }
 
     /*
@@ -195,7 +197,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 object.setCustomName(customName);
                 object.setCustomNameVisible(nameVisible);
-                plugin.getDataHandler().saveEntity(this);
+                if(saveEntity)
+                    plugin.getNMSAdapter().saveEntity(this);
 
                 //We update cached values of mcmmo
                 McMMOHook.updateCachedName(object);
@@ -589,7 +592,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
-        plugin.getDataHandler().saveEntity(this);
+        if(saveEntity)
+            plugin.getNMSAdapter().saveEntity(this);
     }
 
     @Override
@@ -628,16 +632,13 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean hasNameTag() {
-//        String name = object.getCustomName();
-//        return StackCheck.NAME_TAG.isEnabled() && name != null && !name.isEmpty() &&
-//                !plugin.getSettings().entitiesCustomNamePattern.matcher(name).matches();
         return EntityStorage.hasMetadata(object, "nameTag");
     }
 
-    public void setNameTag(boolean save){
+    public void setNameTag(){
         EntityStorage.setMetadata(object, "nameTag", true);
-        if(save)
-            plugin.getDataHandler().saveEntity(this);
+        if(saveEntity)
+            plugin.getNMSAdapter().saveEntity(this);
     }
 
     public boolean isCached(){
@@ -656,6 +657,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public boolean wasRemoved(){
         return removed;
+    }
+
+    public void setSaveEntity(boolean saveEntity){
+        this.saveEntity = saveEntity && isCached();
     }
 
     public static StackedEntity of(Entity entity){

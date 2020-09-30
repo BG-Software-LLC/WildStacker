@@ -7,26 +7,6 @@ public final class DataSerializer {
 
     private DataSerializer() { }
 
-    public static String serializeData(String str){
-        str = ensureNotNull(str);
-
-        if(str.isEmpty())
-            return str;
-
-        StringBuilder result = new StringBuilder();
-
-        for(char ch : str.toCharArray()) {
-            if(isNumber(ch))
-                result.append(COLOR_CHAR).append(NUMBERS_SPACER);
-            result.append(COLOR_CHAR).append(ch);
-        }
-
-        // Marks end of data segment
-        result.append(COLOR_CHAR).append("|").append(COLOR_CHAR).append("f");
-
-        return result.toString();
-    }
-
     public static String deserializeData(String str){
         str = ensureNotNull(str);
 
@@ -58,10 +38,6 @@ public final class DataSerializer {
 
     private static String ensureNotNull(String str){
         return str == null ? "" : str;
-    }
-
-    private static boolean isNumber(char ch){
-        return ch >= '0' && ch <= '9';
     }
 
 }

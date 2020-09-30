@@ -125,18 +125,30 @@ public final class SystemHandler implements SystemManager {
         else{
             String cachedData = DataSerializer.deserializeData(livingEntity.getCustomName());
 
-            if(!cachedData.isEmpty()){
-                String[] dataSections = cachedData.split("-");
-                try{
-                    stackedEntity.setStackAmount(Integer.parseInt(dataSections[0]), false);
-                }catch (Exception ignored){}
-                try{
-                    stackedEntity.setSpawnCause(SpawnCause.valueOf(Integer.parseInt(dataSections[1])));
-                }catch (Exception ignored){}
-                try{
-                    if(dataSections[2].equals("1"))
-                        ((WStackedEntity) stackedEntity).setNameTag(false);
-                }catch (Exception ignored){}
+            try {
+                ((WStackedEntity) stackedEntity).setSaveEntity(false);
+                if (!cachedData.isEmpty()) {
+                    String[] dataSections = cachedData.split("-");
+                    try {
+                        stackedEntity.setStackAmount(Integer.parseInt(dataSections[0]), false);
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        stackedEntity.setSpawnCause(SpawnCause.valueOf(Integer.parseInt(dataSections[1])));
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        if (dataSections[2].equals("1"))
+                            ((WStackedEntity) stackedEntity).setNameTag();
+                    } catch (Exception ignored) {
+                    }
+
+                    livingEntity.setCustomName(DataSerializer.stripData(livingEntity.getCustomName()));
+                } else {
+                    plugin.getNMSAdapter().loadEntity(stackedEntity);
+                }
+            }finally {
+                ((WStackedEntity) stackedEntity).setSaveEntity(true);
             }
         }
 
@@ -182,10 +194,20 @@ public final class SystemHandler implements SystemManager {
         else{
             String cachedData = DataSerializer.deserializeData(item.getCustomName());
 
-            if(!cachedData.isEmpty()){
-                try{
-                    stackedItem.setStackAmount(Integer.parseInt(cachedData), false);
-                }catch (Exception ignored){}
+            try {
+                ((WStackedItem) stackedItem).setSaveItem(false);
+                if (!cachedData.isEmpty()) {
+                    try {
+                        stackedItem.setStackAmount(Integer.parseInt(cachedData), false);
+                    } catch (Exception ignored) {
+                    }
+
+                    item.setCustomName(DataSerializer.stripData(item.getCustomName()));
+                } else {
+                    plugin.getNMSAdapter().loadItem(stackedItem);
+                }
+            }finally {
+                ((WStackedItem) stackedItem).setSaveItem(true);
             }
         }
 

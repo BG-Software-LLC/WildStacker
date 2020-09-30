@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -684,6 +686,75 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
+    }
+
+    /*
+     *   Data methods
+     */
+
+    @Override
+    public void saveEntity(StackedEntity stackedEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+
+        // Removing old tags
+        entityLiving.getScoreboardTags().removeIf(tag -> tag.startsWith("ws:"));
+
+        entityLiving.addScoreboardTag("ws:stack-amount=" + stackedEntity.getStackAmount());
+        entityLiving.addScoreboardTag("ws:stack-cause=" + stackedEntity.getSpawnCause().name());
+        if(stackedEntity.hasNameTag())
+            entityLiving.addScoreboardTag("ws:name-tag=true");
+    }
+
+    @Override
+    public void loadEntity(StackedEntity stackedEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+        for(String scoreboardTag : entityLiving.getScoreboardTags()){
+            if(scoreboardTag.startsWith("ws:")) {
+                String[] tagSections = scoreboardTag.split("=");
+                if (tagSections.length == 2) {
+                    try {
+                        String key = tagSections[0], value = tagSections[1];
+                        if (key.equals("ws:stack-amount")) {
+                            stackedEntity.setStackAmount(Integer.parseInt(value), false);
+                        } else if (key.equals("ws:stack-cause")) {
+                            stackedEntity.setSpawnCause(SpawnCause.valueOf(value));
+                        } else if (key.equals("ws:name-tag")) {
+                            ((WStackedEntity) stackedEntity).setNameTag();
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void saveItem(StackedItem stackedItem) {
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+
+        // Removing old tags
+        entityItem.getScoreboardTags().removeIf(tag -> tag.startsWith("ws:"));
+
+        entityItem.addScoreboardTag("ws:stack-amount=" + stackedItem.getStackAmount());
+    }
+
+    @Override
+    public void loadItem(StackedItem stackedItem) {
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        for(String scoreboardTag : entityItem.getScoreboardTags()){
+            if(scoreboardTag.startsWith("ws:")) {
+                String[] tagSections = scoreboardTag.split("=");
+                if (tagSections.length == 2) {
+                    try {
+                        String key = tagSections[0], value = tagSections[1];
+                        if (key.equals("ws:stack-amount")) {
+                            stackedItem.setStackAmount(Integer.parseInt(value), false);
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
     }
 
     @SuppressWarnings({"deprecation", "NullableProblems"})

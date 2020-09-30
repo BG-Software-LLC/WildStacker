@@ -32,6 +32,7 @@ import java.util.function.Consumer;
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
 
     private String mmoItemName = null;
+    private boolean saveItem = true;
 
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
@@ -59,7 +60,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), stackAmount));
             if(itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
                 object.setItemStack(itemStack);
-            plugin.getDataHandler().saveItem(this);
+            if(saveItem)
+                plugin.getNMSAdapter().saveItem(this);
         }
     }
 
@@ -175,7 +177,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         Executor.sync(() -> {
             if(updateName) {
                 object.setCustomName(CUSTOM_NAME);
-                plugin.getDataHandler().saveItem(this);
+                if(saveItem)
+                    plugin.getNMSAdapter().saveItem(this);
             }
             object.setCustomNameVisible(updateName);
         });
@@ -361,6 +364,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                 remove();
             }
         }
+    }
+
+    public void setSaveItem(boolean saveItem){
+        this.saveItem = saveItem && plugin.getSettings().itemsStackingEnabled && isWhitelisted() && !isBlacklisted() && !isWorldDisabled();
     }
 
     private int giveItem(Inventory inventory, ItemStack itemStack){
