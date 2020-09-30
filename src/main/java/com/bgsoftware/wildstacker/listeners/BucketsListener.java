@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -74,7 +73,7 @@ public final class BucketsListener implements Listener {
                 String entityType = itemInHand.getType().name().replace("_BUCKET", "");
 
                 int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
-                String fishName = DataSerializer.stripData(itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "");
+                String fishName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "";
 
                 StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
                         fluidBlock.getLocation().add(0.5, 0, 0.5), EntityType.valueOf(entityType).getEntityClass()));
