@@ -57,7 +57,7 @@ public final class Key {
     }
 
     public static Key of(String key){
-        return key.contains(":") ? new Key(key.split(":")) : new Key(new String[]{ key });
+        return key.contains(":") ? of(key.split(":")) : of(new String[]{ key });
     }
 
     public static Key of(String[] keys){
