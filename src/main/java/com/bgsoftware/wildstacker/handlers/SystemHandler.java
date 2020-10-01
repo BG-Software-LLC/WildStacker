@@ -593,8 +593,11 @@ public final class SystemHandler implements SystemManager {
         if(entityClass == null)
             return;
 
-        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass,
-                SpawnCause.CUSTOM, null, entity -> {
+        LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass, SpawnCause.CUSTOM, entity -> {
+            // Marking the entity as a corpse before the actual spawning
+            EntityStorage.setMetadata(entity, "corpse", null);
+        }, entity -> {
+            // Updating the entity values after the actual spawning
             plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), (LivingEntity) entity);
         });
 
