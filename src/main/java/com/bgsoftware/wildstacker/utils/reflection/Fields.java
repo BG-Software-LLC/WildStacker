@@ -9,7 +9,9 @@ public enum Fields {
     ENTITY_SPAWNED_VIA_MOB_SPAWNER,
     ENTITY_FROM_MOB_SPAWNER,
 
-    STRIDER_SADDLE_STORAGE;
+    STRIDER_SADDLE_STORAGE,
+
+    CHUNK_ENTITY_SLICES;
 
     public <T> T get(Object object, Class<T> clazz){
         try {

@@ -18,7 +18,8 @@ public final class ReflectionUtils {
             Class entityLivingClass = getNMSClass("EntityLiving"),
                     entityClass = getNMSClass("Entity"),
                     entityInsentientClass = getNMSClass("EntityInsentient"),
-                    worldClass = getNMSClass("World");
+                    worldClass = getNMSClass("World"),
+                    chunkClass = getNMSClass("Chunk");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
@@ -31,6 +32,9 @@ public final class ReflectionUtils {
                 Class<?> entityStriderClass = getNMSClass("EntityStrider");
                 fieldMap.put(Fields.STRIDER_SADDLE_STORAGE, entityStriderClass.getDeclaredField("bA"));
             }catch (Throwable ignored){}
+
+            if(ServerVersion.isAtLeast(ServerVersion.v1_16))
+                fieldMap.put(Fields.CHUNK_ENTITY_SLICES, chunkClass.getField("entitySlices"));
 
             methodMap.put(Methods.ENTITY_SOUND_DEATH, entityLivingClass.getDeclaredMethod(
                     ServerVersion.isAtLeast(ServerVersion.v1_14) ? "getSoundDeath" :

@@ -287,11 +287,25 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
                     int chunkMaxY = MathHelper.clamp(maxY, 0, 15);
 
                     for(int y = chunkMinY; y <= chunkMaxY; y++){
-                        Collection<Entity> entitySlice = chunk.entitySlices[y];
-                        for (Entity entity : entitySlice) {
-                            if (axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
-                                    (filter == null || filter.test(entity.getBukkitEntity()))) {
-                                entities.add(entity.getBukkitEntity());
+                        Collection<Entity> entitySlice = null;
+
+                        try{
+                            entitySlice = chunk.entitySlices[y];
+                        }catch (Throwable ex){
+                            try{
+                                // noinspection unchecked
+                                entitySlice = Fields.CHUNK_ENTITY_SLICES.get(chunk, Collection[].class)[y];
+                            }catch (Throwable ex2){
+                                ex2.printStackTrace();
+                            }
+                        }
+
+                        if(entitySlice != null) {
+                            for (Entity entity : entitySlice) {
+                                if (axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
+                                        (filter == null || filter.test(entity.getBukkitEntity()))) {
+                                    entities.add(entity.getBukkitEntity());
+                                }
                             }
                         }
                     }
