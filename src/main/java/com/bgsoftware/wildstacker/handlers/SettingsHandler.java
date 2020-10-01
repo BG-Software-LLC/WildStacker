@@ -308,7 +308,8 @@ public final class SettingsHandler {
         barrelsShiftPlaceStack = cfg.getBoolean("barrels.shift-place-stack", false);
 
         bucketsStackerEnabled = cfg.getBoolean("buckets.enabled", true);
-        bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist");
+        bucketsBlacklistedNames = cfg.getStringList("buckets.name-blacklist").stream()
+                .map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         bucketsMaxStack = cfg.getInt("buckets.max-stack", 16);
 
         stewsStackingEnabled = cfg.getBoolean("stews.enabled", true);
