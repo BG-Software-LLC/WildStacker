@@ -34,7 +34,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.block.Beehive;
 import org.bukkit.enchantments.Enchantment;
@@ -340,8 +339,9 @@ public final class EntitiesListener implements Listener {
                         if (entityDeathEvent.getDroppedExp() > 0) {
                             if(GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
                                 livingEntity.getKiller().giveExp(entityDeathEvent.getDroppedExp());
-                                livingEntity.getKiller().playSound(livingEntity.getLocation(),
-                                        Sound.valueOf(ServerVersion.isAtLeast(ServerVersion.v1_9) ? "ENTITY_EXPERIENCE_ORB_PICKUP" : "LEVEL_UP"), 0.1F, 0.1F);
+                                if(plugin.getSettings().entitiesExpPickupSound != null)
+                                    livingEntity.getKiller().playSound(livingEntity.getLocation(),
+                                            plugin.getSettings().entitiesExpPickupSound, 0.1F, 0.1F);
                             }
                             else {
                                 EntityUtils.spawnExp(livingEntity.getLocation(), entityDeathEvent.getDroppedExp());

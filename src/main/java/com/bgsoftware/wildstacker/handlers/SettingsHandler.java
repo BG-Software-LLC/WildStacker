@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -65,6 +66,7 @@ public final class SettingsHandler {
             multiplyDrops, multiplyExp;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
+    public final Sound entitiesExpPickupSound;
     public final Pattern entitiesCustomNamePattern;
     public final int linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
@@ -216,6 +218,13 @@ public final class SettingsHandler {
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
         entitiesAutoExpPickup = cfg.getStringList("entities.auto-exp-pickup");
+        Sound entitiesExpPickupSound;
+        try{
+            entitiesExpPickupSound = Sound.valueOf(cfg.getString("entities.exp-pickup-sound"));
+        }catch (Exception ignored){
+            entitiesExpPickupSound = null;
+        }
+        this.entitiesExpPickupSound = entitiesExpPickupSound;
         eggLayMultiply = cfg.getBoolean("entities.egg-lay-multiply", true);
         scuteMultiply = cfg.getBoolean("entities.scute-multiply", true);
         entitiesClearEquipment = cfg.getBoolean("entities.clear-equipment", false);

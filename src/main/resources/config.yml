@@ -398,6 +398,10 @@ entities:
   # You can combine both filters using "ENTITY_TYPE:SPAWN_REASON"
   auto-exp-pickup: []
 
+  # Set a custom exp sound when auto-exp-pickup is enabled.
+  # You can set this to '' if you want to disable it.
+  exp-pickup-sound: ENTITY_EXPERIENCE_ORB_PICKUP
+
   # Should eggs that are laid by stacked chickens be multiplied by it's stack size?
   egg-lay-multiply: true
 
