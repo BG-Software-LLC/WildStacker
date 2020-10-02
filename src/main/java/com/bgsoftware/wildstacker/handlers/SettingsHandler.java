@@ -59,9 +59,10 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
-            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, entitiesHideNames,
-            entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply, entitiesClearEquipment,
-            spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook, multiplyDrops, multiplyExp;
+            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreeding,
+            entitiesHideNames, entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply,
+            entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
+            multiplyDrops, multiplyExp;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final Pattern entitiesCustomNamePattern;
@@ -209,6 +210,7 @@ public final class SettingsHandler {
         mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
         keepLowestHealth = cfg.getStringList("entities.keep-lowest-health");
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
+        smartBreeding = cfg.getBoolean("entities.smart-breeding", false);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");

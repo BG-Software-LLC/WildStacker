@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -778,7 +779,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFeed(PlayerInteractEntityEvent e){
-        if(!StackSplit.ENTITY_BREED.isEnabled() || !(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
+        if(!(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
             return;
 
         if(!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
@@ -789,19 +790,59 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
         int amount = stackedEntity.getStackAmount();
+        ItemStack inHand = e.getPlayer().getItemInHand();
 
         if(amount > 1){
+            int itemsAmountToRemove;
+
+            if(plugin.getSettings().smartBreeding){
+                int breedableAmount = Math.min(stackedEntity.getStackAmount(), inHand.getAmount());
+
+                if(e.getPlayer().getGameMode() == GameMode.CREATIVE)
+                    breedableAmount = stackedEntity.getStackAmount();
+
+                if(breedableAmount % 2 != 0)
+                    breedableAmount--;
+
+                if(breedableAmount < 2)
+                    return;
+
+                // Setting the entity to be in love-mode.
+                plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), true);
+
+                itemsAmountToRemove = breedableAmount;
+
+                Executor.sync(() -> {
+                    // Spawning the baby after 2.5 seconds
+                    int babiesAmount = itemsAmountToRemove / 2;
+                    StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount);
+                    ((Animals) duplicated.getLivingEntity()).setBaby();
+                    // Making sure the entities are not in a love-mode anymore.
+                    plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
+                    plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), false);
+                    // Resetting the breeding of the entity to 5 minutes
+                    ((Animals) e.getRightClicked()).setAge(6000);
+                    // Calculate exp to drop
+                    int expToDrop = Random.nextInt(babiesAmount, 7 * babiesAmount);
+                    EntityUtils.spawnExp(duplicated.getLocation(), expToDrop);
+                }, 50L);
+            }
+            else if(StackSplit.ENTITY_BREED.isEnabled()) {
+                stackedEntity.setStackAmount(amount - 1, true);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
+                itemsAmountToRemove = 1;
+            }
+            else{
+                return;
+            }
+
             e.setCancelled(true);
 
-            stackedEntity.setStackAmount(amount - 1, true);
-            StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-
-            plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
-
             if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                ItemStack inHand = e.getPlayer().getItemInHand().clone();
-                inHand.setAmount(inHand.getAmount() - 1);
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), e.getPlayer().getItemInHand(), inHand);
+                ItemStack newHand = e.getPlayer().getItemInHand().clone();
+                newHand.setAmount(newHand.getAmount() - itemsAmountToRemove);
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newHand);
             }
         }
     }
