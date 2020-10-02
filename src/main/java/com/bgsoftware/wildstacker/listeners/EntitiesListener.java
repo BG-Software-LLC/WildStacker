@@ -38,7 +38,7 @@ import org.bukkit.Statistic;
 import org.bukkit.block.Beehive;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Bee;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -815,6 +815,33 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onMobAgro(EntityTargetLivingEntityEvent e){
+        if(!(e.getEntity() instanceof LivingEntity) || e.getTarget() == null)
+            return;
+
+        EntityTypes entityType = EntityTypes.fromEntity((LivingEntity) e.getEntity());
+
+        if((entityType == EntityTypes.BEE && !StackSplit.BEE_AGRO.isEnabled()) ||
+                (entityType == EntityTypes.IRON_GOLEM && !StackSplit.IRON_GOLEM_AGRO.isEnabled()))
+            return;
+
+        Creature creature = (Creature) e.getEntity();
+        StackedEntity stackedEntity = WStackedEntity.of(creature);
+
+        if(stackedEntity.getStackAmount() > 1){
+            for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
+                Executor.sync(() -> {
+                    if(creature.getTarget() != null) {
+                        stackedEntity.spawnDuplicate(1);
+                        stackedEntity.setStackAmount(stackedEntity.getStackAmount() - 1, true);
+                    }
+                }, i * 20);
+            }
+        }
+
+    }
+
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
         if(!plugin.getSettings().entitiesNamesToggleEnabled)
@@ -967,27 +994,6 @@ public final class EntitiesListener implements Listener {
 
                 plugin.getSystemManager().removeStackObject(stackedEntity);
             }
-        }
-
-        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-        public void onBeeAgro(EntityTargetLivingEntityEvent e){
-            if(!(e.getEntity() instanceof Bee) || !StackSplit.BEE_AGRO.isEnabled())
-                return;
-
-            Bee bee = (Bee) e.getEntity();
-            StackedEntity stackedEntity = WStackedEntity.of(bee);
-
-            if(stackedEntity.getStackAmount() > 1){
-                for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
-                    Executor.sync(() -> {
-                        if(bee.getTarget() != null) {
-                            Bee duplicatedBee = (Bee) stackedEntity.spawnDuplicate(1).getLivingEntity();
-                            stackedEntity.setStackAmount(stackedEntity.getStackAmount() - 1, true);
-                        }
-                    }, i * 20);
-                }
-            }
-
         }
 
     }

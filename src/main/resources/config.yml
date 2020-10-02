@@ -295,6 +295,7 @@ entities:
   stack-split:
     BEE_AGRO: true
     ENTITY_BREED: true
+    IRON_GOLEM_AGRO: true
     MUSHROOM_SHEAR: true
     NAME_TAG: true
     SHEEP_DYE: true
