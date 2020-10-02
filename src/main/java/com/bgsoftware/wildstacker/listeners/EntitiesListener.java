@@ -817,7 +817,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMobAgro(EntityTargetLivingEntityEvent e){
-        if(!(e.getEntity() instanceof LivingEntity) || e.getTarget() == null)
+        if(!(e.getEntity() instanceof LivingEntity) || !(e.getTarget() instanceof Player))
             return;
 
         EntityTypes entityType = EntityTypes.fromEntity((LivingEntity) e.getEntity());
