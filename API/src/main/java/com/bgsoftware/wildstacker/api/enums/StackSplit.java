@@ -2,8 +2,8 @@ package com.bgsoftware.wildstacker.api.enums;
 
 public enum StackSplit {
 
+    BEE_AGRO,
     ENTITY_BREED,
-    FEED,
     MUSHROOM_SHEAR,
     NAME_TAG,
     SHEEP_DYE,

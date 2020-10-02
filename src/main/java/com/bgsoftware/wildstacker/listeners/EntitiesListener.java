@@ -38,6 +38,7 @@ import org.bukkit.Statistic;
 import org.bukkit.block.Beehive;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Bee;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -59,6 +60,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityEnterBlockEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
@@ -941,7 +943,7 @@ public final class EntitiesListener implements Listener {
             this.plugin = plugin;
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onBee(EntityEnterBlockEvent e){
             if(e.getBlock().getState() instanceof Beehive && EntityUtils.isStackable(e.getEntity())){
                 Beehive beehive = (Beehive) e.getBlock().getState();
@@ -965,6 +967,27 @@ public final class EntitiesListener implements Listener {
 
                 plugin.getSystemManager().removeStackObject(stackedEntity);
             }
+        }
+
+        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+        public void onBeeAgro(EntityTargetLivingEntityEvent e){
+            if(!(e.getEntity() instanceof Bee) || !StackSplit.BEE_AGRO.isEnabled())
+                return;
+
+            Bee bee = (Bee) e.getEntity();
+            StackedEntity stackedEntity = WStackedEntity.of(bee);
+
+            if(stackedEntity.getStackAmount() > 1){
+                for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
+                    Executor.sync(() -> {
+                        if(bee.getTarget() != null) {
+                            Bee duplicatedBee = (Bee) stackedEntity.spawnDuplicate(1).getLivingEntity();
+                            stackedEntity.setStackAmount(stackedEntity.getStackAmount() - 1, true);
+                        }
+                    }, i * 20);
+                }
+            }
+
         }
 
     }

@@ -293,6 +293,7 @@ entities:
 
   # A list of all actions that the plugin check before unstacking an entity stack.
   stack-split:
+    BEE_AGRO: true
     ENTITY_BREED: true
     MUSHROOM_SHEAR: true
     NAME_TAG: true
