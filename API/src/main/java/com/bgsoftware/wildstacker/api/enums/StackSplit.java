@@ -7,9 +7,11 @@ public enum StackSplit {
     IRON_GOLEM_AGRO,
     MUSHROOM_SHEAR,
     NAME_TAG,
+    PIGMAN_AGRO,
     SHEEP_DYE,
     SHEEP_SHEAR,
-    VILLAGER_INFECTION;
+    VILLAGER_INFECTION,
+    WOLF_AGRO;
 
     private boolean enabled;
 

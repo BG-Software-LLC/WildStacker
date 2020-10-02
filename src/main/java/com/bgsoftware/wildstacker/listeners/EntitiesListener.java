@@ -822,9 +822,27 @@ public final class EntitiesListener implements Listener {
 
         EntityTypes entityType = EntityTypes.fromEntity((LivingEntity) e.getEntity());
 
-        if((entityType == EntityTypes.BEE && !StackSplit.BEE_AGRO.isEnabled()) ||
-                (entityType == EntityTypes.IRON_GOLEM && !StackSplit.IRON_GOLEM_AGRO.isEnabled()))
-            return;
+        switch (entityType){
+            case BEE:
+                if(!StackSplit.BEE_AGRO.isEnabled())
+                    return;
+                break;
+            case IRON_GOLEM:
+                if(!StackSplit.IRON_GOLEM_AGRO.isEnabled())
+                    return;
+                break;
+            case WOLF:
+                if(!StackSplit.WOLF_AGRO.isEnabled())
+                    return;
+                break;
+            case PIGLIN:
+            case ZOMBIE_PIGMAN:
+                if(!StackSplit.PIGMAN_AGRO.isEnabled())
+                    return;
+                break;
+            default:
+                return;
+        }
 
         Creature creature = (Creature) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(creature);

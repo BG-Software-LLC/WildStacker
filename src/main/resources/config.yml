@@ -298,9 +298,11 @@ entities:
     IRON_GOLEM_AGRO: true
     MUSHROOM_SHEAR: true
     NAME_TAG: true
+    PIGMAN_AGRO: true
     SHEEP_DYE: true
     SHEEP_SHEAR: true
     VILLAGER_INFECTION: true
+    WOLF_AGRO: true
 
   # Linked-entities are entities that are linked to one spawner or more.
   # A spawner that has an entity linked to, will try to stack it's entities first to the linked one.
