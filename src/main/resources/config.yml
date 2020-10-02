@@ -523,6 +523,9 @@ spawners:
     # Chance of spawners to be dropped after break of silk touch.
     break-chance: 100
 
+    # The minimum required level for silk touch.
+    minimum-level: 1
+
   # Here you can configurable all features related to exploded spawners.
   # Other spawner plugins, such as SilkSpawners, will override this section.
   explosions:

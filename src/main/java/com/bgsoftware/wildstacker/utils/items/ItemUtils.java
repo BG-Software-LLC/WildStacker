@@ -409,7 +409,7 @@ public final class ItemUtils {
         if(itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
-        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= 1;
+        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= plugin.getSettings().silkTouchMinimumLevel;
     }
 
     public static Location getSafeDropLocation(Location origin){

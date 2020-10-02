@@ -80,7 +80,8 @@ public final class SettingsHandler {
             dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu,
             spawnersPlacementPermission, spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement,
             onlyOneSpawner, inventoryTweaksEnabled;
-    public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage, explosionsAmountMinimum, silkTouchBreakChance, spawnersChunkLimit;
+    public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
+            explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, spawnerItemLore, silkWorlds, explosionsWorlds;
     public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
     public final KeyMap<Integer> spawnersMergeRadius, spawnersLimits;
@@ -243,6 +244,7 @@ public final class SettingsHandler {
         silkWorlds = cfg.getStringList("spawners.silk-touch.worlds");
         dropSpawnerWithoutSilk = cfg.getBoolean("spawners.silk-touch.drop-without-silk", false);
         silkTouchBreakChance = cfg.getInt("spawners.silk-touch.break-chance", 100);
+        silkTouchMinimumLevel = cfg.getInt("spawners.silk-touch.minimum-level", 1);
         explosionsDropSpawner = cfg.getBoolean("spawners.explosions.enabled", true);
         explosionsDropToInventory = cfg.getBoolean("spawners.explosions.drop-to-inventory", false);
         explosionsWorlds = cfg.getStringList("spawners.explosions.worlds");
