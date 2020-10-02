@@ -600,7 +600,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         source.saveData(nbtTagCompound);
 
-        nbtTagCompound.setFloat("Health", 20);
+        nbtTagCompound.setFloat("Health", source.getMaxHealth());
         nbtTagCompound.remove("SaddleItem");
         nbtTagCompound.remove("ArmorItem");
         nbtTagCompound.remove("ArmorItems");

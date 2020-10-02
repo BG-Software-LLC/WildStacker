@@ -417,8 +417,8 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         source.b(nbtTagCompound);
 
-        nbtTagCompound.setFloat("HealF", 20);
-        nbtTagCompound.setFloat("Health", 20);
+        nbtTagCompound.setFloat("HealF", source.getMaxHealth());
+        nbtTagCompound.setShort("Health", (short) Math.ceil(source.getMaxHealth()));
         nbtTagCompound.remove("SaddleItem");
         nbtTagCompound.remove("ArmorItem");
         nbtTagCompound.remove("Equipment");
