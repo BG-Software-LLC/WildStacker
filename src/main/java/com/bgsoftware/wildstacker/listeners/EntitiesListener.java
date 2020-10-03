@@ -221,8 +221,19 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
-            int stackAmount = Math.min(stackedEntity.getStackAmount(),
-                    stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
+            int stackAmount;
+            double damageToNextStack;
+
+            if(plugin.getSettings().spreadDamage){
+                double leftDamage = e.getFinalDamage() - livingEntity.getHealth();
+                stackAmount = Math.min(stackedEntity.getStackAmount(), 1 + (int) (leftDamage / livingEntity.getMaxHealth()));
+                damageToNextStack = leftDamage % livingEntity.getMaxHealth();
+            }
+            else{
+                stackAmount = Math.min(stackedEntity.getStackAmount(),
+                        stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
+                damageToNextStack = 0;
+            }
 
             int fireTicks = livingEntity.getFireTicks();
 
@@ -237,7 +248,7 @@ public final class EntitiesListener implements Listener {
             double originalDamage = e.getDamage();
 
             e.setDamage(0);
-            livingEntity.setHealth(livingEntity.getMaxHealth());
+            livingEntity.setHealth(livingEntity.getMaxHealth() - damageToNextStack);
 
             //Villager was killed by a zombie - should be turned into a zombie villager.
             if(livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)){

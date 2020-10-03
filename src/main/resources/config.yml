@@ -442,6 +442,10 @@ entities:
   # Should exp get calculated in relation to the amount of mobs that died?
   multiply-exp: true
 
+  # Should damage be spread to the next stack?
+  # If you deal more damage than the health of the entity, the rest of the damage will be dealt to the next stack.
+  spread-damage: false
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?
