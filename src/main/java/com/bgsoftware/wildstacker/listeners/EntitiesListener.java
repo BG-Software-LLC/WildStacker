@@ -226,12 +226,22 @@ public final class EntitiesListener implements Listener {
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
+            ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
+
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount;
             double damageToNextStack;
 
             if(plugin.getSettings().spreadDamage){
-                double leftDamage = e.getFinalDamage() - livingEntity.getHealth();
+                double finalDamage = e.getFinalDamage();
+
+                if(ServerVersion.isAtLeast(ServerVersion.v1_11) && itemInHand != null) {
+                    int sweepingEdgeLevel = itemInHand.getEnchantmentLevel(Enchantment.getByName("SWEEPING_EDGE"));
+                    if(sweepingEdgeLevel > 0)
+                        finalDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
+                }
+
+                double leftDamage = finalDamage - livingEntity.getHealth();
                 stackAmount = Math.min(stackedEntity.getStackAmount(), 1 + (int) (leftDamage / livingEntity.getMaxHealth()));
                 damageToNextStack = leftDamage % livingEntity.getMaxHealth();
             }
@@ -292,7 +302,6 @@ public final class EntitiesListener implements Listener {
 
                 EntityUtils.setKiller(livingEntity, damager);
 
-                ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
                 Player DAMAGER = damager;
 
                 int lootBonusLevel = itemInHand == null ? 0 : itemInHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
