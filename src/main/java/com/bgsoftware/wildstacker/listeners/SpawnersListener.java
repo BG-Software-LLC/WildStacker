@@ -499,7 +499,21 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        if(!plugin.getSettings().changeUsingEggs || (plugin.getSettings().eggsStackMultiply &&
+        if(!plugin.getSettings().changeUsingEggs){
+            e.setCancelled(true);
+
+            if(EntitiesListener.IMP.handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e)) {
+                try {
+                    EntityType entityType = EntityType.valueOf(ItemUtils.getEntityType(e.getItem()).name());
+                    plugin.getNMSAdapter().createEntity(e.getClickedBlock().getRelative(e.getBlockFace())
+                            .getLocation().add(0.5, 0, 0.5), entityType.getEntityClass(), SpawnCause.SPAWNER_EGG, null, null);
+                } catch (Exception ignored) { }
+            }
+
+            return;
+        }
+
+        if((plugin.getSettings().eggsStackMultiply &&
                 stackedSpawner.getStackAmount() > ItemUtils.countItem(e.getPlayer().getInventory(), e.getItem())) ||
                 EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtils.getEntityType(e.getItem())) {
             e.setCancelled(true);

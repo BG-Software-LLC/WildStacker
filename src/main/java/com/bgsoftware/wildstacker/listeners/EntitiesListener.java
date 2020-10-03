@@ -36,6 +36,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.block.Beehive;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Creature;
@@ -94,6 +96,8 @@ public final class EntitiesListener implements Listener {
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
 
+    public static EntitiesListener IMP;
+
     public final static Set<UUID> noStackEntities = new HashSet<>();
 
     private final Set<UUID> noDeathEvent = new HashSet<>();
@@ -101,6 +105,8 @@ public final class EntitiesListener implements Listener {
 
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
+        EntitiesListener.IMP = this;
+
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_15))
@@ -558,31 +564,41 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || e.getItem() == null || e.getAction() != Action.RIGHT_CLICK_BLOCK ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") ||
-                (!Materials.isValidAndSpawnEgg(e.getItem()) && !Materials.isFishBucket(e.getItem())))
+        if(e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
-        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(e.getItem());
+        handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e);
+    }
 
-        if(Materials.isValidAndSpawnEgg(e.getItem())) {
-            nextEntityType = ItemUtils.getEntityType(e.getItem());
+    public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event){
+        if(!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
+                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") ||
+                (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
+            return false;
+
+        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+
+        if(Materials.isValidAndSpawnEgg(usedItem)) {
+            nextEntityType = ItemUtils.getEntityType(usedItem);
 
             if (nextEntityType == null) {
                 nextEntityStackAmount = -1;
-                return;
+                return false;
             }
 
-            EntityType nmsEntityType = ItemUtils.getNMSEntityType(e.getItem());
+            EntityType nmsEntityType = ItemUtils.getNMSEntityType(usedItem);
             if (nmsEntityType != null) {
-                e.setCancelled(true);
+                event.setCancelled(true);
                 nextEntityType = EntityTypes.fromName(nmsEntityType.name());
-                Location toSpawn = e.getClickedBlock().getRelative(e.getBlockFace()).getLocation().add(0.5, 0, 0.5);
+                Location toSpawn = clickedBlock.getRelative(blockFace).getLocation().add(0.5, 0, 0.5);
                 if (toSpawn.getBlock().getType() != Material.AIR)
                     toSpawn = toSpawn.add(0, 1, 0);
                 plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
+                return true;
             }
         }
+
+        return true;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
