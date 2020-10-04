@@ -65,7 +65,7 @@ public final class BucketsListener implements Listener {
         }
         else{
             if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER) {
-                if(!plugin.getNMSAdapter().attemptToWaterLog(fluidBlock))
+                if(!plugin.getNMSAdapter().attemptToWaterLog(e.getBlockClicked()) && !fluidBlock.getType().isSolid())
                     fluidBlock.setType(Material.WATER);
             }
 
