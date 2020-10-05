@@ -120,6 +120,7 @@ public final class SystemHandler implements SystemManager {
 
         Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
         if(entityData != null) {
+            stackedEntity.setStackAmount(entityData.getKey(), false);
             stackedEntity.setSpawnCause(entityData.getValue());
         }
         else{
