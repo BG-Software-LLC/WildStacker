@@ -162,7 +162,6 @@ public final class EntitiesListener implements Listener {
         }
         if(EntityStorage.hasMetadata(e.getEntity(), "corpse")) {
             e.setCancelled(true);
-            e.getEntity().remove();
         }
     }
 
