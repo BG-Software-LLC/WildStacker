@@ -87,12 +87,13 @@ public final class BucketsListener implements Listener {
             }catch (Exception ignored){}
         }
 
-        if(itemToGive.getAmount() <= 0){
-            inventory.setItem(heldItemSlot, e.getItemStack().clone());
-        }
-        else {
-            inventory.setItem(heldItemSlot, itemToGive);
-            inventory.addItem(e.getItemStack().clone());
+        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            if (itemToGive.getAmount() <= 0) {
+                inventory.setItem(heldItemSlot, e.getItemStack().clone());
+            } else {
+                inventory.setItem(heldItemSlot, itemToGive);
+                inventory.addItem(e.getItemStack().clone());
+            }
         }
     }
 
