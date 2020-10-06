@@ -1,8 +1,6 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.google.common.collect.Sets;
-import java.util.Set;
 
 public enum StackCheck {
 
@@ -55,11 +53,11 @@ public enum StackCheck {
     PHANTOM_SIZE(EntityTypes.PHANTOM);
 
     private boolean enabled;
-    private final Set<EntityTypes> allowedTypes;
+    private final EntityTypes[] allowedTypes;
 
     StackCheck(EntityTypes... allowedTypes) {
         this.enabled = false;
-        this.allowedTypes = Sets.newHashSet(allowedTypes);
+        this.allowedTypes = allowedTypes;
     }
 
     public void setEnabled(boolean enabled) {
@@ -70,12 +68,16 @@ public enum StackCheck {
         return enabled;
     }
 
-    public String[] getCompoundKeys() {
-        return new String[0];
-    }
-
     public boolean isTypeAllowed(EntityTypes entityType){
-        return allowedTypes.isEmpty() || allowedTypes.contains(entityType);
+        if(allowedTypes.length == 0)
+            return true;
+
+        for (EntityTypes allowedType : allowedTypes) {
+            if (entityType == allowedType)
+                return true;
+        }
+
+        return false;
     }
 
 }
