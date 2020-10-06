@@ -24,11 +24,14 @@ public final class FastEnumMap<E extends Enum<E>, V> {
         for(String _key : section.getKeys(false)){
             if(_key.equalsIgnoreCase("ALL")) {
                 fastEnumIntMap.globalValue = section.getInt(_key);
+                fastEnumIntMap.size++;
             }
             else {
                 E key = FastEnumUtils.getEnum(keyType, _key.toUpperCase());
                 if (key != null)
                     fastEnumIntMap.put(key, section.getInt(_key));
+                else
+                    fastEnumIntMap.size++;
             }
         }
         return fastEnumIntMap;

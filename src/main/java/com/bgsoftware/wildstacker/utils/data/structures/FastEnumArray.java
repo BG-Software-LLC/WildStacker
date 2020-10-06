@@ -30,11 +30,14 @@ public final class FastEnumArray<E extends Enum<E>> {
         arr.forEach(line -> {
             if(line.equalsIgnoreCase("ALL")){
                 fastEnumArray.containsAll = true;
+                fastEnumArray.size++;
             }
             else {
                 E value = FastEnumUtils.getEnum(keyType, line.toUpperCase());
                 if (value != null)
                     fastEnumArray.add(value);
+                else
+                    fastEnumArray.size++;
             }
         });
         return fastEnumArray;
@@ -68,6 +71,11 @@ public final class FastEnumArray<E extends Enum<E>> {
     public Collection<E> collect(){
         E[] allValues = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(keyType);
         return Arrays.stream(allValues).filter(e -> arr[e.ordinal()]).collect(Collectors.toSet());
+    }
+
+    @Override
+    public String toString() {
+        return collect().toString();
     }
 
 }

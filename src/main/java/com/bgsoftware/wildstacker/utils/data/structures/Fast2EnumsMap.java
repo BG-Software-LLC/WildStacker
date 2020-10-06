@@ -35,6 +35,7 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
     private void put(String raw, V value, Class<E> firstType, Class<T> secondType){
         if(raw.equalsIgnoreCase("ALL")){
             globalValue = value;
+            size++;
         }
         else {
             String[] sections = raw.split(":");
@@ -44,12 +45,16 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
                 T second = FastEnumUtils.getEnum(secondType, sections[1]);
                 if (first != null && second != null)
                     put(first, second, value);
+                else
+                    size++;
             } else if (first != null) {
                 putFirst(first, value);
             } else {
                 T second = FastEnumUtils.getEnum(secondType, sections[0]);
                 if (second != null)
                     putSecond(second, value);
+                else
+                    size++;
             }
         }
     }

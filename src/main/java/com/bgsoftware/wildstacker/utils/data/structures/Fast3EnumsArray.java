@@ -34,6 +34,7 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
         arr.forEach(line -> {
             if (line.equalsIgnoreCase("ALL")) {
                 fast2EnumsArray.containsAll = true;
+                fast2EnumsArray.size++;
             }
             else {
                 String[] sections = line.split(":");
@@ -48,6 +49,8 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
                             S third = FastEnumUtils.getEnum(thirdType, sections[1]);
                             if (third != null)
                                 fast2EnumsArray.addSecond(first, third);
+                            else
+                                fast2EnumsArray.size++;
                         }
                     }
                 } else if (first != null) {
@@ -60,6 +63,8 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
                         S third = FastEnumUtils.getEnum(thirdType, sections[0]);
                         if (third != null)
                             fast2EnumsArray.addThird(third);
+                        else
+                            fast2EnumsArray.size++;
                     }
                 }
             }
