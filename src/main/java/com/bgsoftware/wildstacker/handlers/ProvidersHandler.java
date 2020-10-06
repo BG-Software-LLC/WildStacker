@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
@@ -14,12 +13,6 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider_Arconix;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider_CMI;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider_Default;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider_Holograms;
-import com.bgsoftware.wildstacker.hooks.HologramsProvider_HolographicDisplays;
 import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
@@ -60,7 +53,6 @@ import java.util.List;
 public final class ProvidersHandler {
 
     private SpawnersProvider spawnersProvider;
-    private HologramsProvider hologramsProvider;
     private List<ClaimsProvider> claimsProviders;
 
     public ProvidersHandler(WildStackerPlugin plugin){
@@ -69,7 +61,6 @@ public final class ProvidersHandler {
             long startTime = System.currentTimeMillis();
 
             loadSpawnersProvider();
-            loadHologramsProvider();
             loadClaimsProvider();
             loadPluginHooks(plugin, null, true);
 
@@ -102,18 +93,6 @@ public final class ProvidersHandler {
         else if(Bukkit.getPluginManager().isPluginEnabled("MineableSpawners"))
             spawnersProvider = new SpawnersProvider_MineableSpawners();
         else spawnersProvider = new SpawnersProvider_Default();
-    }
-
-    private void loadHologramsProvider(){
-        if(Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays"))
-            hologramsProvider = new HologramsProvider_HolographicDisplays();
-        else if(Bukkit.getPluginManager().isPluginEnabled("Holograms"))
-            hologramsProvider = new HologramsProvider_Holograms();
-        else if(Bukkit.getPluginManager().isPluginEnabled("Arconix"))
-            hologramsProvider = new HologramsProvider_Arconix();
-        else if(Bukkit.getPluginManager().isPluginEnabled("CMI"))
-            hologramsProvider = new HologramsProvider_CMI();
-        else hologramsProvider = new HologramsProvider_Default();
     }
 
     private void loadClaimsProvider(){
@@ -247,42 +226,6 @@ public final class ProvidersHandler {
 
     public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack){
         spawnersProvider.handleSpawnerPlace(creatureSpawner, itemStack);
-    }
-
-    /*
-     * Holograms Provider
-     */
-
-    public void createHologram(StackedObject stackedObject, String line){
-        hologramsProvider.createHologram(stackedObject, line);
-    }
-
-    public void createHologram(Location location, String line){
-        hologramsProvider.createHologram(location, line);
-    }
-
-    public void deleteHologram(StackedObject stackedObject){
-        hologramsProvider.deleteHologram(stackedObject);
-    }
-
-    public void deleteHologram(Location location){
-        hologramsProvider.deleteHologram(location);
-    }
-
-    public void changeLine(StackedObject stackedObject, String newLine, boolean createIfNull){
-        hologramsProvider.changeLine(stackedObject, newLine, createIfNull);
-    }
-
-    public void changeLine(Location location, String newLine, boolean createIfNull){
-        hologramsProvider.changeLine(location, newLine, createIfNull);
-    }
-
-    public boolean isHologram(Location location){
-        return hologramsProvider.isHologram(location);
-    }
-
-    public void clearHolograms(){
-        hologramsProvider.clearHolograms();
     }
 
     /*

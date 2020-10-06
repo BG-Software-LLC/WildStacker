@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class WStackedSpawner extends WStackedObject<CreatureSpawner> implements StackedSpawner {
+public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawner> implements StackedSpawner {
 
     private final List<Inventory> linkedInventories = new ArrayList<>();
 
@@ -128,7 +128,7 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
 
         Query.SPAWNER_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
 
-        plugin.getProviders().deleteHologram(this);
+        removeHologram();
 
         List<HumanEntity> viewers = new ArrayList<>();
         linkedInventories.forEach(i ->  viewers.addAll(i.getViewers()));
@@ -153,7 +153,7 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
         int amount = getStackAmount();
 
         if(amount <= 1) {
-            plugin.getProviders().deleteHologram(this);
+            removeHologram();
             return;
         }
 
@@ -161,7 +161,8 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
                 .replace("{0}", Integer.toString(amount))
                 .replace("{1}", EntityUtils.getFormattedType(getSpawnedType().name()))
                 .replace("{2}", EntityUtils.getFormattedType(getSpawnedType().name()).toUpperCase());
-        plugin.getProviders().changeLine(this, customName, !plugin.getSettings().floatingSpawnerNames);
+
+        setHologramName(customName, !plugin.getSettings().floatingSpawnerNames);
     }
 
     @Override

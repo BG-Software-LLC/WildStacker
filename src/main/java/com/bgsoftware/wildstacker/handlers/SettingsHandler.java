@@ -358,6 +358,7 @@ public final class SettingsHandler {
         barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
         blacklistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.blacklist"), Material.class);
         whitelistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.whitelist"), Material.class);
+        System.out.println(whitelistedBarrels);
         barrelsChunkLimit = cfg.getInt("barrels.chunk-limit", 0);
         explosionsBreakBarrelStack = cfg.getBoolean("barrels.explosions-break-stack", true);
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);

@@ -393,8 +393,6 @@ public final class SystemHandler implements SystemManager {
                 }
             }
         }
-
-        Executor.sync(plugin.getProviders()::clearHolograms);
     }
 
     @Override
@@ -508,7 +506,6 @@ public final class SystemHandler implements SystemManager {
             if(stackedSpawner.getStackAmount() > 1) {
                 dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
                         .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
-                plugin.getProviders().deleteHologram(stackedSpawner);
             }
         }
 
@@ -516,7 +513,6 @@ public final class SystemHandler implements SystemManager {
             dataHandler.removeStackedBarrel(stackedBarrel);
             dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Maps.newConcurrentMap())
                     .put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
-            plugin.getProviders().deleteHologram(stackedBarrel);
             stackedBarrel.removeDisplayBlock();
         }
     }

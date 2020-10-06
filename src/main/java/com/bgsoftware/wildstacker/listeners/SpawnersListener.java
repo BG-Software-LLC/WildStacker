@@ -559,9 +559,10 @@ public final class SpawnersListener implements Listener {
                     .replace("{0}", Integer.toString(amount))
                     .replace("{1}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()))
                     .replace("{2}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()).toUpperCase());
-            plugin.getProviders().changeLine(stackedSpawner, customName, true);
 
-            Executor.sync(() -> plugin.getProviders().deleteHologram(stackedSpawner), 60L);
+            ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);
+
+            Executor.sync(((WStackedSpawner) stackedSpawner)::removeHologram, 60L);
         }
     }
 

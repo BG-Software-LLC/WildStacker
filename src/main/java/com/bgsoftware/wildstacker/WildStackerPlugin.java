@@ -2,8 +2,6 @@ package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
 import com.bgsoftware.wildstacker.handlers.DataHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
@@ -26,6 +24,7 @@ import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
+import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
@@ -34,6 +33,8 @@ import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -51,6 +52,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private LootHandler lootHandler;
 
     private NMSAdapter nmsAdapter;
+    private NMSHolograms nmsHolograms;
 
     private boolean shouldEnable = true;
 
@@ -144,22 +146,17 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         if(shouldEnable) {
             log("Performing entity&items save");
 
+            for(World world : Bukkit.getWorlds()){
+                for(Chunk chunk : world.getLoadedChunks())
+                    systemManager.handleChunkUnload(chunk);
+            }
+
             //We need to save the entire database
             systemManager.performCacheSave();
 
             log("Clearing database...");
             //We need to close the connection
             dataHandler.clearDatabase();
-
-            log("Deleting spawner holograms...");
-            for (StackedSpawner stackedSpawner : systemManager.getStackedSpawners())
-                providersHandler.deleteHologram(stackedSpawner);
-            log("Deleting barrel holograms...");
-            for (StackedBarrel stackedBarrel : systemManager.getStackedBarrels()) {
-                providersHandler.deleteHologram(stackedBarrel);
-                stackedBarrel.getLocation().getChunk().load(true);
-                stackedBarrel.removeDisplayBlock();
-            }
         }
 
         EntityStorage.clearCache();
@@ -181,6 +178,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         String bukkitVersion = ServerVersion.getBukkitVersion();
         try{
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
+            nmsHolograms = (NMSHolograms) Class.forName("com.bgsoftware.wildstacker.nms.NMSHolograms_" + bukkitVersion).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
@@ -189,6 +187,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public NMSAdapter getNMSAdapter() {
         return nmsAdapter;
+    }
+
+    public NMSHolograms getNMSHolograms(){
+        return nmsHolograms;
     }
 
     public LootHandler getLootHandler() {

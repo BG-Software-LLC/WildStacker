@@ -87,6 +87,7 @@ public final class DataHandler {
         Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(stackedSpawner.getLocation()));
         if(chunkSpawners != null)
             chunkSpawners.remove(stackedSpawner);
+        ((WStackedSpawner) stackedSpawner).removeHologram();
     }
 
     public void addStackedBarrel(StackedBarrel stackedBarrel){
@@ -100,6 +101,8 @@ public final class DataHandler {
         Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
         if(chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
+        stackedBarrel.removeDisplayBlock();
+        ((WStackedBarrel) stackedBarrel).removeHologram();
     }
 
     public List<StackedObject> getStackedObjects(){

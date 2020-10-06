@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public final class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
+public final class WStackedBarrel extends WStackedHologramObject<Block> implements StackedBarrel {
 
     private final List<Inventory> linkedInventories = new ArrayList<>();
 
@@ -130,7 +130,7 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
         Query.BARREL_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
 
-        plugin.getProviders().deleteHologram(this);
+        removeHologram();
         removeDisplayBlock();
 
         List<HumanEntity> viewers = new ArrayList<>();
@@ -156,7 +156,7 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
         int amount = getStackAmount();
 
         if(amount < 1) {
-            plugin.getProviders().deleteHologram(this);
+            removeHologram();
             return;
         }
 
@@ -164,7 +164,8 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
                 .replace("{0}", Integer.toString(amount))
                 .replace("{1}", ItemUtils.getFormattedType(barrelItem))
                 .replace("{2}", ItemUtils.getFormattedType(barrelItem).toUpperCase());
-        plugin.getProviders().changeLine(this, customName, true);
+
+        setHologramName(customName, true);
     }
 
     @Override
