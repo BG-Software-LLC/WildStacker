@@ -14,4 +14,8 @@ public final class FastEnumUtils {
         }
     }
 
+    public static Enum[] getEnumValues(Class<?> clazz){
+        return (Enum[]) clazz.getEnumConstants();
+    }
+
 }

@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
-import sun.misc.SharedSecrets;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,9 +14,9 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
     private int size = 0;
 
     public Fast3EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType, Class<S> thirdKeyType){
-        int firstKeyTypeLength = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(firstKeyType).length;
-        int secondKeyTypeLength = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(secondKeyType).length;
-        int thirdKeyTypeLength = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(thirdKeyType).length;
+        int firstKeyTypeLength = FastEnumUtils.getEnumValues(firstKeyType).length;
+        int secondKeyTypeLength = FastEnumUtils.getEnumValues(secondKeyType).length;
+        int thirdKeyTypeLength = FastEnumUtils.getEnumValues(thirdKeyType).length;
 
         this.firstKeyArray = new FastEnumArray<>(firstKeyTypeLength, firstKeyType);
         this.secondKeyArray = new FastEnumArray<>(secondKeyTypeLength, secondKeyType);

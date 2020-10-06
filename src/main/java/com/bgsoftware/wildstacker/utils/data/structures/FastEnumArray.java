@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
-import sun.misc.SharedSecrets;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +14,7 @@ public final class FastEnumArray<E extends Enum<E>> {
     private int size = 0;
 
     public FastEnumArray(Class<E> keyType){
-        this(SharedSecrets.getJavaLangAccess().getEnumConstantsShared(keyType).length, keyType);
+        this(FastEnumUtils.getEnumValues(keyType).length, keyType);
     }
 
     FastEnumArray(int initSize, Class<E> keyType){
@@ -69,7 +67,8 @@ public final class FastEnumArray<E extends Enum<E>> {
     }
 
     public Collection<E> collect(){
-        E[] allValues = SharedSecrets.getJavaLangAccess().getEnumConstantsShared(keyType);
+        //noinspection unchecked
+        E[] allValues = (E[]) FastEnumUtils.getEnumValues(keyType);
         return Arrays.stream(allValues).filter(e -> arr[e.ordinal()]).collect(Collectors.toSet());
     }
 

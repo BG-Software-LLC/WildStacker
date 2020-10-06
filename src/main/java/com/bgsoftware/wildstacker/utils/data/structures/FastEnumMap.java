@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
 import org.bukkit.configuration.ConfigurationSection;
-import sun.misc.SharedSecrets;
 
 public final class FastEnumMap<E extends Enum<E>, V> {
 
@@ -11,7 +10,7 @@ public final class FastEnumMap<E extends Enum<E>, V> {
     private int size = 0;
 
     public FastEnumMap(Class<E> keyType){
-        this(SharedSecrets.getJavaLangAccess().getEnumConstantsShared(keyType).length);
+        this(FastEnumUtils.getEnumValues(keyType).length);
     }
 
     FastEnumMap(int initSize){
