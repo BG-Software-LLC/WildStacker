@@ -134,6 +134,8 @@ public final class BarrelsPlaceMenu extends WildMenu {
                 ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedBarrel.getLocation());
             }
         }
+
+        ((WStackedBarrel) stackedBarrel).unlinkInventory(e.getInventory());
     }
 
     @Override
