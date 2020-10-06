@@ -112,18 +112,6 @@ public final class SpawnersPlaceMenu extends WildMenu {
         return inventory;
     }
 
-    private static int countSpawners(Inventory inventory, StackedSpawner stackedSpawner){
-        int amount = 0;
-
-        for(ItemStack itemStack : inventory.getContents()) {
-            if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType() &&
-                    plugin.getProviders().getSpawnerType(itemStack) == stackedSpawner.getSpawnedType())
-                amount += ItemUtils.getSpawnerItemAmount(itemStack) * itemStack.getAmount();
-        }
-
-        return amount;
-    }
-
     public static void open(Player player, StackedSpawner stackedSpawner){
         SpawnersPlaceMenu spawnersPlaceMenu = new SpawnersPlaceMenu(stackedSpawner.getLocation(), stackedSpawner.getSpawnedType());
         ((WStackedSpawner) stackedSpawner).linkInventory(spawnersPlaceMenu.inventory);
