@@ -234,15 +234,12 @@ entities:
   particles: true
 
   # A list of WorldGuard regions entities won't get stacked inside them (case-sensitive)
-  disabled-regions:
-    - spawn
+  disabled-regions: []
 
   # Blacklisted names is a list of names that when an entity has this name, it won't get stacked.
   # Color codes are supported, as well as regex.
   # If you wish to enable stacking of all entities based on their name, use "name-blacklist: []"
-  name-blacklist:
-    - '&fEXAMPLE_NAME'
-    - '^[0-9]*$'
+  name-blacklist: []
 
   # How much time should be passed between auto-stacking? (in ticks)
   # If you wish to disable the auto-stacking task, set the stack-interval to 0.
