@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -64,8 +63,8 @@ public final class SpawnersBreakMenu extends WildMenu {
 
         removeAmount = Math.min(stackedSpawner.getStackAmount(), removeAmount);
 
-        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge.getOrDefault(
-                Key.of(stackedSpawner.getSpawnedType().name()), new Pair<>(0.0, false));
+        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge
+                .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? removeAmount : 1);
 

@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -77,8 +76,9 @@ public final class EntityUtils {
         if(typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
             return typeName;
 
-        if(plugin.getSettings().customNames.containsKey(Key.of(typeName)))
-            return plugin.getSettings().customNames.get(Key.of(typeName));
+        String customName = plugin.getSettings().customNames.get(typeName);
+        if(customName != null)
+            return customName;
 
         StringBuilder name = new StringBuilder();
 

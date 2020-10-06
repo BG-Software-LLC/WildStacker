@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.events.BarrelDropEvent;
 import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -362,10 +361,10 @@ public final class BarrelsListener implements Listener {
     }
 
     private boolean isBarrelBlock(Block block){
-        Key key = Key.of(ItemUtils.getFromBlock(block));
-        return (plugin.getSettings().whitelistedBarrels.isEmpty() ||
-                plugin.getSettings().whitelistedBarrels.contains(key)) &&
-                !plugin.getSettings().blacklistedBarrels.contains(key) &&
+        Material type = block.getType();
+        return (plugin.getSettings().whitelistedBarrels.size() == 0 ||
+                plugin.getSettings().whitelistedBarrels.contains(type)) &&
+                !plugin.getSettings().blacklistedBarrels.contains(type) &&
                 !plugin.getSettings().barrelsDisabledWorlds.contains(block.getWorld().getName());
     }
 

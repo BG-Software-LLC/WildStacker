@@ -1,13 +1,16 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.key.Key;
-import com.bgsoftware.wildstacker.key.KeyMap;
-import com.bgsoftware.wildstacker.key.KeySet;
 import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsMap;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast3EnumsArray;
+import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
+import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
@@ -17,12 +20,16 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -41,19 +48,20 @@ public final class SettingsHandler {
     public final ItemStack inspectTool, simulateTool;
     public final boolean deleteInvalidWorlds, killTaskStackedEntities, killTaskUnstackedEntities,
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
-    public final KeyMap<String> customNames;
+    public final Map<String, String> customNames;
     public final long killTaskInterval;
-    public final List<String> killTaskEntitiesWhitelist, killTaskItemsWhitelist, killTaskEntitiesBlacklist,
-            killTaskItemsBlacklist, killTaskEntitiesWorlds, killTaskItemsWorlds;
+    public final Fast2EnumsArray<EntityType, SpawnCause> killTaskEntitiesWhitelist, killTaskEntitiesBlacklist;
+    public final FastEnumArray<Material> killTaskItemsWhitelist, killTaskItemsBlacklist;
+    public final List<String> killTaskEntitiesWorlds, killTaskItemsWorlds;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
             itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems;
     public final List<String> itemsDisabledWorlds;
-    public final KeySet blacklistedItems, whitelistedItems;
+    public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
-    public final KeyMap<Integer> itemsMergeRadius, itemsLimits;
+    public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
@@ -69,12 +77,13 @@ public final class SettingsHandler {
     public final Sound entitiesExpPickupSound;
     public final Pattern entitiesCustomNamePattern;
     public final int linkedEntitiesMaxDistance, entitiesChunkLimit;
-    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, blacklistedEntities, whitelistedEntities,
-            blacklistedEntitiesSpawnReasons, entitiesInstantKills, entitiesNerfedWhitelist,
-            entitiesNerfedBlacklist, entitiesNerfedWorlds, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup,
-            entitiesOneShotTools, entitiesOneShotWhitelist;
+    public final Fast2EnumsArray<EntityType, SpawnCause> blacklistedEntities, whitelistedEntities, entitiesNerfedWhitelist,
+            entitiesNerfedBlacklist, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup, entitiesOneShotWhitelist;
+    public final Fast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> entitiesInstantKills;
+    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, entitiesNerfedWorlds, entitiesOneShotTools;
     public final List<Pattern> blacklistedEntitiesNames;
-    public final KeyMap<Integer> entitiesMergeRadius, entitiesLimits, minimumRequiredEntities, defaultUnstack;
+    public final Fast2EnumsMap<EntityType, SpawnCause, Integer> entitiesMergeRadius, entitiesLimits,
+            minimumRequiredEntities, defaultUnstack;
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
@@ -85,11 +94,12 @@ public final class SettingsHandler {
             onlyOneSpawner, inventoryTweaksEnabled;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
-    public final List<String> spawnersDisabledWorlds, blacklistedSpawners, whitelistedSpawners, spawnerItemLore, silkWorlds, explosionsWorlds;
+    public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
+    public final FastEnumArray<EntityType> blacklistedSpawners, whitelistedSpawners;
     public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
-    public final KeyMap<Integer> spawnersMergeRadius, spawnersLimits;
+    public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
-    public final KeyMap<Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
+    public final FastEnumMap<EntityType, Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
@@ -97,8 +107,8 @@ public final class SettingsHandler {
     public final int barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle, barrelsRequiredPermission;
     public final List<String> barrelsDisabledWorlds;
-    public final KeySet blacklistedBarrels, whitelistedBarrels;
-    public final KeyMap<Integer> barrelsMergeRadius, barrelsLimits;
+    public final FastEnumArray<Material> blacklistedBarrels, whitelistedBarrels;
+    public final FastEnumMap<Material, Integer> barrelsMergeRadius, barrelsLimits;
     public final List<ParticleWrapper> barrelsParticles;
 
     //Buckets settings
@@ -143,23 +153,27 @@ public final class SettingsHandler {
         killTaskStackedItems = cfg.getBoolean("kill-task.stacked-items", true);
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
-        killTaskEntitiesWhitelist = cfg.getStringList("kill-task.kill-entities.whitelist");
-        killTaskEntitiesBlacklist = cfg.getStringList("kill-task.kill-entities.blacklist");
+        killTaskEntitiesWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.whitelist"),
+                EntityType.class, SpawnCause.class);
+        killTaskEntitiesBlacklist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.blacklist"),
+                EntityType.class, SpawnCause.class);
         killTaskEntitiesWorlds = cfg.getStringList("kill-task.kill-entities.worlds");
-        killTaskItemsWhitelist = cfg.getStringList("kill-task.kill-items.whitelist");
-        killTaskItemsBlacklist = cfg.getStringList("kill-task.kill-items.blacklist");
+        killTaskItemsWhitelist = FastEnumArray.fromList(cfg.getStringList("kill-task.kill-items.whitelist"), Material.class);
+        killTaskItemsBlacklist = FastEnumArray.fromList(cfg.getStringList("kill-task.kill-items.blacklist"), Material.class);
         killTaskItemsWorlds = cfg.getStringList("kill-task.kill-items.worlds");
-        customNames = new KeyMap<>();
+        customNames = new HashMap<>();
         loadCustomNames(plugin);
 
         itemsStackingEnabled = cfg.getBoolean("items.enabled", true);
+        itemsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("items.merge-radius"), Material.class);
         itemsParticlesEnabled = cfg.getBoolean("items.particles", true);
         itemsParticles = getParticles(plugin, "items");
         itemsDisabledWorlds = cfg.getStringList("items.disabled-worlds");
+        itemsLimits = FastEnumMap.fromSection(cfg.getConfigurationSection("items.limits"), Material.class);
         itemsUnstackedCustomName = cfg.getBoolean("items.unstacked-custom-name", false);
         itemsFixStackEnabled = cfg.getBoolean("items.fix-stack", false);
-        blacklistedItems = new KeySet(cfg.getStringList("items.blacklist"));
-        whitelistedItems = new KeySet(cfg.getStringList("items.whitelist"));
+        blacklistedItems = FastEnumArray.fromList(cfg.getStringList("items.blacklist"), Material.class);
+        whitelistedItems = FastEnumArray.fromList(cfg.getStringList("items.whitelist"), Material.class);
         itemsChunkLimit = cfg.getInt("items.chunk-limit", 0);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
@@ -173,10 +187,16 @@ public final class SettingsHandler {
         storeItems = cfg.getBoolean("items.store-items", true);
 
         entitiesStackingEnabled = cfg.getBoolean("entities.enabled", true);
+        entitiesMergeRadius = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.merge-radius"),
+                EntityType.class, SpawnCause.class);
         entitiesParticlesEnabled = cfg.getBoolean("entities.particles", true);
         entitiesParticles = getParticles(plugin, "entities");
         entitiesStackInterval = cfg.getLong("entities.stack-interval", 0);
         entitiesDisabledWorlds = cfg.getStringList("entities.disabled-worlds");
+        entitiesLimits = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.limits"),
+                EntityType.class, SpawnCause.class);
+        minimumRequiredEntities = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.minimum-required"),
+                EntityType.class, SpawnCause.class);
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
 
         String entitiesCustomName = this.entitiesCustomName;
@@ -196,28 +216,37 @@ public final class SettingsHandler {
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
         nerfedEntitiesTeleport = cfg.getBoolean("entities.nerfed-entities.teleport", false);
         linkedEntitiesMaxDistance = cfg.getInt("entities.linked-entities.max-distance", 10);
-        blacklistedEntities = cfg.getStringList("entities.blacklist");
-        whitelistedEntities = cfg.getStringList("entities.whitelist");
-        blacklistedEntitiesSpawnReasons = cfg.getStringList("entities.spawn-blacklist");
+        blacklistedEntities = Fast2EnumsArray.fromList(cfg.getStringList("entities.blacklist"),
+                EntityType.class, SpawnCause.class);
+        whitelistedEntities = Fast2EnumsArray.fromList(cfg.getStringList("entities.whitelist"),
+                EntityType.class, SpawnCause.class);
         blacklistedEntitiesNames = cfg.getStringList("entities.name-blacklist").stream()
                 .map(line -> Pattern.compile(ChatColor.translateAlternateColorCodes('&', line)))
                 .collect(Collectors.toList());
-        entitiesInstantKills = cfg.getStringList("entities.instant-kill");
-        entitiesNerfedWhitelist = cfg.getStringList("entities.nerfed-entities.whitelist");
-        entitiesNerfedBlacklist = cfg.getStringList("entities.nerfed-entities.blacklist");
+        entitiesInstantKills = Fast3EnumsArray.fromList(cfg.getStringList("entities.instant-kill"),
+                EntityType.class, SpawnCause.class, EntityDamageEvent.DamageCause.class);
+        entitiesNerfedWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("entities.nerfed-entities.whitelist"),
+                EntityType.class, SpawnCause.class);
+        entitiesNerfedBlacklist = Fast2EnumsArray.fromList(cfg.getStringList("entities.nerfed-entities.blacklist"),
+                EntityType.class, SpawnCause.class);
         entitiesNerfedWorlds = cfg.getStringList("entities.nerfed-entities.worlds");
         stackDownEnabled = cfg.getBoolean("entities.stack-down.enabled", true);
-        stackDownTypes = cfg.getStringList("entities.stack-down.stack-down-types");
+        stackDownTypes = Fast2EnumsArray.fromList(cfg.getStringList("entities.stack-down.stack-down-types"),
+                EntityType.class, SpawnCause.class);
         keepFireEnabled = cfg.getBoolean("entities.keep-fire", true);
         mythicMobsCustomNameEnabled = cfg.getBoolean("entities.mythic-mobs-custom-name", true);
-        keepLowestHealth = cfg.getStringList("entities.keep-lowest-health");
+        keepLowestHealth = Fast2EnumsArray.fromList(cfg.getStringList("entities.keep-lowest-health"),
+                EntityType.class, SpawnCause.class);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
         smartBreeding = cfg.getBoolean("entities.smart-breeding", false);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
         nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
-        entitiesAutoExpPickup = cfg.getStringList("entities.auto-exp-pickup");
+        defaultUnstack = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.default-unstack"),
+                EntityType.class, SpawnCause.class);
+        entitiesAutoExpPickup = Fast2EnumsArray.fromList(cfg.getStringList("entities.auto-exp-pickup"),
+                EntityType.class, SpawnCause.class);
         Sound entitiesExpPickupSound;
         try{
             entitiesExpPickupSound = Sound.valueOf(cfg.getString("entities.exp-pickup-sound"));
@@ -231,7 +260,8 @@ public final class SettingsHandler {
         spawnCorpses = cfg.getBoolean("entities.spawn-corpses", true);
         entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);
         entitiesOneShotTools = cfg.getStringList("entities.one-shot.tools");
-        entitiesOneShotWhitelist = cfg.getStringList("entities.one-shot.whitelist");
+        entitiesOneShotWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("entities.one-shot.whitelist"),
+                EntityType.class, SpawnCause.class);
         storeEntities = cfg.getBoolean("entities.store-entities", true);
         superiorSkyblockHook = cfg.getBoolean("entities.superiorskyblock-hook", false);
         multiplyDrops = cfg.getBoolean("entities.multiply-drops", true);
@@ -239,13 +269,15 @@ public final class SettingsHandler {
         spreadDamage = cfg.getBoolean("entities.spread-damage", false);
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
+        spawnersMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("spawners.merge-radius"), EntityType.class);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);
         spawnersParticlesEnabled = cfg.getBoolean("spawners.particles", true);
         spawnersParticles = getParticles(plugin, "spawners");
         spawnersDisabledWorlds = cfg.getStringList("spawners.disabled-worlds");
+        spawnersLimits = FastEnumMap.fromSection(cfg.getConfigurationSection("spawners.limits"), EntityType.class);
         chunkMergeSpawners = cfg.getBoolean("spawners.chunk-merge", false);
-        blacklistedSpawners = cfg.getStringList("spawners.blacklist");
-        whitelistedSpawners = cfg.getStringList("spawners.whitelist");
+        blacklistedSpawners = FastEnumArray.fromList(cfg.getStringList("spawners.blacklist"), EntityType.class);
+        whitelistedSpawners = FastEnumArray.fromList(cfg.getStringList("spawners.whitelist"), EntityType.class);
         spawnersChunkLimit = cfg.getInt("spawners.chunk-limit", 0);
         hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
         spawnerItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.spawner-item.name", "&e{0} &fSpawner"));
@@ -276,20 +308,36 @@ public final class SettingsHandler {
         SpawnersBreakMenu.loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
-        spawnersBreakCharge = new KeyMap<>();
+        spawnersBreakCharge = new FastEnumMap<>(EntityType.class);
         for(String key : cfg.getConfigurationSection("spawners.break-charge").getKeys(false)){
             ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.break-charge." + key);
+            EntityType entityType;
+
+            try{
+                entityType = EntityType.valueOf(key.toUpperCase());
+            }catch (Exception ex){
+                continue;
+            }
+
             double amount = mobSection.getDouble("price", 0.0);
             if(amount > 0) {
-                spawnersBreakCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersBreakCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
-        spawnersPlaceCharge = new KeyMap<>();
+        spawnersPlaceCharge = new FastEnumMap<>(EntityType.class);
         for(String key : cfg.getConfigurationSection("spawners.place-charge").getKeys(false)){
             ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.place-charge." + key);
+            EntityType entityType;
+
+            try{
+                entityType = EntityType.valueOf(key.toUpperCase());
+            }catch (Exception ex){
+                continue;
+            }
+
             double amount = mobSection.getDouble("price", 0.0);
             if(amount > 0) {
-                spawnersPlaceCharge.put(Key.of(key), new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersPlaceCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
         changeUsingEggs = cfg.getBoolean("spawners.change-using-eggs", true);
@@ -301,13 +349,15 @@ public final class SettingsHandler {
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
+        barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);
         barrelsParticlesEnabled = cfg.getBoolean("barrels.particles", true);
         barrelsParticles = getParticles(plugin, "barrels");
         barrelsDisabledWorlds = cfg.getStringList("barrels.disabled-worlds");
+        barrelsLimits = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.limits"), Material.class);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
         barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
-        blacklistedBarrels = new KeySet(cfg.getStringList("barrels.blacklist"));
-        whitelistedBarrels = new KeySet(cfg.getStringList("barrels.whitelist"));
+        blacklistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.blacklist"), Material.class);
+        whitelistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.whitelist"), Material.class);
         barrelsChunkLimit = cfg.getInt("barrels.chunk-limit", 0);
         explosionsBreakBarrelStack = cfg.getBoolean("barrels.explosions-break-stack", true);
         barrelsToggleCommand = cfg.getBoolean("barrels.toggle-command.enabled", false);
@@ -337,18 +387,6 @@ public final class SettingsHandler {
             split.setEnabled(cfg.getBoolean("entities.stack-split." + split.name(), false));
         }
 
-
-        loadLimits((itemsMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("items.merge-radius"));
-        loadLimits((itemsLimits = new KeyMap<>()), cfg.getConfigurationSection("items.limits"));
-        loadLimits((entitiesMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("entities.merge-radius"));
-        loadLimits((entitiesLimits = new KeyMap<>()), cfg.getConfigurationSection("entities.limits"));
-        loadLimits((minimumRequiredEntities = new KeyMap<>()), cfg.getConfigurationSection("entities.minimum-required"));
-        loadLimits((defaultUnstack = new KeyMap<>()), cfg.getConfigurationSection("entities.default-unstack"));
-        loadLimits((spawnersMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("spawners.merge-radius"));
-        loadLimits((spawnersLimits = new KeyMap<>()), cfg.getConfigurationSection("spawners.limits"));
-        loadLimits((barrelsMergeRadius = new KeyMap<>()), cfg.getConfigurationSection("barrels.merge-radius"));
-        loadLimits((barrelsLimits = new KeyMap<>()), cfg.getConfigurationSection("barrels.limits"));
-
         WildStackerPlugin.log(" - Stacking drops is " + getBoolean(itemsStackingEnabled));
         WildStackerPlugin.log(" - Stacking entities is " + getBoolean(entitiesStackingEnabled));
         WildStackerPlugin.log(" - Stacking spawners is " + getBoolean(spawnersStackingEnabled));
@@ -361,14 +399,6 @@ public final class SettingsHandler {
         return bool ? "enabled" : "disabled";
     }
 
-    private void loadLimits(KeyMap<Integer> limitsMap, ConfigurationSection configSection){
-        if(configSection != null) {
-            for (String type : configSection.getKeys(false)) {
-                limitsMap.put(type, configSection.getInt(type));
-            }
-        }
-    }
-
     private void loadCustomNames(WildStackerPlugin plugin){
         File file = new File(plugin.getDataFolder(), "custom-names.yml");
 
@@ -377,14 +407,10 @@ public final class SettingsHandler {
 
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 
-        for(String stringKey : cfg.getConfigurationSection("").getKeys(false)){
-            if(cfg.isString(stringKey)){
-                customNames.put(Key.of(stringKey), ChatColor.translateAlternateColorCodes('&', cfg.getString(stringKey)));
-            }
+        if(cfg.getBoolean("enabled", true)){
+            for(String key : cfg.getConfigurationSection("").getKeys(false))
+                customNames.put(key, cfg.getString(key));
         }
-
-        if(!cfg.getBoolean("enabled", true))
-            customNames.clear();
     }
 
     private YamlConfiguration particlesYaml = null;

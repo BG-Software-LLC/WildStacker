@@ -295,7 +295,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                     Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 
                     if (entityOptional.isPresent()) {
-                        int minimumStackSize = plugin.getSettings().minimumRequiredEntities.getOrDefault(getType().name(), 1);
+                        int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
                         StackedEntity targetEntity = entityOptional.get();
 
                         if (minimumStackSize > 2) {
@@ -625,9 +625,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean isInstantKill(EntityDamageEvent.DamageCause damageCause) {
-        return GeneralUtils.contains(plugin.getSettings().entitiesInstantKills, this) ||
-                (damageCause != null && (plugin.getSettings().entitiesInstantKills.contains(damageCause.name()) ||
-                        plugin.getSettings().entitiesInstantKills.contains(getType().name() + ":" + damageCause.name())));
+        return GeneralUtils.contains(plugin.getSettings().entitiesInstantKills, this, damageCause);
     }
 
     @Override

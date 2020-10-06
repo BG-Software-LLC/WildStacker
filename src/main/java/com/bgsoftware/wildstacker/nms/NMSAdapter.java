@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Location;
@@ -96,10 +95,10 @@ public interface NMSAdapter {
 
     }
 
-    default Key getEndermanCarried(Enderman enderman){
+    default String getEndermanCarried(Enderman enderman){
         MaterialData materialData = enderman.getCarriedMaterial();
         //noinspection deprecation
-        return Key.of(materialData.getItemType(), materialData.getData());
+        return materialData.getItemType() + ":" + materialData.getData();
     }
 
     default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage){

@@ -1,11 +1,17 @@
 package com.bgsoftware.wildstacker.utils;
 
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.key.KeyMap;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsMap;
+import com.bgsoftware.wildstacker.utils.data.structures.Fast3EnumsArray;
+import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -20,40 +26,30 @@ public final class GeneralUtils {
 
     private static final NumberFormat numberFormant = DecimalFormat.getNumberInstance();
 
-    public static boolean contains(List<String> list, StackedEntity stackedEntity){
-        return list.contains(stackedEntity.getType().name()) ||  list.contains(stackedEntity.getSpawnCause().name()) ||
-                list.contains(stackedEntity.getType().name() + ":" + stackedEntity.getSpawnCause().name()) ||
-                list.contains("all") || list.contains("ALL");
+    public static boolean contains(Fast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity){
+        return fast2EnumsArray.contains(stackedEntity.getType(), stackedEntity.getSpawnCause());
     }
 
-    public static boolean containsOrEmpty(List<String> list, StackedEntity stackedEntity){
-        return list.isEmpty() || contains(list, stackedEntity);
+    public static boolean contains(Fast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> fast3EnumsArray,
+                                   StackedEntity stackedEntity, EntityDamageEvent.DamageCause damageCause){
+        return fast3EnumsArray.containsFirst(stackedEntity.getType(), stackedEntity.getSpawnCause()) ||
+                fast3EnumsArray.containsSecond(stackedEntity.getType(), damageCause);
+    }
+
+    public static boolean containsOrEmpty(Fast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity){
+        return fast2EnumsArray.size() == 0 || contains(fast2EnumsArray, stackedEntity);
+    }
+
+    public static boolean containsOrEmpty(FastEnumArray<Material> fastEnumArray, Material itemType){
+        return fastEnumArray.size() == 0 || fastEnumArray.contains(itemType);
     }
 
     public static boolean containsOrEmpty(List<String> list, String element){
         return list.isEmpty() || element.isEmpty() || list.contains(element);
     }
 
-    public static boolean contains(List<String> list, StackedSpawner stackedSpawner){
-        return list.contains(stackedSpawner.getSpawnedType().name()) || list.contains("all") || list.contains("ALL");
-    }
-
-    public static boolean containsOrEmpty(List<String> list, StackedSpawner stackedSpawner){
-        return list.isEmpty() || contains(list, stackedSpawner);
-    }
-
-    public static int get(KeyMap<Integer> map, StackedEntity stackedEntity, int def){
-        if(map.containsKey(stackedEntity.getType().name()))
-            return map.get(stackedEntity.getType().name());
-        if(map.containsKey(stackedEntity.getSpawnCause().name()))
-            return map.get(stackedEntity.getSpawnCause().name());
-        if(map.containsKey(stackedEntity.getType().name() + ":" + stackedEntity.getSpawnCause().name()))
-            return map.get(stackedEntity.getType().name() + ":" + stackedEntity.getSpawnCause().name());
-        if(map.containsKey("all"))
-            return map.get("all");
-        if(map.containsKey("ALL"))
-            return map.get("ALL");
-        return def;
+    public static int get(Fast2EnumsMap<EntityType, SpawnCause, Integer> fast2EnumsMap, StackedEntity stackedEntity, int def){
+        return fast2EnumsMap.getOrDefault(stackedEntity.getType(), stackedEntity.getSpawnCause(), def);
     }
 
     public static boolean isSameChunk(Location location, Chunk chunk){

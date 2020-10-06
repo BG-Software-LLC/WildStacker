@@ -580,7 +580,7 @@ public final class EntitiesListener implements Listener {
 
     public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event){
         if(!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
-                plugin.getSettings().blacklistedEntitiesSpawnReasons.contains("SPAWNER_EGG") ||
+                plugin.getSettings().blacklistedEntities.contains(SpawnCause.SPAWNER_EGG) ||
                 (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
             return false;
 

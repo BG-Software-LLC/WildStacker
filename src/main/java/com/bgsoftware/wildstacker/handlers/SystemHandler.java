@@ -351,6 +351,13 @@ public final class SystemHandler implements SystemManager {
         return dataHandler.CACHED_BARRELS.containsKey(location);
     }
 
+    public boolean isBarrelBlock(Material blockType, World world){
+        return (plugin.getSettings().whitelistedBarrels.size() == 0 ||
+                plugin.getSettings().whitelistedBarrels.contains(blockType)) &&
+                !plugin.getSettings().blacklistedBarrels.contains(blockType) &&
+                !plugin.getSettings().barrelsDisabledWorlds.contains(world.getName());
+    }
+
     @Override
     public void performCacheClear() {
         List<StackedObject> stackedObjects = dataHandler.getStackedObjects();
@@ -555,7 +562,7 @@ public final class SystemHandler implements SystemManager {
         location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
         location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
 
-        int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack, Integer.MAX_VALUE);
+        int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE);
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
 
         int amountOfItems = amount / limit;
@@ -666,8 +673,8 @@ public final class SystemHandler implements SystemManager {
             if(plugin.getSettings().killTaskStackedItems) {
                 entityList.stream()
                         .filter(entity -> entity instanceof Item && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity) &&
-                                (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskItemsWhitelist, ((Item) entity).getItemStack().getType().name()) &&
-                                        !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType().name()))))
+                                (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskItemsWhitelist, ((Item) entity).getItemStack().getType()) &&
+                                        !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType()))))
                         .forEach(entity -> {
                             StackedItem stackedItem = WStackedItem.of(entity);
                             if(!applyTaskFilter || (plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||

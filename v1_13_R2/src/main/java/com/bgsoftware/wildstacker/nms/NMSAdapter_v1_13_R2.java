@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -319,9 +318,9 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     }
 
     @Override
-    public Key getEndermanCarried(Enderman enderman) {
+    public String getEndermanCarried(Enderman enderman) {
         BlockData carriedData = enderman.getCarriedBlock();
-        return carriedData == null ? Key.of("AIR") : Key.of(carriedData.getMaterial(), (short) 0);
+        return carriedData == null ? "AIR" : carriedData.getMaterial() + "";
     }
 
     @Override

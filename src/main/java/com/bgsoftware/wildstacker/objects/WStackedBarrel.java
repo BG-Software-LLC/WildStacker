@@ -88,25 +88,25 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().barrelsLimits.getOrDefault(getBarrelItem(1), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().barrelsLimits.getOrDefault(barrelItem.getType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().barrelsMergeRadius.getOrDefault(getBarrelItem(1), 0);
+        int radius = plugin.getSettings().barrelsMergeRadius.getOrDefault(barrelItem.getType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedBarrels.contains(getBarrelItem(1));
+        return plugin.getSettings().blacklistedBarrels.contains(barrelItem.getType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedBarrels.isEmpty() ||
-                plugin.getSettings().whitelistedBarrels.contains(getBarrelItem(1));
+        return plugin.getSettings().whitelistedBarrels.size() == 0 ||
+                plugin.getSettings().whitelistedBarrels.contains(barrelItem.getType());
     }
 
     @Override

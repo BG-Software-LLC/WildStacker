@@ -424,8 +424,9 @@ public final class ItemUtils {
     }
 
     private static boolean canBeStacked(ItemStack itemStack, World world){
-        return !plugin.getSettings().blacklistedItems.contains(itemStack) &&
-                (plugin.getSettings().whitelistedItems.isEmpty() || plugin.getSettings().whitelistedItems.contains(itemStack)) &&
+        Material itemType = itemStack.getType();
+        return !plugin.getSettings().blacklistedItems.contains(itemType) &&
+                (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&
                 !plugin.getSettings().itemsDisabledWorlds.contains(world.getName());
     }
 

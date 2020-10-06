@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.key.Key;
 import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -136,8 +135,8 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge.getOrDefault(
-                    Key.of(spawnerType.name()), new Pair<>(0.0, false));
+            Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge
+                    .getOrDefault(spawnerType, new Pair<>(0.0, false));
 
             double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
 
@@ -278,8 +277,8 @@ public final class SpawnersListener implements Listener {
         int originalAmount = stackedSpawner.getStackAmount();
         int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().shiftGetWholeSpawnerStack ? originalAmount : 1;
 
-        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge.getOrDefault(
-                Key.of(stackedSpawner.getSpawnedType().name()), new Pair<>(0.0, false));
+        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge
+                .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? stackAmount : 1);
 
@@ -409,7 +408,7 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
-        int minimumEntityRequirement = plugin.getSettings().minimumRequiredEntities.getOrDefault(stackedEntity.getType().name(), 1);
+        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
         multipleEntities = multipleEntities || minimumEntityRequirement > stackedSpawner.getStackAmount();
 

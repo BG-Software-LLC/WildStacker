@@ -86,25 +86,25 @@ public final class WStackedSpawner extends WStackedObject<CreatureSpawner> imple
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType().name(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().spawnersMergeRadius.getOrDefault(getSpawnedType().name(), 0);
+        int radius = plugin.getSettings().spawnersMergeRadius.getOrDefault(getSpawnedType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType().name());
+        return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedSpawners.isEmpty() ||
-                plugin.getSettings().whitelistedSpawners.contains(getSpawnedType().name());
+        return plugin.getSettings().whitelistedSpawners.size() == 0 ||
+                plugin.getSettings().whitelistedSpawners.contains(getSpawnedType());
     }
 
     @Override

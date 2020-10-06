@@ -143,7 +143,7 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            if(!WildStackerPlugin.getPlugin().getSettings().whitelistedBarrels.contains(barrelType.name().toUpperCase())){
+            if(!WildStackerPlugin.getPlugin().getSettings().whitelistedBarrels.contains(barrelType)){
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
             }
@@ -200,9 +200,7 @@ public final class CommandGive implements ICommand {
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
                 }else if(args[2].equalsIgnoreCase("barrel")) {
-                    plugin.getSettings().whitelistedBarrels.asStringSet().stream()
-                            .filter(this::isValidMaterial)
-                            .forEach(materialName -> list.add(materialName.toLowerCase()));
+                    plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
         }
@@ -228,22 +226,12 @@ public final class CommandGive implements ICommand {
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
                 }else if(args[3].equalsIgnoreCase("barrel")) {
-                    plugin.getSettings().whitelistedBarrels.asStringSet().stream()
-                            .filter(this::isValidMaterial)
-                            .forEach(materialName -> list.add(materialName.toLowerCase()));
+                    plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
         }
 
         return list;
-    }
-
-    private boolean isValidMaterial(String materialName){
-        try{
-            return Material.matchMaterial(materialName) != null;
-        }catch(IllegalArgumentException ex){
-            return false;
-        }
     }
 
 }
