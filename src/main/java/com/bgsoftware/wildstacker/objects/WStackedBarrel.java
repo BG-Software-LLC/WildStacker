@@ -21,12 +21,18 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class WStackedBarrel extends WStackedObject<Block> implements StackedBarrel {
+
+    private final List<Inventory> linkedInventories = new ArrayList<>();
 
     private final ItemStack barrelItem;
     private ArmorStand blockDisplay;
@@ -126,6 +132,13 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
 
         plugin.getProviders().deleteHologram(this);
         removeDisplayBlock();
+
+        List<HumanEntity> viewers = new ArrayList<>();
+        linkedInventories.forEach(i ->  viewers.addAll(i.getViewers()));
+
+        viewers.forEach(HumanEntity::closeInventory);
+
+        linkedInventories.clear();
     }
 
     @Override
@@ -319,8 +332,20 @@ public final class WStackedBarrel extends WStackedObject<Block> implements Stack
         return itemStack;
     }
 
+    public void linkInventory(Inventory inventory){
+        this.linkedInventories.add(inventory);
+    }
+
+    public void unlinkInventory(Inventory inventory){
+        this.linkedInventories.remove(inventory);
+    }
+
     public static StackedBarrel of(Block block){
         return plugin.getSystemManager().getStackedBarrel(block);
+    }
+
+    public static StackedBarrel of(Location location){
+        return plugin.getSystemManager().getStackedBarrel(location);
     }
 
 }
