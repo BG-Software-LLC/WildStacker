@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -673,7 +674,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(EntityUtils.isStackable(livingEntity))
             return plugin.getSystemManager().getStackedEntity(livingEntity);
 
-        if(livingEntity.hasMetadata("NPC"))
+        if(CitizensHook.isNPC(livingEntity))
             throw new IllegalArgumentException("Cannot get a stacked entity from an NPC of Citizens.");
         else
             throw new IllegalArgumentException("The entity-type " + livingEntity.getType() + " is not a stackable entity.");

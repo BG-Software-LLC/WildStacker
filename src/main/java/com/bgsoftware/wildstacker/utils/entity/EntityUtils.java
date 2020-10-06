@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -134,7 +135,7 @@ public final class EntityUtils {
 
     public static boolean isStackable(Entity entity){
         return (MythicMobsHook.isMythicMob(entity) ||
-                (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !entity.hasMetadata("NPC")));
+                (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
     }
 
     public static boolean isItem(Entity entity){

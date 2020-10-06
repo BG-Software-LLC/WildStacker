@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 public final class PluginHooks {
 
+    public static boolean isCitizensEnabled = false;
     public static boolean isEpicSpawnersEnabled = false;
     public static boolean isMergedSpawnersEnabled = false;
     public static boolean isASkyBlockEnabled = false;

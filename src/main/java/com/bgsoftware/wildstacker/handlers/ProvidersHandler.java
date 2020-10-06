@@ -123,6 +123,8 @@ public final class ProvidersHandler {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
 
         // Load listeners
+        if(enable && isPlugin(toCheck, "Citizens") && pluginManager.isPluginEnabled("Citizens"))
+            PluginHooks.isCitizensEnabled = true;
         if(enable && isPlugin(toCheck, "ClearLag") && pluginManager.isPluginEnabled("ClearLag"))
             pluginManager.registerEvents(new ClearLaggListener(plugin), plugin);
         if(enable && isPlugin(toCheck, "SilkSpawners") && pluginManager.isPluginEnabled("SilkSpawners"))
