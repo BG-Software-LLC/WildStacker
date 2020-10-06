@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.google.common.collect.Sets;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
@@ -9,8 +8,6 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
-
-import java.util.Set;
 
 public enum  EntityTypes {
 
@@ -24,9 +21,9 @@ public enum  EntityTypes {
     COW,
     CREEPER,
     DOLPHIN,
-    DONKEY("HORSE"),
+    DONKEY,
     DROWNED,
-    ELDER_GUARDIAN("GUARDIAN"),
+    ELDER_GUARDIAN,
     ENDER_DRAGON,
     ENDERMAN,
     ENDERMITE,
@@ -42,8 +39,8 @@ public enum  EntityTypes {
     IRON_GOLEM,
     LLAMA,
     MAGMA_CUBE,
-    MULE("HORSE"),
-    MOOSHROOM("MUSHROOM_COW"),
+    MULE,
+    MOOSHROOM,
     OCELOT,
     PANDA,
     PARROT,
@@ -61,7 +58,7 @@ public enum  EntityTypes {
     SHULKER,
     SILVERFISH,
     SKELETON,
-    SKELETON_HORSE("HORSE"),
+    SKELETON_HORSE,
     SLIME,
     SNOWMAN,
     SPIDER,
@@ -78,32 +75,25 @@ public enum  EntityTypes {
     WANDERING_TRADER,
     WITCH,
     WITHER,
-    WITHER_SKELETON("SKELETON"),
+    WITHER_SKELETON,
     WOLF,
     ZOGLIN,
     ZOMBIE,
-    ZOMBIE_HORSE("HORSE"),
-    ZOMBIE_PIGMAN("PIG_ZOMBIE", "ZOMBIFIED_PIGLIN"),
-    ZOMBIE_VILLAGER("ZOMBIE");
-
-    EntityTypes(){
-        this.bukkitEntityType = Sets.newHashSet(name());
-    }
-
-    EntityTypes(String... bukkitEntityType){
-        this.bukkitEntityType = Sets.newHashSet(bukkitEntityType);
-    }
-
-    private final Set<String> bukkitEntityType;
+    ZOMBIE_HORSE,
+    ZOMBIE_PIGMAN,
+    ZOMBIE_VILLAGER;
 
     public static EntityTypes fromName(String name){
         try{
             return EntityTypes.valueOf(name);
         }catch(IllegalArgumentException ignored){}
 
-        for(EntityTypes entityType : values()){
-            if(entityType.bukkitEntityType.contains(name))
-                return entityType;
+        switch (name){
+            case "MUSHROOM_COW":
+                return MOOSHROOM;
+            case "ZOMBIFIED_PIGLIN":
+            case "PIG_ZOMBIE":
+                return ZOMBIE_PIGMAN;
         }
 
         throw new IllegalArgumentException("Couldn't cast " + name + " into a EntityTypes enum. Contact Ome_R!");
