@@ -388,7 +388,7 @@ public final class EntitiesListener implements Listener {
                         }
 
                         // Handle sweeping edge enchantment
-                        if(e.isCancelled() && itemInHand != null)
+                        if(e.isCancelled() && itemInHand != null && DAMAGER != null)
                             plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, itemInHand, stackedEntity.getLivingEntity(), originalDamage);
 
                         //Decrease durability when next-stack-knockback is false
