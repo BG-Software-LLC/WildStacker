@@ -26,8 +26,10 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
     public static <E extends Enum<E>, T extends Enum<T>> Fast2EnumsMap<E, T, Integer> fromSectionToInt(
             ConfigurationSection section, Class<E> firstType, Class<T> secondType){
         Fast2EnumsMap<E, T, Integer> fast2EnumsIntMap = new Fast2EnumsMap<>(firstType, secondType);
-        for(String key : section.getKeys(false))
-            fast2EnumsIntMap.put(key, section.getInt(key), firstType, secondType);
+        if(section != null) {
+            for (String key : section.getKeys(false))
+                fast2EnumsIntMap.put(key, section.getInt(key), firstType, secondType);
+        }
         return fast2EnumsIntMap;
     }
 

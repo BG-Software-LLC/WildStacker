@@ -29,44 +29,45 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
     public static <E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> Fast3EnumsArray<E, T, S> fromList(
             List<String> arr, Class<E> firstType, Class<T> secondType, Class<S> thirdType){
         Fast3EnumsArray<E, T, S> fast2EnumsArray = new Fast3EnumsArray<>(firstType, secondType, thirdType);
-        arr.forEach(line -> {
-            if (line.equalsIgnoreCase("ALL")) {
-                fast2EnumsArray.containsAll = true;
-                fast2EnumsArray.size++;
-            }
-            else {
-                String[] sections = line.split(":");
-                E first = FastEnumUtils.getEnum(firstType, sections[0]);
+        if(arr != null) {
+            arr.forEach(line -> {
+                if (line.equalsIgnoreCase("ALL")) {
+                    fast2EnumsArray.containsAll = true;
+                    fast2EnumsArray.size++;
+                } else {
+                    String[] sections = line.split(":");
+                    E first = FastEnumUtils.getEnum(firstType, sections[0]);
 
-                if (sections.length == 2) {
-                    if (first != null) {
-                        T second = FastEnumUtils.getEnum(secondType, sections[1]);
+                    if (sections.length == 2) {
+                        if (first != null) {
+                            T second = FastEnumUtils.getEnum(secondType, sections[1]);
+                            if (second != null) {
+                                fast2EnumsArray.addFirst(first, second);
+                            } else {
+                                S third = FastEnumUtils.getEnum(thirdType, sections[1]);
+                                if (third != null)
+                                    fast2EnumsArray.addSecond(first, third);
+                                else
+                                    fast2EnumsArray.size++;
+                            }
+                        }
+                    } else if (first != null) {
+                        fast2EnumsArray.addFirst(first);
+                    } else {
+                        T second = FastEnumUtils.getEnum(secondType, sections[0]);
                         if (second != null) {
-                            fast2EnumsArray.addFirst(first, second);
+                            fast2EnumsArray.addSecond(second);
                         } else {
-                            S third = FastEnumUtils.getEnum(thirdType, sections[1]);
+                            S third = FastEnumUtils.getEnum(thirdType, sections[0]);
                             if (third != null)
-                                fast2EnumsArray.addSecond(first, third);
+                                fast2EnumsArray.addThird(third);
                             else
                                 fast2EnumsArray.size++;
                         }
                     }
-                } else if (first != null) {
-                    fast2EnumsArray.addFirst(first);
-                } else {
-                    T second = FastEnumUtils.getEnum(secondType, sections[0]);
-                    if (second != null) {
-                        fast2EnumsArray.addSecond(second);
-                    } else {
-                        S third = FastEnumUtils.getEnum(thirdType, sections[0]);
-                        if (third != null)
-                            fast2EnumsArray.addThird(third);
-                        else
-                            fast2EnumsArray.size++;
-                    }
                 }
-            }
-        });
+            });
+        }
         return fast2EnumsArray;
     }
 

@@ -20,17 +20,18 @@ public final class FastEnumMap<E extends Enum<E>, V> {
 
     public static <E extends Enum<E>> FastEnumMap<E, Integer> fromSection(ConfigurationSection section, Class<E> keyType){
         FastEnumMap<E, Integer> fastEnumIntMap = new FastEnumMap<>(keyType);
-        for(String _key : section.getKeys(false)){
-            if(_key.equalsIgnoreCase("ALL")) {
-                fastEnumIntMap.globalValue = section.getInt(_key);
-                fastEnumIntMap.size++;
-            }
-            else {
-                E key = FastEnumUtils.getEnum(keyType, _key.toUpperCase());
-                if (key != null)
-                    fastEnumIntMap.put(key, section.getInt(_key));
-                else
+        if(section != null) {
+            for (String _key : section.getKeys(false)) {
+                if (_key.equalsIgnoreCase("ALL")) {
+                    fastEnumIntMap.globalValue = section.getInt(_key);
                     fastEnumIntMap.size++;
+                } else {
+                    E key = FastEnumUtils.getEnum(keyType, _key.toUpperCase());
+                    if (key != null)
+                        fastEnumIntMap.put(key, section.getInt(_key));
+                    else
+                        fastEnumIntMap.size++;
+                }
             }
         }
         return fastEnumIntMap;

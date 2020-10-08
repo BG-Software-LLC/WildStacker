@@ -25,19 +25,20 @@ public final class FastEnumArray<E extends Enum<E>> {
 
     public static <E extends Enum<E>> FastEnumArray<E> fromList(List<String> arr, Class<E> keyType){
         FastEnumArray<E> fastEnumArray = new FastEnumArray<>(keyType);
-        arr.forEach(line -> {
-            if(line.equalsIgnoreCase("ALL")){
-                fastEnumArray.containsAll = true;
-                fastEnumArray.size++;
-            }
-            else {
-                E value = FastEnumUtils.getEnum(keyType, line.toUpperCase());
-                if (value != null)
-                    fastEnumArray.add(value);
-                else
+        if(arr != null) {
+            arr.forEach(line -> {
+                if (line.equalsIgnoreCase("ALL")) {
+                    fastEnumArray.containsAll = true;
                     fastEnumArray.size++;
-            }
-        });
+                } else {
+                    E value = FastEnumUtils.getEnum(keyType, line.toUpperCase());
+                    if (value != null)
+                        fastEnumArray.add(value);
+                    else
+                        fastEnumArray.size++;
+                }
+            });
+        }
         return fastEnumArray;
     }
 
