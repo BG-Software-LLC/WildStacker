@@ -15,7 +15,7 @@ public final class MythicMobsHook {
         if(WStackedEntity.of(livingEntity).getSpawnCause() == SpawnCause.MYTHIC_MOBS){
             ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
             ActiveMob duplicate = MythicMobs.inst().getMobManager().spawnMob(activeMob.getType().getInternalName(), livingEntity.getLocation());
-            return duplicate.getLivingEntity();
+            return (LivingEntity) duplicate.getEntity().getBukkitEntity();
         }
 
         return null;
@@ -47,7 +47,7 @@ public final class MythicMobsHook {
             try {
                 return activeMob.getDisplayName();
             }catch(Throwable ex){
-                return activeMob.getLivingEntity().getCustomName();
+                return activeMob.getEntity().getBukkitEntity().getCustomName();
             }
         }
 
