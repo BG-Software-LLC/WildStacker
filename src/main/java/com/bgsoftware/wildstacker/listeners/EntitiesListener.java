@@ -240,7 +240,7 @@ public final class EntitiesListener implements Listener {
                         finalDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
                 }
 
-                double leftDamage = finalDamage - livingEntity.getHealth();
+                double leftDamage = Math.max(0, finalDamage - livingEntity.getHealth());
                 stackAmount = Math.min(stackedEntity.getStackAmount(), 1 + (int) (leftDamage / livingEntity.getMaxHealth()));
                 damageToNextStack = leftDamage % livingEntity.getMaxHealth();
             }
