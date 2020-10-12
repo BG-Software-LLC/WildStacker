@@ -417,7 +417,7 @@ public final class EntitiesListener implements Listener {
 
                         ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
-                        if(spawnDuplicate && stackedEntity.getStackAmount() > 1){
+                        if(livingEntity.getHealth() <= 0 || (spawnDuplicate && stackedEntity.getStackAmount() > 1)){
                             stackedEntity.spawnDuplicate(stackedEntity.getStackAmount());
                             stackedEntity.remove();
                         }
