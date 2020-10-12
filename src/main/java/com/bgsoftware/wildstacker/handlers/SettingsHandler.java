@@ -409,7 +409,7 @@ public final class SettingsHandler {
 
         if(cfg.getBoolean("enabled", true)){
             for(String key : cfg.getConfigurationSection("").getKeys(false))
-                customNames.put(key, cfg.getString(key));
+                customNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString(key)));
         }
     }
 
