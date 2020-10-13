@@ -80,6 +80,26 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
+    public String getCustomName() {
+        return plugin.getNMSAdapter().getCustomName(object);
+    }
+
+    @Override
+    public void setCustomName(String customName){
+        plugin.getNMSAdapter().setCustomName(object, customName);
+    }
+
+    @Override
+    public boolean isCustomNameVisible() {
+        return plugin.getNMSAdapter().isCustomNameVisible(object);
+    }
+
+    @Override
+    public void setCustomNameVisible(boolean visible){
+        plugin.getNMSAdapter().setCustomNameVisible(object, visible);
+    }
+
+    @Override
     public void setItemStack(ItemStack itemStack){
         if(itemStack == null || itemStack.getType() == Material.AIR)
             remove();
@@ -152,7 +172,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         boolean mmoItem = !plugin.getNMSAdapter().getTag(itemStack, "MMOITEMS_ITEM_TYPE", String.class, "NULL").equals("NULL");
 
         if(mmoItem && mmoItemName == null)
-            mmoItemName = object.getCustomName();
+            mmoItemName = getCustomName();
 
         String customName = plugin.getSettings().itemsCustomName;
 
@@ -181,11 +201,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         Executor.sync(() -> {
             if(updateName) {
-                object.setCustomName(CUSTOM_NAME);
+                setCustomName(CUSTOM_NAME);
                 if(saveItem)
                     Executor.sync(() -> plugin.getNMSAdapter().saveItem(this));
             }
-            object.setCustomNameVisible(updateName);
+            setCustomNameVisible(updateName);
         });
     }
 

@@ -124,7 +124,7 @@ public final class SystemHandler implements SystemManager {
             stackedEntity.setSpawnCause(entityData.getValue());
         }
         else{
-            String cachedData = DataSerializer.deserializeData(livingEntity.getCustomName());
+            String cachedData = DataSerializer.deserializeData(stackedEntity.getCustomName());
 
             try {
                 ((WStackedEntity) stackedEntity).setSaveEntity(false);
@@ -144,7 +144,7 @@ public final class SystemHandler implements SystemManager {
                     } catch (Exception ignored) {
                     }
 
-                    livingEntity.setCustomName(DataSerializer.stripData(livingEntity.getCustomName()));
+                    stackedEntity.setCustomName(DataSerializer.stripData(stackedEntity.getCustomName()));
                 } else {
                     plugin.getNMSAdapter().loadEntity(stackedEntity);
                 }
@@ -193,7 +193,7 @@ public final class SystemHandler implements SystemManager {
             stackedItem.setStackAmount(entityData, false);
         }
         else{
-            String cachedData = DataSerializer.deserializeData(item.getCustomName());
+            String cachedData = DataSerializer.deserializeData(stackedItem.getCustomName());
 
             try {
                 ((WStackedItem) stackedItem).setSaveItem(false);
@@ -203,7 +203,7 @@ public final class SystemHandler implements SystemManager {
                     } catch (Exception ignored) {
                     }
 
-                    item.setCustomName(DataSerializer.stripData(item.getCustomName()));
+                    stackedItem.setCustomName(DataSerializer.stripData(stackedItem.getCustomName()));
                 } else {
                     plugin.getNMSAdapter().loadItem(stackedItem);
                 }
@@ -457,15 +457,22 @@ public final class SystemHandler implements SystemManager {
         Entity[] entities = chunk.getEntities();
 
         // We substring names if necessary
-        Arrays.stream(entities).filter(entity -> entity.getCustomName() != null && entity.getCustomName().length() > 256)
-                .forEach(entity -> entity.setCustomName(entity.getCustomName().substring(0, 256)));
+        Arrays.stream(entities).filter(entity -> {
+            String customName = plugin.getNMSAdapter().getCustomName(entity);
+            return customName != null && customName.length() > 256;
+        }).forEach(entity -> {
+            String customName = plugin.getNMSAdapter().getCustomName(entity);
+            plugin.getNMSAdapter().setCustomName(entity, customName.substring(0, 256));
+        });
 
         if(ServerVersion.isAtLeast(ServerVersion.v1_8)) {
             //Trying to remove all the corrupted stacked blocks
             Executor.async(() -> {
-                Stream<Entity> entityStream = Arrays.stream(entities)
-                        .filter(entity -> entity instanceof ArmorStand && entity.getCustomName() != null &&
-                                entity.getCustomName().equals("BlockDisplay") && !isStackedBarrel(entity.getLocation().getBlock()));
+                Stream<Entity> entityStream = Arrays.stream(entities).filter(entity -> {
+                    String customName = plugin.getNMSAdapter().getCustomName(entity);
+                    return entity instanceof ArmorStand && customName != null && customName.equals("BlockDisplay") &&
+                            !isStackedBarrel(entity.getLocation().getBlock());
+                });
                 Executor.sync(() -> entityStream.forEach(entity -> {
                     Block block = entity.getLocation().getBlock();
                     if (block.getType() == Material.CAULDRON)

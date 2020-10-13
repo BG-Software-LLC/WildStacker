@@ -624,7 +624,7 @@ public final class EntitiesListener implements Listener {
 
         Executor.sync(() -> {
             //Resetting the name, so updateName will work.
-            e.getEntity().setCustomName("");
+            stackedEntity.setCustomName("");
             stackedEntity.updateName();
         }, 1L);
 
@@ -963,8 +963,10 @@ public final class EntitiesListener implements Listener {
         }
 
         //Refresh item names
-        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> EntityUtils.isStackable(entity) && entity.isCustomNameVisible())
-                .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
+        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
+                EntityUtils.isStackable(entity) && plugin.getNMSAdapter().isCustomNameVisible(entity))
+                .whenComplete((nearbyEntities, ex) ->
+                        nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
     private boolean isChunkLimit(Chunk chunk){

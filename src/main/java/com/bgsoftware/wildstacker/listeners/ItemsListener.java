@@ -220,8 +220,10 @@ public final class ItemsListener implements Listener {
         }
 
         //Refresh item names
-        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity -> entity instanceof Item && entity.isCustomNameVisible())
-                .whenComplete((nearbyEntities, ex) -> nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
+        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
+                entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
+                .whenComplete((nearbyEntities, ex) ->
+                        nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
     private boolean isChunkLimit(Chunk chunk){

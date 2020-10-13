@@ -162,7 +162,7 @@ public final class EntityUtils {
     public static String getEntityName(StackedEntity stackedEntity){
         int stackAmount = stackedEntity.getStackAmount();
 
-        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getLivingEntity().getCustomName() != null) {
+        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getCustomName() != null) {
             return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
         }
 

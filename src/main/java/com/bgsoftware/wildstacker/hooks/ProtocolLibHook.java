@@ -69,8 +69,10 @@ public final class ProtocolLibHook {
         WrappedDataWatcher.Serializer nameSerializer = getNameSerializer();
         WrappedDataWatcher.Serializer visibleSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
-        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer), getCustomName(entity.getCustomName()));
-        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer), entity.isCustomNameVisible());
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer),
+                getCustomName(plugin.getNMSAdapter().getCustomName(entity)));
+        watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer),
+                plugin.getNMSAdapter().isCustomNameVisible(entity));
 
         packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
 

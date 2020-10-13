@@ -116,13 +116,23 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
+    public String getCustomName() {
+        return plugin.getNMSAdapter().getCustomName(object);
+    }
+
+    @Override
     public void setCustomName(String customName){
-        object.setCustomName(customName);
+        plugin.getNMSAdapter().setCustomName(object, customName);
+    }
+
+    @Override
+    public boolean isCustomNameVisible() {
+        return plugin.getNMSAdapter().isCustomNameVisible(object);
     }
 
     @Override
     public void setCustomNameVisible(boolean visible){
-        object.setCustomNameVisible(visible);
+        plugin.getNMSAdapter().setCustomNameVisible(object, visible);
     }
 
     /*
@@ -190,7 +200,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return;
         }
 
-        if(EntityUtils.isNameBlacklisted(object.getCustomName()) || hasNameTag())
+        if(isNameBlacklisted() || hasNameTag())
             return;
 
         if(!isCached())
@@ -201,8 +211,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             boolean nameVisible = getStackAmount() > 1 && !plugin.getSettings().entitiesHideNames;
 
             Executor.sync(() -> {
-                object.setCustomName(customName);
-                object.setCustomNameVisible(nameVisible);
+                setCustomName(customName);
+                setCustomNameVisible(nameVisible);
                 if(saveEntity)
                     Executor.sync(() -> plugin.getNMSAdapter().saveEntity(this));
 
@@ -621,7 +631,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean isNameBlacklisted() {
-        return EntityUtils.isNameBlacklisted(object.getCustomName());
+        return EntityUtils.isNameBlacklisted(getCustomName());
     }
 
     @Override

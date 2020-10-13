@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.gmail.nossr50.config.experience.ExperienceConfig;
 import com.gmail.nossr50.datatypes.experience.XPGainReason;
 import com.gmail.nossr50.datatypes.experience.XPGainSource;
@@ -25,6 +26,8 @@ import java.lang.reflect.Method;
 
 public final class McMMOHook {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
     private static final String CUSTOM_NAME_KEY = "mcMMO: Custom Name";
     private static final String CUSTOM_NAME_VISIBLE_KEY = "mcMMO: Name Visibility";
     private static final String SPAWNED_ENTITY_KEY = "mcMMO: Spawned Entity";
@@ -43,11 +46,11 @@ public final class McMMOHook {
         if(mcMMO != null){
             if(livingEntity.hasMetadata(CUSTOM_NAME_KEY)) {
                 livingEntity.removeMetadata(CUSTOM_NAME_KEY, mcMMO);
-                livingEntity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, livingEntity.getCustomName()));
+                livingEntity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().getCustomName(livingEntity)));
             }
             if(livingEntity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY)) {
                 livingEntity.removeMetadata(CUSTOM_NAME_VISIBLE_KEY, mcMMO);
-                livingEntity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, livingEntity.isCustomNameVisible()));
+                livingEntity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().isCustomNameVisible(livingEntity)));
             }
         }
     }

@@ -105,6 +105,22 @@ public interface NMSAdapter {
 
     }
 
+    default String getCustomName(Entity entity){
+        return entity.getCustomName();
+    }
+
+    default void setCustomName(Entity entity, String name){
+        entity.setCustomName(name);
+    }
+
+    default boolean isCustomNameVisible(Entity entity){
+        return entity.isCustomNameVisible();
+    }
+
+    default void setCustomNameVisible(Entity entity, boolean visibleName){
+        entity.setCustomNameVisible(visibleName);
+    }
+
     /*
      *   Spawner methods
      */

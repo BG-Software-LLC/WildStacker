@@ -41,10 +41,20 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity> {
     double getHealth();
 
     /**
+     * Get the custom name of the living-entity.
+     */
+    String getCustomName();
+
+    /**
      * Set a custom-name to the living-entity.
      * @param customName a new custom name
      */
     void setCustomName(String customName);
+
+    /**
+     * Check whether or not the name of the living entity is visible.
+     */
+    boolean isCustomNameVisible();
 
     /**
      * Set visible custom name flag to the living-entity.

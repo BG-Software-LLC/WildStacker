@@ -259,6 +259,28 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         return nmsItem != null && nmsItem.g();
     }
 
+    @Override
+    public String getCustomName(org.bukkit.entity.Entity entity) {
+        return entity instanceof LivingEntity ? ((LivingEntity) entity).getCustomName() : null;
+    }
+
+    @Override
+    public void setCustomName(org.bukkit.entity.Entity entity, String name) {
+        if(entity instanceof LivingEntity)
+            ((LivingEntity) entity).setCustomName(name);
+    }
+
+    @Override
+    public boolean isCustomNameVisible(org.bukkit.entity.Entity entity) {
+        return entity instanceof LivingEntity && ((LivingEntity) entity).isCustomNameVisible();
+    }
+
+    @Override
+    public void setCustomNameVisible(org.bukkit.entity.Entity entity, boolean visibleName) {
+        if(entity instanceof LivingEntity)
+            ((LivingEntity) entity).setCustomNameVisible(visibleName);
+    }
+
     /*
      *   Spawner methods
      */

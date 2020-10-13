@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import io.lumine.xikage.mythicmobs.MythicMobs;
@@ -10,6 +11,8 @@ import org.bukkit.entity.LivingEntity;
 import java.util.UUID;
 
 public final class MythicMobsHook {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static LivingEntity tryDuplicate(LivingEntity livingEntity){
         if(WStackedEntity.of(livingEntity).getSpawnCause() == SpawnCause.MYTHIC_MOBS){
@@ -46,12 +49,10 @@ public final class MythicMobsHook {
             ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
             try {
                 return activeMob.getDisplayName();
-            }catch(Throwable ex){
-                return activeMob.getEntity().getBukkitEntity().getCustomName();
-            }
+            }catch(Throwable ignored){}
         }
 
-        return livingEntity.getCustomName();
+        return plugin.getNMSAdapter().getCustomName(livingEntity);
     }
 
 }
