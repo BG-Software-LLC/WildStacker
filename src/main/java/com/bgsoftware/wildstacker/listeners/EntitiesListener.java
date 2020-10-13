@@ -187,16 +187,22 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityLastDamage(EntityDamageEvent e){
+        // Making sure the entity is stackable
         if(!EntityUtils.isStackable(e.getEntity()))
             return;
 
         LivingEntity livingEntity = (LivingEntity) e.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
+        // If the entity is already considered as "dead", then we don't deal any damage and return.
         if(((WStackedEntity) stackedEntity).hasDeadFlag()){
             e.setDamage(0);
             return;
         }
+
+        /*
+         *  Getting the damager of the event.
+         */
 
         Entity entityDamager = null;
         Player damager = null;
@@ -220,13 +226,11 @@ public final class EntitiesListener implements Listener {
                 GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
                 plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
 
-        //Checks that it's the last hit of the entity
+        //C hecks that it's the last hit of the entity
         if(stackedEntity.getHealth() - e.getFinalDamage() > 0 && !oneShot)
             return;
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            ItemStack itemInHand = livingEntity.getKiller() == null ? null : livingEntity.getKiller().getItemInHand();
-
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
             int stackAmount;
             double damageToNextStack;
@@ -234,8 +238,8 @@ public final class EntitiesListener implements Listener {
             if(plugin.getSettings().spreadDamage){
                 double finalDamage = e.getFinalDamage();
 
-                if(ServerVersion.isAtLeast(ServerVersion.v1_11) && itemInHand != null) {
-                    int sweepingEdgeLevel = itemInHand.getEnchantmentLevel(Enchantment.getByName("SWEEPING_EDGE"));
+                if(ServerVersion.isAtLeast(ServerVersion.v1_11) && damagerTool != null) {
+                    int sweepingEdgeLevel = damagerTool.getEnchantmentLevel(Enchantment.getByName("SWEEPING_EDGE"));
                     if(sweepingEdgeLevel > 0)
                         finalDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
                 }
@@ -303,7 +307,34 @@ public final class EntitiesListener implements Listener {
 
                 Player DAMAGER = damager;
 
-                int lootBonusLevel = itemInHand == null ? 0 : itemInHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+                int lootBonusLevel = damagerTool == null ? 0 : damagerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+
+                if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+                    livingEntity.setFireTicks(160);
+
+                if (livingEntity.getKiller() != null) {
+                    Player killer = livingEntity.getKiller();
+
+                    try {
+                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, stackAmount);
+                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                    } catch (IllegalArgumentException ignored) { }
+
+                    //Achievements
+                    EntityType victimType = livingEntity.getType();
+
+                    //Monster Hunter
+                    grandAchievement(killer, victimType, "KILL_ENEMY");
+                    grandAchievement(killer, victimType, "adventure/kill_a_mob");
+                    //Monsters Hunted
+                    grandAchievement(killer, victimType, "adventure/kill_all_mobs");
+                    //Sniper Duel
+                    if(killer.getLocation().distanceSquared(livingEntity.getLocation()) >= 50*50){
+                        grandAchievement(killer, "", "SNIPE_SKELETON");
+                        grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
+                    }
+
+                }
 
                 Executor.async(() -> {
                     livingEntity.setLastDamageCause(clonedEvent);
@@ -388,15 +419,15 @@ public final class EntitiesListener implements Listener {
                         }
 
                         // Handle sweeping edge enchantment
-                        if(e.isCancelled() && itemInHand != null && DAMAGER != null)
-                            plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, itemInHand, stackedEntity.getLivingEntity(), originalDamage);
+                        if(e.isCancelled() && damagerTool != null && DAMAGER != null)
+                            plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
 
                         //Decrease durability when next-stack-knockback is false
-                        if(e.isCancelled() && itemInHand != null && !creativeMode) {
-                            int damage = ItemUtils.isSword(itemInHand.getType()) ? 1 : ItemUtils.isTool(itemInHand.getType()) ? 2 : 0;
+                        if(e.isCancelled() && damagerTool != null && !creativeMode) {
+                            int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
                             ThreadLocalRandom random = ThreadLocalRandom.current();
                             if(damage > 0) {
-                                int unbreakingLevel = itemInHand.getEnchantmentLevel(Enchantment.DURABILITY);
+                                int unbreakingLevel = damagerTool.getEnchantmentLevel(Enchantment.DURABILITY);
                                 int damageDecrease = 0;
 
                                 for(int i = 0; unbreakingLevel > 0 && i < damage; i++){
@@ -407,10 +438,10 @@ public final class EntitiesListener implements Listener {
                                 damage -= damageDecrease;
 
                                 if(damage > 0) {
-                                    if(itemInHand.getDurability() + damage > itemInHand.getType().getMaxDurability())
+                                    if(damagerTool.getDurability() + damage > damagerTool.getType().getMaxDurability())
                                         livingEntity.getKiller().setItemInHand(new ItemStack(Material.AIR));
                                     else
-                                        itemInHand.setDurability((short) (itemInHand.getDurability() + damage));
+                                        damagerTool.setDurability((short) (damagerTool.getDurability() + damage));
                                 }
                             }
                         }
@@ -424,33 +455,6 @@ public final class EntitiesListener implements Listener {
 
                     });
                 });
-
-                if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
-                    livingEntity.setFireTicks(160);
-
-                if (livingEntity.getKiller() != null) {
-                    Player killer = livingEntity.getKiller();
-
-                    try {
-                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, stackAmount);
-                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
-                    } catch (IllegalArgumentException ignored) { }
-
-                    //Achievements
-                    EntityType victimType = livingEntity.getType();
-
-                    //Monster Hunter
-                    grandAchievement(killer, victimType, "KILL_ENEMY");
-                    grandAchievement(killer, victimType, "adventure/kill_a_mob");
-                    //Monsters Hunted
-                    grandAchievement(killer, victimType, "adventure/kill_all_mobs");
-                    //Sniper Duel
-                    if(killer.getLocation().distanceSquared(livingEntity.getLocation()) >= 50*50){
-                        grandAchievement(killer, "", "SNIPE_SKELETON");
-                        grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
-                    }
-
-                }
             }
         }
     }
