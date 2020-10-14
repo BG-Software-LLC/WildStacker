@@ -235,7 +235,9 @@ public final class EntitiesListener implements Listener {
             int stackAmount;
             double damageToNextStack;
 
-            if(plugin.getSettings().spreadDamage){
+            boolean instantKill = stackedEntity.isInstantKill(lastDamageCause);
+
+            if(plugin.getSettings().spreadDamage && !instantKill){
                 double finalDamage = e.getFinalDamage();
 
                 if(ServerVersion.isAtLeast(ServerVersion.v1_11) && damagerTool != null) {
@@ -250,7 +252,7 @@ public final class EntitiesListener implements Listener {
             }
             else{
                 stackAmount = Math.min(stackedEntity.getStackAmount(),
-                        stackedEntity.isInstantKill(lastDamageCause) ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
+                        instantKill ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
                 damageToNextStack = 0;
             }
 
