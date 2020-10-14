@@ -41,29 +41,35 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
                     if (sections.length == 2) {
                         if (first != null) {
                             T second = FastEnumUtils.getEnum(secondType, sections[1]);
+                            boolean added = false;
                             if (second != null) {
                                 fast2EnumsArray.addFirst(first, second);
-                            } else {
-                                S third = FastEnumUtils.getEnum(thirdType, sections[1]);
-                                if (third != null)
-                                    fast2EnumsArray.addSecond(first, third);
-                                else
-                                    fast2EnumsArray.size++;
+                                added = true;
                             }
+                            S third = FastEnumUtils.getEnum(thirdType, sections[1]);
+                            if (third != null) {
+                                fast2EnumsArray.addSecond(first, third);
+                                added = true;
+                            }
+                            if(!added)
+                                fast2EnumsArray.size++;
                         }
                     } else if (first != null) {
                         fast2EnumsArray.addFirst(first);
                     } else {
                         T second = FastEnumUtils.getEnum(secondType, sections[0]);
+                        boolean added = false;
                         if (second != null) {
                             fast2EnumsArray.addSecond(second);
-                        } else {
-                            S third = FastEnumUtils.getEnum(thirdType, sections[0]);
-                            if (third != null)
-                                fast2EnumsArray.addThird(third);
-                            else
-                                fast2EnumsArray.size++;
+                            added = true;
                         }
+                        S third = FastEnumUtils.getEnum(thirdType, sections[0]);
+                        if (third != null) {
+                            fast2EnumsArray.addThird(third);
+                            added = true;
+                        }
+                        if(!added)
+                            fast2EnumsArray.size++;
                     }
                 }
             });
