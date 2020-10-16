@@ -73,7 +73,7 @@ public final class DatabaseQueue {
                                 preparedStatement = connection.prepareStatement(query.getStatement());
                                 preparedStatementMap.put(query, preparedStatement);
                             }
-                        }catch (Exception ignored){}
+                        }catch (Throwable ignored){}
 
                         parameters.executeQuery(preparedStatement);
                         preparedStatement.executeUpdate();
