@@ -67,11 +67,14 @@ public final class DatabaseQueue {
                     });
 
                     if (preparedStatement != null) {
-                        if(preparedStatement.isClosed()) {
-                            Query query = parameters.getQuery();
-                            preparedStatement = connection.prepareStatement(query.getStatement());
-                            preparedStatementMap.put(query, preparedStatement);
-                        }
+                        try {
+                            if (preparedStatement.isClosed()) {
+                                Query query = parameters.getQuery();
+                                preparedStatement = connection.prepareStatement(query.getStatement());
+                                preparedStatementMap.put(query, preparedStatement);
+                            }
+                        }catch (Exception ignored){}
+
                         parameters.executeQuery(preparedStatement);
                         preparedStatement.executeUpdate();
                         preparedStatement.clearParameters();
