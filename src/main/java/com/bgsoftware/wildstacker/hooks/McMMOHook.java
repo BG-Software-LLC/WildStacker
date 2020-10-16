@@ -34,6 +34,7 @@ public final class McMMOHook {
 
     private static Plugin mcMMO;
     private static Method gainXPMethod = null;
+    private static Object persistentDataLayerObject = null;
 
     static {
         try{
@@ -56,7 +57,7 @@ public final class McMMOHook {
     }
 
     public static void handleCombat(Player attacker, Entity entityAttacker, LivingEntity target, double finalDamage){
-        if(mcMMO == null)
+        if(mcMMO == null || isSpawnedEntity(target))
             return;
 
         ItemStack heldItem = attacker.getItemInHand();
@@ -158,16 +159,44 @@ public final class McMMOHook {
 
     public static void updateSpawnedEntity(LivingEntity livingEntity){
         if(mcMMO != null){
-            livingEntity.setMetadata(SPAWNED_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
+            if(persistentDataLayerObject != null) {
+                com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer persistentDataLayer =
+                        (com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer) persistentDataLayerObject;
+                persistentDataLayer.flagMetadata(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.MOB_SPAWNER_MOB, livingEntity);
+            }
+            else{
+                livingEntity.setMetadata(SPAWNED_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
+            }
         }
     }
 
     public static boolean isSpawnedEntity(LivingEntity livingEntity){
-        return mcMMO != null && livingEntity.hasMetadata(SPAWNED_ENTITY_KEY);
+        if(mcMMO == null)
+            return false;
+
+        if(persistentDataLayerObject != null){
+            com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer persistentDataLayer =
+                    (com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer) persistentDataLayerObject;
+            return persistentDataLayer.hasMobFlag(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.MOB_SPAWNER_MOB, livingEntity);
+        }
+        else{
+            return livingEntity.hasMetadata(SPAWNED_ENTITY_KEY);
+        }
     }
 
     public static void setEnabled(boolean enabled){
-        mcMMO = enabled ? com.gmail.nossr50.mcMMO.p : null;
+        if(enabled){
+            mcMMO = com.gmail.nossr50.mcMMO.p;
+            try{
+                Method getCompatibilityManagerMethod = com.gmail.nossr50.mcMMO.class.getMethod("getCompatibilityManager");
+                com.gmail.nossr50.util.compat.CompatibilityManager compatibilityManager =
+                        (com.gmail.nossr50.util.compat.CompatibilityManager) getCompatibilityManagerMethod.invoke(mcMMO);
+                persistentDataLayerObject = compatibilityManager.getPersistentDataLayer();
+            }catch (Throwable ignored){}
+        }
+        else{
+            mcMMO = null;
+        }
     }
 
     private static boolean shouldProcess(LivingEntity target, String type){
