@@ -146,24 +146,6 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity> {
     int getExp(int stackAmount, int defaultExp);
 
     /**
-     * Ignore the death event of this entity.
-     * Should be used if you want to override the behaviour of the entity.
-     *
-     * @deprecated No longer supported.
-     */
-    @Deprecated
-    void ignoreDeathEvent();
-
-    /**
-     * Check if the entity should ignore the death event upon death.
-     * @return True if death event is ignored, otherwise false
-     *
-     * @deprecated No longer supported.
-     */
-    @Deprecated
-    boolean isIgnoreDeathEvent();
-
-    /**
      * Returns the spawn cause of this entity
      */
     SpawnCause getSpawnCause();

@@ -16,7 +16,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
-import com.bgsoftware.wildstacker.loot.LootTableTemp;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -52,9 +51,10 @@ import java.util.stream.Collectors;
 
 public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> implements StackedEntity {
 
-    private boolean ignoreDeathEvent = false;
+    private List<ItemStack> drops = null;
+    private int dropsMultiplier = 1;
+
     private SpawnCause spawnCause;
-    private com.bgsoftware.wildstacker.api.loot.LootTable tempLootTable = null;
 
     private boolean deadEntityFlag = false;
     private boolean removed = false;
@@ -525,9 +525,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
         ItemStackList drops = new ItemStackList();
 
-        if(tempLootTable != null){
-            drops.addAll(tempLootTable.getDrops(this, lootBonusLevel, stackAmount));
-            tempLootTable = null;
+        if(this.drops != null){
+            drops.addAll(getTempDrops(stackAmount));
         }
 
         else{
@@ -540,22 +539,27 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setDrops(List<ItemStack> itemStacks) {
-        this.tempLootTable = new LootTableTemp() {
-            @Override
-            public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
-                List<ItemStack> drops = new ArrayList<>();
+        this.drops = new ArrayList<>(itemStacks);
+    }
 
-                itemStacks.stream()
-                        .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
-                        .forEach(itemStack -> {
-                            ItemStack cloned = itemStack.clone();
-                            cloned.setAmount(itemStack.getAmount() * stackAmount);
-                            drops.add(cloned);
-                        });
+    private List<ItemStack> getTempDrops(int stackAmount){
+        List<ItemStack> drops = this.dropsMultiplier <= 0 ? new ArrayList<>() : this.drops.stream()
+                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
+                .collect(Collectors.toList());
 
-                return drops;
-            }
-        };
+        int dropsMultiplier = Math.max(0, this.dropsMultiplier);
+
+        // Reset drop fields
+        this.drops = null;
+        this.dropsMultiplier = 1;
+
+        drops.forEach(itemStack -> {
+            ItemStack cloned = itemStack.clone();
+            cloned.setAmount(itemStack.getAmount() * stackAmount * dropsMultiplier);
+            drops.add(cloned);
+        });
+
+        return drops;
     }
 
     @Override
@@ -565,16 +569,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
-    public void setDropsMultiplier(int multiplier) {
-        this.tempLootTable = new LootTableTemp() {
-            @Override
-            public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
-                tempLootTable = null;
-                List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, stackAmount);
-                drops.forEach(itemStack -> itemStack.setAmount((itemStack.getAmount() * multiplier)));
-                return drops;
-            }
-        };
+    public void setDropsMultiplier(int dropsMultiplier) {
+        this.dropsMultiplier = dropsMultiplier;
     }
 
     @Override
@@ -586,18 +582,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public int getExp(int stackAmount, int defaultExp) {
         return plugin.getLootHandler().getLootTable(object).getExp(this, stackAmount);
-    }
-
-    @Override
-    @Deprecated
-    public void ignoreDeathEvent() {
-        ignoreDeathEvent = true;
-    }
-
-    @Override
-    @Deprecated
-    public boolean isIgnoreDeathEvent() {
-        return ignoreDeathEvent;
     }
 
     @Override
