@@ -28,6 +28,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +37,14 @@ import java.util.List;
 public final class ItemUtils {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static Method IS_UNBREAKABLE_METHOD = null;
+
+    static {
+        try{
+            //noinspection JavaReflectionMemberAccess
+            IS_UNBREAKABLE_METHOD = ItemMeta.class.getMethod("isUnbreakable");
+        }catch (Throwable ignored){}
+    }
 
     private static final int MAX_PICKUP_DELAY = 32767;
 
@@ -421,6 +430,19 @@ public final class ItemUtils {
             return location;
 
         return origin;
+    }
+
+    public static boolean isUnbreakable(ItemStack itemStack){
+        if(!itemStack.hasItemMeta() || IS_UNBREAKABLE_METHOD == null)
+            return false;
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        try {
+            return (boolean) IS_UNBREAKABLE_METHOD.invoke(itemMeta);
+        }catch(Throwable ignored){}
+
+        return false;
     }
 
     private static boolean canBeStacked(ItemStack itemStack, World world){

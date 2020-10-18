@@ -425,7 +425,7 @@ public final class EntitiesListener implements Listener {
                             plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
 
                         //Decrease durability when next-stack-knockback is false
-                        if(e.isCancelled() && damagerTool != null && !creativeMode) {
+                        if(e.isCancelled() && damagerTool != null && !creativeMode && !ItemUtils.isUnbreakable(damagerTool)) {
                             int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
                             ThreadLocalRandom random = ThreadLocalRandom.current();
                             if(damage > 0) {
