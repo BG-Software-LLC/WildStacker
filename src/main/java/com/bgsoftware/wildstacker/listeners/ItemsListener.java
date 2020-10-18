@@ -210,14 +210,14 @@ public final class ItemsListener implements Listener {
             return;
         }
 
-        if(ProtocolLibHook.itemsDisabledNames.contains(e.getPlayer().getUniqueId())){
-            ProtocolLibHook.itemsDisabledNames.remove(e.getPlayer().getUniqueId());
+        if(plugin.getSystemManager().hasItemNamesToggledOff(e.getPlayer())){
             Locale.ITEM_NAMES_TOGGLE_ON.send(e.getPlayer());
         }
         else{
-            ProtocolLibHook.itemsDisabledNames.add(e.getPlayer().getUniqueId());
             Locale.ITEM_NAMES_TOGGLE_OFF.send(e.getPlayer());
         }
+
+        plugin.getSystemManager().toggleItemNames(e.getPlayer());
 
         //Refresh item names
         EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->

@@ -959,14 +959,14 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        if(ProtocolLibHook.entitiesDisabledNames.contains(e.getPlayer().getUniqueId())){
-            ProtocolLibHook.entitiesDisabledNames.remove(e.getPlayer().getUniqueId());
+        if(plugin.getSystemManager().hasEntityNamesToggledOff(e.getPlayer())){
             Locale.ENTITY_NAMES_TOGGLE_ON.send(e.getPlayer());
         }
         else{
-            ProtocolLibHook.entitiesDisabledNames.add(e.getPlayer().getUniqueId());
             Locale.ENTITY_NAMES_TOGGLE_OFF.send(e.getPlayer());
         }
+
+        plugin.getSystemManager().toggleEntityNames(e.getPlayer());
 
         //Refresh item names
         EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->

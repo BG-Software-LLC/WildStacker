@@ -17,6 +17,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -249,5 +250,29 @@ public interface SystemManager {
      * @return StackedSnapshot object
      */
     StackedSnapshot getStackedSnapshot(Chunk chunk);
+
+    /**
+     * Check whether or not a player has item names toggled off.
+     * @param player The player to check.
+     */
+    boolean hasItemNamesToggledOff(Player player);
+
+    /**
+     * Toggle item names for a player.
+     * @param player The player to toggle for.
+     */
+    void toggleItemNames(Player player);
+
+    /**
+     * Check whether or not a player has entity names toggled off.
+     * @param player The player to check.
+     */
+    boolean hasEntityNamesToggledOff(Player player);
+
+    /**
+     * Toggle entity names for a player.
+     * @param player The player to toggle for.
+     */
+    void toggleEntityNames(Player player);
 
 }

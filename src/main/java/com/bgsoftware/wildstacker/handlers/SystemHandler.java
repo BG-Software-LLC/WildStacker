@@ -52,9 +52,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -65,6 +67,9 @@ public final class SystemHandler implements SystemManager {
 
     private final WildStackerPlugin plugin;
     private final DataHandler dataHandler;
+
+    private final Set<UUID> itemsDisabledNames = new HashSet<>();
+    private final Set<UUID> entitiesDisabledNames = new HashSet<>();
 
     public SystemHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -713,4 +718,33 @@ public final class SystemHandler implements SystemManager {
         return plugin.getLootHandler().getLootTable(livingEntity);
     }
 
+    /*
+     * Names toggle methods
+     */
+
+    @Override
+    public boolean hasItemNamesToggledOff(Player player) {
+        return itemsDisabledNames.contains(player.getUniqueId());
+    }
+
+    @Override
+    public void toggleItemNames(Player player) {
+        // If the set contained the uuid (aka, the player had items toggled off), he will be removed and nothing else.
+        // If the set didn't contain the uuid, then the player will be added to it.
+        if(!itemsDisabledNames.remove(player.getUniqueId()))
+            itemsDisabledNames.add(player.getUniqueId());
+    }
+
+    @Override
+    public boolean hasEntityNamesToggledOff(Player player) {
+        return entitiesDisabledNames.contains(player.getUniqueId());
+    }
+
+    @Override
+    public void toggleEntityNames(Player player) {
+        // If the set contained the uuid (aka, the player had entities toggled off), he will be removed and nothing else.
+        // If the set didn't contain the uuid, then the player will be added to it.
+        if(!entitiesDisabledNames.remove(player.getUniqueId()))
+            entitiesDisabledNames.add(player.getUniqueId());
+    }
 }

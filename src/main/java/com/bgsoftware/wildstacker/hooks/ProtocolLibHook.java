@@ -17,18 +17,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 public final class ProtocolLibHook {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-
-    public static Set<UUID> itemsDisabledNames = new HashSet<>();
-    public static Set<UUID> entitiesDisabledNames = new HashSet<>();
 
     public static void setEnabled(boolean enabled){
         PluginHooks.isProtocolLibEnabled = enabled;
@@ -41,8 +35,10 @@ public final class ProtocolLibHook {
                         try {
                             StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
                             if (entityModifier.size() > 0) {
-                                if ((itemsDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof Item) ||
-                                        (entitiesDisabledNames.contains(event.getPlayer().getUniqueId()) && entityModifier.read(0) instanceof LivingEntity)) {
+                                if ((ProtocolLibHook.plugin.getSystemManager().hasItemNamesToggledOff(event.getPlayer()) &&
+                                        entityModifier.read(0) instanceof Item) ||
+                                        (ProtocolLibHook.plugin.getSystemManager().hasEntityNamesToggledOff(event.getPlayer()) &&
+                                                entityModifier.read(0) instanceof LivingEntity)) {
                                     StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
                                     if (structureModifier.size() > 0) {
                                         WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
