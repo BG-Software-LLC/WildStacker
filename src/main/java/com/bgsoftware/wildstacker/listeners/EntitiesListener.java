@@ -338,6 +338,34 @@ public final class EntitiesListener implements Listener {
 
                 }
 
+                // Handle sweeping edge enchantment
+                if(e.isCancelled() && damagerTool != null && DAMAGER != null)
+                    plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
+
+                //Decrease durability when next-stack-knockback is false
+                if(e.isCancelled() && damagerTool != null && !creativeMode && !ItemUtils.isUnbreakable(damagerTool)) {
+                    int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
+                    ThreadLocalRandom random = ThreadLocalRandom.current();
+                    if(damage > 0) {
+                        int unbreakingLevel = damagerTool.getEnchantmentLevel(Enchantment.DURABILITY);
+                        int damageDecrease = 0;
+
+                        for(int i = 0; unbreakingLevel > 0 && i < damage; i++){
+                            if(random.nextInt(damage + 1) > 0)
+                                damageDecrease++;
+                        }
+
+                        damage -= damageDecrease;
+
+                        if(damage > 0) {
+                            if(damagerTool.getDurability() + damage > damagerTool.getType().getMaxDurability())
+                                livingEntity.getKiller().setItemInHand(new ItemStack(Material.AIR));
+                            else
+                                damagerTool.setDurability((short) (damagerTool.getDurability() + damage));
+                        }
+                    }
+                }
+
                 Executor.async(() -> {
                     livingEntity.setLastDamageCause(clonedEvent);
                     livingEntity.setFireTicks(fireTicks);
@@ -418,34 +446,6 @@ public final class EntitiesListener implements Listener {
                             }
 
                             plugin.getNMSAdapter().attemptJoinRaid(livingEntity.getKiller(), raider);
-                        }
-
-                        // Handle sweeping edge enchantment
-                        if(e.isCancelled() && damagerTool != null && DAMAGER != null)
-                            plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
-
-                        //Decrease durability when next-stack-knockback is false
-                        if(e.isCancelled() && damagerTool != null && !creativeMode && !ItemUtils.isUnbreakable(damagerTool)) {
-                            int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
-                            ThreadLocalRandom random = ThreadLocalRandom.current();
-                            if(damage > 0) {
-                                int unbreakingLevel = damagerTool.getEnchantmentLevel(Enchantment.DURABILITY);
-                                int damageDecrease = 0;
-
-                                for(int i = 0; unbreakingLevel > 0 && i < damage; i++){
-                                    if(random.nextInt(damage + 1) > 0)
-                                        damageDecrease++;
-                                }
-
-                                damage -= damageDecrease;
-
-                                if(damage > 0) {
-                                    if(damagerTool.getDurability() + damage > damagerTool.getType().getMaxDurability())
-                                        livingEntity.getKiller().setItemInHand(new ItemStack(Material.AIR));
-                                    else
-                                        damagerTool.setDurability((short) (damagerTool.getDurability() + damage));
-                                }
-                            }
                         }
 
                         ((WStackedEntity) stackedEntity).setDeadFlag(false);

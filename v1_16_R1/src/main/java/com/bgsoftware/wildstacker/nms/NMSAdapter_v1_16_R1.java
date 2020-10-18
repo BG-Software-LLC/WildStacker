@@ -47,7 +47,6 @@ import net.minecraft.server.v1_16_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R1.SaddleStorage;
 import net.minecraft.server.v1_16_R1.SoundEffect;
-import net.minecraft.server.v1_16_R1.SoundEffects;
 import net.minecraft.server.v1_16_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R1.World;
 import net.minecraft.server.v1_16_R1.WorldServer;
@@ -373,9 +372,6 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
                 nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
             }
         }
-
-        entityHuman.world.playSound(null, entityHuman.locX(), entityHuman.locY(), entityHuman.locZ(), SoundEffects.ENTITY_PLAYER_ATTACK_SWEEP, entityHuman.getSoundCategory(), 1.0F, 1.0F);
-        entityHuman.ew();
     }
 
     /*
