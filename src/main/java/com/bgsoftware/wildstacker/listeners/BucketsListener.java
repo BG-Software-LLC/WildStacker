@@ -1,16 +1,11 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +20,6 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 
 @SuppressWarnings("unused")
 public final class BucketsListener implements Listener {
@@ -43,62 +37,20 @@ public final class BucketsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e){
         PlayerInventory inventory = e.getPlayer().getInventory();
-        int heldItemSlot = ItemUtils.getHeldItemSlot(inventory, e.getBucket());
-        ItemStack itemInHand = inventory.getItem(heldItemSlot);
-        ItemMeta itemMeta = itemInHand.getItemMeta();
+        ItemStack itemInHand = inventory.getItem(ItemUtils.getHeldItemSlot(inventory, e.getBucket()));
 
-        if(itemMeta.hasDisplayName() && plugin.getSettings().bucketsBlacklistedNames.contains(itemMeta.getDisplayName()))
-            return;
-
-        e.setCancelled(true);
-
-        ItemStack itemToGive = itemInHand.clone();
-        itemToGive.setAmount(itemToGive.getAmount() - 1);
-
-        Block fluidBlock = e.getBlockClicked().getRelative(e.getBlockFace());
-
-        if(itemInHand.getType().name().contains("LAVA")) {
-            fluidBlock.setType(Material.LAVA);
-        }
-        else{
-            if(e.getBlockClicked().getWorld().getEnvironment() != World.Environment.NETHER) {
-                if(!plugin.getNMSAdapter().attemptToWaterLog(e.getBlockClicked()) &&
-                        !plugin.getNMSAdapter().attemptToWaterLog(fluidBlock) &&
-                        !fluidBlock.getType().isSolid()) {
-                    if(fluidBlock.getType() != Material.AIR)
-                        fluidBlock.breakNaturally();
-                    fluidBlock.setType(Material.WATER);
+        if(itemInHand.getAmount() > 1){
+            Executor.sync(() -> {
+                int newHeldSlot = ItemUtils.getHeldItemSlot(inventory, Material.BUCKET);
+                if(newHeldSlot != -1){
+                    itemInHand.setAmount(itemInHand.getAmount() - 1);
+                    inventory.setItem(newHeldSlot, itemInHand);
+                    ItemUtils.addItem(new ItemStack(Material.BUCKET), inventory, e.getPlayer().getLocation());
                 }
-            }
-
-            try{
-                String entityType = itemInHand.getType().name().replace("_BUCKET", "");
-
-                int amount = ItemUtils.getSpawnerItemAmount(itemInHand);
-                String fishName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : "";
-
-                StackedEntity stackedEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
-                        fluidBlock.getLocation().add(0.5, 0, 0.5), EntityType.valueOf(entityType).getEntityClass()));
-
-                if(!fishName.isEmpty()){
-                    stackedEntity.setCustomName(fishName);
-                    ((WStackedEntity) stackedEntity).setNameTag();
-                }
-
-                stackedEntity.setStackAmount(amount, true);
-            }catch (Exception ignored){}
-        }
-
-        if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            if (itemToGive.getAmount() <= 0) {
-                inventory.setItem(heldItemSlot, e.getItemStack().clone());
-            } else {
-                inventory.setItem(heldItemSlot, itemToGive);
-                inventory.addItem(e.getItemStack().clone());
-            }
+            }, 1L);
         }
     }
 
