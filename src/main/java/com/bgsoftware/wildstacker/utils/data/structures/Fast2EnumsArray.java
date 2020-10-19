@@ -7,7 +7,7 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
 
     private final FastEnumArray<E> firstKeyArray;
     private final FastEnumArray<T> secondKeyArray;
-    private final byte[] combinedKeyArray;
+    private final byte[][] combinedKeyArray;
 
     private boolean containsAll = false;
     private int size = 0;
@@ -19,8 +19,7 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
         this.firstKeyArray = new FastEnumArray<>(firstKeyTypeLength, firstKeyType);
         this.secondKeyArray = new FastEnumArray<>(secondKeyTypeLength, secondKeyType);
 
-        this.combinedKeyArray = new byte[firstKeyTypeLength];
-        Arrays.fill(combinedKeyArray, (byte) -1);
+        this.combinedKeyArray = new byte[firstKeyTypeLength][0];
     }
 
     public static <E extends Enum<E>, T extends Enum<T>> Fast2EnumsArray<E, T> fromList(
@@ -70,13 +69,13 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
     }
 
     public boolean add(E e, T t) {
-        boolean containedBefore = combinedKeyArray[e.ordinal()] != -1;
-
+        byte[] combinedKeyArray = this.combinedKeyArray[e.ordinal()];
+        boolean containedBefore = contains(e, t);
         if(!containedBefore) {
-            combinedKeyArray[e.ordinal()] = (byte) t.ordinal();
+            this.combinedKeyArray[e.ordinal()] = combinedKeyArray = Arrays.copyOf(combinedKeyArray, combinedKeyArray.length + 1);
+            combinedKeyArray[combinedKeyArray.length - 1] = (byte) t.ordinal();
             size++;
         }
-
         return containedBefore;
     }
 
@@ -85,7 +84,21 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
     }
 
     public boolean contains(E e, T t){
-        return containsAll || firstKeyArray.contains(e) || contains(t) || combinedKeyArray[e.ordinal()] == t.ordinal();
+        if(containsAll || firstKeyArray.contains(e) || contains(t))
+            return true;
+
+        byte[] combinedKeyArray = this.combinedKeyArray[e.ordinal()];
+
+        for (byte b : combinedKeyArray) {
+            if (b == t.ordinal())
+                return true;
+        }
+
+        return false;
+    }
+
+    public byte[][] combinedKeyArray(){
+        return combinedKeyArray;
     }
 
     public int size() {

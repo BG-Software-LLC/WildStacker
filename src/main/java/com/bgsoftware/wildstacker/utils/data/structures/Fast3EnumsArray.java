@@ -1,29 +1,18 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
-import java.util.Arrays;
 import java.util.List;
 
 public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> {
 
-    private final FastEnumArray<E> firstKeyArray;
-    private final FastEnumArray<T> secondKeyArray;
-    private final FastEnumArray<S> thirdKeyArray;
-    private final CombinedValue[] combinedKeyArray;
+    private final Fast2EnumsArray<E, T> firstKeyArray;
+    private final Fast2EnumsArray<E, S> secondKeyArray;
 
     private boolean containsAll = false;
     private int size = 0;
 
     public Fast3EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType, Class<S> thirdKeyType){
-        int firstKeyTypeLength = FastEnumUtils.getEnumValues(firstKeyType).length;
-        int secondKeyTypeLength = FastEnumUtils.getEnumValues(secondKeyType).length;
-        int thirdKeyTypeLength = FastEnumUtils.getEnumValues(thirdKeyType).length;
-
-        this.firstKeyArray = new FastEnumArray<>(firstKeyTypeLength, firstKeyType);
-        this.secondKeyArray = new FastEnumArray<>(secondKeyTypeLength, secondKeyType);
-        this.thirdKeyArray = new FastEnumArray<>(thirdKeyTypeLength, thirdKeyType);
-
-        this.combinedKeyArray = new CombinedValue[firstKeyTypeLength];
-        Arrays.fill(combinedKeyArray, new CombinedValue());
+        this.firstKeyArray = new Fast2EnumsArray<>(firstKeyType, secondKeyType);
+        this.secondKeyArray = new Fast2EnumsArray<>(firstKeyType, thirdKeyType);
     }
 
     public static <E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> Fast3EnumsArray<E, T, S> fromList(
@@ -77,66 +66,53 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
         return fast2EnumsArray;
     }
 
-    public boolean addFirst(E e) {
-        boolean containedBefore = firstKeyArray.add(e);
+    public void addFirst(E e) {
+        boolean containedBefore = firstKeyArray.addFirst(e);
         if(!containedBefore)
             size++;
-        return containedBefore;
     }
 
-    public boolean addSecond(T t) {
-        boolean containedBefore = secondKeyArray.add(t);
+    public void addSecond(T t) {
+        boolean containedBefore = firstKeyArray.addSecond(t);
         if(!containedBefore)
             size++;
-        return containedBefore;
     }
 
-    public boolean addThird(S s) {
-        boolean containedBefore = thirdKeyArray.add(s);
+    public void addThird(S s) {
+        boolean containedBefore = secondKeyArray.addSecond(s);
         if(!containedBefore)
             size++;
-        return containedBefore;
     }
 
     public boolean addFirst(E e, T t) {
-        boolean containedBefore = combinedKeyArray[e.ordinal()].first != -1;
+        boolean containedBefore = firstKeyArray.add(e, t);
 
-        if(!containedBefore) {
-            combinedKeyArray[e.ordinal()].first = (byte) t.ordinal();
+        if(!containedBefore)
             size++;
-        }
 
         return containedBefore;
     }
 
     public boolean addSecond(E e, S s) {
-        boolean containedBefore = combinedKeyArray[e.ordinal()].second != -1;
+        boolean containedBefore = secondKeyArray.add(e, s);
 
-        if(!containedBefore) {
-            combinedKeyArray[e.ordinal()].second = (byte) s.ordinal();
+        if(!containedBefore)
             size++;
-        }
 
         return containedBefore;
     }
 
     public boolean containsFirst(E e, T t){
-        return containsAll || firstKeyArray.contains(e) || secondKeyArray.contains(t) || combinedKeyArray[e.ordinal()].first == t.ordinal();
+        return containsAll || firstKeyArray.contains(e, t);
     }
 
 
     public boolean containsSecond(E e, S s){
-        return containsAll || firstKeyArray.contains(e) || thirdKeyArray.contains(s) || combinedKeyArray[e.ordinal()].second == s.ordinal();
+        return containsAll || secondKeyArray.contains(e, s);
     }
 
     public int size() {
         return size;
-    }
-
-    private static final class CombinedValue{
-
-        private byte first = -1, second = -1;
-
     }
 
 }
