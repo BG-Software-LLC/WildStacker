@@ -619,6 +619,9 @@ spawners:
       '%':
         type: BOOK
         name: '&eStatistics'
+        lore:
+          - '&7Player Range&e: &f%player-range%'
+          - '&7Time until Spawn&e: &f%ticks-left%s'
       '^':
         type: EMERALD
         name: '&eDeposit Menu'
