@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
-import com.bgsoftware.wildstacker.utils.FileUtils;
+import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EntityType;

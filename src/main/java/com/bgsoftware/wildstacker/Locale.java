@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.utils.FileUtils;
+import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 

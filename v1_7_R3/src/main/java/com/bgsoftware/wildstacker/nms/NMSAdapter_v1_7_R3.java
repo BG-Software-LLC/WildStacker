@@ -673,6 +673,13 @@ public final class NMSAdapter_v1_7_R3 implements NMSAdapter {
             getSpawner().a().spawnDelay = i;
         }
 
+        @Override
+        public int getRequiredPlayerRange() {
+            NBTTagCompound tagCompound = new NBTTagCompound();
+            getSpawner().a().b(tagCompound);
+            return tagCompound.getShort("RequiredPlayerRange");
+        }
+
         TileEntityMobSpawner getSpawner(){
             return (TileEntityMobSpawner) world.getTileEntity(locX, locY, locZ);
         }

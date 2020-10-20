@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -24,10 +25,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,8 +34,7 @@ import java.util.stream.Stream;
 
 public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawner> implements StackedSpawner {
 
-    private final List<Inventory> linkedInventories = new ArrayList<>();
-
+    private SpawnersManageMenu spawnersManageMenu;
     private LivingEntity linkedEntity = null;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner){
@@ -130,12 +128,11 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         removeHologram();
 
-        List<HumanEntity> viewers = new ArrayList<>();
-        linkedInventories.forEach(i ->  viewers.addAll(i.getViewers()));
-
-        viewers.forEach(HumanEntity::closeInventory);
-
-        linkedInventories.clear();
+        if(spawnersManageMenu != null) {
+            spawnersManageMenu.getInventory().getViewers().forEach(HumanEntity::closeInventory);
+            spawnersManageMenu.stop();
+            unlinkInventory();
+        }
     }
 
     @Override
@@ -345,12 +342,16 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         return linkedEntity;
     }
 
-    public void linkInventory(Inventory inventory){
-        this.linkedInventories.add(inventory);
+    public void linkInventory(SpawnersManageMenu spawnersManageMenu){
+        this.spawnersManageMenu = spawnersManageMenu;
     }
 
-    public void unlinkInventory(Inventory inventory){
-        this.linkedInventories.remove(inventory);
+    public SpawnersManageMenu getLinkedInventory(){
+        return spawnersManageMenu;
+    }
+
+    public void unlinkInventory(){
+        this.spawnersManageMenu = null;
     }
 
     public static StackedSpawner of(Block block){

@@ -33,8 +33,12 @@ public final class SpawnersBreakMenu extends WildMenu {
     private static final Map<UUID, Location> clickedSpawners = new HashMap<>();
     private static Inventory inventory;
 
+    SpawnersBreakMenu(){
+        super("breakMenu");
+    }
+
     @Override
-    public void onButtonClick(InventoryClickEvent e) {
+    public void onPlayerClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
 
         e.setCancelled(true);

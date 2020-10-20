@@ -11,4 +11,6 @@ public interface SyncedCreatureSpawner extends CreatureSpawner {
         return plugin.getNMSAdapter().createSyncedSpawner(creatureSpawner);
     }
 
+    int getRequiredPlayerRange();
+
 }

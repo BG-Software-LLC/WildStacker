@@ -42,6 +42,7 @@ public abstract class EditorMenu extends WildMenu {
     protected final String  editorIdentifier;
 
     protected EditorMenu(Inventory inventory, String fieldPrefix, String editorIdentifier){
+        super(editorIdentifier);
         this.inventory = inventory;
         this.editorIdentifier = editorIdentifier;
         editorMenus.put(editorIdentifier, this);
@@ -52,7 +53,7 @@ public abstract class EditorMenu extends WildMenu {
     }
 
     @Override
-    public void onButtonClick(InventoryClickEvent e) {
+    public void onPlayerClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
 
         e.setCancelled(true);

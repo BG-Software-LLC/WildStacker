@@ -10,8 +10,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
-import com.bgsoftware.wildstacker.menu.SpawnersPlaceMenu;
+import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -535,13 +534,15 @@ public final class SpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
         if(e.getPlayer().isSneaking()){
-            if(plugin.getSettings().spawnersBreakMenu){
-                SpawnersBreakMenu.open(e.getPlayer(), stackedSpawner.getLocation());
-                e.setCancelled(true);
-            }else if(plugin.getSettings().spawnersPlaceMenu){
-                SpawnersPlaceMenu.open(e.getPlayer(), stackedSpawner);
-                e.setCancelled(true);
-            }
+            SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
+            e.setCancelled(true);
+//            if(plugin.getSettings().spawnersBreakMenu){
+//                SpawnersBreakMenu.open(e.getPlayer(), stackedSpawner.getLocation());
+//                e.setCancelled(true);
+//            }else if(plugin.getSettings().spawnersPlaceMenu){
+//                SpawnersPlaceMenu.open(e.getPlayer(), stackedSpawner);
+//                e.setCancelled(true);
+//            }
         }
 
         else{

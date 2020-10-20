@@ -25,6 +25,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
     private boolean closeFlag = false;
 
     private BarrelsPlaceMenu(Location location, ItemStack barrelItem){
+        super("barrelsPlace");
         this.location = location;
         this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().barrelsPlaceInventoryTitle
                 .replace("{0}", EntityUtils.getFormattedType(barrelItem.getType().name())));
@@ -32,7 +33,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
     }
 
     @Override
-    public void onButtonClick(InventoryClickEvent e) {
+    public void onPlayerClick(InventoryClickEvent e) {
         if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
                 !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
             e.setCancelled(true);

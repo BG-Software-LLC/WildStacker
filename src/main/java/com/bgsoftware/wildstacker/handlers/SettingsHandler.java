@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
+import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsMap;
@@ -41,7 +42,7 @@ public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
-            "break-slots", "fill-items", "break-charge", "place-charge" };
+            "break-slots", "manage-menu", "break-charge", "place-charge" };
 
     //Global settings
     public final String giveItemName;
@@ -89,14 +90,14 @@ public final class SettingsHandler {
     //Spawners settings
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
-            dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu, spawnersPlaceMenu,
+            dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu,
             spawnersPlacementPermission, spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement,
             onlyOneSpawner, inventoryTweaksEnabled;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
     public final FastEnumArray<EntityType> blacklistedSpawners, whitelistedSpawners;
-    public final String hologramCustomName, spawnerItemName, spawnersPlaceMenuTitle, inventoryTweaksPermission, inventoryTweaksCommand;
+    public final String hologramCustomName, spawnerItemName, inventoryTweaksPermission, inventoryTweaksCommand;
     public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
     public final FastEnumMap<EntityType, Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
@@ -302,9 +303,7 @@ public final class SettingsHandler {
         getStackedItem = cfg.getBoolean("spawners.drop-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
         spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
-        spawnersPlaceMenu = !spawnersBreakMenu && cfg.getBoolean("spawners.place-inventory.enabled", false);
-        spawnersPlaceMenuTitle = ChatColor.translateAlternateColorCodes('&',
-                cfg.getString("spawners.place-inventory.title", "Add items here ({0})"));
+        SpawnersManageMenu.loadMenu(cfg.getConfigurationSection("spawners.manage-menu"));
         SpawnersBreakMenu.loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);

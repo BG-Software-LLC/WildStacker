@@ -4,6 +4,8 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -11,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("WeakerAccess")
-public final class ItemBuilder{
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
+public final class ItemBuilder {
 
     private ItemStack itemStack;
     private ItemMeta itemMeta;
@@ -97,6 +99,42 @@ public final class ItemBuilder{
         return this;
     }
 
+    public ItemBuilder replaceName(String regex, String replace){
+        if(itemMeta.hasDisplayName())
+            withName(itemMeta.getDisplayName().replace(regex, replace));
+        return this;
+    }
+
+    public ItemBuilder replaceLore(String regex, String replace){
+        if(!itemMeta.hasLore())
+            return this;
+
+        List<String> loreList = new ArrayList<>();
+
+        for(String line : itemMeta.getLore()){
+            loreList.add(line.replace(regex, replace));
+        }
+
+        withLore(loreList);
+        return this;
+    }
+
+    public ItemBuilder replaceAll(String regex, String replace){
+        replaceName(regex, replace);
+        replaceLore(regex, replace);
+        return this;
+    }
+
+    public ItemBuilder withEnchant(Enchantment enchant, int level){
+        itemMeta.addEnchant(enchant, level, true);
+        return this;
+    }
+
+    public ItemBuilder withFlags(ItemFlag... itemFlags){
+        itemMeta.addItemFlags(itemFlags);
+        return this;
+    }
+
     public ItemStack build(){
         return build(1);
     }
@@ -105,6 +143,17 @@ public final class ItemBuilder{
         itemStack.setItemMeta(itemMeta);
         itemStack.setAmount(amount);
         return itemStack;
+    }
+
+    public ItemBuilder copy(){
+        try {
+            ItemBuilder itemBuilder = new ItemBuilder(Material.AIR);
+            itemBuilder.itemStack = itemStack.clone();
+            itemBuilder.itemMeta = itemMeta.clone();
+            return itemBuilder;
+        }catch(Exception ex){
+            throw new NullPointerException(ex.getMessage());
+        }
     }
 
 }

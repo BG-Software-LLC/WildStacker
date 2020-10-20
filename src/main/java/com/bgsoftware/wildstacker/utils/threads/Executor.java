@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.threads;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +47,10 @@ public final class Executor {
             return;
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, runnable, delay);
+    }
+
+    public static BukkitTask timer(Runnable runnable, long period){
+        return Bukkit.getScheduler().runTaskTimer(plugin, runnable, 0L, period);
     }
 
     public static void data(Runnable runnable){

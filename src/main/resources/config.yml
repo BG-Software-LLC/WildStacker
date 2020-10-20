@@ -584,6 +584,57 @@ spawners:
   # You must set a valid custom-name for it to work.
   floating-names: false
 
+  # Here you can configure all the features related to the manage menu.
+  manage-menu:
+    # The title of the menu.
+    title: 'Spawner Information'
+
+    # The pattern of the menu.
+    pattern:
+      - '@ # & $ $ $ $ $ $'
+      - '# & $ $ $ $ $ $ $'
+      - '& $ $ % $ ^ $ $ &'
+      - '$ $ $ $ $ $ $ & #'
+      - '$ $ $ $ $ $ & # @'
+
+    # The slots of the deposit menu.
+    deposit-menu: '^'
+    # The slots for statistic items
+    statistics: '%'
+
+    # The items of the menu
+    items:
+      '@':
+        type: STAINED_GLASS_PANE
+        data: 15
+        name: '&f'
+      '#':
+        type: STAINED_GLASS_PANE
+        data: 4
+        name: '&f'
+      '&':
+        type: STAINED_GLASS_PANE
+        data: 1
+        name: '&f'
+      '%':
+        type: BOOK
+        name: '&eStatistics'
+      '^':
+        type: EMERALD
+        name: '&eDeposit Menu'
+
+    # Sounds for items
+    sounds:
+      '%':
+        type: ENTITY_EXPERIENCE_ORB_PICKUP
+        volume: 0.2
+        pitch: 0.2
+      '^':
+        type: ENTITY_EXPERIENCE_ORB_PICKUP
+        volume: 0.2
+        pitch: 0.2
+
+
   # Here you can configurable all features related to the break menu.
   break-menu:
     # When enabled and shift right-clicking a spawner, a "break-menu" will be opened.
