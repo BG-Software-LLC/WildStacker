@@ -505,6 +505,13 @@ public final class SpawnersListener implements Listener {
                     EntityType entityType = EntityType.valueOf(ItemUtils.getEntityType(e.getItem()).name());
                     plugin.getNMSAdapter().createEntity(e.getClickedBlock().getRelative(e.getBlockFace())
                             .getLocation().add(0.5, 0, 0.5), entityType.getEntityClass(), SpawnCause.SPAWNER_EGG, null, null);
+
+                    if(e.getPlayer().getGameMode() != GameMode.CREATIVE){
+                        ItemStack inHand = e.getItem().clone();
+                        inHand.setAmount(1);
+                        ItemUtils.removeItem(inHand, e);
+                    }
+
                 } catch (Exception ignored) { }
             }
 
