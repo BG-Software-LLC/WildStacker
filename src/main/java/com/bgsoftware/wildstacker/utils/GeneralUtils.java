@@ -68,9 +68,9 @@ public final class GeneralUtils {
         Map<T, Double> distances = new HashMap<>();
         return objects.min((o1, o2) -> {
             if(!distances.containsKey(o1))
-                distances.put(o1, o1.getLocation().distanceSquared(origin));
+                distances.put(o1, distance(o1.getLocation(), origin));
             if(!distances.containsKey(o2))
-                distances.put(o2, o2.getLocation().distanceSquared(origin));
+                distances.put(o2, distance(o2.getLocation(), origin));
 
             return distances.get(o1).compareTo(distances.get(o2));
         });
@@ -78,6 +78,10 @@ public final class GeneralUtils {
 
     public static String format(double number){
         return numberFormant.format(number);
+    }
+
+    private static double distance(Location loc1, Location loc2){
+        return loc1.getWorld() != loc2.getWorld() ? Double.POSITIVE_INFINITY : loc1.distanceSquared(loc2);
     }
 
 }
