@@ -47,6 +47,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> implements StackedEntity {
@@ -59,6 +60,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private boolean deadEntityFlag = false;
     private boolean removed = false;
     private boolean saveEntity = true;
+    private Predicate<LivingEntity> stackFlag = null;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -342,50 +344,49 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        //synchronized (stackingMutex) {
-            if (!StackService.canStackFromThread())
-                return StackResult.THREAD_CATCHER;
+        if (!StackService.canStackFromThread())
+            return StackResult.THREAD_CATCHER;
 
-            if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
-                return StackResult.NOT_SIMILAR;
+        if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
+            return StackResult.NOT_SIMILAR;
 
-            StackedEntity targetEntity = (StackedEntity) stackedObject;
+        StackedEntity targetEntity = (StackedEntity) stackedObject;
 
-            //synchronized (((WStackedEntity) targetEntity).stackingMutex) {
-                EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
-                Bukkit.getPluginManager().callEvent(entityStackEvent);
+        if(!shouldBeStacked() || !((WStackedEntity) targetEntity).shouldBeStacked())
+            return StackResult.NOT_SIMILAR;
 
-                if (entityStackEvent.isCancelled())
-                    return StackResult.EVENT_CANCELLED;
+        EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
+        Bukkit.getPluginManager().callEvent(entityStackEvent);
 
-                double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
-                        Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
-                int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
+        if (entityStackEvent.isCancelled())
+            return StackResult.EVENT_CANCELLED;
 
-                targetEntity.setStackAmount(newStackAmount, false);
-                targetEntity.setHealth(Math.max(health, 0.5D));
+        double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
+                Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
+        int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
-                Executor.sync(() -> {
-                    if (targetEntity.getLivingEntity().isValid())
-                        targetEntity.updateName();
-                }, 2L);
+        targetEntity.setStackAmount(newStackAmount, false);
+        targetEntity.setHealth(Math.max(health, 0.5D));
 
-                plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
+        Executor.sync(() -> {
+            if (targetEntity.getLivingEntity().isValid())
+                targetEntity.updateName();
+        }, 2L);
 
-                if (object.getType().name().equals("PARROT"))
-                    Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
+        plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
-                this.remove();
-            //}
+        if (object.getType().name().equals("PARROT"))
+            Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
 
-            if (plugin.getSettings().entitiesParticlesEnabled) {
-                Location location = getLivingEntity().getLocation();
-                for (ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
-                    particleWrapper.spawnParticle(location);
-            }
+        this.remove();
 
-            return StackResult.SUCCESS;
-        //}
+        if (plugin.getSettings().entitiesParticlesEnabled) {
+            Location location = getLivingEntity().getLocation();
+            for (ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
+                particleWrapper.spawnParticle(location);
+        }
+
+        return StackResult.SUCCESS;
     }
 
     @Override
@@ -655,6 +656,22 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public void setSaveEntity(boolean saveEntity){
         this.saveEntity = saveEntity && isCached();
+    }
+
+    public boolean shouldBeStacked(){
+        if(stackFlag == null)
+            return true;
+
+        if(stackFlag.test(object)){
+            stackFlag = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void setStackFlag(Predicate<LivingEntity> stackFlag){
+        this.stackFlag = stackFlag;
     }
 
     public static StackedEntity of(Entity entity){

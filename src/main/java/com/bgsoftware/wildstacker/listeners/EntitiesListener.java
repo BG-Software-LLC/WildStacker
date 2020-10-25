@@ -307,8 +307,6 @@ public final class EntitiesListener implements Listener {
 
                 EntityUtils.setKiller(livingEntity, damager);
 
-                Player DAMAGER = damager;
-
                 int lootBonusLevel = damagerTool == null ? 0 : damagerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
 
                 if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
@@ -339,8 +337,8 @@ public final class EntitiesListener implements Listener {
                 }
 
                 // Handle sweeping edge enchantment
-                if(e.isCancelled() && damagerTool != null && DAMAGER != null)
-                    plugin.getNMSAdapter().handleSweepingEdge(DAMAGER, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
+                if(e.isCancelled() && damagerTool != null && damager != null)
+                    plugin.getNMSAdapter().handleSweepingEdge(damager, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
 
                 //Decrease durability when next-stack-knockback is false
                 if(e.isCancelled() && damagerTool != null && !creativeMode && !ItemUtils.isUnbreakable(damagerTool)) {
@@ -933,7 +931,9 @@ public final class EntitiesListener implements Listener {
             for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
                 Executor.sync(() -> {
                     if(creature.getTarget() != null) {
-                        stackedEntity.spawnDuplicate(1);
+                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                        ((Creature) duplicate.getLivingEntity()).setTarget(creature.getTarget());
+                        ((WStackedEntity) duplicate).setStackFlag(entity -> ((Creature) entity).getTarget() == null);
                         stackedEntity.setStackAmount(stackedEntity.getStackAmount() - 1, true);
                     }
                 }, i * 20);
