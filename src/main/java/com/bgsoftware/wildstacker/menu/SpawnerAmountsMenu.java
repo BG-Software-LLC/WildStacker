@@ -83,11 +83,10 @@ public final class SpawnerAmountsMenu extends WildMenu {
         if (depositAmount == null)
             return;
 
-        int newStackAmount = stackedSpawner.getStackAmount() + depositAmount;
         int limit = stackedSpawner.getStackLimit();
 
-        if(newStackAmount > limit)
-            depositAmount = newStackAmount - limit;
+        if(stackedSpawner.getStackAmount() + depositAmount > limit)
+            depositAmount = limit - stackedSpawner.getStackAmount();
 
         Map<Integer, Integer> itemsToRemove = new HashMap<>();
         Inventory inventory = e.getWhoClicked().getInventory();
@@ -117,7 +116,6 @@ public final class SpawnerAmountsMenu extends WildMenu {
             }
 
             depositAmount = Math.min(depositAmount, amount);
-            newStackAmount = stackedSpawner.getStackAmount() + depositAmount;
         }
 
         if(depositAmount <= 0){
@@ -136,7 +134,7 @@ public final class SpawnerAmountsMenu extends WildMenu {
             return;
         }
 
-        stackedSpawner.setStackAmount(newStackAmount, true);
+        stackedSpawner.setStackAmount(stackedSpawner.getStackAmount() + depositAmount, true);
         Locale.SPAWNER_UPDATE.send(e.getWhoClicked(), stackedSpawner.getStackAmount());
 
         if(successSound != null)
