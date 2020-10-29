@@ -1,18 +1,19 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 public final class SpawnersManageMenu extends WildMenu {
 
-    private static List<Integer> depositMenuSlots = new ArrayList<>();
+    private static List<Integer> amountsMenuSlots = new ArrayList<>();
     private static List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
     private final WeakReference<StackedSpawner> stackedSpawner;
     private final BukkitTask bukkitTask;
@@ -35,10 +36,10 @@ public final class SpawnersManageMenu extends WildMenu {
 
     @Override
     public void onPlayerClick(InventoryClickEvent e) {
-        if(depositMenuSlots.contains(e.getRawSlot())){
+        if(amountsMenuSlots.contains(e.getRawSlot())){
             StackedSpawner stackedSpawner = this.stackedSpawner.get();
             if(stackedSpawner != null) {
-                SpawnersBreakMenu.open((Player) e.getWhoClicked(), stackedSpawner.getLocation());
+                SpawnerAmountsMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
             else {
                 e.getWhoClicked().closeInventory();
@@ -97,22 +98,31 @@ public final class SpawnersManageMenu extends WildMenu {
         spawnersManageMenu.openMenu(player);
     }
 
-    public static void loadMenu(ConfigurationSection section){
+    public static void loadMenu(){
         SpawnersManageMenu spawnersManageMenu = new SpawnersManageMenu(null);
-        Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnersManageMenu, "manage-menu", section);
-        List<Integer> depositMenuSlots = new ArrayList<>();
+
+        File file = new File(plugin.getDataFolder(), "menus/spawner-manage.yml");
+
+        if(!file.exists())
+            FileUtils.saveResource("menus/spawner-manage.yml");
+
+        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
+        cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-manage.yml"), IGNORED_CONFIG_PATHS);
+
+        Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnersManageMenu, "spawner-manage.yml", cfg);
+        List<Integer> amountsMenuSlots = new ArrayList<>();
         List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
 
-        for(Character character : section.getString("deposit-menu", "").toCharArray())
-            depositMenuSlots.addAll(charSlots.getOrDefault(character, new ArrayList<>()));
+        for(Character character : cfg.getString("amounts-menu", "").toCharArray())
+            amountsMenuSlots.addAll(charSlots.getOrDefault(character, new ArrayList<>()));
 
-        for(Character character : section.getString("statistics", "").toCharArray()) {
+        for(Character character : cfg.getString("statistics", "").toCharArray()) {
             for(int slot : charSlots.getOrDefault(character, new ArrayList<>())){
                 statisticSlots.add(new Pair<>(slot, spawnersManageMenu.getData().fillItems.get(slot)));
             }
         }
 
-        SpawnersManageMenu.depositMenuSlots = depositMenuSlots;
+        SpawnersManageMenu.amountsMenuSlots = amountsMenuSlots;
         SpawnersManageMenu.statisticSlots = statisticSlots;
     }
 

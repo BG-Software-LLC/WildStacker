@@ -12,6 +12,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +30,10 @@ public final class FileUtils {
     public static void saveResource(String resourcePath){
         try {
             File file = new File(plugin.getDataFolder(), resourcePath);
+            String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
+
             if(!file.exists()) {
-                String legacyName = resourcePath.replace(".json", "") + "_legacy.json";
+                String legacyName = resourcePath.replace("." + fileType, "") + "_legacy." + fileType;
                 if (ServerVersion.isLegacy() && plugin.getResource(legacyName) != null) {
                     plugin.saveResource(legacyName, true);
                     File legacyFile = new File(plugin.getDataFolder(), legacyName);
@@ -41,6 +44,17 @@ public final class FileUtils {
             }
         }catch(Exception ex){
             ex.printStackTrace();
+        }
+    }
+
+    public static InputStream getResource(String resourcePath){
+        String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
+
+        String legacyName = resourcePath.replace("." + fileType, "") + "_legacy." + fileType;
+        if (ServerVersion.isLegacy() && plugin.getResource(legacyName) != null) {
+            return plugin.getResource(legacyName);
+        }else{
+            return plugin.getResource(resourcePath);
         }
     }
 

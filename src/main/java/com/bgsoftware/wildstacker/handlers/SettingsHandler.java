@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.menu.SpawnersBreakMenu;
+import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
@@ -89,10 +89,9 @@ public final class SettingsHandler {
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
-            silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack, getStackedItem,
-            dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersBreakMenu,
-            spawnersPlacementPermission, spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement,
-            onlyOneSpawner, inventoryTweaksEnabled;
+            silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
+            getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
+            spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
@@ -302,9 +301,6 @@ public final class SettingsHandler {
         shiftGetWholeSpawnerStack = cfg.getBoolean("spawners.shift-get-whole-stack", true);
         getStackedItem = cfg.getBoolean("spawners.drop-stacked-item", true);
         floatingSpawnerNames = cfg.getBoolean("spawners.floating-names", false);
-        spawnersBreakMenu = cfg.getBoolean("spawners.break-menu.enabled", true);
-        SpawnersManageMenu.loadMenu(cfg.getConfigurationSection("spawners.manage-menu"));
-        SpawnersBreakMenu.loadMenu(cfg.getConfigurationSection("spawners.break-menu"));
         spawnersPlacementPermission = cfg.getBoolean("spawners.placement-permission", false);
         spawnersShiftPlaceStack = cfg.getBoolean("spawners.shift-place-stack", true);
         spawnersBreakCharge = new FastEnumMap<>(EntityType.class);
@@ -390,6 +386,9 @@ public final class SettingsHandler {
         WildStackerPlugin.log(" - Stacking entities is " + getBoolean(entitiesStackingEnabled));
         WildStackerPlugin.log(" - Stacking spawners is " + getBoolean(spawnersStackingEnabled));
         WildStackerPlugin.log(" - Stacking barrels is " + getBoolean(barrelsStackingEnabled));
+
+        SpawnersManageMenu.loadMenu();
+        SpawnerAmountsMenu.loadMenu();
 
         WildStackerPlugin.log("Loading configuration done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }

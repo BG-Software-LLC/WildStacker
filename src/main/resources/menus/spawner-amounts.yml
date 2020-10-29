@@ -1,0 +1,62 @@
+###############################################
+##                                           ##
+##         WildStacker Configuration         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# The title of the menu.
+title: 'Spawner Amounts'
+
+# The pattern of the menu.
+pattern:
+  - '@ # & $ $ $ $ $ $'
+  - '# & $ ! $ * $ $ $'
+  - '& $ % $ $ $ - $ &'
+  - '$ $ $ ^ $ + $ & #'
+  - '$ $ $ $ $ $ & # @'
+
+# The sound that will be played when successfully changing the spawner's amount
+success-sound:
+  type: ENTITY_EXPERIENCE_ORB_PICKUP
+  volume: 0.2
+  pitch: 0.2
+
+# The sound that will be played when failing to change the spawner's amount
+failure-sound: {}
+
+# The items of the menu
+items:
+  '@':
+    type: BLACK_STAINED_GLASS_PANE
+    name: '&f'
+  '#':
+    type: YELLOW_STAINED_GLASS_PANE
+    name: '&f'
+  '&':
+    type: ORANGE_STAINED_GLASS_PANE
+    name: '&f'
+  '!':
+    type: LIME_STAINED_GLASS_PANE
+    deposit: 1
+    name: '&aAdd +1'
+  '%':
+    type: LIME_STAINED_GLASS_PANE
+    deposit: 16
+    name: '&aAdd +16'
+  '^':
+    type: LIME_STAINED_GLASS_PANE
+    deposit: 64
+    name: '&aAdd +64'
+  '*':
+    type: RED_STAINED_GLASS_PANE
+    withdraw: 1
+    name: '&cRemove -1'
+  '-':
+    type: RED_STAINED_GLASS_PANE
+    withdraw: 16
+    name: '&cRemove -16'
+  '+':
+    type: RED_STAINED_GLASS_PANE
+    withdraw: 64
+    name: '&cRemove -64'

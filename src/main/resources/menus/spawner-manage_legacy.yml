@@ -1,0 +1,57 @@
+###############################################
+##                                           ##
+##         WildStacker Configuration         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# The title of the menu.
+title: 'Spawner Information'
+
+# The pattern of the menu.
+pattern:
+  - '@ # & $ $ $ $ $ $'
+  - '# & $ $ $ $ $ $ $'
+  - '& $ $ % $ ^ $ $ &'
+  - '$ $ $ $ $ $ $ & #'
+  - '$ $ $ $ $ $ & # @'
+
+# The slots of the amounts menu.
+amounts-menu: '^'
+# The slots for statistic items
+statistics: '%'
+
+# The items of the menu
+items:
+  '@':
+    type: STAINED_GLASS_PANE
+    data: 15
+    name: '&f'
+  '#':
+    type: STAINED_GLASS_PANE
+    data: 4
+    name: '&f'
+  '&':
+    type: STAINED_GLASS_PANE
+    data: 1
+    name: '&f'
+  '%':
+    type: BOOK
+    name: '&eStatistics'
+    lore:
+      - '&7Player Range&e: &f%player-range%'
+      - '&7Time until Spawn&e: &f%ticks-left%s'
+  '^':
+    type: EMERALD
+    name: '&eAmounts Menu'
+
+# Sounds for items
+sounds:
+  '%':
+    type: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 0.2
+    pitch: 0.2
+  '^':
+    type: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 0.2
+    pitch: 0.2

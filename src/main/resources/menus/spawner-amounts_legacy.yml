@@ -1,0 +1,65 @@
+###############################################
+##                                           ##
+##         WildStacker Configuration         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# The title of the menu.
+title: 'Spawner Amounts'
+
+# The pattern of the menu.
+pattern:
+  - '@ # & $ $ $ $ $ $'
+  - '# & $ ! $ * $ $ $'
+  - '& $ % $ $ $ - $ &'
+  - '$ $ $ ^ $ + $ & #'
+  - '$ $ $ $ $ $ & # @'
+
+# The sound that will be played when successfully changing the spawner's amount
+success-sound:
+  type: ENTITY_EXPERIENCE_ORB_PICKUP
+  volume: 0.2
+  pitch: 0.2
+
+# The sound that will be played when failing to change the spawner's amount
+failure-sound: {}
+
+# The items of the menu
+items:
+  '@':
+    type: STAINED_GLASS_PANE
+    data: 15
+    name: '&f'
+  '#':
+    type: STAINED_GLASS_PANE
+    data: 4
+    name: '&f'
+  '&':
+    type: STAINED_GLASS_PANE
+    data: 1
+    name: '&f'
+  '!':
+    type: STAINED_GLASS_PANE
+    data: 5
+    name: '&f'
+  '%':
+    type: STAINED_GLASS_PANE
+    data: 5
+    name: '&f'
+  '^':
+    type: STAINED_GLASS_PANE
+    data: 5
+    name: '&f'
+  '*':
+    type: STAINED_GLASS_PANE
+    data: 14
+    name: '&f'
+  '-':
+    type: STAINED_GLASS_PANE
+    data: 14
+    name: '&f'
+  '+':
+    type: STAINED_GLASS_PANE
+    data: 14
+    name: '&f'
