@@ -25,6 +25,7 @@ import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
+import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
@@ -53,6 +54,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private NMSAdapter nmsAdapter;
     private NMSHolograms nmsHolograms;
+    private NMSSpawners nmsSpawners;
 
     private boolean shouldEnable = true;
 
@@ -179,6 +181,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         try{
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
             nmsHolograms = (NMSHolograms) Class.forName("com.bgsoftware.wildstacker.nms.NMSHolograms_" + bukkitVersion).newInstance();
+            nmsSpawners = (NMSSpawners) Class.forName("com.bgsoftware.wildstacker.nms.NMSSpawners_" + bukkitVersion).newInstance();
         }catch(Exception ex){
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
@@ -191,6 +194,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public NMSHolograms getNMSHolograms(){
         return nmsHolograms;
+    }
+
+    public NMSSpawners getNMSSpawners() {
+        return nmsSpawners;
     }
 
     public LootHandler getLootHandler() {

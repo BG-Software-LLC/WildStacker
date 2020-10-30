@@ -60,6 +60,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private boolean deadEntityFlag = false;
     private boolean removed = false;
     private boolean saveEntity = true;
+    private boolean demoEntity = false;
     private Predicate<LivingEntity> stackFlag = null;
 
     public WStackedEntity(LivingEntity livingEntity){
@@ -242,7 +243,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(isNameBlacklisted())
             return StackCheckResult.BLACKLISTED_NAME;
 
-        if(object.isDead() || !object.isValid())
+        if(!demoEntity && (object.isDead() || !object.isValid()))
             return StackCheckResult.ALREADY_DEAD;
 
         if(StackCheck.NAME_TAG.isEnabled() && hasNameTag())
@@ -672,6 +673,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public void setStackFlag(Predicate<LivingEntity> stackFlag){
         this.stackFlag = stackFlag;
+    }
+
+    public void setDemoEntity(){
+        demoEntity = true;
     }
 
     public static StackedEntity of(Entity entity){

@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -65,6 +66,18 @@ public final class GeneralUtils {
     }
 
     public static <T extends StackedObject> Optional<T> getClosest(Location origin, Stream<T> objects){
+        Map<T, Double> distances = new HashMap<>();
+        return objects.min((o1, o2) -> {
+            if(!distances.containsKey(o1))
+                distances.put(o1, distance(o1.getLocation(), origin));
+            if(!distances.containsKey(o2))
+                distances.put(o2, distance(o2.getLocation(), origin));
+
+            return distances.get(o1).compareTo(distances.get(o2));
+        });
+    }
+
+    public static <T extends Entity> Optional<T> getClosestBukkit(Location origin, Stream<T> objects){
         Map<T, Double> distances = new HashMap<>();
         return objects.min((o1, o2) -> {
             if(!distances.containsKey(o1))
