@@ -28,7 +28,7 @@ public final class DatabaseQueue {
         if(existingParametersIndex != null)
             queuedCalls.remove(existingParametersIndex);
 
-        int currentIndex = DatabaseQueue.currentIndex.getAndIncrement();
+        int currentIndex = DatabaseQueue.currentIndex.incrementAndGet();
 
         queuedCalls.put(currentIndex, parameters);
         queryCalls.put(caller, currentIndex);
@@ -50,7 +50,7 @@ public final class DatabaseQueue {
             Map<Query, PreparedStatement> preparedStatementMap = new EnumMap<>(Query.class);
             Connection connection = Database.getConnection();
 
-            for(int i = 0; i < currentIndex; i++){
+            for(int i = 0; i <= currentIndex; i++){
                 try {
                     QueryParameters parameters = queuedCalls.get(i);
 
