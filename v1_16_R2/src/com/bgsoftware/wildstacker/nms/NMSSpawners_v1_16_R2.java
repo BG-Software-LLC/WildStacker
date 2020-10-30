@@ -13,6 +13,7 @@ import net.minecraft.server.v1_16_R2.BlockPosition;
 import net.minecraft.server.v1_16_R2.Blocks;
 import net.minecraft.server.v1_16_R2.Entity;
 import net.minecraft.server.v1_16_R2.EntityInsentient;
+import net.minecraft.server.v1_16_R2.EntityPositionTypes;
 import net.minecraft.server.v1_16_R2.EntityTypes;
 import net.minecraft.server.v1_16_R2.EnumMobSpawn;
 import net.minecraft.server.v1_16_R2.MobSpawnerAbstract;
@@ -129,6 +130,15 @@ public final class NMSSpawners_v1_16_R2 implements NMSSpawners {
                 return;
             }
 
+            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(this.spawnData.getEntity());
+
+            if(!entityTypesOptional.isPresent()){
+                resetSpawnDelay();
+                return;
+            }
+
+            EntityTypes<?> entityTypes = entityTypesOptional.get();
+
             org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
 
             if(demoEntityBukkit == null){
@@ -203,6 +213,13 @@ public final class NMSSpawners_v1_16_R2 implements NMSSpawners {
                 double x = position.getX() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
                 double y = position.getY() + world.random.nextInt(3) - 1;
                 double z = position.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
+
+                boolean hasSpace = world.b(entityTypes.a(x, y, z));
+                boolean hasSpawnConditions = EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(),
+                        EnumMobSpawn.SPAWNER, new BlockPosition(x, y, z), world.random);
+
+                if(!hasSpace || !hasSpawnConditions)
+                    continue;
 
                 org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
 
