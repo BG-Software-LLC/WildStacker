@@ -47,6 +47,13 @@ public final class FastEnumMap<E extends Enum<E>, V> {
         return originalValue;
     }
 
+    public V computeIfAbsent(E e, V value){
+        V curr = arr[e.ordinal()];
+        if(curr == null)
+            curr = arr[e.ordinal()] = value;
+        return curr;
+    }
+
     public V getOrDefault(E e, V def){
         V value = get(e);
         return value == null ? def : value;
@@ -55,6 +62,10 @@ public final class FastEnumMap<E extends Enum<E>, V> {
     public V get(E e){
         V value = arr[e.ordinal()];
         return value == null ? globalValue : value;
+    }
+
+    public void remove(E e){
+        arr[e.ordinal()] = null;
     }
 
     public int size() {

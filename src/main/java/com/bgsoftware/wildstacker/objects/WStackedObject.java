@@ -168,4 +168,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     @Override
     public abstract boolean isSimilar(StackedObject stackedObject);
 
+    @Override
+    public abstract void spawnStackParticle(boolean checkEnabled);
+
 }

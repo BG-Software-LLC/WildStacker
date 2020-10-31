@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,11 +20,14 @@ public final class ReflectionUtils {
                     entityClass = getNMSClass("Entity"),
                     entityInsentientClass = getNMSClass("EntityInsentient"),
                     worldClass = getNMSClass("World"),
-                    chunkClass = getNMSClass("Chunk");
+                    chunkClass = getNMSClass("Chunk"),
+                    tileEntitySpawnerClass = getNMSClass("TileEntityMobSpawner"),
+                    mobSpawnerAbstractClass = getNMSClass("MobSpawnerAbstract");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
                     ServerVersion.isEquals(ServerVersion.v1_7) ? "b" : "b_"));
+            fieldMap.put(Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER, getFinalField(tileEntitySpawnerClass, "a"));
 
             try{ fieldMap.put(Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER, entityClass.getField("spawnedViaMobSpawner")); }catch(Throwable ignored){}
             try{ fieldMap.put(Fields.ENTITY_FROM_MOB_SPAWNER, entityClass.getField("fromMobSpawner")); }catch(Throwable ignored){}
@@ -32,6 +36,9 @@ public final class ReflectionUtils {
                 Class<?> entityStriderClass = getNMSClass("EntityStrider");
                 fieldMap.put(Fields.STRIDER_SADDLE_STORAGE, entityStriderClass.getDeclaredField("bA"));
             }catch (Throwable ignored){}
+
+            if(ServerVersion.isEquals(ServerVersion.v1_13))
+                fieldMap.put(Fields.ABSTRACT_SPAWNER_MOBS, mobSpawnerAbstractClass.getDeclaredField("mobs"));
 
             if(ServerVersion.isAtLeast(ServerVersion.v1_16))
                 fieldMap.put(Fields.CHUNK_ENTITY_SLICES, chunkClass.getField("entitySlices"));
@@ -127,6 +134,18 @@ public final class ReflectionUtils {
         }catch(Throwable ex){
             return methodName2;
         }
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static Field getFinalField(Class<?> clazz, String fieldName) throws Exception{
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        return field;
     }
 
 }

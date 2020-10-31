@@ -11,7 +11,10 @@ public enum Fields {
 
     STRIDER_SADDLE_STORAGE,
 
-    CHUNK_ENTITY_SLICES;
+    CHUNK_ENTITY_SLICES,
+
+    TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER,
+    ABSTRACT_SPAWNER_MOBS;
 
     public <T> T get(Object object, Class<T> clazz){
         try {

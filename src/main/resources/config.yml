@@ -638,6 +638,10 @@ spawners:
     # You can set it to be disabled in order to disable the feature.
     toggle-command: 'stacker inventorytweaks,stacker it'
 
+  # Configure spawn conditions for entities that are spawned by spawners
+  spawn-conditions:
+    EXAMPLE_MOB: []
+
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
   # Should blocks get stacked into barrels on the server?

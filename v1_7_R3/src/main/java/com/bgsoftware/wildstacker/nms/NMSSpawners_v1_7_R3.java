@@ -1,0 +1,527 @@
+package com.bgsoftware.wildstacker.nms;
+
+import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
+import net.minecraft.server.v1_7_R3.AxisAlignedBB;
+import net.minecraft.server.v1_7_R3.BiomeBase;
+import net.minecraft.server.v1_7_R3.Blocks;
+import net.minecraft.server.v1_7_R3.Chunk;
+import net.minecraft.server.v1_7_R3.Entity;
+import net.minecraft.server.v1_7_R3.EntityInsentient;
+import net.minecraft.server.v1_7_R3.EntityTypes;
+import net.minecraft.server.v1_7_R3.EnumDifficulty;
+import net.minecraft.server.v1_7_R3.EnumSkyBlock;
+import net.minecraft.server.v1_7_R3.GroupDataEntity;
+import net.minecraft.server.v1_7_R3.MathHelper;
+import net.minecraft.server.v1_7_R3.MobSpawnerAbstract;
+import net.minecraft.server.v1_7_R3.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagList;
+import net.minecraft.server.v1_7_R3.TileEntity;
+import net.minecraft.server.v1_7_R3.TileEntityMobSpawner;
+import net.minecraft.server.v1_7_R3.TileEntityMobSpawnerData;
+import net.minecraft.server.v1_7_R3.UtilColor;
+import net.minecraft.server.v1_7_R3.WeightedRandom;
+import net.minecraft.server.v1_7_R3.World;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_7_R3.event.CraftEventFactory;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiPredicate;
+
+@SuppressWarnings("unused")
+public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    @Override
+    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
+        World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
+        Location location = stackedSpawner.getLocation();
+
+        TileEntity tileEntity = world.getTileEntity(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        if(tileEntity instanceof TileEntityMobSpawner)
+            new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
+    }
+
+    @Override
+    public void registerSpawnConditions() {
+        createCondition("ANIMAL_LIGHT",
+                (world, position) -> world.j(position.x, position.y, position.z) > 8,
+                EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.MUSHROOM_COW, EntityType.PIG,
+                EntityType.SHEEP, EntityType.WOLF
+        );
+
+        createCondition("IN_SLIME_CHUNK",
+                (world, position) -> position.getChunk(world).a(987234911L)
+                        .nextInt(10) == 0 && world.random.nextInt(10) == 0 && position.y < 40,
+                EntityType.SLIME
+        );
+
+        createCondition("IN_SWAMP",
+                (world, position) -> world.getBiome(position.x, position.z) == BiomeBase.SWAMPLAND,
+                EntityType.SLIME
+        );
+
+        createCondition("MONSTER_LIGHT", (world, position) -> {
+            if (world.b(EnumSkyBlock.SKY, position.x, position.y, position.z) > world.random.nextInt(32)) {
+                return false;
+            } else {
+                int lightLevel = world.getLightLevel(position.x, position.y, position.z);
+
+                if (world.P()) {
+                    int j = world.j;
+                    world.c(10);
+                    lightLevel = world.getLightLevel(position.x, position.y, position.z);
+                    world.c(j);
+                }
+
+                return lightLevel <= world.random.nextInt(8);
+            }
+        }, EntityType.CAVE_SPIDER, EntityType.CREEPER, EntityType.ENDERMAN, EntityType.GIANT, EntityType.SKELETON,
+                EntityType.SPIDER, EntityType.WITCH, EntityType.WITHER, EntityType.ZOMBIE
+        );
+
+        createCondition("NOT_PEACEFUL",
+                (world, position) -> world.difficulty != EnumDifficulty.PEACEFUL,
+                EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER, EntityType.ENDERMAN, EntityType.GHAST,
+                EntityType.GIANT, EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME,
+                EntityType.SPIDER, EntityType.WITCH, EntityType.WITHER, EntityType.ZOMBIE, EntityType.PIG_ZOMBIE
+        );
+
+        createCondition("ON_GRASS",
+                (world, position) -> world.getType(position.x, position.y - 1, position.z) == Blocks.GRASS,
+                EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF
+        );
+
+        createCondition("ON_MYCELIUM",
+                (world, position) -> world.getType(position.x, position.y - 1, position.z) == Blocks.MYCEL,
+                EntityType.MUSHROOM_COW
+        );
+    }
+
+    private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes){
+        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id) {
+            @Override
+            public boolean test(Location location) {
+                return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
+                        new BlockPosition(location.getX(), location.getY(), location.getZ()));
+            }
+        });
+        plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
+    }
+
+    private static class StackedMobSpawner extends MobSpawnerAbstract {
+
+        private final World world;
+        private final BlockPosition position;
+        private final WeakReference<WStackedSpawner> stackedSpawner;
+        private final List<TileEntityMobSpawnerData> mobs = new ArrayList<>();
+
+        private String mobName;
+        private TileEntityMobSpawnerData spawnData;
+        private int minSpawnDelay = 200;
+        private int maxSpawnDelay = 800;
+        private int spawnCount = 4;
+        private int maxNearbyEntities = 6;
+        private int requiredPlayerRange = 16;
+        private int spawnRange = 4;
+
+        StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
+            this.world = tileEntityMobSpawner.getWorld();
+            this.position = new BlockPosition(tileEntityMobSpawner.x, tileEntityMobSpawner.y, tileEntityMobSpawner.z);
+            this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
+
+            if(!(tileEntityMobSpawner.a() instanceof StackedMobSpawner)) {
+                MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.a();
+                Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                originalSpawner.b(tagCompound);
+                a(tagCompound);
+            }
+        }
+
+        @Override
+        public String getMobName() {
+            if (spawnData == null) {
+                if (this.mobName == null) {
+                    this.mobName = "Pig";
+                }
+
+                else if (this.mobName.equals("Minecart")) {
+                    this.mobName = "MinecartRideable";
+                }
+
+                return this.mobName;
+            } else {
+                return spawnData.a().getString("Type");
+            }
+        }
+
+        @Override
+        public void a(String mobName) {
+            this.mobName = mobName;
+        }
+
+        @Override
+        public void a(NBTTagCompound nbttagcompound) {
+            this.mobName = nbttagcompound.getString("EntityId");
+            this.spawnDelay = nbttagcompound.getShort("Delay");
+            this.mobs.clear();
+            if (nbttagcompound.hasKeyOfType("SpawnPotentials", 9)) {
+                NBTTagList nbttaglist = nbttagcompound.getList("SpawnPotentials", 10);
+
+                for(int i = 0; i < nbttaglist.size(); ++i) {
+                    this.mobs.add(new TileEntityMobSpawnerData(this, nbttaglist.get(i)));
+                }
+            }
+
+            if (nbttagcompound.hasKeyOfType("SpawnData", 10)) {
+                this.a(new TileEntityMobSpawnerData(this, nbttagcompound.getCompound("SpawnData"), this.mobName));
+            } else {
+                this.a((TileEntityMobSpawnerData) null);
+            }
+
+            if (nbttagcompound.hasKeyOfType("MinSpawnDelay", 99)) {
+                this.minSpawnDelay = nbttagcompound.getShort("MinSpawnDelay");
+                this.maxSpawnDelay = nbttagcompound.getShort("MaxSpawnDelay");
+                this.spawnCount = nbttagcompound.getShort("SpawnCount");
+            }
+
+            if (nbttagcompound.hasKeyOfType("MaxNearbyEntities", 99)) {
+                this.maxNearbyEntities = nbttagcompound.getShort("MaxNearbyEntities");
+                this.requiredPlayerRange = nbttagcompound.getShort("RequiredPlayerRange");
+            }
+
+            if (nbttagcompound.hasKeyOfType("SpawnRange", 99)) {
+                this.spawnRange = nbttagcompound.getShort("SpawnRange");
+            }
+        }
+
+        @Override
+        public void b(NBTTagCompound nbttagcompound) {
+            String s = this.getMobName();
+
+            if (!UtilColor.b(s)) {
+                nbttagcompound.setString("EntityId", s);
+                nbttagcompound.setShort("Delay", (short)this.spawnDelay);
+                nbttagcompound.setShort("MinSpawnDelay", (short)this.minSpawnDelay);
+                nbttagcompound.setShort("MaxSpawnDelay", (short)this.maxSpawnDelay);
+                nbttagcompound.setShort("SpawnCount", (short)this.spawnCount);
+                nbttagcompound.setShort("MaxNearbyEntities", (short)this.maxNearbyEntities);
+                nbttagcompound.setShort("RequiredPlayerRange", (short)this.requiredPlayerRange);
+                nbttagcompound.setShort("SpawnRange", (short)this.spawnRange);
+
+                if (spawnData != null) {
+                    nbttagcompound.set("SpawnData", spawnData.a().getCompound("Properties").clone());
+                }
+
+                if (spawnData != null || this.mobs.size() > 0) {
+                    NBTTagList nbttaglist = new NBTTagList();
+
+                    if (this.mobs.size() > 0) {
+                        for(TileEntityMobSpawnerData mobData : this.mobs)
+                            nbttaglist.add(mobData.a());
+                    } else {
+                        nbttaglist.add(spawnData.a());
+                    }
+
+                    nbttagcompound.set("SpawnPotentials", nbttaglist);
+                }
+            }
+        }
+
+        @Override
+        public void a(TileEntityMobSpawnerData spawnData) {
+            this.spawnData = spawnData;
+            world.notify(position.x, position.y, position.z);
+        }
+
+        @Override
+        public void a(int i) {
+            world.playNote(position.x, position.y, position.z, Blocks.MOB_SPAWNER, i, 0);
+        }
+
+        @Override
+        public World a() {
+            return world;
+        }
+
+        public int b() {
+            return position.x;
+        }
+
+        public int c() {
+            return position.y;
+        }
+
+        public int d() {
+            return position.z;
+        }
+
+        @Override
+        public void g() {
+            WStackedSpawner stackedSpawner = this.stackedSpawner.get();
+
+            if(stackedSpawner == null){
+                super.g();
+                return;
+            }
+
+            if(!hasNearbyPlayers())
+                return;
+
+            if(world.isStatic){
+                double x = position.x + world.random.nextFloat();
+                double y = position.y + world.random.nextFloat();
+                double z = position.z + world.random.nextFloat();
+                world.addParticle("smoke", x, y, z, 0.0D, 0.0D, 0.0D);
+                world.addParticle("flame", x, y, z, 0.0D, 0.0D, 0.0D);
+                if (this.spawnDelay > 0) {
+                    --this.spawnDelay;
+                }
+
+                return;
+            }
+
+            if (this.spawnDelay == -1)
+                resetSpawnDelay();
+
+            if (this.spawnDelay > 0) {
+                --this.spawnDelay;
+                return;
+            }
+
+            org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.x, position.y, position.z, false);
+
+            if(demoEntityBukkit == null){
+                resetSpawnDelay();
+                return;
+            }
+
+            if(!EntityUtils.isStackable(demoEntityBukkit)){
+                super.g();
+                return;
+            }
+
+            StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
+            ((WStackedEntity) demoEntity).setDemoEntity();
+
+            Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
+
+            int stackAmount = stackedSpawner.getStackAmount(), spawnCount = this.spawnCount * stackAmount;
+
+            //noinspection unchecked
+            List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), AxisAlignedBB.a(
+                    position.x, position.y, position.z,
+                    position.x + 1, position.y + 1, position.z + 1
+            ).grow(this.spawnRange, this.spawnRange, this.spawnRange));
+
+            StackedEntity targetEntity = getTargetEntity(stackedSpawner, demoEntity, nearbyEntities);
+
+            if (targetEntity == null && nearbyEntities.size() >= this.maxNearbyEntities) {
+                resetSpawnDelay();
+                return;
+            }
+
+            spawnCount = stackAmount + world.random.nextInt(spawnCount - stackAmount + 1);
+
+            int amountPerEntity = 1;
+            int mobsToSpawn;
+
+            boolean resetDelay = false;
+
+            // Try stacking into the target entity first
+            if(targetEntity != null){
+                int limit = targetEntity.getStackLimit();
+                int newStackAmount = targetEntity.getStackAmount() + spawnCount;
+
+                if(newStackAmount > limit) {
+                    mobsToSpawn = limit - targetEntity.getStackAmount();
+                    newStackAmount = limit;
+                }
+                else{
+                    mobsToSpawn = 0;
+                }
+
+                targetEntity.setStackAmount(newStackAmount, true);
+                demoEntity.spawnStackParticle(true);
+
+                if(plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
+                    stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
+
+                world.triggerEffect(2004, position.x, position.y, position.z, 0);
+
+                resetDelay = true;
+            }
+            else{
+                mobsToSpawn = spawnCount;
+            }
+
+            if(mobsToSpawn > 0){
+                amountPerEntity = !demoEntity.isCached() ? 1 : Math.min(mobsToSpawn, demoEntity.getStackLimit());
+                mobsToSpawn = mobsToSpawn / amountPerEntity;
+            }
+
+            for(int i = 0; i < mobsToSpawn; i++) {
+                double x = position.x + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
+                double y = position.y + world.random.nextInt(3) - 1;
+                double z = position.z + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
+
+                org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
+
+                if (bukkitEntity == null) {
+                    resetSpawnDelay();
+                    return;
+                }
+
+                Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+
+                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || (world.b(nmsEntity.boundingBox) &&
+                        !world.containsLiquid(nmsEntity.boundingBox));
+
+                Location location = new Location(world.getWorld(), x, y, z);
+
+                Collection<SpawnCondition> spawnConditions = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType());
+                boolean failSpawnConditions = !spawnConditions.isEmpty() && spawnConditions.stream()
+                        .anyMatch(spawnCondition -> !spawnCondition.test(location));
+
+                if(!hasSpace || failSpawnConditions)
+                    continue;
+
+                if(handleEntitySpawn(bukkitEntity, amountPerEntity))
+                    resetDelay = true;
+            }
+
+            if(resetDelay)
+                resetSpawnDelay();
+        }
+
+        private boolean hasNearbyPlayers(){
+            return world.findNearbyPlayer(position.x + 0.5D, position.y + 0.5D, position.z + 0.5D, this.requiredPlayerRange) != null;
+        }
+
+        private void resetSpawnDelay(){
+            if (maxSpawnDelay <= minSpawnDelay) {
+                spawnDelay = minSpawnDelay;
+            } else {
+                spawnDelay = minSpawnDelay + world.random.nextInt(maxSpawnDelay - minSpawnDelay);
+            }
+
+            if (!this.mobs.isEmpty()) {
+                a((TileEntityMobSpawnerData) WeightedRandom.a(this.a().random, this.mobs));
+            }
+
+            a(1);
+        }
+
+        private org.bukkit.entity.Entity generateEntity(double x, double y, double z, boolean rotation){
+            Entity entity = EntityTypes.createEntityByName(this.getMobName(), world);
+
+            if(entity == null)
+                return null;
+
+            entity.setPositionRotation(x, y, z, 0f, 0f);
+
+            if(rotation)
+                entity.yaw = world.random.nextFloat() * 360.0F;
+
+            entity.world = world;
+            entity.valid = true;
+            entity.dead = false;
+
+            return entity.getBukkitEntity();
+        }
+
+        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity){
+            Entity entity = ((CraftEntity) bukkitEntity).getHandle();
+            StackedEntity stackedEntity = null;
+
+            if(amountPerEntity > 1) {
+                stackedEntity = WStackedEntity.of(bukkitEntity);
+                stackedEntity.setStackAmount(amountPerEntity, true);
+            }
+
+            if (entity instanceof EntityInsentient) {
+                EntityInsentient entityinsentient = (EntityInsentient)entity;
+
+                ((EntityInsentient)entity).a((GroupDataEntity) null);
+
+                if (entityinsentient.world.spigotConfig.nerfSpawnerMobs) {
+                    entityinsentient.fromMobSpawner = true;
+                }
+            }
+
+            if (CraftEventFactory.callSpawnerSpawnEvent(entity, position.x, position.y, position.z).isCancelled()) {
+                plugin.getSystemManager().removeStackObject(stackedEntity);
+            }
+
+            else {
+                world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
+
+                world.triggerEffect(2004, position.x, position.y, position.z, 0);
+
+                if (entity instanceof EntityInsentient) {
+                    ((EntityInsentient)entity).s();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
+                                              List<? extends Entity> nearbyEntities){
+            LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
+
+            if(linkedEntity != null)
+                return WStackedEntity.of(linkedEntity);
+
+            Optional<CraftEntity> closestEntity = GeneralUtils.getClosestBukkit(stackedSpawner.getLocation(),
+                    nearbyEntities.stream().map(Entity::getBukkitEntity).filter(entity ->
+                            EntityUtils.isStackable(entity) &&
+                                    demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
+
+            return closestEntity.map(WStackedEntity::of).orElse(null);
+        }
+
+    }
+
+    private static final class BlockPosition{
+
+        private final int x, y, z;
+
+        BlockPosition(double x, double y, double z){
+            this(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+        }
+
+        BlockPosition(int x, int y, int z){
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        Chunk getChunk(World world){
+            return world.getChunkAtWorldCoords(MathHelper.floor(x), MathHelper.floor(z));
+        }
+
+    }
+
+}

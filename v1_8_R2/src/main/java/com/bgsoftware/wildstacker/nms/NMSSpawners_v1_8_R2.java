@@ -10,48 +10,42 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
-import net.minecraft.server.v1_14_R1.AxisAlignedBB;
-import net.minecraft.server.v1_14_R1.BiomeBase;
-import net.minecraft.server.v1_14_R1.Biomes;
-import net.minecraft.server.v1_14_R1.Block;
-import net.minecraft.server.v1_14_R1.BlockLogAbstract;
-import net.minecraft.server.v1_14_R1.BlockPosition;
-import net.minecraft.server.v1_14_R1.Blocks;
-import net.minecraft.server.v1_14_R1.ChunkCoordIntPair;
-import net.minecraft.server.v1_14_R1.Entity;
-import net.minecraft.server.v1_14_R1.EntityInsentient;
-import net.minecraft.server.v1_14_R1.EntityMonster;
-import net.minecraft.server.v1_14_R1.EntityTypes;
-import net.minecraft.server.v1_14_R1.EnumDifficulty;
-import net.minecraft.server.v1_14_R1.EnumMobSpawn;
-import net.minecraft.server.v1_14_R1.EnumSkyBlock;
-import net.minecraft.server.v1_14_R1.MobSpawnerAbstract;
-import net.minecraft.server.v1_14_R1.NBTTagCompound;
-import net.minecraft.server.v1_14_R1.Particles;
-import net.minecraft.server.v1_14_R1.SeededRandom;
-import net.minecraft.server.v1_14_R1.TagsBlock;
-import net.minecraft.server.v1_14_R1.TagsFluid;
-import net.minecraft.server.v1_14_R1.TileEntity;
-import net.minecraft.server.v1_14_R1.TileEntityMobSpawner;
-import net.minecraft.server.v1_14_R1.WeightedRandom;
-import net.minecraft.server.v1_14_R1.World;
-import net.minecraft.server.v1_14_R1.WorldServer;
+import net.minecraft.server.v1_8_R2.AxisAlignedBB;
+import net.minecraft.server.v1_8_R2.BiomeBase;
+import net.minecraft.server.v1_8_R2.Block;
+import net.minecraft.server.v1_8_R2.BlockPosition;
+import net.minecraft.server.v1_8_R2.Blocks;
+import net.minecraft.server.v1_8_R2.Entity;
+import net.minecraft.server.v1_8_R2.EntityInsentient;
+import net.minecraft.server.v1_8_R2.EntityTypes;
+import net.minecraft.server.v1_8_R2.EnumDifficulty;
+import net.minecraft.server.v1_8_R2.EnumParticle;
+import net.minecraft.server.v1_8_R2.EnumSkyBlock;
+import net.minecraft.server.v1_8_R2.MobSpawnerAbstract;
+import net.minecraft.server.v1_8_R2.NBTTagCompound;
+import net.minecraft.server.v1_8_R2.NBTTagList;
+import net.minecraft.server.v1_8_R2.TileEntity;
+import net.minecraft.server.v1_8_R2.TileEntityMobSpawner;
+import net.minecraft.server.v1_8_R2.UtilColor;
+import net.minecraft.server.v1_8_R2.WeightedRandom;
+import net.minecraft.server.v1_8_R2.World;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_14_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_14_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_8_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R2.event.CraftEventFactory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
 @SuppressWarnings("unused")
-public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
+public final class NMSSpawners_v1_8_R2 implements NMSSpawners {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -68,106 +62,65 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
     @Override
     public void registerSpawnConditions() {
         createCondition("ANIMAL_LIGHT",
-                (world, position) -> world.getLightLevel(position, 0) > 8,
-                EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA,
-                EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG, EntityType.RABBIT,
-                EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.TURTLE, EntityType.WOLF, EntityType.ZOMBIE_HORSE,
-                EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA
+                (world, position) -> world.k(position) > 8,
+                EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.MUSHROOM_COW, EntityType.PIG,
+                EntityType.RABBIT, EntityType.SHEEP, EntityType.WOLF
         );
 
-        createCondition("ANIMAL_LIGHT_AND_COLD", (world, position) -> {
-            BiomeBase biomeBase = world.getBiome(position);
-            boolean coldBiome = biomeBase == Biomes.FROZEN_OCEAN || biomeBase == Biomes.DEEP_FROZEN_OCEAN;
-            Block block = world.getType(position.down()).getBlock();
-            return world.getLightLevel(position, 0) > 8 && block == (coldBiome ? Blocks.GRASS_BLOCK : Blocks.ICE);
-        }, EntityType.POLAR_BEAR);
-
-        createCondition("BELOW_SEA_LEVEL",
-                (world, position) -> position.getY() < world.getSeaLevel(),
-                EntityType.DOLPHIN
-        );
-
-        createCondition("DARK_BLOCK_LIGHT",
-                (world, position) -> world.getBrightness(EnumSkyBlock.BLOCK, position) <= 8,
-                EntityType.PILLAGER
-        );
-
-        createCondition("IN_SEA_SURFACE",
-                (world, position) -> position.getY() < world.getSeaLevel() + 4,
-                EntityType.TURTLE
-        );
-
-        createCondition("IN_SLIME_CHUNK", (world, position) -> {
-            ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position);
-            boolean flag = SeededRandom.a(chunkcoordintpair.x, chunkcoordintpair.z, world.getSeed(),
-                    world.getMinecraftWorld().spigotConfig.slimeSeed).nextInt(10) == 0;
-            return world.random.nextInt(10) == 0 && flag && position.getY() < 40;
-        }, EntityType.SLIME);
-
-        createCondition("IN_SWAMP",
-                (world, position) -> world.getBiome(position) == Biomes.SWAMP,
+        createCondition("IN_SLIME_CHUNK",
+                (world, position) -> world.getChunkAtWorldCoords(position).a(987234911L)
+                        .nextInt(10) == 0 && world.random.nextInt(10) == 0 && position.getY() < 40,
                 EntityType.SLIME
         );
 
-        createCondition("IN_WATER_DEEP",
-                (world, position) -> world.getFluid(position).a(TagsFluid.WATER) && world.getFluid(position.up()).a(TagsFluid.WATER),
-                EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TROPICAL_FISH
+        createCondition("IN_SWAMP",
+                (world, position) -> world.getBiome(position) == BiomeBase.SWAMPLAND,
+                EntityType.SLIME
         );
 
-        createCondition("MONSTER_LIGHT",
-                (world, position) -> EntityMonster.a(world, position, world.random),
-                EntityType.DROWNED, EntityType.CAVE_SPIDER, EntityType.CREEPER,
-                EntityType.ENDERMAN, EntityType.GIANT, EntityType.HUSK, EntityType.SKELETON, EntityType.SPIDER,
-                EntityType.STRAY, EntityType.WITCH, EntityType.WITHER, EntityType.WITHER_SKELETON, EntityType.ZOMBIE,
-                EntityType.ZOMBIE_VILLAGER, EntityType.EVOKER, EntityType.ILLUSIONER, EntityType.RAVAGER, EntityType.VEX,
-                EntityType.VINDICATOR
-        );
+        createCondition("MONSTER_LIGHT", (world, position) -> {
+            if (world.b(EnumSkyBlock.SKY, position) > world.random.nextInt(32)) {
+                return false;
+            } else {
+                int lightLevel = world.getLightLevel(position);
 
-        createCondition("NOT_IN_OCEAN", (world, position) -> {
-            BiomeBase biomeBase = world.getBiome(position);
-            return biomeBase != Biomes.OCEAN && biomeBase != Biomes.DEEP_OCEAN;
-        }, EntityType.DOLPHIN);
+                if (world.R()) {
+                    int j = world.ab();
+                    world.c(10);
+                    lightLevel = world.getLightLevel(position);
+                    world.c(j);
+                }
+
+                return lightLevel <= world.random.nextInt(8);
+            }
+        }, EntityType.CAVE_SPIDER, EntityType.CREEPER, EntityType.ENDERMAN, EntityType.GIANT, EntityType.SKELETON,
+                EntityType.SPIDER, EntityType.WITCH, EntityType.WITHER, EntityType.ZOMBIE
+        );
 
         createCondition("NOT_PEACEFUL",
                 (world, position) -> world.getDifficulty() != EnumDifficulty.PEACEFUL,
-                EntityType.DROWNED, EntityType.GUARDIAN, EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
-                EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.GHAST, EntityType.GIANT, EntityType.HUSK,
-                EntityType.MAGMA_CUBE, EntityType.PILLAGER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME,
-                EntityType.SPIDER, EntityType.STRAY, EntityType.WITCH, EntityType.WITHER, EntityType.WITHER_SKELETON,
-                EntityType.ZOMBIE, EntityType.PIG_ZOMBIE, EntityType.ZOMBIE_VILLAGER, EntityType.EVOKER,
-                EntityType.ILLUSIONER, EntityType.RAVAGER, EntityType.VEX, EntityType.VINDICATOR, EntityType.ELDER_GUARDIAN
+                EntityType.GUARDIAN, EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
+                EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.GHAST, EntityType.GIANT,
+                EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME,
+                EntityType.SPIDER, EntityType.WITCH, EntityType.WITHER, EntityType.ZOMBIE, EntityType.PIG_ZOMBIE
         );
 
         createCondition("ON_GRASS",
-                (world, position) -> world.getType(position.down()).getBlock() == Blocks.GRASS_BLOCK,
-                EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA,
-                EntityType.MULE, EntityType.PIG, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.WOLF,
-                EntityType.ZOMBIE_HORSE, EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA
+                (world, position) -> world.getType(position.down()).getBlock() == Blocks.GRASS,
+                EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF
         );
 
         createCondition("ON_GRASS_OR_SAND_OR_SNOW", (world, position) -> {
             Block block = world.getType(position.down()).getBlock();
-            return block == Blocks.GRASS_BLOCK || block == Blocks.SAND || block == Blocks.SNOW;
+            return block == Blocks.GRASS || block == Blocks.SAND || block == Blocks.SNOW;
         }, EntityType.RABBIT);
 
         createCondition("ON_MYCELIUM",
                 (world, position) -> world.getType(position.down()).getBlock() == Blocks.MYCELIUM,
                 EntityType.MUSHROOM_COW
         );
-
-        createCondition("ON_SAND",
-                (world, position) -> world.getType(position.down()).getBlock() == Blocks.SAND,
-                EntityType.TURTLE
-        );
-
-        createCondition("ON_TREE_OR_AIR", (world, position) -> {
-            Block block = world.getType(position.down()).getBlock();
-            return block.a(TagsBlock.LEAVES) || block == Blocks.GRASS_BLOCK ||
-                    block instanceof BlockLogAbstract || block == Blocks.AIR;
-        }, EntityType.PARROT);
     }
 
-    @SuppressWarnings("ConstantConditions")
     private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes){
         SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id) {
             @Override
@@ -184,6 +137,16 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
         private final World world;
         private final BlockPosition position;
         private final WeakReference<WStackedSpawner> stackedSpawner;
+        private final List<MobSpawnerAbstract.a> mobs = new ArrayList<>();
+
+        private String mobName;
+        private MobSpawnerAbstract.a spawnData;
+        private int minSpawnDelay = 200;
+        private int maxSpawnDelay = 800;
+        private int spawnCount = 4;
+        private int maxNearbyEntities = 6;
+        private int requiredPlayerRange = 16;
+        private int spawnRange = 4;
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
             this.world = tileEntityMobSpawner.getWorld();
@@ -193,23 +156,110 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
             if(!(tileEntityMobSpawner.getSpawner() instanceof StackedMobSpawner)) {
                 MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
                 Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
-
-                this.mobs.clear();
-                this.mobs.addAll(originalSpawner.mobs);
-
-                this.spawnData = originalSpawner.spawnData;
-                this.minSpawnDelay = originalSpawner.minSpawnDelay;
-                this.maxSpawnDelay = originalSpawner.maxSpawnDelay;
-                this.spawnCount = originalSpawner.spawnCount;
-                this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
-                this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
-                this.spawnRange = originalSpawner.spawnRange;
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                originalSpawner.b(tagCompound);
+                a(tagCompound);
             }
         }
 
         @Override
+        public String getMobName() {
+            if (spawnData == null) {
+                if (this.mobName == null) {
+                    this.mobName = "Pig";
+                }
+
+                else if (this.mobName.equals("Minecart")) {
+                    this.mobName = "MinecartRideable";
+                }
+
+                return this.mobName;
+            } else {
+                return spawnData.a().getString("Type");
+            }
+        }
+
+        @Override
+        public void setMobName(String mobName) {
+            this.mobName = mobName;
+        }
+
+        @Override
+        public void a(NBTTagCompound nbttagcompound) {
+            this.mobName = nbttagcompound.getString("EntityId");
+            this.spawnDelay = nbttagcompound.getShort("Delay");
+            this.mobs.clear();
+            if (nbttagcompound.hasKeyOfType("SpawnPotentials", 9)) {
+                NBTTagList nbttaglist = nbttagcompound.getList("SpawnPotentials", 10);
+
+                for(int i = 0; i < nbttaglist.size(); ++i) {
+                    this.mobs.add(new MobSpawnerAbstract.a(nbttaglist.get(i)));
+                }
+            }
+
+            if (nbttagcompound.hasKeyOfType("SpawnData", 10)) {
+                this.a(new MobSpawnerAbstract.a(nbttagcompound.getCompound("SpawnData"), this.mobName));
+            } else {
+                this.a((MobSpawnerAbstract.a)null);
+            }
+
+            if (nbttagcompound.hasKeyOfType("MinSpawnDelay", 99)) {
+                this.minSpawnDelay = nbttagcompound.getShort("MinSpawnDelay");
+                this.maxSpawnDelay = nbttagcompound.getShort("MaxSpawnDelay");
+                this.spawnCount = nbttagcompound.getShort("SpawnCount");
+            }
+
+            if (nbttagcompound.hasKeyOfType("MaxNearbyEntities", 99)) {
+                this.maxNearbyEntities = nbttagcompound.getShort("MaxNearbyEntities");
+                this.requiredPlayerRange = nbttagcompound.getShort("RequiredPlayerRange");
+            }
+
+            if (nbttagcompound.hasKeyOfType("SpawnRange", 99)) {
+                this.spawnRange = nbttagcompound.getShort("SpawnRange");
+            }
+        }
+
+        @Override
+        public void b(NBTTagCompound nbttagcompound) {
+            String s = this.getMobName();
+
+            if (!UtilColor.b(s)) {
+                nbttagcompound.setString("EntityId", s);
+                nbttagcompound.setShort("Delay", (short)this.spawnDelay);
+                nbttagcompound.setShort("MinSpawnDelay", (short)this.minSpawnDelay);
+                nbttagcompound.setShort("MaxSpawnDelay", (short)this.maxSpawnDelay);
+                nbttagcompound.setShort("SpawnCount", (short)this.spawnCount);
+                nbttagcompound.setShort("MaxNearbyEntities", (short)this.maxNearbyEntities);
+                nbttagcompound.setShort("RequiredPlayerRange", (short)this.requiredPlayerRange);
+                nbttagcompound.setShort("SpawnRange", (short)this.spawnRange);
+
+                if (spawnData != null) {
+                    nbttagcompound.set("SpawnData", spawnData.a().getCompound("Properties").clone());
+                }
+
+                if (spawnData != null || this.mobs.size() > 0) {
+                    NBTTagList nbttaglist = new NBTTagList();
+
+                    if (this.mobs.size() > 0) {
+                        for(MobSpawnerAbstract.a mobData : this.mobs)
+                            nbttaglist.add(mobData.a());
+                    } else {
+                        nbttaglist.add(spawnData.a());
+                    }
+
+                    nbttagcompound.set("SpawnPotentials", nbttaglist);
+                }
+            }
+        }
+
+        @Override
+        public void a(MobSpawnerAbstract.a spawnData) {
+            this.spawnData = spawnData;
+        }
+
+        @Override
         public void a(int i) {
-            world.playBlockAction(position, Blocks.SPAWNER, i, 0);
+            world.playBlockAction(position, Blocks.MOB_SPAWNER, i, 0);
         }
 
         @Override
@@ -238,8 +288,8 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
                 double x = position.getX() + world.random.nextFloat();
                 double y = position.getY() + world.random.nextFloat();
                 double z = position.getZ() + world.random.nextFloat();
-                world.addParticle(Particles.SMOKE, x, y, z, 0.0D, 0.0D, 0.0D);
-                world.addParticle(Particles.FLAME, x, y, z, 0.0D, 0.0D, 0.0D);
+                world.addParticle(EnumParticle.SMOKE_NORMAL, x, y, z, 0.0D, 0.0D, 0.0D);
+                world.addParticle(EnumParticle.FLAME, x, y, z, 0.0D, 0.0D, 0.0D);
                 if (this.spawnDelay > 0) {
                     --this.spawnDelay;
                 }
@@ -254,15 +304,6 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
                 --this.spawnDelay;
                 return;
             }
-
-            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(this.spawnData.getEntity());
-
-            if(!entityTypesOptional.isPresent()){
-                resetSpawnDelay();
-                return;
-            }
-
-            EntityTypes<?> entityTypes = entityTypesOptional.get();
 
             org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
 
@@ -280,14 +321,13 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
             ((WStackedEntity) demoEntity).setDemoEntity();
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
-            ((WorldServer) world).unregisterEntity(demoNMSEntity);
 
             int stackAmount = stackedSpawner.getStackAmount(), spawnCount = this.spawnCount * stackAmount;
 
             List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), new AxisAlignedBB(
                     position.getX(), position.getY(), position.getZ(),
                     position.getX() + 1, position.getY() + 1, position.getZ() + 1
-            ).g(this.spawnRange));
+            ).grow(this.spawnRange, this.spawnRange, this.spawnRange));
 
             StackedEntity targetEntity = getTargetEntity(stackedSpawner, demoEntity, nearbyEntities);
 
@@ -340,9 +380,18 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
                 double y = position.getY() + world.random.nextInt(3) - 1;
                 double z = position.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
 
-                Location location = new Location(world.getWorld(), x, y, z);
+                org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
 
-                boolean hasSpace = world.b(entityTypes.a(x, y, z));
+                if (bukkitEntity == null) {
+                    resetSpawnDelay();
+                    return;
+                }
+
+                Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+
+                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+
+                Location location = new Location(world.getWorld(), x, y, z);
 
                 Collection<SpawnCondition> spawnConditions = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType());
                 boolean failSpawnConditions = !spawnConditions.isEmpty() && spawnConditions.stream()
@@ -350,13 +399,6 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
 
                 if(!hasSpace || failSpawnConditions)
                     continue;
-
-                org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
-
-                if (bukkitEntity == null) {
-                    resetSpawnDelay();
-                    return;
-                }
 
                 if(handleEntitySpawn(bukkitEntity, amountPerEntity))
                     resetDelay = true;
@@ -379,27 +421,28 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
             }
 
             if (!this.mobs.isEmpty()) {
-                setSpawnData(WeightedRandom.a(this.a().random, this.mobs));
+                a(WeightedRandom.a(this.a().random, this.mobs));
             }
 
             a(1);
         }
 
         private org.bukkit.entity.Entity generateEntity(double x, double y, double z, boolean rotation){
-            NBTTagCompound entityCompound = this.spawnData.getEntity();
-            Entity entity = EntityTypes.a(entityCompound, world, _entity -> {
-                _entity.setPositionRotation(x, y, z, 0f, 0f);
+            Entity entity = EntityTypes.createEntityByName(this.getMobName(), world);
 
-                if(rotation)
-                    _entity.yaw = world.random.nextFloat() * 360.0F;
+            if(entity == null)
+                return null;
 
-                _entity.world = world;
-                _entity.valid = true;
-                _entity.dead = false;
+            entity.setPositionRotation(x, y, z, 0f, 0f);
 
-                return _entity;
-            });
-            return entity == null ? null : entity.getBukkitEntity();
+            if(rotation)
+                entity.yaw = world.random.nextFloat() * 360.0F;
+
+            entity.world = world;
+            entity.valid = true;
+            entity.dead = false;
+
+            return entity.getBukkitEntity();
         }
 
         private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity){
@@ -413,49 +456,31 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
 
             if (entity instanceof EntityInsentient) {
                 EntityInsentient entityinsentient = (EntityInsentient)entity;
-                if (!entityinsentient.a(world, EnumMobSpawn.SPAWNER) || !entityinsentient.a(world)) {
-                    return false;
-                }
 
-                if (this.spawnData.getEntity().d() == 1 && this.spawnData.getEntity().hasKeyOfType("id", 8)) {
-                    ((EntityInsentient)entity).prepare(world, world.getDamageScaler(new BlockPosition(entity)), EnumMobSpawn.SPAWNER, null, null);
-                }
+                ((EntityInsentient)entity).prepare(entity.world.E(new BlockPosition(entity)), null);
 
                 if (entityinsentient.world.spigotConfig.nerfSpawnerMobs) {
                     entityinsentient.fromMobSpawner = true;
                 }
             }
 
-            if (CraftEventFactory.callSpawnerSpawnEvent(entity, position).isCancelled()) {
-                Entity vehicle = entity.getVehicle();
-                if (vehicle != null) {
-                    vehicle.dead = true;
-                }
-                for(Entity passenger : entity.getAllPassengers())
-                    passenger.dead = true;
-                if(stackedEntity != null)
-                    plugin.getSystemManager().removeStackObject(stackedEntity);
+            if (CraftEventFactory.callSpawnerSpawnEvent(entity, position.getX(), position.getY(), position.getZ()).isCancelled()) {
+                plugin.getSystemManager().removeStackObject(stackedEntity);
             }
 
             else {
-                addEntity(entity);
+                world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
 
                 world.triggerEffect(2004, position, 0);
 
                 if (entity instanceof EntityInsentient) {
-                    ((EntityInsentient)entity).doSpawnEffect();
+                    ((EntityInsentient)entity).y();
                 }
 
                 return true;
             }
 
             return false;
-        }
-
-        private void addEntity(Entity entity) {
-            ((WorldServer) world).unregisterEntity(entity);
-            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER))
-                entity.getPassengers().forEach(this::addEntity);
         }
 
         private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,

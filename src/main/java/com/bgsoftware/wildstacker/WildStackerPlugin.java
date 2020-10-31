@@ -86,9 +86,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         GlowEnchantment.registerEnchantment();
 
-        settingsHandler = new SettingsHandler(this);
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);
+        settingsHandler = new SettingsHandler(this);
         providersHandler = new ProvidersHandler(this);
         lootHandler = new LootHandler(this);
 

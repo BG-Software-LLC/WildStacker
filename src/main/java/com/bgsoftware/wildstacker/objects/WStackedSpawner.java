@@ -46,6 +46,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
         super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
+        plugin.getNMSSpawners().updateStackedSpawner(this);
     }
 
     @Override
@@ -249,11 +250,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         this.remove();
 
-        if (plugin.getSettings().spawnersParticlesEnabled) {
-            Location location = getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
-                particleWrapper.spawnParticle(location);
-        }
+        spawnStackParticle(true);
 
         return StackResult.SUCCESS;
     }
@@ -279,6 +276,15 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
         return stackedObject instanceof StackedSpawner && getSpawnedType() == ((StackedSpawner) stackedObject).getSpawnedType();
+    }
+
+    @Override
+    public void spawnStackParticle(boolean checkEnabled) {
+        if (!checkEnabled || plugin.getSettings().spawnersParticlesEnabled) {
+            Location location = getLocation();
+            for (ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
+                particleWrapper.spawnParticle(location);
+        }
     }
 
     @Override

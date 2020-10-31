@@ -175,4 +175,10 @@ public interface StackedObject<T> {
      */
     boolean isSimilar(StackedObject stackedObject);
 
+    /**
+     * Spawn the stacking particle of the object.
+     * @param checkEnabled When true, the particle will be spawned only if enabled in the config.
+     */
+    void spawnStackParticle(boolean checkEnabled);
+
 }

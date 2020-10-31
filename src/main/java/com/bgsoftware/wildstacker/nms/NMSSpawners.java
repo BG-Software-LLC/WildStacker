@@ -6,4 +6,6 @@ public interface NMSSpawners {
 
     void updateStackedSpawner(StackedSpawner stackedSpawner);
 
+    void registerSpawnConditions();
+
 }

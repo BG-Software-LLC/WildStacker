@@ -247,11 +247,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         this.remove();
 
-        if (plugin.getSettings().barrelsParticlesEnabled) {
-            Location location = getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().barrelsParticles)
-                particleWrapper.spawnParticle(location);
-        }
+        spawnStackParticle(true);
 
         return StackResult.SUCCESS;
     }
@@ -278,6 +274,15 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     public boolean isSimilar(StackedObject stackedObject) {
         return stackedObject instanceof StackedBarrel && getType() == ((StackedBarrel) stackedObject).getType() &&
                 getData() == ((StackedBarrel) stackedObject).getData();
+    }
+
+    @Override
+    public void spawnStackParticle(boolean checkEnabled) {
+        if (!checkEnabled || plugin.getSettings().barrelsParticlesEnabled) {
+            Location location = getLocation();
+            for (ParticleWrapper particleWrapper : plugin.getSettings().barrelsParticles)
+                particleWrapper.spawnParticle(location);
+        }
     }
 
     @Override

@@ -303,11 +303,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         this.remove();
 
-        if(plugin.getSettings().itemsParticlesEnabled) {
-            Location location = getItem().getLocation();
-            for(ParticleWrapper particleWrapper : plugin.getSettings().itemsParticles)
-                particleWrapper.spawnParticle(location);
-        }
+        spawnStackParticle(true);
 
         return StackResult.SUCCESS;
     }
@@ -320,6 +316,15 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
         return stackedObject instanceof StackedItem && getItemStack().isSimilar(((StackedItem) stackedObject).getItemStack());
+    }
+
+    @Override
+    public void spawnStackParticle(boolean checkEnabled) {
+        if(!checkEnabled || plugin.getSettings().itemsParticlesEnabled) {
+            Location location = getItem().getLocation();
+            for(ParticleWrapper particleWrapper : plugin.getSettings().itemsParticles)
+                particleWrapper.spawnParticle(location);
+        }
     }
 
     @Override

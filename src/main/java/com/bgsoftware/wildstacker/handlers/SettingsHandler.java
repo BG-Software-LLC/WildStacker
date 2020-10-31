@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
+import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
-            "break-slots", "manage-menu", "break-charge", "place-charge" };
+            "break-slots", "manage-menu", "break-charge", "place-charge", "spawn-conditions" };
 
     //Global settings
     public final String giveItemName;
@@ -342,6 +344,23 @@ public final class SettingsHandler {
         inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
+        plugin.getNMSSpawners().registerSpawnConditions();
+        for(String entityTypeRaw : cfg.getConfigurationSection("spawners.spawn-conditions").getKeys(false)){
+            try{
+                EntityType entityType = EntityType.valueOf(entityTypeRaw);
+                plugin.getSystemManager().clearSpawnConditions(entityType);
+                for(String spawnConditionId : cfg.getStringList("spawners.spawn-conditions." + entityTypeRaw)){
+                    Optional<SpawnCondition> spawnConditionOptional = plugin.getSystemManager().getSpawnCondition(spawnConditionId);
+
+                    if(!spawnConditionOptional.isPresent()){
+                        WildStackerPlugin.log("Invalid spawn condition: " + spawnConditionId);
+                        continue;
+                    }
+
+                    plugin.getSystemManager().addSpawnCondition(spawnConditionOptional.get(), entityType);
+                }
+            }catch (Exception ignored){}
+        }
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);

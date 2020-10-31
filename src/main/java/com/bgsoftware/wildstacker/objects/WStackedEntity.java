@@ -381,11 +381,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         this.remove();
 
-        if (plugin.getSettings().entitiesParticlesEnabled) {
-            Location location = getLivingEntity().getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
-                particleWrapper.spawnParticle(location);
-        }
+        spawnStackParticle(true);
 
         return StackResult.SUCCESS;
     }
@@ -426,6 +422,15 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
         return stackedObject instanceof StackedEntity;
+    }
+
+    @Override
+    public void spawnStackParticle(boolean checkEnabled) {
+        if (!checkEnabled || plugin.getSettings().entitiesParticlesEnabled) {
+            Location location = getLivingEntity().getLocation();
+            for (ParticleWrapper particleWrapper : plugin.getSettings().entitiesParticles)
+                particleWrapper.spawnParticle(location);
+        }
     }
 
     @Override

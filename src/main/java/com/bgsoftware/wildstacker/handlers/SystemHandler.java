@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -28,6 +29,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.data.DataSerializer;
+import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -44,6 +46,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -52,9 +55,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -70,6 +77,9 @@ public final class SystemHandler implements SystemManager {
 
     private final Set<UUID> itemsDisabledNames = new HashSet<>();
     private final Set<UUID> entitiesDisabledNames = new HashSet<>();
+
+    private final FastEnumMap<EntityType, Set<SpawnCondition>> spawnConditions = new FastEnumMap<>(EntityType.class);
+    private final Map<String, SpawnCondition> spawnConditionsIds = new HashMap<>();
 
     public SystemHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -433,6 +443,11 @@ public final class SystemHandler implements SystemManager {
 
             spawnersToLoad.clear();
         }
+
+        if(plugin.getSettings().spawnersStackingEnabled){
+            Arrays.stream(chunk.getTileEntities()).filter(blockState -> blockState instanceof CreatureSpawner)
+                    .forEach(blockState -> plugin.getNMSSpawners().updateStackedSpawner(WStackedSpawner.of(blockState.getBlock())));
+        }
     }
 
     public void loadBarrels(Chunk chunk){
@@ -747,4 +762,39 @@ public final class SystemHandler implements SystemManager {
         if(!entitiesDisabledNames.remove(player.getUniqueId()))
             entitiesDisabledNames.add(player.getUniqueId());
     }
+
+    @Override
+    public void addSpawnCondition(SpawnCondition spawnCondition, EntityType... entityTypes) {
+        for(EntityType entityType : entityTypes)
+            spawnConditions.computeIfAbsent(entityType, new HashSet<>(1)).add(spawnCondition);
+    }
+
+    @Override
+    public Collection<SpawnCondition> getSpawnConditions(EntityType entityType) {
+        return Collections.unmodifiableSet(spawnConditions.getOrDefault(entityType, new HashSet<>()));
+    }
+
+    @Override
+    public void removeSpawnCondition(EntityType entityType, SpawnCondition spawnCondition) {
+        Set<SpawnCondition> spawnConditionSet = spawnConditions.get(entityType);
+        if(spawnConditionSet != null)
+            spawnConditionSet.remove(spawnCondition);
+    }
+
+    @Override
+    public void clearSpawnConditions(EntityType entityType) {
+        spawnConditions.remove(entityType);
+    }
+
+    @Override
+    public Optional<SpawnCondition> getSpawnCondition(String id) {
+        return Optional.ofNullable(spawnConditionsIds.get(id.toLowerCase()));
+    }
+
+    @Override
+    public SpawnCondition registerSpawnCondition(SpawnCondition spawnCondition) {
+        spawnConditionsIds.put(spawnCondition.getId().toLowerCase(), spawnCondition);
+        return spawnCondition;
+    }
+
 }

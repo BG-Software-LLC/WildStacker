@@ -10,18 +10,22 @@ import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public interface SystemManager {
@@ -274,5 +278,44 @@ public interface SystemManager {
      * @param player The player to toggle for.
      */
     void toggleEntityNames(Player player);
+
+    /**
+     * Add a spawn condition to entities.
+     * @param spawnCondition The spawn condition to add.
+     * @param entityTypes All the entity types to add the spawn condition to.
+     */
+    void addSpawnCondition(SpawnCondition spawnCondition, EntityType... entityTypes);
+
+    /**
+     * Get all the spawn conditions of an entity.
+     * @param entityType The entity's type.
+     */
+    Collection<SpawnCondition> getSpawnConditions(EntityType entityType);
+
+    /**
+     * Remove a spawn condition from an entity.
+     * @param entityType The entity's type
+     * @param spawnCondition The spawn condition to remove.
+     */
+    void removeSpawnCondition(EntityType entityType, SpawnCondition spawnCondition);
+
+    /**
+     * Clear all the spawn conditions of an entity.
+     * @param entityType The entity's type.
+     */
+    void clearSpawnConditions(EntityType entityType);
+
+    /**
+     * Get a spawn condition by it's id.
+     * @param id The id of the spawn condition.
+     */
+    Optional<SpawnCondition> getSpawnCondition(String id);
+
+    /**
+     * Register a new spawn condition into the system.
+     * If a spawn condition already exists with a similar id, the new one will override the old one.
+     * @param spawnCondition The spawn condition to register.
+     */
+    SpawnCondition registerSpawnCondition(SpawnCondition spawnCondition);
 
 }
