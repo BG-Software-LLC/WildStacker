@@ -404,9 +404,6 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
 
             if (entity instanceof EntityInsentient) {
                 EntityInsentient entityinsentient = (EntityInsentient)entity;
-                if (!entityinsentient.a(world, true)) {
-                    return false;
-                }
 
                 if (this.spawnData.b().d() == 1 && this.spawnData.b().hasKeyOfType("id", 8)) {
                     ((EntityInsentient)entity).prepare(world.getDamageScaler(new BlockPosition(entity)), null, null);

@@ -379,7 +379,8 @@ public final class NMSSpawners_v1_10_R1 implements NMSSpawners {
 
                 Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || (world.a(nmsEntity.getBoundingBox(), nmsEntity) &&
+                        !world.containsLiquid(nmsEntity.getBoundingBox()));
 
                 Location location = new Location(world.getWorld(), x, y, z);
 
@@ -434,9 +435,6 @@ public final class NMSSpawners_v1_10_R1 implements NMSSpawners {
 
             if (entity instanceof EntityInsentient) {
                 EntityInsentient entityinsentient = (EntityInsentient)entity;
-                if (!entityinsentient.cK()) {
-                    return false;
-                }
 
                 if (this.spawnData.b().d() == 1 && this.spawnData.b().hasKeyOfType("id", 8)) {
                     ((EntityInsentient)entity).prepare(world.D(new BlockPosition(entity)), null);
