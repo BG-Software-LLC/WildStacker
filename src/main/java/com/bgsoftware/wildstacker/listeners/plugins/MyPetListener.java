@@ -12,8 +12,18 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import java.lang.reflect.Method;
+
 @SuppressWarnings("unused")
 public final class MyPetListener implements Listener {
+
+    private static Method GET_ENTITY_METHOD = null;
+
+    static {
+        try{
+            GET_ENTITY_METHOD = MyPet.class.getMethod("getEntity");
+        }catch (Throwable ignored){}
+    }
 
     @EventHandler
     public void onMyPetSpawn(MyPetCallEvent e){
@@ -27,7 +37,7 @@ public final class MyPetListener implements Listener {
 
             try{
                 //noinspection all
-                Optional<MyPetBukkitEntity> optional = (Optional<MyPetBukkitEntity>) MyPet.class.getMethod("getEntity").invoke(myPet);
+                Optional<MyPetBukkitEntity> optional = (Optional<MyPetBukkitEntity>) GET_ENTITY_METHOD.invoke(myPet);
                 entity = optional.orNull();
             }catch(Exception ex){
                 entity = myPet.getEntity().orElse(null);
