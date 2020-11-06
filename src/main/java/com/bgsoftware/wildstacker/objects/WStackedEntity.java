@@ -84,7 +84,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
         if(saveEntity)
-            Executor.sync(() -> plugin.getNMSAdapter().saveEntity(this));
+            Executor.sync(() -> plugin.getSystemManager().saveEntity(this));
     }
 
     /*
@@ -215,7 +215,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
                 if(saveEntity)
-                    Executor.sync(() -> plugin.getNMSAdapter().saveEntity(this));
+                    Executor.sync(() -> plugin.getSystemManager().saveEntity(this));
 
                 //We update cached values of mcmmo
                 McMMOHook.updateCachedName(object);
@@ -591,7 +591,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
         if(saveEntity)
-            Executor.sync(() -> plugin.getNMSAdapter().saveEntity(this));
+            Executor.sync(() -> plugin.getSystemManager().saveEntity(this));
     }
 
     @Override
@@ -634,7 +634,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void setNameTag(){
         EntityStorage.setMetadata(object, "nameTag", true);
         if(saveEntity)
-            Executor.sync(() -> plugin.getNMSAdapter().saveEntity(this));
+            Executor.sync(() -> plugin.getSystemManager().saveEntity(this));
     }
 
     public void setDeadFlag(boolean deadEntityFlag){

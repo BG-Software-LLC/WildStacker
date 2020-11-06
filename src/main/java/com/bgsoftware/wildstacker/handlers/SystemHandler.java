@@ -14,6 +14,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
+import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -81,9 +83,12 @@ public final class SystemHandler implements SystemManager {
     private final FastEnumMap<EntityType, Set<SpawnCondition>> spawnConditions = new FastEnumMap<>(EntityType.class);
     private final Map<String, SpawnCondition> spawnConditionsIds = new HashMap<>();
 
+    private IDataSerializer dataSerializer;
+
     public SystemHandler(WildStackerPlugin plugin){
         this.plugin = plugin;
         this.dataHandler = plugin.getDataHandler();
+        this.dataSerializer = new DataSerializer_Default(plugin);
 
         //Start all required tasks
         Executor.sync(() -> {
@@ -161,7 +166,7 @@ public final class SystemHandler implements SystemManager {
 
                     stackedEntity.setCustomName(DataSerializer.stripData(stackedEntity.getCustomName()));
                 } else {
-                    plugin.getNMSAdapter().loadEntity(stackedEntity);
+                    loadEntity(stackedEntity);
                 }
             }finally {
                 ((WStackedEntity) stackedEntity).setSaveEntity(true);
@@ -220,7 +225,7 @@ public final class SystemHandler implements SystemManager {
 
                     stackedItem.setCustomName(DataSerializer.stripData(stackedItem.getCustomName()));
                 } else {
-                    plugin.getNMSAdapter().loadItem(stackedItem);
+                    loadItem(stackedItem);
                 }
             }finally {
                 ((WStackedItem) stackedItem).setSaveItem(true);
@@ -763,6 +768,10 @@ public final class SystemHandler implements SystemManager {
             entitiesDisabledNames.add(player.getUniqueId());
     }
 
+    /*
+     * Spawn condition methods
+     */
+
     @Override
     public void addSpawnCondition(SpawnCondition spawnCondition, EntityType... entityTypes) {
         for(EntityType entityType : entityTypes)
@@ -795,6 +804,30 @@ public final class SystemHandler implements SystemManager {
     public SpawnCondition registerSpawnCondition(SpawnCondition spawnCondition) {
         spawnConditionsIds.put(spawnCondition.getId().toLowerCase(), spawnCondition);
         return spawnCondition;
+    }
+
+    /*
+     * Data serialization methods
+     */
+
+    public void setDataSerializer(IDataSerializer dataSerializer){
+        this.dataSerializer = dataSerializer;
+    }
+
+    public void saveEntity(StackedEntity stackedEntity){
+        dataSerializer.saveEntity(stackedEntity);
+    }
+
+    public void loadEntity(StackedEntity stackedEntity){
+        dataSerializer.loadEntity(stackedEntity);
+    }
+
+    public void saveItem(StackedItem stackedItem){
+        dataSerializer.saveItem(stackedItem);
+    }
+
+    public void loadItem(StackedItem stackedItem){
+        dataSerializer.loadItem(stackedItem);
     }
 
 }

@@ -60,7 +60,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             if(itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
                 object.setItemStack(itemStack);
             if(saveItem)
-                Executor.sync(() -> plugin.getNMSAdapter().saveItem(this));
+                Executor.sync(() -> plugin.getSystemManager().saveItem(this));
         }
     }
 
@@ -202,7 +202,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             if(updateName) {
                 setCustomName(CUSTOM_NAME);
                 if(saveItem)
-                    Executor.sync(() -> plugin.getNMSAdapter().saveItem(this));
+                    Executor.sync(() -> plugin.getSystemManager().saveItem(this));
             }
             setCustomNameVisible(updateName);
         });

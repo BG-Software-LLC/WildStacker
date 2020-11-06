@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV5;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
+import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.JobsHook;
@@ -178,6 +179,8 @@ public final class ProvidersHandler {
             PluginHook_FabledSkyblock.register(plugin);
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             SuperiorSkyblockHook.register(plugin);
+        if (enable && isPlugin(toCheck, "NBTInjector") && ReflectionUtils.isPluginEnabled("de.tr7zw.nbtinjector.NBTInjector"))
+            DataSerializer_NBTInjector.register(plugin);
     }
 
     private boolean isPlugin(Plugin plugin, String pluginName){
