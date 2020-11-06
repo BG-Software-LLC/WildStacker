@@ -26,6 +26,7 @@ import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
 import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.MathHelper;
+import net.minecraft.server.v1_8_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagList;
@@ -662,9 +663,15 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
         @Override
         public int getRequiredPlayerRange() {
-            NBTTagCompound tagCompound = new NBTTagCompound();
-            getSpawner().getSpawner().b(tagCompound);
-            return tagCompound.getShort("RequiredPlayerRange");
+            MobSpawnerAbstract spawnerAbstract = getSpawner().getSpawner();
+            if(spawnerAbstract instanceof NMSSpawners_v1_8_R3.StackedMobSpawner) {
+                return ((NMSSpawners_v1_8_R3.StackedMobSpawner) spawnerAbstract).requiredPlayerRange;
+            }
+            else{
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                spawnerAbstract.b(tagCompound);
+                return tagCompound.getShort("RequiredPlayerRange");
+            }
         }
 
         TileEntityMobSpawner getSpawner(){

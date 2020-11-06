@@ -24,6 +24,7 @@ import net.minecraft.server.v1_7_R4.EntityZombie;
 import net.minecraft.server.v1_7_R4.IScoreboardCriteria;
 import net.minecraft.server.v1_7_R4.ItemStack;
 import net.minecraft.server.v1_7_R4.MathHelper;
+import net.minecraft.server.v1_7_R4.MobSpawnerAbstract;
 import net.minecraft.server.v1_7_R4.NBTCompressedStreamTools;
 import net.minecraft.server.v1_7_R4.NBTTagCompound;
 import net.minecraft.server.v1_7_R4.NBTTagList;
@@ -673,9 +674,15 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
 
         @Override
         public int getRequiredPlayerRange() {
-            NBTTagCompound tagCompound = new NBTTagCompound();
-            getSpawner().getSpawner().b(tagCompound);
-            return tagCompound.getShort("RequiredPlayerRange");
+            MobSpawnerAbstract spawnerAbstract = getSpawner().getSpawner();
+            if(spawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner) {
+                return ((NMSSpawners_v1_7_R4.StackedMobSpawner) spawnerAbstract).requiredPlayerRange;
+            }
+            else{
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                spawnerAbstract.b(tagCompound);
+                return tagCompound.getShort("RequiredPlayerRange");
+            }
         }
 
         TileEntityMobSpawner getSpawner(){

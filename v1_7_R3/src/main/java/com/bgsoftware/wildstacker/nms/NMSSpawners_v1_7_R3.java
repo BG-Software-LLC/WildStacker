@@ -127,7 +127,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
         plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
     }
 
-    private static class StackedMobSpawner extends MobSpawnerAbstract {
+    static class StackedMobSpawner extends MobSpawnerAbstract {
 
         private final World world;
         private final BlockPosition position;
@@ -140,7 +140,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
         private int maxSpawnDelay = 800;
         private int spawnCount = 4;
         private int maxNearbyEntities = 6;
-        private int requiredPlayerRange = 16;
+        public int requiredPlayerRange = 16;
         private int spawnRange = 4;
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
