@@ -1,11 +1,10 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.dnyferguson.mineablespawners.MineableSpawners;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
@@ -131,16 +130,14 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
 
     @Override
     public void dropSpawner(StackedSpawner stackedSpawner, Player player, int amount) {
-        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), amount));
-        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-
+        ItemStack dropItem = EventsCaller.callSpawnerDropEvent(stackedSpawner, player, amount);
         Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
         if (plugin.getConfigurationHandler().getBoolean("mining", "drop-to-inventory")) {
-            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);
+            ItemUtils.addItem(dropItem, player.getInventory(), toDrop);
         }
         else{
-            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), toDrop);
+            ItemUtils.dropItem(dropItem, toDrop);
         }
     }
 

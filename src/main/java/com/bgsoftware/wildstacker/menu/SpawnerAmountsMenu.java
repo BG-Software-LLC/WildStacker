@@ -1,15 +1,14 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.Locale;
-import com.bgsoftware.wildstacker.api.events.SpawnerPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -124,11 +123,7 @@ public final class SpawnerAmountsMenu extends WildMenu {
             return;
         }
 
-        SpawnerPlaceInventoryEvent spawnerPlaceInventoryEvent = new SpawnerPlaceInventoryEvent(
-                (Player) e.getWhoClicked(), stackedSpawner, depositAmount);
-        Bukkit.getPluginManager().callEvent(spawnerPlaceInventoryEvent);
-
-        if(spawnerPlaceInventoryEvent.isCancelled()) {
+        if(!EventsCaller.callSpawnerPlaceInventoryEvent((Player) e.getWhoClicked(), stackedSpawner, depositAmount)){
             if(failureSound != null)
                 failureSound.playSound(e.getWhoClicked());
             return;

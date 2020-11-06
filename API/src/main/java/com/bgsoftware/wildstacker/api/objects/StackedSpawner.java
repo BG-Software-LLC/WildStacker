@@ -41,4 +41,10 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner> {
      */
     ItemStack getDropItem();
 
+    /**
+     * Get the drop item of the spawner.
+     * @param amount the amount of the item to drop.
+     */
+    ItemStack getDropItem(int amount);
+
 }

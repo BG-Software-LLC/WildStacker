@@ -1,12 +1,11 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.events.SpawnerDropEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -96,15 +95,13 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     @Override
     public void dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount) {
-        SpawnerDropEvent spawnerDropEvent = new SpawnerDropEvent(stackedSpawner, player, getSpawnerItem(stackedSpawner.getSpawnedType(), brokenAmount));
-        Bukkit.getPluginManager().callEvent(spawnerDropEvent);
-
+        ItemStack dropItem = EventsCaller.callSpawnerDropEvent(stackedSpawner, player, brokenAmount);
         Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
         if (ss.config.getBoolean("dropSpawnerToInventory", false) && player != null) {
-            ItemUtils.addItem(spawnerDropEvent.getItemStack(), player.getInventory(), toDrop);
+            ItemUtils.addItem(dropItem, player.getInventory(), toDrop);
         } else {
-            ItemUtils.dropItem(spawnerDropEvent.getItemStack(), toDrop);
+            ItemUtils.dropItem(dropItem, toDrop);
         }
     }
 

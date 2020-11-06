@@ -3,17 +3,16 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.ItemStackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -288,10 +287,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         StackedItem targetItem = (StackedItem) stackedObject;
 
-        ItemStackEvent itemStackEvent = new ItemStackEvent(targetItem, this);
-        Bukkit.getPluginManager().callEvent(itemStackEvent);
-
-        if (itemStackEvent.isCancelled())
+        if(!EventsCaller.callItemStackEvent(targetItem, this))
             return StackResult.EVENT_CANCELLED;
 
         targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);

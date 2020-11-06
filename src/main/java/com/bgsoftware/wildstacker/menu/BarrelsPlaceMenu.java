@@ -1,10 +1,10 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.Locale;
-import com.bgsoftware.wildstacker.api.events.BarrelPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -124,10 +124,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
                 newStackAmount = limit;
             }
 
-            BarrelPlaceInventoryEvent barrelPlaceInventoryEvent = new BarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, newStackAmount - stackedBarrel.getStackAmount());
-            Bukkit.getPluginManager().callEvent(barrelPlaceInventoryEvent);
-
-            if(!barrelPlaceInventoryEvent.isCancelled()) {
+            if(EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, newStackAmount - stackedBarrel.getStackAmount())){
                 stackedBarrel.setStackAmount(newStackAmount, true);
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
             }

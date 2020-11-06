@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import net.minecraft.server.v1_11_R1.AxisAlignedBB;
 import net.minecraft.server.v1_11_R1.BiomeBase;
@@ -348,7 +349,7 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
             boolean resetDelay = false;
 
             // Try stacking into the target entity first
-            if(targetEntity != null){
+            if(targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, demoEntity)){
                 int limit = targetEntity.getStackLimit();
                 int newStackAmount = targetEntity.getStackAmount() + spawnCount;
 

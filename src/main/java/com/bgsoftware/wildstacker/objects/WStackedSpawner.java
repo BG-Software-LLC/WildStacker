@@ -3,8 +3,6 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
-import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -12,6 +10,7 @@ import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -240,10 +239,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
         int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
 
-        SpawnerStackEvent spawnerStackEvent = new SpawnerStackEvent(targetSpawner, this);
-        Bukkit.getPluginManager().callEvent(spawnerStackEvent);
-
-        if (spawnerStackEvent.isCancelled())
+        if(!EventsCaller.callSpawnerStackEvent(targetSpawner, this))
             return StackResult.EVENT_CANCELLED;
 
         targetSpawner.setStackAmount(newStackAmount, true);
@@ -257,10 +253,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public UnstackResult runUnstack(int amount, Entity entity) {
-        SpawnerUnstackEvent spawnerUnstackEvent = new SpawnerUnstackEvent(this, entity, amount);
-        Bukkit.getPluginManager().callEvent(spawnerUnstackEvent);
-
-        if(spawnerUnstackEvent.isCancelled())
+        if(!EventsCaller.callSpawnerUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
         int stackAmount = this.getStackAmount() - amount;
@@ -345,7 +338,12 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public ItemStack getDropItem() {
-        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), getStackAmount());
+        return getDropItem(getStackAmount());
+    }
+
+    @Override
+    public ItemStack getDropItem(int amount) {
+        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount);
     }
 
     public LivingEntity getRawLinkedEntity(){

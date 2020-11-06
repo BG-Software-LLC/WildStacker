@@ -3,12 +3,11 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
-import com.bgsoftware.wildstacker.api.events.BarrelUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -237,10 +236,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
         int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
-        BarrelStackEvent barrelStackEvent = new BarrelStackEvent(targetBarrel, this);
-        Bukkit.getPluginManager().callEvent(barrelStackEvent);
-
-        if (barrelStackEvent.isCancelled())
+        if(!EventsCaller.callBarrelStackEvent(targetBarrel, this))
             return StackResult.EVENT_CANCELLED;
 
         targetBarrel.setStackAmount(newStackAmount, true);
@@ -254,10 +250,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public UnstackResult runUnstack(int amount, Entity entity) {
-        BarrelUnstackEvent barrelUnstackEvent = new BarrelUnstackEvent(this, entity, amount);
-        Bukkit.getPluginManager().callEvent(barrelUnstackEvent);
-
-        if(barrelUnstackEvent.isCancelled())
+        if(!EventsCaller.callBarrelUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
         int stackAmount = this.getStackAmount() - amount;

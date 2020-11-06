@@ -3,16 +3,14 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.BarrelDropEvent;
-import com.bgsoftware.wildstacker.api.events.BarrelPlaceEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -126,10 +124,7 @@ public final class BarrelsListener implements Listener {
                     return;
                 }
 
-                BarrelPlaceEvent barrelPlaceEvent = new BarrelPlaceEvent(e.getPlayer(), stackedBarrel, inHand);
-                Bukkit.getPluginManager().callEvent(barrelPlaceEvent);
-
-                if (barrelPlaceEvent.isCancelled()) {
+                if(!EventsCaller.callBarrelPlaceEvent(e.getPlayer(), stackedBarrel, inHand)){
                     stackedBarrel.remove();
                     return;
                 }
@@ -189,13 +184,8 @@ public final class BarrelsListener implements Listener {
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlock());
         int stackSize = stackedBarrel.getStackAmount();
 
-        ItemStack dropStack = stackedBarrel.getBarrelItem(stackSize);
-
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, e.getPlayer(), dropStack);
-            Bukkit.getPluginManager().callEvent(barrelDropEvent);
-
-            dropStack = barrelDropEvent.getItemStack();
+            ItemStack dropStack = EventsCaller.callBarrelDropEvent(stackedBarrel, e.getPlayer(), stackSize);
 
             if(plugin.getSettings().barrelsAutoPickup) {
                 ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getBlock().getLocation());
@@ -255,10 +245,7 @@ public final class BarrelsListener implements Listener {
             CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, e.getPlayer(), stackedBarrel.getBarrelItem(1));
-                Bukkit.getPluginManager().callEvent(barrelDropEvent);
-
-                ItemStack dropStack = barrelDropEvent.getItemStack();
+                ItemStack dropStack = EventsCaller.callBarrelDropEvent(stackedBarrel, e.getPlayer(), 1);
 
                 if(plugin.getSettings().barrelsAutoPickup) {
                     ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getClickedBlock().getLocation());
@@ -289,11 +276,9 @@ public final class BarrelsListener implements Listener {
             StackedBarrel stackedBarrel = WStackedBarrel.of(block);
 
             int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
+            ItemStack barrelItem = EventsCaller.callBarrelDropEvent(stackedBarrel, null, amount);
 
-            BarrelDropEvent barrelDropEvent = new BarrelDropEvent(stackedBarrel, null, stackedBarrel.getBarrelItem(amount));
-            Bukkit.getPluginManager().callEvent(barrelDropEvent);
-
-            ItemUtils.dropItem(barrelDropEvent.getItemStack(), block.getLocation());
+            ItemUtils.dropItem(barrelItem, block.getLocation());
             stackedBarrel.runUnstack(amount, e.getEntity());
         }
     }

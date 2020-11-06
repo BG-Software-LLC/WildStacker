@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
@@ -17,6 +16,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -185,10 +185,7 @@ public final class SpawnersListener implements Listener {
                     }
                 }
 
-                SpawnerPlaceEvent spawnerPlaceEvent = new SpawnerPlaceEvent(e.getPlayer(), stackedSpawner, itemInHand);
-                Bukkit.getPluginManager().callEvent(spawnerPlaceEvent);
-
-                if (spawnerPlaceEvent.isCancelled()) {
+                if(!EventsCaller.callSpawnerPlaceEvent(e.getPlayer(), stackedSpawner, itemInHand)){
                     e.setCancelled(true);
                     stackedSpawner.remove();
                     return;
@@ -436,14 +433,7 @@ public final class SpawnersListener implements Listener {
     private boolean callSpawnerSpawnEvent(StackedEntity stackedEntity, StackedSpawner stackedSpawner){
         SpawnerSpawnEvent spawnerSpawnEvent = new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner());
         Bukkit.getPluginManager().callEvent(new SpawnerSpawnEvent(stackedEntity.getLivingEntity(), stackedSpawner.getSpawner()));
-
-        if(spawnerSpawnEvent.isCancelled() || stackedEntity.getLivingEntity().isDead() || !stackedEntity.getLivingEntity().isValid())
-            return false;
-
-        //noinspection deprecation
-        Bukkit.getPluginManager().callEvent(new com.bgsoftware.wildstacker.api.events.SpawnerSpawnEvent(stackedEntity, stackedSpawner));
-
-        return true;
+        return !spawnerSpawnEvent.isCancelled() && !stackedEntity.getLivingEntity().isDead() && stackedEntity.getLivingEntity().isValid();
     }
 
     private void spawnEntities(StackedSpawner stackedSpawner, StackedEntity stackedEntity, int amountToSpawn, int limit){

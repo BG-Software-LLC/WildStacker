@@ -4,9 +4,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.events.DuplicateSpawnEvent;
-import com.bgsoftware.wildstacker.api.events.EntityStackEvent;
-import com.bgsoftware.wildstacker.api.events.EntityUnstackEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -20,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -356,10 +354,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(!shouldBeStacked() || !((WStackedEntity) targetEntity).shouldBeStacked())
             return StackResult.NOT_SIMILAR;
 
-        EntityStackEvent entityStackEvent = new EntityStackEvent(targetEntity, this);
-        Bukkit.getPluginManager().callEvent(entityStackEvent);
-
-        if (entityStackEvent.isCancelled())
+        if(!EventsCaller.callEntityStackEvent(targetEntity, this))
             return StackResult.EVENT_CANCELLED;
 
         double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
@@ -391,10 +386,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(hasDeadFlag())
             return UnstackResult.ALREADY_DEAD;
 
-        EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(this, entity, amount);
-        Bukkit.getPluginManager().callEvent(entityUnstackEvent);
-
-        if(entityUnstackEvent.isCancelled())
+        if(!EventsCaller.callEntityUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
         int stackAmount = this.getStackAmount();
@@ -507,8 +499,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
             duplicate.getLivingEntity().setFireTicks(160);
 
-        DuplicateSpawnEvent duplicateSpawnEvent = new DuplicateSpawnEvent(this, duplicate);
-        Bukkit.getPluginManager().callEvent(duplicateSpawnEvent);
+        EventsCaller.callDuplicateSpawnEvent(this, duplicate);
 
         return duplicate;
     }
