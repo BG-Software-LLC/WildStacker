@@ -394,8 +394,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
 
                 Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || (world.b(nmsEntity.boundingBox) &&
-                        !world.containsLiquid(nmsEntity.boundingBox));
+                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
 
                 Location location = new Location(world.getWorld(), x, y, z);
 

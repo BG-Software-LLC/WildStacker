@@ -343,7 +343,7 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
 
                 Location location = new Location(world.getWorld(), x, y, z);
 
-                boolean hasSpace = world.b(entityTypes.a(x, y, z));
+                boolean hasSpace = world.c(entityTypes.a(x, y, z));
 
                 Collection<SpawnCondition> spawnConditions = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType());
                 boolean failSpawnConditions = !spawnConditions.isEmpty() && spawnConditions.stream()

@@ -22,6 +22,7 @@ import net.minecraft.server.v1_8_R3.EntityTypes;
 import net.minecraft.server.v1_8_R3.EnumDifficulty;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.EnumSkyBlock;
+import net.minecraft.server.v1_8_R3.MathHelper;
 import net.minecraft.server.v1_8_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagList;
@@ -390,8 +391,7 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
 
                 Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || (world.a(nmsEntity.getBoundingBox(), nmsEntity) &&
-                        !world.containsLiquid(nmsEntity.getBoundingBox()));
+                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
 
                 Location location = new Location(world.getWorld(), x, y, z);
 
@@ -498,6 +498,30 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                                     demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
 
             return closestEntity.map(WStackedEntity::of).orElse(null);
+        }
+
+        private boolean hasEmptySpace(Entity entity){
+            AxisAlignedBB boundingBox = entity.getBoundingBox();
+            int i = MathHelper.floor(boundingBox.a);
+            int j = MathHelper.floor(boundingBox.d);
+            int k = MathHelper.floor(boundingBox.b);
+            int l = MathHelper.floor(boundingBox.e);
+            int i1 = MathHelper.floor(boundingBox.c);
+            int j1 = MathHelper.floor(boundingBox.f);
+            BlockPosition.MutableBlockPosition blockPosition = new BlockPosition.MutableBlockPosition();
+
+            for(int k1 = i; k1 <= j; ++k1) {
+                for(int l1 = k; l1 <= l; ++l1) {
+                    for(int i2 = i1; i2 <= j1; ++i2) {
+                        Block block = world.getType(blockPosition.c(k1, l1, i2)).getBlock();
+                        if (block.getMaterial().isLiquid()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
     }
