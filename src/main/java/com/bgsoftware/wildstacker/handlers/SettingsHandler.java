@@ -362,7 +362,7 @@ public final class SettingsHandler {
                 }
             }catch (Exception ignored){}
         }
-        amountsMenuEnabled = cfg.getBoolean("manage-menu.amounts-menu");
+        amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         manageMenuEnabled = amountsMenuEnabled;
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
