@@ -638,6 +638,12 @@ spawners:
     # You can set it to be disabled in order to disable the feature.
     toggle-command: 'stacker inventorytweaks,stacker it'
 
+  # Settings related to the manage menu of spawners.
+  # If all the sub menus are disabled, the manage menu will not be opened.
+  manage-menu:
+    # Should the amounts menu be enabled?
+    amounts-menu: true
+
   # Configure spawn conditions for entities that are spawned by spawners
   spawn-conditions:
     EXAMPLE_MOB: []

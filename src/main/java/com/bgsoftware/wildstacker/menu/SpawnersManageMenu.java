@@ -36,7 +36,7 @@ public final class SpawnersManageMenu extends WildMenu {
 
     @Override
     public void onPlayerClick(InventoryClickEvent e) {
-        if(amountsMenuSlots.contains(e.getRawSlot())){
+        if(plugin.getSettings().amountsMenuEnabled && amountsMenuSlots.contains(e.getRawSlot())){
             StackedSpawner stackedSpawner = this.stackedSpawner.get();
             if(stackedSpawner != null) {
                 SpawnerAmountsMenu.open((Player) e.getWhoClicked(), stackedSpawner);

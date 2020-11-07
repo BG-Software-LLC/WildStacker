@@ -540,16 +540,9 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        if(e.getPlayer().isSneaking()){
+        if(e.getPlayer().isSneaking() && plugin.getSettings().manageMenuEnabled){
             SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
             e.setCancelled(true);
-//            if(plugin.getSettings().spawnersBreakMenu){
-//                SpawnersBreakMenu.open(e.getPlayer(), stackedSpawner.getLocation());
-//                e.setCancelled(true);
-//            }else if(plugin.getSettings().spawnersPlaceMenu){
-//                SpawnersPlaceMenu.open(e.getPlayer(), stackedSpawner);
-//                e.setCancelled(true);
-//            }
         }
 
         else{
