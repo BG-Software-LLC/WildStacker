@@ -28,6 +28,7 @@ public abstract class WildMenu implements InventoryHolder {
     private final String identifier;
 
     protected Inventory inventory;
+    protected boolean cancelOnClick = true;
 
     protected WildMenu(String identifier){
         this.identifier = identifier;
@@ -36,7 +37,8 @@ public abstract class WildMenu implements InventoryHolder {
     public final void onButtonClick(InventoryClickEvent e){
         Player player = (Player) e.getWhoClicked();
 
-        e.setCancelled(true);
+        if(cancelOnClick)
+            e.setCancelled(true);
 
         if(e.getCurrentItem() != null) {
             SoundWrapper sound = getSound(e.getRawSlot());
@@ -121,6 +123,10 @@ public abstract class WildMenu implements InventoryHolder {
         }
 
         return inventory;
+    }
+
+    public boolean isCancelOnClick(){
+        return cancelOnClick;
     }
 
     public void resetData(){

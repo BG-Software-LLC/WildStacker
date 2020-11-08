@@ -30,6 +30,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
         this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().barrelsPlaceInventoryTitle
                 .replace("{0}", EntityUtils.getFormattedType(barrelItem.getType().name())));
         this.barrelItem = barrelItem;
+        this.cancelOnClick = false;
     }
 
     @Override

@@ -47,12 +47,13 @@ public final class MenusListener implements Listener {
      * by shift clicking and closing the inventory in the same time.
      */
 
-    private Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
+    private final Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMenuClickMonitor(InventoryClickEvent e){
         Inventory topInventory = e.getView().getTopInventory();
-        if(e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu){
+        if(e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu &&
+                ((WildMenu) topInventory.getHolder()).isCancelOnClick()){
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
@@ -60,8 +61,8 @@ public final class MenusListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMenuCloseMonitor(InventoryCloseEvent e){
-        if(latestClickedItem.containsKey(e.getPlayer().getUniqueId())){
-            ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
+        ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
+        if(clickedItem != null){
             Executor.sync(() -> {
                 e.getPlayer().getInventory().removeItem(clickedItem);
                 ((Player) e.getPlayer()).updateInventory();
