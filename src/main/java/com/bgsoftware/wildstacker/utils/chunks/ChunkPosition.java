@@ -18,7 +18,7 @@ public final class ChunkPosition {
         this(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
     }
 
-    private ChunkPosition(String world, int x, int z){
+    public ChunkPosition(String world, int x, int z){
         this.world = world;
         this.x = x;
         this.z = z;

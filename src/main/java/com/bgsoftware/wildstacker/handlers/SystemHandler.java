@@ -316,8 +316,14 @@ public final class SystemHandler implements SystemManager {
         return new ArrayList<>(dataHandler.CACHED_SPAWNERS.values());
     }
 
+    @Override
     public List<StackedSpawner> getStackedSpawners(Chunk chunk) {
-        Set<StackedSpawner> chunkSpawners = dataHandler.CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(chunk));
+        return getStackedSpawners(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    }
+
+    @Override
+    public List<StackedSpawner> getStackedSpawners(World world, int chunkX, int chunkZ) {
+        Set<StackedSpawner> chunkSpawners = dataHandler.CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(world.getName(), chunkX, chunkZ));
         return chunkSpawners == null ? new ArrayList<>() : new ArrayList<>(chunkSpawners);
     }
 
@@ -336,8 +342,14 @@ public final class SystemHandler implements SystemManager {
         return new ArrayList<>(dataHandler.CACHED_BARRELS.values());
     }
 
+    @Override
     public List<StackedBarrel> getStackedBarrels(Chunk chunk) {
-        Set<StackedBarrel> chunkBarrels = dataHandler.CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(chunk));
+        return getStackedBarrels(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    }
+
+    @Override
+    public List<StackedBarrel> getStackedBarrels(World world, int chunkX, int chunkZ) {
+        Set<StackedBarrel> chunkBarrels = dataHandler.CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(world.getName(), chunkX, chunkZ));
         return chunkBarrels == null ? new ArrayList<>() : new ArrayList<>(chunkBarrels);
     }
 

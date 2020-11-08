@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -97,6 +98,22 @@ public interface SystemManager {
     List<StackedSpawner> getStackedSpawners();
 
     /**
+     * Get all the stacked spawners from cache in a chunk.
+     * @param chunk The chunk to retrieve spawners from.
+     * @return A list of stacked spawners
+     */
+    List<StackedSpawner> getStackedSpawners(Chunk chunk);
+
+    /**
+     * Get all the stacked spawners from cache in a chunk.
+     * @param world The world of the chunk.
+     * @param chunkX The chunk's x-coords.
+     * @param chunkZ The chunk's z-coords.
+     * @return A list of stacked spawners
+     */
+    List<StackedSpawner> getStackedSpawners(World world, int chunkX, int chunkZ);
+
+    /**
      * Get all the stacked spawners on the server.
      * @return A list of pairs for locations and stack amounts of the spawners.
      */
@@ -107,6 +124,22 @@ public interface SystemManager {
      * @return A list of stacked barrels
      */
     List<StackedBarrel> getStackedBarrels();
+
+    /**
+     * Get all the stacked barrels from cache in a chunk.
+     * @param chunk The chunk to retrieve barrels from.
+     * @return A list of stacked barrels
+     */
+    List<StackedBarrel> getStackedBarrels(Chunk chunk);
+
+    /**
+     * Get all the stacked barrels from cache in a chunk.
+     * @param world The world of the chunk.
+     * @param chunkX The chunk's x-coords.
+     * @param chunkZ The chunk's z-coords.
+     * @return A list of stacked barrels
+     */
+    List<StackedBarrel> getStackedBarrels(World world, int chunkX, int chunkZ);
 
     /**
      * Get all the stacked barrels on the server.
