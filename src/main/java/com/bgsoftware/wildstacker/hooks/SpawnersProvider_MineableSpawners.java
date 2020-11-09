@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.dnyferguson.mineablespawners.MineableSpawners;
+import com.dnyferguson.mineablespawners.listeners.SpawnerMineListener;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
@@ -12,27 +13,69 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class SpawnersProvider_MineableSpawners implements SpawnersProvider {
 
-    private final Map<String, Double> permissionChances = new HashMap<>();
     private final MineableSpawners plugin;
+
+    private Map<String, Double> permissionChances = new HashMap<>();
+    private Map<EntityType, Double> prices = new HashMap<>();
+    private boolean allSamePrice = false;
+    private double globalPrice = 0.0;
 
     public SpawnersProvider_MineableSpawners(){
         WildStackerPlugin.log(" - Using MineableSpawners as SpawnersProvider.");
         plugin = JavaPlugin.getPlugin(MineableSpawners.class);
-        for (String line : plugin.getConfigurationHandler().getList("mining", "perm-based-chances")) {
-            String[] args = line.split(":");
-            try {
-                String permission = args[0];
-                double chance = Double.parseDouble(args[1]);
-                permissionChances.put(permission, chance);
-            } catch (Exception ignored) {}
+        Listener spawnerMineListener = Arrays.stream(BlockBreakEvent.getHandlerList().getRegisteredListeners())
+                .filter(registeredListener -> registeredListener.getPlugin() == plugin)
+                .map(RegisteredListener::getListener).findFirst().orElse(null);
+
+        try{
+            if(spawnerMineListener == null)
+                throw new NullPointerException("Error while trying to find the listener instance.");
+
+            /* Permission Chances */
+            {
+                Field permissionChancesField = SpawnerMineListener.class.getDeclaredField("permissionChances");
+                permissionChancesField.setAccessible(true);
+                //noinspection unchecked
+                permissionChances = (Map<String, Double>) permissionChancesField.get(spawnerMineListener);
+            }
+
+            /* Prices */
+            {
+                Field pricesField = SpawnerMineListener.class.getDeclaredField("prices");
+                pricesField.setAccessible(true);
+                //noinspection unchecked
+                prices = (Map<EntityType, Double>) pricesField.get(spawnerMineListener);
+            }
+
+            /* Same Price */
+            {
+                Field allSamePriceField = SpawnerMineListener.class.getDeclaredField("allSamePrice");
+                allSamePriceField.setAccessible(true);
+                allSamePrice = (Boolean) allSamePriceField.get(spawnerMineListener);
+            }
+
+            /* Global Price */
+            {
+                Field globalPriceField = SpawnerMineListener.class.getDeclaredField("globalPrice");
+                globalPriceField.setAccessible(true);
+                globalPrice = (Double) globalPriceField.get(spawnerMineListener);
+            }
+        }catch (Throwable ex){
+            WildStackerPlugin.log("&cError while hooking into MS - can cause conflicts / unintended bypasses.");
+            ex.printStackTrace();
         }
     }
 
@@ -100,12 +143,20 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
                     return;
             }
 
-            double dropChance = 1.0;
+            if(plugin.getEcon() != null && plugin.getConfigurationHandler().getBoolean("mining", "charge")){
+                double cost = !allSamePrice ? globalPrice : prices.getOrDefault(entityType, globalPrice);
+
+                if (!plugin.getEcon().withdrawPlayer(player, cost).transactionSuccess())
+                    return;
+            }
+
+            double dropChance;
+
             if (plugin.getConfigurationHandler().getBoolean("mining", "use-perm-based-chances") && permissionChances.size() > 0) {
+                dropChance = 0;
                 for (String perm : permissionChances.keySet()) {
                     if (player.hasPermission(perm)) {
-                        dropChance = permissionChances.get(perm) / 100.0;
-                        break;
+                        dropChance = Math.max(dropChance, permissionChances.get(perm) / 100.0);
                     }
                 }
             }
