@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -323,6 +324,7 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
             }
 
             StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
+            demoEntity.setSpawnCause(SpawnCause.SPAWNER);
             ((WStackedEntity) demoEntity).setDemoEntity();
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
@@ -444,6 +446,7 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
 
             if(amountPerEntity > 1) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
+                stackedEntity.setSpawnCause(SpawnCause.SPAWNER);
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 
