@@ -61,6 +61,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
@@ -411,14 +412,13 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public StackedItem createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer) {
         CraftWorld craftWorld = (CraftWorld) location.getWorld();
+        Chunk chunk = ((CraftChunk) location.getChunk()).getHandle();
 
         EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
 
         entityItem.pickupDelay = 10;
 
-        entityItem.valid = true;
-        StackedItem stackedItem = WStackedItem.of(entityItem.getBukkitEntity());
-        entityItem.valid = false;
+        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
         itemConsumer.accept(stackedItem);
 

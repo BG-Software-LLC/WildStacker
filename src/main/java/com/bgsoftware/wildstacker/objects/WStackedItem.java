@@ -417,6 +417,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if(!ItemUtils.isStackable(item))
             throw new IllegalArgumentException("The item " + item + " is not a stackable item.");
 
+        return ofBypass(item);
+    }
+
+    public static StackedItem ofBypass(Item item){
         return plugin.getSystemManager().getStackedItem(item);
     }
 

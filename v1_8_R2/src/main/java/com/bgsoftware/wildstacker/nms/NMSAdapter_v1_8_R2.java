@@ -292,9 +292,7 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
 
         entityItem.pickupDelay = 10;
 
-        entityItem.valid = true;
-        StackedItem stackedItem = WStackedItem.of(entityItem.getBukkitEntity());
-        entityItem.valid = false;
+        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
         itemConsumer.accept(stackedItem);
 
