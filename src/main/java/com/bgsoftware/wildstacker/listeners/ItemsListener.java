@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -50,7 +51,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled)
+        if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()))
             return;
 
         StackedItem stackedItem = WStackedItem.of(e.getEntity());
@@ -103,15 +104,17 @@ public final class ItemsListener implements Listener {
     //This method will be fired even if stacking-drops is disabled.
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemDespawn(ItemDespawnEvent e){
-        WStackedItem.of(e.getEntity()).remove();
+        if(ItemUtils.isStackable(e.getEntity()))
+            WStackedItem.of(e.getEntity()).remove();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityPickup(EntityPickupItemEvent e) {
-        StackedItem stackedItem = WStackedItem.of(e.getItem());
+        StackedItem stackedItem = e.getItem();
+        Item item = stackedItem.getItem();
 
-        if(EntityStorage.hasMetadata(e.getItem(), "pickup")){
-            EntityStorage.removeMetadata(e.getItem(), "pickup");
+        if(EntityStorage.hasMetadata(item, "pickup")){
+            EntityStorage.removeMetadata(item, "pickup");
             stackedItem.remove();
 
             e.setCancelled(true);
@@ -166,12 +169,12 @@ public final class ItemsListener implements Listener {
                 }
 
                 //Pick up animation
-                plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), e.getItem());
+                plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), item);
             }
 
             if (stackedItem.getStackAmount() <= 0) {
-                e.getItem().setPickupDelay(5);
-                EntityStorage.setMetadata(e.getItem(), "pickup", true);
+                item.setPickupDelay(5);
+                EntityStorage.setMetadata(item, "pickup", true);
 
                 Executor.sync(() -> {
                     e.getItem().remove();
@@ -184,6 +187,9 @@ public final class ItemsListener implements Listener {
     //This method will be fired even if stacking-drops is disabled.
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryPickup(InventoryPickupItemEvent e){
+        if(!ItemUtils.isStackable(e.getItem()))
+            return;
+
         StackedItem stackedItem = WStackedItem.of(e.getItem());
         if (stackedItem.getStackAmount() > 1) {
             e.setCancelled(true);
@@ -254,7 +260,8 @@ public final class ItemsListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onItemMerge(ItemMergeEvent e){
-            if(!plugin.getSettings().itemsStackingEnabled)
+            if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()) ||
+                    !ItemUtils.isStackable(e.getTarget()))
                 return;
 
             StackedItem stackedItem = WStackedItem.of(e.getEntity());

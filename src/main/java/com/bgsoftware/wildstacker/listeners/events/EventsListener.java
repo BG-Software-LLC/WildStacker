@@ -1,8 +1,10 @@
 package com.bgsoftware.wildstacker.listeners.events;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
@@ -38,7 +40,10 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.entity.EntityPickupItemEvent e){
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getEntity(), e.getItem());
+            if(!ItemUtils.isStackable(e.getItem()))
+                return;
+
+            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getEntity(), WStackedItem.of(e.getItem()));
             Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
             if(entityPickupItemEvent.isCancelled())
                 e.setCancelled(true);
@@ -50,7 +55,10 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.player.PlayerPickupItemEvent e){
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), e.getItem());
+            if(!ItemUtils.isStackable(e.getItem()))
+                return;
+
+            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
             Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
             if(entityPickupItemEvent.isCancelled())
                 e.setCancelled(true);

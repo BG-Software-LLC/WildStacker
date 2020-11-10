@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -408,21 +409,22 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
      */
 
     @Override
-    public Item createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer) {
+    public StackedItem createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer) {
         CraftWorld craftWorld = (CraftWorld) location.getWorld();
 
-        assert craftWorld != null;
-
         EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
-        Item bukkitItem = (Item) entityItem.getBukkitEntity();
 
         entityItem.pickupDelay = 10;
 
-        itemConsumer.accept(bukkitItem);
+        entityItem.valid = true;
+        StackedItem stackedItem = WStackedItem.of(entityItem.getBukkitEntity());
+        entityItem.valid = false;
+
+        itemConsumer.accept(stackedItem);
 
         craftWorld.addEntity(entityItem, spawnCause.toSpawnReason());
 
-        return bukkitItem;
+        return stackedItem;
     }
 
     @Override

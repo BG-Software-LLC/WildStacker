@@ -614,10 +614,8 @@ public final class SystemHandler implements SystemManager {
         for(int i = 0; i < amountOfItems; i++) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
-            lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
-                StackedItem stackedItem = WStackedItem.of(item);
-                stackedItem.setStackAmount(itemLimit, stackedItem.isCached());
-            }));
+            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM,
+                    stackedItem -> stackedItem.setStackAmount(itemLimit, stackedItem.isCached()));
         }
 
         int leftOvers = amount % limit;
@@ -625,10 +623,8 @@ public final class SystemHandler implements SystemManager {
         if(leftOvers > 0) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
-            lastDroppedItem = WStackedItem.of(plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, item -> {
-                StackedItem stackedItem = WStackedItem.of(item);
-                stackedItem.setStackAmount(leftOvers, stackedItem.isCached());
-            }));
+            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM,
+                    stackedItem -> stackedItem.setStackAmount(leftOvers, stackedItem.isCached()));
         }
 
         return lastDroppedItem;
@@ -712,7 +708,7 @@ public final class SystemHandler implements SystemManager {
 
             if(plugin.getSettings().killTaskStackedItems) {
                 entityList.stream()
-                        .filter(entity -> entity instanceof Item && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity) &&
+                        .filter(entity -> ItemUtils.isStackable(entity) && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity) &&
                                 (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskItemsWhitelist, ((Item) entity).getItemStack().getType()) &&
                                         !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType()))))
                         .forEach(entity -> {

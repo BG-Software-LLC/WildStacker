@@ -25,7 +25,6 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.Ocelot;
@@ -136,10 +135,6 @@ public final class EntityUtils {
     public static boolean isStackable(Entity entity){
         return (MythicMobsHook.isMythicMob(entity) ||
                 (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
-    }
-
-    public static boolean isItem(Entity entity){
-        return entity.isValid() && !entity.isDead() && entity instanceof Item;
     }
 
     public static void spawnExp(Location location, int amount){

@@ -133,11 +133,15 @@ public interface NMSAdapter {
      *   Item methods
      */
 
-    Item createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<Item> itemConsumer);
+    StackedItem createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer);
 
     Enchantment getGlowEnchant();
 
     ItemStack getPlayerSkull(String texture);
+
+    default boolean isDroppedItem(Entity entity){
+        return entity instanceof Item;
+    }
 
     /*
      *   World methods

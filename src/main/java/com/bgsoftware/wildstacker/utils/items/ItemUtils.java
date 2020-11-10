@@ -8,13 +8,12 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -29,10 +28,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public final class ItemUtils {
 
@@ -255,42 +252,6 @@ public final class ItemUtils {
                 .forEach(player -> ((Player) player).updateInventory());
     }
 
-    public static ItemStack getFromConfig(ConfigurationSection section){
-        Material type;
-
-        try{
-            type = Material.valueOf(section.getString("type"));
-        }catch(IllegalArgumentException ex){
-            WildStackerPlugin.log("Couldn't find a valid type for fill item " + section.getName() + " - skipping...");
-            return null;
-        }
-
-        short data = (short) section.getInt("data", 0);
-
-        ItemStack itemStack = new ItemStack(type, 1, data);
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        if(itemMeta != null) {
-            if (section.contains("name")) {
-                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
-            }
-
-            if (section.contains("lore")) {
-                List<String> lore = new ArrayList<>();
-
-                for (String line : section.getStringList("lore")) {
-                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
-                }
-
-                itemMeta.setLore(lore);
-            }
-
-            itemStack.setItemMeta(itemMeta);
-        }
-
-        return itemStack;
-    }
-
     @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
     public static void removeItem(ItemStack itemStack, PlayerInteractEvent event){
         try{
@@ -444,6 +405,10 @@ public final class ItemUtils {
         }catch(Throwable ignored){}
 
         return false;
+    }
+
+    public static boolean isStackable(Entity entity){
+        return entity.isValid() && !entity.isDead() && plugin.getNMSAdapter().isDroppedItem(entity);
     }
 
     private static boolean canBeStacked(ItemStack itemStack, World world){

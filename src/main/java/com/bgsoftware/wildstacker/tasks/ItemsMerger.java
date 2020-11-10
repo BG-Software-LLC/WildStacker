@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.tasks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Item;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ItemsMerger extends BukkitRunnable {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static BukkitTask task = null;
 
@@ -40,7 +41,7 @@ public final class ItemsMerger extends BukkitRunnable {
 
                     for (Item item : items) {
                         try {
-                            if (!item.isValid())
+                            if (!ItemUtils.isStackable(item))
                                 continue;
 
                             StackedItem stackedItem = WStackedItem.of(item);

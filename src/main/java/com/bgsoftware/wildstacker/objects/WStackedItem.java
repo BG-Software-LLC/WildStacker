@@ -251,7 +251,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             return;
         }
 
-        EntityUtils.getNearbyEntities(object.getLocation(), range, EntityUtils::isItem).whenComplete((nearbyEntities, ex) ->
+        EntityUtils.getNearbyEntities(object.getLocation(), range, ItemUtils::isStackable).whenComplete((nearbyEntities, ex) ->
                 StackService.execute(this, () -> {
                     Location itemLocation = getItem().getLocation();
 
@@ -414,6 +414,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     public static StackedItem of(Item item){
+        if(!ItemUtils.isStackable(item))
+            throw new IllegalArgumentException("The item " + item + " is not a stackable item.");
+
         return plugin.getSystemManager().getStackedItem(item);
     }
 

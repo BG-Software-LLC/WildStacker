@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.listeners.events;
 
-import org.bukkit.entity.Item;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -16,19 +16,19 @@ public final class EntityPickupItemEvent extends EntityEvent implements Cancella
 
     private static final HandlerList handlers = new HandlerList();
 
-    private final Item item;
+    private final StackedItem stackedItem;
     private final Inventory inventory;
 
     private boolean cancelled = false;
 
-    public EntityPickupItemEvent(LivingEntity entity, Item item){
+    public EntityPickupItemEvent(LivingEntity entity, StackedItem stackedItem){
         super(entity);
-        this.item = item;
+        this.stackedItem = stackedItem;
         this.inventory = entity instanceof InventoryHolder ? ((InventoryHolder) entity).getInventory() : null;
     }
 
-    public Item getItem() {
-        return item;
+    public StackedItem getItem() {
+        return stackedItem;
     }
 
     @Nullable
