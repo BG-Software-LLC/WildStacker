@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -90,6 +91,8 @@ public final class SpawnerAmountsMenu extends WildMenu {
         Map<Integer, Integer> itemsToRemove = new HashMap<>();
         Inventory inventory = e.getWhoClicked().getInventory();
 
+        Bukkit.broadcastMessage("Amount to deposit: " + depositAmount);
+
         if(e.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
             int amount = 0;
 
@@ -101,11 +104,14 @@ public final class SpawnerAmountsMenu extends WildMenu {
                     continue;
 
                 int itemAmount = ItemUtils.getSpawnerItemAmount(itemStack);
+                int itemsToAdd = itemStack.getAmount();
 
-                int itemsToAdd = (depositAmount - amount) / itemAmount;
+                if((itemAmount * itemsToAdd) + amount > depositAmount){
+                    itemsToAdd = (depositAmount - amount) / itemAmount;
 
-                if(itemsToAdd <= 0)
-                    continue;
+                    if(itemsToAdd <= 0)
+                        continue;
+                }
 
                 itemsToRemove.put(i, itemsToAdd);
                 amount += (itemAmount * itemsToAdd);
@@ -113,6 +119,8 @@ public final class SpawnerAmountsMenu extends WildMenu {
                 if (amount >= depositAmount)
                     break;
             }
+
+            Bukkit.broadcastMessage("Found in inventory: " + amount);
 
             depositAmount = Math.min(depositAmount, amount);
         }
