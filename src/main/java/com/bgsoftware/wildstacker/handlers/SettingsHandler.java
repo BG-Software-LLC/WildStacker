@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
+import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -94,7 +95,7 @@ public final class SettingsHandler {
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
             getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled,
-            amountsMenuEnabled, manageMenuEnabled;
+            amountsMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
@@ -364,6 +365,7 @@ public final class SettingsHandler {
         }
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         manageMenuEnabled = amountsMenuEnabled;
+        spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER != null;
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);

@@ -27,7 +27,10 @@ public final class ReflectionUtils {
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
                     ServerVersion.isEquals(ServerVersion.v1_7) ? "b" : "b_"));
-            fieldMap.put(Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER, getFinalField(tileEntitySpawnerClass, "a"));
+
+            Field spawnerAbstractField = getFinalField(tileEntitySpawnerClass, "a");
+            if(spawnerAbstractField != null)
+                fieldMap.put(Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER, spawnerAbstractField);
 
             try{ fieldMap.put(Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER, entityClass.getField("spawnedViaMobSpawner")); }catch(Throwable ignored){}
             try{ fieldMap.put(Fields.ENTITY_FROM_MOB_SPAWNER, entityClass.getField("fromMobSpawner")); }catch(Throwable ignored){}
@@ -142,9 +145,13 @@ public final class ReflectionUtils {
         Field field = clazz.getDeclaredField(fieldName);
         field.setAccessible(true);
 
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        try {
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        }catch (Throwable ex){
+            field = null;
+        }
 
         return field;
     }

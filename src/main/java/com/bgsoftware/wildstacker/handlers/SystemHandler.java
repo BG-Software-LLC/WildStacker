@@ -461,7 +461,7 @@ public final class SystemHandler implements SystemManager {
             spawnersToLoad.clear();
         }
 
-        if(plugin.getSettings().spawnersStackingEnabled){
+        if(plugin.getSettings().spawnersOverrideEnabled){
             Arrays.stream(chunk.getTileEntities()).filter(blockState -> blockState instanceof CreatureSpawner)
                     .forEach(blockState -> plugin.getNMSSpawners().updateStackedSpawner(WStackedSpawner.of(blockState.getBlock())));
         }
