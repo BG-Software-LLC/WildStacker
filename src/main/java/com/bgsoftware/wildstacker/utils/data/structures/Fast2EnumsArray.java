@@ -39,12 +39,14 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
                             fast2EnumsArray.add(first, second);
                         else
                             fast2EnumsArray.size++;
-                    } else if (first != null) {
-                        fast2EnumsArray.addFirst(first);
                     } else {
+                        if (first != null)
+                            fast2EnumsArray.addFirst(first);
+
                         T second = FastEnumUtils.getEnum(secondType, sections[0]);
                         if (second != null)
                             fast2EnumsArray.addSecond(second);
+
                         else
                             fast2EnumsArray.size++;
                     }
