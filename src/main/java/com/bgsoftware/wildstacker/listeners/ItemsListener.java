@@ -51,10 +51,10 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()))
+        if(!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSAdapter().isDroppedItem(e.getEntity()))
             return;
 
-        StackedItem stackedItem = WStackedItem.of(e.getEntity());
+        StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
 
         if(!stackedItem.isCached())
             return;
