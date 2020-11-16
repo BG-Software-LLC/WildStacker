@@ -363,9 +363,10 @@ public final class SettingsHandler {
                 }
             }catch (Exception ignored){}
         }
+
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         manageMenuEnabled = amountsMenuEnabled;
-        spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER != null;
+        spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.exists();
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);
