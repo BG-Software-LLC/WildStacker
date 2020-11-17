@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -327,7 +329,24 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     @Override
     public ItemStack getBarrelItem(int amount) {
         ItemStack itemStack = barrelItem.clone();
-        itemStack.setAmount(amount);
+
+        if(plugin.getSettings().dropStackedItem){
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
+            itemStack.setAmount(1);
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+                    .replace("{0}", amount + "")
+                    .replace("{1}", ItemUtils.getFormattedType(new ItemStack(getType())))
+                    .replace("{2}", "Barrel")
+            );
+
+            itemStack.setItemMeta(itemMeta);
+        }
+        else {
+            itemStack.setAmount(amount);
+        }
+
         return itemStack;
     }
 
