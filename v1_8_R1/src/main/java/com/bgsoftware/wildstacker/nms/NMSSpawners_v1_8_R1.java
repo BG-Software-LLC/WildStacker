@@ -348,6 +348,7 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
             int mobsToSpawn;
 
             boolean resetDelay = false;
+            short particlesAmount = 0;
 
             // Try stacking into the target entity first
             if(targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, demoEntity)){
@@ -369,6 +370,7 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
                     stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
                 world.triggerEffect(2004, position, 0);
+                particlesAmount++;
 
                 resetDelay = true;
             }
@@ -406,8 +408,10 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
                 if(!hasSpace || failSpawnConditions)
                     continue;
 
-                if(handleEntitySpawn(bukkitEntity, amountPerEntity))
+                if(handleEntitySpawn(bukkitEntity, amountPerEntity, particlesAmount <= this.spawnCount)) {
                     resetDelay = true;
+                    particlesAmount++;
+                }
             }
 
             if(resetDelay)
@@ -451,7 +455,7 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
             return entity.getBukkitEntity();
         }
 
-        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity){
+        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity, boolean spawnParticles){
             Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
 
@@ -478,7 +482,8 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
             else {
                 world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
 
-                world.triggerEffect(2004, position, 0);
+                if(spawnParticles)
+                    world.triggerEffect(2004, position, 0);
 
                 if (entity instanceof EntityInsentient) {
                     ((EntityInsentient)entity).y();
