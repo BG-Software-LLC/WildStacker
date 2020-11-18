@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -426,9 +427,10 @@ public final class NMSSpawners_v1_9_R2 implements NMSSpawners {
             Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
 
+            EntityStorage.setMetadata(bukkitEntity, "spawn-cause", SpawnCause.SPAWNER);
+
             if(amountPerEntity > 1) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
-                stackedEntity.setSpawnCause(SpawnCause.SPAWNER);
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 
