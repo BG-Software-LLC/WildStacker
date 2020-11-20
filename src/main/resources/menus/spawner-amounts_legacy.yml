@@ -42,24 +42,30 @@ items:
   '!':
     type: STAINED_GLASS_PANE
     data: 5
-    name: '&f'
+    deposit: 1
+    name: '&aAdd +1'
   '%':
     type: STAINED_GLASS_PANE
     data: 5
-    name: '&f'
+    deposit: 16
+    name: '&aAdd +16'
   '^':
     type: STAINED_GLASS_PANE
     data: 5
-    name: '&f'
+    deposit: 64
+    name: '&aAdd +64'
   '*':
     type: STAINED_GLASS_PANE
     data: 14
-    name: '&f'
+    withdraw: 1
+    name: '&cRemove -1'
   '-':
     type: STAINED_GLASS_PANE
     data: 14
-    name: '&f'
+    withdraw: 16
+    name: '&cRemove -16'
   '+':
     type: STAINED_GLASS_PANE
     data: 14
-    name: '&f'
+    withdraw: 64
+    name: '&cRemove -64'
