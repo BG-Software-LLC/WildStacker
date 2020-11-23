@@ -5,7 +5,6 @@ import org.bukkit.entity.Entity;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -13,7 +12,7 @@ import java.util.function.Function;
 
 public final class EntityStorage {
 
-    private static final WeakHashMap<UUID, Map<String, Object>> entityStorage = new WeakHashMap<>();
+    private static final Map<UUID, Map<String, Object>> entityStorage = new HashMap<>();
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public static void setMetadata(Entity entity, String key, Object value){
@@ -57,7 +56,7 @@ public final class EntityStorage {
         });
     }
 
-    private static void write(Consumer<WeakHashMap<UUID, Map<String, Object>>> consumer){
+    private static void write(Consumer<Map<UUID, Map<String, Object>>> consumer){
         try{
             lock.writeLock().lock();
             consumer.accept(entityStorage);
@@ -66,7 +65,7 @@ public final class EntityStorage {
         }
     }
 
-    private static <R> R writeAndGet(Function<WeakHashMap<UUID, Map<String, Object>>, R> function){
+    private static <R> R writeAndGet(Function<Map<UUID, Map<String, Object>>, R> function){
         try{
             lock.writeLock().lock();
             return function.apply(entityStorage);
@@ -75,7 +74,7 @@ public final class EntityStorage {
         }
     }
 
-    private static <R> R read(Function<WeakHashMap<UUID, Map<String, Object>>, R> function){
+    private static <R> R read(Function<Map<UUID, Map<String, Object>>, R> function){
         try{
             lock.readLock().lock();
             return function.apply(entityStorage);
