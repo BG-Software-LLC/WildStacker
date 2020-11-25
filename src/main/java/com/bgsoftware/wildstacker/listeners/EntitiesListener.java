@@ -506,7 +506,6 @@ public final class EntitiesListener implements Listener {
 
     // Handle entity removed from world.
     public void handleEntityRemove(Entity entity){
-        new Exception().printStackTrace();
         if(EntityUtils.isStackable(entity)) {
             plugin.getDataHandler().CACHED_ENTITIES.remove(entity.getUniqueId());
         }
