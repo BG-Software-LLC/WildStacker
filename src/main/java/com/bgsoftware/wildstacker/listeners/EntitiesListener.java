@@ -512,6 +512,7 @@ public final class EntitiesListener implements Listener {
         else if(entity instanceof Item){
             plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
         }
+        EntityStorage.clearMetadata(entity);
     }
 
     private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason){
