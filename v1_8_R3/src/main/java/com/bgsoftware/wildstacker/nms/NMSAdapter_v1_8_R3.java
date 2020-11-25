@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.nms;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
@@ -28,7 +27,6 @@ import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
 import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.MathHelper;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
 import net.minecraft.server.v1_8_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
@@ -38,11 +36,9 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_8_R3.Scoreboard;
 import net.minecraft.server.v1_8_R3.ScoreboardObjective;
-import net.minecraft.server.v1_8_R3.ScoreboardServer;
 import net.minecraft.server.v1_8_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -535,40 +531,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     /*
      *   Data methods
      */
-
-    @Override
-    public void loadScoreboards() {
-        for(org.bukkit.World bukkitWorld : Bukkit.getWorlds()){
-            WorldServer worldServer = ((CraftWorld) bukkitWorld).getHandle();
-            Scoreboard originalScoreboard = worldServer.scoreboard;
-            worldServer.scoreboard = new ScoreboardServer(MinecraftServer.getServer()) {
-
-                @Override
-                public void a(Entity entity) {
-                    super.a(entity);
-                    if(entity.world.areChunksLoaded(entity.getChunkCoordinates(), 0)) {
-                        org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
-                        WildStackerPlugin.getPlugin().getDataHandler().deleteEntity(bukkitEntity);
-                    }
-                }
-
-            };
-
-            originalScoreboard.getPlayers().forEach(line -> {
-                try{
-                    UUID uuid = UUID.fromString(line);
-
-                    int stackAmount = getData(originalScoreboard, uuid, "ws:stack-amount");
-                    int spawnCause = getData(originalScoreboard, uuid, "ws:stack-cause");
-                    int nameTag = getData(originalScoreboard, uuid, "ws:name-tag");
-
-                    saveData(worldServer.scoreboard, uuid, "ws:stack-amount", stackAmount);
-                    saveData(worldServer.scoreboard, uuid, "ws:stack-cause", spawnCause);
-                    saveData(worldServer.scoreboard, uuid, "ws:name-tag", nameTag);
-                }catch (Exception ignored){}
-            });
-        }
-    }
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
