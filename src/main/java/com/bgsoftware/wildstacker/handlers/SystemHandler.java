@@ -176,7 +176,7 @@ public final class SystemHandler implements SystemManager {
         boolean shouldBeCached = stackedEntity.isCached();
 
         //A new entity was created. Let's see if we need to add him
-        if(!(livingEntity instanceof Player) && !livingEntity.getType().name().equals("ARMOR_STAND") && shouldBeCached)
+        if(shouldBeCached)
             dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
 
         boolean deadFlag = shouldBeCached ? dataHandler.CACHED_DEAD_ENTITIES.remove(livingEntity.getUniqueId()) :
