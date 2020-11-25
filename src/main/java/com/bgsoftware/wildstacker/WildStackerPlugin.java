@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.listeners.ShulkerOversizedPatch;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
+import com.bgsoftware.wildstacker.listeners.WorldsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
@@ -109,6 +110,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new SpawnersListener(this), this);
         getServer().getPluginManager().registerEvents(new StewListener(this), this);
         getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
+        getServer().getPluginManager().registerEvents(new WorldsListener(this), this);
         EventsListener.register(this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);

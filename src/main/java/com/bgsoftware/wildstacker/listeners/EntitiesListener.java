@@ -45,6 +45,7 @@ import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fish;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
@@ -501,6 +502,17 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e){
         handleEntitySpawn(e.getEntity(), e.getSpawnReason());
+    }
+
+    // Handle entity removed from world.
+    public void handleEntityRemove(Entity entity){
+        new Exception().printStackTrace();
+        if(EntityUtils.isStackable(entity)) {
+            plugin.getDataHandler().CACHED_ENTITIES.remove(entity.getUniqueId());
+        }
+        else if(entity instanceof Item){
+            plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
+        }
     }
 
     private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason){

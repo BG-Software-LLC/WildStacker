@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -15,6 +16,7 @@ import net.minecraft.server.v1_8_R2.BlockRotatable;
 import net.minecraft.server.v1_8_R2.Chunk;
 import net.minecraft.server.v1_8_R2.Entity;
 import net.minecraft.server.v1_8_R2.EntityAnimal;
+import net.minecraft.server.v1_8_R2.EntityHuman;
 import net.minecraft.server.v1_8_R2.EntityInsentient;
 import net.minecraft.server.v1_8_R2.EntityItem;
 import net.minecraft.server.v1_8_R2.EntityLiving;
@@ -25,6 +27,7 @@ import net.minecraft.server.v1_8_R2.EntityVillager;
 import net.minecraft.server.v1_8_R2.EntityZombie;
 import net.minecraft.server.v1_8_R2.EnumParticle;
 import net.minecraft.server.v1_8_R2.IScoreboardCriteria;
+import net.minecraft.server.v1_8_R2.IWorldAccess;
 import net.minecraft.server.v1_8_R2.ItemStack;
 import net.minecraft.server.v1_8_R2.MathHelper;
 import net.minecraft.server.v1_8_R2.MobSpawnerAbstract;
@@ -405,6 +408,71 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     public void playSpawnEffect(LivingEntity livingEntity) {
         EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
         entityInsentient.y();
+    }
+
+    @Override
+    public void startEntityListen(org.bukkit.World world) {
+        ((CraftWorld) world).getHandle().addIWorldAccess(new IWorldAccess() {
+            @Override
+            public void a(BlockPosition blockPosition) {
+
+            }
+
+            @Override
+            public void b(BlockPosition blockPosition) {
+
+            }
+
+            @Override
+            public void a(int i, int i1, int i2, int i3, int i4, int i5) {
+
+            }
+
+            @Override
+            public void a(String s, double v, double v1, double v2, float v3, float v4) {
+
+            }
+
+            @Override
+            public void a(EntityHuman entityHuman, String s, double v, double v1, double v2, float v3, float v4) {
+
+            }
+
+            @Override
+            public void a(int i, boolean b, double v, double v1, double v2, double v3, double v4, double v5, int... ints) {
+
+            }
+
+            @Override
+            public void a(Entity entity) {
+
+            }
+
+            @Override
+            public void b(Entity entity) {
+                EntitiesListener.IMP.handleEntityRemove(entity.getBukkitEntity());
+            }
+
+            @Override
+            public void a(String s, BlockPosition blockPosition) {
+
+            }
+
+            @Override
+            public void a(int i, BlockPosition blockPosition, int i1) {
+
+            }
+
+            @Override
+            public void a(EntityHuman entityHuman, int i, BlockPosition blockPosition, int i1) {
+
+            }
+
+            @Override
+            public void b(int i, BlockPosition blockPosition, int i1) {
+
+            }
+        });
     }
 
     /*

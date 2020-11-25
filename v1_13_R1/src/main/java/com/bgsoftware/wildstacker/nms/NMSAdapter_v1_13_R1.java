@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -30,8 +31,10 @@ import net.minecraft.server.v1_13_R1.EntityTypes;
 import net.minecraft.server.v1_13_R1.EntityVillager;
 import net.minecraft.server.v1_13_R1.EntityZombieVillager;
 import net.minecraft.server.v1_13_R1.FluidTypes;
+import net.minecraft.server.v1_13_R1.IBlockAccess;
 import net.minecraft.server.v1_13_R1.IBlockData;
 import net.minecraft.server.v1_13_R1.IFluidContainer;
+import net.minecraft.server.v1_13_R1.IWorldAccess;
 import net.minecraft.server.v1_13_R1.ItemStack;
 import net.minecraft.server.v1_13_R1.ItemSword;
 import net.minecraft.server.v1_13_R1.MathHelper;
@@ -42,6 +45,8 @@ import net.minecraft.server.v1_13_R1.NBTTagList;
 import net.minecraft.server.v1_13_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_13_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_13_R1.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_13_R1.ParticleParam;
+import net.minecraft.server.v1_13_R1.SoundCategory;
 import net.minecraft.server.v1_13_R1.SoundEffect;
 import net.minecraft.server.v1_13_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_13_R1.World;
@@ -84,6 +89,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.EntityEquipment;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -518,6 +524,71 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
         }
 
         return false;
+    }
+
+    @Override
+    public void startEntityListen(org.bukkit.World world) {
+        ((CraftWorld) world).getHandle().addIWorldAccess(new IWorldAccess() {
+            @Override
+            public void a(IBlockAccess iBlockAccess, BlockPosition blockPosition, IBlockData iBlockData, IBlockData iBlockData1, int i) {
+
+            }
+
+            @Override
+            public void a(BlockPosition blockPosition) {
+
+            }
+
+            @Override
+            public void a(int i, int i1, int i2, int i3, int i4, int i5) {
+
+            }
+
+            @Override
+            public void a(@Nullable EntityHuman entityHuman, SoundEffect soundEffect, SoundCategory soundCategory, double v, double v1, double v2, float v3, float v4) {
+
+            }
+
+            @Override
+            public void a(SoundEffect soundEffect, BlockPosition blockPosition) {
+
+            }
+
+            @Override
+            public void a(ParticleParam particleParam, boolean b, double v, double v1, double v2, double v3, double v4, double v5) {
+
+            }
+
+            @Override
+            public void a(ParticleParam particleParam, boolean b, boolean b1, double v, double v1, double v2, double v3, double v4, double v5) {
+
+            }
+
+            @Override
+            public void a(Entity entity) {
+
+            }
+
+            @Override
+            public void b(Entity entity) {
+                EntitiesListener.IMP.handleEntityRemove(entity.getBukkitEntity());
+            }
+
+            @Override
+            public void a(int i, BlockPosition blockPosition, int i1) {
+
+            }
+
+            @Override
+            public void a(EntityHuman entityHuman, int i, BlockPosition blockPosition, int i1) {
+
+            }
+
+            @Override
+            public void b(int i, BlockPosition blockPosition, int i1) {
+
+            }
+        });
     }
 
     /*

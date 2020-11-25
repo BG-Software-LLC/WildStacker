@@ -26,6 +26,7 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
@@ -69,6 +70,9 @@ public final class ProvidersHandler {
             Bukkit.getPluginManager().registerEvents(new ProvidersListener(plugin), plugin);
 
             fixConflicts(plugin);
+
+            if(hasPaperEntityRemoveSupport())
+                Bukkit.getPluginManager().registerEvents(new PaperListener(), plugin);
 
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 0L);
@@ -141,7 +145,7 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new MyPetListener(), plugin);
         if(enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             pluginManager.registerEvents(new EchoPetListener(), plugin);
-        if(enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners"))
+        if(enable && isPlugin(toCheck, "EpicSpawners") && ReflectionUtils.isPluginEnabled("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))
             EpicSpawnersListener.register(plugin);
         if(enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
             CrazyEnchantmentsHook.register();
@@ -247,6 +251,15 @@ public final class ProvidersHandler {
         }
 
         return true;
+    }
+
+    private static boolean hasPaperEntityRemoveSupport(){
+        try{
+            Class.forName("com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent");
+            return true;
+        }catch (Throwable ex){
+            return false;
+        }
     }
 
 }

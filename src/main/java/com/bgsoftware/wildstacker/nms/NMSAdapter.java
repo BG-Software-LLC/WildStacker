@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
@@ -175,6 +176,10 @@ public interface NMSAdapter {
 
     default boolean attemptToWaterLog(Block block){
         return false;
+    }
+
+    default void startEntityListen(World world){
+
     }
 
     /*
