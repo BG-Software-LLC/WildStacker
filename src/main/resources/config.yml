@@ -266,6 +266,7 @@ entities:
     IS_TAMED: true
     LLAMA_COLOR: true
     LLAMA_STRENGTH: true
+    MOOSHROOM_TYPE: true
     NAME_TAG: true
     NERFED: true
     OCELOT_TYPE: true

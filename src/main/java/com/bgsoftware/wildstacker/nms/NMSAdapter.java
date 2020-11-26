@@ -18,6 +18,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
 import org.bukkit.entity.Villager;
@@ -100,6 +101,10 @@ public interface NMSAdapter {
         MaterialData materialData = enderman.getCarriedMaterial();
         //noinspection deprecation
         return materialData.getItemType() + ":" + materialData.getData();
+    }
+
+    default byte getMooshroomType(MushroomCow mushroomCow){
+        return 0;
     }
 
     default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage){

@@ -27,6 +27,7 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Phantom;
@@ -428,6 +429,11 @@ public final class EntityUtils {
         if(StackCheck.PHANTOM_SIZE.isEnabled() && StackCheck.PHANTOM_SIZE.isTypeAllowed(entityType)){
             if(((Phantom) en1).getSize() != ((Phantom) en2).getSize())
                 return StackCheckResult.PHANTOM_SIZE;
+        }
+
+        if(StackCheck.MOOSHROOM_TYPE.isEnabled() && StackCheck.MOOSHROOM_TYPE.isTypeAllowed(entityType)){
+            if(plugin.getNMSAdapter().getMooshroomType((MushroomCow) en1) != plugin.getNMSAdapter().getMooshroomType((MushroomCow) en2))
+                return StackCheckResult.MOOSHROOM_TYPE;
         }
 
         return StackCheckResult.SUCCESS;

@@ -82,6 +82,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -333,6 +334,11 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     public String getEndermanCarried(Enderman enderman) {
         BlockData carriedData = enderman.getCarriedBlock();
         return carriedData == null ? "AIR" : carriedData.getMaterial() + "";
+    }
+
+    @Override
+    public byte getMooshroomType(MushroomCow mushroomCow) {
+        return mushroomCow.getVariant() == MushroomCow.Variant.RED ? 0 : (byte) 1;
     }
 
     @Override

@@ -24,6 +24,7 @@ public enum StackCheckResult {
     IS_TAMED,
     LLAMA_COLOR,
     LLAMA_STRENGTH,
+    MOOSHROOM_TYPE,
     OCELOT_TYPE,
     PARROT_TYPE,
     PHANTOM_SIZE,
