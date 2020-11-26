@@ -336,7 +336,7 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public byte getMooshroomType(MushroomCow mushroomCow) {
-        return mushroomCow.getVariant() == MushroomCow.Variant.RED ? 0 : (byte) 1;
+        return (byte) mushroomCow.getVariant().ordinal();
     }
 
     @Override
