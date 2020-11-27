@@ -30,6 +30,9 @@ import net.minecraft.server.v1_8_R2.IScoreboardCriteria;
 import net.minecraft.server.v1_8_R2.IWorldAccess;
 import net.minecraft.server.v1_8_R2.ItemStack;
 import net.minecraft.server.v1_8_R2.MathHelper;
+import net.minecraft.server.v1_8_R2.MinecraftKey;
+import net.minecraft.server.v1_8_R2.MobEffect;
+import net.minecraft.server.v1_8_R2.MobEffectList;
 import net.minecraft.server.v1_8_R2.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R2.NBTTagCompound;
@@ -83,6 +86,13 @@ import java.util.function.Predicate;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
+
+    public static MobEffectCustomData STACK_AMOUNT = MobEffectCustomData.newEffect(31, new MinecraftKey("ws:stackAmount"))
+            .c("ws.stackAmount").withVanillaEffect(MobEffectList.FASTER_DIG);
+    public static MobEffectCustomData SPAWN_CAUSE = MobEffectCustomData.newEffect(30, new MinecraftKey("ws:spawnCause"))
+            .c("ws.spawnCause").withVanillaEffect(MobEffectList.SLOWER_DIG);
+    public static MobEffectCustomData HAS_NAMETAG = MobEffectCustomData.newEffect(29, new MinecraftKey("ws:hasNametag"))
+            .c("ws.hasNametag").withVanillaEffect(MobEffectList.SATURATION);
 
     /*
      *   Entity methods
@@ -602,38 +612,85 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
-        Scoreboard worldScoreboard = entityLiving.world.getScoreboard();
-
-        saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-amount", stackedEntity.getStackAmount());
-        saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-cause", stackedEntity.getSpawnCause().getId());
+        addEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackedEntity.getStackAmount()));
+        addEffect(entityLiving, new CustomMobEffect(SPAWN_CAUSE, stackedEntity.getSpawnCause().getId()));
         if(stackedEntity.hasNameTag())
-            saveData(worldScoreboard, entityLiving.getUniqueID(), "ws:name-tag", 1);
+            addEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, 1));
     }
 
     @Override
     public void loadEntity(StackedEntity stackedEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
-        Scoreboard worldScoreboard = entityLiving.world.getScoreboard();
 
-        int stackAmount = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-amount");
-        int spawnCause = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-cause");
-        int nameTag = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:name-tag");
+        // Loading old data from scoreboards
+        {
+            Scoreboard worldScoreboard = entityLiving.world.getScoreboard();
 
-        if(stackAmount > 0)
-            stackedEntity.setStackAmount(stackAmount, false);
+            int stackAmount = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-amount");
+            int spawnCause = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:stack-cause");
+            int nameTag = getData(worldScoreboard, entityLiving.getUniqueID(), "ws:name-tag");
 
-        if(spawnCause > 0)
-            stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
+            if(stackAmount > 0)
+                stackedEntity.setStackAmount(stackAmount, false);
 
-        if(nameTag == 1)
-            ((WStackedEntity) stackedEntity).setNameTag();
+            if(spawnCause > 0)
+                stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
+
+            if(nameTag == 1)
+                ((WStackedEntity) stackedEntity).setNameTag();
+
+            worldScoreboard.resetPlayerScores(entityLiving.getUniqueID() + "", null);
+        }
+
+        {
+            // This section is used to convert the effects into custom ones.
+            // This is done because we cannot save custom effects, otherwise 1.8 clients crash.
+            {
+                MobEffect stackAmountLoad = entityLiving.effects.get(STACK_AMOUNT.vanillaEffect.id),
+                        spawnCauseLoad = entityLiving.effects.get(SPAWN_CAUSE.vanillaEffect.id),
+                        hasNametagLoad = entityLiving.effects.get(HAS_NAMETAG.vanillaEffect.id);
+
+                if(stackAmountLoad != null && stackAmountLoad.getDuration() > 2140000000){
+                    setEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackAmountLoad.getAmplifier()));
+                    entityLiving.effects.remove(stackAmountLoad.getEffectId());
+                }
+
+                if(spawnCauseLoad != null && spawnCauseLoad.getDuration() > 2140000000){
+                    setEffect(entityLiving, new CustomMobEffect(SPAWN_CAUSE, spawnCauseLoad.getAmplifier()));
+                    entityLiving.effects.remove(spawnCauseLoad.getEffectId());
+                }
+
+                if(hasNametagLoad != null && hasNametagLoad.getDuration() > 2140000000){
+                    setEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, hasNametagLoad.getAmplifier()));
+                    entityLiving.effects.remove(hasNametagLoad.getEffectId());
+                }
+            }
+
+            // Loading data from custom effects
+            {
+                MobEffect stackAmount = entityLiving.getEffect(STACK_AMOUNT),
+                        spawnCause = entityLiving.getEffect(SPAWN_CAUSE),
+                        hasNametag = entityLiving.getEffect(HAS_NAMETAG);
+
+                if(stackAmount != null)
+                    stackedEntity.setStackAmount(stackAmount.getAmplifier(), false);
+
+                if(spawnCause != null)
+                    stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause.getAmplifier()));
+
+                if(hasNametag != null && hasNametag.getAmplifier() == 1)
+                    ((WStackedEntity) stackedEntity).setNameTag();
+            }
+        }
     }
 
     @Override
     public void saveItem(StackedItem stackedItem) {
-        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
-        Scoreboard worldScoreboard = entityItem.world.getScoreboard();
-        saveData(worldScoreboard, entityItem.getUniqueID(), "ws:stack-amount", stackedItem.getStackAmount());
+        if(stackedItem.getStackAmount() > stackedItem.getItemStack().getType().getMaxStackSize()) {
+            EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+            Scoreboard worldScoreboard = entityItem.world.getScoreboard();
+            saveData(worldScoreboard, entityItem.getUniqueID(), "ws:stack-amount", stackedItem.getStackAmount());
+        }
     }
 
     @Override
@@ -661,6 +718,67 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
             return -1;
 
         return scoreboard.getPlayerScoreForObjective(entity + "", objective).getScore();
+    }
+
+    private static void addEffect(EntityLiving entityLiving, CustomMobEffect mobEffect){
+        if (entityLiving.d(mobEffect)) {
+            MobEffect currentEffect = entityLiving.effects.get(mobEffect.getCustomId());
+            if(currentEffect != null){
+                currentEffect.a(mobEffect);
+            }
+            else{
+                entityLiving.effects.put(mobEffect.getCustomId(), mobEffect);
+            }
+        }
+    }
+
+    private static void setEffect(EntityLiving entityLiving, CustomMobEffect mobEffect){
+        entityLiving.effects.put(mobEffect.getCustomId(), mobEffect);
+    }
+
+    private static final class MobEffectCustomData extends MobEffectList {
+
+        private MobEffectList vanillaEffect;
+
+        MobEffectCustomData(int id, MinecraftKey minecraftKey){
+            super(id, minecraftKey, false, 16262179);
+        }
+
+        public MobEffectCustomData withVanillaEffect(MobEffectList vanillaEffect){
+            this.vanillaEffect = vanillaEffect;
+            return this;
+        }
+
+        public MobEffectList getVanillaEffect() {
+            return vanillaEffect;
+        }
+
+        @Override
+        public MobEffectCustomData c(String s) {
+            return (MobEffectCustomData) super.c(s);
+        }
+
+        static MobEffectCustomData newEffect(int id, MinecraftKey minecraftKey){
+            try{
+                new MobEffectCustomData(id, minecraftKey);
+            }catch (Exception ignored){}
+            return (MobEffectCustomData) MobEffectList.byId[id];
+        }
+
+    }
+
+    private static final class CustomMobEffect extends MobEffect {
+
+        private final int customId;
+
+        CustomMobEffect(MobEffectCustomData mobEffectCustomData, int value){
+            super(mobEffectCustomData.vanillaEffect.id, Integer.MAX_VALUE, value, false, false);
+            customId = mobEffectCustomData.id;
+        }
+
+        public int getCustomId() {
+            return customId;
+        }
     }
 
     @SuppressWarnings("deprecation")
