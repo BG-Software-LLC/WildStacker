@@ -135,12 +135,14 @@ public final class BarrelsListener implements Listener {
                 //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
                 Executor.sync(() -> {
                     e.getBlock().setType(Material.CAULDRON);
+                    stackedBarrel.createDisplayBlock();
 
                     if(attemptPlaceDelayed){
                         if (e.getBlockPlaced().getType() != Material.CAULDRON)
                             return;
 
                         stackedBarrel.updateName();
+
                         Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
 
                         finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
@@ -151,6 +153,7 @@ public final class BarrelsListener implements Listener {
                     return;
 
                 stackedBarrel.updateName();
+
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             } else {
                 revokeItem(e.getPlayer(), inHand);
@@ -167,8 +170,6 @@ public final class BarrelsListener implements Listener {
     }
 
     private void finishBarrelPlace(Player player, ItemStack inHand, StackedBarrel stackedBarrel, boolean replaceAir){
-        stackedBarrel.createDisplayBlock();
-
         //Removing item from player's inventory
         if(player.getGameMode() != GameMode.CREATIVE && replaceAir)
             ItemUtils.setItemInHand(player.getInventory(), inHand, new ItemStack(Material.AIR));
