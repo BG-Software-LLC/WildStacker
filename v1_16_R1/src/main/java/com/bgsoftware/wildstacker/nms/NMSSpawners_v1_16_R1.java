@@ -116,9 +116,9 @@ public final class NMSSpawners_v1_16_R1 implements NMSSpawners {
                 return true;
 
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position);
-            boolean flag = SeededRandom.a(chunkcoordintpair.x, chunkcoordintpair.z, ((GeneratorAccessSeed) world).getSeed(),
+            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.x, chunkcoordintpair.z, ((GeneratorAccessSeed) world).getSeed(),
                             world.getMinecraftWorld().spigotConfig.slimeSeed).nextInt(10) == 0;
-            return world.random.nextInt(10) == 0 && flag && position.getY() < 40;
+            return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);
 
         createCondition("IN_WATER_DEEP",

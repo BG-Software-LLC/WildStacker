@@ -80,13 +80,11 @@ public final class NMSSpawners_v1_10_R1 implements NMSSpawners {
             return world.j(position) > 8 && block == (coldBiome ? Blocks.GRASS : Blocks.ICE);
         }, EntityType.POLAR_BEAR);
 
-        createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
-            if(world.getBiome(position) == Biomes.h)
-                return true;
-
-            return world.getChunkAtWorldCoords(position).a(987234911L)
-                    .nextInt(10) == 0 && world.random.nextInt(10) == 0 && position.getY() < 40;
-        }, EntityType.SLIME);
+        createCondition("IN_SLIME_CHUNK_OR_SWAMP",
+                (world, position) -> world.getBiome(position) == Biomes.h || world.getChunkAtWorldCoords(position)
+                        .a(987234911L).nextInt(10) == 0 && position.getY() < 4,
+                EntityType.SLIME
+        );
 
         createCondition("MONSTER_LIGHT", (world, position) -> {
             if (world.b(EnumSkyBlock.SKY, position) > world.random.nextInt(32)) {

@@ -70,13 +70,12 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
                 EntityType.SHEEP, EntityType.WOLF
         );
 
-        createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
-            if(world.getBiome(position.x, position.z) == BiomeBase.SWAMPLAND)
-                return true;
-
-            return position.getChunk(world).a(987234911L)
-                    .nextInt(10) == 0 && world.random.nextInt(10) == 0 && position.y < 40;
-        }, EntityType.SLIME);
+        createCondition("IN_SLIME_CHUNK_OR_SWAMP",
+                (world, position) -> world.getBiome(position.x, position.z) == BiomeBase.SWAMPLAND ||
+                        world.getChunkAtWorldCoords(position.x, position.z).a(987234911L).nextInt(10) == 0 &&
+                        position.y < 40,
+                EntityType.SLIME
+        );
 
         createCondition("MONSTER_LIGHT", (world, position) -> {
             if (world.b(EnumSkyBlock.SKY, position.x, position.y, position.z) > world.random.nextInt(32)) {
