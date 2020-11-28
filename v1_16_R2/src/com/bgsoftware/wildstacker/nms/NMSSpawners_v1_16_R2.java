@@ -114,17 +114,15 @@ public final class NMSSpawners_v1_16_R2 implements NMSSpawners {
                 EntityType.TURTLE
         );
 
-        createCondition("IN_SLIME_CHUNK", (world, position) -> {
+        createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
+            if(Objects.equals(world.i(position), Optional.of(Biomes.SWAMP)))
+                return true;
+
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position);
             boolean flag = SeededRandom.a(chunkcoordintpair.x, chunkcoordintpair.z, ((GeneratorAccessSeed)world).getSeed(),
                             world.getMinecraftWorld().spigotConfig.slimeSeed).nextInt(10) == 0;
             return world.random.nextInt(10) == 0 && flag && position.getY() < 40;
         }, EntityType.SLIME);
-
-        createCondition("IN_SWAMP",
-                (world, position) -> Objects.equals(world.i(position), Optional.of(Biomes.SWAMP)),
-                EntityType.SLIME
-        );
 
         createCondition("IN_WATER_DEEP",
                 (world, position) -> world.getFluid(position).a(TagsFluid.WATER) && world.getFluid(position.up()).a(TagsFluid.WATER),
