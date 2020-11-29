@@ -14,6 +14,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -25,7 +26,14 @@ import java.util.stream.Stream;
 
 public final class GeneralUtils {
 
-    private static final NumberFormat numberFormant = DecimalFormat.getNumberInstance();
+    private static final NumberFormat numberFormatter = DecimalFormat.getNumberInstance();
+
+    static {
+        numberFormatter.setGroupingUsed(true);
+        numberFormatter.setMinimumFractionDigits(2);
+        numberFormatter.setMaximumFractionDigits(2);
+        numberFormatter.setRoundingMode(RoundingMode.FLOOR);
+    }
 
     public static boolean contains(Fast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity){
         return fast2EnumsArray.contains(stackedEntity.getType(), stackedEntity.getSpawnCause());
@@ -90,7 +98,7 @@ public final class GeneralUtils {
     }
 
     public static String format(double number){
-        return numberFormant.format(number);
+        return numberFormatter.format(number);
     }
 
     private static double distance(Location loc1, Location loc2){
