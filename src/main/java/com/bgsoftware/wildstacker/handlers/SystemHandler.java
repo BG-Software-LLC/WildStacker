@@ -126,6 +126,9 @@ public final class SystemHandler implements SystemManager {
         if(stackedEntity != null && stackedEntity.getLivingEntity() != null)
             return stackedEntity;
 
+        if(!EntityUtils.isStackable(livingEntity))
+            throw new IllegalArgumentException("Cannot convert " + livingEntity.getType() + " into a stacked entity.");
+
         //Entity wasn't found, creating a new object
         if(EntityStorage.hasMetadata(livingEntity, "spawn-cause"))
             stackedEntity = new WStackedEntity(livingEntity, 1, EntityStorage.getMetadata(livingEntity, "spawn-cause", SpawnCause.class));
