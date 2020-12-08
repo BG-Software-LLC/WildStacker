@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.menu;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -71,22 +72,23 @@ public final class BarrelsPlaceMenu extends WildMenu {
                 return;
         }
 
-        if(!this.barrelItem.isSimilar(barrelItem)) {
+        if(barrelItem == null)
+            return;
+
+        if(!isSimilar(barrelItem)){
             e.setCancelled(true);
         }
 
-        if(barrelItem != null) {
-            Executor.sync(() -> {
-                if (closeFlag) {
-                    for(ItemStack itemStack : e.getWhoClicked().getInventory().getContents()){
-                        if(barrelItem.equals(itemStack))
-                            return;
-                    }
-
-                    ItemUtils.addItem(barrelItem, e.getWhoClicked().getInventory(), location);
+        Executor.sync(() -> {
+            if (closeFlag) {
+                for(ItemStack itemStack : e.getWhoClicked().getInventory().getContents()){
+                    if(barrelItem.equals(itemStack))
+                        return;
                 }
-            }, 5L);
-        }
+
+                ItemUtils.addItem(barrelItem, e.getWhoClicked().getInventory(), location);
+            }
+        }, 5L);
     }
 
     @Override
@@ -108,10 +110,12 @@ public final class BarrelsPlaceMenu extends WildMenu {
             dropAll = true;
 
         for(ItemStack itemStack : e.getInventory().getContents()){
-            if(barrelItem.isSimilar(itemStack) && !dropAll)
-                amount += itemStack.getAmount();
-            else if(itemStack != null && itemStack.getType() != Material.AIR)
+            if(isSimilar(itemStack) && !dropAll) {
+                amount += (itemStack.getAmount() * ItemUtils.getSpawnerItemAmount(itemStack));
+            }
+            else if(itemStack != null && itemStack.getType() != Material.AIR) {
                 ItemUtils.addItem(itemStack, e.getPlayer().getInventory(), stackedBarrel.getLocation());
+            }
         }
 
         if(amount != 0) {
@@ -140,6 +144,11 @@ public final class BarrelsPlaceMenu extends WildMenu {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    private boolean isSimilar(ItemStack barrelItem){
+        return barrelItem != null && this.barrelItem.getType() == barrelItem.getType() && (!ServerVersion.isLegacy() ||
+                this.barrelItem.getDurability() == barrelItem.getDurability());
     }
 
     public static void open(Player player, StackedBarrel stackedBarrel){
