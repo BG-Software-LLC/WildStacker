@@ -350,7 +350,7 @@ public final class EntitiesListener implements Listener {
                         int damageDecrease = 0;
 
                         for(int i = 0; unbreakingLevel > 0 && i < damage; i++){
-                            if(random.nextInt(damage + 1) > 0)
+                            if(random.nextInt(unbreakingLevel + 1) > 0)
                                 damageDecrease++;
                         }
 
