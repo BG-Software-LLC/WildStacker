@@ -694,8 +694,9 @@ public final class SystemHandler implements SystemManager {
                                         !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType()))))
                         .forEach(entity -> {
                             StackedItem stackedItem = WStackedItem.of(entity);
-                            if(!applyTaskFilter || (plugin.getSettings().killTaskStackedItems && stackedItem.getStackAmount() > 1) ||
-                                    (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= 1))
+                            int maxStackSize = ((Item) entity).getItemStack().getMaxStackSize();
+                            if(!applyTaskFilter || stackedItem.getStackAmount() > maxStackSize ||
+                                    (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= maxStackSize))
                                 stackedItem.remove();
                         });
             }
