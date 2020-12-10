@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
@@ -529,7 +530,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         else{
             LootTable lootTable = plugin.getLootHandler().getLootTable(object);
-            drops.addAll(lootTable.getDrops(this, lootBonusLevel, stackAmount));
+            try {
+                drops.addAll(lootTable.getDrops(this, lootBonusLevel, stackAmount));
+            }catch (Exception ex){
+                WildStackerPlugin.log("Error while calculating drops for " + getType() + " with looting " + lootBonusLevel + " and stack size of " + stackAmount + ":");
+                ex.printStackTrace();
+            }
         }
 
         return drops.toList();
