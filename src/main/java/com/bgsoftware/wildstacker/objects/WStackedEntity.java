@@ -679,6 +679,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public void setDemoEntity(){
         demoEntity = true;
+        // Demo entities should not be cached!
+        plugin.getSystemManager().removeStackObject(this);
     }
 
     public static StackedEntity of(Entity entity){
