@@ -25,6 +25,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -34,7 +35,11 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
@@ -197,6 +202,38 @@ public final class ItemsListener implements Listener {
             Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
             hopper.getState().update();
         }
+    }
+
+    @EventHandler
+    public void g(BlockDropItemEvent e){
+        if(!plugin.getSettings().itemsStackingEnabled)
+            return;
+
+        Map<ItemStack, Item> itemsMap = new HashMap<>();
+        List<Item> itemsToRemove = new ArrayList<>();
+
+        for(Item item : e.getItems()){
+            ItemStack clone = item.getItemStack().clone();
+            clone.setAmount(1);
+
+            StackedItem stackedItem = WStackedItem.ofBypass(item);
+
+            if(stackedItem.isCached()){
+                Item currentItem = itemsMap.get(clone);
+
+                if(currentItem == null){
+                    itemsMap.put(clone, item);
+                }
+                else{
+                    itemsToRemove.add(item);
+                    currentItem.getItemStack().setAmount(currentItem.getItemStack().getAmount() + item.getItemStack().getAmount());
+                }
+
+                plugin.getSystemManager().removeStackObject(stackedItem);
+            }
+        }
+
+        e.getItems().removeAll(itemsToRemove);
     }
 
     @EventHandler
