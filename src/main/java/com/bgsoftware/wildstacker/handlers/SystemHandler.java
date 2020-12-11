@@ -230,6 +230,11 @@ public final class SystemHandler implements SystemManager {
                 } else {
                     loadItem(stackedItem);
                 }
+
+                // We want to update the item's size if it's above max stack size.
+                // We do it here so item will not be saved.
+                if(stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize())
+                    stackedItem.setStackAmount(stackedItem.getStackAmount(), false);
             }finally {
                 ((WStackedItem) stackedItem).setSaveItem(true);
             }
