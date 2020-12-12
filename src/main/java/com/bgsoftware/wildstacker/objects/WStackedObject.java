@@ -32,7 +32,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public int getStackAmount(){
         try {
             lock.readLock().lock();
-            return Math.max(stackAmount, 1);
+            return Math.max(stackAmount, 0);
         }finally {
             lock.readLock().unlock();
         }
