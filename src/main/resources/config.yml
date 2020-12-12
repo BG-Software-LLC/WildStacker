@@ -37,7 +37,7 @@ database:
 kill-task:
   # How much time should be passed between auto-killing? (in seconds)
   # If you wish to disable the auto-killing task, set the interval to 0.
-  interval: 300
+  interval: 0
   # Should the kill task remove stacked entities?
   stacked-entities: true
   # Should the kill task remove unstacked entities?
