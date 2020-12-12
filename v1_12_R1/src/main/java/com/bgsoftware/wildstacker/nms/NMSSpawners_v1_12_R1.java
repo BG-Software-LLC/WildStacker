@@ -181,6 +181,7 @@ public final class NMSSpawners_v1_12_R1 implements NMSSpawners {
                 MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
                 Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
                 a(originalSpawner.b(new NBTTagCompound()));
+                this.mobs.clear();
             }
         }
 

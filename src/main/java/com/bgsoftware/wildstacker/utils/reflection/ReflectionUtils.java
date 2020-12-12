@@ -21,8 +21,7 @@ public final class ReflectionUtils {
                     entityInsentientClass = getNMSClass("EntityInsentient"),
                     worldClass = getNMSClass("World"),
                     chunkClass = getNMSClass("Chunk"),
-                    tileEntitySpawnerClass = getNMSClass("TileEntityMobSpawner"),
-                    mobSpawnerAbstractClass = getNMSClass("MobSpawnerAbstract");
+                    tileEntitySpawnerClass = getNMSClass("TileEntityMobSpawner");
 
             fieldMap.put(Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME, entityLivingClass.getDeclaredField("lastDamageByPlayerTime"));
             fieldMap.put(Fields.ENTITY_EXP, entityInsentientClass.getDeclaredField(ServerVersion.isAtLeast(ServerVersion.v1_14) ? "f" :
@@ -39,9 +38,6 @@ public final class ReflectionUtils {
                 Class<?> entityStriderClass = getNMSClass("EntityStrider");
                 fieldMap.put(Fields.STRIDER_SADDLE_STORAGE, entityStriderClass.getDeclaredField("bA"));
             }catch (Throwable ignored){}
-
-            if(ServerVersion.isEquals(ServerVersion.v1_13))
-                fieldMap.put(Fields.ABSTRACT_SPAWNER_MOBS, mobSpawnerAbstractClass.getDeclaredField("mobs"));
 
             if(ServerVersion.isAtLeast(ServerVersion.v1_16))
                 fieldMap.put(Fields.CHUNK_ENTITY_SLICES, chunkClass.getField("entitySlices"));

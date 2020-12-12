@@ -158,6 +158,7 @@ public final class NMSSpawners_v1_9_R1 implements NMSSpawners {
                 NBTTagCompound tagCompound = new NBTTagCompound();
                 originalSpawner.b(tagCompound);
                 a(tagCompound);
+                this.mobs.clear();
             }
         }
 

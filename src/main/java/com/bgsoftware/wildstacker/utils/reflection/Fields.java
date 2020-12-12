@@ -13,8 +13,7 @@ public enum Fields {
 
     CHUNK_ENTITY_SLICES,
 
-    TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER,
-    ABSTRACT_SPAWNER_MOBS;
+    TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER;
 
     public <T> T get(Object object, Class<T> clazz){
         try {

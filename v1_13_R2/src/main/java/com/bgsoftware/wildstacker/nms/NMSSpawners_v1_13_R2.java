@@ -181,7 +181,7 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
         private final World world;
         private final BlockPosition position;
         private final WeakReference<WStackedSpawner> stackedSpawner;
-        private final List<MobSpawnerData> mobs;
+        private final List<MobSpawnerData> mobs = new ArrayList<>();
         private MobSpawnerData spawnData = new MobSpawnerData();
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
@@ -195,9 +195,6 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
 
                 NBTTagCompound tagCompound = originalSpawner.b(new NBTTagCompound());
 
-                //noinspection unchecked
-                this.mobs = Fields.ABSTRACT_SPAWNER_MOBS.get(originalSpawner, List.class);
-
                 if (tagCompound.hasKeyOfType("SpawnData", 10))
                     this.a(new MobSpawnerData(1, tagCompound.getCompound("SpawnData")));
 
@@ -207,9 +204,6 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
                 this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
                 this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
                 this.spawnRange = originalSpawner.spawnRange;
-            }
-            else{
-                this.mobs = new ArrayList<>();
             }
         }
 

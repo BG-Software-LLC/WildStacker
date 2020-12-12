@@ -195,9 +195,6 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                 MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
                 Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
 
-                this.mobs.clear();
-                this.mobs.addAll(originalSpawner.mobs);
-
                 this.spawnData = originalSpawner.spawnData;
                 this.minSpawnDelay = originalSpawner.minSpawnDelay;
                 this.maxSpawnDelay = originalSpawner.maxSpawnDelay;
