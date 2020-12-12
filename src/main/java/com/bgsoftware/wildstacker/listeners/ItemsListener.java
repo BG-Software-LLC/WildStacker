@@ -128,8 +128,8 @@ public final class ItemsListener implements Listener {
         }
 
         //Should run only if the item is 1 (stacked item)
-        if((stackedItem.getStackAmount() > 1 || (plugin.getSettings().bucketsStackerEnabled &&
-                e.getItem().getItemStack().getType().name().contains("BUCKET")))) {
+        if(plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
+                (plugin.getSettings().bucketsStackerEnabled && e.getItem().getItemStack().getType().name().contains("BUCKET")))) {
             e.setCancelled(true);
 
             //Causes too many issues
