@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.command.commands;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -98,12 +99,11 @@ public final class CommandGive implements ICommand {
             }
 
             Material eggType = Materials.getSpawnEgg(entityType);
-            if(eggType == null){
+            if(eggType == null || ServerVersion.isLegacy()){
                 itemStack = ItemUtils.getItemNMSEntityType(entityType);
             }
             else{
-                itemStack = new ItemStack(Materials.getSpawnEgg(entityType));
-                ItemUtils.setEntityType(itemStack, entityType);
+                itemStack = new ItemStack(eggType);
             }
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
         }
