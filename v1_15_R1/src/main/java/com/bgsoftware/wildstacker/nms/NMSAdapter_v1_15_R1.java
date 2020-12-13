@@ -16,6 +16,9 @@ import net.minecraft.server.v1_15_R1.ChatMessage;
 import net.minecraft.server.v1_15_R1.Chunk;
 import net.minecraft.server.v1_15_R1.ChunkProviderServer;
 import net.minecraft.server.v1_15_R1.DamageSource;
+import net.minecraft.server.v1_15_R1.DataWatcher;
+import net.minecraft.server.v1_15_R1.DataWatcherObject;
+import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
 import net.minecraft.server.v1_15_R1.DynamicOpsNBT;
 import net.minecraft.server.v1_15_R1.EnchantmentManager;
 import net.minecraft.server.v1_15_R1.Entity;
@@ -28,6 +31,7 @@ import net.minecraft.server.v1_15_R1.EntityLiving;
 import net.minecraft.server.v1_15_R1.EntityPlayer;
 import net.minecraft.server.v1_15_R1.EntityPositionTypes;
 import net.minecraft.server.v1_15_R1.EntityRaider;
+import net.minecraft.server.v1_15_R1.EntityTurtle;
 import net.minecraft.server.v1_15_R1.EntityTypes;
 import net.minecraft.server.v1_15_R1.EntityVillager;
 import net.minecraft.server.v1_15_R1.EntityZombieVillager;
@@ -60,6 +64,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_15_R1.CraftParticle;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
@@ -71,6 +76,7 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers;
@@ -84,6 +90,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -106,6 +113,9 @@ import java.util.function.Predicate;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
+
+    private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
+    private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
 
     /*
      *   Entity methods
@@ -251,6 +261,14 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     }
 
     @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        assert location.getWorld() != null;
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
+        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    }
+
+    @Override
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
         Set<org.bukkit.entity.Entity> entities = new HashSet<>();
 
@@ -340,11 +358,21 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     }
 
     @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
-        assert location.getWorld() != null;
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
-        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    public void setTurtleEgg(Turtle turtle) {
+        ((CraftTurtle) turtle).getHandle().getDataWatcher().set(TURTLE_HAS_EGG, true);
+    }
+
+    @Override
+    public Location getTurtleHome(Turtle turtle) {
+        BlockPosition homePosition = ((CraftTurtle) turtle).getHandle().getDataWatcher().get(TURTLE_HOME);
+        return new Location(turtle.getWorld(), homePosition.getX(), homePosition.getY(), homePosition.getZ());
+    }
+
+    @Override
+    public void setTurtleEggsAmount(Block turtleEggBlock, int amount) {
+        TurtleEgg turtleEgg = (TurtleEgg) turtleEggBlock.getBlockData();
+        turtleEgg.setEggs(amount);
+        turtleEggBlock.setBlockData(turtleEgg, true);
     }
 
     @Override

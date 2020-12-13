@@ -61,6 +61,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_16_R2.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R2.block.CraftBlock;
@@ -87,6 +88,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -256,6 +258,14 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        assert location.getWorld() != null;
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
+        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    }
+
+    @Override
     public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
         Set<org.bukkit.entity.Entity> entities = new HashSet<>();
 
@@ -369,11 +379,20 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
-        assert location.getWorld() != null;
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
-        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.SPAWNER, new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    public void setTurtleEgg(Turtle turtle) {
+        turtle.setHasEgg(true);
+    }
+
+    @Override
+    public Location getTurtleHome(Turtle turtle) {
+        return turtle.getHome();
+    }
+
+    @Override
+    public void setTurtleEggsAmount(Block turtleEggBlock, int amount) {
+        TurtleEgg turtleEgg = (TurtleEgg) turtleEggBlock.getBlockData();
+        turtleEgg.setEggs(amount);
+        turtleEggBlock.setBlockData(turtleEgg, true);
     }
 
     @Override

@@ -61,6 +61,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private boolean saveEntity = true;
     private boolean demoEntity = false;
     private Predicate<LivingEntity> stackFlag = null;
+    private int breedableAmount = 0;
 
     public WStackedEntity(LivingEntity livingEntity){
         this(livingEntity, 1, null);
@@ -681,6 +682,16 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         demoEntity = true;
         // Demo entities should not be cached!
         plugin.getSystemManager().removeStackObject(this);
+    }
+
+    public void setBreedableAmount(int breedableAmount){
+        this.breedableAmount = breedableAmount;
+    }
+
+    public int getBreedableAmount(){
+        int breedableAmount = this.breedableAmount;
+        this.breedableAmount = 0;
+        return breedableAmount;
     }
 
     public static StackedEntity of(Entity entity){

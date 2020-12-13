@@ -21,6 +21,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
@@ -105,6 +106,18 @@ public interface NMSAdapter {
 
     default byte getMooshroomType(MushroomCow mushroomCow){
         return 0;
+    }
+
+    default void setTurtleEgg(Turtle turtle){
+
+    }
+
+    default Location getTurtleHome(Turtle turtle){
+        return null;
+    }
+
+    default void setTurtleEggsAmount(Block turtleEggBlock, int amount){
+
     }
 
     default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage){

@@ -52,6 +52,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -59,6 +60,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -96,6 +98,7 @@ public final class EntitiesListener implements Listener {
     private static final Map<EntityDamageEvent.DamageModifier, ? extends Function<? super Double, Double>> damageModifiersFunctions =
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
+    private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
 
     public static EntitiesListener IMP;
 
@@ -110,6 +113,8 @@ public final class EntitiesListener implements Listener {
 
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
+        if(ServerVersion.isAtLeast(ServerVersion.v1_14))
+            plugin.getServer().getPluginManager().registerEvents(new TurtleListener(plugin), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_15))
             plugin.getServer().getPluginManager().registerEvents(new BeeListener(plugin), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
@@ -548,6 +553,20 @@ public final class EntitiesListener implements Listener {
             }
         }
 
+        else if(spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE){
+            org.bukkit.entity.Turtle turtle = (org.bukkit.entity.Turtle) entity;
+            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(turtle);
+            Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
+            if(cachedEggs != null && cachedEggs > 1) {
+                Executor.async(() -> {
+                    int newBabiesAmount = cachedEggs < 10 ?
+                            Random.nextInt((4 * cachedEggs) - cachedEggs + 1) + cachedEggs :
+                            Random.nextInt(cachedEggs, 4 * cachedEggs);
+                    WStackedEntity.of(turtle).setStackAmount(newBabiesAmount, true);
+                });
+            }
+        }
+
         if(!stackedEntity.isCached())
             return;
 
@@ -867,16 +886,25 @@ public final class EntitiesListener implements Listener {
                 Executor.sync(() -> {
                     // Spawning the baby after 2.5 seconds
                     int babiesAmount = itemsAmountToRemove / 2;
-                    StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount);
-                    ((Animals) duplicated.getLivingEntity()).setBaby();
+
+                    if(EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE){
+                        // Turtles should lay an egg instead of spawning a baby.
+                        plugin.getNMSAdapter().setTurtleEgg((Turtle) stackedEntity.getLivingEntity());
+                        ((WStackedEntity) stackedEntity).setBreedableAmount(babiesAmount);
+                    }
+                    else {
+                        StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount);
+                        ((Animals) duplicated.getLivingEntity()).setBaby();
+                        plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), false);
+                    }
+
                     // Making sure the entities are not in a love-mode anymore.
                     plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
-                    plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), false);
                     // Resetting the breeding of the entity to 5 minutes
                     ((Animals) e.getRightClicked()).setAge(6000);
                     // Calculate exp to drop
                     int expToDrop = Random.nextInt(babiesAmount, 7 * babiesAmount);
-                    EntityUtils.spawnExp(duplicated.getLocation(), expToDrop);
+                    EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
                 }, 50L);
             }
             else if(StackSplit.ENTITY_BREED.isEnabled()) {
@@ -1110,6 +1138,40 @@ public final class EntitiesListener implements Listener {
                 plugin.getSystemManager().removeStackObject(stackedEntity);
             }
         }
+
+    }
+
+    private static class TurtleListener implements Listener {
+
+        private final WildStackerPlugin plugin;
+
+        TurtleListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+        public void onTurtleEggLay(EntityChangeBlockEvent e){
+            if(plugin.getSettings().smartBreeding && e.getEntity() instanceof Turtle &&
+                e.getTo().name().equals("TURTLE_EGG")){
+                StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+                int breedableAmount = ((WStackedEntity) stackedEntity).getBreedableAmount();
+                if(breedableAmount > 1) {
+                    Executor.sync(() -> plugin.getNMSAdapter().setTurtleEggsAmount(e.getBlock(), 1), 1L);
+                    turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
+                }
+            }
+        }
+
+//        @EventHandler
+//        public void g(PlayerInteractEvent e){
+//            if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER") &&
+//                e.getClickedBlock() != null && e.getClickedBlock().getType().name().equals("TURTLE_EGG")){
+//                CraftBlock craftBlock = (CraftBlock) e.getClickedBlock();
+//                TurtleEgg turtleEgg = (TurtleEgg) craftBlock.getBlockData();
+//                turtleEgg.setHatch(1);
+//                craftBlock.setBlockData(turtleEgg, true);
+//            }
+//        }
 
     }
 

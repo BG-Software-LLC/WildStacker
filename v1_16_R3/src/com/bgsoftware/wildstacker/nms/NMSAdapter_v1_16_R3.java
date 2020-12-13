@@ -61,6 +61,7 @@ import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
@@ -88,6 +89,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -367,6 +369,23 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public byte getMooshroomType(MushroomCow mushroomCow) {
         return (byte) mushroomCow.getVariant().ordinal();
+    }
+
+    @Override
+    public void setTurtleEgg(Turtle turtle) {
+        turtle.setHasEgg(true);
+    }
+
+    @Override
+    public Location getTurtleHome(Turtle turtle) {
+        return turtle.getHome();
+    }
+
+    @Override
+    public void setTurtleEggsAmount(Block turtleEggBlock, int amount) {
+        TurtleEgg turtleEgg = (TurtleEgg) turtleEggBlock.getBlockData();
+        turtleEgg.setEggs(amount);
+        turtleEggBlock.setBlockData(turtleEgg, true);
     }
 
     @Override
