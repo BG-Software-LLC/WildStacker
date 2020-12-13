@@ -17,9 +17,16 @@ public final class Random {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
-    public static int nextInt(int min, int max){
-        int avg = getAverage(min, max);
-        return ensureRange(min, max, (int) Math.round(nextGaussian() * getSD(max, avg) + avg));
+    public static int nextInt(int min, int max, int amount){
+        if(amount < 10){
+            return nextInt(max - min + 1) + min;
+        }
+        else {
+            min = min * amount;
+            max = max * amount;
+            int avg = getAverage(min, max);
+            return ensureRange(min, max, (int) Math.round(nextGaussian() * getSD(max, avg) + avg));
+        }
     }
 
     private static double nextGaussian(){

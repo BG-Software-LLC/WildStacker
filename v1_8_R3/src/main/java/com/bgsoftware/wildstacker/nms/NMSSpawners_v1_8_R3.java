@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
@@ -323,7 +324,7 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
 
-            int stackAmount = stackedSpawner.getStackAmount(), spawnCount = this.spawnCount * stackAmount;
+            int stackAmount = stackedSpawner.getStackAmount();
 
             List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), new AxisAlignedBB(
                     position.getX(), position.getY(), position.getZ(),
@@ -337,7 +338,7 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                 return;
             }
 
-            spawnCount = stackAmount + world.random.nextInt(spawnCount - stackAmount + 1);
+            int spawnCount = Random.nextInt(1, this.spawnCount, stackAmount);
 
             int amountPerEntity = 1;
             int mobsToSpawn;

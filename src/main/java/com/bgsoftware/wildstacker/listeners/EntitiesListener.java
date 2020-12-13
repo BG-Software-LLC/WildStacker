@@ -557,9 +557,7 @@ public final class EntitiesListener implements Listener {
             Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
             if(cachedEggs != null && cachedEggs > 1) {
                 Executor.async(() -> {
-                    int newBabiesAmount = cachedEggs < 10 ?
-                            Random.nextInt((4 * cachedEggs) - cachedEggs + 1) + cachedEggs :
-                            Random.nextInt(cachedEggs, 4 * cachedEggs);
+                    int newBabiesAmount = Random.nextInt(1,4, cachedEggs);
                     WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
                 });
             }
@@ -901,7 +899,7 @@ public final class EntitiesListener implements Listener {
                     // Resetting the breeding of the entity to 5 minutes
                     ((Animals) e.getRightClicked()).setAge(6000);
                     // Calculate exp to drop
-                    int expToDrop = Random.nextInt(babiesAmount, 7 * babiesAmount);
+                    int expToDrop = Random.nextInt(1, 7, babiesAmount);
                     EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
                 }, 50L);
             }

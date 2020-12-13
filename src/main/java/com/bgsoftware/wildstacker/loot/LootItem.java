@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootItem {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final ItemStack itemStack, burnableItem;
     private final double chance;
@@ -71,8 +71,7 @@ public class LootItem {
             lootingBonus = Random.nextInt(lootBonusLevel + 1);
         }
 
-        int itemAmount = amountOfItems < 10 ? Random.nextInt(((max + lootingBonus) * amountOfItems) - ((min + lootingBonus) * amountOfItems) + 1) + ((min + lootingBonus) * amountOfItems) :
-                Random.nextInt((min + lootingBonus) * amountOfItems, (max + lootingBonus) * amountOfItems);
+        int itemAmount = Random.nextInt(min + lootingBonus, max + lootingBonus, amountOfItems);
 
         if(itemAmount <= 0)
             return null;
