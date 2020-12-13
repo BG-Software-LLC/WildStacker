@@ -646,6 +646,8 @@ spawners:
     amounts-menu: true
 
   # Configure spawn conditions for entities that are spawned by spawners
+  # You can find more information regarding this by visiting the official wiki:
+  # https://wiki.bg-software.com/#/wildstacker/spawn-conditions/
   spawn-conditions:
     EXAMPLE_MOB: []
 
