@@ -379,13 +379,13 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     @Override
-    public void setTurtleEgg(Turtle turtle) {
-        turtle.setHasEgg(true);
+    public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
+        ((Turtle) turtle).setHasEgg(true);
     }
 
     @Override
-    public Location getTurtleHome(Turtle turtle) {
-        return turtle.getHome();
+    public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
+        return ((Turtle) turtle).getHome();
     }
 
     @Override

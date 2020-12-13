@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -50,6 +51,8 @@ public final class ItemsListener implements Listener {
         this.plugin = plugin;
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteListener(plugin), plugin);
+        if(ReflectionUtils.isPluginEnabled("org.bukkit.event.block.BlockDropItemEvent"))
+            plugin.getServer().getPluginManager().registerEvents(new BlockDropItemListener(plugin), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_8))
             plugin.getServer().getPluginManager().registerEvents(new MergeListener(plugin), plugin);
     }
@@ -205,38 +208,6 @@ public final class ItemsListener implements Listener {
     }
 
     @EventHandler
-    public void g(BlockDropItemEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled)
-            return;
-
-        Map<ItemStack, Item> itemsMap = new HashMap<>();
-        List<Item> itemsToRemove = new ArrayList<>();
-
-        for(Item item : e.getItems()){
-            ItemStack clone = item.getItemStack().clone();
-            clone.setAmount(1);
-
-            StackedItem stackedItem = WStackedItem.ofBypass(item);
-
-            if(stackedItem.isCached()){
-                Item currentItem = itemsMap.get(clone);
-
-                if(currentItem == null){
-                    itemsMap.put(clone, item);
-                }
-                else{
-                    itemsToRemove.add(item);
-                    currentItem.getItemStack().setAmount(currentItem.getItemStack().getAmount() + item.getItemStack().getAmount());
-                }
-
-                plugin.getSystemManager().removeStackObject(stackedItem);
-            }
-        }
-
-        e.getItems().removeAll(itemsToRemove);
-    }
-
-    @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
         if(!plugin.getSettings().itemsNamesToggleEnabled)
             return;
@@ -336,6 +307,49 @@ public final class ItemsListener implements Listener {
             ItemStack scuteItem = e.getScute().getItemStack();
             scuteItem.setAmount(stackedEntity.getStackAmount());
             e.getScute().setItemStack(scuteItem);
+        }
+
+    }
+
+    private static class BlockDropItemListener implements Listener{
+
+        private final WildStackerPlugin plugin;
+
+        private BlockDropItemListener(WildStackerPlugin plugin){
+            this.plugin = plugin;
+        }
+
+        @SuppressWarnings("deprecation")
+        @EventHandler
+        public void onBlockDropItem(BlockDropItemEvent e){
+            if(!plugin.getSettings().itemsStackingEnabled)
+                return;
+
+            Map<ItemStack, Item> itemsMap = new HashMap<>();
+            List<Item> itemsToRemove = new ArrayList<>();
+
+            for(Item item : e.getItems()){
+                ItemStack clone = item.getItemStack().clone();
+                clone.setAmount(1);
+
+                StackedItem stackedItem = WStackedItem.ofBypass(item);
+
+                if(stackedItem.isCached()){
+                    Item currentItem = itemsMap.get(clone);
+
+                    if(currentItem == null){
+                        itemsMap.put(clone, item);
+                    }
+                    else{
+                        itemsToRemove.add(item);
+                        currentItem.getItemStack().setAmount(currentItem.getItemStack().getAmount() + item.getItemStack().getAmount());
+                    }
+
+                    plugin.getSystemManager().removeStackObject(stackedItem);
+                }
+            }
+
+            e.getItems().removeAll(itemsToRemove);
         }
 
     }

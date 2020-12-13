@@ -21,7 +21,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
-import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
@@ -108,11 +107,11 @@ public interface NMSAdapter {
         return 0;
     }
 
-    default void setTurtleEgg(Turtle turtle){
+    default void setTurtleEgg(Entity turtle){
 
     }
 
-    default Location getTurtleHome(Turtle turtle){
+    default Location getTurtleHome(Entity turtle){
         return null;
     }
 

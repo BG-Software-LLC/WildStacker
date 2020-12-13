@@ -52,7 +52,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
-import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -554,15 +553,14 @@ public final class EntitiesListener implements Listener {
         }
 
         else if(spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE){
-            org.bukkit.entity.Turtle turtle = (org.bukkit.entity.Turtle) entity;
-            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(turtle);
+            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(entity);
             Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
             if(cachedEggs != null && cachedEggs > 1) {
                 Executor.async(() -> {
                     int newBabiesAmount = cachedEggs < 10 ?
                             Random.nextInt((4 * cachedEggs) - cachedEggs + 1) + cachedEggs :
                             Random.nextInt(cachedEggs, 4 * cachedEggs);
-                    WStackedEntity.of(turtle).setStackAmount(newBabiesAmount, true);
+                    WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
                 });
             }
         }
@@ -889,7 +887,7 @@ public final class EntitiesListener implements Listener {
 
                     if(EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE){
                         // Turtles should lay an egg instead of spawning a baby.
-                        plugin.getNMSAdapter().setTurtleEgg((Turtle) stackedEntity.getLivingEntity());
+                        plugin.getNMSAdapter().setTurtleEgg(stackedEntity.getLivingEntity());
                         ((WStackedEntity) stackedEntity).setBreedableAmount(babiesAmount);
                     }
                     else {
@@ -1151,7 +1149,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onTurtleEggLay(EntityChangeBlockEvent e){
-            if(plugin.getSettings().smartBreeding && e.getEntity() instanceof Turtle &&
+            if(plugin.getSettings().smartBreeding && e.getEntity() instanceof org.bukkit.entity.Turtle &&
                 e.getTo().name().equals("TURTLE_EGG")){
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
                 int breedableAmount = ((WStackedEntity) stackedEntity).getBreedableAmount();
@@ -1161,17 +1159,6 @@ public final class EntitiesListener implements Listener {
                 }
             }
         }
-
-//        @EventHandler
-//        public void g(PlayerInteractEvent e){
-//            if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER") &&
-//                e.getClickedBlock() != null && e.getClickedBlock().getType().name().equals("TURTLE_EGG")){
-//                CraftBlock craftBlock = (CraftBlock) e.getClickedBlock();
-//                TurtleEgg turtleEgg = (TurtleEgg) craftBlock.getBlockData();
-//                turtleEgg.setHatch(1);
-//                craftBlock.setBlockData(turtleEgg, true);
-//            }
-//        }
 
     }
 

@@ -93,7 +93,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
-import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -373,12 +372,12 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
     }
 
     @Override
-    public void setTurtleEgg(Turtle turtle) {
+    public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
         ((CraftTurtle) turtle).getHandle().getDataWatcher().set(TURTLE_HAS_EGG, true);
     }
 
     @Override
-    public Location getTurtleHome(Turtle turtle) {
+    public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
         BlockPosition homePosition = ((CraftTurtle) turtle).getHandle().getDataWatcher().get(TURTLE_HOME);
         return new Location(turtle.getWorld(), homePosition.getX(), homePosition.getY(), homePosition.getZ());
     }
