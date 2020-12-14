@@ -18,12 +18,13 @@ public final class Random {
     }
 
     public static int nextInt(int min, int max, int amount){
+        min *= amount;
+        max *= amount;
+
         if(amount < 10){
             return nextInt(max - min + 1) + min;
         }
         else {
-            min = min * amount;
-            max = max * amount;
             int avg = getAverage(min, max);
             return ensureRange(min, max, (int) Math.round(nextGaussian() * getSD(max, avg) + avg));
         }
