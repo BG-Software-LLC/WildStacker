@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.api.objects;
 
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 
-public interface UnloadedStackedSpawner extends UnloadedStackedObject {
+public interface UpgradeableStackedObject {
 
     /**
      * Get the upgrade of the object.
@@ -16,7 +16,5 @@ public interface UnloadedStackedSpawner extends UnloadedStackedObject {
      * @param spawnerUpgrade The upgrade to set.
      */
     void setUpgrade(SpawnerUpgrade spawnerUpgrade);
-
-
 
 }

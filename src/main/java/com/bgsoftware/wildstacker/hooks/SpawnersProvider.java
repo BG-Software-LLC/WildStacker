@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 public interface SpawnersProvider {
 
-    ItemStack getSpawnerItem(EntityType entityType, int amount);
+    ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName);
 
     EntityType getSpawnerType(ItemStack itemStack);
 

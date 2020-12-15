@@ -50,6 +50,7 @@ public final class ToolsListener implements Listener {
         Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
         Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnCause().name());
         Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
+        Locale.ENTITY_INFO_UPGRADE.send(e.getPlayer(), stackedEntity.getUpgrade().getName());
         Locale.ENTITY_INFO_FOOTER.send(e.getPlayer());
     }
 
@@ -80,6 +81,7 @@ public final class ToolsListener implements Listener {
         Locale.SPAWNER_INFO_HEADER.send(e.getPlayer());
         Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
         Locale.SPAWNER_INFO_AMOUNT.send(e.getPlayer(), stackedSpawner.getStackAmount());
+        Locale.SPAWNER_INFO_UPGRADE.send(e.getPlayer(), stackedSpawner.getUpgrade().getName());
         Locale.SPAWNER_INFO_FOOTER.send(e.getPlayer());
     }
 

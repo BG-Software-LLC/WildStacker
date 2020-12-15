@@ -30,11 +30,11 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
-    private final String requiredPermission;
+    private final String requiredPermission, requiredUpgrade;
     private final List<String> spawnCauseFilter, deathCauseFilter;
 
     private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance, boolean looting,
-                     String requiredPermission, List<String> spawnCauseFilter, List<String> deathCauseFilter){
+                     String requiredPermission, String requiredUpgrade, List<String> spawnCauseFilter, List<String> deathCauseFilter){
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
@@ -42,6 +42,7 @@ public class LootItem {
         this.chance = chance;
         this.looting = looting;
         this.requiredPermission = requiredPermission;
+        this.requiredUpgrade = requiredUpgrade;
         this.spawnCauseFilter = spawnCauseFilter;
         this.deathCauseFilter = deathCauseFilter;
     }
@@ -52,6 +53,10 @@ public class LootItem {
 
     public String getRequiredPermission() {
         return requiredPermission;
+    }
+
+    public String getRequiredUpgrade() {
+        return requiredUpgrade;
     }
 
     public List<String> getSpawnCauseFilter() {
@@ -93,6 +98,7 @@ public class LootItem {
         int max = JsonUtils.getInt(jsonObject, "max", 1);
         boolean looting = (boolean) jsonObject.getOrDefault("looting", false);
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
+        String requiredUpgrade = (String) jsonObject.getOrDefault("upgrade", "");
         List<String> spawnCauseFilter = new ArrayList<>(), deathCauseFilter = new ArrayList<>();
 
         Object spawnCauseFilterObject = jsonObject.get("spawn-cause");
@@ -111,7 +117,7 @@ public class LootItem {
             burnableItem = buildItemStack((JSONObject) jsonObject.get("burnable"));
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, spawnCauseFilter, deathCauseFilter);
+        return new LootItem(itemStack, burnableItem, min, max, chance, looting, requiredPermission, requiredUpgrade, spawnCauseFilter, deathCauseFilter);
     }
 
     private static ItemStack buildItemStack(JSONObject jsonObject){

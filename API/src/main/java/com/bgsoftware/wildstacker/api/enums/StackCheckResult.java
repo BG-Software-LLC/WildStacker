@@ -77,5 +77,6 @@ public enum StackCheckResult {
     TARGET_NAME_TAG,
     TARGET_NOT_WHITELISTED,
     TARGET_PICKUP_DELAY_EXCEEDED,
+    UPGRADE
 
 }

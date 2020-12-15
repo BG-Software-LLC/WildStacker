@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -102,6 +103,9 @@ public final class SpawnersListener implements Listener {
 
             stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
 
+            int upgradeId = ItemUtils.getSpawnerUpgrade(itemInHand);
+            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, false);
+
             int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
 
             if (plugin.getSettings().spawnersPlacementPermission && !e.getPlayer().hasPermission("wildstacker.place.*") &&
@@ -128,7 +132,8 @@ public final class SpawnersListener implements Listener {
                 int limit = stackedSpawner.getStackLimit();
                 //If the spawnerItemAmount is larger than the spawner limit, we want to give to the player the leftovers
                 if (limit < spawnerItemAmount) {
-                    limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(), spawnerItemAmount - limit);
+                    limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(),
+                            spawnerItemAmount - limit, stackedSpawner.getUpgrade().getDisplayName());
                     //Adding the item to the inventory after the spawner is placed
                     spawnerItemAmount = limit;
                 }
@@ -414,6 +419,8 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
+        ((WStackedEntity) stackedEntity).setUpgradeId(((WStackedSpawner) stackedSpawner).getUpgradeId());
+
         int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
         multipleEntities = multipleEntities || minimumEntityRequirement > stackedSpawner.getStackAmount();
@@ -589,9 +596,12 @@ public final class SpawnersListener implements Listener {
                     int spawnersAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem());
                     if (spawnersAmount > 1 && e.getCurrentItem().getAmount() == 1) {
                         e.setCancelled(true);
+                        SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         EntityType entityType = plugin.getProviders().getSpawnerType(e.getCurrentItem());
-                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, spawnersAmount / 2));
-                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, spawnersAmount - (spawnersAmount / 2)));
+                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType,
+                                spawnersAmount / 2, spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, spawnersAmount - (spawnersAmount / 2),
+                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
                     }
                 }
                 break;
@@ -605,9 +615,12 @@ public final class SpawnersListener implements Listener {
                         int cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
                         if (cursorAmount > 1 && e.getCursor().getAmount() == 1) {
                             e.setCancelled(true);
+                            SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                             EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
-                            e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, cursorAmount - 1));
-                            e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, 1));
+                            e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, cursorAmount - 1,
+                                    spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                            e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, 1,
+                                    spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
                         }
                     }
                     break;
@@ -619,8 +632,10 @@ public final class SpawnersListener implements Listener {
                     EntityType currentType = plugin.getProviders().getSpawnerType(e.getCurrentItem()), cursorType = plugin.getProviders().getSpawnerType(e.getCursor());
                     if (currentType == cursorType) {
                         e.setCancelled(true);
+                        SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
-                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType, currentAmount + cursorAmount));
+                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType, currentAmount + cursorAmount,
+                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
                     }
                 }
                 break;
@@ -630,6 +645,7 @@ public final class SpawnersListener implements Listener {
                     if (e.getCursor().getAmount() == 1) {
                         e.setCancelled(true);
                         EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
+                        SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         for (int i = 0; i < e.getClickedInventory().getSize(); i++) {
                             ItemStack itemStack = e.getClickedInventory().getItem(i);
                             if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
@@ -639,7 +655,8 @@ public final class SpawnersListener implements Listener {
                                 }
                             }
                         }
-                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, newCursorAmount));
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, newCursorAmount,
+                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
                     }
                 }
                 break;

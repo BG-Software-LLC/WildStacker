@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
-public interface StackedSpawner extends StackedObject<CreatureSpawner> {
+public interface StackedSpawner extends StackedObject<CreatureSpawner>, UpgradeableStackedObject {
 
     /**
      * Get the creature-spawner object of bukkit.

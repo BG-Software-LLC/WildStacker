@@ -80,7 +80,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
         ItemStack itemStack = MineableSpawners.getApi().getSpawnerFromEntityType(entityType);
         itemStack.setAmount(amount);
         return itemStack;

@@ -10,6 +10,7 @@ public enum StackCheck {
     SPAWN_REASON(),
     NERFED(),
     NAME_TAG(),
+    UPGRADE(),
 
     /**
      * Vanilla stack checks.

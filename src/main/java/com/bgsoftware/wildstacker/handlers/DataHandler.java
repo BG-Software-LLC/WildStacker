@@ -24,8 +24,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -115,14 +113,10 @@ public final class DataHandler {
     }
 
     private void loadDatabase(){
-        //Creating default entities table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS entities (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER, spawnCause VARCHAR);");
-
-        //Creating default items table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS items (uuid VARCHAR PRIMARY KEY, stackAmount INTEGER);");
-
         //Creating default spawners table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER);");
+        Database.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER, upgrade INTEGER);");
+        // Adding upgrade column if it doesn't exist
+        addColumnIfNotExists("upgrade", "spawners", "0", "INTEGER");
 
         //Creating default barrels table
         Database.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
@@ -139,7 +133,7 @@ public final class DataHandler {
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                     CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
                 }
-            });
+            }, ex -> {});
 
             WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
         }
@@ -155,7 +149,7 @@ public final class DataHandler {
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                     CACHED_ITEMS_RAW.put(uuid, stackAmount);
                 }
-            });
+            }, ex -> {});
 
             WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
         }
@@ -182,8 +176,9 @@ public final class DataHandler {
 
                     try {
                         int stackAmount = resultSet.getInt("stackAmount");
+                        int upgradeId = resultSet.getInt("upgrade");
                         CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(blockLocation), s -> Maps.newConcurrentMap())
-                                .put(blockLocation, new WUnloadedStackedSpawner(blockLocation, stackAmount));
+                                .put(blockLocation, new WUnloadedStackedSpawner(blockLocation, stackAmount, upgradeId));
                         continue;
                     }catch(Exception ex){
                         exceptionReason = "Exception was thrown.";
@@ -252,38 +247,17 @@ public final class DataHandler {
         }
     }
 
-    private class RawStackedSpawner{
+    private static void addColumnIfNotExists(String column, String table, String def, String type) {
+        String defaultSection = " DEFAULT " + def;
 
-        private int stackAmount;
-        private Block block;
+        String statementStr = "ALTER TABLE " + table + " ADD " + column + " " + type + defaultSection + ";";
 
-        RawStackedSpawner(Block block, int stackAmount){
-            this.block = block;
-            this.stackAmount = stackAmount;
-        }
-
-        StackedSpawner create(){
-            return new WStackedSpawner((CreatureSpawner) block.getState(), stackAmount);
-        }
-
-    }
-
-    private class RawStackedBarrel{
-
-        private int stackAmount;
-        private Block block;
-        private ItemStack barrelItem;
-
-        RawStackedBarrel(Block block, ItemStack barrelItem, int stackAmount){
-            this.block = block;
-            this.barrelItem = barrelItem;
-            this.stackAmount = stackAmount;
-        }
-
-        StackedBarrel create(){
-            return new WStackedBarrel(block, barrelItem, stackAmount);
-        }
-
+        Database.executeUpdate(statementStr, ex -> {
+            if(!ex.getMessage().toLowerCase().contains("duplicate")) {
+                System.out.println("Statement: " + statementStr);
+                ex.printStackTrace();
+            }
+        });
     }
 
 }

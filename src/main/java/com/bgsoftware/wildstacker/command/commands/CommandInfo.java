@@ -70,6 +70,7 @@ public final class CommandInfo implements ICommand {
             Locale.SPAWNER_INFO_HEADER.send(sender);
             Locale.SPAWNER_INFO_TYPE.send(sender, EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
             Locale.SPAWNER_INFO_AMOUNT.send(sender, stackedSpawner.getStackAmount());
+            Locale.SPAWNER_INFO_UPGRADE.send(sender, stackedSpawner.getUpgrade().getName());
             Locale.SPAWNER_INFO_FOOTER.send(sender);
             return;
         }

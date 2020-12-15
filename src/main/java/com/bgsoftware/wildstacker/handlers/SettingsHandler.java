@@ -367,6 +367,36 @@ public final class SettingsHandler {
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         manageMenuEnabled = amountsMenuEnabled;
         spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.exists();
+        plugin.getUpgradesManager().removeAllUpgrades();
+//  # All settings related to spawner upgrades.
+//        spawner-upgrades:
+//    # Settings for default spawners.
+//        default:
+//        nearby-players: 16
+//        coal:
+//        id: 1
+//        display: '&7 (&aCoal&7)'
+//        cost: 10000
+//        entities:
+//        - ZOMBIE
+//
+//        for(String upgradeName : cfg.getConfigurationSection("spawners.spawner-upgrades").getKeys(false)){
+//            ConfigurationSection upgrade = cfg.getConfigurationSection("spawners.spawner-upgrades." + upgradeName);
+//            try {
+//                SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().createUpgrade(upgradeName, upgrade.getInt("id", 0));
+//                spawnerUpgrade.setDisplayName(upgrade.getString("display", ""));
+//                spawnerUpgrade.setCost(upgrade.getDouble("cost", 0D));
+//                spawnerUpgrade.setAllowedEntities(upgrade.getStringList("entities"));
+//                spawnerUpgrade.setMinSpawnDelay(upgrade.getInt("min-spawn-delay", 200));
+//                spawnerUpgrade.setMaxSpawnDelay(upgrade.getInt("max-spawn-delay", 800));
+//                spawnerUpgrade.setSpawnCount(upgrade.getInt("spawn-count", 4));
+//                spawnerUpgrade.setMaxNearbyEntities(upgrade.getInt("max-nearby-entities", 6));
+//                spawnerUpgrade.setRequiredPlayerRange(upgrade.getInt("required-player-range", 16));
+//                spawnerUpgrade.setSpawnRange(upgrade.getInt("spawn-range", 4));
+//            }catch (Exception ex){
+//                ex.printStackTrace();
+//            }
+//        }
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);

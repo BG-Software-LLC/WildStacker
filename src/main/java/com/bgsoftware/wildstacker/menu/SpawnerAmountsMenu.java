@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
@@ -97,7 +98,8 @@ public final class SpawnerAmountsMenu extends WildMenu {
                 ItemStack itemStack = inventory.getItem(i);
 
                 if (itemStack == null || itemStack.getType() != Materials.SPAWNER.toBukkitType() ||
-                        plugin.getProviders().getSpawnerType(itemStack) != stackedSpawner.getSpawnedType())
+                        plugin.getProviders().getSpawnerType(itemStack) != stackedSpawner.getSpawnedType() ||
+                        ItemUtils.getSpawnerUpgrade(itemStack) != ((WStackedSpawner) stackedSpawner).getUpgradeId())
                     continue;
 
                 int itemAmount = ItemUtils.getSpawnerItemAmount(itemStack);

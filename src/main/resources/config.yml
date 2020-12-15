@@ -190,7 +190,8 @@ entities:
   # {0} represents stack amount
   # {1} represents entity type
   # {2} represents entity type in upper case
-  custom-name: '&6x{0} &f&o{1}'
+  # {3} represents the upgrade's display name
+  custom-name: '&6x{0} &f&o{1}{3}'
 
   # Blacklisted entities are entities that won't get stacked.
   # EntityType list: https://bg-software.com/entities/
@@ -283,6 +284,7 @@ entities:
     TROPICALFISH_BODY_COLOR: true
     TROPICALFISH_TYPE: true
     TROPICALFISH_TYPE_COLOR: true
+    UPGRADE: true
     VILLAGER_PROFESSION: true
     WOLF_ANGRY: false
     WOLF_COLLAR_COLOR: true
@@ -460,7 +462,8 @@ spawners:
   # {0} represents stack amount
   # {1} represents entity type
   # {2} represents entity type in upper case
-  custom-name: '&6x{0} &f&o{1}'
+  # {3} represents the upgrade's display name
+  custom-name: '&6x{0} &f&o{1}{3}'
 
   # Blacklisted spawners are spawners that won't get stacked.
   # EntityType list: https://bg-software.com/entities/
@@ -506,7 +509,8 @@ spawners:
     # If you don't want a custom name, use "custom-name: ''"
     # {0} represents stack amount
     # {1} represents entity type
-    name: '&6x{0} &f&o{1} Spawners'
+    # {2} represents the upgrade's display name
+    name: '&6x{0} &f&o{1} Spawners{2}'
 
     # Custom lore for the item.
     # If you don't want a custom lore, use "custom-lore: []"

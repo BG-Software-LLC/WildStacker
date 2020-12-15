@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
@@ -79,6 +80,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
@@ -90,6 +92,8 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
             .b("ws.spawnCause").withVanillaEffect(MobEffectList.SLOWER_DIG);
     public static MobEffectCustomData HAS_NAMETAG = MobEffectCustomData.newEffect(29)
             .b("ws.hasNametag").withVanillaEffect(MobEffectList.SATURATION);
+    public static MobEffectCustomData UPGRADE = MobEffectCustomData.newEffect(28)
+            .b("ws.upgrade").withVanillaEffect(MobEffectList.BLINDNESS);
 
     /*
      *   Entity methods
@@ -631,6 +635,9 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         addEffect(entityLiving, new CustomMobEffect(SPAWN_CAUSE, stackedEntity.getSpawnCause().getId()));
         if(stackedEntity.hasNameTag())
             addEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, 1));
+        int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
+        if(upgradeId != 0)
+            addEffect(entityLiving, new CustomMobEffect(UPGRADE, upgradeId));
     }
 
     @Override
@@ -659,11 +666,12 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
 
         {
             // This section is used to convert the effects into custom ones.
-            // This is done because we cannot save custom effects, otherwise 1.7 clients crash.
+            // This is done because we cannot save custom effects, otherwise 1.8 clients crash.
             {
                 MobEffect stackAmountLoad = (MobEffect) entityLiving.effects.get(STACK_AMOUNT.vanillaEffect.id),
                         spawnCauseLoad = (MobEffect) entityLiving.effects.get(SPAWN_CAUSE.vanillaEffect.id),
-                        hasNametagLoad = (MobEffect) entityLiving.effects.get(HAS_NAMETAG.vanillaEffect.id);
+                        hasNametagLoad = (MobEffect) entityLiving.effects.get(HAS_NAMETAG.vanillaEffect.id),
+                        hasUpgradeLoad = (MobEffect) entityLiving.effects.get(UPGRADE.vanillaEffect.id);
 
                 if(stackAmountLoad != null && stackAmountLoad.getDuration() > 2140000000){
                     setEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackAmountLoad.getAmplifier()));
@@ -679,13 +687,19 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
                     setEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, hasNametagLoad.getAmplifier()));
                     entityLiving.effects.remove(hasNametagLoad.getEffectId());
                 }
+
+                if(hasUpgradeLoad != null && hasUpgradeLoad.getDuration() > 2140000000){
+                    setEffect(entityLiving, new CustomMobEffect(UPGRADE, hasUpgradeLoad.getAmplifier()));
+                    entityLiving.effects.remove(hasUpgradeLoad.getEffectId());
+                }
             }
 
             // Loading data from custom effects
             {
                 MobEffect stackAmount = entityLiving.getEffect(STACK_AMOUNT),
                         spawnCause = entityLiving.getEffect(SPAWN_CAUSE),
-                        hasNametag = entityLiving.getEffect(HAS_NAMETAG);
+                        hasNametag = entityLiving.getEffect(HAS_NAMETAG),
+                        upgrade = entityLiving.getEffect(UPGRADE);
 
                 if(stackAmount != null)
                     stackedEntity.setStackAmount(stackAmount.getAmplifier(), false);
@@ -695,6 +709,9 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
 
                 if(hasNametag != null && hasNametag.getAmplifier() == 1)
                     ((WStackedEntity) stackedEntity).setNameTag();
+
+                if(upgrade != null && upgrade.getAmplifier() != 0)
+                    ((WStackedEntity) stackedEntity).setUpgradeId(upgrade.getAmplifier());
             }
         }
     }
@@ -873,20 +890,88 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         }
 
         @Override
-        public int getRequiredPlayerRange() {
-            MobSpawnerAbstract spawnerAbstract = getSpawner().getSpawner();
-            if(spawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner) {
-                return ((NMSSpawners_v1_7_R4.StackedMobSpawner) spawnerAbstract).requiredPlayerRange;
+        public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
+            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner){
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).spawnCount = spawnerUpgrade.getSpawnCount();
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
+                ((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract).spawnRange = spawnerUpgrade.getSpawnRange();
             }
             else{
-                NBTTagCompound tagCompound = new NBTTagCompound();
-                spawnerAbstract.b(tagCompound);
-                return tagCompound.getShort("RequiredPlayerRange");
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                mobSpawnerAbstract.b(nbtTagCompound);
+
+                nbtTagCompound.setShort("MinSpawnDelay", (short) spawnerUpgrade.getMinSpawnDelay());
+                nbtTagCompound.setShort("MaxSpawnDelay", (short) spawnerUpgrade.getMaxSpawnDelay());
+                nbtTagCompound.setShort("SpawnCount", (short) spawnerUpgrade.getSpawnCount());
+                nbtTagCompound.setShort("MaxNearbyEntities", (short) spawnerUpgrade.getMaxNearbyEntities());
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) spawnerUpgrade.getRequiredPlayerRange());
+                nbtTagCompound.setShort("SpawnRange", (short) spawnerUpgrade.getSpawnRange());
+
+                mobSpawnerAbstract.a(nbtTagCompound);
             }
+        }
+
+        @Override
+        public int getMinSpawnDelay() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MinSpawnDelay"),
+                    stackedMobSpawner -> stackedMobSpawner.minSpawnDelay);
+        }
+
+        @Override
+        public int getMaxSpawnDelay() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxSpawnDelay"),
+                    stackedMobSpawner -> stackedMobSpawner.maxSpawnDelay);
+        }
+
+        @Override
+        public int getSpawnCount() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnCount"),
+                    stackedMobSpawner -> stackedMobSpawner.spawnCount);
+        }
+
+        @Override
+        public int getMaxNearbyEntities() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxNearbyEntities"),
+                    stackedMobSpawner -> stackedMobSpawner.maxNearbyEntities);
+        }
+
+        @Override
+        public int getRequiredPlayerRange() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("RequiredPlayerRange"),
+                    stackedMobSpawner -> stackedMobSpawner.requiredPlayerRange);
+        }
+
+        @Override
+        public int getSpawnRange() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnRange"),
+                    stackedMobSpawner -> stackedMobSpawner.spawnRange);
         }
 
         TileEntityMobSpawner getSpawner(){
             return (TileEntityMobSpawner) world.getTileEntity(locX, locY, locZ);
+        }
+
+        private static <T> T getData(MobSpawnerAbstract mobSpawnerAbstract,
+                                     Function<NBTTagCompound, T> tagDataAccess,
+                                     Function<NMSSpawners_v1_7_R4.StackedMobSpawner, T> directDataAccess){
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner){
+                return directDataAccess.apply((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract);
+            }
+            else{
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                mobSpawnerAbstract.b(tagCompound);
+                return tagDataAccess.apply(tagCompound);
+            }
         }
 
     }

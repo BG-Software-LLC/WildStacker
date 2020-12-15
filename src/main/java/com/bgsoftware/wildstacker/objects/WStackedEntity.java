@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
@@ -55,6 +56,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private int dropsMultiplier = 1;
 
     private SpawnCause spawnCause;
+    private int spawnerUpgradeId = 0;
 
     private boolean deadEntityFlag = false;
     private boolean removed = false;
@@ -262,6 +264,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         if(StackCheck.NAME_TAG.isEnabled() && targetEntity.hasNameTag())
             return StackCheckResult.TARGET_NAME_TAG;
+
+        if(StackCheck.UPGRADE.isEnabled() && spawnerUpgradeId != ((WStackedEntity) targetEntity).getUpgradeId())
+            return StackCheckResult.UPGRADE;
 
         if(StackCheck.NERFED.isEnabled() && isNerfed() != targetEntity.isNerfed())
             return StackCheckResult.NERFED;
@@ -693,6 +698,33 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         this.breedableAmount = 0;
         return breedableAmount;
     }
+
+    /*
+     * UpgradeableStackedObject's methods
+     */
+
+    @Override
+    public SpawnerUpgrade getUpgrade() {
+        SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
+        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade() : currentUpgrade;
+    }
+
+    public int getUpgradeId(){
+        return spawnerUpgradeId;
+    }
+
+    @Override
+    public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
+        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId());
+    }
+
+    public void setUpgradeId(int spawnerUpgradeId){
+        this.spawnerUpgradeId = spawnerUpgradeId;
+    }
+
+    /*
+     * Other methods
+     */
 
     public static StackedEntity of(Entity entity){
         if(entity instanceof LivingEntity)

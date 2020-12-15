@@ -104,31 +104,22 @@ public final class ItemUtils {
         return plugin.getNMSAdapter().setTag(itemStack, "spawners-amount", amount);
     }
 
+    public static ItemStack setSpawnerUpgrade(ItemStack itemStack, int upgradeId){
+        return plugin.getNMSAdapter().setTag(itemStack, "spawners-upgrade", upgradeId);
+    }
+
     public static int getSpawnerItemAmount(ItemStack itemStack){
         int spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1);
-
-//        if(spawnersAmount <= 0 && itemStack.getItemMeta().hasDisplayName()){
-//            String displayName = itemStack.getItemMeta().getDisplayName();
-//            Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
-//            if(matcher.matches()) {
-//                List<String> indexes = Stream.of("0", "1", "2")
-//                        .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
-//                try {
-//                    spawnersAmount = Integer.parseInt(matcher.group(indexes.indexOf("0") + 1));
-//                }catch(Throwable ex){
-//                    spawnersAmount = 1;
-//                }
-//            }
-//        }
-
         return Math.max(1, spawnersAmount);
     }
 
-    public static ItemStack getSpawnerItem(EntityType entityType, int amount){
-//        if(SpawnersProvider_SilkSpawners.isRegisered()){
-//            return SpawnersProvider_SilkSpawners.getSpawnerItem(entityType, amount);
-//        }
-        return plugin.getProviders().getSpawnerItem(entityType, amount);
+    public static int getSpawnerUpgrade(ItemStack itemStack){
+        int spawnerUpgrade = plugin.getNMSAdapter().getTag(itemStack, "spawners-upgrade", Integer.class, 0);
+        return Math.max(0, spawnerUpgrade);
+    }
+
+    public static ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName){
+        return plugin.getProviders().getSpawnerItem(entityType, amount, upgradeDisplayName);
     }
 
     @SuppressWarnings("deprecation")

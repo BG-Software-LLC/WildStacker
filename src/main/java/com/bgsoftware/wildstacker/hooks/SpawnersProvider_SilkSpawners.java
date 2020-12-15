@@ -32,7 +32,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
         try {
             //noinspection deprecation
             String entityID = silkUtil.getDisplayNameToMobID().get(entityType.getName());

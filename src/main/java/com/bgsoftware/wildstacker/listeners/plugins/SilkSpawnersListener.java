@@ -24,7 +24,7 @@ public final class SilkSpawnersListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSpawnerBreak(SilkSpawnersSpawnerBreakEvent e){
         if(plugin.getSettings().spawnersStackingEnabled)
-            e.setDrop(plugin.getProviders().getSpawnerItem(e.getSpawner().getSpawnedType(), 0));
+            e.setDrop(plugin.getProviders().getSpawnerItem(e.getSpawner().getSpawnedType(), 0, ""));
     }
 
     //This one will run only if SilkSpawners is enabled

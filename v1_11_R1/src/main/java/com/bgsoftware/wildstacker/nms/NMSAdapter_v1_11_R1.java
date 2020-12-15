@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
@@ -87,6 +88,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
@@ -671,6 +673,9 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         entityLiving.a("ws:stack-cause=" + stackedEntity.getSpawnCause().name());
         if(stackedEntity.hasNameTag())
             entityLiving.a("ws:name-tag=true");
+        int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
+        if(upgradeId != 0)
+            entityLiving.a("ws:upgrade=" + upgradeId);
     }
 
     @Override
@@ -688,6 +693,8 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
                             stackedEntity.setSpawnCause(SpawnCause.valueOf(value));
                         } else if (key.equals("ws:name-tag")) {
                             ((WStackedEntity) stackedEntity).setNameTag();
+                        } else if (key.equals("ws:upgrade")) {
+                            ((WStackedEntity) stackedEntity).setUpgradeId(Integer.parseInt(value));
                         }
                     } catch (Exception ignored) {
                     }
@@ -795,20 +802,88 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         }
 
         @Override
-        public int getRequiredPlayerRange() {
-            MobSpawnerAbstract spawnerAbstract = getSpawner().getSpawner();
-            if(spawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner) {
-                return ((NMSSpawners_v1_11_R1.StackedMobSpawner) spawnerAbstract).requiredPlayerRange;
+        public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
+            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner){
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).spawnCount = spawnerUpgrade.getSpawnCount();
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
+                ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).spawnRange = spawnerUpgrade.getSpawnRange();
             }
             else{
-                NBTTagCompound tagCompound = new NBTTagCompound();
-                spawnerAbstract.b(tagCompound);
-                return tagCompound.getShort("RequiredPlayerRange");
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                mobSpawnerAbstract.b(nbtTagCompound);
+
+                nbtTagCompound.setShort("MinSpawnDelay", (short) spawnerUpgrade.getMinSpawnDelay());
+                nbtTagCompound.setShort("MaxSpawnDelay", (short) spawnerUpgrade.getMaxSpawnDelay());
+                nbtTagCompound.setShort("SpawnCount", (short) spawnerUpgrade.getSpawnCount());
+                nbtTagCompound.setShort("MaxNearbyEntities", (short) spawnerUpgrade.getMaxNearbyEntities());
+                nbtTagCompound.setShort("RequiredPlayerRange", (short) spawnerUpgrade.getRequiredPlayerRange());
+                nbtTagCompound.setShort("SpawnRange", (short) spawnerUpgrade.getSpawnRange());
+
+                mobSpawnerAbstract.a(nbtTagCompound);
             }
+        }
+
+        @Override
+        public int getMinSpawnDelay() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MinSpawnDelay"),
+                    stackedMobSpawner -> stackedMobSpawner.minSpawnDelay);
+        }
+
+        @Override
+        public int getMaxSpawnDelay() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxSpawnDelay"),
+                    stackedMobSpawner -> stackedMobSpawner.maxSpawnDelay);
+        }
+
+        @Override
+        public int getSpawnCount() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnCount"),
+                    stackedMobSpawner -> stackedMobSpawner.spawnCount);
+        }
+
+        @Override
+        public int getMaxNearbyEntities() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxNearbyEntities"),
+                    stackedMobSpawner -> stackedMobSpawner.maxNearbyEntities);
+        }
+
+        @Override
+        public int getRequiredPlayerRange() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("RequiredPlayerRange"),
+                    stackedMobSpawner -> stackedMobSpawner.requiredPlayerRange);
+        }
+
+        @Override
+        public int getSpawnRange() {
+            return getData(getSpawner().getSpawner(),
+                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnRange"),
+                    stackedMobSpawner -> stackedMobSpawner.spawnRange);
         }
 
         TileEntityMobSpawner getSpawner(){
             return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
+        }
+
+        private static <T> T getData(MobSpawnerAbstract mobSpawnerAbstract,
+                                     Function<NBTTagCompound, T> tagDataAccess,
+                                     Function<NMSSpawners_v1_11_R1.StackedMobSpawner, T> directDataAccess){
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner){
+                return directDataAccess.apply((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract);
+            }
+            else{
+                NBTTagCompound tagCompound = new NBTTagCompound();
+                mobSpawnerAbstract.b(tagCompound);
+                return tagDataAccess.apply(tagCompound);
+            }
         }
 
     }

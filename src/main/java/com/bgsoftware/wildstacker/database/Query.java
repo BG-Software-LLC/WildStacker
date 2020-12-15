@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.database;
 
 public enum Query {
 
-    SPAWNER_INSERT("REPLACE INTO spawners VALUES(?, ?);", 2),
+    SPAWNER_INSERT("REPLACE INTO spawners VALUES(?, ?, ?);", 3),
     SPAWNER_DELETE("DELETE FROM spawners WHERE location=?;", 1),
 
     BARREL_INSERT("REPLACE INTO barrels VALUES(?, ?, ?);", 3),

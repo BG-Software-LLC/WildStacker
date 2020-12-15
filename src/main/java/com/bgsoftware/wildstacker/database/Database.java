@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 
 public final class Database {
 
@@ -34,20 +35,28 @@ public final class Database {
     }
 
     public static void executeQuery(String statement, DatabaseConsumer<ResultSet> callback){
+        executeQuery(statement, callback, Throwable::printStackTrace);
+    }
+
+    public static void executeQuery(String statement, DatabaseConsumer<ResultSet> callback, Consumer<Throwable> onError){
         initializeConnection();
         try(PreparedStatement preparedStatement = connection.prepareStatement(statement); ResultSet resultSet = preparedStatement.executeQuery()){
             callback.accept(resultSet);
         }catch(SQLException ex){
-            ex.printStackTrace();
+            onError.accept(ex);
         }
     }
 
     public static void executeUpdate(String statement){
+        executeUpdate(statement, Throwable::printStackTrace);
+    }
+
+    public static void executeUpdate(String statement, Consumer<Throwable> onError){
         initializeConnection();
         try(PreparedStatement preparedStatement = connection.prepareStatement(statement)){
             preparedStatement.executeUpdate();
         }catch(SQLException ex){
-            ex.printStackTrace();
+            onError.accept(ex);
         }
     }
 

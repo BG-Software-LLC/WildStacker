@@ -601,6 +601,7 @@ public final class EntitiesListener implements Listener {
 
     private int nextEntityStackAmount = -1;
     private EntityTypes nextEntityType = null;
+    private int nextUpgradeId = 0;
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
@@ -617,12 +618,14 @@ public final class EntitiesListener implements Listener {
             return false;
 
         nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        nextUpgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
 
         if(Materials.isValidAndSpawnEgg(usedItem)) {
             nextEntityType = ItemUtils.getEntityType(usedItem);
 
             if (nextEntityType == null) {
                 nextEntityStackAmount = -1;
+                nextUpgradeId = 0;
                 return false;
             }
 
@@ -654,6 +657,9 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
         stackedEntity.setStackAmount(nextEntityStackAmount, false);
 
+        if(nextUpgradeId != 0)
+            ((WStackedEntity) stackedEntity).setUpgradeId(nextUpgradeId);
+
         Executor.sync(() -> {
             //Resetting the name, so updateName will work.
             stackedEntity.setCustomName("");
@@ -661,6 +667,7 @@ public final class EntitiesListener implements Listener {
         }, 1L);
 
         nextEntityStackAmount = -1;
+        nextUpgradeId = 0;
         nextEntityType = null;
     }
 

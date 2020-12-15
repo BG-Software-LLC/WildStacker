@@ -220,8 +220,8 @@ public final class ProvidersHandler {
      * Spawners Provider
      */
 
-    public ItemStack getSpawnerItem(EntityType entityType, int amount){
-        return spawnersProvider.getSpawnerItem(entityType, amount);
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName){
+        return spawnersProvider.getSpawnerItem(entityType, amount, upgradeDisplayName);
     }
 
     public EntityType getSpawnerType(ItemStack itemStack){

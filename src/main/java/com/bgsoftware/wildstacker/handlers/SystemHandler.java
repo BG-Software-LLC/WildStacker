@@ -437,7 +437,8 @@ public final class SystemHandler implements SystemManager {
                     Block block = location.getBlock();
 
                     if (block.getType() == Materials.SPAWNER.toBukkitType()) {
-                        StackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                        WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                        stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), false);
                         stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
                         dataHandler.addStackedSpawner(stackedSpawner);
                     }

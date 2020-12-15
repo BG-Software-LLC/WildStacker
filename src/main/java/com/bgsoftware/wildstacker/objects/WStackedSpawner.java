@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -38,6 +39,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     private SpawnersManageMenu spawnersManageMenu;
     private LivingEntity linkedEntity = null;
+    private int spawnerUpgradeId = 0;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner){
         this(creatureSpawner, 1);
@@ -52,7 +54,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        Query.SPAWNER_INSERT.insertParameters().setLocation(getLocation()).setObject(getStackAmount()).queue(getLocation());
+        Query.SPAWNER_INSERT.insertParameters().setLocation(getLocation()).setObject(getStackAmount())
+                .setObject(spawnerUpgradeId).queue(getLocation());
     }
 
     @Override
@@ -161,7 +164,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         customName = customName
                 .replace("{0}", Integer.toString(amount))
                 .replace("{1}", EntityUtils.getFormattedType(getSpawnedType().name()))
-                .replace("{2}", EntityUtils.getFormattedType(getSpawnedType().name()).toUpperCase());
+                .replace("{2}", EntityUtils.getFormattedType(getSpawnedType().name()).toUpperCase())
+                .replace("{3}", getUpgrade().getDisplayName());
 
         setHologramName(customName, !plugin.getSettings().floatingSpawnerNames);
     }
@@ -269,7 +273,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        return stackedObject instanceof StackedSpawner && getSpawnedType() == ((StackedSpawner) stackedObject).getSpawnedType();
+        return stackedObject instanceof StackedSpawner && getSpawnedType() == ((StackedSpawner) stackedObject).getSpawnedType() &&
+                spawnerUpgradeId == ((WStackedSpawner) stackedObject).getUpgradeId();
     }
 
     @Override
@@ -289,6 +294,39 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public String toString() {
         return String.format("StackedSpawner{location=%s,amount=%s,type=%s}", getLocation(), getStackAmount(), getSpawnedType());
+    }
+
+    /*
+     * UpgradeableStackedObject's methods
+     */
+
+    @Override
+    public SpawnerUpgrade getUpgrade() {
+        SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
+        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade() : currentUpgrade;
+    }
+
+    public int getUpgradeId(){
+        return spawnerUpgradeId;
+    }
+
+    @Override
+    public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
+        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId(), true);
+    }
+
+    public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent){
+        this.spawnerUpgradeId = spawnerUpgradeId;
+
+        SpawnerUpgrade spawnerUpgrade = getUpgrade();
+
+        if(fireEvent)
+            EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade);
+
+        SyncedCreatureSpawner.of(object).updateSpawner(spawnerUpgrade);
+
+        Query.SPAWNER_INSERT.insertParameters().setLocation(getLocation()).setObject(getStackAmount())
+                .setObject(spawnerUpgradeId).queue(getLocation());
     }
 
     /*
@@ -344,7 +382,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public ItemStack getDropItem(int amount) {
-        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount);
+        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade().getDisplayName());
     }
 
     public LivingEntity getRawLinkedEntity(){

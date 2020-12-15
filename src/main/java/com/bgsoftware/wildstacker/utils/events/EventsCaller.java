@@ -14,10 +14,12 @@ import com.bgsoftware.wildstacker.api.events.SpawnerPlaceEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerPlaceInventoryEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
+import com.bgsoftware.wildstacker.api.events.SpawnerUpgradeEvent;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -109,6 +111,11 @@ public final class EventsCaller {
         SpawnerUnstackEvent spawnerUnstackEvent = new SpawnerUnstackEvent(spawner, unstackSource, unstackAmount);
         Bukkit.getPluginManager().callEvent(spawnerUnstackEvent);
         return !spawnerUnstackEvent.isCancelled();
+    }
+
+    public static void callSpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade){
+        SpawnerUpgradeEvent spawnerUpgradeEvent = new SpawnerUpgradeEvent(stackedSpawner, spawnerUpgrade);
+        Bukkit.getPluginManager().callEvent(spawnerUpgradeEvent);
     }
 
 }

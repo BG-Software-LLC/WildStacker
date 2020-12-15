@@ -277,6 +277,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
             StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
             demoEntity.setSpawnCause(SpawnCause.SPAWNER);
+            ((WStackedEntity) demoEntity).setUpgradeId(stackedSpawner.getUpgradeId());
             ((WStackedEntity) demoEntity).setDemoEntity();
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
@@ -360,7 +361,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                     return;
                 }
 
-                if(handleEntitySpawn(bukkitEntity, amountPerEntity, particlesAmount <= this.spawnCount)) {
+                if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
                     resetDelay = true;
                     particlesAmount++;
                 }
@@ -406,7 +407,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             return entity == null ? null : entity.getBukkitEntity();
         }
 
-        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity, boolean spawnParticles){
+        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, WStackedSpawner stackedSpawner, int amountPerEntity, boolean spawnParticles){
             Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
 
@@ -414,6 +415,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
             if(amountPerEntity > 1) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
+                ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 

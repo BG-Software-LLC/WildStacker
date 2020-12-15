@@ -173,7 +173,8 @@ public final class EntityUtils {
             newName = customName
                     .replace("{0}", Integer.toString(stackAmount))
                     .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
-                    .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase());
+                    .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase())
+                    .replace("{3}", stackedEntity.getUpgrade().getDisplayName());
         }
 
         return newName;

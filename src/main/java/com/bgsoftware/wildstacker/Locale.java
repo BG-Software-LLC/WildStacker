@@ -34,6 +34,7 @@ public final class Locale {
     public static Locale INVALID_PLAYER = new Locale("INVALID_PLAYER");
     public static Locale INVALID_SPAWN_CAUSE = new Locale("INVALID_SPAWN_CAUSE");
     public static Locale INVALID_TYPE = new Locale("INVALID_TYPE");
+    public static Locale INVALID_UPGRADE = new Locale("INVALID_UPGRADE");
     public static Locale INVENTORY_TWEAKS_TOGGLE_ON = new Locale("INVENTORY_TWEAKS_TOGGLE_ON");
     public static Locale INVENTORY_TWEAKS_TOGGLE_OFF = new Locale("INVENTORY_TWEAKS_TOGGLE_OFF");
     public static Locale INSPECT_GIVE_PLAYER = new Locale("INSPECT_GIVE_PLAYER");
@@ -66,6 +67,7 @@ public final class Locale {
     public static Locale SPAWNER_INFO_HEADER = new Locale("SPAWNER_INFO_HEADER");
     public static Locale SPAWNER_INFO_TYPE = new Locale("SPAWNER_INFO_TYPE");
     public static Locale SPAWNER_INFO_AMOUNT = new Locale("SPAWNER_INFO_AMOUNT");
+    public static Locale SPAWNER_INFO_UPGRADE = new Locale("SPAWNER_INFO_UPGRADE");
     public static Locale SPAWNER_INFO_FOOTER = new Locale("SPAWNER_INFO_FOOTER");
     public static Locale ENTITY_INFO_HEADER = new Locale("ENTITY_INFO_HEADER");
     public static Locale ENTITY_INFO_UUID = new Locale("ENTITY_INFO_UUID");
@@ -73,6 +75,7 @@ public final class Locale {
     public static Locale ENTITY_INFO_AMOUNT = new Locale("ENTITY_INFO_AMOUNT");
     public static Locale ENTITY_INFO_SPAWN_REASON = new Locale("ENTITY_INFO_SPAWN_REASON");
     public static Locale ENTITY_INFO_NERFED = new Locale("ENTITY_INFO_NERFED");
+    public static Locale ENTITY_INFO_UPGRADE = new Locale("ENTITY_INFO_UPGRADE");
     public static Locale ENTITY_INFO_FOOTER = new Locale("ENTITY_INFO_FOOTER");
     public static Locale OBJECT_SIMULATE_CHOOSE_SECOND = new Locale("OBJECT_SIMULATE_CHOOSE_SECOND");
     public static Locale OBJECT_SIMULATE_SUCCESS_RESULT = new Locale("OBJECT_SIMULATE_SUCCESS_RESULT");

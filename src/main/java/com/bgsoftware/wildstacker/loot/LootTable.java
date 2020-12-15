@@ -46,6 +46,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
             (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
             (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
+            (lootPair.getRequiredUpgrade().isEmpty() || stackedEntity.getUpgrade().getName().equalsIgnoreCase(lootPair.getRequiredUpgrade())) &&
             GeneralUtils.containsOrEmpty(lootPair.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()) &&
             GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
         ).collect(Collectors.toList());

@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.command.commands;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class CommandGive implements ICommand {
@@ -30,7 +32,7 @@ public final class CommandGive implements ICommand {
 
     @Override
     public String getUsage() {
-        return "stacker give [-s] <player-name> <spawner/egg/barrel> <entity-type/material-type> <stack-size>";
+        return "stacker give [-s] <player-name> <spawner/egg/barrel> <entity-type/material-type> <stack-size> [upgrade]";
     }
 
     @Override
@@ -50,7 +52,7 @@ public final class CommandGive implements ICommand {
 
     @Override
     public int getMaxArgs() {
-        return 6;
+        return 7;
     }
 
     @Override
@@ -59,11 +61,16 @@ public final class CommandGive implements ICommand {
 
         if(args[1].equalsIgnoreCase("-s")){
             silence = true;
-            if(args.length != 6){
+            if(args.length != 6 && args.length != 7){
                 Locale.COMMAND_USAGE.send(sender, getUsage());
                 return;
             }
-            args = new String[] {"give", args[2], args[3], args[4], args[5] };
+            if(args.length == 7) {
+                args = new String[]{"give", args[2], args[3], args[4], args[5], args[6]};
+            }
+            else{
+                args = new String[]{"give", args[2], args[3], args[4], args[5] };
+            }
         }
 
         Player target = Bukkit.getPlayer(args[1]);
@@ -85,6 +92,16 @@ public final class CommandGive implements ICommand {
             return;
         }
 
+        String upgradeName = args.length == 6 ? args[5] : "default";
+        SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(upgradeName);
+
+        if(spawnerUpgrade == null){
+            Locale.INVALID_UPGRADE.send(sender, upgradeName);
+            return;
+        }
+
+        int upgradeId = spawnerUpgrade.getId();
+
         boolean reformatItem = true;
 
         if(args[2].equalsIgnoreCase("egg") ){
@@ -100,12 +117,21 @@ public final class CommandGive implements ICommand {
 
             Material eggType = Materials.getSpawnEgg(entityType);
             if(eggType == null || ServerVersion.isLegacy()){
-                itemStack = ItemUtils.getItemNMSEntityType(entityType);
+                if(ServerVersion.isLegacy()){
+                    itemStack = new ItemStack(Material.MONSTER_EGG);
+                    ItemUtils.setEntityType(itemStack, entityType);
+                }
+                else {
+                    itemStack = ItemUtils.getItemNMSEntityType(entityType);
+                }
             }
             else{
                 itemStack = new ItemStack(eggType);
             }
+
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
+            if(upgradeId != 0)
+                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, upgradeId);
         }
 
         else if(args[2].equalsIgnoreCase("spawner")){
@@ -119,7 +145,7 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize);
+            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade.getDisplayName());
 
             if(plugin.getSettings().getStackedItem){
                 itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
@@ -128,6 +154,9 @@ public final class CommandGive implements ICommand {
             else{
                 itemStack.setAmount(stackSize);
             }
+
+            if(upgradeId != 0)
+                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, upgradeId);
 
             reformatItem = false;
         }
@@ -203,6 +232,11 @@ public final class CommandGive implements ICommand {
                     plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
+            case 6:
+                list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream().map(spawnerUpgrade -> spawnerUpgrade.getName().toLowerCase())
+                        .filter(upgradeName -> !upgradeName.equals("default") && upgradeName.startsWith(args[5]))
+                        .collect(Collectors.toList()));
+                break;
         }
 
         return list;
@@ -228,6 +262,11 @@ public final class CommandGive implements ICommand {
                 }else if(args[3].equalsIgnoreCase("barrel")) {
                     plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
+                break;
+            case 7:
+                list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream().map(spawnerUpgrade -> spawnerUpgrade.getName().toLowerCase())
+                        .filter(upgradeName -> !upgradeName.equals("default") && upgradeName.startsWith(args[6]))
+                        .collect(Collectors.toList()));
                 break;
         }
 

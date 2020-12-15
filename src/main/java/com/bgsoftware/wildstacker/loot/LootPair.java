@@ -18,21 +18,22 @@ import java.util.List;
 @SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootPair {
 
-    private List<LootItem> lootItems = new ArrayList<>();
-    private List<LootCommand> lootCommands = new ArrayList<>();
-    private List<String> killer = new ArrayList<>();
-    private double chance, lootingChance;
-    private String requiredPermission;
+    private final List<LootItem> lootItems = new ArrayList<>();
+    private final List<LootCommand> lootCommands = new ArrayList<>();
+    private final List<String> killer = new ArrayList<>();
+    private final double chance, lootingChance;
+    private final String requiredPermission, requiredUpgrade;
     private final List<String> spawnCauseFilter, deathCauseFilter;
 
     private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, List<String> killer, double chance, double lootingChance,
-                     String requiredPermission, List<String> spawnCauseFilter, List<String> deathCauseFilter){
+                     String requiredPermission, String requiredUpgrade, List<String> spawnCauseFilter, List<String> deathCauseFilter){
         this.lootItems.addAll(lootItems);
         this.lootCommands.addAll(lootCommands);
         this.killer.addAll(killer);
         this.chance = chance;
         this.lootingChance = lootingChance;
         this.requiredPermission = requiredPermission;
+        this.requiredUpgrade = requiredUpgrade;
         this.spawnCauseFilter = spawnCauseFilter;
         this.deathCauseFilter = deathCauseFilter;
     }
@@ -43,6 +44,10 @@ public class LootPair {
         for(LootItem lootItem : lootItems){
             if(!lootItem.getRequiredPermission().isEmpty() && LootTable.isKilledByPlayer(stackedEntity) &&
                     !LootTable.getKiller(stackedEntity).hasPermission(lootItem.getRequiredPermission()))
+                continue;
+
+            if(!lootItem.getRequiredUpgrade().isEmpty() && !stackedEntity.getUpgrade().getName()
+                    .equalsIgnoreCase(lootItem.getRequiredUpgrade()))
                 continue;
 
             if(!GeneralUtils.containsOrEmpty(lootItem.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()))
@@ -94,6 +99,10 @@ public class LootPair {
         return requiredPermission;
     }
 
+    public String getRequiredUpgrade() {
+        return requiredUpgrade;
+    }
+
     public List<String> getSpawnCauseFilter() {
         return spawnCauseFilter;
     }
@@ -111,6 +120,7 @@ public class LootPair {
         double chance = JsonUtils.getDouble(jsonObject, "chance", 100);
         double lootingChance = JsonUtils.getDouble(jsonObject, "lootingChance", 0);
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
+        String requiredUpgrade = (String) jsonObject.getOrDefault("upgrade", "");
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
         List<String> killer = new ArrayList<>();
@@ -159,7 +169,7 @@ public class LootPair {
             }
         }
 
-        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission, spawnCauseFilter, deathCauseFilter);
+        return new LootPair(lootItems, lootCommands, killer, chance, lootingChance, requiredPermission, requiredUpgrade, spawnCauseFilter, deathCauseFilter);
     }
 
 }

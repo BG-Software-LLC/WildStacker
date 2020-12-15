@@ -135,12 +135,12 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
 
         private String mobName;
         private TileEntityMobSpawnerData spawnData;
-        private int minSpawnDelay = 200;
-        private int maxSpawnDelay = 800;
-        private int spawnCount = 4;
-        private int maxNearbyEntities = 6;
+        public int minSpawnDelay = 200;
+        public int maxSpawnDelay = 800;
+        public int spawnCount = 4;
+        public int maxNearbyEntities = 6;
         public int requiredPlayerRange = 16;
-        private int spawnRange = 4;
+        public int spawnRange = 4;
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
             this.world = tileEntityMobSpawner.getWorld();
@@ -321,6 +321,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
 
             StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
             demoEntity.setSpawnCause(SpawnCause.SPAWNER);
+            ((WStackedEntity) demoEntity).setUpgradeId(stackedSpawner.getUpgradeId());
             ((WStackedEntity) demoEntity).setDemoEntity();
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
@@ -406,7 +407,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
                 if(!hasSpace || failSpawnConditions)
                     continue;
 
-                if(handleEntitySpawn(bukkitEntity, amountPerEntity, particlesAmount <= this.spawnCount)) {
+                if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
                     resetDelay = true;
                     particlesAmount++;
                 }
@@ -452,7 +453,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             return entity.getBukkitEntity();
         }
 
-        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, int amountPerEntity, boolean spawnParticles){
+        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, WStackedSpawner stackedSpawner, int amountPerEntity, boolean spawnParticles){
             Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
 
@@ -460,6 +461,7 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
 
             if(amountPerEntity > 1) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
+                ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 

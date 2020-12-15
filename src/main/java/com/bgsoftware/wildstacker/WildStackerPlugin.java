@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
+import com.bgsoftware.wildstacker.handlers.UpgradesHandler;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
 import com.bgsoftware.wildstacker.listeners.BucketsListener;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
@@ -49,6 +50,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private SettingsHandler settingsHandler;
     private SystemHandler systemManager;
+    private UpgradesHandler upgradesHandler;
     private DataHandler dataHandler;
     private ProvidersHandler providersHandler;
     private LootHandler lootHandler;
@@ -89,6 +91,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);
+        upgradesHandler = new UpgradesHandler();
         settingsHandler = new SettingsHandler(this);
         providersHandler = new ProvidersHandler(this);
         lootHandler = new LootHandler(this);
@@ -218,8 +221,14 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return dataHandler;
     }
 
+    @Override
     public SystemHandler getSystemManager(){
         return systemManager;
+    }
+
+    @Override
+    public UpgradesHandler getUpgradesManager() {
+        return upgradesHandler;
     }
 
     public SettingsHandler getSettings(){

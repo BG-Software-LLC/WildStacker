@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -40,6 +41,7 @@ import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
 import net.minecraft.server.v1_16_R3.MathHelper;
 import net.minecraft.server.v1_16_R3.MinecraftKey;
+import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_16_R3.NBTReadLimiter;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
@@ -757,6 +759,9 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         entityLiving.addScoreboardTag("ws:stack-cause=" + stackedEntity.getSpawnCause().name());
         if(stackedEntity.hasNameTag())
             entityLiving.addScoreboardTag("ws:name-tag=true");
+        int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
+        if(upgradeId != 0)
+            entityLiving.addScoreboardTag("ws:upgrade=" + upgradeId);
     }
 
     @Override
@@ -774,6 +779,8 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
                             stackedEntity.setSpawnCause(SpawnCause.valueOf(value));
                         } else if (key.equals("ws:name-tag")) {
                             ((WStackedEntity) stackedEntity).setNameTag();
+                        } else if (key.equals("ws:upgrade")) {
+                            ((WStackedEntity) stackedEntity).setUpgradeId(Integer.parseInt(value));
                         }
                     } catch (Exception ignored) {
                     }
@@ -940,6 +947,17 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
             try{
                 getSpawner().getSpawner().resetTimer();
             }catch (Throwable ignored){}
+        }
+
+        @Override
+        public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
+            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
+            mobSpawnerAbstract.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
+            mobSpawnerAbstract.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
+            mobSpawnerAbstract.spawnCount = spawnerUpgrade.getSpawnCount();
+            mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
+            mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
+            mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
         }
 
         @Override

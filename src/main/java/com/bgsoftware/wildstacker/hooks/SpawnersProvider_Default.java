@@ -32,7 +32,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
         int perStackAmount = amount;
 
@@ -59,7 +59,8 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         if(!customName.equals(""))
             itemMeta.setDisplayName(customName.replace("{0}", perStackAmount + "")
-                    .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
+                    .replace("{1}", EntityUtils.getFormattedType(entityType.name()))
+                    .replace("{2}", upgradeDisplayName));
 
         List<String> customLore = plugin.getSettings().spawnerItemLore;
 
