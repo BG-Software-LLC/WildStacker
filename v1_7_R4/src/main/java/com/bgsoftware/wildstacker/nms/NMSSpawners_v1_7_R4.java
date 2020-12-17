@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
@@ -325,7 +326,7 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
 
             Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
 
-            int stackAmount = stackedSpawner.getStackAmount(), spawnCount = this.spawnCount * stackAmount;
+            int stackAmount = stackedSpawner.getStackAmount();
 
             //noinspection unchecked
             List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), AxisAlignedBB.a(
@@ -340,7 +341,12 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
                 return;
             }
 
-            spawnCount = stackAmount + world.random.nextInt(spawnCount - stackAmount + 1);
+            int spawnCount = Random.nextInt(1, this.spawnCount, stackAmount);
+
+            // If there's an entity to stack into, we bypass the location restrictions
+            // Therefore, we must nerf the amount of mobs to spawn.
+            if(targetEntity != null)
+                spawnCount -= Random.nextInt(spawnCount / 2);
 
             int amountPerEntity = 1;
             int mobsToSpawn;
