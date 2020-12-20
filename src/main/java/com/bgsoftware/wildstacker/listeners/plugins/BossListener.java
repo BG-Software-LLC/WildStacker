@@ -33,7 +33,7 @@ public final class BossListener {
     private static class NewBossListener implements Listener {
 
         @EventHandler
-        public void onBossSpawn(org.mineacademy.boss.lib.boss.api.event.BossSpawnEvent e) {
+        public void onBossSpawn(org.mineacademy.boss.api.event.BossSpawnEvent e) {
             if (EntityUtils.isStackable(e.getEntity()))
                 Executor.sync(() -> WStackedEntity.of(e.getEntity()).setSpawnCause(SpawnCause.BOSS), 2L);
         }
