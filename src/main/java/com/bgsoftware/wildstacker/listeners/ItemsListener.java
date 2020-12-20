@@ -272,7 +272,7 @@ public final class ItemsListener implements Listener {
                     !ItemUtils.isStackable(e.getTarget()))
                 return;
 
-            StackedItem stackedItem = WStackedItem.of(e.getEntity());
+            StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
 
             if(!stackedItem.isCached())
                 return;
@@ -282,7 +282,7 @@ public final class ItemsListener implements Listener {
 
             Executor.sync(() -> {
                 if(e.getEntity().isValid() && e.getTarget().isValid()){
-                    StackedItem targetItem = WStackedItem.of(e.getTarget());
+                    StackedItem targetItem = WStackedItem.ofBypass(e.getTarget());
                     stackedItem.runStackAsync(targetItem, null);
                 }
             }, 5L);
