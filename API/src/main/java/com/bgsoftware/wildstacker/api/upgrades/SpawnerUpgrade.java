@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.upgrades;
 
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
@@ -15,6 +16,37 @@ public interface SpawnerUpgrade {
      * Get the id of the upgrade.
      */
     int getId();
+
+    /**
+     * Check if this upgrade is a default upgrade.
+     * @return This returns true if the id is set to 0.
+     */
+    boolean isDefault();
+
+    /**
+     * Get the next upgrade in the ladder.
+     * If null, it means that this upgrade is the last in the ladder.
+     */
+    SpawnerUpgrade getNextUpgrade();
+
+    /**
+     * Set the next upgrade in the ladder.
+     * @param nextUpgrade The next upgrade to set.
+     */
+    void setNextUpgrade(SpawnerUpgrade nextUpgrade);
+
+    /**
+     * Get the icon of the upgrade that is displayed on the upgrade menu.
+     * The returned icon will be parsed with all the upgrade's data.
+     */
+    ItemStack getIcon();
+
+    /**
+     * Set the icon of the upgrade that will be displayed on the upgrade menu.
+     * If set to null, the default icon will be used.
+     * @param icon The icon to set.
+     */
+    void setIcon(ItemStack icon);
 
     /**
      * Get the cost of the upgrade.

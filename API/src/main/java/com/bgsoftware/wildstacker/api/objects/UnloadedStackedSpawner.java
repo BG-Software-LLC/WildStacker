@@ -6,7 +6,7 @@ public interface UnloadedStackedSpawner extends UnloadedStackedObject {
 
     /**
      * Get the upgrade of the object.
-     * If it doesn't have an upgrade, default upgrade will be returned.
+     * If it doesn't have an upgrade, default global upgrade will be returned.
      */
     SpawnerUpgrade getUpgrade();
 

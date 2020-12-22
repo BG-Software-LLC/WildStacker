@@ -92,16 +92,6 @@ public final class CommandGive implements ICommand {
             return;
         }
 
-        String upgradeName = args.length == 6 ? args[5] : "default";
-        SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(upgradeName);
-
-        if(spawnerUpgrade == null){
-            Locale.INVALID_UPGRADE.send(sender, upgradeName);
-            return;
-        }
-
-        int upgradeId = spawnerUpgrade.getId();
-
         boolean reformatItem = true;
 
         if(args[2].equalsIgnoreCase("egg") ){
@@ -112,6 +102,14 @@ public final class CommandGive implements ICommand {
                 typeName = EntityUtils.getFormattedType(entityType.name());
             }catch(IllegalArgumentException ex){
                 Locale.INVALID_ENTITY.send(sender, args[3]);
+                return;
+            }
+
+            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
+                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+
+            if(spawnerUpgrade == null){
+                Locale.INVALID_UPGRADE.send(sender, args[5]);
                 return;
             }
 
@@ -130,8 +128,8 @@ public final class CommandGive implements ICommand {
             }
 
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-            if(upgradeId != 0)
-                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, upgradeId);
+            if(spawnerUpgrade.getId() != 0)
+                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
         }
 
         else if(args[2].equalsIgnoreCase("spawner")){
@@ -145,6 +143,14 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
+            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
+                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+
+            if(spawnerUpgrade == null){
+                Locale.INVALID_UPGRADE.send(sender, args[5]);
+                return;
+            }
+
             itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade.getDisplayName());
 
             if(plugin.getSettings().getStackedItem){
@@ -155,8 +161,8 @@ public final class CommandGive implements ICommand {
                 itemStack.setAmount(stackSize);
             }
 
-            if(upgradeId != 0)
-                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, upgradeId);
+            if(spawnerUpgrade.getId() != 0)
+                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
 
             reformatItem = false;
         }
@@ -233,9 +239,13 @@ public final class CommandGive implements ICommand {
                 }
                 break;
             case 6:
-                list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream().map(spawnerUpgrade -> spawnerUpgrade.getName().toLowerCase())
-                        .filter(upgradeName -> !upgradeName.equals("default") && upgradeName.startsWith(args[5]))
-                        .collect(Collectors.toList()));
+                if(args[2].equalsIgnoreCase("egg") || args[2].equalsIgnoreCase("spawner")) {
+                    EntityType entityType = EntityType.valueOf(args[3].toUpperCase());
+                    list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream()
+                            .filter(upgrade -> !upgrade.isDefault() && upgrade.isEntityAllowed(entityType) &&
+                                    upgrade.getName().toLowerCase().startsWith(args[5]))
+                            .map(upgrade -> upgrade.getName().toLowerCase()).collect(Collectors.toList()));
+                }
                 break;
         }
 
@@ -264,9 +274,13 @@ public final class CommandGive implements ICommand {
                 }
                 break;
             case 7:
-                list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream().map(spawnerUpgrade -> spawnerUpgrade.getName().toLowerCase())
-                        .filter(upgradeName -> !upgradeName.equals("default") && upgradeName.startsWith(args[6]))
-                        .collect(Collectors.toList()));
+                if(args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
+                    EntityType entityType = EntityType.valueOf(args[4].toUpperCase());
+                    list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream()
+                            .filter(upgrade -> !upgrade.isDefault() && upgrade.isEntityAllowed(entityType) &&
+                                    upgrade.getName().toLowerCase().startsWith(args[6]))
+                            .map(upgrade -> upgrade.getName().toLowerCase()).collect(Collectors.toList()));
+                }
                 break;
         }
 

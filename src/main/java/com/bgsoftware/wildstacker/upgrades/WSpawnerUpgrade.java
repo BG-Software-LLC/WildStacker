@@ -1,27 +1,47 @@
 package com.bgsoftware.wildstacker.upgrades;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
+import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
 public final class WSpawnerUpgrade implements SpawnerUpgrade {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final ItemStack DEFAULT_ICON = new ItemBuilder(Material.GOLD_INGOT)
+            .withName("%name%")
+            .withLore(
+                    "&7Spawn Delay Range: &f%min-spawn-delay%-%max-spawn-delay%",
+                    "&7Spawn Count: &f%spawn-count%",
+                    "&7Max Nearby Entities: &f%max-nearby-entities%",
+                    "&7Required Player Range: &f%required-player-range%",
+                    "&7Spawn Range: &f%spawn-range%"
+            ).build();
+
     private final String name;
     private final int id;
 
-    private double cost;
-    private String displayName = "";
-    private FastEnumArray<EntityType> allowedEntities;
-
+    private ItemStack icon = DEFAULT_ICON.clone();
+    private int nextId = 0;
     private int minSpawnDelay = 200;
     private int maxSpawnDelay = 800;
     private int spawnCount = 4;
     private int maxNearbyEntities = 6;
     private int requiredPlayerRange = 16;
     private int spawnRange = 4;
+
+    // Default upgrade values
+    private FastEnumArray<EntityType> allowedEntities;
+
+    // Regular upgrade values
+    private double cost;
+    private String displayName = "";
 
     public WSpawnerUpgrade(String name, int id){
         this.name = name;
@@ -36,6 +56,43 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
     @Override
     public int getId() {
         return id;
+    }
+
+    @Override
+    public boolean isDefault() {
+        return id == 0;
+    }
+
+    @Override
+    public SpawnerUpgrade getNextUpgrade() {
+        return nextId <= 0 ? null : plugin.getUpgradesManager().getUpgrade(nextId);
+    }
+
+    @Override
+    public void setNextUpgrade(SpawnerUpgrade nextUpgrade) {
+        setNextUpgrade(nextUpgrade == null ? 0 : nextUpgrade.getId());
+    }
+
+    public void setNextUpgrade(int nextId){
+        this.nextId = Math.max(0, nextId);
+    }
+
+    @Override
+    public ItemStack getIcon() {
+        return new ItemBuilder(icon)
+                .replaceAll("%name%", name)
+                .replaceAll("%min-spawn-delay%", minSpawnDelay + "")
+                .replaceAll("%max-spawn-delay%", maxSpawnDelay + "")
+                .replaceAll("%spawn-count%", spawnCount + "")
+                .replaceAll("%max-nearby-entities%", maxNearbyEntities + "")
+                .replaceAll("%required-player-range%", requiredPlayerRange + "")
+                .replaceAll("%spawn-range%", spawnRange + "")
+                .build();
+    }
+
+    @Override
+    public void setIcon(ItemStack icon) {
+        this.icon = icon == null ? DEFAULT_ICON.clone() : icon.clone();
     }
 
     @Override

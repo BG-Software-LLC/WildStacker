@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.api.handlers;
 
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import org.bukkit.entity.EntityType;
 
 import java.util.List;
 
@@ -13,6 +14,15 @@ public interface UpgradesManager {
      * @param id The id of the upgrade
      */
     SpawnerUpgrade createUpgrade(String name, int id);
+
+    /**
+     * Create a new default upgrade.
+     * This upgrade will be given to spawners by default.
+     * If this upgrade doesn't have a next upgrade, then spawners won't be able to be upgraded.
+     * @param allowedEntities A list of entities that will have this upgrade.
+     *                        If the list is empty, then all the entities will receive this upgrade.
+     */
+    SpawnerUpgrade createDefault(List<String> allowedEntities);
 
     /**
      * Get an upgrade by its name.
@@ -29,11 +39,13 @@ public interface UpgradesManager {
     /**
      * Get the default upgrade of spawners.
      * This simulates vanilla's spawner settings.
+     * @param entityType The entity type of the spawner. Set to null if you want the global default.
      */
-    SpawnerUpgrade getDefaultUpgrade();
+    SpawnerUpgrade getDefaultUpgrade(EntityType entityType);
 
     /**
      * Get all the upgrades available.
+     * This doesn't include the default upgrades.
      */
     List<SpawnerUpgrade> getAllUpgrades();
 

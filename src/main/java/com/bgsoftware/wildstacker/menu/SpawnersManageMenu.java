@@ -21,7 +21,7 @@ import java.util.Map;
 
 public final class SpawnersManageMenu extends WildMenu {
 
-    private static List<Integer> amountsMenuSlots = new ArrayList<>();
+    private static List<Integer> amountsMenuSlots = new ArrayList<>(), upgradeMenuSlots = new ArrayList<>();
     private static List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
     private final WeakReference<StackedSpawner> stackedSpawner;
     private final BukkitTask bukkitTask;
@@ -36,14 +36,22 @@ public final class SpawnersManageMenu extends WildMenu {
 
     @Override
     public void onPlayerClick(InventoryClickEvent e) {
-        if(plugin.getSettings().amountsMenuEnabled && amountsMenuSlots.contains(e.getRawSlot())){
-            StackedSpawner stackedSpawner = this.stackedSpawner.get();
-            if(stackedSpawner != null) {
+        StackedSpawner stackedSpawner = this.stackedSpawner.get();
+
+        if(stackedSpawner == null){
+            e.getWhoClicked().closeInventory();
+            stop();
+            return;
+        }
+
+        if(amountsMenuSlots.contains(e.getRawSlot())){
+            if(plugin.getSettings().amountsMenuEnabled) {
                 SpawnerAmountsMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
-            else {
-                e.getWhoClicked().closeInventory();
-                stop();
+        }
+        else if(upgradeMenuSlots.contains(e.getRawSlot())){
+            if(plugin.getSettings().amountsMenuEnabled) {
+                SpawnerUpgradeMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
         }
     }
@@ -110,20 +118,16 @@ public final class SpawnersManageMenu extends WildMenu {
         cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-manage.yml"), IGNORED_CONFIG_PATHS);
 
         Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnersManageMenu, "spawner-manage.yml", cfg);
-        List<Integer> amountsMenuSlots = new ArrayList<>();
-        List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
 
-        for(Character character : cfg.getString("amounts-menu", "").toCharArray())
-            amountsMenuSlots.addAll(charSlots.getOrDefault(character, new ArrayList<>()));
+        amountsMenuSlots = getSlots(cfg, "amounts-menu", charSlots);
+        upgradeMenuSlots = getSlots(cfg, "upgrade-menu", charSlots);
+        statisticSlots = new ArrayList<>();
 
         for(Character character : cfg.getString("statistics", "").toCharArray()) {
             for(int slot : charSlots.getOrDefault(character, new ArrayList<>())){
                 statisticSlots.add(new Pair<>(slot, spawnersManageMenu.getData().fillItems.get(slot)));
             }
         }
-
-        SpawnersManageMenu.amountsMenuSlots = amountsMenuSlots;
-        SpawnersManageMenu.statisticSlots = statisticSlots;
     }
 
 }

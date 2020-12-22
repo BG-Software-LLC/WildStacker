@@ -6,13 +6,16 @@ import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -190,6 +193,22 @@ public abstract class WildMenu implements InventoryHolder {
         public String title = "";
         public int rowsSize = 6;
 
+    }
+
+    protected static List<Integer> getSlots(ConfigurationSection section, String key, Map<Character, List<Integer>> charSlots) {
+        if(!section.contains(key))
+            return new ArrayList<>();
+
+        List<Character> chars = new ArrayList<>();
+
+        for(char ch : section.getString(key).toCharArray())
+            chars.add(ch);
+
+        List<Integer> slots = new ArrayList<>();
+
+        chars.stream().filter(charSlots::containsKey).forEach(ch -> slots.addAll(charSlots.get(ch)));
+
+        return slots.isEmpty() ? Collections.singletonList(-1) : slots;
     }
 
 }

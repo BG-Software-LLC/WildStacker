@@ -1,0 +1,54 @@
+###############################################
+##                                           ##
+##         WildStacker Configuration         ##
+##            Developed by Ome_R             ##
+##                                           ##
+###############################################
+
+# The title of the menu.
+title: 'Spawner Upgrade'
+
+# The pattern of the menu.
+pattern:
+  - '@ # & $ $ $ $ $ $'
+  - '# & $ $ $ $ $ $ $'
+  - '& $ $ ! $ ^ $ $ &'
+  - '$ $ $ $ $ $ $ & #'
+  - '$ $ $ $ $ $ & # @'
+
+# The sound that will be played when successfully changing the spawner's amount
+success-sound:
+  type: ENTITY_EXPERIENCE_ORB_PICKUP
+  volume: 0.2
+  pitch: 0.2
+
+# The sound that will be played when failing to change the spawner's amount
+failure-sound:
+  type: BLOCK_ANVIL_PLACE
+  volume: 0.2
+  pitch: 0.2
+
+current-upgrade: '!'
+next-upgrade: '^'
+
+# The items of the menu
+items:
+  '@':
+    type: BLACK_STAINED_GLASS_PANE
+    name: '&f'
+  '#':
+    type: YELLOW_STAINED_GLASS_PANE
+    name: '&f'
+  '&':
+    type: ORANGE_STAINED_GLASS_PANE
+    name: '&f'
+  '!':
+    type: BARRIER
+    name: '&cInvalid Upgrade'
+    lore:
+      - '&7You cannot upgrade this spawner anymore.'
+  '^':
+    type: BARRIER
+    name: '&cInvalid Upgrade'
+    lore:
+      - '&7You cannot upgrade this spawner anymore.'

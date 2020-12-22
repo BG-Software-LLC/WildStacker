@@ -25,7 +25,7 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
-        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade() : currentUpgrade;
+        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(null) : currentUpgrade;
     }
 
     public int getUpgradeId(){

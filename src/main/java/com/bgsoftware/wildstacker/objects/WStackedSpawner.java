@@ -156,7 +156,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         int amount = getStackAmount();
 
-        if(amount <= 1) {
+        if(amount <= 1 && spawnerUpgradeId == 0) {
             removeHologram();
             return;
         }
@@ -303,7 +303,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
-        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade() : currentUpgrade;
+        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType()) : currentUpgrade;
     }
 
     public int getUpgradeId(){
@@ -313,6 +313,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
         setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId(), true);
+        updateName();
     }
 
     public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent){

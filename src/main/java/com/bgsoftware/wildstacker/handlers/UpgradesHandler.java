@@ -4,17 +4,22 @@ import com.bgsoftware.wildstacker.api.handlers.UpgradesManager;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.upgrades.WSpawnerUpgrade;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class UpgradesHandler implements UpgradesManager {
 
     private final Map<String, SpawnerUpgrade> spawnerUpgrades = Maps.newConcurrentMap();
     private final Map<Integer, SpawnerUpgrade> spawnerUpgradesById = Maps.newConcurrentMap();
-    private final SpawnerUpgrade DEFAULT_UPGRADE = createUpgrade("Default", 0);
+
+    private final Set<SpawnerUpgrade> defaultUpgrades = Sets.newConcurrentHashSet();
+    private SpawnerUpgrade GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", 0);
 
     @Override
     public SpawnerUpgrade createUpgrade(String name, int upgradeId) {
@@ -40,6 +45,21 @@ public final class UpgradesHandler implements UpgradesManager {
     }
 
     @Override
+    public SpawnerUpgrade createDefault(List<String> allowedEntities) {
+        SpawnerUpgrade spawnerUpgrade = new WSpawnerUpgrade("Default", 0);
+
+        if(allowedEntities.size() > 0) {
+            spawnerUpgrade.setAllowedEntities(allowedEntities);
+            GLOBAL_UPGRADE = spawnerUpgrade;
+        }
+        else {
+            defaultUpgrades.add(spawnerUpgrade);
+        }
+
+        return spawnerUpgrade;
+    }
+
+    @Override
     public SpawnerUpgrade getUpgrade(String name) {
         return spawnerUpgrades.get(name.toLowerCase());
     }
@@ -50,8 +70,9 @@ public final class UpgradesHandler implements UpgradesManager {
     }
 
     @Override
-    public SpawnerUpgrade getDefaultUpgrade() {
-        return DEFAULT_UPGRADE;
+    public SpawnerUpgrade getDefaultUpgrade(EntityType entityType) {
+        return entityType == null ? GLOBAL_UPGRADE : defaultUpgrades.stream().filter(spawnerUpgrade ->
+                spawnerUpgrade.isEntityAllowed(entityType)).findFirst().orElse(GLOBAL_UPGRADE);
     }
 
     @Override
@@ -61,15 +82,16 @@ public final class UpgradesHandler implements UpgradesManager {
 
     @Override
     public void removeUpgrade(SpawnerUpgrade spawnerUpgrade) {
-        if(DEFAULT_UPGRADE != spawnerUpgrade)
+        if(!spawnerUpgrade.isDefault())
             spawnerUpgrades.remove(spawnerUpgrade.getName().toLowerCase());
     }
 
     @Override
     public void removeAllUpgrades() {
         spawnerUpgrades.clear();
-        spawnerUpgrades.put("default", DEFAULT_UPGRADE);
-        spawnerUpgradesById.put(0, DEFAULT_UPGRADE);
+        spawnerUpgradesById.clear();
+        defaultUpgrades.clear();
+        GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", 0);
     }
 
 }

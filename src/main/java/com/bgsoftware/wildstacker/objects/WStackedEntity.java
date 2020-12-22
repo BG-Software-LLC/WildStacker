@@ -213,7 +213,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         try {
             String customName = EntityUtils.getEntityName(this);
-            boolean nameVisible = getStackAmount() > 1 && !plugin.getSettings().entitiesHideNames;
+            boolean nameVisible = (getStackAmount() > 1 || spawnerUpgradeId != 0) && !plugin.getSettings().entitiesHideNames;
 
             Executor.sync(() -> {
                 setCustomName(customName);
@@ -706,7 +706,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
-        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade() : currentUpgrade;
+        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(object.getType()) : currentUpgrade;
     }
 
     public int getUpgradeId(){
@@ -716,6 +716,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
         setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId());
+        updateName();
     }
 
     public void setUpgradeId(int spawnerUpgradeId){

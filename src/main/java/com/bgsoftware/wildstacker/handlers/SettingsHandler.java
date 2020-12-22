@@ -4,9 +4,12 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
+import com.bgsoftware.wildstacker.menu.SpawnerUpgradeMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
+import com.bgsoftware.wildstacker.upgrades.WSpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsMap;
@@ -14,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.data.structures.Fast3EnumsArray;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
+import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -95,7 +99,7 @@ public final class SettingsHandler {
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
             getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled,
-            amountsMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled;
+            amountsMenuEnabled, upgradeMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
@@ -365,38 +369,50 @@ public final class SettingsHandler {
         }
 
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
-        manageMenuEnabled = amountsMenuEnabled;
+        upgradeMenuEnabled = cfg.getBoolean("spawners.manage-menu.upgrade-menu");
+        manageMenuEnabled = amountsMenuEnabled || upgradeMenuEnabled;
         spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.exists();
         plugin.getUpgradesManager().removeAllUpgrades();
-//  # All settings related to spawner upgrades.
-//        spawner-upgrades:
-//    # Settings for default spawners.
-//        default:
-//        nearby-players: 16
-//        coal:
-//        id: 1
-//        display: '&7 (&aCoal&7)'
-//        cost: 10000
-//        entities:
-//        - ZOMBIE
-//
-//        for(String upgradeName : cfg.getConfigurationSection("spawners.spawner-upgrades").getKeys(false)){
-//            ConfigurationSection upgrade = cfg.getConfigurationSection("spawners.spawner-upgrades." + upgradeName);
-//            try {
-//                SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().createUpgrade(upgradeName, upgrade.getInt("id", 0));
-//                spawnerUpgrade.setDisplayName(upgrade.getString("display", ""));
-//                spawnerUpgrade.setCost(upgrade.getDouble("cost", 0D));
-//                spawnerUpgrade.setAllowedEntities(upgrade.getStringList("entities"));
-//                spawnerUpgrade.setMinSpawnDelay(upgrade.getInt("min-spawn-delay", 200));
-//                spawnerUpgrade.setMaxSpawnDelay(upgrade.getInt("max-spawn-delay", 800));
-//                spawnerUpgrade.setSpawnCount(upgrade.getInt("spawn-count", 4));
-//                spawnerUpgrade.setMaxNearbyEntities(upgrade.getInt("max-nearby-entities", 6));
-//                spawnerUpgrade.setRequiredPlayerRange(upgrade.getInt("required-player-range", 16));
-//                spawnerUpgrade.setSpawnRange(upgrade.getInt("spawn-range", 4));
-//            }catch (Exception ex){
-//                ex.printStackTrace();
-//            }
-//        }
+        for(String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades").getKeys(false)){
+            ConfigurationSection ladderSection = cfg.getConfigurationSection("spawners.spawner-upgrades." + ladder);
+            List<String> allowedEntities = ladderSection.getStringList("entities");
+
+            for(String upgradeName : ladderSection.getKeys(false)){
+                if(ladderSection.isConfigurationSection(upgradeName)) {
+                    ConfigurationSection upgrade = ladderSection.getConfigurationSection(upgradeName);
+                    try {
+                        SpawnerUpgrade spawnerUpgrade;
+
+                        if (upgradeName.equalsIgnoreCase("default")) {
+                            spawnerUpgrade = plugin.getUpgradesManager().createDefault(allowedEntities);
+                        } else {
+                            spawnerUpgrade = plugin.getUpgradesManager().createUpgrade(upgradeName, upgrade.getInt("id", 0));
+                            spawnerUpgrade.setDisplayName(upgrade.getString("display", ""));
+                            spawnerUpgrade.setCost(upgrade.getDouble("cost", 0D));
+                            spawnerUpgrade.setAllowedEntities(allowedEntities);
+                        }
+
+                        String nextUpgrade = upgrade.getString("next-upgrade");
+                        if(nextUpgrade != null)
+                            ((WSpawnerUpgrade) spawnerUpgrade).setNextUpgrade(ladderSection.getInt(nextUpgrade + ".id", 0));
+
+                        if(upgrade.isConfigurationSection("icon")) {
+                            spawnerUpgrade.setIcon(FileUtils.getItemStack("spawner-upgrades.yml",
+                                    upgrade.getConfigurationSection("icon")).build());
+                        }
+
+                        spawnerUpgrade.setMinSpawnDelay(upgrade.getInt("min-spawn-delay", 200));
+                        spawnerUpgrade.setMaxSpawnDelay(upgrade.getInt("max-spawn-delay", 800));
+                        spawnerUpgrade.setSpawnCount(upgrade.getInt("spawn-count", 4));
+                        spawnerUpgrade.setMaxNearbyEntities(upgrade.getInt("max-nearby-entities", 6));
+                        spawnerUpgrade.setRequiredPlayerRange(upgrade.getInt("required-player-range", 16));
+                        spawnerUpgrade.setSpawnRange(upgrade.getInt("spawn-range", 4));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
         barrelsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.merge-radius"), Material.class);
@@ -444,6 +460,7 @@ public final class SettingsHandler {
 
         SpawnersManageMenu.loadMenu();
         SpawnerAmountsMenu.loadMenu();
+        SpawnerUpgradeMenu.loadMenu();
 
         WildStackerPlugin.log("Loading configuration done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
     }

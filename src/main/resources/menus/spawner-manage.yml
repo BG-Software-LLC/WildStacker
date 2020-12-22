@@ -12,7 +12,7 @@ title: 'Spawner Information'
 pattern:
   - '@ # & $ $ $ $ $ $'
   - '# & $ $ $ $ $ $ $'
-  - '& $ $ % $ ^ $ $ &'
+  - '& $ % $ ^ $ ! $ &'
   - '$ $ $ $ $ $ $ & #'
   - '$ $ $ $ $ $ & # @'
 
@@ -20,6 +20,8 @@ pattern:
 amounts-menu: '^'
 # The slots for statistic items
 statistics: '%'
+# The slots of the upgrade menu.
+upgrade-menu: '!'
 
 # The items of the menu
 items:
@@ -41,6 +43,9 @@ items:
   '^':
     type: EMERALD
     name: '&eAmounts Menu'
+  '!':
+    type: GOLD_INGOT
+    name: '&eUpgrades Menu'
 
 # Sounds for items
 sounds:
@@ -49,6 +54,10 @@ sounds:
     volume: 0.2
     pitch: 0.2
   '^':
+    type: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 0.2
+    pitch: 0.2
+  '!':
     type: ENTITY_EXPERIENCE_ORB_PICKUP
     volume: 0.2
     pitch: 0.2

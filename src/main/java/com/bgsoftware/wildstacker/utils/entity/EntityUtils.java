@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -169,12 +170,14 @@ public final class EntityUtils {
 
         String newName = "";
 
-        if(stackAmount > 1) {
+        SpawnerUpgrade spawnerUpgrade = stackedEntity.getUpgrade();
+
+        if(stackAmount > 1 || !spawnerUpgrade.isDefault()) {
             newName = customName
                     .replace("{0}", Integer.toString(stackAmount))
                     .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
                     .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase())
-                    .replace("{3}", stackedEntity.getUpgrade().getDisplayName());
+                    .replace("{3}", spawnerUpgrade.getDisplayName());
         }
 
         return newName;
