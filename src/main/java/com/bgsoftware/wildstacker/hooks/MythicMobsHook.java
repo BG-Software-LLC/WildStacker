@@ -38,7 +38,9 @@ public final class MythicMobsHook {
             if((activeMob1 == null) != (activeMob2 == null))
                 return false;
 
-            return activeMob1 == null || activeMob1.getType().getInternalName().equals(activeMob2.getType().getInternalName());
+            try {
+                return activeMob1 == null || activeMob1.getType().getInternalName().equals(activeMob2.getType().getInternalName());
+            }catch (Exception ignored){}
         }
 
         return true;
