@@ -56,9 +56,9 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -440,8 +440,8 @@ public final class EntityUtils {
         return StackCheckResult.SUCCESS;
     }
 
-    public static CompletableFuture<Set<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
-        CompletableFuture<Set<Entity>> completableFuture = new CompletableFuture<>();
+    public static CompletableFuture<Collection<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+        CompletableFuture<Collection<Entity>> completableFuture = new CompletableFuture<>();
 
         if(Bukkit.isPrimaryThread()){
             completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));

@@ -76,13 +76,13 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_9_R1 implements NMSAdapter {
@@ -221,8 +221,8 @@ public final class NMSAdapter_v1_9_R1 implements NMSAdapter {
     }
 
     @Override
-    public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
+    public List<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
+        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
         World world = ((CraftWorld) location.getWorld()).getHandle();
 
@@ -245,13 +245,13 @@ public final class NMSAdapter_v1_9_R1 implements NMSAdapter {
 
                     for(int y = chunkMinY; y <= chunkMaxY; y++){
                         List<Entity> entitySlice = chunk.entitySlices[y];
-                        for (Entity entity : entitySlice) {
-                            if(entity.locX >= axisAlignedBB.a && entity.locX < axisAlignedBB.d &&
-                                    entity.locY >= axisAlignedBB.b && entity.locY < axisAlignedBB.e &&
-                                    entity.locZ >= axisAlignedBB.c && entity.locZ < axisAlignedBB.f &&
-                                    (filter == null || filter.test(entity.getBukkitEntity()))){
-                                entities.add(entity.getBukkitEntity());
-                            }
+                        if(entitySlice != null) {
+                            entities.addAll(entitySlice.stream().filter(entity ->
+                                    entity.locX >= axisAlignedBB.a && entity.locX < axisAlignedBB.d &&
+                                            entity.locY >= axisAlignedBB.b && entity.locY < axisAlignedBB.e &&
+                                            entity.locZ >= axisAlignedBB.c && entity.locZ < axisAlignedBB.f &&
+                                            (filter == null || filter.test(entity.getBukkitEntity())))
+                                    .map(Entity::getBukkitEntity).collect(Collectors.toList()));
                         }
                     }
                 }

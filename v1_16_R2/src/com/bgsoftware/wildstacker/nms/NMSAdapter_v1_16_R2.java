@@ -103,14 +103,14 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
@@ -268,8 +268,8 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     @Override
-    public Set<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        Set<org.bukkit.entity.Entity> entities = new HashSet<>();
+    public List<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
+        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
 
         World world = ((CraftWorld) location.getWorld()).getHandle();
 
@@ -313,12 +313,9 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
                         }
 
                         if(entitySlice != null) {
-                            for (Entity entity : entitySlice) {
-                                if (axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
-                                        (filter == null || filter.test(entity.getBukkitEntity()))) {
-                                    entities.add(entity.getBukkitEntity());
-                                }
-                            }
+                            entities.addAll(entitySlice.stream().filter(entity -> axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
+                                    (filter == null || filter.test(entity.getBukkitEntity())))
+                                    .map(Entity::getBukkitEntity).collect(Collectors.toList()));
                         }
                     }
                 }

@@ -27,7 +27,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-import java.util.Set;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -65,7 +65,7 @@ public interface NMSAdapter {
 
     boolean canSpawnOn(Entity entity, Location location);
 
-    Set<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter);
+    List<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter);
 
     default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
         return entityEquipment.getItemInHandDropChance();
