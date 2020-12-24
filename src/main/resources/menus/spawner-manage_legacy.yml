@@ -41,8 +41,14 @@ items:
     type: BOOK
     name: '&eStatistics'
     lore:
-      - '&7Player Range&e: &f%player-range%'
       - '&7Time until Spawn&e: &f%ticks-left%s'
+      - '&c%failure-reason%'
+      - '&7 '
+      - '&7Spawn Delay Range&e: &f%min-spawn-delay%-%max-spawn-delay%'
+      - '&7Spawn Count&e: &f%spawn-count%'
+      - '&7Max Nearby Entities&e: &f%max-nearby-entities%'
+      - '&7Required Player Range&e: &f%required-player-range%'
+      - '&7Spawn Range&e: &f%spawn-range%'
   '^':
     type: EMERALD
     name: '&eAmounts Menu'

@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.entity.Player;
@@ -79,14 +80,19 @@ public final class SpawnersManageMenu extends WildMenu {
         }
 
         SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
-
-        int requiredPlayerRange = creatureSpawner.getRequiredPlayerRange();
-        int ticksLeft = creatureSpawner.getDelay() / 20;
+        SpawnerCachedData spawnerData = creatureSpawner.readData();
 
         for(Pair<Integer, ItemBuilder> statisticItem : statisticSlots){
             inventory.setItem(statisticItem.getKey(), statisticItem.getValue().copy()
-                    .replaceAll("%player-range%",  requiredPlayerRange + "")
-                    .replaceAll("%ticks-left%", ticksLeft + "")
+                    .replaceAll("%min-spawn-delay%",  spawnerData.getMinSpawnDelay() + "")
+                    .replaceAll("%max-spawn-delay%",  spawnerData.getMaxSpawnDelay() + "")
+                    .replaceAll("%spawn-count%",  spawnerData.getSpawnCount() + "")
+                    .replaceAll("%max-nearby-entities%",  spawnerData.getMaxNearbyEntities() + "")
+                    .replaceAll("%player-range%",  spawnerData.getRequiredPlayerRange() + "")
+                    .replaceAll("%required-player-range%",  spawnerData.getRequiredPlayerRange() + "")
+                    .replaceAll("%spawn-range%",  spawnerData.getSpawnRange() + "")
+                    .replaceAll("%ticks-left%", spawnerData.getTicksLeft() + "")
+                    .replaceAll("%failure-reason%", spawnerData.getFailureReason())
                     .build());
         }
     }

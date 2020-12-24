@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_15_R1.AxisAlignedBB;
 import net.minecraft.server.v1_15_R1.BlockPosition;
@@ -918,6 +919,20 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
             mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
             mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
             mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
+        }
+
+        @Override
+        public SpawnerCachedData readData() {
+            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
+            return new SpawnerCachedData(
+                    mobSpawnerAbstract.minSpawnDelay,
+                    mobSpawnerAbstract.maxSpawnDelay,
+                    mobSpawnerAbstract.spawnCount,
+                    mobSpawnerAbstract.maxNearbyEntities,
+                    mobSpawnerAbstract.requiredPlayerRange,
+                    mobSpawnerAbstract.spawnRange,
+                    mobSpawnerAbstract.spawnDelay / 20
+            );
         }
 
         @Override

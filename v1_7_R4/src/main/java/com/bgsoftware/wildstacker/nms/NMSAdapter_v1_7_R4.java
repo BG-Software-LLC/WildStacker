@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_7_R4.AxisAlignedBB;
 import net.minecraft.server.v1_7_R4.BlockRotatable;
@@ -79,7 +80,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -916,62 +916,37 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         }
 
         @Override
-        public int getMinSpawnDelay() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("MinSpawnDelay"),
-                    stackedMobSpawner -> stackedMobSpawner.minSpawnDelay);
-        }
-
-        @Override
-        public int getMaxSpawnDelay() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxSpawnDelay"),
-                    stackedMobSpawner -> stackedMobSpawner.maxSpawnDelay);
-        }
-
-        @Override
-        public int getSpawnCount() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnCount"),
-                    stackedMobSpawner -> stackedMobSpawner.spawnCount);
-        }
-
-        @Override
-        public int getMaxNearbyEntities() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("MaxNearbyEntities"),
-                    stackedMobSpawner -> stackedMobSpawner.maxNearbyEntities);
-        }
-
-        @Override
-        public int getRequiredPlayerRange() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("RequiredPlayerRange"),
-                    stackedMobSpawner -> stackedMobSpawner.requiredPlayerRange);
-        }
-
-        @Override
-        public int getSpawnRange() {
-            return getData(getSpawner().getSpawner(),
-                    nbtTagCompound -> (int) nbtTagCompound.getShort("SpawnRange"),
-                    stackedMobSpawner -> stackedMobSpawner.spawnRange);
+        public SpawnerCachedData readData() {
+            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner){
+                NMSSpawners_v1_7_R4.StackedMobSpawner stackedMobSpawner = (NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract;
+                return new SpawnerCachedData(
+                        stackedMobSpawner.minSpawnDelay,
+                        stackedMobSpawner.maxSpawnDelay,
+                        stackedMobSpawner.spawnCount,
+                        stackedMobSpawner.maxNearbyEntities,
+                        stackedMobSpawner.requiredPlayerRange,
+                        stackedMobSpawner.spawnRange,
+                        stackedMobSpawner.spawnDelay / 20
+                );
+            }
+            else{
+                NBTTagCompound nbtTagCompound = new NBTTagCompound();
+                mobSpawnerAbstract.b(nbtTagCompound);
+                return new SpawnerCachedData(
+                        nbtTagCompound.getShort("MinSpawnDelay"),
+                        nbtTagCompound.getShort("MaxSpawnDelay"),
+                        nbtTagCompound.getShort("SpawnCount"),
+                        nbtTagCompound.getShort("MaxNearbyEntities"),
+                        nbtTagCompound.getShort("RequiredPlayerRange"),
+                        nbtTagCompound.getShort("SpawnRange"),
+                        nbtTagCompound.getShort("Delay") / 20
+                );
+            }
         }
 
         TileEntityMobSpawner getSpawner(){
             return (TileEntityMobSpawner) world.getTileEntity(locX, locY, locZ);
-        }
-
-        private static <T> T getData(MobSpawnerAbstract mobSpawnerAbstract,
-                                     Function<NBTTagCompound, T> tagDataAccess,
-                                     Function<NMSSpawners_v1_7_R4.StackedMobSpawner, T> directDataAccess){
-            if(mobSpawnerAbstract instanceof NMSSpawners_v1_7_R4.StackedMobSpawner){
-                return directDataAccess.apply((NMSSpawners_v1_7_R4.StackedMobSpawner) mobSpawnerAbstract);
-            }
-            else{
-                NBTTagCompound tagCompound = new NBTTagCompound();
-                mobSpawnerAbstract.b(tagCompound);
-                return tagDataAccess.apply(tagCompound);
-            }
         }
 
     }

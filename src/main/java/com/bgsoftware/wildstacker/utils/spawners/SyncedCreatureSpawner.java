@@ -15,16 +15,6 @@ public interface SyncedCreatureSpawner extends CreatureSpawner {
 
     void updateSpawner(SpawnerUpgrade spawnerUpgrade);
 
-    int getMinSpawnDelay();
-
-    int getMaxSpawnDelay();
-
-    int getSpawnCount();
-
-    int getMaxNearbyEntities();
-
-    int getRequiredPlayerRange();
-
-    int getSpawnRange();
+    SpawnerCachedData readData();
 
 }
