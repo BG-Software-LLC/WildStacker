@@ -143,6 +143,8 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
         public int requiredPlayerRange = 16;
         public int spawnRange = 4;
 
+        private int spawnedEntities = 0;
+
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
             this.world = tileEntityMobSpawner.getWorld();
             this.position = new BlockPosition(tileEntityMobSpawner.x, tileEntityMobSpawner.y, tileEntityMobSpawner.z);
@@ -287,19 +289,6 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             if(!hasNearbyPlayers())
                 return;
 
-            if(world.isStatic){
-                double x = position.x + world.random.nextFloat();
-                double y = position.y + world.random.nextFloat();
-                double z = position.z + world.random.nextFloat();
-                world.addParticle("smoke", x, y, z, 0.0D, 0.0D, 0.0D);
-                world.addParticle("flame", x, y, z, 0.0D, 0.0D, 0.0D);
-                if (this.spawnDelay > 0) {
-                    --this.spawnDelay;
-                }
-
-                return;
-            }
-
             if (this.spawnDelay == -1)
                 resetSpawnDelay();
 
@@ -352,7 +341,6 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             int amountPerEntity = 1;
             int mobsToSpawn;
 
-            boolean resetDelay = false;
             short particlesAmount = 0;
 
             // Try stacking into the target entity first
@@ -361,11 +349,13 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
                 int newStackAmount = targetEntity.getStackAmount() + spawnCount;
 
                 if(newStackAmount > limit) {
-                    mobsToSpawn = limit - targetEntity.getStackAmount();
+                    mobsToSpawn = newStackAmount - limit;
                     newStackAmount = limit;
+                    spawnedEntities += limit - targetEntity.getStackAmount();
                 }
                 else{
                     mobsToSpawn = 0;
+                    spawnedEntities += spawnCount;
                 }
 
                 targetEntity.setStackAmount(newStackAmount, true);
@@ -376,8 +366,6 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
 
                 world.triggerEffect(2004, position.x, position.y, position.z, 0);
                 particlesAmount++;
-
-                resetDelay = true;
             }
             else{
                 mobsToSpawn = spawnCount;
@@ -414,12 +402,12 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
                     continue;
 
                 if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
-                    resetDelay = true;
+                    spawnedEntities++;
                     particlesAmount++;
                 }
             }
 
-            if(resetDelay)
+            if(spawnedEntities >= stackAmount)
                 resetSpawnDelay();
         }
 
@@ -437,6 +425,8 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             if (!this.mobs.isEmpty()) {
                 a((TileEntityMobSpawnerData) WeightedRandom.a(this.a().random, this.mobs));
             }
+
+            spawnedEntities = 0;
 
             a(1);
         }

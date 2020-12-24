@@ -23,9 +23,7 @@ import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.EntityTypes;
 import net.minecraft.server.v1_8_R3.EnumDifficulty;
-import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.EnumSkyBlock;
-import net.minecraft.server.v1_8_R3.MathHelper;
 import net.minecraft.server.v1_8_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagList;
@@ -147,6 +145,8 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
         public int maxNearbyEntities = 6;
         public int requiredPlayerRange = 16;
         public int spawnRange = 4;
+
+        private int spawnedEntities = 0;
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
             this.world = tileEntityMobSpawner.getWorld();
@@ -285,19 +285,6 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
             if(!hasNearbyPlayers())
                 return;
 
-            if(world.isClientSide){
-                double x = position.getX() + world.random.nextFloat();
-                double y = position.getY() + world.random.nextFloat();
-                double z = position.getZ() + world.random.nextFloat();
-                world.addParticle(EnumParticle.SMOKE_NORMAL, x, y, z, 0.0D, 0.0D, 0.0D);
-                world.addParticle(EnumParticle.FLAME, x, y, z, 0.0D, 0.0D, 0.0D);
-                if (this.spawnDelay > 0) {
-                    --this.spawnDelay;
-                }
-
-                return;
-            }
-
             if (this.spawnDelay == -1)
                 resetSpawnDelay();
 
@@ -349,7 +336,6 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
             int amountPerEntity = 1;
             int mobsToSpawn;
 
-            boolean resetDelay = false;
             short particlesAmount = 0;
 
             // Try stacking into the target entity first
@@ -358,11 +344,13 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                 int newStackAmount = targetEntity.getStackAmount() + spawnCount;
 
                 if(newStackAmount > limit) {
-                    mobsToSpawn = limit - targetEntity.getStackAmount();
+                    mobsToSpawn = newStackAmount - limit;
                     newStackAmount = limit;
+                    spawnedEntities += limit - targetEntity.getStackAmount();
                 }
                 else{
                     mobsToSpawn = 0;
+                    spawnedEntities += spawnCount;
                 }
 
                 targetEntity.setStackAmount(newStackAmount, true);
@@ -373,8 +361,6 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
 
                 world.triggerEffect(2004, position, 0);
                 particlesAmount++;
-
-                resetDelay = true;
             }
             else{
                 mobsToSpawn = spawnCount;
@@ -411,12 +397,12 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                     continue;
 
                 if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
-                    resetDelay = true;
+                    spawnedEntities++;
                     particlesAmount++;
                 }
             }
 
-            if(resetDelay)
+            if(spawnedEntities >= stackAmount)
                 resetSpawnDelay();
         }
 
@@ -435,6 +421,8 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
             if (!this.mobs.isEmpty()) {
                 a(WeightedRandom.a(this.a().random, this.mobs));
             }
+
+            spawnedEntities = 0;
 
             a(1);
         }
@@ -512,30 +500,6 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                                     demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
 
             return closestEntity.map(WStackedEntity::of).orElse(null);
-        }
-
-        private boolean hasEmptySpace(Entity entity){
-            AxisAlignedBB boundingBox = entity.getBoundingBox();
-            int i = MathHelper.floor(boundingBox.a);
-            int j = MathHelper.floor(boundingBox.d);
-            int k = MathHelper.floor(boundingBox.b);
-            int l = MathHelper.floor(boundingBox.e);
-            int i1 = MathHelper.floor(boundingBox.c);
-            int j1 = MathHelper.floor(boundingBox.f);
-            BlockPosition.MutableBlockPosition blockPosition = new BlockPosition.MutableBlockPosition();
-
-            for(int k1 = i; k1 <= j; ++k1) {
-                for(int l1 = k; l1 <= l; ++l1) {
-                    for(int i2 = i1; i2 <= j1; ++i2) {
-                        Block block = world.getType(blockPosition.c(k1, l1, i2)).getBlock();
-                        if (block.getMaterial().isLiquid()) {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
 
     }
