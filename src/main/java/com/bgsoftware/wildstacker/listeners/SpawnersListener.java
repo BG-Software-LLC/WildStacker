@@ -101,10 +101,17 @@ public final class SpawnersListener implements Listener {
             plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
             EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
-            stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(200, 800));
+            SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(itemInHand));
+            ((WStackedSpawner) stackedSpawner).setUpgradeId(spawnerUpgrade.getId(), false);
 
-            int upgradeId = ItemUtils.getSpawnerUpgrade(itemInHand);
-            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, false);
+            if(spawnerUpgrade.getMinSpawnDelay() >= spawnerUpgrade.getMaxSpawnDelay()){
+                stackedSpawner.getSpawner().setDelay(spawnerUpgrade.getMinSpawnDelay());
+            }
+            else {
+                stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(
+                        spawnerUpgrade.getMinSpawnDelay(), spawnerUpgrade.getMaxSpawnDelay()
+                ));
+            }
 
             int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
 
