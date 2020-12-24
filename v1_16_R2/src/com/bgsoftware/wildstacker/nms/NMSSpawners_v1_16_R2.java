@@ -381,7 +381,7 @@ public final class NMSSpawners_v1_16_R2 implements NMSSpawners {
                 }
 
                 if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
-                    spawnedEntities++;
+                    spawnedEntities += amountPerEntity;
                     particlesAmount++;
                 }
             }
