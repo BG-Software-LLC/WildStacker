@@ -8,14 +8,23 @@ import java.util.function.Predicate;
 
 public abstract class SpawnCondition implements Predicate<Location> {
 
-    private final String id;
+    private final String id, name;
 
     protected SpawnCondition(String id){
+        this(id, id);
+    }
+
+    protected SpawnCondition(String id, String name){
         this.id = id;
+        this.name = name;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getName(){
+        return name;
     }
 
     @Override

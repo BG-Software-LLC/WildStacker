@@ -927,7 +927,8 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
                         stackedMobSpawner.maxNearbyEntities,
                         stackedMobSpawner.requiredPlayerRange,
                         stackedMobSpawner.spawnRange,
-                        stackedMobSpawner.spawnDelay / 20
+                        stackedMobSpawner.spawnDelay / 20,
+                        stackedMobSpawner.failureReason
                 );
             }
             else{

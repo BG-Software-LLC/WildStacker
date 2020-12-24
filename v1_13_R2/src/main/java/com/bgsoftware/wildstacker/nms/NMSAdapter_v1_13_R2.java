@@ -945,7 +945,9 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
                     mobSpawnerAbstract.maxNearbyEntities,
                     mobSpawnerAbstract.requiredPlayerRange,
                     mobSpawnerAbstract.spawnRange,
-                    mobSpawnerAbstract.spawnDelay / 20
+                    mobSpawnerAbstract.spawnDelay / 20,
+                    mobSpawnerAbstract instanceof NMSSpawners_v1_13_R2.StackedMobSpawner ?
+                            ((NMSSpawners_v1_13_R2.StackedMobSpawner) mobSpawnerAbstract).failureReason : ""
             );
         }
 

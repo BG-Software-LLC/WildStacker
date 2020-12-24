@@ -46,7 +46,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -166,7 +165,7 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
     }
 
     private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes){
-        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id) {
+        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
             @Override
             public boolean test(Location location) {
                 return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
@@ -176,13 +175,14 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
         plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
     }
 
-    private static class StackedMobSpawner extends MobSpawnerAbstract {
+    static class StackedMobSpawner extends MobSpawnerAbstract {
 
         private final World world;
         private final BlockPosition position;
         private final WeakReference<WStackedSpawner> stackedSpawner;
         private final List<MobSpawnerData> mobs = new ArrayList<>();
         private MobSpawnerData spawnData = new MobSpawnerData();
+        public String failureReason = "";
 
         private int spawnedEntities = 0;
 
@@ -238,8 +238,10 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
                 return;
             }
 
-            if(!hasNearbyPlayers())
+            if(!hasNearbyPlayers()) {
+                failureReason = "There are no nearby players.";
                 return;
+            }
 
             if (this.spawnDelay == -1)
                 resetSpawnDelay();
@@ -278,9 +280,11 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
             StackedEntity targetEntity = getTargetEntity(stackedSpawner, demoEntity, nearbyEntities);
 
             if (targetEntity == null && nearbyEntities.size() >= this.maxNearbyEntities) {
-                resetSpawnDelay();
+                failureReason = "There are too many nearby entities.";
                 return;
             }
+
+            failureReason = "";
 
             int spawnCount = !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
                     Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
@@ -339,14 +343,20 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
 
                 boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
 
+                if(!hasSpace){
+                    failureReason = "Not enough space to spawn the entity.";
+                    continue;
+                }
+
                 Location location = new Location(world.getWorld(), x, y, z);
 
-                Collection<SpawnCondition> spawnConditions = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType());
-                boolean failSpawnConditions = !spawnConditions.isEmpty() && spawnConditions.stream()
-                        .anyMatch(spawnCondition -> !spawnCondition.test(location));
+                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType())
+                        .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
 
-                if(!hasSpace || failSpawnConditions)
+                if(failedCondition != null) {
+                    failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
                     continue;
+                }
 
                 if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountPerEntity, particlesAmount <= this.spawnCount)) {
                     spawnedEntities += amountPerEntity;

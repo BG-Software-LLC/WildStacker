@@ -82,11 +82,15 @@ public final class EntityUtils {
         if(customName != null)
             return customName;
 
+        return format(typeName);
+    }
+
+    public static String format(String type){
         StringBuilder name = new StringBuilder();
 
-        typeName = typeName.replace(" ", "_");
+        type = type.replace(" ", "_");
 
-        for (String section : typeName.split("_")) {
+        for (String section : type.split("_")) {
             name.append(section.substring(0, 1).toUpperCase()).append(section.substring(1).toLowerCase()).append(" ");
         }
 
