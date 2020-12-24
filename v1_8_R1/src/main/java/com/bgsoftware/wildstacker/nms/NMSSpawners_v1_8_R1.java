@@ -329,12 +329,8 @@ public final class NMSSpawners_v1_8_R1 implements NMSSpawners {
                 return;
             }
 
-            int spawnCount = Random.nextInt(1, this.spawnCount, stackAmount);
-
-            // If there's an entity to stack into, we bypass the location restrictions
-            // Therefore, we must nerf the amount of mobs to spawn.
-            if(targetEntity != null)
-                spawnCount -= Random.nextInt(spawnCount / 2);
+            int spawnCount = !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
+                    Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 
             int amountPerEntity = 1;
             int mobsToSpawn;

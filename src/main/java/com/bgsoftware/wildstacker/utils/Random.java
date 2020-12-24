@@ -17,6 +17,17 @@ public final class Random {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
+    public static int nextInt(int min, int max, int amount, double exp){
+        min *= amount;
+        max *= amount;
+
+        double power = Math.pow(nextFloat(), exp);
+        double bound = ((double) (max - min + 1)) * power;
+        int rounded = Math.max(1, (int) Math.round(bound));
+
+        return nextInt(rounded) + min;
+    }
+
     public static int nextInt(int min, int max, int amount){
         min *= amount;
         max *= amount;
@@ -32,6 +43,10 @@ public final class Random {
 
     private static double nextGaussian(){
         return ThreadLocalRandom.current().nextGaussian();
+    }
+
+    private static float nextFloat(){
+        return ThreadLocalRandom.current().nextFloat();
     }
 
     private static int getAverage(int min, int max){
