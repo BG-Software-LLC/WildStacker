@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.WildToolsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -118,8 +119,8 @@ public final class ItemUtils {
         return Math.max(0, spawnerUpgrade);
     }
 
-    public static ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName){
-        return plugin.getProviders().getSpawnerItem(entityType, amount, upgradeDisplayName);
+    public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade){
+        return plugin.getProviders().getSpawnerItem(entityType, amount, spawnerUpgrade);
     }
 
     @SuppressWarnings("deprecation")

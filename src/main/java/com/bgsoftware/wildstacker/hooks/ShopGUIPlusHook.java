@@ -30,7 +30,7 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(EntityType entityType) {
-            return plugin.getProviders().getSpawnerItem(entityType, 1, "");
+            return plugin.getProviders().getSpawnerItem(entityType, 1, null);
         }
 
         @Override
@@ -60,7 +60,7 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(String entityId, String customName) {
-            return plugin.getProviders().getSpawnerItem(EntityType.valueOf(entityId), 1, "");
+            return plugin.getProviders().getSpawnerItem(EntityType.valueOf(entityId), 1, null);
         }
 
         @Override

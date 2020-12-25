@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import de.dustplanet.silkspawners.SilkSpawners;
@@ -32,16 +33,20 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
+        ItemStack itemStack;
         try {
             //noinspection deprecation
             String entityID = silkUtil.getDisplayNameToMobID().get(entityType.getName());
-            return silkUtil.newSpawnerItem(entityID, silkUtil.getCustomSpawnerName(entityID), amount, false);
+            itemStack = silkUtil.newSpawnerItem(entityID, silkUtil.getCustomSpawnerName(entityID), amount, false);
         }catch(Throwable ex){
             //noinspection deprecation
             short entityID = entityType.getTypeId();
-            return newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
+            itemStack = newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
         }
+
+        return spawnerUpgrade == null || spawnerUpgrade.isDefault() ? itemStack :
+                ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
     }
 
     @Override

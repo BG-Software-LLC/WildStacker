@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
@@ -220,8 +221,8 @@ public final class ProvidersHandler {
      * Spawners Provider
      */
 
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName){
-        return spawnersProvider.getSpawnerItem(entityType, amount, upgradeDisplayName);
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade){
+        return spawnersProvider.getSpawnerItem(entityType, amount, spawnerUpgrade);
     }
 
     public EntityType getSpawnerType(ItemStack itemStack){

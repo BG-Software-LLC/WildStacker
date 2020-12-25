@@ -101,8 +101,12 @@ public final class SpawnersListener implements Listener {
             plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
             EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
-            SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(itemInHand));
-            ((WStackedSpawner) stackedSpawner).setUpgradeId(spawnerUpgrade.getId(), false);
+            int upgradeId = ItemUtils.getSpawnerUpgrade(itemInHand);
+            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, false);
+
+            SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(upgradeId);
+            if(spawnerUpgrade == null)
+                spawnerUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(spawnerType);
 
             if(spawnerUpgrade.getMinSpawnDelay() >= spawnerUpgrade.getMaxSpawnDelay()){
                 stackedSpawner.getSpawner().setDelay(spawnerUpgrade.getMinSpawnDelay());
@@ -140,7 +144,7 @@ public final class SpawnersListener implements Listener {
                 //If the spawnerItemAmount is larger than the spawner limit, we want to give to the player the leftovers
                 if (limit < spawnerItemAmount) {
                     limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(),
-                            spawnerItemAmount - limit, stackedSpawner.getUpgrade().getDisplayName());
+                            spawnerItemAmount - limit, stackedSpawner.getUpgrade());
                     //Adding the item to the inventory after the spawner is placed
                     spawnerItemAmount = limit;
                 }
@@ -606,9 +610,9 @@ public final class SpawnersListener implements Listener {
                         SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         EntityType entityType = plugin.getProviders().getSpawnerType(e.getCurrentItem());
                         e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType,
-                                spawnersAmount / 2, spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
-                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, spawnersAmount - (spawnersAmount / 2),
-                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                                spawnersAmount / 2, spawnerUpgrade));
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType,
+                                spawnersAmount - (spawnersAmount / 2), spawnerUpgrade));
                     }
                 }
                 break;
@@ -624,10 +628,10 @@ public final class SpawnersListener implements Listener {
                             e.setCancelled(true);
                             SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                             EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
-                            e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, cursorAmount - 1,
-                                    spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
-                            e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType, 1,
-                                    spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                            e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType,
+                                    cursorAmount - 1, spawnerUpgrade));
+                            e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(
+                                    entityType, 1, spawnerUpgrade));
                         }
                     }
                     break;
@@ -641,8 +645,8 @@ public final class SpawnersListener implements Listener {
                         e.setCancelled(true);
                         SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
-                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType, currentAmount + cursorAmount,
-                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                        e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(currentType,
+                                currentAmount + cursorAmount, spawnerUpgrade));
                     }
                 }
                 break;
@@ -662,8 +666,7 @@ public final class SpawnersListener implements Listener {
                                 }
                             }
                         }
-                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, newCursorAmount,
-                                spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
+                        e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType, newCursorAmount, spawnerUpgrade));
                     }
                 }
                 break;

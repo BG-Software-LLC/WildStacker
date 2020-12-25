@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -32,7 +33,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
         int perStackAmount = amount;
 
@@ -43,6 +44,9 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         else{
             perStackAmount = 1;
         }
+
+        if(spawnerUpgrade != null && !spawnerUpgrade.isDefault())
+            itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
@@ -60,7 +64,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         if(!customName.equals(""))
             itemMeta.setDisplayName(customName.replace("{0}", perStackAmount + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name()))
-                    .replace("{2}", upgradeDisplayName));
+                    .replace("{2}", spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
 
         List<String> customLore = plugin.getSettings().spawnerItemLore;
 

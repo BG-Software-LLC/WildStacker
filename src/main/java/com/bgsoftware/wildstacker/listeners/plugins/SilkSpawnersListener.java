@@ -13,7 +13,7 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class SilkSpawnersListener implements Listener {
 
-    private WildStackerPlugin plugin;
+    private final WildStackerPlugin plugin;
 
     public SilkSpawnersListener(WildStackerPlugin plugin){
         this.plugin = plugin;
@@ -23,8 +23,9 @@ public final class SilkSpawnersListener implements Listener {
     //This one will run only if SilkSpawners is enabled
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSpawnerBreak(SilkSpawnersSpawnerBreakEvent e){
-        if(plugin.getSettings().spawnersStackingEnabled)
-            e.setDrop(plugin.getProviders().getSpawnerItem(e.getSpawner().getSpawnedType(), 0, ""));
+        if(plugin.getSettings().spawnersStackingEnabled) {
+            e.setDrop(WStackedSpawner.of(e.getSpawner()).getDropItem(0));
+        }
     }
 
     //This one will run only if SilkSpawners is enabled

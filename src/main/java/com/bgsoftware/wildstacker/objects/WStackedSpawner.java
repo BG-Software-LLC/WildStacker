@@ -383,7 +383,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public ItemStack getDropItem(int amount) {
-        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade().getDisplayName());
+        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade());
     }
 
     public LivingEntity getRawLinkedEntity(){

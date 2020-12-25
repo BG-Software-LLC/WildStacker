@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.dnyferguson.mineablespawners.MineableSpawners;
@@ -80,10 +81,11 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, String upgradeDisplayName) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = MineableSpawners.getApi().getSpawnerFromEntityType(entityType);
         itemStack.setAmount(amount);
-        return itemStack;
+        return spawnerUpgrade == null || spawnerUpgrade.isDefault() ? itemStack :
+                ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
     }
 
     @Override

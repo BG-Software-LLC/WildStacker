@@ -128,7 +128,7 @@ public final class CommandGive implements ICommand {
             }
 
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-            if(spawnerUpgrade.getId() != 0)
+            if(!spawnerUpgrade.isDefault())
                 itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
         }
 
@@ -151,7 +151,7 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade.getDisplayName());
+            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade);
 
             if(plugin.getSettings().getStackedItem){
                 itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
@@ -161,7 +161,7 @@ public final class CommandGive implements ICommand {
                 itemStack.setAmount(stackSize);
             }
 
-            if(spawnerUpgrade.getId() != 0)
+            if(!spawnerUpgrade.isDefault())
                 itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
 
             reformatItem = false;
