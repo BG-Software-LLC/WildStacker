@@ -284,9 +284,10 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
                 return;
             }
 
+            boolean spawnStacked = EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
             failureReason = "";
 
-            int spawnCount = !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
+            int spawnCount = !spawnStacked || !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
                     Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 
             int amountPerEntity = 1;
@@ -322,8 +323,8 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
                 mobsToSpawn = spawnCount;
             }
 
-            if(mobsToSpawn > 0){
-                amountPerEntity = !demoEntity.isCached() ? 1 : Math.min(mobsToSpawn, demoEntity.getStackLimit());
+            if(mobsToSpawn > 0 && demoEntity.isCached() && spawnStacked){
+                amountPerEntity = Math.min(mobsToSpawn, demoEntity.getStackLimit());
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
 

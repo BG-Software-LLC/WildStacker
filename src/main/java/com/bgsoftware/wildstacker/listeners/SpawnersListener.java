@@ -422,19 +422,15 @@ public final class SpawnersListener implements Listener {
 
         stackedEntity.updateNerfed();
 
-        boolean multipleEntities = !plugin.getSettings().entitiesStackingEnabled;
-
-        if(!multipleEntities){
-            multipleEntities = !stackedEntity.isCached();
-        }
-
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
         ((WStackedEntity) stackedEntity).setUpgradeId(((WStackedSpawner) stackedSpawner).getUpgradeId());
 
         int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
-        multipleEntities = multipleEntities || minimumEntityRequirement > stackedSpawner.getStackAmount();
+        boolean multipleEntities = !stackedEntity.isCached() ||
+                minimumEntityRequirement > stackedSpawner.getStackAmount() ||
+                !EventsCaller.callSpawnerStackedEntitySpawnEvent(e.getSpawner());
 
         if(multipleEntities || stackedSpawner.getStackAmount() > stackedEntity.getStackLimit()) {
             if(stackedSpawner.getStackAmount() > 1)

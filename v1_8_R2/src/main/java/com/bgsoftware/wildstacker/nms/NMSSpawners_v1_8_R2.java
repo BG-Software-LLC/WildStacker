@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import net.minecraft.server.v1_8_R2.AxisAlignedBB;
 import net.minecraft.server.v1_8_R2.BiomeBase;
@@ -327,9 +328,10 @@ public final class NMSSpawners_v1_8_R2 implements NMSSpawners {
                 return;
             }
 
+            boolean spawnStacked = EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
             failureReason = "";
 
-            int spawnCount = !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
+            int spawnCount = !spawnStacked || !demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
                     Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 
             int amountPerEntity = 1;
@@ -365,8 +367,8 @@ public final class NMSSpawners_v1_8_R2 implements NMSSpawners {
                 mobsToSpawn = spawnCount;
             }
 
-            if(mobsToSpawn > 0){
-                amountPerEntity = !demoEntity.isCached() ? 1 : Math.min(mobsToSpawn, demoEntity.getStackLimit());
+            if(mobsToSpawn > 0 && demoEntity.isCached() && spawnStacked){
+                amountPerEntity = Math.min(mobsToSpawn, demoEntity.getStackLimit());
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
 
