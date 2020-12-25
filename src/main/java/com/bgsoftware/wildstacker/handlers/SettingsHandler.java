@@ -649,6 +649,11 @@ public final class SettingsHandler {
             cfg.set("barrels.merge-radius.all", cfg.getInt("barrels.merge-radius"));
         if(cfg.isBoolean("spawners.explosions-break-stack"))
             cfg.set("spawners.explosions-break-percentage", cfg.getBoolean("spawners.explosions-break-stack") ? 100 : -1);
+        if(!cfg.contains("spawners.spawner-upgrades.ladders")){
+            ConfigurationSection laddersSection = cfg.getConfigurationSection("spawners.spawner-upgrades");
+            cfg.set("spawners.spawner-upgrades", null);
+            cfg.set("spawners.spawner-upgrades.ladders", laddersSection);
+        }
     }
 
     public static void reload(){
