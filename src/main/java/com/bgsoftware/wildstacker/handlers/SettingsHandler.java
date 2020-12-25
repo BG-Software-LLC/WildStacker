@@ -49,7 +49,7 @@ public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
-            "break-slots", "manage-menu", "break-charge", "place-charge", "spawn-conditions" };
+            "break-slots", "manage-menu", "break-charge", "place-charge", "spawn-conditions", "spawner-upgrades.ladders" };
 
     //Global settings
     public final String giveItemName;
@@ -99,7 +99,7 @@ public final class SettingsHandler {
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
             getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled,
-            amountsMenuEnabled, upgradeMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled;
+            amountsMenuEnabled, upgradeMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled, spawnerUpgradesMultiplyStackAmount;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
@@ -372,9 +372,10 @@ public final class SettingsHandler {
         upgradeMenuEnabled = cfg.getBoolean("spawners.manage-menu.upgrade-menu");
         manageMenuEnabled = amountsMenuEnabled || upgradeMenuEnabled;
         spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.exists();
+        spawnerUpgradesMultiplyStackAmount = cfg.getBoolean("spawners.spawner-upgrades.multiply-stack-amount", true);
         plugin.getUpgradesManager().removeAllUpgrades();
-        for(String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades").getKeys(false)){
-            ConfigurationSection ladderSection = cfg.getConfigurationSection("spawners.spawner-upgrades." + ladder);
+        for(String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades.ladders").getKeys(false)){
+            ConfigurationSection ladderSection = cfg.getConfigurationSection("spawners.spawner-upgrades.ladders." + ladder);
             List<String> allowedEntities = ladderSection.getStringList("entities");
 
             for(String upgradeName : ladderSection.getKeys(false)){

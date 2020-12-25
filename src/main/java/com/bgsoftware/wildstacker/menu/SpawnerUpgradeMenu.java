@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
+import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
@@ -14,12 +15,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class SpawnerUpgradeMenu extends WildMenu {
 
@@ -57,8 +60,11 @@ public final class SpawnerUpgradeMenu extends WildMenu {
 
         double upgradeCost = nextUpgrade.getCost();
 
+        if(plugin.getSettings().spawnerUpgradesMultiplyStackAmount)
+            upgradeCost *= stackedSpawner.getStackAmount();
+
         if (upgradeCost > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < upgradeCost) {
-            Locale.SPAWNER_UPGRADE_NOT_ENOUGH_MONEY.send(player, upgradeCost);
+            Locale.SPAWNER_UPGRADE_NOT_ENOUGH_MONEY.send(player, GeneralUtils.format(upgradeCost));
             if(failureSound != null)
                 failureSound.playSound(player);
             return;
@@ -91,17 +97,27 @@ public final class SpawnerUpgradeMenu extends WildMenu {
             SpawnerUpgrade spawnerUpgrade = stackedSpawner.getUpgrade();
             {
                 ItemStack rawCurrentIcon = spawnerUpgrade.getIcon();
+                ItemMeta rawCurrentItemMeta = rawCurrentIcon.getItemMeta();
                 ItemStack currentIcon = new ItemBuilder(rawCurrentIcon)
-                        .withName("&6Current Upgrade: &7" + rawCurrentIcon.getItemMeta().getDisplayName())
+                        .withName("&6Current Upgrade: &7" + rawCurrentItemMeta.getDisplayName())
+                        .withLore(rawCurrentItemMeta.getLore().stream().filter(line -> !line.contains("%cost%"))
+                                .collect(Collectors.toList()))
+                        .replaceName("%cost%", "")
                         .build();
                 currentUpgradeSlots.forEach(slot -> inventory.setItem(slot, currentIcon));
             }
 
             SpawnerUpgrade nextUpgrade = spawnerUpgrade.getNextUpgrade();
             if(nextUpgrade != null){
+                double upgradeCost = nextUpgrade.getCost();
+
+                if(plugin.getSettings().spawnerUpgradesMultiplyStackAmount)
+                    upgradeCost *= stackedSpawner.getStackAmount();
+
                 ItemStack rawNextIcon = nextUpgrade.getIcon();
                 ItemStack nextIcon = new ItemBuilder(rawNextIcon)
                         .withName("&6Next Upgrade: &7" + rawNextIcon.getItemMeta().getDisplayName())
+                        .replaceAll("%cost%", GeneralUtils.format(upgradeCost))
                         .build();
                 nextUpgradeSlots.forEach(slot -> inventory.setItem(slot, nextIcon));
             }

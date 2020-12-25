@@ -15,7 +15,7 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final ItemStack DEFAULT_ICON = new ItemBuilder(Material.GOLD_INGOT)
-            .withName("%name%")
+            .withName("%name% &7%cost%")
             .withLore(
                     "&7Spawn Delay Range: &f%min-spawn-delay%-%max-spawn-delay%",
                     "&7Spawn Count: &f%spawn-count%",

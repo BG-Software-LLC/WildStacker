@@ -659,86 +659,90 @@ spawners:
 
   # All settings related to spawner upgrades.
   spawner-upgrades:
-    '1':
-      entities:
-        - EXAMPLE_MOB
-      default:
-        next-upgrade: coal
-        nearby-players: 16
-        icon:
-          type: STONE
-          name: '&fBasic'
-          lore:
-            - '&fThis upgrade is free of charge'
-            - '&7 '
-            - '&7Spawn Delay Range&f: %min-spawn-delay%-%max-spawn-delay%'
-            - '&7Spawn Count&f: %spawn-count%'
-            - '&7Max Nearby Entities&f: %max-nearby-entities%'
-            - '&7Required Player Range&f: %required-player-range%'
-            - '&7Spawn Range&f: %spawn-range%'
-      coal:
-        id: 1
-        next-upgrade: iron
-        display: '&7 (&8Coal&7)'
-        cost: 10000
-        icon:
-          type: COAL
-          name: '&8Coal'
-          lore:
-            - '&8This upgrade costs $10,000'
-            - '&7 '
-            - '&7Spawn Delay Range&f: &8%min-spawn-delay%-%max-spawn-delay%'
-            - '&7Spawn Count&f: &8%spawn-count%'
-            - '&7Max Nearby Entities&f: &8%max-nearby-entities%'
-            - '&7Required Player Range&f: &8%required-player-range%'
-            - '&7Spawn Range&f: &8%spawn-range%'
-      iron:
-        id: 2
-        next-upgrade: gold
-        display: '&7 (Iron)'
-        cost: 25000
-        icon:
-          type: IRON_INGOT
-          name: '&7Iron'
-          lore:
-            - '&7This upgrade costs $25,000'
-            - '&7 '
-            - '&7Spawn Delay Range&f: &7%min-spawn-delay%-%max-spawn-delay%'
-            - '&7Spawn Count&f: &7%spawn-count%'
-            - '&7Max Nearby Entities&f: &7%max-nearby-entities%'
-            - '&7Required Player Range&f: &7%required-player-range%'
-            - '&7Spawn Range&f: &7%spawn-range%'
-      gold:
-        id: 3
-        next-upgrade: diamond
-        display: '&7 (&6Gold&7)'
-        cost: 75000
-        icon:
-          type: GOLD_INGOT
-          name: '&6Gold'
-          lore:
-            - '&6This upgrade costs $75,000'
-            - '&7 '
-            - '&7Spawn Delay Range&f: &6%min-spawn-delay%-%max-spawn-delay%'
-            - '&7Spawn Count&f: &6%spawn-count%'
-            - '&7Max Nearby Entities&f: &6%max-nearby-entities%'
-            - '&7Required Player Range&f: &6%required-player-range%'
-            - '&7Spawn Range&f: &6%spawn-range%'
-      diamond:
-        id: 4
-        display: '&7 (&bDiamond&7)'
-        cost: 120000
-        icon:
-          type: DIAMOND
-          name: '&bDiamond'
-          lore:
-            - '&bThis upgrade costs $120,000'
-            - '&7 '
-            - '&7Spawn Delay Range&f: &b%min-spawn-delay%-%max-spawn-delay%'
-            - '&7Spawn Count&f: &b%spawn-count%'
-            - '&7Max Nearby Entities&f: &b%max-nearby-entities%'
-            - '&7Required Player Range&f: &b%required-player-range%'
-            - '&7Spawn Range&f: &b%spawn-range%'
+    # Should the cost to upgrade be multiplied by the stack amount of the spawner?
+    multiply-stack-amount: true
+    # Upgrade ladders
+    ladders:
+      '1':
+        entities:
+          - EXAMPLE_MOB
+        default:
+          next-upgrade: coal
+          nearby-players: 16
+          icon:
+            type: STONE
+            name: '&fBasic'
+            lore:
+              - '&fThis upgrade is free of charge'
+              - '&7 '
+              - '&7Spawn Delay Range&f: %min-spawn-delay%-%max-spawn-delay%'
+              - '&7Spawn Count&f: %spawn-count%'
+              - '&7Max Nearby Entities&f: %max-nearby-entities%'
+              - '&7Required Player Range&f: %required-player-range%'
+              - '&7Spawn Range&f: %spawn-range%'
+        coal:
+          id: 1
+          next-upgrade: iron
+          display: '&7 (&8Coal&7)'
+          cost: 10000
+          icon:
+            type: COAL
+            name: '&8Coal'
+            lore:
+              - '&8This upgrade costs $%cost%'
+              - '&7 '
+              - '&7Spawn Delay Range&f: &8%min-spawn-delay%-%max-spawn-delay%'
+              - '&7Spawn Count&f: &8%spawn-count%'
+              - '&7Max Nearby Entities&f: &8%max-nearby-entities%'
+              - '&7Required Player Range&f: &8%required-player-range%'
+              - '&7Spawn Range&f: &8%spawn-range%'
+        iron:
+          id: 2
+          next-upgrade: gold
+          display: '&7 (Iron)'
+          cost: 25000
+          icon:
+            type: IRON_INGOT
+            name: '&7Iron'
+            lore:
+              - '&7This upgrade costs $%cost%'
+              - '&7 '
+              - '&7Spawn Delay Range&f: &7%min-spawn-delay%-%max-spawn-delay%'
+              - '&7Spawn Count&f: &7%spawn-count%'
+              - '&7Max Nearby Entities&f: &7%max-nearby-entities%'
+              - '&7Required Player Range&f: &7%required-player-range%'
+              - '&7Spawn Range&f: &7%spawn-range%'
+        gold:
+          id: 3
+          next-upgrade: diamond
+          display: '&7 (&6Gold&7)'
+          cost: 75000
+          icon:
+            type: GOLD_INGOT
+            name: '&6Gold'
+            lore:
+              - '&6This upgrade costs $%cost%'
+              - '&7 '
+              - '&7Spawn Delay Range&f: &6%min-spawn-delay%-%max-spawn-delay%'
+              - '&7Spawn Count&f: &6%spawn-count%'
+              - '&7Max Nearby Entities&f: &6%max-nearby-entities%'
+              - '&7Required Player Range&f: &6%required-player-range%'
+              - '&7Spawn Range&f: &6%spawn-range%'
+        diamond:
+          id: 4
+          display: '&7 (&bDiamond&7)'
+          cost: 120000
+          icon:
+            type: DIAMOND
+            name: '&bDiamond'
+            lore:
+              - '&bThis upgrade costs $%cost%'
+              - '&7 '
+              - '&7Spawn Delay Range&f: &b%min-spawn-delay%-%max-spawn-delay%'
+              - '&7Spawn Count&f: &b%spawn-count%'
+              - '&7Max Nearby Entities&f: &b%max-nearby-entities%'
+              - '&7Required Player Range&f: &b%required-player-range%'
+              - '&7Spawn Range&f: &b%spawn-range%'
 
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
