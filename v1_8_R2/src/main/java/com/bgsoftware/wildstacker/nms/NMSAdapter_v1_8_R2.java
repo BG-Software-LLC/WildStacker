@@ -617,13 +617,13 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
-        addEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackedEntity.getStackAmount()));
-        addEffect(entityLiving, new CustomMobEffect(SPAWN_CAUSE, stackedEntity.getSpawnCause().getId()));
+        setEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackedEntity.getStackAmount()));
+        setEffect(entityLiving, new CustomMobEffect(SPAWN_CAUSE, stackedEntity.getSpawnCause().getId()));
         if(stackedEntity.hasNameTag())
-            addEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, 1));
+            setEffect(entityLiving, new CustomMobEffect(HAS_NAMETAG, 1));
         int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
         if(upgradeId != 0)
-            addEffect(entityLiving, new CustomMobEffect(UPGRADE, upgradeId));
+            setEffect(entityLiving, new CustomMobEffect(UPGRADE, upgradeId));
     }
 
     @Override
@@ -736,18 +736,6 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
             return -1;
 
         return scoreboard.getPlayerScoreForObjective(entity + "", objective).getScore();
-    }
-
-    private static void addEffect(EntityLiving entityLiving, CustomMobEffect mobEffect){
-        if (entityLiving.d(mobEffect)) {
-            MobEffect currentEffect = entityLiving.effects.get(mobEffect.getCustomId());
-            if(currentEffect != null){
-                currentEffect.a(mobEffect);
-            }
-            else{
-                entityLiving.effects.put(mobEffect.getCustomId(), mobEffect);
-            }
-        }
     }
 
     private static void setEffect(EntityLiving entityLiving, CustomMobEffect mobEffect){
