@@ -100,7 +100,7 @@ public final class SystemHandler implements SystemManager {
         //Start the auto-clear
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::performCacheClear, 100L, 100L);
         //Start the auto-save
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> Executor.data(this::performCacheSave), 6000L, 6000L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::performCacheSave, 300L, 300L);
     }
 
     /*
@@ -169,7 +169,7 @@ public final class SystemHandler implements SystemManager {
 
                     stackedEntity.setCustomName(DataSerializer.stripData(stackedEntity.getCustomName()));
                 } else {
-                    loadEntity(stackedEntity);
+                    dataSerializer.loadEntity(stackedEntity);
                 }
             }finally {
                 ((WStackedEntity) stackedEntity).setSaveEntity(true);
@@ -228,7 +228,7 @@ public final class SystemHandler implements SystemManager {
 
                     stackedItem.setCustomName(DataSerializer.stripData(stackedItem.getCustomName()));
                 } else {
-                    loadItem(stackedItem);
+                    dataSerializer.loadItem(stackedItem);
                 }
 
                 // We want to update the item's size if it's above max stack size.
@@ -419,6 +419,34 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void performCacheSave() {
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(this::performCacheSave);
+            return;
+        }
+
+        try{
+            dataHandler.saveLock.writeLock().lock();
+
+            dataHandler.OBJECTS_TO_SAVE.forEach(stackedObject -> {
+                if (stackedObject instanceof StackedEntity) {
+                    dataSerializer.saveEntity((StackedEntity) stackedObject);
+                } else if (stackedObject instanceof StackedItem) {
+                    dataSerializer.saveItem((StackedItem) stackedObject);
+                }
+            });
+            dataHandler.OBJECTS_TO_SAVE.clear();
+        }finally {
+            dataHandler.saveLock.writeLock().unlock();
+        }
+    }
+
+    public void markToBeSaved(StackedObject stackedObject){
+        try {
+            dataHandler.saveLock.readLock().lock();
+            dataHandler.OBJECTS_TO_SAVE.add(stackedObject);
+        } finally {
+            dataHandler.saveLock.readLock().unlock();
+        }
     }
 
     @Override
@@ -525,16 +553,19 @@ public final class SystemHandler implements SystemManager {
     public void handleChunkUnload(Chunk chunk){
         Entity[] entities = chunk.getEntities();
 
-        Executor.async(() -> {
-            for(Entity entity : entities){
-                if(EntityUtils.isStackable(entity)){
-                    dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
-                }
-                else if(entity instanceof Item){
-                    dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
-                }
+        for(Entity entity : entities){
+            if(EntityUtils.isStackable(entity)) {
+                StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
+                if (stackedEntity != null)
+                    dataSerializer.saveEntity(stackedEntity);
             }
-        });
+
+            else if(entity instanceof Item) {
+                StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
+                if (stackedItem != null)
+                    dataSerializer.saveItem(stackedItem);
+            }
+        }
 
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);
@@ -812,22 +843,6 @@ public final class SystemHandler implements SystemManager {
 
     public void setDataSerializer(IDataSerializer dataSerializer){
         this.dataSerializer = dataSerializer;
-    }
-
-    public void saveEntity(StackedEntity stackedEntity){
-        dataSerializer.saveEntity(stackedEntity);
-    }
-
-    public void loadEntity(StackedEntity stackedEntity){
-        dataSerializer.loadEntity(stackedEntity);
-    }
-
-    public void saveItem(StackedItem stackedItem){
-        dataSerializer.saveItem(stackedItem);
-    }
-
-    public void loadItem(StackedItem stackedItem){
-        dataSerializer.loadItem(stackedItem);
     }
 
 }
