@@ -1,5 +1,5 @@
 name: WildStacker
-version: 3.4.3
+version: ${project.version}
 api-version: 1.13
 main: com.bgsoftware.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
