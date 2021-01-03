@@ -258,7 +258,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                     Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
                             nearbyEntities.stream()
                                     .filter(ItemUtils::isStackable)
-                                    .map(WStackedItem::of)
+                                    .map(entity -> WStackedItem.ofBypass((Item) entity))
                                     .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
                     );
 
