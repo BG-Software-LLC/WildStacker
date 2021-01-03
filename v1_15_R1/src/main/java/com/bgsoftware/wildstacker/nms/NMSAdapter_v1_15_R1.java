@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
@@ -98,6 +99,8 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,6 +118,8 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
     private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
@@ -723,41 +728,69 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
      *   Data methods
      */
 
+    private static final NamespacedKey
+            STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
+            SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
+            NAME_TAG = new NamespacedKey(plugin, "nameTag"),
+            UPGRADE = new NamespacedKey(plugin, "upgrade");
+
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+        LivingEntity livingEntity = stackedEntity.getLivingEntity();
+        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
 
-        // Removing old tags
-        entityLiving.getScoreboardTags().removeIf(tag -> tag.startsWith("ws:"));
+        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedEntity.getStackAmount());
+        dataContainer.set(SPAWN_CAUSE, PersistentDataType.STRING, stackedEntity.getSpawnCause().name());
 
-        entityLiving.addScoreboardTag("ws:stack-amount=" + stackedEntity.getStackAmount());
-        entityLiving.addScoreboardTag("ws:stack-cause=" + stackedEntity.getSpawnCause().name());
         if(stackedEntity.hasNameTag())
-            entityLiving.addScoreboardTag("ws:name-tag=true");
+            dataContainer.set(NAME_TAG, PersistentDataType.BYTE, (byte) 1);
+
         int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
         if(upgradeId != 0)
-            entityLiving.addScoreboardTag("ws:upgrade=" + upgradeId);
+            dataContainer.set(UPGRADE, PersistentDataType.INTEGER, upgradeId);
     }
 
     @Override
     public void loadEntity(StackedEntity stackedEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
-        for(String scoreboardTag : entityLiving.getScoreboardTags()){
-            if(scoreboardTag.startsWith("ws:")) {
-                String[] tagSections = scoreboardTag.split("=");
-                if (tagSections.length == 2) {
-                    try {
-                        String key = tagSections[0], value = tagSections[1];
-                        if (key.equals("ws:stack-amount")) {
-                            stackedEntity.setStackAmount(Integer.parseInt(value), false);
-                        } else if (key.equals("ws:stack-cause")) {
-                            stackedEntity.setSpawnCause(SpawnCause.valueOf(value));
-                        } else if (key.equals("ws:name-tag")) {
-                            ((WStackedEntity) stackedEntity).setNameTag();
-                        } else if (key.equals("ws:upgrade")) {
-                            ((WStackedEntity) stackedEntity).setUpgradeId(Integer.parseInt(value));
-                        }
-                    } catch (Exception ignored) {
+        LivingEntity livingEntity = stackedEntity.getLivingEntity();
+        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
+
+        if (dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)) {
+            try {
+                Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
+                stackedEntity.setStackAmount(stackAmount, false);
+
+                String spawnCause = dataContainer.get(SPAWN_CAUSE, PersistentDataType.STRING);
+                if (spawnCause != null)
+                    stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
+
+                if (dataContainer.has(NAME_TAG, PersistentDataType.BYTE))
+                    ((WStackedEntity) stackedEntity).setNameTag();
+
+                Integer upgradeId = dataContainer.get(UPGRADE, PersistentDataType.INTEGER);
+                if (upgradeId != null && upgradeId > 0)
+                    ((WStackedEntity) stackedEntity).setUpgradeId(upgradeId);
+            }catch (Exception ignored){}
+        }
+        else {
+            // Old saving method
+            EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
+            for (String scoreboardTag : entityLiving.getScoreboardTags()) {
+                if (scoreboardTag.startsWith("ws:")) {
+                    String[] tagSections = scoreboardTag.split("=");
+                    if (tagSections.length == 2) {
+                        try {
+                            String key = tagSections[0], value = tagSections[1];
+                            if (key.equals("ws:stack-amount")) {
+                                stackedEntity.setStackAmount(Integer.parseInt(value), false);
+                            } else if (key.equals("ws:stack-cause")) {
+                                stackedEntity.setSpawnCause(SpawnCause.valueOf(value));
+                            } else if (key.equals("ws:name-tag")) {
+                                ((WStackedEntity) stackedEntity).setNameTag();
+                            } else if (key.equals("ws:upgrade")) {
+                                ((WStackedEntity) stackedEntity).setUpgradeId(Integer.parseInt(value));
+                            }
+                        } catch (Exception ignored) { }
                     }
                 }
             }
@@ -766,27 +799,34 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public void saveItem(StackedItem stackedItem) {
-        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
-
-        // Removing old tags
-        entityItem.getScoreboardTags().removeIf(tag -> tag.startsWith("ws:"));
-
-        entityItem.addScoreboardTag("ws:stack-amount=" + stackedItem.getStackAmount());
+        Item item = stackedItem.getItem();
+        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
+        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedItem.getStackAmount());
     }
 
     @Override
     public void loadItem(StackedItem stackedItem) {
-        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
-        for(String scoreboardTag : entityItem.getScoreboardTags()){
-            if(scoreboardTag.startsWith("ws:")) {
-                String[] tagSections = scoreboardTag.split("=");
-                if (tagSections.length == 2) {
-                    try {
-                        String key = tagSections[0], value = tagSections[1];
-                        if (key.equals("ws:stack-amount")) {
-                            stackedItem.setStackAmount(Integer.parseInt(value), false);
+        Item item = stackedItem.getItem();
+        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
+
+        if(dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)){
+            Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
+            stackedItem.setStackAmount(stackAmount, false);
+        }
+        else {
+            // Old saving method
+            EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
+            for (String scoreboardTag : entityItem.getScoreboardTags()) {
+                if (scoreboardTag.startsWith("ws:")) {
+                    String[] tagSections = scoreboardTag.split("=");
+                    if (tagSections.length == 2) {
+                        try {
+                            String key = tagSections[0], value = tagSections[1];
+                            if (key.equals("ws:stack-amount")) {
+                                stackedItem.setStackAmount(Integer.parseInt(value), false);
+                            }
+                        } catch (Exception ignored) {
                         }
-                    } catch (Exception ignored) {
                     }
                 }
             }
