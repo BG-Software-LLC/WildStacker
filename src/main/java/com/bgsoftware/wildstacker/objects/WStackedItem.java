@@ -388,10 +388,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                 amountLeft += giveItem(inventory, itemStack.clone());
             }
 
-            setStackAmount(amountLeft, true);
-
-            if (amountLeft <= 0) {
+            if(amountLeft <= 0){
                 remove();
+            }
+            else {
+                setStackAmount(amountLeft, true);
             }
         }
     }
