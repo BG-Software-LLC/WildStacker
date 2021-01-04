@@ -389,6 +389,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             }
 
             if(amountLeft <= 0){
+                setStackAmount(amountLeft, false);
                 remove();
             }
             else {
