@@ -78,9 +78,6 @@ public final class StatementHolder {
     }
 
     public void execute(boolean async) {
-        System.out.println("Executing " + queryEnum);
-        new Exception().printStackTrace();
-
         if(async && !Executor.isDataThread()){
             Executor.data(() -> execute(false));
             return;
