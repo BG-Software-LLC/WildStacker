@@ -104,7 +104,7 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
         createCondition("IN_WATER_DEEP",
                 (world, position) -> world.getType(position).getBlock() == Blocks.WATER &&
                         world.getType(position.up()).getBlock() == Blocks.WATER,
-                EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TROPICAL_FISH
+                EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.TROPICAL_FISH, EntityType.DOLPHIN
         );
 
         createCondition("MONSTER_LIGHT", (world, position) -> {
