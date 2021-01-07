@@ -50,11 +50,13 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        Query.BARREL_INSERT.insertParameters()
-                .setLocation(getLocation())
-                .setObject(getStackAmount())
-                .setItemStack(getBarrelItem(1))
-                .queue(getLocation());
+        if(saveData) {
+            Query.BARREL_INSERT.getStatementHolder()
+                    .setLocation(getLocation())
+                    .setInt(getStackAmount())
+                    .setItemStack(getBarrelItem(1))
+                    .execute(true);
+        }
     }
 
     @Override
@@ -129,7 +131,9 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         plugin.getSystemManager().removeStackObject(this);
 
-        Query.BARREL_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
+        Query.BARREL_DELETE.getStatementHolder()
+                .setLocation(getLocation())
+                .execute(true);
 
         removeHologram();
         removeDisplayBlock();

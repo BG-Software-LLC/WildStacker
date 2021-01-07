@@ -36,7 +36,9 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
         if(cachedBarrels != null)
             cachedBarrels.remove(location);
 
-        Query.BARREL_DELETE.insertParameters().setLocation(getLocation()).queue(getLocation());
+        Query.BARREL_DELETE.getStatementHolder()
+                .setLocation(getLocation())
+                .execute(true);
     }
 
 }

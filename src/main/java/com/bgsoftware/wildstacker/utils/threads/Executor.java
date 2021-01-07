@@ -53,6 +53,10 @@ public final class Executor {
         return Bukkit.getScheduler().runTaskTimer(plugin, runnable, 0L, period);
     }
 
+    public static boolean isDataThread(){
+        return Thread.currentThread().getName().contains("WildStacker Database Thread");
+    }
+
     public static void data(Runnable runnable){
         if(shutdown)
             return;
@@ -63,10 +67,28 @@ public final class Executor {
     public static void stop(){
         try{
             shutdown = true;
-            dataService.shutdown();
-            dataService.awaitTermination(1, TimeUnit.MINUTES);
-        }catch (Exception ex){
+            System.out.println("Shutting down database executor");
+            shutdownAndAwaitTermination();
+        }catch(Exception ex){
             ex.printStackTrace();
+        }
+    }
+
+    private static void shutdownAndAwaitTermination() {
+        dataService.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!dataService.awaitTermination(60, TimeUnit.SECONDS)) {
+                dataService.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!dataService.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            dataService.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 }

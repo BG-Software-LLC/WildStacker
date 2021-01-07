@@ -9,8 +9,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
-import com.bgsoftware.wildstacker.database.Database;
-import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.SQLHelper;
 import com.bgsoftware.wildstacker.listeners.ChunksListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
@@ -27,7 +26,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +64,8 @@ public final class DataHandler {
 
         Executor.sync(() -> {
             try {
-                Database.start(new File(plugin.getDataFolder(), "database.db"));
+                //Database.start(new File(plugin.getDataFolder(), "database.db"));
+                SQLHelper.createConnection(plugin);
                 loadDatabase();
             }catch(Exception ex){
                 ex.printStackTrace();
@@ -77,7 +76,8 @@ public final class DataHandler {
     }
 
     public void clearDatabase(){
-        Database.stop();
+        //Database.stop();
+        SQLHelper.close();
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner){
@@ -120,19 +120,19 @@ public final class DataHandler {
 
     private void loadDatabase(){
         //Creating default spawners table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER, upgrade INTEGER);");
+        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER, upgrade INTEGER);");
         // Adding upgrade column if it doesn't exist
         addColumnIfNotExists("upgrade", "spawners", "0", "INTEGER");
 
         //Creating default barrels table
-        Database.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
+        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
 
         long startTime = System.currentTimeMillis();
 
         if(plugin.getSettings().storeEntities) {
             WildStackerPlugin.log("Starting to load entities...");
 
-            Database.executeQuery("SELECT * FROM entities;", resultSet -> {
+            SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
                 while (resultSet.next()) {
                     int stackAmount = resultSet.getInt("stackAmount");
                     SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
@@ -149,7 +149,7 @@ public final class DataHandler {
         if(plugin.getSettings().storeItems) {
             WildStackerPlugin.log("Starting to load items...");
 
-            Database.executeQuery("SELECT * FROM items;", resultSet -> {
+            SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
                 while (resultSet.next()) {
                     int stackAmount = resultSet.getInt("stackAmount");
                     UUID uuid = UUID.fromString(resultSet.getString("uuid"));
@@ -163,7 +163,7 @@ public final class DataHandler {
         startTime = System.currentTimeMillis();
         WildStackerPlugin.log("Starting to load spawners...");
 
-        Database.executeQuery("SELECT * FROM spawners;", resultSet -> {
+        SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -195,7 +195,7 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    Query.SPAWNER_DELETE.insertParameters().setObject(location).queue(location);
+                    SQLHelper.executeUpdate("DELETE FROM spawners WHERE location = '" + location + "';");
                     WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
                 }
             }
@@ -205,7 +205,7 @@ public final class DataHandler {
         startTime = System.currentTimeMillis();
         WildStackerPlugin.log("Starting to load barrels...");
 
-        Database.executeQuery("SELECT * FROM barrels;", resultSet -> {
+        SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -237,7 +237,7 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if(exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    Database.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
+                    SQLHelper.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
                     WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
                 }
             }
@@ -258,7 +258,7 @@ public final class DataHandler {
 
         String statementStr = "ALTER TABLE " + table + " ADD " + column + " " + type + defaultSection + ";";
 
-        Database.executeUpdate(statementStr, ex -> {
+        SQLHelper.executeUpdate(statementStr, ex -> {
             if(!ex.getMessage().toLowerCase().contains("duplicate")) {
                 System.out.println("Statement: " + statementStr);
                 ex.printStackTrace();

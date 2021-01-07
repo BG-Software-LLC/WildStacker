@@ -60,7 +60,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     private boolean deadEntityFlag = false;
     private boolean removed = false;
-    private boolean saveEntity = true;
     private boolean demoEntity = false;
     private Predicate<LivingEntity> stackFlag = null;
     private int breedableAmount = 0;
@@ -87,7 +86,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        if(saveEntity)
+        if(saveData)
             plugin.getSystemManager().markToBeSaved(this);
     }
 
@@ -218,7 +217,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
-                if(saveEntity)
+                if(saveData)
                     plugin.getSystemManager().markToBeSaved(this);
 
                 //We update cached values of mcmmo
@@ -602,7 +601,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause == null ? SpawnCause.CHUNK_GEN : spawnCause;
-        if(saveEntity)
+        if(saveData)
             plugin.getSystemManager().markToBeSaved(this);
     }
 
@@ -645,7 +644,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public void setNameTag(){
         EntityStorage.setMetadata(object, "nameTag", true);
-        if(saveEntity)
+        if(saveData)
             plugin.getSystemManager().markToBeSaved(this);
     }
 
@@ -661,10 +660,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public boolean wasRemoved(){
         return removed;
-    }
-
-    public void setSaveEntity(boolean saveEntity){
-        this.saveEntity = saveEntity && isCached();
     }
 
     public boolean shouldBeStacked(){

@@ -24,8 +24,8 @@ public enum Query {
         return parametersCount;
     }
 
-    public QueryParameters insertParameters(){
-        return new QueryParameters(this);
+    public StatementHolder getStatementHolder(){
+        return new StatementHolder(this);
     }
 
 }

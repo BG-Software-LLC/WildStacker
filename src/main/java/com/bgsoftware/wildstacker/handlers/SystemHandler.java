@@ -150,7 +150,7 @@ public final class SystemHandler implements SystemManager {
             String cachedData = DataSerializer.deserializeData(stackedEntity.getCustomName());
 
             try {
-                ((WStackedEntity) stackedEntity).setSaveEntity(false);
+                ((WStackedEntity) stackedEntity).setSaveData(false);
                 if (!cachedData.isEmpty()) {
                     String[] dataSections = cachedData.split("-");
                     try {
@@ -171,8 +171,8 @@ public final class SystemHandler implements SystemManager {
                 } else {
                     dataSerializer.loadEntity(stackedEntity);
                 }
-            }finally {
-                ((WStackedEntity) stackedEntity).setSaveEntity(true);
+            } finally {
+                ((WStackedEntity) stackedEntity).setSaveData(true);
             }
         }
 
@@ -219,7 +219,7 @@ public final class SystemHandler implements SystemManager {
             String cachedData = DataSerializer.deserializeData(stackedItem.getCustomName());
 
             try {
-                ((WStackedItem) stackedItem).setSaveItem(false);
+                ((WStackedItem) stackedItem).setSaveData(false);
                 if (!cachedData.isEmpty()) {
                     try {
                         stackedItem.setStackAmount(Integer.parseInt(cachedData), false);
@@ -236,7 +236,7 @@ public final class SystemHandler implements SystemManager {
                 if(stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize())
                     stackedItem.setStackAmount(stackedItem.getStackAmount(), false);
             }finally {
-                ((WStackedItem) stackedItem).setSaveItem(true);
+                ((WStackedItem) stackedItem).setSaveData(true);
             }
         }
 
@@ -470,9 +470,14 @@ public final class SystemHandler implements SystemManager {
 
                     if (block.getType() == Materials.SPAWNER.toBukkitType()) {
                         WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                        stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), false);
-                        stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
-                        dataHandler.addStackedSpawner(stackedSpawner);
+                        try {
+                            stackedSpawner.setSaveData(false);
+                            stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), false);
+                            stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
+                            dataHandler.addStackedSpawner(stackedSpawner);
+                        } finally {
+                            stackedSpawner.setSaveData(true);
+                        }
                     }
                 }
             }
@@ -497,10 +502,15 @@ public final class SystemHandler implements SystemManager {
                     Block block = location.getBlock();
 
                     if(block.getType() == Material.CAULDRON){
-                        StackedBarrel stackedBarrel = new WStackedBarrel(block, unloadedStackedBarrel.getBarrelItem(1));
-                        stackedBarrel.setStackAmount(unloadedStackedBarrel.getStackAmount(), true);
-                        stackedBarrel.createDisplayBlock();
-                        dataHandler.addStackedBarrel(stackedBarrel);
+                        WStackedBarrel stackedBarrel = new WStackedBarrel(block, unloadedStackedBarrel.getBarrelItem(1));
+                        try {
+                            stackedBarrel.setSaveData(false);
+                            stackedBarrel.setStackAmount(unloadedStackedBarrel.getStackAmount(), true);
+                            stackedBarrel.createDisplayBlock();
+                            dataHandler.addStackedBarrel(stackedBarrel);
+                        } finally {
+                            stackedBarrel.setSaveData(true);
+                        }
                     }
                 }
             }

@@ -21,6 +21,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     protected final T object;
     private int stackAmount;
+    protected boolean saveData = true;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     protected WStackedObject(T object, int stackAmount) {
@@ -49,6 +50,10 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
         if(updateName)
             updateName();
+    }
+
+    public void setSaveData(boolean saveData){
+        this.saveData = saveData && isCached();
     }
 
     @Override
