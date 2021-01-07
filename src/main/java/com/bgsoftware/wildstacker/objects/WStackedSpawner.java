@@ -54,13 +54,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public void setStackAmount(int stackAmount, boolean updateName) {
         super.setStackAmount(stackAmount, updateName);
-        if(saveData) {
-            Query.SPAWNER_INSERT.getStatementHolder()
-                    .setLocation(getLocation())
-                    .setInt(getStackAmount())
-                    .setInt(spawnerUpgradeId)
-                    .execute(true);
-        }
+        if(saveData)
+            plugin.getSystemManager().markToBeSaved(this);
     }
 
     @Override
@@ -294,6 +289,11 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     }
 
     @Override
+    public int hashCode() {
+        return getLocation().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof StackedSpawner ? getLocation().equals(((StackedSpawner) obj).getLocation()) : super.equals(obj);
     }
@@ -333,13 +333,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         SyncedCreatureSpawner.of(object).updateSpawner(spawnerUpgrade);
 
-        if(saveData) {
-            Query.SPAWNER_INSERT.getStatementHolder()
-                    .setLocation(getLocation())
-                    .setInt(getStackAmount())
-                    .setInt(spawnerUpgradeId)
-                    .execute(true);
-        }
+        if(saveData)
+            plugin.getSystemManager().markToBeSaved(this);
     }
 
     /*

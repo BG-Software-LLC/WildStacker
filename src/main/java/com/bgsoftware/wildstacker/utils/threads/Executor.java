@@ -13,7 +13,7 @@ public final class Executor {
 
     private static final ExecutorService dataService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("WildStacker Database Thread #%d").build());
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static boolean shutdown = false;
+    private static boolean shutdown = false, dataShutdown = false;
 
     public static void sync(Runnable runnable){
         if(shutdown)
@@ -58,15 +58,19 @@ public final class Executor {
     }
 
     public static void data(Runnable runnable){
-        if(shutdown)
+        if(dataShutdown)
             return;
 
         dataService.execute(runnable);
     }
 
     public static void stop(){
+        shutdown = true;
+    }
+
+    public static void stopData(){
         try{
-            shutdown = true;
+            dataShutdown = true;
             System.out.println("Shutting down database executor");
             shutdownAndAwaitTermination();
         }catch(Exception ex){

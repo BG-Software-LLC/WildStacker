@@ -161,6 +161,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             //We need to save the entire database
             systemManager.performCacheSave();
 
+            Executor.stopData();
+
             log("Clearing database...");
             //We need to close the connection
             dataHandler.clearDatabase();

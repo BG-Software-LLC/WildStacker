@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
@@ -117,6 +118,8 @@ public final class SystemHandler implements SystemManager {
             dataHandler.removeStackedSpawner((StackedSpawner) stackedObject);
         else if(stackedObject instanceof StackedBarrel)
             dataHandler.removeStackedBarrel((StackedBarrel) stackedObject);
+
+        markToBeUnsaved(stackedObject);
     }
 
     @Override
@@ -432,6 +435,18 @@ public final class SystemHandler implements SystemManager {
                     dataSerializer.saveEntity((StackedEntity) stackedObject);
                 } else if (stackedObject instanceof StackedItem) {
                     dataSerializer.saveItem((StackedItem) stackedObject);
+                } else if(stackedObject instanceof StackedSpawner){
+                    Query.SPAWNER_INSERT.getStatementHolder()
+                            .setLocation(stackedObject.getLocation())
+                            .setInt(stackedObject.getStackAmount())
+                            .setInt(((WStackedSpawner) stackedObject).getUpgradeId())
+                            .execute(true);
+                } else if(stackedObject instanceof StackedBarrel){
+                    Query.BARREL_INSERT.getStatementHolder()
+                            .setLocation(stackedObject.getLocation())
+                            .setInt(stackedObject.getStackAmount())
+                            .setItemStack(((StackedBarrel) stackedObject).getBarrelItem(1))
+                            .execute(true);
                 }
             });
             dataHandler.OBJECTS_TO_SAVE.clear();
@@ -444,6 +459,15 @@ public final class SystemHandler implements SystemManager {
         try {
             dataHandler.saveLock.readLock().lock();
             dataHandler.OBJECTS_TO_SAVE.add(stackedObject);
+        } finally {
+            dataHandler.saveLock.readLock().unlock();
+        }
+    }
+
+    public void markToBeUnsaved(StackedObject stackedObject){
+        try {
+            dataHandler.saveLock.readLock().lock();
+            dataHandler.OBJECTS_TO_SAVE.remove(stackedObject);
         } finally {
             dataHandler.saveLock.readLock().unlock();
         }

@@ -327,6 +327,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
+    public int hashCode() {
+        return getUniqueId().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof StackedItem ? getUniqueId().equals(((StackedItem) obj).getUniqueId()) : super.equals(obj);
     }

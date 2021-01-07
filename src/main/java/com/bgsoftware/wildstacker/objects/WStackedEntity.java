@@ -432,6 +432,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     @Override
+    public int hashCode() {
+        return getUniqueId().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof StackedEntity && getUniqueId().equals(((StackedEntity) obj).getUniqueId());
     }
