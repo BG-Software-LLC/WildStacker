@@ -460,7 +460,7 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
         }
 
         private void addEntity(Entity entity) {
-            ((WorldServer) world).unregisterEntity(entity);
+            entity.valid = false;
             if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER))
                 entity.getPassengers().forEach(this::addEntity);
         }
