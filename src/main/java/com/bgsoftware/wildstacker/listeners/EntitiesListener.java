@@ -54,10 +54,12 @@ import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockShearEntityEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -106,21 +108,32 @@ public final class EntitiesListener implements Listener {
     private final Set<UUID> noDeathEvent = new HashSet<>();
     private final WildStackerPlugin plugin;
 
+    private int mooshroomFlag = -1;
+    private int nextEntityStackAmount = -1;
+    private EntityTypes nextEntityType = null;
+    private int nextUpgradeId = 0;
+
     public EntitiesListener(WildStackerPlugin plugin){
         this.plugin = plugin;
         EntitiesListener.IMP = this;
 
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
-            plugin.getServer().getPluginManager().registerEvents(new TransformListener(plugin), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new TransformListener(), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_14))
-            plugin.getServer().getPluginManager().registerEvents(new TurtleListener(plugin), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new TurtleListener(), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_15))
-            plugin.getServer().getPluginManager().registerEvents(new BeeListener(plugin), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
             plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
         if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent"))
-            plugin.getServer().getPluginManager().registerEvents(new EntityRemoveListener(plugin), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new EntityRemoveListener(), plugin);
+        if(ReflectionUtils.isPluginEnabled("org.bukkit.event.block.BlockShearEntityEvent"))
+            plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
     }
+
+    /*
+     *  Event handlers
+     */
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e){
@@ -470,26 +483,6 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
     }
 
-    private void grandAchievement(Player killer, EntityType entityType, String name){
-        try{
-            plugin.getNMSAdapter().grandAchievement(killer, entityType, name);
-        }catch(Throwable ignored){}
-    }
-
-    private void grandAchievement(Player killer, String criteria, String name){
-        try{
-            plugin.getNMSAdapter().grandAchievement(killer, criteria, name);
-        }catch(Throwable ignored){}
-    }
-
-    private List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2){
-        List<ItemStack> toReturn = new ArrayList<>(list2);
-        toReturn.removeAll(list1);
-        return toReturn;
-    }
-
-    private int mooshroomFlag = -1;
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySpawnLow(CreatureSpawnEvent e){
         if(EntityUtils.isStackable(e.getEntity()) && EntityTypes.fromEntity(e.getEntity()).isSlime()){
@@ -508,140 +501,12 @@ public final class EntitiesListener implements Listener {
         handleEntitySpawn(e.getEntity(), e.getSpawnReason());
     }
 
-    // Handle entity removed from world.
-    public void handleEntityRemove(Entity entity){
-        if(EntityUtils.isStackable(entity)) {
-            plugin.getDataHandler().CACHED_ENTITIES.remove(entity.getUniqueId());
-        }
-        else if(entity instanceof Item){
-            plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
-        }
-        EntityStorage.clearMetadata(entity);
-    }
-
-    private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason){
-        if(!plugin.getSettings().entitiesStackingEnabled)
-            return;
-
-        if(!EntityUtils.isStackable(entity) || EntityStorage.hasMetadata(entity, "corpse"))
-            return;
-
-        SpawnCause spawnCause = SpawnCause.valueOf(spawnReason);
-
-        EntityStorage.setMetadata(entity, "spawn-cause", spawnCause);
-        StackedEntity stackedEntity = WStackedEntity.of(entity);
-
-        if(mooshroomFlag != -1){
-            stackedEntity.setStackAmount(mooshroomFlag, true);
-            mooshroomFlag = -1;
-        }
-
-        if(spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(entity) == EntityTypes.BEE){
-            org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) entity;
-            Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
-            if(beesAmount != null){
-                for(int i = beesAmount.length - 1; i >= 0; i--){
-                    if(beesAmount[i] != -1){
-                        stackedEntity.setStackAmount(beesAmount[i], true);
-                        beesAmount[i] = -1;
-                        break;
-                    }
-                    if(i == 0)
-                        EntitiesListener.beesAmount.remove(bee.getHive());
-                }
-            }
-        }
-
-        else if(spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE){
-            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(entity);
-            Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
-            if(cachedEggs != null && cachedEggs > 1) {
-                Executor.async(() -> {
-                    int newBabiesAmount = Random.nextInt(1,4, cachedEggs);
-                    WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
-                });
-            }
-        }
-
-        if(!stackedEntity.isCached())
-            return;
-
-        if(noStackEntities.contains(entity.getUniqueId())) {
-            noStackEntities.remove(entity.getUniqueId());
-            return;
-        }
-
-        //Chunk Limit
-        Executor.sync(() -> {
-            if(isChunkLimit(entity.getLocation().getChunk()))
-                stackedEntity.remove();
-        }, 5L);
-
-        //EpicSpawners has it's own event
-        if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
-            return;
-
-        if (!plugin.getSettings().spawnersStackingEnabled && !PluginHooks.isMergedSpawnersEnabled &&
-                spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
-            return;
-
-        Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
-            if(!entityOptional.isPresent())
-                stackedEntity.updateNerfed();
-        };
-
-        //Need to add a delay so eggs will get removed from inventory
-        if(spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
-                entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
-                entity.getType() == EntityType.SNOWMAN || PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
-            Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
-        else
-            stackedEntity.runStackAsync(entityConsumer);
-    }
-
-    private int nextEntityStackAmount = -1;
-    private EntityTypes nextEntityType = null;
-    private int nextUpgradeId = 0;
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerEggUse(PlayerInteractEvent e){
         if(e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 
         handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e);
-    }
-
-    public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event){
-        if(!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
-                plugin.getSettings().blacklistedEntities.contains(SpawnCause.SPAWNER_EGG) ||
-                (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
-            return false;
-
-        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
-        nextUpgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
-
-        if(Materials.isValidAndSpawnEgg(usedItem)) {
-            nextEntityType = ItemUtils.getEntityType(usedItem);
-
-            if (nextEntityType == null) {
-                nextEntityStackAmount = -1;
-                nextUpgradeId = 0;
-                return false;
-            }
-
-            EntityType nmsEntityType = ItemUtils.getNMSEntityType(usedItem);
-            if (nmsEntityType != null) {
-                event.setCancelled(true);
-                nextEntityType = EntityTypes.fromName(nmsEntityType.name());
-                Location toSpawn = clickedBlock.getRelative(blockFace).getLocation().add(0.5, 0, 0.5);
-                if (toSpawn.getBlock().getType() != Material.AIR)
-                    toSpawn = toSpawn.add(0, 1, 0);
-                plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
-                return true;
-            }
-        }
-
-        return true;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -752,47 +617,8 @@ public final class EntitiesListener implements Listener {
 
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerShear(PlayerShearEntityEvent e){
-        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(e.getEntity()))
-            return;
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-        if(e.getEntity() instanceof MushroomCow){
-            if(StackSplit.MUSHROOM_SHEAR.isEnabled()) {
-                stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
-                stackedEntity.remove();
-            }
-            else{
-                int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
-                ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
-                ItemUtils.dropItem(mushroomItem, e.getEntity().getLocation());
-                mooshroomFlag = stackedEntity.getStackAmount();
-            }
-        }
-
-        else if(e.getEntity() instanceof Sheep){
-            int stackAmount = stackedEntity.getStackAmount();
-            if(StackSplit.SHEEP_SHEAR.isEnabled()) {
-                Executor.sync(() -> {
-                    if (stackAmount > 1) {
-                        ((Sheep) e.getEntity()).setSheared(false);
-                        stackedEntity.setStackAmount(stackAmount - 1, true);
-                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
-                        ((Sheep) duplicate.getLivingEntity()).setSheared(true);
-                        duplicate.runStackAsync(null);
-                    } else {
-                        stackedEntity.runStackAsync(null);
-                    }
-                }, 0L);
-            }
-            else if(stackAmount > 1){
-                int woolAmount = ThreadLocalRandom.current().nextInt(2 * (stackAmount - 1)) + stackAmount - 1;
-                ItemStack woolItem = Materials.getWool((((Sheep) e.getEntity()).getColor()));
-                woolItem.setAmount(woolAmount);
-                ItemUtils.dropItem(woolItem, e.getEntity().getLocation());
-            }
-        }
+    public void onPlayerShearEntity(PlayerShearEntityEvent e){
+        handleEntityShear(e, e.getEntity());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -1019,6 +845,177 @@ public final class EntitiesListener implements Listener {
                         nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
+    /*
+     *  General methods
+     */
+
+    public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event){
+        if(!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
+                plugin.getSettings().blacklistedEntities.contains(SpawnCause.SPAWNER_EGG) ||
+                (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
+            return false;
+
+        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        nextUpgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
+
+        if(Materials.isValidAndSpawnEgg(usedItem)) {
+            nextEntityType = ItemUtils.getEntityType(usedItem);
+
+            if (nextEntityType == null) {
+                nextEntityStackAmount = -1;
+                nextUpgradeId = 0;
+                return false;
+            }
+
+            EntityType nmsEntityType = ItemUtils.getNMSEntityType(usedItem);
+            if (nmsEntityType != null) {
+                event.setCancelled(true);
+                nextEntityType = EntityTypes.fromName(nmsEntityType.name());
+                Location toSpawn = clickedBlock.getRelative(blockFace).getLocation().add(0.5, 0, 0.5);
+                if (toSpawn.getBlock().getType() != Material.AIR)
+                    toSpawn = toSpawn.add(0, 1, 0);
+                plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    // Handle entity removed from world.
+    public void handleEntityRemove(Entity entity){
+        if(EntityUtils.isStackable(entity)) {
+            plugin.getDataHandler().CACHED_ENTITIES.remove(entity.getUniqueId());
+        }
+        else if(entity instanceof Item){
+            plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
+        }
+        EntityStorage.clearMetadata(entity);
+    }
+
+    private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason){
+        if(!plugin.getSettings().entitiesStackingEnabled)
+            return;
+
+        if(!EntityUtils.isStackable(entity) || EntityStorage.hasMetadata(entity, "corpse"))
+            return;
+
+        SpawnCause spawnCause = SpawnCause.valueOf(spawnReason);
+
+        EntityStorage.setMetadata(entity, "spawn-cause", spawnCause);
+        StackedEntity stackedEntity = WStackedEntity.of(entity);
+
+        if(mooshroomFlag != -1){
+            stackedEntity.setStackAmount(mooshroomFlag, true);
+            mooshroomFlag = -1;
+        }
+
+        if(spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(entity) == EntityTypes.BEE){
+            org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) entity;
+            Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
+            if(beesAmount != null){
+                for(int i = beesAmount.length - 1; i >= 0; i--){
+                    if(beesAmount[i] != -1){
+                        stackedEntity.setStackAmount(beesAmount[i], true);
+                        beesAmount[i] = -1;
+                        break;
+                    }
+                    if(i == 0)
+                        EntitiesListener.beesAmount.remove(bee.getHive());
+                }
+            }
+        }
+
+        else if(spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE){
+            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(entity);
+            Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
+            if(cachedEggs != null && cachedEggs > 1) {
+                Executor.async(() -> {
+                    int newBabiesAmount = Random.nextInt(1,4, cachedEggs);
+                    WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
+                });
+            }
+        }
+
+        if(!stackedEntity.isCached())
+            return;
+
+        if(noStackEntities.contains(entity.getUniqueId())) {
+            noStackEntities.remove(entity.getUniqueId());
+            return;
+        }
+
+        //Chunk Limit
+        Executor.sync(() -> {
+            if(isChunkLimit(entity.getLocation().getChunk()))
+                stackedEntity.remove();
+        }, 5L);
+
+        //EpicSpawners has it's own event
+        if(stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
+            return;
+
+        if (!plugin.getSettings().spawnersStackingEnabled && !PluginHooks.isMergedSpawnersEnabled &&
+                spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
+            return;
+
+        Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
+            if(!entityOptional.isPresent())
+                stackedEntity.updateNerfed();
+        };
+
+        //Need to add a delay so eggs will get removed from inventory
+        if(spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
+                entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
+                entity.getType() == EntityType.SNOWMAN || PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
+            Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
+        else
+            stackedEntity.runStackAsync(entityConsumer);
+    }
+
+    private void handleEntityShear(Cancellable cancellable, Entity entity){
+        if(!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(entity))
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(entity);
+
+        if(entity instanceof MushroomCow){
+            if(StackSplit.MUSHROOM_SHEAR.isEnabled()) {
+                stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
+                stackedEntity.remove();
+            }
+            else{
+                int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
+                ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
+                ItemUtils.dropItem(mushroomItem, entity.getLocation());
+                mooshroomFlag = stackedEntity.getStackAmount();
+            }
+        }
+
+        else if(entity instanceof Sheep){
+            int stackAmount = stackedEntity.getStackAmount();
+            if(StackSplit.SHEEP_SHEAR.isEnabled()) {
+                Executor.sync(() -> {
+                    if (stackAmount > 1) {
+                        ((Sheep) entity).setSheared(false);
+                        stackedEntity.setStackAmount(stackAmount - 1, true);
+                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                        ((Sheep) duplicate.getLivingEntity()).setSheared(true);
+                        duplicate.runStackAsync(null);
+                    } else {
+                        stackedEntity.runStackAsync(null);
+                    }
+                }, 0L);
+            }
+            else if(stackAmount > 1){
+                int woolAmount = ThreadLocalRandom.current().nextInt(2 * (stackAmount - 1)) + stackAmount - 1;
+                ItemStack woolItem = Materials.getWool((((Sheep) entity).getColor()));
+                woolItem.setAmount(woolAmount);
+                ItemUtils.dropItem(woolItem, entity.getLocation());
+            }
+        }
+    }
+
     private boolean isChunkLimit(Chunk chunk){
         int chunkLimit = plugin.getSettings().entitiesChunkLimit;
 
@@ -1028,7 +1025,35 @@ public final class EntitiesListener implements Listener {
         return (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count() > chunkLimit;
     }
 
-    class EntityKillListener implements Listener {
+    private void grandAchievement(Player killer, EntityType entityType, String name){
+        try{
+            plugin.getNMSAdapter().grandAchievement(killer, entityType, name);
+        }catch(Throwable ignored){}
+    }
+
+    private void grandAchievement(Player killer, String criteria, String name){
+        try{
+            plugin.getNMSAdapter().grandAchievement(killer, criteria, name);
+        }catch(Throwable ignored){}
+    }
+
+    private List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2){
+        List<ItemStack> toReturn = new ArrayList<>(list2);
+        toReturn.removeAll(list1);
+        return toReturn;
+    }
+
+    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager){
+        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
+        if(damager == null){
+            return new EntityDamageEvent(entity, damageCause, damageModifiers, damageModifiersFunctions);
+        }
+        else{
+            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
+        }
+    }
+
+    private class EntityKillListener implements Listener {
 
         @EventHandler
         public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent e){
@@ -1042,13 +1067,7 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    private static class EntityRemoveListener implements Listener {
-
-        private final WildStackerPlugin plugin;
-
-        private EntityRemoveListener(WildStackerPlugin plugin){
-            this.plugin = plugin;
-        }
+    private class EntityRemoveListener implements Listener {
 
         @EventHandler
         public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent e){
@@ -1062,23 +1081,7 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager){
-        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
-        if(damager == null){
-            return new EntityDamageEvent(entity, damageCause, damageModifiers, damageModifiersFunctions);
-        }
-        else{
-            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
-        }
-    }
-
-    private static class TransformListener implements Listener {
-
-        private final WildStackerPlugin plugin;
-
-        TransformListener(WildStackerPlugin plugin){
-            this.plugin = plugin;
-        }
+    private class TransformListener implements Listener {
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
@@ -1108,13 +1111,7 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    private static class BeeListener implements Listener {
-
-        private final WildStackerPlugin plugin;
-
-        BeeListener(WildStackerPlugin plugin){
-            this.plugin = plugin;
-        }
+    private class BeeListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onBee(EntityEnterBlockEvent e){
@@ -1144,13 +1141,7 @@ public final class EntitiesListener implements Listener {
 
     }
 
-    private static class TurtleListener implements Listener {
-
-        private final WildStackerPlugin plugin;
-
-        TurtleListener(WildStackerPlugin plugin){
-            this.plugin = plugin;
-        }
+    private class TurtleListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onTurtleEggLay(EntityChangeBlockEvent e){
@@ -1163,6 +1154,15 @@ public final class EntitiesListener implements Listener {
                     turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
                 }
             }
+        }
+
+    }
+
+    private class BlockShearEntityListener implements Listener {
+
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onBlockShearEntity(BlockShearEntityEvent e){
+            handleEntityShear(e, e.getEntity());
         }
 
     }
