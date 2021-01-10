@@ -1,8 +1,8 @@
 package com.bgsoftware.wildstacker.menu;
 
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
@@ -168,7 +168,12 @@ public final class SpawnerAmountsMenu extends WildMenu {
             FileUtils.saveResource("menus/spawner-amounts.yml");
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-amounts.yml"), IGNORED_CONFIG_PATHS);
+
+        try {
+            cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-amounts.yml"), IGNORED_CONFIG_PATHS);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnerAmountsMenu, "spawner-amounts.yml", cfg);
         Map<Integer, Integer> depositSpawners = new HashMap<>();

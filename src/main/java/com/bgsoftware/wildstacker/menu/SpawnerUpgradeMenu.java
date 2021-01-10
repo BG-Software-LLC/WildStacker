@@ -1,9 +1,9 @@
 package com.bgsoftware.wildstacker.menu;
 
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -139,7 +139,12 @@ public final class SpawnerUpgradeMenu extends WildMenu {
             FileUtils.saveResource("menus/spawner-upgrade.yml");
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-upgrade.yml"), IGNORED_CONFIG_PATHS);
+
+        try {
+            cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-upgrade.yml"), IGNORED_CONFIG_PATHS);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnerUpgradeMenu, "spawner-upgrade.yml", cfg);
 

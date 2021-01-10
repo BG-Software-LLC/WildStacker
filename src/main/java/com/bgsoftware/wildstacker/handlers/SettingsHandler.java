@@ -1,11 +1,11 @@
 package com.bgsoftware.wildstacker.handlers;
 
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
 import com.bgsoftware.wildstacker.menu.SpawnerUpgradeMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
@@ -140,7 +140,11 @@ public final class SettingsHandler {
 
         dataConvertor(cfg);
 
-        cfg.syncWithConfig(file, plugin.getResource("config.yml"), CONFIG_IGNORED_SECTIONS);
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("config.yml"), CONFIG_IGNORED_SECTIONS);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&6x{0} &f&o{1} {2}"));
         SPAWNERS_PATTERN = Pattern.compile(giveItemName

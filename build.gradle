@@ -29,6 +29,7 @@ subprojects {
 repositories {
     maven { url 'https://repo.bg-software.com/repository/nms/' }
     maven { url 'https://repo.bg-software.com/repository/api/' }
+    maven { url 'https://repo.bg-software.com/repository/common/' }
     maven { url 'https://repo.bg-software.com/repository/public-libs/' }
 
     String mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : System.getenv('mavenUsername');
@@ -49,6 +50,8 @@ repositories {
 dependencies {
     implementation project(":API")
     implementation fileTree("archive")
+
+    implementation 'com.bgsoftware.common.config:CommentedConfiguration:latest'
 
     // Spigot jars
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"

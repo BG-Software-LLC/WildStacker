@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.menu;
 
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
@@ -121,7 +121,12 @@ public final class SpawnersManageMenu extends WildMenu {
             FileUtils.saveResource("menus/spawner-manage.yml");
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-manage.yml"), IGNORED_CONFIG_PATHS);
+
+        try {
+            cfg.syncWithConfig(file, FileUtils.getResource("menus/spawner-manage.yml"), IGNORED_CONFIG_PATHS);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         Map<Character, List<Integer>> charSlots = FileUtils.loadGUI(spawnersManageMenu, "spawner-manage.yml", cfg);
 

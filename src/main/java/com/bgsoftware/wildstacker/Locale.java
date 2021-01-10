@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker;
 
-import com.bgsoftware.wildstacker.config.CommentedConfiguration;
+import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -122,7 +122,12 @@ public final class Locale {
             FileUtils.saveResource("lang.yml");
 
         CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-        cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
+
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         for(String identifier : localeMap.keySet()){
             localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));
