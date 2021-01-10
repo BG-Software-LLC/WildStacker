@@ -48,11 +48,11 @@ public final class UpgradesHandler implements UpgradesManager {
     public SpawnerUpgrade createDefault(List<String> allowedEntities) {
         SpawnerUpgrade spawnerUpgrade = new WSpawnerUpgrade("Default", 0);
 
-        if(allowedEntities.size() > 0) {
-            spawnerUpgrade.setAllowedEntities(allowedEntities);
+        if(allowedEntities.isEmpty()) {
             GLOBAL_UPGRADE = spawnerUpgrade;
         }
         else {
+            spawnerUpgrade.setAllowedEntities(allowedEntities);
             defaultUpgrades.add(spawnerUpgrade);
         }
 
@@ -71,8 +71,8 @@ public final class UpgradesHandler implements UpgradesManager {
 
     @Override
     public SpawnerUpgrade getDefaultUpgrade(EntityType entityType) {
-        return entityType == null ? GLOBAL_UPGRADE : defaultUpgrades.stream().filter(spawnerUpgrade ->
-                spawnerUpgrade.isEntityAllowed(entityType)).findFirst().orElse(GLOBAL_UPGRADE);
+        return entityType == null ? GLOBAL_UPGRADE : defaultUpgrades.stream().filter(_spawnerUpgrade ->
+                _spawnerUpgrade.isEntityAllowed(entityType)).findFirst().orElse(GLOBAL_UPGRADE);
     }
 
     @Override
