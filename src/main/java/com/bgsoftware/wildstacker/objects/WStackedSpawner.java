@@ -40,6 +40,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     private SpawnersManageMenu spawnersManageMenu;
     private LivingEntity linkedEntity = null;
     private int spawnerUpgradeId = 0;
+    private EntityType cachedEntity;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner){
         this(creatureSpawner, 1);
@@ -49,6 +50,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
         if(plugin.getSettings().spawnersOverrideEnabled)
             plugin.getNMSSpawners().updateStackedSpawner(this);
+        cachedEntity = creatureSpawner.getSpawnedType();
     }
 
     @Override
@@ -67,7 +69,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     public EntityType getSpawnedType(){
         if(object.getSpawnedType() == null)
             object.setSpawnedType(EntityType.PIG);
-        return object.getSpawnedType();
+        return Bukkit.isPrimaryThread() ? (cachedEntity = object.getSpawnedType()) : cachedEntity;
     }
 
     @Override
