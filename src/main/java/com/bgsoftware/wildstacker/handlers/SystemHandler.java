@@ -71,7 +71,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class SystemHandler implements SystemManager {
 
@@ -544,44 +543,35 @@ public final class SystemHandler implements SystemManager {
     }
 
     public void handleChunkLoad(Chunk chunk){
-        Entity[] entities = chunk.getEntities();
-
-        // We substring names if necessary
-        Arrays.stream(entities).filter(entity -> {
-            String customName = plugin.getNMSAdapter().getCustomName(entity);
-            return customName != null && customName.length() > 256;
-        }).forEach(entity -> {
-            String customName = plugin.getNMSAdapter().getCustomName(entity);
-            plugin.getNMSAdapter().setCustomName(entity, customName.substring(0, 256));
-        });
-
-        if(ServerVersion.isAtLeast(ServerVersion.v1_8)) {
-            //Trying to remove all the corrupted stacked blocks
-            Executor.async(() -> {
-                Stream<Entity> entityStream = Arrays.stream(entities).filter(entity -> {
-                    String customName = plugin.getNMSAdapter().getCustomName(entity);
-                    return entity instanceof ArmorStand && customName != null && customName.equals("BlockDisplay") &&
-                            !isStackedBarrel(entity.getLocation().getBlock());
-                });
-                Executor.sync(() -> entityStream.forEach(entity -> {
-                    Block block = entity.getLocation().getBlock();
-                    if (block.getType() == Material.CAULDRON)
-                        block.setType(Material.AIR);
-                    entity.remove();
-                }));
-            });
-
-            loadBarrels(chunk);
-        }
-
         loadSpawners(chunk);
 
-        //Update nerf status & names to all entities
-        Executor.async(() -> Arrays.stream(entities).filter(EntityUtils::isStackable).forEach(entity -> {
-            StackedEntity stackedEntity = WStackedEntity.of(entity);
-            stackedEntity.updateNerfed();
-            stackedEntity.updateName();
-        }));
+        boolean atLeast18 = ServerVersion.isAtLeast(ServerVersion.v1_8);
+
+        if(atLeast18)
+            loadBarrels(chunk);
+
+        for(Entity entity : chunk.getEntities()){
+            String customName = plugin.getNMSAdapter().getCustomName(entity);
+
+            // Checking for too long names
+            if(customName != null && customName.length() > 256)
+                plugin.getNMSAdapter().setCustomName(entity, customName.substring(0, 256));
+
+            // Remove display blocks of invalid barrels
+            if(atLeast18 && entity instanceof ArmorStand && customName != null &&
+                    customName.equals("BlockDisplay") && !isStackedBarrel(entity.getLocation().getBlock())){
+                Block block = entity.getLocation().getBlock();
+                if (block.getType() == Material.CAULDRON)
+                    block.setType(Material.AIR);
+                entity.remove();
+            }
+
+            if(EntityUtils.isStackable(entity)){
+                StackedEntity stackedEntity = WStackedEntity.of(entity);
+                stackedEntity.updateNerfed();
+                stackedEntity.updateName();
+            }
+        }
     }
 
     public void handleChunkUnload(Chunk chunk){
