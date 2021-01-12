@@ -20,6 +20,38 @@ You must add yourself all the private jars or purchase access to our private rep
 - PlotSquared (legacy, v4 & v5) by IntellectualSites [[link]](https://www.spigotmc.org/resources/77506/)
 - ShopGUIPlus (v1.18 & v1.20) by brcdev [[link]](https://www.spigotmc.org/resources/6515/)
 
+## API
+
+You can hook into the plugin by using the built-in API module.<br>
+The API module is safe to be used, its methods will not be renamed or changed, and will not have methods removed 
+without any further warning.<br>
+You can add the API as a dependency using Maven or Gradle:<br>
+
+#### Maven
+```
+<repository>
+    <id>bg-repo</id>
+    <url>https://repo.bg-software.com/repository/api/</url>
+</repository>
+
+<dependency>
+    <groupId>com.bgsoftware</groupId>
+    <artifactId>WildStackerAPI</artifactId>
+    <version>latest</version>
+</dependency>
+```
+
+#### Gradle
+```
+repositories {
+    maven { url 'https://repo.bg-software.com/repository/api/' }
+}
+
+dependencies {
+    compileOnly 'com.bgsoftware:WildStackerAPI:latest'
+}
+```
+
 ## Updates
 
 This plugin is provided "as is", which means no updates or new features are guaranteed. We will do our best to keep 
