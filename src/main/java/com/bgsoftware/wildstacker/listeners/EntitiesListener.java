@@ -399,6 +399,11 @@ public final class EntitiesListener implements Listener {
                         McMMOHook.updateCachedName(livingEntity);
                         boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnedEntity(livingEntity);
 
+                        // I set the health to 0 so it will be 0 in the EntityDeathEvent
+                        // Some plugins, such as MyPet, check for that value
+                        double originalHealth = livingEntity.getHealth();
+                        plugin.getNMSAdapter().setHealthDirectly(livingEntity, 0);
+
                         EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
 
                         boolean spawnDuplicate = false;
@@ -411,6 +416,7 @@ public final class EntitiesListener implements Listener {
                         }
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
+                        plugin.getNMSAdapter().setHealthDirectly(livingEntity, originalHealth);
 
                         stackedEntity.setStackAmount(currentStackAmount, false);
 
