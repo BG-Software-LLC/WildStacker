@@ -9,14 +9,14 @@ import org.bukkit.scheduler.BukkitTask;
 
 public final class KillTask extends BukkitRunnable {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static BukkitTask task = null;
     private long timeLeft;
 
     private KillTask(){
         timeLeft = plugin.getSettings().killTaskInterval;
-        task = runTaskTimerAsynchronously(plugin, 20L,20L);
+        task = runTaskTimer(plugin, 20L,20L);
     }
 
     public static void start(){

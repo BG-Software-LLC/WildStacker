@@ -137,12 +137,6 @@ public final class SystemHandler implements SystemManager {
         else
             stackedEntity = new WStackedEntity(livingEntity);
 
-        //Checks if the entity still exists after a few ticks
-        Executor.sync(() -> {
-            if(livingEntity.isDead())
-                dataHandler.CACHED_ENTITIES.remove(livingEntity.getUniqueId());
-        }, 10L);
-
         Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
         if(entityData != null) {
             stackedEntity.setStackAmount(entityData.getKey(), false);

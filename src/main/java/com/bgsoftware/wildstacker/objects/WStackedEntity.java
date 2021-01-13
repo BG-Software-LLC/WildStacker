@@ -199,11 +199,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void updateName() {
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(this::updateName);
-            return;
-        }
-
         if(isNameBlacklisted() || hasNameTag())
             return;
 

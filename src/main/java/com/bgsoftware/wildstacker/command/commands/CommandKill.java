@@ -6,8 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -56,11 +54,6 @@ public final class CommandKill implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        if(Bukkit.isPrimaryThread()){
-            Executor.async(() -> perform(plugin, sender, args));
-            return;
-        }
-
         Set<EntityTypes> entityTypes = new HashSet<>();
         Set<SpawnCause> spawnCauses = new HashSet<>();
         IntegerValue integerValue = new IntegerValue(-1);
