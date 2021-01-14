@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
 import org.bukkit.Location;
@@ -155,7 +156,11 @@ public interface NMSAdapter {
 
     Enchantment getGlowEnchant();
 
-    ItemStack getPlayerSkull(String texture);
+    ItemStack getPlayerSkull(ItemStack bukkitItem, String texture);
+
+    default ItemStack getPlayerSkull(String texture){
+        return getPlayerSkull(Materials.PLAYER_HEAD.toBukkitItem(), texture);
+    }
 
     default boolean isDroppedItem(Entity entity){
         return entity instanceof Item;

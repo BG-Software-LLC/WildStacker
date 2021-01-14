@@ -101,6 +101,9 @@ public final class FileUtils {
                 itemBuilder.withFlags(ItemFlag.valueOf(flag));
         }
 
+        if(section.contains("skull"))
+            itemBuilder.asSkullOf(section.getString("skull"));
+
         return itemBuilder;
     }
 

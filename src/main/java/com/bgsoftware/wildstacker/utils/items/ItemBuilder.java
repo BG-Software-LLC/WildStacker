@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.items;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,8 +17,11 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
 public final class ItemBuilder {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
     private ItemStack itemStack;
     private ItemMeta itemMeta;
+    private String texture;
 
     public ItemBuilder(Materials material){
         this(material.toBukkitItem());
@@ -135,6 +139,12 @@ public final class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder asSkullOf(String texture){
+        if(itemStack.isSimilar(Materials.PLAYER_HEAD.toBukkitItem()))
+            this.texture = texture;
+        return this;
+    }
+
     public ItemStack build(){
         return build(1);
     }
@@ -142,7 +152,7 @@ public final class ItemBuilder {
     public ItemStack build(int amount){
         itemStack.setItemMeta(itemMeta);
         itemStack.setAmount(amount);
-        return itemStack;
+        return texture == null ? itemStack : plugin.getNMSAdapter().getPlayerSkull(itemStack, texture);
     }
 
     public ItemBuilder copy(){
