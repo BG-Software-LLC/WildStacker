@@ -634,7 +634,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public int getDefaultUnstack() {
-        return GeneralUtils.get(plugin.getSettings().defaultUnstack, this, 1);
+        return Math.max(1, GeneralUtils.get(plugin.getSettings().defaultUnstack, this, 1));
     }
 
     @Override
