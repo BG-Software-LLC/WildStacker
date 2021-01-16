@@ -10,6 +10,7 @@ loadbefore: [ShopGUIPlus]
 commands:
   stacker:
     description: Main command for the plugin
+    aliases: [ wstacker, ws ]
 permissions:
   wildstacker.*:
     description: Gives access to all the command.
