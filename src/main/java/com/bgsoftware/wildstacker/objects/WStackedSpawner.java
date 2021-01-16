@@ -121,7 +121,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public boolean isCached() {
-        return plugin.getSettings().spawnersStackingEnabled && super.isCached();
+        return plugin.getSettings().spawnersStackingEnabled && (spawnerUpgradeId != 0 || super.isCached());
     }
 
     @Override
@@ -326,7 +326,13 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     }
 
     public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent){
+        if(spawnerUpgradeId != 0 && !isCached())
+            plugin.getDataHandler().addStackedSpawner(this);
+
         this.spawnerUpgradeId = spawnerUpgradeId;
+
+        if(spawnerUpgradeId == 0 && !isCached())
+            plugin.getDataHandler().removeStackedSpawner(this);
 
         SpawnerUpgrade spawnerUpgrade = getUpgrade();
 
