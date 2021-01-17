@@ -458,7 +458,7 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
 
             EntityStorage.setMetadata(bukkitEntity, "spawn-cause", SpawnCause.SPAWNER);
 
-            if(amountPerEntity > 1) {
+            if(amountPerEntity > 1 || stackedSpawner.getUpgradeId() != 0) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
                 ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
                 stackedEntity.setStackAmount(amountPerEntity, true);
