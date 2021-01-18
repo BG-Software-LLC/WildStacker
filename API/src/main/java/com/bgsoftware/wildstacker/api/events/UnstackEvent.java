@@ -15,7 +15,7 @@ public abstract class UnstackEvent extends Event implements Cancellable {
 
     protected final StackedObject object;
     protected final Entity unstackSource;
-    protected final int unstackAmount;
+    protected int unstackAmount;
 
     /**
      * The constructor for the event.

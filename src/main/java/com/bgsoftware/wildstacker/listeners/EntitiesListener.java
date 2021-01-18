@@ -320,7 +320,11 @@ public final class EntitiesListener implements Listener {
                 }
             }
 
+            int originalAmount = stackedEntity.getStackAmount();
+
             if(stackedEntity.runUnstack(stackAmount, entityDamager) == UnstackResult.SUCCESS) {
+                int unstackAmount = originalAmount - stackedEntity.getStackAmount();
+
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 EntityUtils.setKiller(livingEntity, damager);
@@ -334,8 +338,8 @@ public final class EntitiesListener implements Listener {
                     Player killer = livingEntity.getKiller();
 
                     try {
-                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, stackAmount);
-                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), stackAmount);
+                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, unstackAmount);
+                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), unstackAmount);
                     } catch (IllegalArgumentException ignored) { }
 
                     //Achievements
@@ -386,15 +390,15 @@ public final class EntitiesListener implements Listener {
                     livingEntity.setLastDamageCause(clonedEvent);
                     livingEntity.setFireTicks(fireTicks);
 
-                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? stackAmount : 1);
-                    int droppedExp = stackedEntity.getExp(plugin.getSettings().multiplyExp ? stackAmount : 1, 0);
+                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
+                    int droppedExp = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
                     Executor.sync(() -> {
                         plugin.getNMSAdapter().setEntityDead(livingEntity, true);
 
                         int currentStackAmount = stackedEntity.getStackAmount();
 
-                        stackedEntity.setStackAmount(stackAmount, false);
+                        stackedEntity.setStackAmount(unstackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
                         boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnedEntity(livingEntity);
@@ -435,7 +439,7 @@ public final class EntitiesListener implements Listener {
                         //Multiply items that weren't added in the first place
                         if(plugin.getSettings().multiplyDrops) {
                             subtract(drops, entityDeathEvent.getDrops())
-                                    .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * stackAmount));
+                                    .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
                         }
 
                         Location dropLocation = livingEntity.getLocation();

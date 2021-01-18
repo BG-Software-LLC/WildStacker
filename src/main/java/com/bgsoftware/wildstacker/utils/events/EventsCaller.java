@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -74,10 +75,10 @@ public final class EventsCaller {
         return !entityStackEvent.isCancelled();
     }
 
-    public static boolean callEntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount){
+    public static Pair<Boolean, Integer> callEntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount){
         EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(entity, unstackSource, unstackAmount);
         Bukkit.getPluginManager().callEvent(entityUnstackEvent);
-        return !entityUnstackEvent.isCancelled();
+        return new Pair<>(!entityUnstackEvent.isCancelled(), entityUnstackEvent.getAmount());
     }
 
     public static boolean callItemStackEvent(StackedItem item, StackedItem target){

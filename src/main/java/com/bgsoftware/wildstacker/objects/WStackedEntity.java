@@ -23,6 +23,7 @@ import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -387,11 +388,13 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(hasDeadFlag())
             return UnstackResult.ALREADY_DEAD;
 
-        if(!EventsCaller.callEntityUnstackEvent(this, entity, amount))
+        Pair<Boolean, Integer> eventResult = EventsCaller.callEntityUnstackEvent(this, entity, amount);
+
+        if(!eventResult.getKey())
             return UnstackResult.EVENT_CANCELLED;
 
         int stackAmount = this.getStackAmount();
-        int newStackAmount = stackAmount - amount;
+        int newStackAmount = stackAmount - eventResult.getValue();
 
         setStackAmount(newStackAmount, true);
 

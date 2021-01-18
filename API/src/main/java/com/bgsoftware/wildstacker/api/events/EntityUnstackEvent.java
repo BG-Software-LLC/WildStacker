@@ -35,6 +35,14 @@ public class EntityUnstackEvent extends UnstackEvent {
         return unstackAmount;
     }
 
+    /**
+     * Set the amount the entity will be unstacked by.
+     * @param unstackAmount The amount to set.
+     */
+    public void setAmount(int unstackAmount){
+        this.unstackAmount = unstackAmount;
+    }
+
     @Override
     public HandlerList getHandlers() {
         return HANDLERS;
