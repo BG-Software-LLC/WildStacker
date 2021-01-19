@@ -587,7 +587,7 @@ public final class SystemHandler implements SystemManager {
 
         for(StackedSpawner stackedSpawner : getStackedSpawners(chunk)){
             dataHandler.removeStackedSpawner(stackedSpawner);
-            if(stackedSpawner.getStackAmount() > 1) {
+            if(stackedSpawner.getStackAmount() > 1 || ((WStackedSpawner) stackedSpawner).getUpgradeId() != 0) {
                 dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
                         .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
             }
