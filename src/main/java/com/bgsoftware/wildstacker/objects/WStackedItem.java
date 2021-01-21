@@ -314,7 +314,8 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        return stackedObject instanceof StackedItem && getItemStack().isSimilar(((StackedItem) stackedObject).getItemStack());
+        return stackedObject instanceof StackedItem && object.getItemStack()
+                .isSimilar(((StackedItem) stackedObject).getItem().getItemStack());
     }
 
     @Override
