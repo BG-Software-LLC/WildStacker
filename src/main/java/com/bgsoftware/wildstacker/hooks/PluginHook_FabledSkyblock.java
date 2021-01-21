@@ -9,7 +9,7 @@ import com.songoda.skyblock.api.SkyBlockAPI;
 import com.songoda.skyblock.core.compatibility.CompatibleMaterial;
 import com.songoda.skyblock.island.Island;
 import com.songoda.skyblock.levelling.IslandLevelManager;
-import com.songoda.skyblock.levelling.IslandScan;
+import com.songoda.skyblock.levelling.QueuedIslandScan;
 import com.songoda.skyblock.levelling.amount.BlockAmount;
 import com.songoda.skyblock.levelling.calculator.Calculator;
 import com.songoda.skyblock.levelling.calculator.CalculatorRegistry;
@@ -29,7 +29,7 @@ import java.util.Map;
 public final class PluginHook_FabledSkyblock implements Calculator {
 
     private final WildStackerPlugin plugin;
-    private Map<Island, IslandScan> inScan = new HashMap<>();
+    private Map<Island, QueuedIslandScan> inScan = new HashMap<>();
     private Field amountsField;
 
     private PluginHook_FabledSkyblock(WildStackerPlugin plugin){
@@ -38,9 +38,9 @@ public final class PluginHook_FabledSkyblock implements Calculator {
             Field scanField = IslandLevelManager.class.getDeclaredField("inScan");
             scanField.setAccessible(true);
             //noinspection unchecked
-            inScan = (Map<Island, IslandScan>) scanField.get(SkyBlock.getInstance().getLevellingManager());
+            inScan = (Map<Island, QueuedIslandScan>) scanField.get(SkyBlock.getInstance().getLevellingManager());
 
-            amountsField = IslandScan.class.getDeclaredField("amounts");
+            amountsField = QueuedIslandScan.class.getDeclaredField("amounts");
             amountsField.setAccessible(true);
         }catch (Exception ex){
             ex.printStackTrace();
@@ -54,7 +54,7 @@ public final class PluginHook_FabledSkyblock implements Calculator {
         }
         else if(plugin.getSystemManager().isStackedBarrel(block)){
             Island island = SkyBlockAPI.getIslandManager().getIslandAtLocation(block.getLocation()).getIsland();
-            IslandScan islandScan = inScan.get(island);
+            QueuedIslandScan islandScan = inScan.get(island);
             if(islandScan != null) {
                 try {
                     //noinspection unchecked
