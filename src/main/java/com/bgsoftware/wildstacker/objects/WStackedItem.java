@@ -108,7 +108,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     @Override
     public ItemStack getItemStack() {
         ItemStack is = object.getItemStack().clone();
-        is.setAmount(getStackAmount());
+        is.setAmount(Math.max(1, getStackAmount()));
         return is;
     }
 
