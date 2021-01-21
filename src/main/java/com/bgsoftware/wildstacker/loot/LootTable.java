@@ -51,28 +51,20 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
         ).collect(Collectors.toList());
 
-        int amountOfDifferentPairs = max == -1 || min == -1 ? -1 : max == min ? max : Random.nextInt(max - min + 1) + min;
-        int chosenPairs = 0;
+        int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
+                Random.nextInt(min, max, stackAmount);
 
-        do{
-            for (LootPair lootPair : filteredPairs) {
-                if(chosenPairs == amountOfDifferentPairs)
-                    break;
+        for (LootPair lootPair : filteredPairs) {
+            int amountOfPairs = (int) (lootPair.getChance() * amountOfDifferentPairs / 100);
 
-                int amountOfPairs = (int) (lootPair.getChance() * stackAmount / 100);
-
-                if (amountOfPairs == 0) {
-                    amountOfPairs = Random.nextChance(lootPair.getChance(), stackAmount);
-                }
-
-                if (amountOfPairs > 0)
-                    chosenPairs++;
-
-                drops.addAll(lootPair.getItems(stackedEntity, amountOfPairs, lootBonusLevel));
-                if (isKilledByPlayer(stackedEntity))
-                    lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
+            if (amountOfPairs == 0) {
+                amountOfPairs = Random.nextChance(lootPair.getChance(), amountOfDifferentPairs);
             }
-        }while(chosenPairs != amountOfDifferentPairs && amountOfDifferentPairs != -1);
+
+            drops.addAll(lootPair.getItems(stackedEntity, amountOfPairs, lootBonusLevel));
+            if (isKilledByPlayer(stackedEntity))
+                lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
+        }
 
         if(dropEquipment) {
             drops.addAll(EntityUtils.getEquipment(stackedEntity.getLivingEntity(), lootBonusLevel));
