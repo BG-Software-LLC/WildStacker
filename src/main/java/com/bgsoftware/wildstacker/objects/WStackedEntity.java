@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -193,7 +194,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         removed = true;
 
-        object.remove();
+        if(EntityTypes.fromEntity(object).isSlime()){
+            Executor.sync(object::remove);
+        }
+        else {
+            object.remove();
+        }
 
         EntityStorage.clearMetadata(object);
     }
