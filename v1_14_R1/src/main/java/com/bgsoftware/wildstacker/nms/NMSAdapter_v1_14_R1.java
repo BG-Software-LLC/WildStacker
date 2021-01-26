@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
@@ -108,6 +109,8 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -312,6 +315,28 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         }
 
         return entities;
+    }
+
+    @Override
+    public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
+        World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
+
+        Chunk chunk;
+
+        if(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.isValid()){
+            chunk = (Chunk) Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.invoke(world, chunkPosition.getX(), chunkPosition.getZ());
+        }
+        else{
+            chunk = world.getChunkProvider().getChunkAt(chunkPosition.getX(), chunkPosition.getZ(), false);
+        }
+
+        if(chunk == null)
+            return new ArrayList<>();
+
+        return Arrays.stream(chunk.entitySlices)
+                .flatMap(Collection::stream)
+                .map(Entity::getBukkitEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

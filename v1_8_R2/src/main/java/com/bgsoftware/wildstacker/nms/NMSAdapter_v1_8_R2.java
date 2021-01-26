@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
@@ -46,6 +47,7 @@ import net.minecraft.server.v1_8_R2.ScoreboardObjective;
 import net.minecraft.server.v1_8_R2.TileEntityMobSpawner;
 import net.minecraft.server.v1_8_R2.World;
 import net.minecraft.server.v1_8_R2.WorldServer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
@@ -79,6 +81,8 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -271,6 +275,21 @@ public final class NMSAdapter_v1_8_R2 implements NMSAdapter {
         }
 
         return entities;
+    }
+
+    @Override
+    public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
+        World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
+
+        Chunk chunk = world.getChunkIfLoaded(chunkPosition.getX(), chunkPosition.getZ());
+
+        if(chunk == null)
+            return new ArrayList<>();
+
+        return Arrays.stream(chunk.entitySlices)
+                .flatMap(Collection::stream)
+                .map(Entity::getBukkitEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

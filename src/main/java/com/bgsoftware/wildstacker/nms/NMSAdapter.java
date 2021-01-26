@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
@@ -28,6 +29,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -67,6 +69,8 @@ public interface NMSAdapter {
     boolean canSpawnOn(Entity entity, Location location);
 
     List<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter);
+
+    Collection<Entity> getEntitiesAtChunk(ChunkPosition chunkPosition);
 
     default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
         return entityEquipment.getItemInHandDropChance();

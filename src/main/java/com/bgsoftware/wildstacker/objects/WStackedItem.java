@@ -7,7 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -22,6 +22,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -250,34 +251,64 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             return;
         }
 
-        EntityUtils.getNearbyEntities(object.getLocation(), range, item -> true).whenComplete((nearbyEntities, ex) ->
-                StackService.execute(this, () -> {
-                    Location itemLocation = getItem().getLocation();
+        Collection<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range, item -> true);
 
-                    Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
-                            nearbyEntities.stream()
-                                    .filter(ItemUtils::isStackable)
-                                    .map(entity -> WStackedItem.ofBypass((Item) entity))
-                                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                    );
+        StackService.execute(this, () -> {
+            Location itemLocation = getItem().getLocation();
 
-                    if (itemOptional.isPresent()) {
-                        StackedItem targetItem = itemOptional.get();
+            Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
+                    nearbyEntities.stream()
+                            .filter(ItemUtils::isStackable)
+                            .map(entity -> WStackedItem.ofBypass((Item) entity))
+                            .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+            );
 
-                        StackResult stackResult = runStack(targetItem);
+            if (itemOptional.isPresent()) {
+                StackedItem targetItem = itemOptional.get();
 
-                        if (stackResult == StackResult.SUCCESS) {
-                            if (result != null)
-                                result.accept(itemOptional.map(StackedItem::getItem));
-                            return;
-                        }
-                    }
+                StackResult stackResult = runStack(targetItem);
 
-                    updateName();
-
+                if (stackResult == StackResult.SUCCESS) {
                     if (result != null)
-                        result.accept(Optional.empty());
-            }));
+                        result.accept(itemOptional.map(StackedItem::getItem));
+                    return;
+                }
+            }
+
+            updateName();
+
+            if (result != null)
+                result.accept(Optional.empty());
+        });
+
+//        EntityUtils.getNearbyEntities(object.getLocation(), range, item -> true).whenComplete((nearbyEntities, ex) ->
+//                StackService.execute(this, () -> {
+//                    Location itemLocation = getItem().getLocation();
+//
+//                    Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
+//                            nearbyEntities.stream()
+//                                    .filter(ItemUtils::isStackable)
+//                                    .map(entity -> WStackedItem.ofBypass((Item) entity))
+//                                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+//                    );
+//
+//                    if (itemOptional.isPresent()) {
+//                        StackedItem targetItem = itemOptional.get();
+//
+//                        StackResult stackResult = runStack(targetItem);
+//
+//                        if (stackResult == StackResult.SUCCESS) {
+//                            if (result != null)
+//                                result.accept(itemOptional.map(StackedItem::getItem));
+//                            return;
+//                        }
+//                    }
+//
+//                    updateName();
+//
+//                    if (result != null)
+//                        result.accept(Optional.empty());
+//            }));
     }
 
     @Override

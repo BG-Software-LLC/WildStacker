@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
@@ -107,6 +108,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -328,6 +330,44 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         }
 
         return entities;
+    }
+
+    @Override
+    public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
+        World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
+
+        Chunk chunk;
+
+        if(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.isValid()){
+            chunk = (Chunk) Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.invoke(world, chunkPosition.getX(), chunkPosition.getZ());
+        }
+        else{
+            chunk = world.getChunkProvider().getChunkAt(chunkPosition.getX(), chunkPosition.getZ(), false);
+        }
+
+        if(chunk == null)
+            return new ArrayList<>();
+
+        Collection<Entity>[] entitySlices = null;
+
+        try{
+            entitySlices = chunk.entitySlices;
+        }catch (Throwable ex){
+            try{
+                // noinspection unchecked
+                entitySlices = Fields.CHUNK_ENTITY_SLICES.get(chunk, Collection[].class);
+            }catch (Throwable ex2){
+                ex2.printStackTrace();
+            }
+        }
+
+        if(entitySlices == null)
+            return new ArrayList<>();
+
+        return Arrays.stream(entitySlices)
+                .flatMap(Collection::stream)
+                .map(Entity::getBukkitEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

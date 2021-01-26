@@ -16,6 +16,7 @@ import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
@@ -43,6 +44,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -308,45 +310,87 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return;
         }
 
-        EntityUtils.getNearbyEntities(object.getLocation(), range,
-                entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
-                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
-                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid).map(WStackedEntity::of).collect(Collectors.toSet());
-                    Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
+        Collection<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range,
+                entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS);
 
-                    if (entityOptional.isPresent()) {
-                        int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
-                        StackedEntity targetEntity = entityOptional.get();
+        StackService.execute(this, () -> {
+            Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid)
+                    .map(WStackedEntity::of).collect(Collectors.toSet());
+            Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 
-                        if (minimumStackSize > 2) {
-                            int totalStackSize = getStackAmount();
+            if (entityOptional.isPresent()) {
+                int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
+                StackedEntity targetEntity = entityOptional.get();
 
-                            for (StackedEntity stackedEntity : filteredEntities)
-                                totalStackSize += stackedEntity.getStackAmount();
+                if (minimumStackSize > 2) {
+                    int totalStackSize = getStackAmount();
 
-                            if (totalStackSize < minimumStackSize) {
-                                updateName();
-                                if (result != null)
-                                    result.accept(Optional.empty());
-                                return;
-                            }
+                    for (StackedEntity stackedEntity : filteredEntities)
+                        totalStackSize += stackedEntity.getStackAmount();
 
-                            filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStack(targetEntity));
-                        }
-
-                        StackResult stackResult = runStack(targetEntity);
-
-                        if (stackResult != StackResult.SUCCESS) {
-                            updateName();
-                            if (result != null)
-                                result.accept(Optional.empty());
-                            return;
-                        }
+                    if (totalStackSize < minimumStackSize) {
+                        updateName();
+                        if (result != null)
+                            result.accept(Optional.empty());
+                        return;
                     }
 
+                    filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStack(targetEntity));
+                }
+
+                StackResult stackResult = runStack(targetEntity);
+
+                if (stackResult != StackResult.SUCCESS) {
+                    updateName();
                     if (result != null)
-                        result.accept(entityOptional.map(StackedEntity::getLivingEntity));
-        }));
+                        result.accept(Optional.empty());
+                    return;
+                }
+            }
+
+            if (result != null)
+                result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+        });
+
+//        EntityUtils.getNearbyEntities(object.getLocation(), range,
+//                entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
+//                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
+//                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid).map(WStackedEntity::of).collect(Collectors.toSet());
+//                    Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
+//
+//                    if (entityOptional.isPresent()) {
+//                        int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
+//                        StackedEntity targetEntity = entityOptional.get();
+//
+//                        if (minimumStackSize > 2) {
+//                            int totalStackSize = getStackAmount();
+//
+//                            for (StackedEntity stackedEntity : filteredEntities)
+//                                totalStackSize += stackedEntity.getStackAmount();
+//
+//                            if (totalStackSize < minimumStackSize) {
+//                                updateName();
+//                                if (result != null)
+//                                    result.accept(Optional.empty());
+//                                return;
+//                            }
+//
+//                            filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStack(targetEntity));
+//                        }
+//
+//                        StackResult stackResult = runStack(targetEntity);
+//
+//                        if (stackResult != StackResult.SUCCESS) {
+//                            updateName();
+//                            if (result != null)
+//                                result.accept(Optional.empty());
+//                            return;
+//                        }
+//                    }
+//
+//                    if (result != null)
+//                        result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+//        }));
     }
 
     @Override

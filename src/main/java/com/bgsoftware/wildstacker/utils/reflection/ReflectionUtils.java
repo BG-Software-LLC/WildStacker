@@ -1,6 +1,8 @@
 package com.bgsoftware.wildstacker.utils.reflection;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -96,6 +98,17 @@ public final class ReflectionUtils {
 
             try{
                 methodMap.put(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER, worldClass.getMethod("getChunkIfLoaded",int.class, int.class));
+            }catch (Throwable ignored){}
+
+            try{
+                //noinspection JavaReflectionMemberAccess
+                methodMap.put(Methods.HUMAN_GET_SHOULDER_ENTITY_RIGHT, HumanEntity.class.getMethod("getShoulderEntityRight"));
+                //noinspection JavaReflectionMemberAccess
+                methodMap.put(Methods.HUMAN_SET_SHOULDER_ENTITY_RIGHT, HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class));
+                //noinspection JavaReflectionMemberAccess
+                methodMap.put(Methods.HUMAN_GET_SHOULDER_ENTITY_LEFT, HumanEntity.class.getMethod("getShoulderEntityLeft"));
+                //noinspection JavaReflectionMemberAccess
+                methodMap.put(Methods.HUMAN_SET_SHOULDER_ENTITY_LEFT, HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class));
             }catch (Throwable ignored){}
 
             fieldMap.values().forEach(field -> field.setAccessible(true));

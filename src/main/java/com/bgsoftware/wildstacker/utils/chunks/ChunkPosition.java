@@ -24,6 +24,18 @@ public final class ChunkPosition {
         this.z = z;
     }
 
+    public String getWorld() {
+        return world;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getZ() {
+        return z;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.listeners.events;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -75,12 +75,19 @@ public final class EventsListener {
 
             Item egg = e.getEntity();
 
-            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
-                    entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
-                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(chicken -> {
-                        EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
-                        Bukkit.getPluginManager().callEvent(eggLayEvent);
-                    }));
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2, entity ->
+                    entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
+                    .stream().findFirst().ifPresent(chicken -> {
+                EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
+                Bukkit.getPluginManager().callEvent(eggLayEvent);
+            });
+
+//            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
+//                    entity -> entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
+//                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(chicken -> {
+//                        EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
+//                        Bukkit.getPluginManager().callEvent(eggLayEvent);
+//                    }));
         }
 
     }
@@ -94,12 +101,19 @@ public final class EventsListener {
 
             Item scute = e.getEntity();
 
-            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
+            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
                     entity -> entity instanceof org.bukkit.entity.Turtle)
-                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(turtle -> {
-                        ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);
-                        Bukkit.getPluginManager().callEvent(scuteDropEvent);
-                    }));
+                    .stream().findFirst().ifPresent(turtle -> {
+                ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);
+                Bukkit.getPluginManager().callEvent(scuteDropEvent);
+            });
+
+//            EntityUtils.getNearbyEntities(e.getEntity().getLocation(), 2,
+//                    entity -> entity instanceof org.bukkit.entity.Turtle)
+//                    .whenComplete((nearbyEntities, ex) -> nearbyEntities.stream().findFirst().ifPresent(turtle -> {
+//                        ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);
+//                        Bukkit.getPluginManager().callEvent(scuteDropEvent);
+//                    }));
         }
 
     }

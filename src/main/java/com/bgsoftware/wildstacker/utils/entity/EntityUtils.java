@@ -9,8 +9,7 @@ import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
+import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +24,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.MushroomCow;
@@ -60,9 +58,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -120,22 +116,36 @@ public final class EntityUtils {
             plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
     }
 
-    @SuppressWarnings({"JavaReflectionMemberAccess", "JavaReflectionInvocation"})
+
     public static void removeParrotIfShoulder(Parrot parrot){
-        getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
-            try {
-                for (Entity entity : nearbyEntities) {
-                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {
-                        HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
-                        break;
-                    }
-                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))) {
-                        HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
-                        break;
-                    }
+        if(Methods.HUMAN_GET_SHOULDER_ENTITY_RIGHT.isValid()) {
+            Collection<Entity> entities = EntitiesGetter.getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player);
+
+            for (Entity entity : entities){
+                if(parrot.equals(Methods.HUMAN_GET_SHOULDER_ENTITY_RIGHT.invoke(entity))){
+                    Methods.HUMAN_SET_SHOULDER_ENTITY_RIGHT.invoke(entities, (Object) null);
+                    break;
                 }
-            }catch(Exception ignored){}
-        });
+                if(parrot.equals(Methods.HUMAN_GET_SHOULDER_ENTITY_LEFT.invoke(entity))){
+                    Methods.HUMAN_SET_SHOULDER_ENTITY_LEFT.invoke(entities, (Object) null);
+                    break;
+                }
+            }
+        }
+//        getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
+//            try {
+//                for (Entity entity : nearbyEntities) {
+//                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {
+//                        HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
+//                        break;
+//                    }
+//                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))) {
+//                        HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
+//                        break;
+//                    }
+//                }
+//            }catch(Exception ignored){}
+//        });
     }
 
     public static boolean isStackable(Entity entity){
@@ -144,20 +154,34 @@ public final class EntityUtils {
     }
 
     public static void spawnExp(Location location, int amount){
-        EntityUtils.getNearbyEntities(location, 2, entity -> entity instanceof ExperienceOrb).whenComplete((nearbyEntities, ex) -> {
-            Optional<Entity> closestOrb = nearbyEntities.stream().findFirst();
+        Optional<Entity> closestOrb = EntitiesGetter.getNearbyEntities(location, 2, entity ->
+                entity instanceof ExperienceOrb).stream().findFirst();
 
-            ExperienceOrb experienceOrb;
+        ExperienceOrb experienceOrb;
 
-            if(closestOrb.isPresent()){
-                experienceOrb = (ExperienceOrb) closestOrb.get();
-                experienceOrb.setExperience(experienceOrb.getExperience() + amount);
-            }
-            else{
-                experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
-                experienceOrb.setExperience(amount);
-            }
-        });
+        if(closestOrb.isPresent()){
+            experienceOrb = (ExperienceOrb) closestOrb.get();
+            experienceOrb.setExperience(experienceOrb.getExperience() + amount);
+        }
+        else{
+            experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+            experienceOrb.setExperience(amount);
+        }
+
+//        EntityUtils.getNearbyEntities(location, 2, entity -> entity instanceof ExperienceOrb).whenComplete((nearbyEntities, ex) -> {
+//            Optional<Entity> closestOrb = nearbyEntities.stream().findFirst();
+//
+//            ExperienceOrb experienceOrb;
+//
+//            if(closestOrb.isPresent()){
+//                experienceOrb = (ExperienceOrb) closestOrb.get();
+//                experienceOrb.setExperience(experienceOrb.getExperience() + amount);
+//            }
+//            else{
+//                experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+//                experienceOrb.setExperience(amount);
+//            }
+//        });
     }
 
     public static String getEntityName(StackedEntity stackedEntity){
@@ -447,18 +471,18 @@ public final class EntityUtils {
         return StackCheckResult.SUCCESS;
     }
 
-    public static CompletableFuture<Collection<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
-        CompletableFuture<Collection<Entity>> completableFuture = new CompletableFuture<>();
-
-        if(Bukkit.isPrimaryThread()){
-            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-        }
-        else{
-            Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
-        }
-
-        return completableFuture;
-    }
+//    public static CompletableFuture<Collection<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+//        CompletableFuture<Collection<Entity>> completableFuture = new CompletableFuture<>();
+//
+//        if(Bukkit.isPrimaryThread()){
+//            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
+//        }
+//        else{
+//            Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
+//        }
+//
+//        return completableFuture;
+//    }
 
     public static boolean canBeBred(Animals animal) {
         return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);

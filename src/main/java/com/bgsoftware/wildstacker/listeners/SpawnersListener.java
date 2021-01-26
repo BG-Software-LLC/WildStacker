@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
@@ -391,11 +392,13 @@ public final class SpawnersListener implements Listener {
                 e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)){
             Location location = e.getClickedBlock().getLocation();
             Executor.sync(() -> {
-                try{
-                    EntityUtils.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
-                            .whenComplete((nearbyEntities,  ex) -> nearbyEntities.stream().findFirst()
-                                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())));
-                }catch(Throwable ignored){}
+                EntitiesGetter.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
+                        .stream().findFirst().ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId()));
+//                try{
+//                    EntityUtils.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
+//                            .whenComplete((nearbyEntities,  ex) -> nearbyEntities.stream().findFirst()
+//                                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())));
+//                }catch(Throwable ignored){}
             }, 2L);
         }
     }

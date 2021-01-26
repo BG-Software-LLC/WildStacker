@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.listeners.events.ScuteDropEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -234,10 +235,13 @@ public final class ItemsListener implements Listener {
         plugin.getSystemManager().toggleItemNames(e.getPlayer());
 
         //Refresh item names
-        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
+        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
                 entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
-                .whenComplete((nearbyEntities, ex) ->
-                        nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
+                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
+//        EntityUtils.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
+//                entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
+//                .whenComplete((nearbyEntities, ex) ->
+//                        nearbyEntities.forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity)));
     }
 
     private boolean isChunkLimit(Chunk chunk){
