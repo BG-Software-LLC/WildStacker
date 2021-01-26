@@ -75,6 +75,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public WStackedEntity(LivingEntity livingEntity, int stackAmount, @Nullable SpawnCause spawnCause){
         super(livingEntity, stackAmount);
         this.spawnCause = spawnCause;
+        setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
     }
 
     @Override

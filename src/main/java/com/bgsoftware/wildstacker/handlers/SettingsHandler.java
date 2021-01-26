@@ -4,11 +4,19 @@ import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
+import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
 import com.bgsoftware.wildstacker.menu.SpawnerUpgradeMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
+import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.upgrades.WSpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
@@ -19,6 +27,8 @@ import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
+import com.bgsoftware.wildstacker.utils.names.NameBuilder;
+import com.bgsoftware.wildstacker.utils.names.NamePlaceholder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.reflection.Fields;
@@ -38,14 +48,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
-
-    private static final Pattern BRACKET_PATTERN = Pattern.compile("([\\(\\[\\{\\}\\)\\]])");
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
@@ -69,6 +76,7 @@ public final class SettingsHandler {
     public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
+    public final NameBuilder<StackedItem> itemsNameBuilder;
     public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
     public final float itemsSoundVolume, itemsSoundPitch;
     public final List<ParticleWrapper> itemsParticles;
@@ -82,8 +90,8 @@ public final class SettingsHandler {
             multiplyDrops, multiplyExp, spreadDamage;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
+    public final NameBuilder<StackedEntity> entitiesNameBuilder;
     public final Sound entitiesExpPickupSound;
-    public final Pattern entitiesCustomNamePattern;
     public final int linkedEntitiesMaxDistance, entitiesChunkLimit;
     public final Fast2EnumsArray<EntityType, SpawnCause> blacklistedEntities, whitelistedEntities, entitiesNerfedWhitelist,
             entitiesNerfedBlacklist, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup, entitiesOneShotWhitelist;
@@ -104,7 +112,8 @@ public final class SettingsHandler {
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
     public final FastEnumArray<EntityType> blacklistedSpawners, whitelistedSpawners;
-    public final String hologramCustomName, spawnerItemName, inventoryTweaksPermission, inventoryTweaksCommand;
+    public final String spawnersCustomName, spawnerItemName, inventoryTweaksPermission, inventoryTweaksCommand;
+    public final NameBuilder<StackedSpawner> spawnersNameBuilder;
     public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
     public final FastEnumMap<EntityType, Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
@@ -114,6 +123,7 @@ public final class SettingsHandler {
             barrelsToggleCommand, barrelsPlaceInventory, forceCauldron, barrelsAutoPickup, dropStackedItem, barrelsShiftPlaceStack;
     public final int barrelsChunkLimit;
     public final String barrelsCustomName, barrelsToggleCommandSyntax, barrelsPlaceInventoryTitle, barrelsRequiredPermission;
+    public final NameBuilder<StackedBarrel> barrelsNameBuilder;
     public final List<String> barrelsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedBarrels, whitelistedBarrels;
     public final FastEnumMap<Material, Integer> barrelsMergeRadius, barrelsLimits;
@@ -188,6 +198,12 @@ public final class SettingsHandler {
         whitelistedItems = FastEnumArray.fromList(cfg.getStringList("items.whitelist"), Material.class);
         itemsChunkLimit = cfg.getInt("items.chunk-limit", 0);
         itemsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("items.custom-name", "&6&lx{0} {1}"));
+        //noinspection unchecked
+        itemsNameBuilder = new NameBuilder<>(itemsCustomName,
+                new NamePlaceholder<>("{0}", stackedItem -> stackedItem.getStackAmount() + ""),
+                new NamePlaceholder<>("{1}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName()),
+                new NamePlaceholder<>("{2}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName().toUpperCase())
+        );
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
@@ -210,19 +226,13 @@ public final class SettingsHandler {
         minimumRequiredEntities = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.minimum-required"),
                 EntityType.class, SpawnCause.class);
         entitiesCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
-
-        String entitiesCustomName = this.entitiesCustomName;
-        Matcher bracketsMatcher = BRACKET_PATTERN.matcher(entitiesCustomName);
-
-        if(bracketsMatcher.find())
-            entitiesCustomName = bracketsMatcher.replaceAll("\\\\$0");
-
-        entitiesCustomNamePattern = Pattern.compile(entitiesCustomName
-                .replace("\\{0\\}", "([0-9]+)")
-                .replace("\\{1\\}", "(.*)")
-                .replace("\\{2\\}", "(.*)")
+        //noinspection unchecked
+        entitiesNameBuilder = new NameBuilder<>(entitiesCustomName,
+                new NamePlaceholder<>("{0}", stackedEntity -> stackedEntity.getStackAmount() + ""),
+                new NamePlaceholder<>("{1}", stackedEntity -> ((WStackedEntity) stackedEntity).getCachedDisplayName()),
+                new NamePlaceholder<>("{2}", stackedEntity -> ((WStackedEntity) stackedEntity).getCachedDisplayName().toUpperCase()),
+                new NamePlaceholder<>("{3}", stackedEntity -> stackedEntity.getUpgrade().getDisplayName())
         );
-
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);
@@ -291,7 +301,14 @@ public final class SettingsHandler {
         blacklistedSpawners = FastEnumArray.fromList(cfg.getStringList("spawners.blacklist"), EntityType.class);
         whitelistedSpawners = FastEnumArray.fromList(cfg.getStringList("spawners.whitelist"), EntityType.class);
         spawnersChunkLimit = cfg.getInt("spawners.chunk-limit", 0);
-        hologramCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
+        spawnersCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.custom-name", "&9&lx{0} {1}"));
+        //noinspection unchecked
+        spawnersNameBuilder = new NameBuilder<>(spawnersCustomName,
+                new NamePlaceholder<>("{0}", stackedSpawner -> stackedSpawner.getStackAmount() + ""),
+                new NamePlaceholder<>("{1}", stackedSpawner -> ((WStackedSpawner) stackedSpawner).getCachedDisplayName()),
+                new NamePlaceholder<>("{2}", stackedSpawner -> ((WStackedSpawner) stackedSpawner).getCachedDisplayName().toUpperCase()),
+                new NamePlaceholder<>("{3}", stackedSpawner -> stackedSpawner.getUpgrade().getDisplayName())
+        );
         spawnerItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.spawner-item.name", "&e{0} &fSpawner"));
         spawnerItemLore = cfg.getStringList("spawners.spawner-item.lore").stream().map(line ->
                 ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
@@ -427,6 +444,12 @@ public final class SettingsHandler {
         barrelsLimits = FastEnumMap.fromSection(cfg.getConfigurationSection("barrels.limits"), Material.class);
         chunkMergeBarrels = cfg.getBoolean("barrels.chunk-merge", false);
         barrelsCustomName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.custom-name", "&9&lx{0} {1}"));
+        //noinspection unchecked
+        barrelsNameBuilder = new NameBuilder<>(barrelsCustomName,
+                new NamePlaceholder<>("{0}", stackedBarrel -> stackedBarrel.getStackAmount() + ""),
+                new NamePlaceholder<>("{1}", stackedBarrel -> ((WStackedBarrel) stackedBarrel).getCachedDisplayName()),
+                new NamePlaceholder<>("{2}", stackedBarrel -> ((WStackedBarrel) stackedBarrel).getCachedDisplayName().toUpperCase())
+        );
         blacklistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.blacklist"), Material.class);
         whitelistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.whitelist"), Material.class);
         barrelsChunkLimit = cfg.getInt("barrels.chunk-limit", 0);

@@ -566,18 +566,15 @@ public final class SpawnersListener implements Listener {
             if(!plugin.getSettings().floatingSpawnerNames || stackedSpawner.getStackAmount() <= 1)
                 return;
 
-            String customName = plugin.getSettings().hologramCustomName;
+            String customName = plugin.getSettings().spawnersCustomName;
 
             if (customName.isEmpty())
                 return;
 
-            int amount = stackedSpawner.getStackAmount();
+            ((WStackedSpawner) stackedSpawner).setCachedDisplayName(
+                    EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
 
-            customName = customName
-                    .replace("{0}", Integer.toString(amount))
-                    .replace("{1}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()))
-                    .replace("{2}", EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()).toUpperCase());
-
+            customName = plugin.getSettings().spawnersNameBuilder.build(stackedSpawner);
             ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);
 
             Executor.sync(((WStackedSpawner) stackedSpawner)::removeHologram, 60L);

@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -97,7 +96,7 @@ public final class EntityUtils {
         if(name == null)
             return false;
 
-        if(ChatColor.getLastColors(name).isEmpty())
+        if(!name.contains(ChatColor.COLOR_CHAR + ""))
             name = ChatColor.WHITE + name;
 
         List<Pattern> blacklistedNames = plugin.getSettings().blacklistedEntitiesNames;
@@ -191,24 +190,11 @@ public final class EntityUtils {
             return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
         }
 
-        String customName = plugin.getSettings().entitiesCustomName;
-
-        if (customName.isEmpty())
+        if (plugin.getSettings().entitiesCustomName.isEmpty())
             throw new NullPointerException();
 
-        String newName = "";
-
-        SpawnerUpgrade spawnerUpgrade = stackedEntity.getUpgrade();
-
-        if(stackAmount > 1 || !spawnerUpgrade.isDefault()) {
-            newName = customName
-                    .replace("{0}", Integer.toString(stackAmount))
-                    .replace("{1}", EntityUtils.getFormattedType(stackedEntity.getType().name()))
-                    .replace("{2}", EntityUtils.getFormattedType(stackedEntity.getType().name()).toUpperCase())
-                    .replace("{3}", spawnerUpgrade.getDisplayName());
-        }
-
-        return newName;
+        return stackAmount <= 1 && stackedEntity.getUpgrade().isDefault() ? "" :
+                plugin.getSettings().entitiesNameBuilder.build(stackedEntity);
     }
 
     public static int getBadOmenAmplifier(Player player){

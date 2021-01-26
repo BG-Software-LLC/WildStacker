@@ -182,18 +182,15 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
-            String itemType = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
-            String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemType;
+            String cachedDisplayName = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
+            String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : cachedDisplayName;
 
             if(plugin.getSettings().itemsDisplayEnabled)
-                itemType = displayName;
+                cachedDisplayName = displayName;
 
-            itemType = itemType.replace("{0}", displayName);
+            setCachedDisplayName(cachedDisplayName.replace("{0}", displayName));
 
-            customName = customName
-                    .replace("{0}", Integer.toString(amount))
-                    .replace("{1}", itemType)
-                    .replace("{2}", itemType.toUpperCase());
+            customName = plugin.getSettings().itemsNameBuilder.build(this);
         }
 
         String CUSTOM_NAME = customName;

@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_16_R2.AxisAlignedBB;
 import net.minecraft.server.v1_16_R2.BlockPosition;
 import net.minecraft.server.v1_16_R2.BlockRotatable;
+import net.minecraft.server.v1_16_R2.ChatComponentText;
 import net.minecraft.server.v1_16_R2.ChatMessage;
 import net.minecraft.server.v1_16_R2.Chunk;
 import net.minecraft.server.v1_16_R2.ChunkProviderServer;
@@ -456,6 +457,12 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
                 nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
             }
         }
+    }
+
+    @Override
+    public void setCustomName(org.bukkit.entity.Entity entity, String name) {
+        // Much more optimized way than Bukkit's method.
+        ((CraftEntity) entity).getHandle().setCustomName(new ChatComponentText(name));
     }
 
     /*

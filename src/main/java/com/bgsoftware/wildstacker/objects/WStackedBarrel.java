@@ -45,6 +45,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
         super(block, stackAmount);
         this.barrelItem = itemStack;
+        setCachedDisplayName(ItemUtils.getFormattedType(barrelItem));
     }
 
     @Override
@@ -160,11 +161,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return;
         }
 
-        customName = customName
-                .replace("{0}", Integer.toString(amount))
-                .replace("{1}", ItemUtils.getFormattedType(barrelItem))
-                .replace("{2}", ItemUtils.getFormattedType(barrelItem).toUpperCase());
-
+        customName = plugin.getSettings().barrelsNameBuilder.build(this);
         setHologramName(customName, true);
     }
 

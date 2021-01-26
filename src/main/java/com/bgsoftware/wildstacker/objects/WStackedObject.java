@@ -23,6 +23,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     private int stackAmount;
     protected boolean saveData = true;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private String cachedDisplayName = "";
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
@@ -54,6 +55,14 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     public void setSaveData(boolean saveData){
         this.saveData = saveData && isCached();
+    }
+
+    public String getCachedDisplayName(){
+        return cachedDisplayName;
+    }
+
+    public void setCachedDisplayName(String cachedDisplayName){
+        this.cachedDisplayName = cachedDisplayName;
     }
 
     @Override
