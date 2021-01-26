@@ -214,6 +214,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
         public String failureReason = "";
 
         private int spawnedEntities = 0;
+        private WStackedEntity demoEntity = null;
 
         StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
             this.world = (WorldServer) tileEntityMobSpawner.getWorld();
@@ -232,6 +233,8 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                 this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
                 this.spawnRange = originalSpawner.spawnRange;
             }
+
+            updateDemoEntity();
         }
 
         @Override
@@ -280,25 +283,23 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
 
             EntityTypes<?> entityTypes = entityTypesOptional.get();
 
-            org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
-
-            if(demoEntityBukkit == null){
-                resetSpawnDelay();
-                return;
-            }
-
-            if(!EntityUtils.isStackable(demoEntityBukkit)){
+            if(demoEntity == null){
                 super.c();
                 return;
             }
 
-            StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
-            demoEntity.setSpawnCause(SpawnCause.SPAWNER);
-            ((WStackedEntity) demoEntity).setUpgradeId(stackedSpawner.getUpgradeId());
-            ((WStackedEntity) demoEntity).setDemoEntity();
+            Entity demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
 
-            Entity demoNMSEntity = ((CraftEntity) demoEntityBukkit).getHandle();
-            world.unregisterEntity(demoNMSEntity);
+            if(demoNMSEntity.getEntityType() != entityTypes){
+                updateDemoEntity();
+
+                if(demoEntity == null){
+                    super.c();
+                    return;
+                }
+
+                demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
+            }
 
             int stackAmount = stackedSpawner.getStackAmount();
 
@@ -372,7 +373,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                     continue;
                 }
 
-                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntityBukkit.getType())
+                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())
                         .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
 
                 if(failedCondition != null) {
@@ -496,7 +497,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                                               List<? extends Entity> nearbyEntities){
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
-            if(linkedEntity != null)
+            if(linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
                 return WStackedEntity.of(linkedEntity);
 
             Optional<CraftEntity> closestEntity = GeneralUtils.getClosestBukkit(stackedSpawner.getLocation(),
@@ -505,6 +506,20 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                                     demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
 
             return closestEntity.map(WStackedEntity::of).orElse(null);
+        }
+
+        private void updateDemoEntity(){
+            org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
+
+            if(demoEntityBukkit == null || !EntityUtils.isStackable(demoEntityBukkit)){
+                demoEntity = null;
+                return;
+            }
+
+            demoEntity = (WStackedEntity) WStackedEntity.of(demoEntityBukkit);
+            demoEntity.setSpawnCause(SpawnCause.SPAWNER);
+            demoEntity.setDemoEntity();
+            world.unregisterEntity(((CraftEntity) demoEntityBukkit).getHandle());
         }
 
     }
