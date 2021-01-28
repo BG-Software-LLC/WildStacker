@@ -36,6 +36,7 @@ import net.minecraft.server.v1_13_R2.EntityZombieVillager;
 import net.minecraft.server.v1_13_R2.FluidTypes;
 import net.minecraft.server.v1_13_R2.IBlockAccess;
 import net.minecraft.server.v1_13_R2.IBlockData;
+import net.minecraft.server.v1_13_R2.IChatBaseComponent;
 import net.minecraft.server.v1_13_R2.IFluidContainer;
 import net.minecraft.server.v1_13_R2.IWorldAccess;
 import net.minecraft.server.v1_13_R2.ItemStack;
@@ -371,7 +372,8 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public String getCustomName(org.bukkit.entity.Entity entity) {
         // Much more optimized way than Bukkit's method.
-        return ((CraftEntity) entity).getHandle().getCustomName().getText();
+        IChatBaseComponent chatBaseComponent = ((CraftEntity) entity).getHandle().getCustomName();
+        return chatBaseComponent == null ? "" : chatBaseComponent.getText();
     }
 
     @Override

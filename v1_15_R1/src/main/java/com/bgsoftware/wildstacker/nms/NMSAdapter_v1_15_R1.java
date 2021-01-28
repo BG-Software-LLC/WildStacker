@@ -43,6 +43,7 @@ import net.minecraft.server.v1_15_R1.EnumMobSpawn;
 import net.minecraft.server.v1_15_R1.FluidTypes;
 import net.minecraft.server.v1_15_R1.GameRules;
 import net.minecraft.server.v1_15_R1.IBlockData;
+import net.minecraft.server.v1_15_R1.IChatBaseComponent;
 import net.minecraft.server.v1_15_R1.IFluidContainer;
 import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.ItemSword;
@@ -428,7 +429,8 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public String getCustomName(org.bukkit.entity.Entity entity) {
         // Much more optimized way than Bukkit's method.
-        return ((CraftEntity) entity).getHandle().getCustomName().getText();
+        IChatBaseComponent chatBaseComponent = ((CraftEntity) entity).getHandle().getCustomName();
+        return chatBaseComponent == null ? "" : chatBaseComponent.getText();
     }
 
     @Override
