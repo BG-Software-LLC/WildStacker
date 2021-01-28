@@ -21,10 +21,10 @@ public final class EpicSpawnersListener implements Listener {
 
     public static void register(WildStackerPlugin plugin){
         PluginHooks.isEpicSpawnersEnabled = true;
-        if(Bukkit.getPluginManager().getPlugin("EpicSpawners").getDescription().getVersion().startsWith("6"))
-            Bukkit.getPluginManager().registerEvents(new EpicSpawners6Listener(), plugin);
-        else
+        if(Bukkit.getPluginManager().getPlugin("EpicSpawners").getDescription().getVersion().startsWith("5"))
             Bukkit.getPluginManager().registerEvents(new EpicSpawners5Listener(), plugin);
+        else
+            Bukkit.getPluginManager().registerEvents(new EpicSpawners6Listener(), plugin);
     }
 
     private static class EpicSpawners6Listener implements Listener{
