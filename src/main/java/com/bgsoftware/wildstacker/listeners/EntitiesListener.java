@@ -402,7 +402,7 @@ public final class EntitiesListener implements Listener {
                         stackedEntity.setStackAmount(unstackAmount, false);
 
                         McMMOHook.updateCachedName(livingEntity);
-                        boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnedEntity(livingEntity);
+                        boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnerEntity(livingEntity);
 
                         // I set the health to 0 so it will be 0 in the EntityDeathEvent
                         // Some plugins, such as MyPet, check for that value
