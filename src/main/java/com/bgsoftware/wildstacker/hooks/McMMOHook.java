@@ -30,7 +30,10 @@ public final class McMMOHook {
 
     private static final String CUSTOM_NAME_KEY = "mcMMO: Custom Name";
     private static final String CUSTOM_NAME_VISIBLE_KEY = "mcMMO: Name Visibility";
-    private static final String SPAWNED_ENTITY_KEY = "mcMMO: Spawned Entity";
+
+    // Multiplier tags
+    private static final String SPAWNER_ENTITY_KEY = "mcMMO: Spawned Entity";
+    private static final String BRED_ANIMAL_KEY = "mcMMO: Bred Animal";
 
     private static Plugin mcMMO;
     private static Method gainXPMethod = null;
@@ -57,7 +60,7 @@ public final class McMMOHook {
     }
 
     public static void handleCombat(Player attacker, Entity entityAttacker, LivingEntity target, double finalDamage){
-        if(mcMMO == null || isSpawnedEntity(target))
+        if(mcMMO == null)
             return;
 
         ItemStack heldItem = attacker.getItemInHand();
@@ -138,12 +141,20 @@ public final class McMMOHook {
             baseXp = ExperienceConfig.getInstance().getCombatXP(type);
         }
 
-        if (target.hasMetadata("mcMMO: Spawned Entity")) {
+        if (isSpawnEggEntity(target)) {
+            baseXp *= ExperienceConfig.getInstance().getEggXpMultiplier();
+        }
+        else if (isSpawnerEntity(target)) {
             baseXp *= ExperienceConfig.getInstance().getSpawnedMobXpMultiplier();
         }
-
-        if (target.hasMetadata("mcMMO: Bred Animal")) {
+        else if (isNetherPortal(target)) {
+            baseXp *= ExperienceConfig.getInstance().getNetherPortalXpMultiplier();
+        }
+        else if (isAnimalBred(target)) {
             baseXp *= ExperienceConfig.getInstance().getBredMobXpMultiplier();
+        }
+        else if (isTamedAnimal(target)) {
+            baseXp *= ExperienceConfig.getInstance().getTamedMobXpMultiplier();
         }
 
         baseXp *= 10;
@@ -165,23 +176,29 @@ public final class McMMOHook {
                 persistentDataLayer.flagMetadata(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.MOB_SPAWNER_MOB, livingEntity);
             }
             else{
-                livingEntity.setMetadata(SPAWNED_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
+                livingEntity.setMetadata(SPAWNER_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
             }
         }
     }
 
-    public static boolean isSpawnedEntity(LivingEntity livingEntity){
-        if(mcMMO == null)
-            return false;
+    public static boolean isSpawnerEntity(LivingEntity livingEntity){
+        return hasTag(livingEntity, "MOB_SPAWNER_MOB", SPAWNER_ENTITY_KEY);
+    }
 
-        if(persistentDataLayerObject != null){
-            com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer persistentDataLayer =
-                    (com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer) persistentDataLayerObject;
-            return persistentDataLayer.hasMobFlag(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.MOB_SPAWNER_MOB, livingEntity);
-        }
-        else{
-            return livingEntity.hasMetadata(SPAWNED_ENTITY_KEY);
-        }
+    public static boolean isSpawnEggEntity(LivingEntity livingEntity){
+        return hasTag(livingEntity, "EGG_MOB", "UNKNOWN");
+    }
+
+    public static boolean isNetherPortal(LivingEntity livingEntity){
+        return hasTag(livingEntity, "NETHER_PORTAL_MOB", "UNKNOWN");
+    }
+
+    public static boolean isAnimalBred(LivingEntity livingEntity){
+        return hasTag(livingEntity, "PLAYER_BRED_MOB", BRED_ANIMAL_KEY);
+    }
+
+    public static boolean isTamedAnimal(LivingEntity livingEntity){
+        return hasTag(livingEntity, "PLAYER_TAMED_MOB", "UNKNOWN");
     }
 
     public static void setEnabled(boolean enabled){
@@ -228,6 +245,20 @@ public final class McMMOHook {
             return ExperienceConfig.getInstance().getAnimalsXP(type);
         }catch(Throwable ex){
             return ExperienceConfig.getInstance().getAnimalsXP();
+        }
+    }
+
+    private static boolean hasTag(LivingEntity livingEntity, String mobMetaFlagType, String metadataKey){
+        if(mcMMO == null)
+            return false;
+
+        if(persistentDataLayerObject != null){
+            com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer persistentDataLayer =
+                    (com.gmail.nossr50.util.compat.layers.persistentdata.AbstractPersistentDataLayer) persistentDataLayerObject;
+            return persistentDataLayer.hasMobFlag(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.valueOf(mobMetaFlagType), livingEntity);
+        }
+        else{
+            return livingEntity.hasMetadata(metadataKey);
         }
     }
 
