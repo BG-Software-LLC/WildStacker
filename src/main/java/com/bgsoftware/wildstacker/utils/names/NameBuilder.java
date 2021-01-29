@@ -14,42 +14,47 @@ public final class NameBuilder<T> {
         StringBuilder stringBuilder = new StringBuilder();
 
         for(String word : words){
-            stringBuilder.append(" ");
+            stringBuilder = handleWord(word, stringBuilder, placeholders);
+        }
+    }
 
-            Optional<NamePlaceholder<T>> placeholder = Arrays.stream(placeholders)
-                    .filter(_placeholder -> word.contains(_placeholder.getPlaceholder()))
-                    .findFirst();
+    private StringBuilder handleWord(String word, StringBuilder stringBuilder, NamePlaceholder<T>... placeholders){
+        stringBuilder.append(" ");
 
-            if(placeholder.isPresent()){
-                String rawPlaceholder = placeholder.get().getPlaceholder();
-                int placeholderIndex = word.indexOf(rawPlaceholder);
+        Optional<NamePlaceholder<T>> placeholder = Arrays.stream(placeholders)
+                .filter(_placeholder -> word.contains(_placeholder.getPlaceholder()))
+                .findFirst();
 
-                // Add string before the placeholder
-                if(placeholderIndex > 0){
-                    stringBuilder.append(word, 0, placeholderIndex);
-                    if(namePart == null)
-                        namePart = new StaticPart<>(stringBuilder.length() != 0 ? stringBuilder.substring(1) : stringBuilder.toString());
-                    else
-                        namePart.addPart(new StaticPart<>(stringBuilder.toString()));
-                }
+        if(placeholder.isPresent()){
+            String rawPlaceholder = placeholder.get().getPlaceholder();
+            int placeholderIndex = word.indexOf(rawPlaceholder);
 
+            // Add string before the placeholder
+            if(placeholderIndex > 0){
+                stringBuilder.append(word, 0, placeholderIndex);
                 if(namePart == null)
-                    namePart = new PlaceholderPart<>(placeholder.get().getParser());
+                    namePart = new StaticPart<>(stringBuilder.length() != 0 ? stringBuilder.substring(1) : stringBuilder.toString());
                 else
-                    namePart.addPart(new PlaceholderPart<>(placeholder.get().getParser()));
-
-                stringBuilder = new StringBuilder();
-
-                // Add string after the placeholder
-                if(placeholderIndex + rawPlaceholder.length() < word.length()){
-                    stringBuilder.append(word.substring(placeholderIndex + rawPlaceholder.length() - 1));
-                }
+                    namePart.addPart(new StaticPart<>(stringBuilder.toString()));
             }
-            else{
-                stringBuilder.append(word);
+
+            if(namePart == null)
+                namePart = new PlaceholderPart<>(placeholder.get().getParser());
+            else
+                namePart.addPart(new PlaceholderPart<>(placeholder.get().getParser()));
+
+            stringBuilder = new StringBuilder();
+
+            // Add string after the placeholder
+            if(placeholderIndex + rawPlaceholder.length() < word.length()){
+                stringBuilder = handleWord(word.substring(placeholderIndex + rawPlaceholder.length()), stringBuilder, placeholders);
             }
         }
+        else{
+            stringBuilder.append(word);
+        }
 
+        return stringBuilder;
     }
 
     public String build(T argument){
