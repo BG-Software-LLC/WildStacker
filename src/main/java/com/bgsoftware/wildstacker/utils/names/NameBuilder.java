@@ -18,6 +18,10 @@ public final class NameBuilder<T> {
         }
     }
 
+    public String build(T argument){
+        return namePart.build(argument);
+    }
+
     private StringBuilder handleWord(String word, StringBuilder stringBuilder, NamePlaceholder<T>... placeholders){
         stringBuilder.append(" ");
 
@@ -55,10 +59,6 @@ public final class NameBuilder<T> {
         }
 
         return stringBuilder;
-    }
-
-    public String build(T argument){
-        return namePart.build(argument);
     }
 
     private static abstract class NamePart<T> {
