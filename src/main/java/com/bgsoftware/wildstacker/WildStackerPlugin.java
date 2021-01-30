@@ -146,10 +146,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         StackService.stop();
 
-        log("Stopping executor...");
-
-        Executor.stop();
-
         if(shouldEnable) {
             log("Performing entity&items save");
 
@@ -167,6 +163,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             //We need to close the connection
             dataHandler.clearDatabase();
         }
+
+        log("Stopping executor...");
+
+        Executor.stop();
 
         EntityStorage.clearCache();
     }
