@@ -14,6 +14,7 @@ public final class NameBuilder<T> {
         StringBuilder stringBuilder = new StringBuilder();
 
         for(String word : words){
+            stringBuilder.append(" ");
             stringBuilder = handleWord(word, stringBuilder, placeholders);
         }
     }
@@ -23,8 +24,6 @@ public final class NameBuilder<T> {
     }
 
     private StringBuilder handleWord(String word, StringBuilder stringBuilder, NamePlaceholder<T>... placeholders){
-        stringBuilder.append(" ");
-
         Optional<NamePlaceholder<T>> placeholder = Arrays.stream(placeholders)
                 .filter(_placeholder -> word.contains(_placeholder.getPlaceholder()))
                 .findFirst();
