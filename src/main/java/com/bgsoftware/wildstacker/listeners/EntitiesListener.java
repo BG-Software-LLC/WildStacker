@@ -387,6 +387,8 @@ public final class EntitiesListener implements Listener {
                     }
                 }
 
+                Location dropLocation = livingEntity.getLocation();
+
                 Executor.async(() -> {
                     livingEntity.setLastDamageCause(clonedEvent);
                     livingEntity.setFireTicks(fireTicks);
@@ -442,8 +444,6 @@ public final class EntitiesListener implements Listener {
                             subtract(drops, entityDeathEvent.getDrops())
                                     .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
                         }
-
-                        Location dropLocation = livingEntity.getLocation();
 
                         entityDeathEvent.getDrops().stream()
                                 .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
