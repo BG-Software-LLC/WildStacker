@@ -101,15 +101,6 @@ public final class GeneralUtils {
         return numberFormatter.format(number);
     }
 
-    public static Location getMiddleBlock(Location location){
-        return new Location(
-                location.getWorld(),
-                location.getBlockX() + 0.5D,
-                location.getBlockY() + 0.5D,
-                location.getBlockZ() + 0.5D
-        );
-    }
-
     private static double distance(Location loc1, Location loc2){
         return loc1.getWorld() != loc2.getWorld() ? Double.POSITIVE_INFINITY : loc1.distanceSquared(loc2);
     }
