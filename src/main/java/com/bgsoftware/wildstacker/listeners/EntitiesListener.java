@@ -387,7 +387,7 @@ public final class EntitiesListener implements Listener {
                     }
                 }
 
-                Location dropLocation = livingEntity.getLocation();
+                Location dropLocation = GeneralUtils.getMiddleBlock(livingEntity.getLocation());
 
                 Executor.async(() -> {
                     livingEntity.setLastDamageCause(clonedEvent);
