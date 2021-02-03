@@ -208,6 +208,10 @@ public interface NMSAdapter {
 
     }
 
+    default boolean handlePiglinPickup(Entity bukkitPiglin, Item item){
+        return false;
+    }
+
     /*
      *   Tag methods
      */

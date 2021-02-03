@@ -16,6 +16,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
@@ -144,7 +145,19 @@ public final class ItemsListener implements Listener {
 
             if(e.getInventory() != null) {
                 stackedItem.giveItemStack(e.getInventory());
-            }else{
+            }
+
+            else if(EntityTypes.fromEntity(e.getEntity()) == EntityTypes.PIGLIN &&
+                    plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)){
+                if(stackAmount <= 1){
+                    stackedItem.remove();
+                }
+                else{
+                    stackedItem.setStackAmount(stackAmount - 1, true);
+                }
+            }
+
+            else{
                 ItemStack itemStack = stackedItem.getItemStack();
                 int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
 

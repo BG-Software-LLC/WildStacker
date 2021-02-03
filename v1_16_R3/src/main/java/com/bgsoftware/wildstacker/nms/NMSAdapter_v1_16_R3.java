@@ -29,12 +29,15 @@ import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.EntityInsentient;
 import net.minecraft.server.v1_16_R3.EntityItem;
 import net.minecraft.server.v1_16_R3.EntityLiving;
+import net.minecraft.server.v1_16_R3.EntityPiglin;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EntityPositionTypes;
 import net.minecraft.server.v1_16_R3.EntityRaider;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EntityVillager;
 import net.minecraft.server.v1_16_R3.EntityZombieVillager;
+import net.minecraft.server.v1_16_R3.EnumHand;
+import net.minecraft.server.v1_16_R3.EnumItemSlot;
 import net.minecraft.server.v1_16_R3.EnumMobSpawn;
 import net.minecraft.server.v1_16_R3.FluidTypes;
 import net.minecraft.server.v1_16_R3.GameRules;
@@ -43,7 +46,9 @@ import net.minecraft.server.v1_16_R3.IChatBaseComponent;
 import net.minecraft.server.v1_16_R3.IFluidContainer;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
+import net.minecraft.server.v1_16_R3.Items;
 import net.minecraft.server.v1_16_R3.MathHelper;
+import net.minecraft.server.v1_16_R3.MemoryModuleType;
 import net.minecraft.server.v1_16_R3.MinecraftKey;
 import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
@@ -53,7 +58,9 @@ import net.minecraft.server.v1_16_R3.NBTTagList;
 import net.minecraft.server.v1_16_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
+import net.minecraft.server.v1_16_R3.PiglinAI;
 import net.minecraft.server.v1_16_R3.SoundEffect;
+import net.minecraft.server.v1_16_R3.TagsItem;
 import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R3.World;
 import net.minecraft.server.v1_16_R3.WorldServer;
@@ -79,6 +86,7 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
@@ -93,6 +101,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
 import org.bukkit.entity.Turtle;
@@ -668,6 +677,46 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item bukkitItem) {
+        if(!(bukkitPiglin instanceof Piglin))
+            return false;
+
+        EntityPiglin entityPiglin = ((CraftPiglin) bukkitPiglin).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+
+        entityPiglin.a(entityItem);
+
+        entityPiglin.getBehaviorController().removeMemory(MemoryModuleType.WALK_TARGET);
+        entityPiglin.getNavigation().o();
+
+        entityPiglin.receive(entityItem, 1);
+
+        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        net.minecraft.server.v1_16_R3.Item item = itemStack.getItem();
+        if (item.a(TagsItem.PIGLIN_LOVED)) {
+            entityPiglin.getBehaviorController().removeMemory(MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM);
+            if (!entityPiglin.getItemInOffHand().isEmpty()) {
+                entityPiglin.a(entityPiglin.b(EnumHand.OFF_HAND));
+            }
+
+            entityPiglin.setSlot(EnumItemSlot.OFFHAND, itemStack);
+            entityPiglin.d(EnumItemSlot.OFFHAND);
+
+            if (item != PiglinAI.a) {
+                entityPiglin.persistent = true;
+            }
+
+            entityPiglin.getBehaviorController().a(MemoryModuleType.ADMIRING_ITEM, true, 120L);
+        }
+        else if ((item == Items.PORKCHOP || item == Items.COOKED_PORKCHOP) && !
+                entityPiglin.getBehaviorController().hasMemory(MemoryModuleType.ATE_RECENTLY)) {
+            entityPiglin.getBehaviorController().a(MemoryModuleType.ATE_RECENTLY, true, 200L);
+        }
+
+        return true;
     }
 
     /*
