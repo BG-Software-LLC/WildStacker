@@ -51,7 +51,7 @@ public final class SpawnersManageMenu extends WildMenu {
             }
         }
         else if(upgradeMenuSlots.contains(e.getRawSlot())){
-            if(plugin.getSettings().amountsMenuEnabled) {
+            if(plugin.getSettings().upgradeMenuEnabled) {
                 SpawnerUpgradeMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
         }
