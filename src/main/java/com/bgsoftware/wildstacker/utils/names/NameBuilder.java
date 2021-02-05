@@ -17,6 +17,11 @@ public final class NameBuilder<T> {
             stringBuilder.append(" ");
             stringBuilder = handleWord(word, stringBuilder, placeholders);
         }
+
+        if(namePart == null)
+            namePart = new StaticPart<>(stringBuilder.toString());
+        else
+            namePart.addPart(new StaticPart<>(stringBuilder.toString()));
     }
 
     public String build(T argument){
