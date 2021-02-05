@@ -439,6 +439,11 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         ((CraftEntity) entity).getHandle().setCustomName(name == null || name.isEmpty() ? null : new ChatComponentText(name));
     }
 
+    @Override
+    public Object getPersistentDataContainer(org.bukkit.entity.Entity entity) {
+        return entity.getPersistentDataContainer();
+    }
+
     /*
      *   Spawner methods
      */

@@ -5,7 +5,9 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.CitizensHook;
+import com.bgsoftware.wildstacker.hooks.LevelledMobsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
+import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.reflection.Methods;
@@ -186,8 +188,13 @@ public final class EntityUtils {
     public static String getEntityName(StackedEntity stackedEntity){
         int stackAmount = stackedEntity.getStackAmount();
 
-        if(stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS && stackedEntity.getCustomName() != null) {
-            return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
+        if(stackedEntity.getCustomName() != null) {
+            if (stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS) {
+                return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
+            }
+            else if (PluginHooks.isLevelledMobsEnabled && LevelledMobsHook.isLevelledMob(stackedEntity.getLivingEntity())) {
+                return plugin.getNMSAdapter().getCustomName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
+            }
         }
 
         if (plugin.getSettings().entitiesCustomName.isEmpty())
@@ -227,6 +234,9 @@ public final class EntityUtils {
 
         if(!MythicMobsHook.areSimilar(en1.getUniqueId(), en2.getUniqueId()))
             return StackCheckResult.MYTHIC_MOB_TYPE;
+
+        if(PluginHooks.isLevelledMobsEnabled && !LevelledMobsHook.areSimilar(en1, en2))
+            return StackCheckResult.LEVELLED_MOB_LEVEL;
 
         //EpicSpawners drops data
         if(EntityStorage.hasMetadata(en1, "ES") != EntityStorage.hasMetadata(en2, "ES"))

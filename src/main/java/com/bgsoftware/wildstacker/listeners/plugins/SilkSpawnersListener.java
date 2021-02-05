@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.listeners.plugins;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerBreakEvent;
@@ -17,7 +16,6 @@ public final class SilkSpawnersListener implements Listener {
 
     public SilkSpawnersListener(WildStackerPlugin plugin){
         this.plugin = plugin;
-        PluginHooks.isSilkSpawnersEnabled = true;
     }
 
     //This one will run only if SilkSpawners is enabled

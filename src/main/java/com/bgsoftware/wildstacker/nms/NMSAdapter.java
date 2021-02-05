@@ -144,6 +144,10 @@ public interface NMSAdapter {
         entity.setCustomNameVisible(visibleName);
     }
 
+    default Object getPersistentDataContainer(Entity entity){
+        return null;
+    }
+
     /*
      *   Spawner methods
      */

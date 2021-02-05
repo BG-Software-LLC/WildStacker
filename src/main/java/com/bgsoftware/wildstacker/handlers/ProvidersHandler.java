@@ -38,6 +38,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -142,6 +143,8 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new EpicBossesListener(), plugin);
         if(enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
             pluginManager.registerEvents(new MythicMobsListener(), plugin);
+        if(enable && isPlugin(toCheck, "LevelledMobs") && pluginManager.isPluginEnabled("LevelledMobs"))
+            PluginHooks.isLevelledMobsEnabled = ServerVersion.isAtLeast(ServerVersion.v1_14);
         if(enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
             pluginManager.registerEvents(new MyPetListener(), plugin);
         if(enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
@@ -168,12 +171,8 @@ public final class ProvidersHandler {
             EconomyHook.setEnabled(enable);
         if(isPlugin(toCheck, "MergedSpawner") && pluginManager.isPluginEnabled("MergedSpawner"))
             PluginHooks.isMergedSpawnersEnabled = enable;
-        if(isPlugin(toCheck, "ASkyBlock") && pluginManager.isPluginEnabled("ASkyBlock") && pluginManager.getPlugin("ASkyBlock").getDescription().getAuthors().contains("Ome_R"))
-            PluginHooks.isASkyBlockEnabled = enable;
         if(isPlugin(toCheck, "FastAsyncWorldEdit") && pluginManager.isPluginEnabled("FastAsyncWorldEdit"))
             PluginHooks.isFastAsyncWorldEditEnabled = enable;
-        if(isPlugin(toCheck, "PickupSpawners") && pluginManager.isPluginEnabled("PickupSpawners"))
-            PluginHooks.isPickupSpawnersEnabled = enable;
         if(enable && isPlugin(toCheck, "FactionsTop") && ReflectionUtils.isPluginEnabled("net.novucs.ftop.FactionsTopPlugin"))
             PluginHook_Novucs.setEnabled(plugin);
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
