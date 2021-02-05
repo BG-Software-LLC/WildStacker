@@ -430,7 +430,7 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     @Override
     public void setCustomName(org.bukkit.entity.Entity entity, String name) {
         // Much more optimized way than Bukkit's method.
-        ((CraftEntity) entity).getHandle().setCustomName(new ChatComponentText(name));
+        ((CraftEntity) entity).getHandle().setCustomName(name == null || name.isEmpty() ? null : new ChatComponentText(name));
     }
 
     /*
