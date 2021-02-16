@@ -45,6 +45,10 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             perStackAmount = 1;
         }
 
+        if(spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {
+            itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
+        }
+
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         try {
@@ -55,9 +59,6 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
             blockStateMeta.setBlockState(creatureSpawner);
         }catch(Throwable ignored){}
-
-        if(spawnerUpgrade != null && !spawnerUpgrade.isDefault())
-            itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
 
         String customName = plugin.getSettings().spawnerItemName;
 
