@@ -101,6 +101,7 @@ public final class EntitiesListener implements Listener {
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
     private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
+    private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
 
     public static EntitiesListener IMP;
 
@@ -259,8 +260,8 @@ public final class EntitiesListener implements Listener {
             if(plugin.getSettings().spreadDamage && !instantKill){
                 double finalDamage = e.getFinalDamage();
 
-                if(ServerVersion.isAtLeast(ServerVersion.v1_11) && damagerTool != null) {
-                    int sweepingEdgeLevel = damagerTool.getEnchantmentLevel(Enchantment.getByName("SWEEPING_EDGE"));
+                if(SWEEPING_EDGE != null && damagerTool != null) {
+                    int sweepingEdgeLevel = damagerTool.getEnchantmentLevel(SWEEPING_EDGE);
                     if(sweepingEdgeLevel > 0)
                         finalDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
                 }
