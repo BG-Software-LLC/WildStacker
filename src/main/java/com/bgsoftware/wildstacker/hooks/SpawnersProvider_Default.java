@@ -34,7 +34,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
-        ItemStack itemStack = Materials.SPAWNER.toBukkitItem(amount);
+        ItemStack itemStack = Materials.SPAWNER.toBukkitItem(1);
 
         if(spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {
             itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
@@ -47,6 +47,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
         }
         else {
+            itemStack.setAmount(amount);
             perStackAmount = 1;
         }
 
