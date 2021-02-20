@@ -452,7 +452,7 @@ public final class EntitiesListener implements Listener {
 
                         if (entityDeathEvent.getDroppedExp() > 0) {
                             if(GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
-                                livingEntity.getKiller().giveExp(entityDeathEvent.getDroppedExp());
+                                EntityUtils.giveExp(livingEntity.getKiller(), entityDeathEvent.getDroppedExp());
                                 if(plugin.getSettings().entitiesExpPickupSound != null)
                                     livingEntity.getKiller().playSound(livingEntity.getLocation(),
                                             plugin.getSettings().entitiesExpPickupSound, 0.1F, 0.1F);
