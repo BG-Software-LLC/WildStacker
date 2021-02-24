@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -240,6 +241,12 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
+        // Should be called sync due to collecting nearby entities
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> runStackAsync(result));
+            return;
+        }
+
         int range = getMergeRadius();
 
         if(range <= 0 || getStackLimit() <= 1){

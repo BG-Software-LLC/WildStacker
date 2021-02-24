@@ -302,6 +302,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
+        // Should be called sync due to collecting nearby entities
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> runStackAsync(result));
+            return;
+        }
+
         int range = getMergeRadius();
         Location entityLocation = getLivingEntity().getLocation();
 
