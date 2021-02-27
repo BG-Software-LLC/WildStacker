@@ -264,6 +264,7 @@ entities:
     HORSE_STYLE: true
     HORSE_TAME_PROGRESS: true
     HORSE_TYPE: true
+    IS_IN_LOVE: true
     IS_TAMED: true
     LLAMA_COLOR: true
     LLAMA_STRENGTH: true

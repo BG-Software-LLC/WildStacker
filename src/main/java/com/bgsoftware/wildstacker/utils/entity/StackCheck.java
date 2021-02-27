@@ -31,6 +31,7 @@ public enum StackCheck {
     HORSE_STYLE(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
     HORSE_TAME_PROGRESS(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
     HORSE_TYPE(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
+    IS_IN_LOVE(),
     IS_TAMED(),
     LLAMA_COLOR(EntityTypes.LLAMA),
     LLAMA_STRENGTH(EntityTypes.LLAMA),

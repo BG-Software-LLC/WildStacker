@@ -282,6 +282,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 EntityUtils.canBeBred((Animals) object) != EntityUtils.canBeBred((Animals) targetEntity.getLivingEntity()))
             return StackCheckResult.BREED_STATUS;
 
+        if(StackCheck.IS_IN_LOVE.isEnabled() && object instanceof Animals && (
+                plugin.getNMSAdapter().isInLove((Animals) object) ||
+                plugin.getNMSAdapter().isInLove((Animals) targetEntity.getLivingEntity())))
+            return StackCheckResult.IN_LOVE_STATUS;
+
         if(PluginHooks.isWorldGuardEnabled && !plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
             Set<String> regions = new HashSet<>();
             regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
