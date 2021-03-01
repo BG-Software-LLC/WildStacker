@@ -212,7 +212,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(isNameBlacklisted() || hasNameTag())
             return;
 
-        if(!isCached())
+        if(!plugin.getDataHandler().CACHED_ENTITIES.containsKey(getUniqueId()))
             return;
 
         try {
