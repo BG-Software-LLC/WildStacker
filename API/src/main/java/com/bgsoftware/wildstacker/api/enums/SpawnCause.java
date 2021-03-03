@@ -54,7 +54,8 @@ public enum SpawnCause {
     EPIC_BOSSES_MINION(105),
     EPIC_SPAWNERS(106),
     MY_PET(107),
-    ECHO_PET(108);
+    ECHO_PET(108),
+    ELITE_BOSSES(109);
 
     private final int id;
 

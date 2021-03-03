@@ -94,6 +94,7 @@ dependencies {
     compileOnly 'com.bgsoftware:WildToolsAPI:latest'
     compileOnly 'com.sk89q:WorldEdit-7:latest'
     compileOnly 'com.sk89q:WorldGuard-7:latest'
+    compileOnly 'net.splodgebox:EliteBosses:latest'
 }
 
 jar {

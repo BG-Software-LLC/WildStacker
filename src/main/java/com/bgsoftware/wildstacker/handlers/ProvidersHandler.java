@@ -33,6 +33,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EchoPetListener;
+import com.bgsoftware.wildstacker.listeners.plugins.EliteBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
@@ -155,6 +156,8 @@ public final class ProvidersHandler {
             CrazyEnchantmentsHook.register();
         if(enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss"))
             BossListener.register(plugin);
+        if(enable && isPlugin(toCheck, "EliteBosses") && pluginManager.isPluginEnabled("EliteBosses"))
+            pluginManager.registerEvents(new EliteBossesListener(), plugin);
 
         //Load plugin hooks
         if(isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO"))
