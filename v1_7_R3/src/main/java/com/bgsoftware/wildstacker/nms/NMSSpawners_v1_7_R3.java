@@ -54,13 +54,17 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     @Override
-    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
+    public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
         World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
 
         TileEntity tileEntity = world.getTileEntity(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        if(tileEntity instanceof TileEntityMobSpawner)
+        if(tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).a() instanceof StackedMobSpawner)) {
             new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -151,13 +155,11 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             this.position = new BlockPosition(tileEntityMobSpawner.x, tileEntityMobSpawner.y, tileEntityMobSpawner.z);
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
-            if(!(tileEntityMobSpawner.a() instanceof StackedMobSpawner)) {
-                MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.a();
-                Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
-                NBTTagCompound tagCompound = new NBTTagCompound();
-                originalSpawner.b(tagCompound);
-                a(tagCompound);
-            }
+            MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.a();
+            Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
+            NBTTagCompound tagCompound = new NBTTagCompound();
+            originalSpawner.b(tagCompound);
+            a(tagCompound);
 
             updateDemoEntity();
         }

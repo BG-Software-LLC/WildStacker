@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 
 public interface NMSSpawners {
 
-    void updateStackedSpawner(StackedSpawner stackedSpawner);
+    boolean updateStackedSpawner(StackedSpawner stackedSpawner);
 
     void registerSpawnConditions();
 

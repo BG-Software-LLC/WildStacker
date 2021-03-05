@@ -417,15 +417,22 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(plugin.getSettings().spawnersOverrideEnabled || !listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
+        if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
+
+        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
+
+        if(plugin.getSettings().spawnersOverrideEnabled){
+            // We make sure the spawner is still overridden by WildStacker
+            // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
+            if(!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
+                return;
+        }
 
         EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.SPAWNER);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         stackedEntity.updateNerfed();
-
-        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
         ((WStackedEntity) stackedEntity).setUpgradeId(((WStackedSpawner) stackedSpawner).getUpgradeId());
 

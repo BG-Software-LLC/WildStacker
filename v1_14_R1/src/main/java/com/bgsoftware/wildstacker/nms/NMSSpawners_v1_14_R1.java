@@ -58,13 +58,17 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     @Override
-    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
+    public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
         World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
 
         TileEntity tileEntity = world.getTileEntity(new BlockPosition(location.getX(), location.getY(), location.getZ()));
-        if(tileEntity instanceof TileEntityMobSpawner)
+        if(tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner)) {
             new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
+            return false;
+        }
+
+        return false;
     }
 
     @Override
@@ -194,18 +198,16 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
             this.position = tileEntityMobSpawner.getPosition();
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
-            if(!(tileEntityMobSpawner.getSpawner() instanceof StackedMobSpawner)) {
-                MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
-                Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
+            MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
+            Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
 
-                this.spawnData = originalSpawner.spawnData;
-                this.minSpawnDelay = originalSpawner.minSpawnDelay;
-                this.maxSpawnDelay = originalSpawner.maxSpawnDelay;
-                this.spawnCount = originalSpawner.spawnCount;
-                this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
-                this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
-                this.spawnRange = originalSpawner.spawnRange;
-            }
+            this.spawnData = originalSpawner.spawnData;
+            this.minSpawnDelay = originalSpawner.minSpawnDelay;
+            this.maxSpawnDelay = originalSpawner.maxSpawnDelay;
+            this.spawnCount = originalSpawner.spawnCount;
+            this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
+            this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
+            this.spawnRange = originalSpawner.spawnRange;
 
             updateDemoEntity();
         }
