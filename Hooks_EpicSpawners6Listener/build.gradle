@@ -1,0 +1,25 @@
+group 'Hooks_EpicSpawners6Listener'
+
+repositories {
+    maven { url 'https://repo.bg-software.com/repository/private-libs/' }
+
+    String mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : System.getenv('mavenUsername');
+    String mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : System.getenv('mavenPassword');
+
+    if(mavenUsername != null && mavenPassword != null) {
+        maven {
+            url 'https://repo.bg-software.com/repository/private-libs/'
+            credentials {
+                username mavenUsername
+                password mavenPassword
+            }
+        }
+    }
+}
+
+dependencies {
+    compileOnly "org.spigotmc:v1_7_R3:latest"
+    compileOnly 'com.songoda:EpicSpawners-6:latest'
+    compileOnly project(":API")
+    compileOnly parent
+}
