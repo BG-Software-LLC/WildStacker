@@ -101,6 +101,7 @@ public final class EventsCaller {
 
     public static boolean callSpawnerPlaceInventoryEvent(Player player, StackedSpawner stackedSpawner, int increaseAmount){
         SpawnerPlaceInventoryEvent spawnerPlaceInventoryEvent = new SpawnerPlaceInventoryEvent(player, stackedSpawner, increaseAmount);
+        Bukkit.getPluginManager().callEvent(spawnerPlaceInventoryEvent);
         return !spawnerPlaceInventoryEvent.isCancelled();
     }
 
