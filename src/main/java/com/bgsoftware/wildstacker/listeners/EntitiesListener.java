@@ -278,8 +278,11 @@ public final class EntitiesListener implements Listener {
 
             int fireTicks = livingEntity.getFireTicks();
 
-            if(!plugin.getSettings().nextStackKnockback)
+            if(!plugin.getSettings().nextStackKnockback) {
                 e.setCancelled(true);
+                // We make sure the entity has no damage ticks, so it can always be hit.
+                livingEntity.setMaximumNoDamageTicks(0);
+            }
 
             if(damager != null)
                 McMMOHook.handleCombat(damager, entityDamager, livingEntity, e.getFinalDamage());
