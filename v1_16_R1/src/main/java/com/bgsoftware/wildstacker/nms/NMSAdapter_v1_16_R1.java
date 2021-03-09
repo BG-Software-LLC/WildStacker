@@ -1066,6 +1066,8 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
             mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
             mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
             mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
+            if(mobSpawnerAbstract instanceof NMSSpawners_v1_16_R1.StackedMobSpawner)
+                ((NMSSpawners_v1_16_R1.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
         }
 
         @Override

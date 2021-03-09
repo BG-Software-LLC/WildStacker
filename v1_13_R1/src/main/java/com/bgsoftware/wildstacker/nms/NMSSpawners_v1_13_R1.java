@@ -213,6 +213,7 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
             this.spawnRange = originalSpawner.spawnRange;
 
             updateDemoEntity();
+            updateUpgrade(((WStackedSpawner) stackedSpawner).getUpgradeId());
         }
 
         @Override
@@ -271,6 +272,8 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
                     super.c();
                     return;
                 }
+
+                updateUpgrade(stackedSpawner.getUpgradeId());
 
                 demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
             }
@@ -372,6 +375,10 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
 
             if(spawnedEntities >= stackAmount)
                 resetSpawnDelay();
+        }
+
+        public void updateUpgrade(int upgradeId){
+            demoEntity.setUpgradeId(upgradeId);
         }
 
         private boolean hasNearbyPlayers(){

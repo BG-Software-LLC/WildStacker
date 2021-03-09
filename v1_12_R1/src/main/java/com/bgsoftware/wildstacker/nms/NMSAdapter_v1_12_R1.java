@@ -815,6 +815,7 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
                 ((NMSSpawners_v1_12_R1.StackedMobSpawner) mobSpawnerAbstract).maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
                 ((NMSSpawners_v1_12_R1.StackedMobSpawner) mobSpawnerAbstract).requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
                 ((NMSSpawners_v1_12_R1.StackedMobSpawner) mobSpawnerAbstract).spawnRange = spawnerUpgrade.getSpawnRange();
+                ((NMSSpawners_v1_12_R1.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
             }
             else{
                 NBTTagCompound nbtTagCompound = new NBTTagCompound();
