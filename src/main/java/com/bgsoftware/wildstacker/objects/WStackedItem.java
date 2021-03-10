@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
@@ -20,8 +21,10 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Collection;
 import java.util.Map;
@@ -435,6 +438,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             else {
                 setStackAmount(amountLeft, true);
             }
+
+            if(inventory instanceof PlayerInventory)
+                CoreProtectHook.recordItemPickup((Player) ((PlayerInventory) inventory).getHolder(), this, giveAmount - amountLeft);
         }
     }
 
