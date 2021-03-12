@@ -67,7 +67,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -635,12 +634,11 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        location = location.clone();
-
-        location.setX(location.getX() + (random.nextFloat() * 0.5F) + 0.25D);
-        location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
-        location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
+//        ThreadLocalRandom random = ThreadLocalRandom.current();
+        
+//        location.setX(location.getX() + (random.nextFloat() * 0.5F) + 0.25D);
+//        location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
+//        location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
 
         int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE);
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
