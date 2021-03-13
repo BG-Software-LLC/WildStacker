@@ -377,7 +377,8 @@ public final class NMSSpawners_v1_14_R1 implements NMSSpawners {
         }
 
         public void updateUpgrade(int upgradeId){
-            demoEntity.setUpgradeId(upgradeId);
+            if(demoEntity != null)
+                demoEntity.setUpgradeId(upgradeId);
         }
 
         private boolean hasNearbyPlayers(){
