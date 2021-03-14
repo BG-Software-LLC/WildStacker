@@ -8,7 +8,7 @@ import java.net.URL;
 
 public final class Updater {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static String latestVersion, versionDescription;
 
@@ -20,7 +20,7 @@ public final class Updater {
     private Updater(){}
 
     public static boolean isOutdated(){
-        return !plugin.getDescription().getVersion().equals(latestVersion);
+        return !plugin.getDescription().getVersion().startsWith(latestVersion);
     }
 
     public static String getLatestVersion(){
