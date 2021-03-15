@@ -171,7 +171,8 @@ public final class SystemHandler implements SystemManager {
             }
         }
 
-        boolean shouldBeCached = stackedEntity.isCached();
+        boolean shouldBeCached = stackedEntity.isCached() || stackedEntity.getStackAmount() > 1 ||
+                ((WStackedEntity) stackedEntity).getUpgradeId() != 0;
 
         //A new entity was created. Let's see if we need to add him
         if(shouldBeCached)
