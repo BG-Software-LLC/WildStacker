@@ -44,7 +44,6 @@ permissions:
     description: Gives access to use settings editor.
   wildstacker.place.*:
     description: Gives access to place all spawner types
-    default: true
   wildstacker.stack.*:
     description: Gives access to stack all spawner types
     default: true
