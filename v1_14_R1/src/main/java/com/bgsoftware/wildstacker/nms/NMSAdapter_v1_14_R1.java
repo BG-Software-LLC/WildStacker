@@ -19,6 +19,7 @@ import net.minecraft.server.v1_14_R1.ChatComponentText;
 import net.minecraft.server.v1_14_R1.ChatMessage;
 import net.minecraft.server.v1_14_R1.Chunk;
 import net.minecraft.server.v1_14_R1.ChunkProviderServer;
+import net.minecraft.server.v1_14_R1.CriterionTriggers;
 import net.minecraft.server.v1_14_R1.DamageSource;
 import net.minecraft.server.v1_14_R1.DataWatcher;
 import net.minecraft.server.v1_14_R1.DataWatcherObject;
@@ -39,6 +40,7 @@ import net.minecraft.server.v1_14_R1.EntityTurtle;
 import net.minecraft.server.v1_14_R1.EntityTypes;
 import net.minecraft.server.v1_14_R1.EntityVillager;
 import net.minecraft.server.v1_14_R1.EntityZombieVillager;
+import net.minecraft.server.v1_14_R1.EnumHand;
 import net.minecraft.server.v1_14_R1.EnumMobSpawn;
 import net.minecraft.server.v1_14_R1.FluidTypes;
 import net.minecraft.server.v1_14_R1.GameRules;
@@ -47,8 +49,11 @@ import net.minecraft.server.v1_14_R1.IChatBaseComponent;
 import net.minecraft.server.v1_14_R1.IFluidContainer;
 import net.minecraft.server.v1_14_R1.ItemStack;
 import net.minecraft.server.v1_14_R1.ItemSword;
+import net.minecraft.server.v1_14_R1.Items;
 import net.minecraft.server.v1_14_R1.MathHelper;
 import net.minecraft.server.v1_14_R1.MinecraftKey;
+import net.minecraft.server.v1_14_R1.MobEffect;
+import net.minecraft.server.v1_14_R1.MobEffects;
 import net.minecraft.server.v1_14_R1.MobSpawnerAbstract;
 import net.minecraft.server.v1_14_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_14_R1.NBTTagCompound;
@@ -57,6 +62,7 @@ import net.minecraft.server.v1_14_R1.PacketPlayOutCollect;
 import net.minecraft.server.v1_14_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_14_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_14_R1.SoundEffect;
+import net.minecraft.server.v1_14_R1.StatisticList;
 import net.minecraft.server.v1_14_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_14_R1.World;
 import net.minecraft.server.v1_14_R1.WorldServer;
@@ -99,6 +105,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -436,6 +444,46 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     @Override
     public Object getPersistentDataContainer(org.bukkit.entity.Entity entity) {
         return entity.getPersistentDataContainer();
+    }
+
+    @Override
+    public boolean handleTotemOfUndying(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        ItemStack totemOfUndying = ItemStack.a;
+
+        for (EnumHand enumHand : EnumHand.values()) {
+            ItemStack handItem = entityLiving.b(enumHand);
+            if (handItem.getItem() == Items.TOTEM_OF_UNDYING) {
+                totemOfUndying = handItem;
+                break;
+            }
+        }
+
+        EntityResurrectEvent event = new EntityResurrectEvent(livingEntity);
+        event.setCancelled(totemOfUndying.isEmpty());
+        Bukkit.getPluginManager().callEvent(event);
+
+        if(event.isCancelled())
+            return false;
+
+        if(!totemOfUndying.isEmpty()) {
+            totemOfUndying.subtract(1);
+
+            if(entityLiving instanceof EntityPlayer){
+                ((EntityPlayer) entityLiving).b(StatisticList.ITEM_USED.b(Items.TOTEM_OF_UNDYING));
+                CriterionTriggers.B.a((EntityPlayer) entityLiving, totemOfUndying);
+            }
+
+            entityLiving.setHealth(1.0F);
+            entityLiving.removeAllEffects(EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.REGENERATION, 900, 1), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.ABSORBTION, 100, 1), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.FIRE_RESISTANCE, 800, 0), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.world.broadcastEntityEffect(entityLiving, (byte) 35);
+        }
+
+        return true;
     }
 
     /*

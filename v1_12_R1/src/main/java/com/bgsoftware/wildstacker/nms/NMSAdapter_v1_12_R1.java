@@ -17,6 +17,7 @@ import net.minecraft.server.v1_12_R1.AxisAlignedBB;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.BlockRotatable;
 import net.minecraft.server.v1_12_R1.Chunk;
+import net.minecraft.server.v1_12_R1.CriterionTriggers;
 import net.minecraft.server.v1_12_R1.DamageSource;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
 import net.minecraft.server.v1_12_R1.Entity;
@@ -31,13 +32,17 @@ import net.minecraft.server.v1_12_R1.EntityTracker;
 import net.minecraft.server.v1_12_R1.EntityTypes;
 import net.minecraft.server.v1_12_R1.EntityVillager;
 import net.minecraft.server.v1_12_R1.EntityZombieVillager;
+import net.minecraft.server.v1_12_R1.EnumHand;
 import net.minecraft.server.v1_12_R1.EnumParticle;
 import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.IWorldAccess;
 import net.minecraft.server.v1_12_R1.ItemStack;
 import net.minecraft.server.v1_12_R1.ItemSword;
+import net.minecraft.server.v1_12_R1.Items;
 import net.minecraft.server.v1_12_R1.MathHelper;
 import net.minecraft.server.v1_12_R1.MinecraftKey;
+import net.minecraft.server.v1_12_R1.MobEffect;
+import net.minecraft.server.v1_12_R1.MobEffects;
 import net.minecraft.server.v1_12_R1.MobSpawnerAbstract;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
@@ -47,6 +52,7 @@ import net.minecraft.server.v1_12_R1.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_12_R1.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_12_R1.SoundCategory;
 import net.minecraft.server.v1_12_R1.SoundEffect;
+import net.minecraft.server.v1_12_R1.StatisticList;
 import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_12_R1.World;
 import net.minecraft.server.v1_12_R1.WorldServer;
@@ -76,6 +82,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.inventory.EntityEquipment;
 
 import javax.annotation.Nullable;
@@ -340,6 +347,46 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
                 nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
             }
         }
+    }
+
+    @Override
+    public boolean handleTotemOfUndying(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        ItemStack totemOfUndying = ItemStack.a;
+
+        for (EnumHand enumHand : EnumHand.values()) {
+            ItemStack handItem = entityLiving.b(enumHand);
+            if (handItem.getItem() == Items.cY) {
+                totemOfUndying = handItem;
+                break;
+            }
+        }
+
+        EntityResurrectEvent event = new EntityResurrectEvent(livingEntity);
+        event.setCancelled(totemOfUndying.isEmpty());
+        Bukkit.getPluginManager().callEvent(event);
+
+        if(event.isCancelled())
+            return false;
+
+        if(!totemOfUndying.isEmpty()) {
+            totemOfUndying.subtract(1);
+
+            if(entityLiving instanceof EntityPlayer){
+                ((EntityPlayer) entityLiving).b(StatisticList.b(Items.cY));
+                CriterionTriggers.A.a((EntityPlayer) entityLiving, totemOfUndying);
+            }
+
+            entityLiving.setHealth(1.0F);
+            entityLiving.removeAllEffects();
+            entityLiving.addEffect(new MobEffect(MobEffects.REGENERATION, 900, 1));
+            entityLiving.addEffect(new MobEffect(MobEffects.ABSORBTION, 100, 1));
+            entityLiving.addEffect(new MobEffect(MobEffects.FIRE_RESISTANCE, 800, 0));
+            entityLiving.world.broadcastEntityEffect(entityLiving, (byte) 35);
+        }
+
+        return true;
     }
 
     /*

@@ -19,6 +19,7 @@ import net.minecraft.server.v1_16_R3.ChatComponentText;
 import net.minecraft.server.v1_16_R3.ChatMessage;
 import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkProviderServer;
+import net.minecraft.server.v1_16_R3.CriterionTriggers;
 import net.minecraft.server.v1_16_R3.DamageSource;
 import net.minecraft.server.v1_16_R3.DynamicOpsNBT;
 import net.minecraft.server.v1_16_R3.EnchantmentManager;
@@ -50,6 +51,8 @@ import net.minecraft.server.v1_16_R3.Items;
 import net.minecraft.server.v1_16_R3.MathHelper;
 import net.minecraft.server.v1_16_R3.MemoryModuleType;
 import net.minecraft.server.v1_16_R3.MinecraftKey;
+import net.minecraft.server.v1_16_R3.MobEffect;
+import net.minecraft.server.v1_16_R3.MobEffects;
 import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_16_R3.NBTReadLimiter;
@@ -60,6 +63,7 @@ import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R3.PiglinAI;
 import net.minecraft.server.v1_16_R3.SoundEffect;
+import net.minecraft.server.v1_16_R3.StatisticList;
 import net.minecraft.server.v1_16_R3.TagsItem;
 import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R3.World;
@@ -108,6 +112,8 @@ import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -487,6 +493,46 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public Object getPersistentDataContainer(org.bukkit.entity.Entity entity) {
         return entity.getPersistentDataContainer();
+    }
+
+    @Override
+    public boolean handleTotemOfUndying(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        ItemStack totemOfUndying = ItemStack.b;
+
+        for (EnumHand enumHand : EnumHand.values()) {
+            ItemStack handItem = entityLiving.b(enumHand);
+            if (handItem.getItem() == Items.TOTEM_OF_UNDYING) {
+                totemOfUndying = handItem;
+                break;
+            }
+        }
+
+        EntityResurrectEvent event = new EntityResurrectEvent(livingEntity);
+        event.setCancelled(totemOfUndying.isEmpty());
+        Bukkit.getPluginManager().callEvent(event);
+
+        if(event.isCancelled())
+            return false;
+
+        if(!totemOfUndying.isEmpty()) {
+            totemOfUndying.subtract(1);
+
+            if(entityLiving instanceof EntityPlayer){
+                ((EntityPlayer) entityLiving).b(StatisticList.ITEM_USED.b(Items.TOTEM_OF_UNDYING));
+                CriterionTriggers.B.a((EntityPlayer) entityLiving, totemOfUndying);
+            }
+
+            entityLiving.setHealth(1.0F);
+            entityLiving.removeAllEffects(EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.REGENERATION, 900, 1), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.ABSORBTION, 100, 1), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.addEffect(new MobEffect(MobEffects.FIRE_RESISTANCE, 800, 0), EntityPotionEffectEvent.Cause.TOTEM);
+            entityLiving.world.broadcastEntityEffect(entityLiving, (byte) 35);
+        }
+
+        return true;
     }
 
     /*

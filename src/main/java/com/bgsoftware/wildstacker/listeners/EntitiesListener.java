@@ -252,6 +252,12 @@ public final class EntitiesListener implements Listener {
 
         if(plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
             EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
+
+            if(lastDamageCause != EntityDamageEvent.DamageCause.VOID && plugin.getNMSAdapter().handleTotemOfUndying(livingEntity)) {
+                e.setCancelled(true);
+                return;
+            }
+
             int stackAmount;
             double damageToNextStack;
 

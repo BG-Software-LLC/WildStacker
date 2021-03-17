@@ -148,6 +148,10 @@ public interface NMSAdapter {
         return null;
     }
 
+    default boolean handleTotemOfUndying(LivingEntity livingEntity){
+        return false;
+    }
+
     /*
      *   Spawner methods
      */
