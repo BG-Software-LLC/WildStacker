@@ -1,0 +1,29 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "ROTTEN_FLESH",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "killedByPlayer": true,
+      "chance": 5,
+      "lootingChance": 1,
+      "items": [
+        {
+          "type": "GOLD_INGOT",
+          "chance": 100,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

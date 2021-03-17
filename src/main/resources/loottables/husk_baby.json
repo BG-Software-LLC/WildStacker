@@ -1,0 +1,39 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "ROTTEN_FLESH",
+          "chance": 100,
+          "min": 0,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 1.5,
+      "items": [
+        {
+          "type": "IRON_INGOT",
+          "chance": 33,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "type": "CARROT",
+          "chance": 33,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "type": "POTATO",
+          "chance": 34,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
