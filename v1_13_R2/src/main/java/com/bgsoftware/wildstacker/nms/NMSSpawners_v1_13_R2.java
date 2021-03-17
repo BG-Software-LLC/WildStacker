@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
@@ -13,7 +14,6 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
-import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import net.minecraft.server.v1_13_R2.AxisAlignedBB;
 import net.minecraft.server.v1_13_R2.BiomeBase;
 import net.minecraft.server.v1_13_R2.Biomes;
@@ -54,6 +54,8 @@ import java.util.function.BiPredicate;
 
 @SuppressWarnings("unused")
 public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
+
+    private static final ReflectField<MobSpawnerAbstract> MOB_SPAWNER_ABSTRACT = new ReflectField<MobSpawnerAbstract>(TileEntityMobSpawner.class, MobSpawnerAbstract.class, "a").removeFinal();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -198,7 +200,7 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
             MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
-            Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.set(tileEntityMobSpawner, this);
+            MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
 
             NBTTagCompound tagCompound = originalSpawner.b(new NBTTagCompound());
 

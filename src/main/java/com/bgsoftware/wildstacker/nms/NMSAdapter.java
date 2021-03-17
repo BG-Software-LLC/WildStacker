@@ -30,9 +30,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public interface NMSAdapter {
 
@@ -67,8 +65,6 @@ public interface NMSAdapter {
     void setKiller(LivingEntity livingEntity, Player killer);
 
     boolean canSpawnOn(Entity entity, Location location);
-
-    List<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter);
 
     Collection<Entity> getEntitiesAtChunk(ChunkPosition chunkPosition);
 

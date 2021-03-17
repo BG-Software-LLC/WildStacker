@@ -31,7 +31,6 @@ import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -66,13 +65,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         plugin = this;
         new Metrics(this);
 
-        if(!ReflectionUtils.init()){
-            shouldEnable = false;
-        }
-        else {
-            loadNMSAdapter();
-            loadAPI();
-        }
+        loadNMSAdapter();
+        loadAPI();
 
         if(!shouldEnable)
             log("&cThere was an error while loading the plugin.");

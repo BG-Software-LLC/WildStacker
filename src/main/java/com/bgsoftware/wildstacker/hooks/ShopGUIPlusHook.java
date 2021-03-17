@@ -1,27 +1,34 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-
-import java.lang.reflect.Method;
 
 public final class ShopGUIPlusHook {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static void setEnabled(){
-        if(ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider") ?
-                new NewSpawnerProvider().register() : new OldSpawnerProvider().register()){
-            WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
+        boolean registered;
+
+        try{
+            Class.forName("net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider");
+            registered = new NewSpawnerProvider().register();
+        }catch (Throwable ex){
+            registered = new OldSpawnerProvider().register();
         }
+
+        if(registered)
+            WildStackerPlugin.log("Found ShopGUIPlus - Hooked as SpawnerProvider!");
     }
 
     static class NewSpawnerProvider implements net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider{
+
+        private static final ReflectMethod<Void> REGISTER_SPAWNER_PROVIDER = new ReflectMethod<>(ShopGuiPlusApi.class, "registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
 
         @Override
         public String getName() {
@@ -40,8 +47,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.spawner.external.provider.ExternalSpawnerProvider.class);
-                method.invoke(null, this);
+                REGISTER_SPAWNER_PROVIDER.invoke(null, this);
                 return true;
             }catch(Exception ex){
                 ex.printStackTrace();
@@ -52,6 +58,8 @@ public final class ShopGUIPlusHook {
     }
 
     static class OldSpawnerProvider extends net.brcdev.shopgui.provider.spawner.SpawnerProvider{
+
+        private static final ReflectMethod<Void> REGISTER_SPAWNER_PROVIDER = new ReflectMethod<>(ShopGuiPlusApi.class, "registerSpawnerProvider", net.brcdev.shopgui.provider.spawner.SpawnerProvider.class);
 
         @Override
         public net.brcdev.shopgui.provider.spawner.SpawnerProvider hook(Plugin plugin) {
@@ -75,8 +83,7 @@ public final class ShopGUIPlusHook {
 
         boolean register(){
             try{
-                Method method = ShopGuiPlusApi.class.getMethod("registerSpawnerProvider", net.brcdev.shopgui.provider.spawner.SpawnerProvider.class);
-                method.invoke(null, this);
+                REGISTER_SPAWNER_PROVIDER.invoke(null, this);
                 return true;
             }catch(Exception ex){
                 ex.printStackTrace();

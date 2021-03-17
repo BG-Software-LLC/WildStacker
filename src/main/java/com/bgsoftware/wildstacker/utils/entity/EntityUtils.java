@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
@@ -10,7 +11,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -26,6 +26,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
 import org.bukkit.entity.MushroomCow;
@@ -66,6 +67,11 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class EntityUtils {
+
+    private static final ReflectMethod<Entity> GET_SHOULDER_ENTITY_RIGHT = new ReflectMethod<>(HumanEntity.class, "getShoulderEntityRight");
+    private static final ReflectMethod<Void> SET_SHOULDER_ENTITY_RIGHT = new ReflectMethod<>(HumanEntity.class, "setShoulderEntityRight", Entity.class);
+    private static final ReflectMethod<Entity> GET_SHOULDER_ENTITY_LEFT = new ReflectMethod<>(HumanEntity.class, "getShoulderEntityLeft");
+    private static final ReflectMethod<Void> SET_SHOULDER_ENTITY_LEFT = new ReflectMethod<>(HumanEntity.class, "setShoulderEntityLeft", Entity.class);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final Object NULL = new Object();
@@ -119,36 +125,21 @@ public final class EntityUtils {
             plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
     }
 
-
     public static void removeParrotIfShoulder(Parrot parrot){
-        if(Methods.HUMAN_GET_SHOULDER_ENTITY_RIGHT.isValid()) {
+        if(GET_SHOULDER_ENTITY_RIGHT.isValid()) {
             Collection<Entity> entities = EntitiesGetter.getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player);
 
             for (Entity entity : entities){
-                if(parrot.equals(Methods.HUMAN_GET_SHOULDER_ENTITY_RIGHT.invoke(entity))){
-                    Methods.HUMAN_SET_SHOULDER_ENTITY_RIGHT.invoke(entities, (Object) null);
+                if(parrot.equals(GET_SHOULDER_ENTITY_RIGHT.invoke(entity))){
+                    SET_SHOULDER_ENTITY_RIGHT.invoke(entities, (Object) null);
                     break;
                 }
-                if(parrot.equals(Methods.HUMAN_GET_SHOULDER_ENTITY_LEFT.invoke(entity))){
-                    Methods.HUMAN_SET_SHOULDER_ENTITY_LEFT.invoke(entities, (Object) null);
+                if(parrot.equals(GET_SHOULDER_ENTITY_LEFT.invoke(entity))){
+                    SET_SHOULDER_ENTITY_LEFT.invoke(entities, (Object) null);
                     break;
                 }
             }
         }
-//        getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player).whenComplete((nearbyEntities, ex) -> {
-//            try {
-//                for (Entity entity : nearbyEntities) {
-//                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityRight").invoke(entity))) {
-//                        HumanEntity.class.getMethod("setShoulderEntityRight", Entity.class).invoke(entity, (Object) null);
-//                        break;
-//                    }
-//                    if (parrot.equals(HumanEntity.class.getMethod("getShoulderEntityLeft").invoke(entity))) {
-//                        HumanEntity.class.getMethod("setShoulderEntityLeft", Entity.class).invoke(entity, (Object) null);
-//                        break;
-//                    }
-//                }
-//            }catch(Exception ignored){}
-//        });
     }
 
     public static boolean isStackable(Entity entity){

@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -51,12 +50,16 @@ public final class ItemsListener implements Listener {
 
     public ItemsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
+
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteListener(plugin), plugin);
-        if(ReflectionUtils.isPluginEnabled("org.bukkit.event.block.BlockDropItemEvent"))
-            plugin.getServer().getPluginManager().registerEvents(new BlockDropItemListener(plugin), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_8))
             plugin.getServer().getPluginManager().registerEvents(new MergeListener(plugin), plugin);
+
+        try{
+            Class.forName("org.bukkit.event.block.BlockDropItemEvent");
+            plugin.getServer().getPluginManager().registerEvents(new BlockDropItemListener(plugin), plugin);
+        }catch (Exception ignored){}
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -336,7 +339,6 @@ public final class ItemsListener implements Listener {
             this.plugin = plugin;
         }
 
-        @SuppressWarnings("deprecation")
         @EventHandler
         public void onBlockDropItem(BlockDropItemEvent e){
             if(!plugin.getSettings().itemsStackingEnabled)

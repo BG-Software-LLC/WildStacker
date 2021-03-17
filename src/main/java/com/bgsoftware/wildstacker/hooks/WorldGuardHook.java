@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.hooks;
 
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -9,13 +8,12 @@ import java.util.stream.Collectors;
 
 public final class WorldGuardHook {
 
-    private static final WorldGuardProvider worldGuardProvider;
+    private static WorldGuardProvider worldGuardProvider;
 
     static {
-        if(ReflectionUtils.isPluginEnabled("com.sk89q.worldguard.protection.regions.RegionContainer")){
+        try{
             worldGuardProvider = new WorldGuardProvider() {};
-        }
-        else{
+        }catch (Exception ex){
             worldGuardProvider = newOldInstance();
         }
     }

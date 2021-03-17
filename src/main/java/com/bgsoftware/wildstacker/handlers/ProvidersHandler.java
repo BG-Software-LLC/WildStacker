@@ -40,7 +40,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -150,7 +149,7 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new MyPetListener(), plugin);
         if(enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             pluginManager.registerEvents(new EchoPetListener(), plugin);
-        if(enable && isPlugin(toCheck, "EpicSpawners") && ReflectionUtils.isPluginEnabled("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))
+        if(enable && isPlugin(toCheck, "EpicSpawners") && doesClassExist("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))
             EpicSpawnersListener.register(plugin);
         if(enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
             CrazyEnchantmentsHook.register();
@@ -176,9 +175,9 @@ public final class ProvidersHandler {
             PluginHooks.isMergedSpawnersEnabled = enable;
         if(isPlugin(toCheck, "FastAsyncWorldEdit") && pluginManager.isPluginEnabled("FastAsyncWorldEdit"))
             PluginHooks.isFastAsyncWorldEditEnabled = enable;
-        if(enable && isPlugin(toCheck, "FactionsTop") && ReflectionUtils.isPluginEnabled("net.novucs.ftop.FactionsTopPlugin"))
+        if(enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
             PluginHook_Novucs.setEnabled(plugin);
-        if (enable && isPlugin(toCheck, "ShopGUIPlus") && ReflectionUtils.isPluginEnabled("net.brcdev.shopgui.ShopGuiPlugin"))
+        if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin"))
             ShopGUIPlusHook.setEnabled();
         if(isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
             JobsHook.setEnabled(enable);
@@ -186,7 +185,7 @@ public final class ProvidersHandler {
             PluginHook_FabledSkyblock.register(plugin);
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             SuperiorSkyblockHook.register(plugin);
-        if (enable && isPlugin(toCheck, "NBTInjector") && ReflectionUtils.isPluginEnabled("de.tr7zw.nbtinjector.NBTInjector"))
+        if (enable && isPlugin(toCheck, "NBTInjector") && doesClassExist("de.tr7zw.nbtinjector.NBTInjector"))
             DataSerializer_NBTInjector.register(plugin);
     }
 
@@ -259,6 +258,15 @@ public final class ProvidersHandler {
     private static boolean hasPaperEntityRemoveSupport(){
         try{
             Class.forName("com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent");
+            return true;
+        }catch (Throwable ex){
+            return false;
+        }
+    }
+
+    private static boolean doesClassExist(String clazz){
+        try{
+            Class.forName(clazz);
             return true;
         }catch (Throwable ex){
             return false;

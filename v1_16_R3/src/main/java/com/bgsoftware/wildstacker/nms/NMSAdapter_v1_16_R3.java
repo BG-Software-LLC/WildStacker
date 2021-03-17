@@ -1,5 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
+import com.bgsoftware.common.reflection.ReflectField;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -8,11 +10,8 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.reflection.Fields;
-import com.bgsoftware.wildstacker.utils.reflection.Methods;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import net.minecraft.server.v1_16_R3.AxisAlignedBB;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.BlockRotatable;
 import net.minecraft.server.v1_16_R3.ChatComponentText;
@@ -21,6 +20,9 @@ import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkProviderServer;
 import net.minecraft.server.v1_16_R3.CriterionTriggers;
 import net.minecraft.server.v1_16_R3.DamageSource;
+import net.minecraft.server.v1_16_R3.DataWatcher;
+import net.minecraft.server.v1_16_R3.DataWatcherObject;
+import net.minecraft.server.v1_16_R3.DataWatcherRegistry;
 import net.minecraft.server.v1_16_R3.DynamicOpsNBT;
 import net.minecraft.server.v1_16_R3.EnchantmentManager;
 import net.minecraft.server.v1_16_R3.Entity;
@@ -34,6 +36,7 @@ import net.minecraft.server.v1_16_R3.EntityPiglin;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EntityPositionTypes;
 import net.minecraft.server.v1_16_R3.EntityRaider;
+import net.minecraft.server.v1_16_R3.EntityTurtle;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EntityVillager;
 import net.minecraft.server.v1_16_R3.EntityZombieVillager;
@@ -48,7 +51,6 @@ import net.minecraft.server.v1_16_R3.IFluidContainer;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
 import net.minecraft.server.v1_16_R3.Items;
-import net.minecraft.server.v1_16_R3.MathHelper;
 import net.minecraft.server.v1_16_R3.MemoryModuleType;
 import net.minecraft.server.v1_16_R3.MinecraftKey;
 import net.minecraft.server.v1_16_R3.MobEffect;
@@ -93,6 +95,7 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
@@ -108,7 +111,6 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
-import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -132,11 +134,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
+
+    private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "f");
+    private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
+    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(Entity.class, boolean.class, "fromMobSpawner");
+    private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(Chunk.class, Collection[].class, "entitySlices");
+    private static final ReflectMethod<Boolean> ALWAYS_GIVES_EXP = new ReflectMethod<>(EntityLiving.class, "alwaysGivesExp");
+    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "isDropExperience");
+    private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
+    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
+    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "dH");
+
+    private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
+    private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -227,10 +241,10 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     public int getEntityExp(LivingEntity livingEntity) {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
 
-        int defaultEntityExp = Fields.ENTITY_EXP.get(entityLiving, Integer.class);
+        int defaultEntityExp = ENTITY_EXP.get(entityLiving);
         int exp = entityLiving.getExpReward();
 
-        Fields.ENTITY_EXP.set(entityLiving, defaultEntityExp);
+        ENTITY_EXP.set(entityLiving, defaultEntityExp);
 
         return exp;
     }
@@ -238,16 +252,17 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public boolean canDropExp(LivingEntity livingEntity){
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        int lastDamageByPlayerTime = Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving, Integer.class);
-        boolean alwaysGivesExp = (boolean) Methods.ENTITY_ALWAYS_GIVES_EXP.invoke(entityLiving);
-        boolean isDropExperience = (boolean) Methods.ENTITY_IS_DROP_EXPERIENCE.invoke(entityLiving);
-        return !entityLiving.world.isClientSide && (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience && entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
+        int lastDamageByPlayerTime = LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving);
+        boolean alwaysGivesExp = ALWAYS_GIVES_EXP.invoke(entityLiving);
+        boolean isDropExperience = IS_DROP_EXPERIENCE.invoke(entityLiving);
+        return (alwaysGivesExp || lastDamageByPlayerTime > 0) && isDropExperience &&
+                entityLiving.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
     }
 
     @Override
     public void updateLastDamageTime(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Fields.ENTITY_LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
+        LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
     }
 
     @Override
@@ -270,12 +285,10 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
         try { entityLiving.aware = !nerfed; } catch(Throwable ignored){ }
+        try { entityLiving.spawnedViaMobSpawner = nerfed; } catch(Throwable ignored){ }
 
-        if(Fields.ENTITY_FROM_MOB_SPAWNER.exists())
-            Fields.ENTITY_FROM_MOB_SPAWNER.set(entityLiving, nerfed);
-
-        if(Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER.exists())
-            Fields.ENTITY_SPAWNED_VIA_MOB_SPAWNER.set(entityLiving, nerfed);
+        if(FROM_MOB_SPAWNER.isValid())
+            FROM_MOB_SPAWNER.set(entityLiving, nerfed);
     }
 
     @Override
@@ -285,74 +298,14 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     }
 
     @Override
-    public List<org.bukkit.entity.Entity> getNearbyEntities(Location location, int range, Predicate<org.bukkit.entity.Entity> filter) {
-        List<org.bukkit.entity.Entity> entities = new ArrayList<>();
-
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-
-        AxisAlignedBB axisAlignedBB = new AxisAlignedBB(location.getX() - range, location.getY() - range,
-                location.getZ() - range, location.getX() + range, location.getY() + range, location.getZ() + range);
-
-        int minX = MathHelper.floor((axisAlignedBB.minX - 2) / 16.0D);
-        int minY = MathHelper.floor((axisAlignedBB.minY - 2) / 16.0D);
-        int minZ = MathHelper.floor((axisAlignedBB.minZ - 2) / 16.0D);
-        int maxX = MathHelper.floor((axisAlignedBB.maxX + 2) / 16.0D);
-        int maxY = MathHelper.floor((axisAlignedBB.maxY + 2) / 16.0D);
-        int maxZ = MathHelper.floor((axisAlignedBB.maxZ + 2) / 16.0D);
-
-        for(int x = minX; x <= maxX; x++) {
-            for(int z = minZ; z <= maxZ; z++) {
-                Chunk chunk;
-
-                if(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.isValid()){
-                    chunk = (Chunk) Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.invoke(world, x, z);
-                }
-                else{
-                    chunk = world.getChunkProvider().getChunkAt(x, z, false);
-                }
-
-                if(chunk != null) {
-                    int chunkMinY = MathHelper.clamp(minY, 0, 15);
-                    int chunkMaxY = MathHelper.clamp(maxY, 0, 15);
-
-                    for(int y = chunkMinY; y <= chunkMaxY; y++){
-                        Collection<Entity> entitySlice = null;
-
-                        try{
-                            entitySlice = chunk.entitySlices[y];
-                        }catch (Throwable ex){
-                            try{
-                                // noinspection unchecked
-                                entitySlice = Fields.CHUNK_ENTITY_SLICES.get(chunk, Collection[].class)[y];
-                            }catch (Throwable ex2){
-                                ex2.printStackTrace();
-                            }
-                        }
-
-                        if(entitySlice != null) {
-                            entities.addAll(entitySlice.stream()
-                                    .filter(entity -> axisAlignedBB.e(entity.locX(), entity.locY(), entity.locZ()) &&
-                                    (filter == null || filter.test(entity.getBukkitEntity())))
-                                    .map(Entity::getBukkitEntity).collect(Collectors.toList()));
-                        }
-                    }
-                }
-            }
-        }
-
-        return entities;
-    }
-
-    @Override
     public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
         World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
 
         Chunk chunk;
 
-        if(Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.isValid()){
-            chunk = (Chunk) Methods.WORLD_GET_CHUNK_IF_LOADED_PAPER.invoke(world, chunkPosition.getX(), chunkPosition.getZ());
-        }
-        else{
+        try{
+            chunk = world.getChunkIfLoaded(chunkPosition.getX(), chunkPosition.getZ());
+        }catch (Throwable ex){
             chunk = world.getChunkProvider().getChunkAt(chunkPosition.getX(), chunkPosition.getZ(), false);
         }
 
@@ -364,12 +317,9 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         try{
             entitySlices = chunk.entitySlices;
         }catch (Throwable ex){
-            try{
+            if(ENTITY_SLICES.isValid())
                 // noinspection unchecked
-                entitySlices = Fields.CHUNK_ENTITY_SLICES.get(chunk, Collection[].class);
-            }catch (Throwable ex2){
-                ex2.printStackTrace();
-            }
+                entitySlices = ENTITY_SLICES.get(chunk);
         }
 
         if(entitySlices == null)
@@ -435,12 +385,13 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
-        ((Turtle) turtle).setHasEgg(true);
+        ((CraftTurtle) turtle).getHandle().getDataWatcher().set(TURTLE_HAS_EGG, true);
     }
 
     @Override
     public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
-        return ((Turtle) turtle).getHome();
+        BlockPosition homePosition = ((CraftTurtle) turtle).getHandle().getDataWatcher().get(TURTLE_HOME);
+        return new Location(turtle.getWorld(), homePosition.getX(), homePosition.getY(), homePosition.getZ());
     }
 
     @Override
@@ -682,12 +633,12 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public void playDeathSound(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        Object soundEffect = Methods.ENTITY_SOUND_DEATH.invoke(entityLiving);
-        if (soundEffect != null) {
-            float soundVolume = (float) Methods.ENTITY_SOUND_VOLUME.invoke(entityLiving);
-            float soundPitch = (float) Methods.ENTITY_SOUND_PITCH.invoke(entityLiving);
-            entityLiving.playSound((SoundEffect) soundEffect, soundVolume, soundPitch);
-        }
+
+        SoundEffect deathSound = GET_SOUND_DEATH.invoke(entityLiving);
+        float soundVolume = GET_SOUND_VOLUME.invoke(entityLiving);
+        float soundPitch = GET_SOUND_PITCH.invoke(entityLiving);
+
+        entityLiving.playSound(deathSound, soundVolume, soundPitch);
     }
 
     @Override

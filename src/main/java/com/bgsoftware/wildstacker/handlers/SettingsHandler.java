@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
@@ -31,7 +32,6 @@ import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import com.bgsoftware.wildstacker.utils.names.NamePlaceholder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
-import com.bgsoftware.wildstacker.utils.reflection.Fields;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -53,6 +53,8 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
+
+    private static final ReflectField<Object> MOB_SPAWNER_ABSTRACT = new ReflectField<>("net.minecraft.server.VERSION.TileEntityMobSpawner", Object.class, "a").removeFinal();
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
@@ -392,7 +394,7 @@ public final class SettingsHandler {
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         upgradeMenuEnabled = cfg.getBoolean("spawners.manage-menu.upgrade-menu");
         manageMenuEnabled = amountsMenuEnabled || upgradeMenuEnabled;
-        spawnersOverrideEnabled = spawnersStackingEnabled && Fields.TILE_ENTITY_SPAWNER_ABSTRACT_SPAWNER.exists();
+        spawnersOverrideEnabled = spawnersStackingEnabled && MOB_SPAWNER_ABSTRACT.isValid();
         spawnerUpgradesMultiplyStackAmount = cfg.getBoolean("spawners.spawner-upgrades.multiply-stack-amount", true);
         plugin.getUpgradesManager().removeAllUpgrades();
         for(String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades.ladders").getKeys(false)){

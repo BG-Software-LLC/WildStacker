@@ -21,7 +21,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.reflection.ReflectionUtils;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Function;
@@ -125,12 +124,11 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new TurtleListener(), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_15))
             plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
-        if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent"))
-            plugin.getServer().getPluginManager().registerEvents(new EntityKillListener(), plugin);
-        if(ReflectionUtils.isPluginEnabled("com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent"))
-            plugin.getServer().getPluginManager().registerEvents(new EntityRemoveListener(), plugin);
-        if(ReflectionUtils.isPluginEnabled("org.bukkit.event.block.BlockShearEntityEvent"))
+
+        try{
+            Class.forName("org.bukkit.event.block.BlockShearEntityEvent");
             plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
+        }catch (Exception ignored){ }
     }
 
     /*
@@ -1084,34 +1082,6 @@ public final class EntitiesListener implements Listener {
         else{
             return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
         }
-    }
-
-    private class EntityKillListener implements Listener {
-
-        @EventHandler
-        public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityKillEvent e){
-            if(EntityStorage.hasMetadata(e.getEntity(), "corpse"))
-                return;
-
-            e.setCancelled(true);
-
-            onEntityLastDamage(createDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM, e.getEntity().getHealth(), null));
-        }
-
-    }
-
-    private class EntityRemoveListener implements Listener {
-
-        @EventHandler
-        public void onEntityKill(com.ome_r.wildstacker.enchantspatch.events.EntityRemoveEvent e){
-            WStackedEntity stackedEntity = (WStackedEntity) WStackedEntity.of(e.getEntity());
-
-            if(stackedEntity.wasRemoved())
-                return;
-
-            plugin.getSystemManager().removeStackObject(stackedEntity);
-        }
-
     }
 
     private class TransformListener implements Listener {
