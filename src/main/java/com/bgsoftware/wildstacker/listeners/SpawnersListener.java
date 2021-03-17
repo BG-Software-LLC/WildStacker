@@ -394,11 +394,6 @@ public final class SpawnersListener implements Listener {
             Executor.sync(() -> {
                 EntitiesGetter.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
                         .stream().findFirst().ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId()));
-//                try{
-//                    EntityUtils.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
-//                            .whenComplete((nearbyEntities,  ex) -> nearbyEntities.stream().findFirst()
-//                                    .ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId())));
-//                }catch(Throwable ignored){}
             }, 2L);
         }
     }

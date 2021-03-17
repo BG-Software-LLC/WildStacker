@@ -168,21 +168,6 @@ public final class EntityUtils {
             experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
             experienceOrb.setExperience(amount);
         }
-
-//        EntityUtils.getNearbyEntities(location, 2, entity -> entity instanceof ExperienceOrb).whenComplete((nearbyEntities, ex) -> {
-//            Optional<Entity> closestOrb = nearbyEntities.stream().findFirst();
-//
-//            ExperienceOrb experienceOrb;
-//
-//            if(closestOrb.isPresent()){
-//                experienceOrb = (ExperienceOrb) closestOrb.get();
-//                experienceOrb.setExperience(experienceOrb.getExperience() + amount);
-//            }
-//            else{
-//                experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
-//                experienceOrb.setExperience(amount);
-//            }
-//        });
     }
 
     public static String getEntityName(StackedEntity stackedEntity){

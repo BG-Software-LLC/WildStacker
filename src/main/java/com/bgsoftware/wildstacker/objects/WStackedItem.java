@@ -287,35 +287,6 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             if (result != null)
                 result.accept(Optional.empty());
         });
-
-//        EntityUtils.getNearbyEntities(object.getLocation(), range, item -> true).whenComplete((nearbyEntities, ex) ->
-//                StackService.execute(this, () -> {
-//                    Location itemLocation = getItem().getLocation();
-//
-//                    Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
-//                            nearbyEntities.stream()
-//                                    .filter(ItemUtils::isStackable)
-//                                    .map(entity -> WStackedItem.ofBypass((Item) entity))
-//                                    .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-//                    );
-//
-//                    if (itemOptional.isPresent()) {
-//                        StackedItem targetItem = itemOptional.get();
-//
-//                        StackResult stackResult = runStack(targetItem);
-//
-//                        if (stackResult == StackResult.SUCCESS) {
-//                            if (result != null)
-//                                result.accept(itemOptional.map(StackedItem::getItem));
-//                            return;
-//                        }
-//                    }
-//
-//                    updateName();
-//
-//                    if (result != null)
-//                        result.accept(Optional.empty());
-//            }));
     }
 
     @Override

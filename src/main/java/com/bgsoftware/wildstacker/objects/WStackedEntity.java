@@ -363,46 +363,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             if (result != null)
                 result.accept(entityOptional.map(StackedEntity::getLivingEntity));
         });
-
-//        EntityUtils.getNearbyEntities(object.getLocation(), range,
-//                entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS)
-//                .whenComplete((nearbyEntities, ex) -> StackService.execute(this, () -> {
-//                    Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid).map(WStackedEntity::of).collect(Collectors.toSet());
-//                    Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
-//
-//                    if (entityOptional.isPresent()) {
-//                        int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
-//                        StackedEntity targetEntity = entityOptional.get();
-//
-//                        if (minimumStackSize > 2) {
-//                            int totalStackSize = getStackAmount();
-//
-//                            for (StackedEntity stackedEntity : filteredEntities)
-//                                totalStackSize += stackedEntity.getStackAmount();
-//
-//                            if (totalStackSize < minimumStackSize) {
-//                                updateName();
-//                                if (result != null)
-//                                    result.accept(Optional.empty());
-//                                return;
-//                            }
-//
-//                            filteredEntities.forEach(nearbyEntity -> nearbyEntity.runStack(targetEntity));
-//                        }
-//
-//                        StackResult stackResult = runStack(targetEntity);
-//
-//                        if (stackResult != StackResult.SUCCESS) {
-//                            updateName();
-//                            if (result != null)
-//                                result.accept(Optional.empty());
-//                            return;
-//                        }
-//                    }
-//
-//                    if (result != null)
-//                        result.accept(entityOptional.map(StackedEntity::getLivingEntity));
-//        }));
     }
 
     @Override
