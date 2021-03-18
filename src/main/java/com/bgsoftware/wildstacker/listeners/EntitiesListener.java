@@ -918,6 +918,8 @@ public final class EntitiesListener implements Listener {
         if(!EntityUtils.isStackable(entity) || EntityStorage.hasMetadata(entity, "corpse"))
             return;
 
+        EntitiesGetter.handleEntitySpawn(entity);
+
         SpawnCause spawnCause = SpawnCause.valueOf(spawnReason);
 
         EntityStorage.setMetadata(entity, "spawn-cause", spawnCause);

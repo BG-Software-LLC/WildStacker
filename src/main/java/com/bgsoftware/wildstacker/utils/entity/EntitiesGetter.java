@@ -21,13 +21,18 @@ public final class EntitiesGetter {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static final LoadingCache<ChunkPosition, Collection<Entity>> entitiesCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(3, TimeUnit.SECONDS)
+            .expireAfterWrite(5, TimeUnit.SECONDS)
             .build(new CacheLoader<ChunkPosition, Collection<Entity>>() {
                 @Override
                 public Collection<Entity> load(@NotNull ChunkPosition chunkPosition) {
                     return plugin.getNMSAdapter().getEntitiesAtChunk(chunkPosition);
                 }
             });
+
+    public static void handleEntitySpawn(Entity entity){
+        ChunkPosition chunkPosition = new ChunkPosition(entity.getLocation());
+        entitiesCache.getUnchecked(chunkPosition).add(entity);
+    }
 
     public static Collection<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         int minX = location.getBlockX() - range;

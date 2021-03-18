@@ -72,6 +72,8 @@ public final class ItemsListener implements Listener {
         if(!stackedItem.isCached())
             return;
 
+        EntitiesGetter.handleEntitySpawn(e.getEntity());
+
         int limit = stackedItem.getStackLimit();
 
         if(stackedItem.getStackAmount() > limit){
