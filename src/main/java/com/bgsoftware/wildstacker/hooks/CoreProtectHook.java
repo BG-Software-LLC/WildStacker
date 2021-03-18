@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("deprecation")
 public final class CoreProtectHook {
@@ -24,9 +25,14 @@ public final class CoreProtectHook {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static Plugin coreProtect;
+    private static boolean pickupSupport = false;
 
     public static void setEnabled(boolean enabled){
         coreProtect = enabled ? Bukkit.getPluginManager().getPlugin("CoreProtect") : null;
+        try{
+            Map<?, ?> map = ConfigHandler.itemsPickup;
+            pickupSupport = true;
+        }catch (Throwable ignored){}
     }
 
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Block block, boolean place) {
@@ -61,7 +67,7 @@ public final class CoreProtectHook {
     }
 
     public static void recordItemPickup(OfflinePlayer offlinePlayer, StackedItem stackedItem, int amount){
-        if(coreProtect == null)
+        if(coreProtect == null || !pickupSupport)
             return;
 
         if(!Bukkit.isPrimaryThread()){
