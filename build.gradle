@@ -141,17 +141,17 @@ shadowJar {
     configurations = [project.configurations.getByName("runtimeClasspath")]
 }
 
+clean {
+    delete file('./archive/')
+}
+
 build {
     dependsOn shadowJar
-    dependsOn publish
+    dependsOn clean
 }
 
 publish.shouldRunAfter shadowJar
 shadowJar.shouldRunAfter build
-compileJava.options.encoding = 'UTF-8'
+build.shouldRunAfter subprojects.build
 
-publishing {
-    repositories {
-        mavenLocal()
-    }
-}
+compileJava.options.encoding = 'UTF-8'
