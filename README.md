@@ -1,6 +1,13 @@
-# WildStacker
-
-WildStacker 3 - The first ever multi-threaded stacking solution!
+<p align="center">
+<img src="https://bg-software.com/imgs/wildstacker-logo.png" />
+<h2 align="center">The first ever multi-threaded stacking solution!</h2>
+</p>
+<br>
+<p align="center">
+<a href="https://bg-software.com/discord/"><img src="https://img.shields.io/discord/293212540723396608?color=7289DA&label=Discord&logo=discord&logoColor=7289DA&link=https://bg-software.com/discord/"></a>
+<a href="https://bg-software.com/patreon/"><img src="https://img.shields.io/badge/-Support_on_Patreon-F96854.svg?logo=patreon&style=flat&logoColor=white&link=https://bg-software.com/patreon/"></a><br>
+<a href=""><img src="https://img.shields.io/maintenance/yes/2020"></a>
+</p>
 
 ## Compiling
 
@@ -20,6 +27,37 @@ You must add yourself all the private jars or purchase access to our private rep
 - PlotSquared (legacy, v4 & v5) by IntellectualSites [[link]](https://www.spigotmc.org/resources/77506/)
 - ShopGUIPlus (v1.18 & v1.20) by brcdev [[link]](https://www.spigotmc.org/resources/6515/)
 
+## API
+
+The plugin is packed with a rich API for interacting with entities, items and more. When hooking into the plugin, it's highly recommended to only use the API and not the compiled plugin, as the API methods are not only commented, but also will not get removed or changed unless they are marked as deprecated. This means that by using the API, you won't have to do any additional changes to your code between updates.
+
+##### Maven
+```
+<repositories>
+    <repository>
+        <id>bg-repo</id>
+        <url>https://repo.bg-software.com/repository/api/</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.bgsoftware</groupId>
+        <artifactId>WildStackerAPI</artifactId>
+        <version>latest</version>
+    </dependency>
+</dependencies>
+```
+##### Gradle
+```
+repositories {
+    maven { url 'https://repo.bg-software.com/repository/api/' }
+}
+
+dependencies {
+    compileOnly 'com.bgsoftware:WildStackerAPI:latest'
+}
+```
 ## Updates
 
 This plugin is provided "as is", which means no updates or new features are guaranteed. We will do our best to keep 
