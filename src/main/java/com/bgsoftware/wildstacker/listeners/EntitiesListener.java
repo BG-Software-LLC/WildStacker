@@ -288,7 +288,7 @@ public final class EntitiesListener implements Listener {
                 // We make sure the entity has no damage ticks, so it can always be hit.
                 livingEntity.setMaximumNoDamageTicks(0);
                 // We make sure the entity doesn't get any knockback by setting the velocity to 0.
-                Executor.sync(() -> livingEntity.setVelocity(new Vector()), 2L);
+                Executor.sync(() -> livingEntity.setVelocity(new Vector()), 1L);
             }
 
             if(damager != null)
