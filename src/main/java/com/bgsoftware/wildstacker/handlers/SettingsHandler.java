@@ -58,7 +58,7 @@ public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
-            "break-slots", "manage-menu", "break-charge", "place-charge", "spawn-conditions", "spawner-upgrades.ladders" };
+            "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions", "spawner-upgrades.ladders" };
 
     //Global settings
     public final String giveItemName;
@@ -373,28 +373,30 @@ public final class SettingsHandler {
         inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
-        plugin.getNMSSpawners().registerSpawnConditions();
-        for(String entityTypeRaw : cfg.getConfigurationSection("spawners.spawn-conditions").getKeys(false)){
-            try{
-                EntityType entityType = EntityType.valueOf(entityTypeRaw);
-                plugin.getSystemManager().clearSpawnConditions(entityType);
-                for(String spawnConditionId : cfg.getStringList("spawners.spawn-conditions." + entityTypeRaw)){
-                    Optional<SpawnCondition> spawnConditionOptional = plugin.getSystemManager().getSpawnCondition(spawnConditionId);
+        spawnersOverrideEnabled = spawnersStackingEnabled && MOB_SPAWNER_ABSTRACT.isValid() && cfg.getBoolean("spawners-override.enabled");
+        if(spawnersOverrideEnabled) {
+            plugin.getNMSSpawners().registerSpawnConditions();
+            for (String entityTypeRaw : cfg.getConfigurationSection("spawners.spawners-override.spawn-conditions").getKeys(false)) {
+                try {
+                    EntityType entityType = EntityType.valueOf(entityTypeRaw);
+                    plugin.getSystemManager().clearSpawnConditions(entityType);
+                    for (String spawnConditionId : cfg.getStringList("spawners.spawners-override.spawn-conditions." + entityTypeRaw)) {
+                        Optional<SpawnCondition> spawnConditionOptional = plugin.getSystemManager().getSpawnCondition(spawnConditionId);
 
-                    if(!spawnConditionOptional.isPresent()){
-                        WildStackerPlugin.log("Invalid spawn condition: " + spawnConditionId);
-                        continue;
+                        if (!spawnConditionOptional.isPresent()) {
+                            WildStackerPlugin.log("Invalid spawn condition: " + spawnConditionId);
+                            continue;
+                        }
+
+                        plugin.getSystemManager().addSpawnCondition(spawnConditionOptional.get(), entityType);
                     }
-
-                    plugin.getSystemManager().addSpawnCondition(spawnConditionOptional.get(), entityType);
+                } catch (Exception ignored) {
                 }
-            }catch (Exception ignored){}
+            }
         }
-
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         upgradeMenuEnabled = cfg.getBoolean("spawners.manage-menu.upgrade-menu");
         manageMenuEnabled = amountsMenuEnabled || upgradeMenuEnabled;
-        spawnersOverrideEnabled = spawnersStackingEnabled && MOB_SPAWNER_ABSTRACT.isValid();
         spawnerUpgradesMultiplyStackAmount = cfg.getBoolean("spawners.spawner-upgrades.multiply-stack-amount", true);
         plugin.getUpgradesManager().removeAllUpgrades();
         for(String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades.ladders").getKeys(false)){
@@ -682,6 +684,11 @@ public final class SettingsHandler {
             ConfigurationSection laddersSection = cfg.getConfigurationSection("spawners.spawner-upgrades");
             cfg.set("spawners.spawner-upgrades", null);
             cfg.set("spawners.spawner-upgrades.ladders", laddersSection);
+        }
+        if(cfg.contains("spawners.spawn-conditions")){
+            ConfigurationSection spawnConditions = cfg.getConfigurationSection("spawners.spawn-conditions");
+            cfg.set("spawners.spawn-conditions", null);
+            cfg.set("spawners.spawners-override.spawn-conditions", spawnConditions);
         }
     }
 

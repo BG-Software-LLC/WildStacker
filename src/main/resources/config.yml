@@ -652,11 +652,16 @@ spawners:
     # Should the upgrades menu be enabled?
     upgrade-menu: true
 
-  # Configure spawn conditions for entities that are spawned by spawners
-  # You can find more information regarding this by visiting the official wiki:
-  # https://wiki.bg-software.com/#/wildstacker/spawn-conditions/
-  spawn-conditions:
-    EXAMPLE_MOB: []
+  # Settings related to overriding spawners.
+  spawners-override:
+    # Should spawners behavior be overridden by WildStacker?
+    # When enabled, you should see better performance from spawners.
+    enabled: true
+    # Configure spawn conditions for entities that are spawned by spawners
+    # You can find more information regarding this by visiting the official wiki:
+    # https://wiki.bg-software.com/#/wildstacker/spawn-conditions/
+    spawn-conditions:
+      EXAMPLE_MOB: []
 
   # All settings related to spawner upgrades.
   spawner-upgrades:
