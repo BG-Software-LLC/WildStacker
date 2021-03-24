@@ -645,6 +645,11 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         return false;
     }
 
+    @Override
+    public void giveExp(Player player, int amount) {
+        player.giveExp(amount, true);
+    }
+
     /*
      *   Tag methods
      */

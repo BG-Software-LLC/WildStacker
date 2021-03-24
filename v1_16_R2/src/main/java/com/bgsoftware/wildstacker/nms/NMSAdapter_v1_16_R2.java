@@ -718,6 +718,11 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         return true;
     }
 
+    @Override
+    public void giveExp(Player player, int amount) {
+        player.giveExp(amount, true);
+    }
+
     /*
      *   Tag methods
      */

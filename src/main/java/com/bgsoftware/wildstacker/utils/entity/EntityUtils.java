@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,7 +48,6 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -148,10 +146,7 @@ public final class EntityUtils {
     }
 
     public static void giveExp(Player player, int amount){
-        PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
-        Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
-        if(playerExpChangeEvent.getAmount() > 0)
-            player.giveExp(playerExpChangeEvent.getAmount());
+        plugin.getNMSAdapter().giveExp(player, amount);
     }
 
     public static void spawnExp(Location location, int amount){

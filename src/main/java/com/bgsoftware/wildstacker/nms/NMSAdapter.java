@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Achievement;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -25,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -214,6 +216,15 @@ public interface NMSAdapter {
 
     default boolean handlePiglinPickup(Entity bukkitPiglin, Item item){
         return false;
+    }
+
+    default void giveExp(Player player, int amount){
+        if(amount > 0) {
+            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
+            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
+            if(playerExpChangeEvent.getAmount() > 0)
+                player.giveExp(playerExpChangeEvent.getAmount());
+        }
     }
 
     /*

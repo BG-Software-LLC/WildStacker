@@ -16,6 +16,8 @@ import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_9_R2.BlockPosition;
 import net.minecraft.server.v1_9_R2.BlockRotatable;
 import net.minecraft.server.v1_9_R2.Chunk;
+import net.minecraft.server.v1_9_R2.EnchantmentManager;
+import net.minecraft.server.v1_9_R2.Enchantments;
 import net.minecraft.server.v1_9_R2.Entity;
 import net.minecraft.server.v1_9_R2.EntityAnimal;
 import net.minecraft.server.v1_9_R2.EntityHuman;
@@ -68,6 +70,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 
 import javax.annotation.Nullable;
@@ -478,6 +481,26 @@ public final class NMSAdapter_v1_9_R2 implements NMSAdapter {
 
             }
         });
+    }
+
+    @Override
+    public void giveExp(Player player, int amount) {
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+
+        ItemStack mendingItem = EnchantmentManager.b(Enchantments.A, entityPlayer);
+
+        if (mendingItem != null && mendingItem.getItem().usesDurability()) {
+            int repairAmount = Math.min(amount * 2, mendingItem.getData());
+            amount -= repairAmount / 2;
+            mendingItem.setData(mendingItem.getData() - repairAmount);
+        }
+
+        if(amount > 0) {
+            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
+            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
+            if(playerExpChangeEvent.getAmount() > 0)
+                player.giveExp(playerExpChangeEvent.getAmount());
+        }
     }
 
     /*

@@ -19,6 +19,7 @@ import net.minecraft.server.v1_12_R1.Chunk;
 import net.minecraft.server.v1_12_R1.CriterionTriggers;
 import net.minecraft.server.v1_12_R1.DamageSource;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
+import net.minecraft.server.v1_12_R1.Enchantments;
 import net.minecraft.server.v1_12_R1.Entity;
 import net.minecraft.server.v1_12_R1.EntityAnimal;
 import net.minecraft.server.v1_12_R1.EntityArmorStand;
@@ -81,6 +82,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 
 import javax.annotation.Nullable;
@@ -566,6 +568,26 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
 
             }
         });
+    }
+
+    @Override
+    public void giveExp(Player player, int amount) {
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+
+        ItemStack mendingItem = EnchantmentManager.b(Enchantments.C, entityPlayer);
+
+        if (!mendingItem.isEmpty() && mendingItem.getItem().usesDurability()) {
+            int repairAmount = Math.min(amount * 2, mendingItem.getData());
+            amount -= repairAmount / 2;
+            mendingItem.setData(mendingItem.getData() - repairAmount);
+        }
+
+        if(amount > 0) {
+            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
+            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
+            if(playerExpChangeEvent.getAmount() > 0)
+                player.giveExp(playerExpChangeEvent.getAmount());
+        }
     }
 
     /*

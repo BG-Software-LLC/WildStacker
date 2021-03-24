@@ -25,9 +25,11 @@ import net.minecraft.server.v1_14_R1.DataWatcherObject;
 import net.minecraft.server.v1_14_R1.DataWatcherRegistry;
 import net.minecraft.server.v1_14_R1.DynamicOpsNBT;
 import net.minecraft.server.v1_14_R1.EnchantmentManager;
+import net.minecraft.server.v1_14_R1.Enchantments;
 import net.minecraft.server.v1_14_R1.Entity;
 import net.minecraft.server.v1_14_R1.EntityAnimal;
 import net.minecraft.server.v1_14_R1.EntityArmorStand;
+import net.minecraft.server.v1_14_R1.EntityExperienceOrb;
 import net.minecraft.server.v1_14_R1.EntityHuman;
 import net.minecraft.server.v1_14_R1.EntityInsentient;
 import net.minecraft.server.v1_14_R1.EntityItem;
@@ -40,6 +42,7 @@ import net.minecraft.server.v1_14_R1.EntityTypes;
 import net.minecraft.server.v1_14_R1.EntityVillager;
 import net.minecraft.server.v1_14_R1.EntityZombieVillager;
 import net.minecraft.server.v1_14_R1.EnumHand;
+import net.minecraft.server.v1_14_R1.EnumItemSlot;
 import net.minecraft.server.v1_14_R1.EnumMobSpawn;
 import net.minecraft.server.v1_14_R1.FluidTypes;
 import net.minecraft.server.v1_14_R1.GameRules;
@@ -88,6 +91,7 @@ import org.bukkit.craftbukkit.v1_14_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_14_R1.event.CraftEventFactory;
 import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_14_R1.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
@@ -106,6 +110,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -121,6 +127,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -639,6 +646,37 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         }
 
         return false;
+    }
+
+    @Override
+    public void giveExp(Player player, int amount) {
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+
+        Map.Entry<EnumItemSlot, ItemStack> entry = EnchantmentManager.b(Enchantments.MENDING, entityPlayer);
+        ItemStack mendingItem = entry != null ? entry.getValue() : ItemStack.a;
+
+        if (!mendingItem.isEmpty() && mendingItem.getItem().usesDurability()) {
+            EntityExperienceOrb orb = EntityTypes.EXPERIENCE_ORB.a(entityPlayer.world);
+            orb.value = amount;
+            orb.setPosition(entityPlayer.locX, entityPlayer.locY, entityPlayer.locZ);
+            int repairAmount = Math.min(amount * 2, mendingItem.getDamage());
+
+            PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(entityPlayer, orb, mendingItem, repairAmount);
+            repairAmount = event.getRepairAmount();
+            orb.dead = true;
+
+            if (!event.isCancelled()) {
+                amount -= repairAmount / 2;
+                mendingItem.setDamage(mendingItem.getDamage() - repairAmount);
+            }
+        }
+
+        if(amount > 0) {
+            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
+            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
+            if(playerExpChangeEvent.getAmount() > 0)
+                player.giveExp(playerExpChangeEvent.getAmount());
+        }
     }
 
     /*
