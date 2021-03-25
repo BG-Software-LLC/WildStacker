@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -89,8 +90,8 @@ public final class ItemsListener implements Listener {
                 return;
 
             Executor.sync(() -> {
-                if(EntityStorage.hasMetadata(e.getEntity(), "player-drop"))
-                    EntityStorage.removeMetadata(e.getEntity(), "player-drop");
+                if(EntityStorage.hasMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER))
+                    EntityStorage.removeMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER);
                 else if(isChunkLimit(e.getLocation().getChunk()))
                     stackedItem.remove();
             });
@@ -100,7 +101,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerItemDrop(PlayerDropItemEvent e){
-        EntityStorage.setMetadata(e.getItemDrop(), "player-drop", true);
+        EntityStorage.setMetadata(e.getItemDrop(), EntityFlag.DROPPED_BY_PLAYER, true);
     }
 
     @EventHandler
@@ -128,8 +129,8 @@ public final class ItemsListener implements Listener {
         StackedItem stackedItem = e.getItem();
         Item item = stackedItem.getItem();
 
-        if(EntityStorage.hasMetadata(item, "pickup")){
-            EntityStorage.removeMetadata(item, "pickup");
+        if(EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)){
+            EntityStorage.removeMetadata(item, EntityFlag.RECENTLY_PICKED_UP);
             stackedItem.remove();
 
             e.setCancelled(true);
@@ -201,7 +202,7 @@ public final class ItemsListener implements Listener {
 
             if (stackedItem.getStackAmount() <= 0) {
                 item.setPickupDelay(5);
-                EntityStorage.setMetadata(item, "pickup", true);
+                EntityStorage.setMetadata(item, EntityFlag.RECENTLY_PICKED_UP, true);
 
                 Executor.sync(() -> {
                     e.getItem().remove();

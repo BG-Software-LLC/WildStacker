@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.api.objects;
 
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -192,5 +193,35 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity>, Upgrade
      * Checks if entity has a name tag.
      */
     boolean hasNameTag();
+
+    /**
+     * Check if this entity has the flag in memory.
+     * @param entityFlag The flag to check.
+     */
+    boolean hasFlag(EntityFlag entityFlag);
+
+    /**
+     * Get the value associated with a requested flag.
+     * @param entityFlag The flag to check.
+     */
+    <T> T getFlag(EntityFlag entityFlag);
+
+    /**
+     * Set a value associated with a requested flag.
+     * @param entityFlag The flag to set.
+     * @param value The value to set.
+     */
+    void setFlag(EntityFlag entityFlag, Object value);
+
+    /**
+     * Remove a flag from memory.
+     * @param entityFlag The flag to set.
+     */
+    void removeFlag(EntityFlag entityFlag);
+
+    /**
+     * Clear all flags from this entity.
+     */
+    void clearFlags();
 
 }

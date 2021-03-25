@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -424,7 +425,7 @@ public final class SpawnersListener implements Listener {
                 return;
         }
 
-        EntityStorage.setMetadata(e.getEntity(), "spawn-cause", SpawnCause.SPAWNER);
+        EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         stackedEntity.updateNerfed();

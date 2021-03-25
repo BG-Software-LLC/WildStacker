@@ -218,10 +218,6 @@ public final class EntityUtils {
         if(PluginHooks.isLevelledMobsEnabled && !LevelledMobsHook.areSimilar(en1, en2))
             return StackCheckResult.LEVELLED_MOB_LEVEL;
 
-        //EpicSpawners drops data
-        if(EntityStorage.hasMetadata(en1, "ES") != EntityStorage.hasMetadata(en2, "ES"))
-            return StackCheckResult.EPIC_SPAWNERS_DROPS;
-
         if(StackCheck.AGE.isEnabled() && en1 instanceof Ageable){
             if((((Ageable) en1).getAge() >= 0) != (((Ageable) en2).getAge() >= 0))
                 return StackCheckResult.AGE;

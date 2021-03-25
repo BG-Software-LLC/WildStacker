@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
@@ -17,7 +18,6 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
@@ -130,11 +130,9 @@ public final class SystemHandler implements SystemManager {
         if(!EntityUtils.isStackable(livingEntity))
             throw new IllegalArgumentException("Cannot convert " + livingEntity.getType() + " into a stacked entity.");
 
+
         //Entity wasn't found, creating a new object
-        if(EntityStorage.hasMetadata(livingEntity, "spawn-cause"))
-            stackedEntity = new WStackedEntity(livingEntity, 1, EntityStorage.getMetadata(livingEntity, "spawn-cause", SpawnCause.class));
-        else
-            stackedEntity = new WStackedEntity(livingEntity);
+        stackedEntity = new WStackedEntity(livingEntity);
 
         Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
         if(entityData != null) {
@@ -387,7 +385,7 @@ public final class SystemHandler implements SystemManager {
                 StackedEntity stackedEntity = (StackedEntity) stackedObject;
                 if(stackedEntity.getLivingEntity() == null || (
                         GeneralUtils.isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) &&
-                        (stackedEntity.getLivingEntity().isDead() && !((WStackedEntity) stackedEntity).hasDeadFlag())) ||
+                        (stackedEntity.getLivingEntity().isDead() && !stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY))) ||
                         !EntityUtils.isStackable(stackedEntity.getLivingEntity())) {
                     removeStackObject(stackedObject);
                 }
@@ -622,7 +620,7 @@ public final class SystemHandler implements SystemManager {
 
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer){
         return plugin.getNMSAdapter().createEntity(location, type, spawnCause, entity -> {
-            EntitiesListener.noStackEntities.add(entity.getUniqueId());
+            EntityStorage.setMetadata(entity, EntityFlag.BYPASS_STACKING, true);
             if(beforeSpawnConsumer != null)
                 beforeSpawnConsumer.accept(entity);
         }, afterSpawnConsumer);
@@ -678,7 +676,7 @@ public final class SystemHandler implements SystemManager {
 
         LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass, SpawnCause.CUSTOM, entity -> {
             // Marking the entity as a corpse before the actual spawning
-            EntityStorage.setMetadata(entity, "corpse", null);
+            EntityStorage.setMetadata(entity, EntityFlag.CORPSE, true);
         }, entity -> {
             // Updating the entity values after the actual spawning
             plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), (LivingEntity) entity);

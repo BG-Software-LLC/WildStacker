@@ -1,7 +1,9 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import org.bukkit.entity.Entity;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -10,35 +12,36 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@SuppressWarnings("unchecked")
 public final class EntityStorage {
 
-    private static final Map<UUID, Map<String, Object>> entityStorage = new HashMap<>();
+    private static final Map<UUID, EnumMap<EntityFlag, Object>> entityStorage = new HashMap<>();
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public static void setMetadata(Entity entity, String key, Object value){
+    public static void setMetadata(Entity entity, EntityFlag entityFlag, Object value){
         UUID uuid = entity.getUniqueId();
-        write(entityStorage -> entityStorage.computeIfAbsent(uuid, s -> new HashMap<>()).put(key, value));
+        write(entityStorage -> entityStorage.computeIfAbsent(uuid, s -> new EnumMap<>(EntityFlag.class)).put(entityFlag, value));
     }
 
-    public static boolean hasMetadata(Entity entity, String key){
-        Map<String, Object> map = read(entityStorage -> entityStorage.get(entity.getUniqueId()));
-        return map != null && map.containsKey(key);
+    public static boolean hasMetadata(Entity entity, EntityFlag entityFlag){
+        EnumMap<EntityFlag, Object> map = read(entityStorage -> entityStorage.get(entity.getUniqueId()));
+        return map != null && map.containsKey(entityFlag);
     }
 
-    public static <T> T getMetadata(Entity entity, String key, Class<T> type){
+    public static <T> T getMetadata(Entity entity, EntityFlag entityFlag){
         UUID uuid = entity.getUniqueId();
         return read(entityStorage -> {
-            Map<String, Object> map = entityStorage.get(uuid);
-            return map == null ? null : type.cast(map.get(key));
+            EnumMap<EntityFlag, Object> map = entityStorage.get(uuid);
+            return map == null ? null : (T) entityFlag.getValueClass().cast(map.get(entityFlag));
         });
     }
 
-    public static void removeMetadata(Entity entity, String key){
+    public static void removeMetadata(Entity entity, EntityFlag entityFlag){
         UUID uuid = entity.getUniqueId();
         write(entityStorage -> {
-            Map<String, Object> map = entityStorage.get(uuid);
+            EnumMap<EntityFlag, Object> map = entityStorage.get(uuid);
             if(map != null)
-                map.remove(key);
+                map.remove(entityFlag);
         });
     }
 
@@ -56,7 +59,7 @@ public final class EntityStorage {
         });
     }
 
-    private static void write(Consumer<Map<UUID, Map<String, Object>>> consumer){
+    private static void write(Consumer<Map<UUID, EnumMap<EntityFlag, Object>>> consumer){
         try{
             lock.writeLock().lock();
             consumer.accept(entityStorage);
@@ -65,7 +68,7 @@ public final class EntityStorage {
         }
     }
 
-    private static <R> R writeAndGet(Function<Map<UUID, Map<String, Object>>, R> function){
+    private static <R> R writeAndGet(Function<Map<UUID, EnumMap<EntityFlag, Object>>, R> function){
         try{
             lock.writeLock().lock();
             return function.apply(entityStorage);
@@ -74,7 +77,7 @@ public final class EntityStorage {
         }
     }
 
-    private static <R> R read(Function<Map<UUID, Map<String, Object>>, R> function){
+    private static <R> R read(Function<Map<UUID, EnumMap<EntityFlag, Object>>, R> function){
         try{
             lock.readLock().lock();
             return function.apply(entityStorage);
