@@ -12,6 +12,7 @@ public final class WorldGuardHook {
 
     static {
         try{
+            Class.forName("com.sk89q.worldguard.WorldGuard");
             worldGuardProvider = new WorldGuardProvider() {};
         }catch (Exception ex){
             worldGuardProvider = newOldInstance();
