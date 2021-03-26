@@ -373,7 +373,7 @@ public final class SettingsHandler {
         inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
-        spawnersOverrideEnabled = spawnersStackingEnabled && MOB_SPAWNER_ABSTRACT.isValid() && cfg.getBoolean("spawners-override.enabled");
+        spawnersOverrideEnabled = spawnersStackingEnabled && MOB_SPAWNER_ABSTRACT.isValid() && cfg.getBoolean("spawners.spawners-override.enabled");
         if(spawnersOverrideEnabled) {
             plugin.getNMSSpawners().registerSpawnConditions();
             for (String entityTypeRaw : cfg.getConfigurationSection("spawners.spawners-override.spawn-conditions").getKeys(false)) {
