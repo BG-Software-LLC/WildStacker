@@ -161,12 +161,11 @@ public final class EntitiesListener implements Listener {
         if(EntityStorage.hasMetadata(e.getEntity(), EntityFlag.CORPSE) || !EntityUtils.isStackable(e.getEntity()))
             return;
 
-        if(WStackedEntity.of(e.getEntity()).hasFlag(EntityFlag.DEAD_ENTITY)){
-            //deadEntities.remove(e.getEntity().getUniqueId());
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+        if(stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY)){
             return;
         }
-
-        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
         noDeathEvent.add(stackedEntity.getUniqueId());
         stackedEntity.setDrops(e.getDrops()); // Fixing issues with plugins changing the drops in this event.
