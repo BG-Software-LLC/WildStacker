@@ -572,7 +572,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     private List<ItemStack> getTempDrops(int stackAmount){
-        List<ItemStack> drops = this.dropsMultiplier <= 0 ? new ArrayList<>() : this.drops.stream()
+        List<ItemStack> filteredDrops = this.dropsMultiplier <= 0 ? new ArrayList<>() : this.drops.stream()
                 .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
                 .collect(Collectors.toList());
 
@@ -582,13 +582,15 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         this.drops = null;
         this.dropsMultiplier = 1;
 
-        drops.forEach(itemStack -> {
+        List<ItemStack> finalDrops = new ArrayList<>();
+
+        filteredDrops.forEach(itemStack -> {
             ItemStack cloned = itemStack.clone();
             cloned.setAmount(itemStack.getAmount() * stackAmount * dropsMultiplier);
-            drops.add(cloned);
+            finalDrops.add(cloned);
         });
 
-        return drops;
+        return finalDrops;
     }
 
     @Override

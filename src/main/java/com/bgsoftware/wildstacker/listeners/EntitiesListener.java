@@ -93,9 +93,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings("unused")
 public final class EntitiesListener implements Listener {
 
     private static final Map<EntityDamageEvent.DamageModifier, ? extends Function<? super Double, Double>> damageModifiersFunctions =
@@ -167,7 +166,11 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        noDeathEvent.add(e.getEntity().getUniqueId());
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+        noDeathEvent.add(stackedEntity.getUniqueId());
+        stackedEntity.setDrops(e.getDrops()); // Fixing issues with plugins changing the drops in this event.
+        stackedEntity.setFlag(EntityFlag.EXP_TO_DROP, e.getDroppedExp());
 
         //Calling the onEntityLastDamage function with default parameters.
         onEntityLastDamage(createDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM, e.getEntity().getHealth(), null));
@@ -421,15 +424,22 @@ public final class EntitiesListener implements Listener {
                         double originalHealth = livingEntity.getHealth();
                         plugin.getNMSAdapter().setHealthDirectly(livingEntity, 0);
 
-                        EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
-
                         boolean spawnDuplicate = false;
+                        List<ItemStack> finalDrops;
+                        int finalExp;
 
-                        if(!noDeathEvent.contains(e.getEntity().getUniqueId()))
+                        if(!noDeathEvent.contains(e.getEntity().getUniqueId())) {
+                            EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
                             Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                            finalDrops = entityDeathEvent.getDrops();
+                            finalExp = entityDeathEvent.getDroppedExp();
+                        }
                         else {
                             spawnDuplicate = true;
                             noDeathEvent.remove(e.getEntity().getUniqueId());
+                            finalDrops = drops;
+                            finalExp = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
+                            stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                         }
 
                         plugin.getNMSAdapter().setEntityDead(livingEntity, false);
@@ -444,30 +454,25 @@ public final class EntitiesListener implements Listener {
 
                         JobsHook.updateSpawnReason(livingEntity, stackedEntity.getSpawnCause());
 
-                        List<ItemStack> eventDrops = new ArrayList<>(entityDeathEvent.getDrops());
-                        entityDeathEvent.getDrops().clear();
-                        entityDeathEvent.getDrops().addAll(eventDrops.stream()
-                                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR).collect(Collectors.toList()));
+                        finalDrops.removeIf(itemStack -> itemStack == null || itemStack.getType() == Material.AIR);
 
-                        //Multiply items that weren't added in the first place
-                        if(plugin.getSettings().multiplyDrops) {
-                            subtract(drops, entityDeathEvent.getDrops())
-                                    .forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
+                        // Multiply items that weren't added in the first place
+                        // We should call this only when the event was called - aka finalDrops != drops.
+                        if(plugin.getSettings().multiplyDrops && finalDrops != drops) {
+                            subtract(drops, finalDrops).forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
                         }
 
-                        entityDeathEvent.getDrops().stream()
-                                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
-                                .forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
+                        finalDrops.forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
 
-                        if (entityDeathEvent.getDroppedExp() > 0) {
+                        if (finalExp > 0) {
                             if(GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
-                                EntityUtils.giveExp(livingEntity.getKiller(), entityDeathEvent.getDroppedExp());
+                                EntityUtils.giveExp(livingEntity.getKiller(), finalExp);
                                 if(plugin.getSettings().entitiesExpPickupSound != null)
                                     livingEntity.getKiller().playSound(livingEntity.getLocation(),
                                             plugin.getSettings().entitiesExpPickupSound, 0.1F, 0.1F);
                             }
                             else {
-                                EntityUtils.spawnExp(livingEntity.getLocation(), entityDeathEvent.getDroppedExp());
+                                EntityUtils.spawnExp(livingEntity.getLocation(), finalExp);
                             }
                         }
 
