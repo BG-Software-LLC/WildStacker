@@ -3,34 +3,22 @@ package com.bgsoftware.wildstacker.utils.items;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ItemStackList extends AbstractList<ItemStack> {
+public final class ItemStackList {
 
-    private Map<ItemStack, Integer> map = new HashMap<>();
+    private final Map<ItemStack, Integer> map = new HashMap<>();
 
     public ItemStackList(){ }
 
-    public ItemStackList(List<ItemStack> drops){
-        addAll(drops);
-    }
-
-    @Override
-    public ItemStack get(int index) {
-        throw new UnsupportedOperationException("You cannot use get(index) from ItemStackList.");
-    }
-
-    @Override
     public int size() {
         return map.size();
     }
 
-    @Override
     public boolean add(ItemStack itemStack) {
         if(itemStack == null)
             return false;
@@ -47,7 +35,6 @@ public final class ItemStackList extends AbstractList<ItemStack> {
         return true;
     }
 
-    @Override
     public boolean addAll(Collection<? extends ItemStack> collection) {
         boolean bool = true;
 
