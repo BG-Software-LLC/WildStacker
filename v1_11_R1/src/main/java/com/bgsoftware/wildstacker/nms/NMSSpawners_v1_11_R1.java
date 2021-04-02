@@ -24,10 +24,12 @@ import net.minecraft.server.v1_11_R1.Blocks;
 import net.minecraft.server.v1_11_R1.ChunkRegionLoader;
 import net.minecraft.server.v1_11_R1.Entity;
 import net.minecraft.server.v1_11_R1.EntityInsentient;
+import net.minecraft.server.v1_11_R1.EntityOcelot;
 import net.minecraft.server.v1_11_R1.EntityTypes;
 import net.minecraft.server.v1_11_R1.EnumDifficulty;
 import net.minecraft.server.v1_11_R1.EnumSkyBlock;
 import net.minecraft.server.v1_11_R1.IBlockData;
+import net.minecraft.server.v1_11_R1.Material;
 import net.minecraft.server.v1_11_R1.MinecraftKey;
 import net.minecraft.server.v1_11_R1.MobSpawnerAbstract;
 import net.minecraft.server.v1_11_R1.MobSpawnerData;
@@ -77,6 +79,11 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
 
     @Override
     public void registerSpawnConditions() {
+        createCondition("ABOVE_SEA_LEVEL",
+                (world, position) -> position.getY() >= world.K(),
+                EntityType.OCELOT
+        );
+
         createCondition("ANIMAL_LIGHT",
                 (world, position) -> world.j(position) > 8,
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA,
@@ -134,6 +141,11 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
                 EntityType.MULE, EntityType.PIG, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.WOLF,
                 EntityType.ZOMBIE_HORSE
         );
+
+        createCondition("ON_GRASS_OR_LEAVES", (world, position) -> {
+            IBlockData blockData = world.getType(position.down());
+            return blockData.getBlock() == Blocks.GRASS || blockData.getMaterial() == Material.LEAVES;
+        }, EntityType.OCELOT);
 
         createCondition("ON_GRASS_OR_SAND_OR_SNOW", (world, position) -> {
             Block block = world.getType(position.down()).getBlock();
@@ -403,7 +415,18 @@ public final class NMSSpawners_v1_11_R1 implements NMSSpawners {
 
                 Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                boolean hasSpace;
+
+                if (nmsEntity instanceof EntityOcelot) {
+                    World world = nmsEntity.world;
+                    hasSpace = !world.containsLiquid(nmsEntity.getBoundingBox()) &&
+                            world.getCubes(nmsEntity, nmsEntity.getBoundingBox()).isEmpty() &&
+                            world.a(nmsEntity.getBoundingBox(), nmsEntity);
+                }
+
+                else {
+                    hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                }
 
                 if(!hasSpace){
                     failureReason = "Not enough space to spawn the entity.";

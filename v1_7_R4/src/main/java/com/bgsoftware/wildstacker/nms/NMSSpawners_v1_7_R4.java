@@ -17,13 +17,16 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import net.minecraft.server.v1_7_R4.AxisAlignedBB;
 import net.minecraft.server.v1_7_R4.BiomeBase;
+import net.minecraft.server.v1_7_R4.Block;
 import net.minecraft.server.v1_7_R4.Blocks;
 import net.minecraft.server.v1_7_R4.Chunk;
 import net.minecraft.server.v1_7_R4.Entity;
 import net.minecraft.server.v1_7_R4.EntityInsentient;
+import net.minecraft.server.v1_7_R4.EntityOcelot;
 import net.minecraft.server.v1_7_R4.EntityTypes;
 import net.minecraft.server.v1_7_R4.EnumDifficulty;
 import net.minecraft.server.v1_7_R4.EnumSkyBlock;
+import net.minecraft.server.v1_7_R4.Material;
 import net.minecraft.server.v1_7_R4.MathHelper;
 import net.minecraft.server.v1_7_R4.MobSpawnerAbstract;
 import net.minecraft.server.v1_7_R4.NBTTagCompound;
@@ -71,6 +74,11 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
 
     @Override
     public void registerSpawnConditions() {
+        createCondition("ABOVE_SEA_LEVEL",
+                (world, position) -> position.y >= 63,
+                EntityType.OCELOT
+        );
+
         createCondition("ANIMAL_LIGHT",
                 (world, position) -> world.j(position.x, position.y, position.z) > 8,
                 EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.MUSHROOM_COW, EntityType.PIG,
@@ -114,6 +122,11 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
                 (world, position) -> world.getType(position.x, position.y - 1, position.z) == Blocks.GRASS,
                 EntityType.CHICKEN, EntityType.COW, EntityType.HORSE, EntityType.PIG, EntityType.SHEEP, EntityType.WOLF
         );
+
+        createCondition("ON_GRASS_OR_LEAVES", (world, position) -> {
+            Block block = world.getType(position.x, position.y - 1, position.z);
+            return block == Blocks.GRASS || block.getMaterial() == Material.LEAVES;
+        }, EntityType.OCELOT);
 
         createCondition("ON_MYCELIUM",
                 (world, position) -> world.getType(position.x, position.y - 1, position.z) == Blocks.MYCEL,
@@ -402,7 +415,18 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
 
                 Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-                boolean hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                boolean hasSpace;
+
+                if (nmsEntity instanceof EntityOcelot) {
+                    World world = nmsEntity.world;
+                    hasSpace = !world.containsLiquid(nmsEntity.boundingBox) &&
+                            world.getCubes(nmsEntity, nmsEntity.boundingBox).isEmpty() &&
+                            world.b(nmsEntity.boundingBox);
+                }
+
+                else {
+                    hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                }
 
                 if(!hasSpace){
                     failureReason = "Not enough space to spawn the entity.";
