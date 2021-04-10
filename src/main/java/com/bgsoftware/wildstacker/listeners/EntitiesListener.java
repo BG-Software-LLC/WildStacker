@@ -516,8 +516,8 @@ public final class EntitiesListener implements Listener {
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
                     entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize() && EntityStorage.hasMetadata(entity, EntityFlag.ORIGINAL_AMOUNT))
                     .stream().findFirst().ifPresent(entity -> {
-                StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-                stackedEntity.setStackAmount(stackedEntity.getFlag(EntityFlag.ORIGINAL_AMOUNT), true);
+                int originalAmount = EntityStorage.getMetadata(entity, EntityFlag.ORIGINAL_AMOUNT);
+                WStackedEntity.of(e.getEntity()).setStackAmount(originalAmount, true);
             });
         }
     }
