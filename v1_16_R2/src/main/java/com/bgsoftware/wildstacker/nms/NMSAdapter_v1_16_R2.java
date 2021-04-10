@@ -635,7 +635,8 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         float soundVolume = GET_SOUND_VOLUME.invoke(entityLiving);
         float soundPitch = GET_SOUND_PITCH.invoke(entityLiving);
 
-        entityLiving.playSound(deathSound, soundVolume, soundPitch);
+        if(deathSound != null)
+            entityLiving.playSound(deathSound, soundVolume, soundPitch);
     }
 
     @Override
