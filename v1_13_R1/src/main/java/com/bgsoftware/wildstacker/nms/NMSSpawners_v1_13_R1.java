@@ -249,6 +249,7 @@ public final class NMSSpawners_v1_13_R1 implements NMSSpawners {
 
         @Override
         public void a(MobSpawnerData spawnData) {
+            super.a(spawnData);
             this.spawnData = spawnData;
         }
 
