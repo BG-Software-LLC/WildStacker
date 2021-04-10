@@ -698,6 +698,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         entityPiglin.receive(entityItem, 1);
 
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        itemStack.setCount(1);
         net.minecraft.server.v1_16_R3.Item item = itemStack.getItem();
         if (item.a(TagsItem.PIGLIN_LOVED)) {
             entityPiglin.getBehaviorController().removeMemory(MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM);
