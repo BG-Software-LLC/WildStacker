@@ -520,7 +520,8 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             }
 
             if (CraftEventFactory.callSpawnerSpawnEvent(entity, position.x, position.y, position.z).isCancelled()) {
-                plugin.getSystemManager().removeStackObject(stackedEntity);
+                if(stackedEntity != null)
+                    plugin.getSystemManager().removeStackObject(stackedEntity);
             }
 
             else {
