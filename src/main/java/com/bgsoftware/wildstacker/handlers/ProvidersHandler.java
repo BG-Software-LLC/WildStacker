@@ -36,6 +36,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.EchoPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EliteBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
+import com.bgsoftware.wildstacker.listeners.plugins.JetsMinionsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
@@ -157,6 +158,8 @@ public final class ProvidersHandler {
             BossListener.register(plugin);
         if(enable && isPlugin(toCheck, "EliteBosses") && pluginManager.isPluginEnabled("EliteBosses"))
             pluginManager.registerEvents(new EliteBossesListener(), plugin);
+        if(enable && isPlugin(toCheck, "JetsMinions") && pluginManager.isPluginEnabled("JetsMinions"))
+            pluginManager.registerEvents(new JetsMinionsListener(), plugin);
 
         //Load plugin hooks
         if(isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO"))
