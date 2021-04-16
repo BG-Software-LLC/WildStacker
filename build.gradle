@@ -101,6 +101,7 @@ dependencies {
     compileOnly 'com.sk89q:WorldGuard-7:latest'
     compileOnly 'net.splodgebox:EliteBosses:latest'
     compileOnly 'me.jet315:JetsMinions:latest'
+    compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
 }
 
 jar {

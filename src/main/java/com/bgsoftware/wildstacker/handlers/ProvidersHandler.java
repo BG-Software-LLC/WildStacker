@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.hooks.ShopGUIPlusHook;
+import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
@@ -190,6 +191,8 @@ public final class ProvidersHandler {
             SuperiorSkyblockHook.register(plugin);
         if (enable && isPlugin(toCheck, "NBTInjector") && doesClassExist("de.tr7zw.nbtinjector.NBTInjector"))
             DataSerializer_NBTInjector.register(plugin);
+        if(isPlugin(toCheck, "Slimefun") && pluginManager.isPluginEnabled("Slimefun"))
+            SlimefunHook.setEnabled(enable);
     }
 
     private boolean isPlugin(Plugin plugin, String pluginName){
