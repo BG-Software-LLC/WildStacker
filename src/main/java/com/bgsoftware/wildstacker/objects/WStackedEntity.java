@@ -195,8 +195,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         else {
             object.remove();
         }
-
-        clearFlags();
     }
 
     @Override

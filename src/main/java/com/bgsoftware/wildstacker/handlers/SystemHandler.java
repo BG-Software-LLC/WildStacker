@@ -108,8 +108,10 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public void removeStackObject(StackedObject stackedObject) {
-        if(stackedObject instanceof StackedEntity)
+        if(stackedObject instanceof StackedEntity) {
             dataHandler.CACHED_ENTITIES.remove(((StackedEntity) stackedObject).getUniqueId());
+            ((StackedEntity) stackedObject).clearFlags();
+        }
         else if(stackedObject instanceof StackedItem)
             dataHandler.CACHED_ITEMS.remove(((StackedItem) stackedObject).getUniqueId());
         else if(stackedObject instanceof StackedSpawner)
@@ -572,8 +574,10 @@ public final class SystemHandler implements SystemManager {
         for(Entity entity : entities){
             if(EntityUtils.isStackable(entity)) {
                 StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
-                if (stackedEntity != null)
+                if (stackedEntity != null) {
                     dataSerializer.saveEntity(stackedEntity);
+                    stackedEntity.clearFlags();
+                }
             }
 
             else if(entity instanceof Item) {
