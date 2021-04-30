@@ -454,10 +454,14 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                     passenger.dead = true;
                 if(stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
+                EntityStorage.clearMetadata(bukkitEntity);
             }
 
             else {
-                addEntity(entity);
+                if(!addEntity(entity)){
+                    EntityStorage.clearMetadata(bukkitEntity);
+                    return false;
+                }
 
                 if(spawnParticles)
                     world.triggerEffect(2004, position, 0);
@@ -472,10 +476,15 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             return false;
         }
 
-        private void addEntity(Entity entity) {
+        private boolean addEntity(Entity entity) {
             entity.valid = false;
-            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER))
+
+            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
                 entity.getPassengers().forEach(this::addEntity);
+                return true;
+            }
+
+            return false;
         }
 
         private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,

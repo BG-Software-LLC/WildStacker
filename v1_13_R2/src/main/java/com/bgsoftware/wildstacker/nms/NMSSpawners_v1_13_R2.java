@@ -471,10 +471,14 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
                     passenger.dead = true;
                 if(stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
+                EntityStorage.clearMetadata(bukkitEntity);
             }
 
             else {
-                ChunkRegionLoader.a(entity, world, CreatureSpawnEvent.SpawnReason.SPAWNER);
+                if(!addEntity(entity)){
+                    EntityStorage.clearMetadata(bukkitEntity);
+                    return false;
+                }
 
                 if(spawnParticles)
                     world.triggerEffect(2004, position, 0);
@@ -483,6 +487,17 @@ public final class NMSSpawners_v1_13_R2 implements NMSSpawners {
                     ((EntityInsentient)entity).doSpawnEffect();
                 }
 
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean addEntity(Entity entity) {
+            entity.valid = false;
+
+            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+                entity.bP().forEach(this::addEntity);
                 return true;
             }
 

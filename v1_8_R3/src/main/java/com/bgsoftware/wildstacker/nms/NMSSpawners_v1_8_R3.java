@@ -517,10 +517,14 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
             if (CraftEventFactory.callSpawnerSpawnEvent(entity, position.getX(), position.getY(), position.getZ()).isCancelled()) {
                 if(stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
+                EntityStorage.clearMetadata(bukkitEntity);
             }
 
             else {
-                world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
+                if(!addEntity(entity)){
+                    EntityStorage.clearMetadata(bukkitEntity);
+                    return false;
+                }
 
                 if(spawnParticles)
                     world.triggerEffect(2004, position, 0);
@@ -529,6 +533,18 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
                     ((EntityInsentient)entity).y();
                 }
 
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean addEntity(Entity entity) {
+            entity.valid = false;
+
+            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+                if(entity.passenger != null)
+                    addEntity(entity.passenger);
                 return true;
             }
 

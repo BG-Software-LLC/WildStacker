@@ -522,18 +522,34 @@ public final class NMSSpawners_v1_7_R3 implements NMSSpawners {
             if (CraftEventFactory.callSpawnerSpawnEvent(entity, position.x, position.y, position.z).isCancelled()) {
                 if(stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
+                EntityStorage.clearMetadata(bukkitEntity);
             }
 
             else {
-                world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER);
+                if(!addEntity(entity)){
+                    EntityStorage.clearMetadata(bukkitEntity);
+                    return false;
+                }
 
-                if(spawnParticles)
+                if (spawnParticles)
                     world.triggerEffect(2004, position.x, position.y, position.z, 0);
 
                 if (entity instanceof EntityInsentient) {
-                    ((EntityInsentient)entity).s();
+                    ((EntityInsentient) entity).s();
                 }
 
+                return true;
+            }
+
+            return false;
+        }
+
+        private boolean addEntity(Entity entity) {
+            entity.valid = false;
+
+            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+                if(entity.passenger != null)
+                    addEntity(entity.passenger);
                 return true;
             }
 
