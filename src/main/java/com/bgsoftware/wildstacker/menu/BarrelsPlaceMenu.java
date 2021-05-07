@@ -138,6 +138,8 @@ public final class BarrelsPlaceMenu extends WildMenu {
             }
         }
 
+        closeFlag = false;
+
         ((WStackedBarrel) stackedBarrel).unlinkInventory(e.getInventory());
     }
 
