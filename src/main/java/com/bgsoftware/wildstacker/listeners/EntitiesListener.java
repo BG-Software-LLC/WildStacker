@@ -437,7 +437,8 @@ public final class EntitiesListener implements Listener {
                             spawnDuplicate = true;
                             noDeathEvent.remove(e.getEntity().getUniqueId());
                             finalDrops = drops;
-                            finalExp = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
+                            Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
+                            finalExp = expToDropFlag == null ? 0 : expToDropFlag;
                             stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                         }
 
