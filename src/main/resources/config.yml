@@ -385,8 +385,8 @@ entities:
     # What the toggle command will be?
     command: 'stacker names entity'
 
-  # Should entities get knockback after they are killed?
-  next-stack-knockback: true
+  # Should entities can be killed fast by players (No damage-cooldown)?
+  fast-kill: false
 
   # The default amount entities should get unstacked by.
   # Use the "ENTITY_TYPE:AMOUNT" or "ENTITY_TYPE:SPAWN_CAUSE:AMOUNT"

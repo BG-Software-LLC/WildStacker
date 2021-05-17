@@ -58,7 +58,8 @@ public final class SettingsHandler {
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
-            "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions", "spawner-upgrades.ladders" };
+            "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
+            "spawner-upgrades.ladders" };
 
     //Global settings
     public final String giveItemName;
@@ -87,7 +88,7 @@ public final class SettingsHandler {
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreeding,
-            entitiesHideNames, entitiesNamesToggleEnabled, nextStackKnockback, eggLayMultiply, scuteMultiply,
+            entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill, eggLayMultiply, scuteMultiply,
             entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
             multiplyDrops, multiplyExp, spreadDamage;
     public final long entitiesStackInterval;
@@ -266,7 +267,7 @@ public final class SettingsHandler {
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
-        nextStackKnockback = cfg.getBoolean("entities.next-stack-knockback", true);
+        entitiesFastKill = cfg.getBoolean("entities.fast-kill", true);
         defaultUnstack = Fast2EnumsMap.fromSectionToInt(cfg.getConfigurationSection("entities.default-unstack"),
                 EntityType.class, SpawnCause.class);
         entitiesAutoExpPickup = Fast2EnumsArray.fromList(cfg.getStringList("entities.auto-exp-pickup"),
@@ -689,6 +690,10 @@ public final class SettingsHandler {
             ConfigurationSection spawnConditions = cfg.getConfigurationSection("spawners.spawn-conditions");
             cfg.set("spawners.spawn-conditions", null);
             cfg.set("spawners.spawners-override.spawn-conditions", spawnConditions);
+        }
+        if(cfg.contains("entities.next-stack-knockback")){
+            cfg.set("entities.fast-kill", !cfg.getBoolean("entities.next-stack-knockback"));
+            cfg.set("entities.next-stack-knockback", null);
         }
     }
 

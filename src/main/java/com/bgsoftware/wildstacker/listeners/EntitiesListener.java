@@ -284,7 +284,7 @@ public final class EntitiesListener implements Listener {
 
             int fireTicks = livingEntity.getFireTicks();
 
-            if(!plugin.getSettings().nextStackKnockback) {
+            if(plugin.getSettings().entitiesFastKill) {
                 e.setCancelled(true);
 
                 if(damager != null) {
