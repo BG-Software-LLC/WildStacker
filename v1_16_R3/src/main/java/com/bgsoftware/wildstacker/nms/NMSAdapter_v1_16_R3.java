@@ -20,9 +20,6 @@ import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkProviderServer;
 import net.minecraft.server.v1_16_R3.CriterionTriggers;
 import net.minecraft.server.v1_16_R3.DamageSource;
-import net.minecraft.server.v1_16_R3.DataWatcher;
-import net.minecraft.server.v1_16_R3.DataWatcherObject;
-import net.minecraft.server.v1_16_R3.DataWatcherRegistry;
 import net.minecraft.server.v1_16_R3.DynamicOpsNBT;
 import net.minecraft.server.v1_16_R3.EnchantmentManager;
 import net.minecraft.server.v1_16_R3.Entity;
@@ -36,7 +33,6 @@ import net.minecraft.server.v1_16_R3.EntityPiglin;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EntityPositionTypes;
 import net.minecraft.server.v1_16_R3.EntityRaider;
-import net.minecraft.server.v1_16_R3.EntityTurtle;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EntityVillager;
 import net.minecraft.server.v1_16_R3.EntityZombieVillager;
@@ -95,7 +91,6 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
@@ -111,6 +106,7 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -148,9 +144,6 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "dH");
-
-    private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
-    private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -385,13 +378,12 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
-        ((CraftTurtle) turtle).getHandle().getDataWatcher().set(TURTLE_HAS_EGG, true);
+        ((Turtle) turtle).setHasEgg(true);
     }
 
     @Override
     public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
-        BlockPosition homePosition = ((CraftTurtle) turtle).getHandle().getDataWatcher().get(TURTLE_HOME);
-        return new Location(turtle.getWorld(), homePosition.getX(), homePosition.getY(), homePosition.getZ());
+        return ((Turtle) turtle).getHome();
     }
 
     @Override
