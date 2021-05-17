@@ -102,10 +102,6 @@ public final class EntitiesListener implements Listener {
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
     private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
     private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
-    private final static List<EntityDamageEvent.DamageCause> FIRE_CAUSES = Arrays.asList(
-            EntityDamageEvent.DamageCause.LAVA, EntityDamageEvent.DamageCause.FIRE,
-            EntityDamageEvent.DamageCause.FIRE_TICK
-    );
 
     public static EntitiesListener IMP;
 
@@ -290,12 +286,14 @@ public final class EntitiesListener implements Listener {
 
             if(!plugin.getSettings().nextStackKnockback) {
                 e.setCancelled(true);
-                if(!FIRE_CAUSES.contains(e.getCause())) {
+
+                if(damager != null) {
                     // We make sure the entity has no damage ticks, so it can always be hit.
                     livingEntity.setMaximumNoDamageTicks(0);
-                    // We make sure the entity doesn't get any knockback by setting the velocity to 0.
-                    Executor.sync(() -> livingEntity.setVelocity(new Vector()), 1L);
                 }
+
+                // We make sure the entity doesn't get any knockback by setting the velocity to 0.
+                Executor.sync(() -> livingEntity.setVelocity(new Vector()), 1L);
             }
 
             if(damager != null)
