@@ -9,7 +9,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -45,15 +47,15 @@ public final class EntitiesGetter {
 
         String worldName = location.getWorld().getName();
 
-        Stream<Entity> entities = Stream.empty();
+        List<Entity> entities = new ArrayList<>();
 
         for (int x = minChunkX; x <= maxChunkX; x++){
             for (int z = minChunkZ; z <= maxChunkZ; z++){
-                entities = Stream.concat(entities, entitiesCache.getUnchecked(new ChunkPosition(worldName, x, z)).stream());
+                entities.addAll(entitiesCache.getUnchecked(new ChunkPosition(worldName, x, z)));
             }
         }
 
-        return entities.filter(entity ->
+        return entities.stream().filter(entity ->
                 isInRange(entity.getLocation(), minX, minY, minZ, maxX, maxY, maxZ) &&
                 (filter == null || filter.test(entity))
         );
