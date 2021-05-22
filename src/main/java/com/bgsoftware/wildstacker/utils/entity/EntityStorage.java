@@ -25,7 +25,7 @@ public final class EntityStorage {
 
     public static boolean hasMetadata(Entity entity, EntityFlag entityFlag){
         EnumMap<EntityFlag, Object> map = read(entityStorage -> entityStorage.get(entity.getUniqueId()));
-        return map != null && map.containsKey(entityFlag);
+        return map != null && map.get(entityFlag) != null;
     }
 
     public static <T> T getMetadata(Entity entity, EntityFlag entityFlag){
