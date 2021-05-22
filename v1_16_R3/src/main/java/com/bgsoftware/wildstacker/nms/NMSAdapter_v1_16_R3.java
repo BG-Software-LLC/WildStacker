@@ -12,6 +12,8 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import io.papermc.paper.enchantments.EnchantmentRarity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.BlockRotatable;
 import net.minecraft.server.v1_16_R3.ChatComponentText;
@@ -99,6 +101,7 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
+import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -114,8 +117,10 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -128,6 +133,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -557,6 +563,30 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
             @Override
             public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
                 return true;
+            }
+
+            public @NotNull Component displayName(int i) {
+                return null;
+            }
+
+            public boolean isTradeable() {
+                return false;
+            }
+
+            public boolean isDiscoverable() {
+                return false;
+            }
+
+            public @NotNull EnchantmentRarity getRarity() {
+                return null;
+            }
+
+            public float getDamageIncrease(int i, @NotNull EntityCategory entityCategory) {
+                return 0;
+            }
+
+            public @NotNull Set<EquipmentSlot> getActiveSlots() {
+                return null;
             }
         };
     }
@@ -1090,6 +1120,10 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
             try{
                 getSpawner().getSpawner().resetTimer();
             }catch (Throwable ignored){}
+        }
+
+        public void setSpawnedItem(org.bukkit.inventory.@NotNull ItemStack itemStack) {
+
         }
 
         @Override
