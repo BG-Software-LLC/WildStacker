@@ -26,11 +26,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
@@ -258,13 +258,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             return;
         }
 
-        Collection<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range, item -> true);
+        Stream<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range, item -> true);
 
         StackService.execute(this, () -> {
             Location itemLocation = getItem().getLocation();
 
             Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
-                    nearbyEntities.stream()
+                    nearbyEntities
                             .filter(ItemUtils::isStackable)
                             .map(entity -> WStackedItem.ofBypass((Item) entity))
                             .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)

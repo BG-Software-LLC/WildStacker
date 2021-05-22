@@ -77,7 +77,7 @@ public final class EventsListener {
 
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2, entity ->
                     entity instanceof Chicken && plugin.getNMSAdapter().getEggLayTime((Chicken) entity) <= 0)
-                    .stream().findFirst().ifPresent(chicken -> {
+                    .findFirst().ifPresent(chicken -> {
                 EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
                 Bukkit.getPluginManager().callEvent(eggLayEvent);
             });
@@ -96,7 +96,7 @@ public final class EventsListener {
 
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
                     entity -> entity instanceof org.bukkit.entity.Turtle)
-                    .stream().findFirst().ifPresent(turtle -> {
+                    .findFirst().ifPresent(turtle -> {
                 ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);
                 Bukkit.getPluginManager().callEvent(scuteDropEvent);
             });

@@ -44,7 +44,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +52,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> implements StackedEntity {
 
@@ -315,11 +315,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return;
         }
 
-        Collection<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range,
+        Stream<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range,
                 entity -> EntityUtils.isStackable(entity) && runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS);
 
         StackService.execute(this, () -> {
-            Set<StackedEntity> filteredEntities = nearbyEntities.stream().filter(Entity::isValid)
+            Set<StackedEntity> filteredEntities = nearbyEntities.filter(Entity::isValid)
                     .map(WStackedEntity::of).collect(Collectors.toSet());
             Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, filteredEntities);
 

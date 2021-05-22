@@ -57,7 +57,6 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -125,18 +124,14 @@ public final class EntityUtils {
 
     public static void removeParrotIfShoulder(Parrot parrot){
         if(GET_SHOULDER_ENTITY_RIGHT.isValid()) {
-            Collection<Entity> entities = EntitiesGetter.getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player);
-
-            for (Entity entity : entities){
+            EntitiesGetter.getNearbyEntities(((Animals) parrot).getLocation(), 1, entity -> entity instanceof Player).forEach(entity -> {
                 if(parrot.equals(GET_SHOULDER_ENTITY_RIGHT.invoke(entity))){
-                    SET_SHOULDER_ENTITY_RIGHT.invoke(entities, (Object) null);
-                    break;
+                    SET_SHOULDER_ENTITY_RIGHT.invoke(entity, (Object) null);
                 }
                 if(parrot.equals(GET_SHOULDER_ENTITY_LEFT.invoke(entity))){
-                    SET_SHOULDER_ENTITY_LEFT.invoke(entities, (Object) null);
-                    break;
+                    SET_SHOULDER_ENTITY_LEFT.invoke(entity, (Object) null);
                 }
-            }
+            });
         }
     }
 
@@ -151,7 +146,7 @@ public final class EntityUtils {
 
     public static void spawnExp(Location location, int amount){
         Optional<Entity> closestOrb = EntitiesGetter.getNearbyEntities(location, 2, entity ->
-                entity instanceof ExperienceOrb).stream().findFirst();
+                entity instanceof ExperienceOrb).findFirst();
 
         ExperienceOrb experienceOrb;
 

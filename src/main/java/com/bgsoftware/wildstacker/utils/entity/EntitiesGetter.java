@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -34,7 +33,7 @@ public final class EntitiesGetter {
         entitiesCache.getUnchecked(chunkPosition).add(entity);
     }
 
-    public static Collection<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+    public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
         int minX = location.getBlockX() - range;
         int minY = location.getBlockY() - range;
         int minZ = location.getBlockZ() - range;
@@ -57,7 +56,7 @@ public final class EntitiesGetter {
         return entities.filter(entity ->
                 isInRange(entity.getLocation(), minX, minY, minZ, maxX, maxY, maxZ) &&
                 (filter == null || filter.test(entity))
-        ).collect(Collectors.toList());
+        );
     }
 
     private static boolean isInRange(Location location, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
