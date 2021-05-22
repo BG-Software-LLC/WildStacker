@@ -102,6 +102,7 @@ dependencies {
     compileOnly 'net.splodgebox:EliteBosses:latest'
     compileOnly 'me.jet315:JetsMinions:latest'
     compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
+    compileOnly 'me.derpy:MoreBosses:latest'
 }
 
 jar {
