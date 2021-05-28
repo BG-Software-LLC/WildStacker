@@ -168,7 +168,7 @@ public abstract class EditorMenu extends WildMenu {
             }
             else{
                 ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK).withName("&6" +
-                        EntityUtils.getFormattedType(fullPath.replaceFirst(pathPrefix, "")
+                        EntityUtils.format(fullPath.replaceFirst(pathPrefix, "")
                                 .replace("-", "_").replace(".", "_").replace(" ", "_"))
                 );
 
