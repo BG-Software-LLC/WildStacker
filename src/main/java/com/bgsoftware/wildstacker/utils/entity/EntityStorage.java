@@ -32,7 +32,11 @@ public final class EntityStorage {
         UUID uuid = entity.getUniqueId();
         return read(entityStorage -> {
             EnumMap<EntityFlag, Object> map = entityStorage.get(uuid);
-            return map == null ? null : (T) entityFlag.getValueClass().cast(map.get(entityFlag));
+            if(map == null)
+                return null;
+
+            Object value = map.get(entityFlag);
+            return value == null ? null : (T) entityFlag.getValueClass().cast(value);
         });
     }
 
