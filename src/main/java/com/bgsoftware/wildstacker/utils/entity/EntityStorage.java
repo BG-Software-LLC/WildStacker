@@ -29,14 +29,18 @@ public final class EntityStorage {
     }
 
     public static <T> T getMetadata(Entity entity, EntityFlag entityFlag){
+        return getMetadata(entity, entityFlag, null);
+    }
+
+    public static <T> T getMetadata(Entity entity, EntityFlag entityFlag, T def){
         UUID uuid = entity.getUniqueId();
         return read(entityStorage -> {
             EnumMap<EntityFlag, Object> map = entityStorage.get(uuid);
             if(map == null)
-                return null;
+                return def;
 
             Object value = map.get(entityFlag);
-            return value == null ? null : (T) entityFlag.getValueClass().cast(value);
+            return value == null ? def : (T) entityFlag.getValueClass().cast(value);
         });
     }
 
