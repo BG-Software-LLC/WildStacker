@@ -445,8 +445,7 @@ public final class SpawnersListener implements Listener {
 
         else{
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-            //Making sure the stacking is ran at least one tick later, so the entity will be considered "valid".
-            Executor.sync(() -> stackedEntity.runSpawnerStackAsync(stackedSpawner, null), 1L);
+            stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
         }
     }
 
