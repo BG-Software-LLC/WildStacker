@@ -447,6 +447,16 @@ entities:
   # If you deal more damage than the health of the entity, the rest of the damage will be dealt to the next stack.
   spread-damage: false
 
+  # Which transform types should WildStacker listen to?
+  # When an entity is transforming into another entity with one of the following reasons,
+  # the plugin will convert it's data to the new entity.
+  # A list of transform reasons can be find here:
+  # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/EntityTransformEvent.TransformReason.html
+  filtered-transforms:
+  - 'DROWNED'
+  - 'CURED'
+  - 'PIGLIN_ZOMBIFIED'
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

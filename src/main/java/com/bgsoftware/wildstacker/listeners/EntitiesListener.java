@@ -69,7 +69,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityEnterBlockEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
-import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -1090,8 +1089,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e){
-            if(e.getTransformReason() != EntityTransformEvent.TransformReason.DROWNED &&
-                    e.getTransformReason() != EntityTransformEvent.TransformReason.CURED)
+            if(!plugin.getSettings().entitiesFilteredTransforms.contains(e.getTransformReason().name()))
                 return;
 
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -1100,14 +1098,25 @@ public final class EntitiesListener implements Listener {
                 StackedEntity transformedEntity = WStackedEntity.of(e.getTransformedEntity());
                 boolean multipleEntities = !transformedEntity.isCached();
 
+                SpawnCause spawnCause;
+
+                try{
+                    spawnCause = SpawnCause.valueOf(e.getTransformReason().name());
+                }catch (IllegalArgumentException ex){
+                    spawnCause = stackedEntity.getSpawnCause();
+                }
+
                 if(multipleEntities){
                     for(int i = 0; i < stackedEntity.getStackAmount() - 1; i++){
-                        plugin.getSystemManager().spawnEntityWithoutStacking(e.getTransformedEntity().getLocation(), e.getTransformedEntity().getClass());
+                        plugin.getSystemManager().spawnEntityWithoutStacking(e.getTransformedEntity().getLocation(),
+                                e.getTransformedEntity().getClass(), spawnCause);
                     }
                 }
                 else {
                     StackedEntity transformed = WStackedEntity.of(e.getTransformedEntity());
                     transformed.setStackAmount(stackedEntity.getStackAmount(), true);
+                    transformed.setSpawnCause(spawnCause);
+                    transformed.updateNerfed();
                 }
 
                 stackedEntity.remove();

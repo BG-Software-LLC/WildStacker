@@ -99,7 +99,8 @@ public final class SettingsHandler {
     public final Fast2EnumsArray<EntityType, SpawnCause> blacklistedEntities, whitelistedEntities, entitiesNerfedWhitelist,
             entitiesNerfedBlacklist, stackDownTypes, keepLowestHealth, entitiesAutoExpPickup, entitiesOneShotWhitelist;
     public final Fast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> entitiesInstantKills;
-    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, entitiesNerfedWorlds, entitiesOneShotTools;
+    public final List<String> entitiesDisabledWorlds, entitiesDisabledRegions, entitiesNerfedWorlds, entitiesOneShotTools,
+            entitiesFilteredTransforms;
     public final List<Pattern> blacklistedEntitiesNames;
     public final Fast2EnumsMap<EntityType, SpawnCause, Integer> entitiesMergeRadius, entitiesLimits,
             minimumRequiredEntities, defaultUnstack;
@@ -292,6 +293,7 @@ public final class SettingsHandler {
         multiplyDrops = cfg.getBoolean("entities.multiply-drops", true);
         multiplyExp = cfg.getBoolean("entities.multiply-exp", true);
         spreadDamage = cfg.getBoolean("entities.spread-damage", false);
+        entitiesFilteredTransforms = cfg.getStringList("entities.filtered-transforms");
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         spawnersMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("spawners.merge-radius"), EntityType.class);
