@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -150,6 +151,12 @@ public final class ItemsListener implements Listener {
             int stackAmount = stackedItem.getStackAmount();
 
             if(e.getInventory() != null) {
+                // For no reason, villagers pickup the item and then call the event.
+                // Therefore, even if it's cancelled, the item is still in their inventory.
+                if(e.getEntityType() == EntityType.VILLAGER) {
+                    e.getInventory().removeItem(stackedItem.getItemStack());
+                }
+
                 stackedItem.giveItemStack(e.getInventory());
             }
 
