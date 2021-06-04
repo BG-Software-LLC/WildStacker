@@ -43,6 +43,9 @@ public enum SpawnCause {
     TRAP(31),
     VILLAGE_DEFENSE(32),
     VILLAGE_INVASION(33),
+    COMMAND(34),
+    PIGLIN_ZOMBIFIED(35),
+
 
     /**
      * Custom spawn causes.
