@@ -54,7 +54,11 @@ import java.util.stream.Collectors;
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
 
-    private static final ReflectField<Object> MOB_SPAWNER_ABSTRACT = new ReflectField<>("net.minecraft.server.VERSION.TileEntityMobSpawner", Object.class, "a").removeFinal();
+    private static final String TILE_ENTITY_MOB_SPAWNER_CLASS = ServerVersion.isAtLeast(ServerVersion.v1_17) ?
+            "net.minecraft.world.level.block.entity.TileEntityMobSpawner" :
+            "net.minecraft.server.VERSION.TileEntityMobSpawner";
+    private static final ReflectField<Object> MOB_SPAWNER_ABSTRACT = new ReflectField<>(
+            TILE_ENTITY_MOB_SPAWNER_CLASS, Object.class, "a").removeFinal();
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = { "merge-radius", "limits", "minimum-required", "default-unstack",
