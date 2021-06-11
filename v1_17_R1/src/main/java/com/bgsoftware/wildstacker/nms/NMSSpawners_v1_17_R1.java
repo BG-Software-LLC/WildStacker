@@ -27,12 +27,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
+import net.minecraft.world.entity.animal.EntityWaterAnimal;
 import net.minecraft.world.entity.monster.EntityMonster;
 import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.EnumSkyBlock;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.MobSpawnerAbstract;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
@@ -98,7 +100,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
 
         createCondition("BELOW_SEA_LEVEL",
                 (world, position) -> position.getY() < world.getSeaLevel(),
-                EntityType.DOLPHIN
+                EntityType.DOLPHIN, EntityType.AXOLOTL
         );
 
         createCondition("DARK_BLOCK_LIGHT",
@@ -119,6 +121,16 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
         createCondition("IN_SEA_SURFACE",
                 (world, position) -> position.getY() < world.getSeaLevel() + 4,
                 EntityType.TURTLE
+        );
+
+        createCondition("IN_FULL_DARKNESS",
+                (world, position) -> (world.Y() ? world.c(position, 10) : world.getLightLevel(position)) == 0,
+                EntityType.AXOLOTL
+        );
+
+        createCondition("ON_OCEAN_FLOOR",
+                (world, position) -> EntityWaterAnimal.a(position, (WorldAccess) world),
+                EntityType.AXOLOTL
         );
 
         createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
