@@ -25,6 +25,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.GlowSquid;
+import org.bukkit.entity.Goat;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
@@ -450,6 +451,11 @@ public final class EntityUtils {
         if(StackCheck.GLOW_SQUID_DARK_TICKS.isEnabled() && StackCheck.GLOW_SQUID_DARK_TICKS.isTypeAllowed(entityType)){
             if(((GlowSquid) en1).getDarkTicksRemaining() != ((GlowSquid) en2).getDarkTicksRemaining())
                 return StackCheckResult.GLOW_SQUID_DARK_TICKS;
+        }
+
+        if(StackCheck.GOAT_SCREAMING.isEnabled() && StackCheck.GOAT_SCREAMING.isTypeAllowed(entityType)){
+            if(((Goat) en1).isScreaming() != ((Goat) en2).isScreaming())
+                return StackCheckResult.GOAT_SCREAMING;
         }
 
         return StackCheckResult.SUCCESS;

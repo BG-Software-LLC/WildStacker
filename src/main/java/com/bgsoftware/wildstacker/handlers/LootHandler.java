@@ -96,6 +96,10 @@ public final class LootHandler {
         if(containsEntity("GLOW_SQUID")) {
             FileUtils.saveResource("loottables/glow_squid.json");
         }
+        if(containsEntity("GOAT")) {
+            FileUtils.saveResource("loottables/goat.json");
+            FileUtils.saveResource("loottables/goat_baby.json");
+        }
         FileUtils.saveResource("loottables/guardian.json");
         if(containsEntity("HOGLIN")) {
             FileUtils.saveResource("loottables/hoglin.json");

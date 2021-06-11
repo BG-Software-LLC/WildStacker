@@ -258,8 +258,9 @@ entities:
     CAT_TYPE: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false
-    GUARDIAN_ELDER: true
     GLOW_SQUID_DARK_TICKS: false
+    GOAT_SCREAMING: false
+    GUARDIAN_ELDER: true
     HORSE_CARRYING_CHEST: true
     HORSE_COLOR: true
     HORSE_JUMP: true

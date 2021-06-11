@@ -33,6 +33,7 @@ public enum  EntityTypes {
     GHAST,
     GIANT,
     GLOW_SQUID,
+    GOAT,
     GUARDIAN,
     HOGLIN,
     HORSE,
