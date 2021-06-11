@@ -250,6 +250,8 @@ entities:
   stack-checks:
     AGE: true
     ANIMAL_OWNER: true
+    AXOLOTL_TYPE: true
+    AXOLOTL_PLAYING_DEAD: false
     BAT_AWAKE: false
     CAN_BREED: true
     CAT_COLLAR_COLOR: true

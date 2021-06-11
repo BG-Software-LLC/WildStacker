@@ -18,6 +18,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Enderman;
@@ -433,6 +434,16 @@ public final class EntityUtils {
         if(StackCheck.MOOSHROOM_TYPE.isEnabled() && StackCheck.MOOSHROOM_TYPE.isTypeAllowed(entityType)){
             if(plugin.getNMSAdapter().getMooshroomType((MushroomCow) en1) != plugin.getNMSAdapter().getMooshroomType((MushroomCow) en2))
                 return StackCheckResult.MOOSHROOM_TYPE;
+        }
+
+        if(StackCheck.AXOLOTL_TYPE.isEnabled() && StackCheck.AXOLOTL_TYPE.isTypeAllowed(entityType)){
+            if(((Axolotl) en1).getVariant() != ((Axolotl) en2).getVariant())
+                return StackCheckResult.AXOLOTL_TYPE;
+        }
+
+        if(StackCheck.AXOLOTL_PLAYING_DEAD.isEnabled() && StackCheck.AXOLOTL_PLAYING_DEAD.isTypeAllowed(entityType)){
+            if(((Axolotl) en1).isPlayingDead() != ((Axolotl) en2).isPlayingDead())
+                return StackCheckResult.AXOLOTL_PLAYING_DEAD;
         }
 
         return StackCheckResult.SUCCESS;

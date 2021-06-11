@@ -53,6 +53,10 @@ public final class LootHandler {
     }
 
     private void initAllLootTables(){
+        if(containsEntity("AXOLOTL")) {
+            FileUtils.saveResource("loottables/axolotl.json");
+            FileUtils.saveResource("loottables/axolotl_baby.json");
+        }
         FileUtils.saveResource("loottables/bat.json");
         if(containsEntity("BEE")) {
             FileUtils.saveResource("loottables/bee.json");

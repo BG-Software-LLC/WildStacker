@@ -17,6 +17,8 @@ public enum StackCheck {
      */
     AGE(),
     ANIMAL_OWNER(),
+    AXOLOTL_TYPE(EntityTypes.AXOLOTL),
+    AXOLOTL_PLAYING_DEAD(EntityTypes.AXOLOTL),
     BAT_AWAKE(EntityTypes.BAT),
     CAN_BREED(),
     CAT_COLLAR_COLOR(EntityTypes.CAT),

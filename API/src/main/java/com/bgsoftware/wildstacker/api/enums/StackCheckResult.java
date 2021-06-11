@@ -7,6 +7,8 @@ public enum StackCheckResult {
      */
     AGE,
     ANIMAL_OWNER,
+    AXOLOTL_TYPE,
+    AXOLOTL_PLAYING_DEAD,
     BAT_AWAKE,
     CAN_BREED,
     CAT_COLLAR_COLOR,
