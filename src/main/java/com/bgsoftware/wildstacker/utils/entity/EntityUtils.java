@@ -438,19 +438,6 @@ public final class EntityUtils {
         return StackCheckResult.SUCCESS;
     }
 
-//    public static CompletableFuture<Collection<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
-//        CompletableFuture<Collection<Entity>> completableFuture = new CompletableFuture<>();
-//
-//        if(Bukkit.isPrimaryThread()){
-//            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-//        }
-//        else{
-//            Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
-//        }
-//
-//        return completableFuture;
-//    }
-
     public static boolean canBeBred(Animals animal) {
         return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);
     }
