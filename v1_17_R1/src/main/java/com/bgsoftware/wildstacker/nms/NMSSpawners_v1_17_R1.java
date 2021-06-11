@@ -100,7 +100,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
 
         createCondition("BELOW_SEA_LEVEL",
                 (world, position) -> position.getY() < world.getSeaLevel(),
-                EntityType.DOLPHIN, EntityType.AXOLOTL
+                EntityType.DOLPHIN, EntityType.AXOLOTL, EntityType.GLOW_SQUID
         );
 
         createCondition("DARK_BLOCK_LIGHT",
@@ -125,12 +125,12 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
 
         createCondition("IN_FULL_DARKNESS",
                 (world, position) -> (world.Y() ? world.c(position, 10) : world.getLightLevel(position)) == 0,
-                EntityType.AXOLOTL
+                EntityType.AXOLOTL, EntityType.GLOW_SQUID
         );
 
         createCondition("ON_OCEAN_FLOOR",
                 (world, position) -> EntityWaterAnimal.a(position, (WorldAccess) world),
-                EntityType.AXOLOTL
+                EntityType.AXOLOTL, EntityType.GLOW_SQUID
         );
 
         createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
