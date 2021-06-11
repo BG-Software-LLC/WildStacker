@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -36,6 +35,12 @@ public final class EntitiesGetter {
     }
 
     public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+        Collection<Entity> entities = plugin.getNMSAdapter().getNearbyEntities(location, range, filter);
+
+        if(entities != null){
+            return entities.stream();
+        }
+
         int minX = location.getBlockX() - range;
         int minY = location.getBlockY() - range;
         int minZ = location.getBlockZ() - range;
@@ -47,7 +52,7 @@ public final class EntitiesGetter {
 
         String worldName = location.getWorld().getName();
 
-        List<Entity> entities = new ArrayList<>();
+        entities = new ArrayList<>();
 
         for (int x = minChunkX; x <= maxChunkX; x++){
             for (int z = minChunkZ; z <= maxChunkZ; z++){
