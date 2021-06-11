@@ -24,6 +24,7 @@ import org.bukkit.entity.Cat;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.GlowSquid;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
@@ -444,6 +445,11 @@ public final class EntityUtils {
         if(StackCheck.AXOLOTL_PLAYING_DEAD.isEnabled() && StackCheck.AXOLOTL_PLAYING_DEAD.isTypeAllowed(entityType)){
             if(((Axolotl) en1).isPlayingDead() != ((Axolotl) en2).isPlayingDead())
                 return StackCheckResult.AXOLOTL_PLAYING_DEAD;
+        }
+
+        if(StackCheck.GLOW_SQUID_DARK_TICKS.isEnabled() && StackCheck.GLOW_SQUID_DARK_TICKS.isTypeAllowed(entityType)){
+            if(((GlowSquid) en1).getDarkTicksRemaining() != ((GlowSquid) en2).getDarkTicksRemaining())
+                return StackCheckResult.GLOW_SQUID_DARK_TICKS;
         }
 
         return StackCheckResult.SUCCESS;

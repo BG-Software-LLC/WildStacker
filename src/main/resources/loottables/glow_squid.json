@@ -1,0 +1,28 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "GLOW_INK_SAC",
+          "chance": 100,
+          "min": 1,
+          "max": 3,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "killer": [
+        "WITHER"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "WITHER_ROSE",
+          "chance": 100
+        }
+      ]
+    }
+  ]
+}

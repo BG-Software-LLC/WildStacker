@@ -25,6 +25,7 @@ public enum StackCheck {
     CAT_TYPE(EntityTypes.CAT),
     ENDERMAN_CARRIED_BLOCK(EntityTypes.ENDERMAN),
     EXACT_AGE(),
+    GLOW_SQUID_DARK_TICKS(EntityTypes.GLOW_SQUID),
     GUARDIAN_ELDER(EntityTypes.ELDER_GUARDIAN),
     HORSE_CARRYING_CHEST(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
     HORSE_COLOR(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
