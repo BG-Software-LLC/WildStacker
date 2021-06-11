@@ -87,7 +87,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA,
                 EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG, EntityType.RABBIT,
                 EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.TURTLE, EntityType.WOLF, EntityType.ZOMBIE_HORSE,
-                EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA
+                EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA, EntityType.GOAT
         );
 
         createCondition("ANIMAL_LIGHT_AND_COLD", (world, position) -> {
@@ -187,7 +187,8 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
                 (world, position) -> world.getType(position.down()).a(Blocks.i),
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA,
                 EntityType.MULE, EntityType.PIG, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.WOLF,
-                EntityType.ZOMBIE_HORSE, EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA
+                EntityType.ZOMBIE_HORSE, EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA,
+                EntityType.GOAT
         );
 
         createCondition("ON_GRASS_OR_SAND_OR_SNOW", (world, position) -> {
