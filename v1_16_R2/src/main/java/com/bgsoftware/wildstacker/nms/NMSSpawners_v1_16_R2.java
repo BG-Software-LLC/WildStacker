@@ -430,6 +430,7 @@ public final class NMSSpawners_v1_16_R2 implements NMSSpawners {
             }
 
             spawnedEntities = 0;
+            failureReason = "";
 
             a(1);
         }
