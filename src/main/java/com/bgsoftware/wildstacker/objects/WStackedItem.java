@@ -37,12 +37,17 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     private String mmoItemName = null;
 
+    private final UUID cachedUUID;
+    private final int cachedEntityId;
+
     public WStackedItem(Item item){
         this(item, item.getItemStack().getAmount());
     }
 
     public WStackedItem(Item item, int stackAmount){
         super(item, stackAmount);
+        cachedUUID = item.getUniqueId();
+        cachedEntityId = item.getEntityId();
     }
 
     @Override
@@ -79,12 +84,12 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public UUID getUniqueId(){
-        return object.getUniqueId();
+        return cachedUUID;
     }
 
     @Override
     public int getId() {
-        return getItem().getEntityId();
+        return cachedEntityId;
     }
 
     @Override

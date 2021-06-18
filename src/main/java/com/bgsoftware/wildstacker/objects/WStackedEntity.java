@@ -63,10 +63,16 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     private Predicate<LivingEntity> stackFlag = null;
 
+    private final UUID cachedUUID;
+    private final int cachedEntityId;
+    private EntityType cachedType;
+
     public WStackedEntity(LivingEntity livingEntity){
         super(livingEntity, 1);
         this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
         setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
+        this.cachedUUID = livingEntity.getUniqueId();
+        this.cachedEntityId = livingEntity.getEntityId();
     }
 
     @Override
@@ -97,17 +103,20 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public UUID getUniqueId(){
-        return object.getUniqueId();
+        return cachedUUID;
     }
 
     @Override
     public int getId() {
-        return getLivingEntity().getEntityId();
+        return cachedEntityId;
     }
 
     @Override
     public EntityType getType(){
-        return object.getType();
+        if(cachedType == null)
+            cachedType = object.getType();
+
+        return cachedType;
     }
 
     @Override
