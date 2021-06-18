@@ -11,9 +11,13 @@ import java.util.function.Consumer;
 @SuppressWarnings("WeakerAccess")
 public abstract class WAsyncStackedObject<T> extends WStackedObject<T> implements AsyncStackedObject<T> {
 
+    private final Object mutex = new Object();
+
     protected WAsyncStackedObject(T object, int stackAmount) {
         super(object, stackAmount);
     }
+
+    public abstract int getId();
 
     @Override
     public Optional<T> runStack(){
@@ -29,7 +33,7 @@ public abstract class WAsyncStackedObject<T> extends WStackedObject<T> implement
 
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
-        StackService.execute(stackedObject, () -> {
+        StackService.execute(this, stackedObject, () -> {
             StackResult _stackResult = runStack(stackedObject);
             if(stackResult != null)
                 stackResult.accept(_stackResult);
@@ -38,5 +42,9 @@ public abstract class WAsyncStackedObject<T> extends WStackedObject<T> implement
 
     @Override
     public abstract void runStackAsync(Consumer<Optional<T>> result);
+
+    public Object getMutex() {
+        return mutex;
+    }
 
 }

@@ -83,6 +83,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
+    public int getId() {
+        return getItem().getEntityId();
+    }
+
+    @Override
     public String getCustomName() {
         return plugin.getNMSAdapter().getCustomName(object);
     }
@@ -233,23 +238,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (targetItem.getItem().isDead())
             return StackCheckResult.TARGET_ALREADY_DEAD;
 
-//            if (getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-//                return StackCheckResult.INSIDE_PORTAL;
-//
-//            if (targetItem.getItem().getLocation().getBlock().getType() == Materials.NETHER_PORTAL.toBukkitType())
-//                return StackCheckResult.TARGET_INSIDE_PORTAL;
-
         return StackCheckResult.SUCCESS;
     }
 
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
-        // Should be called sync due to collecting nearby entities
-        if(!Bukkit.isPrimaryThread()){
-            Executor.sync(() -> runStackAsync(result));
-            return;
-        }
-
         int range = getMergeRadius();
 
         if(range <= 0 || getStackLimit() <= 1){
@@ -258,35 +251,38 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             return;
         }
 
-        Stream<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(object.getLocation(), range, item -> true);
+        // Should be called sync due to collecting nearby entities
+        if(!Bukkit.isPrimaryThread()){
+            Executor.sync(() -> runStackAsync(result));
+            return;
+        }
 
-        StackService.execute(this, () -> {
-            Location itemLocation = getItem().getLocation();
+        Location itemLocation = getItem().getLocation();
+        Stream<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(itemLocation, range, ItemUtils::isStackable);
+        Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation, nearbyEntities
+                .map(entity -> WStackedItem.ofBypass((Item) entity))
+                .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS));
 
-            Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation,
-                    nearbyEntities
-                            .filter(ItemUtils::isStackable)
-                            .map(entity -> WStackedItem.ofBypass((Item) entity))
-                            .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-            );
-
-            if (itemOptional.isPresent()) {
-                StackedItem targetItem = itemOptional.get();
-
-                StackResult stackResult = runStack(targetItem);
-
-                if (stackResult == StackResult.SUCCESS) {
+        if(itemOptional.isPresent()){
+            runStackAsync(itemOptional.get(), stackResult -> {
+                if(stackResult == StackResult.SUCCESS){
                     if (result != null)
                         result.accept(itemOptional.map(StackedItem::getItem));
-                    return;
                 }
-            }
+                else{
+                    updateName();
 
+                    if (result != null)
+                        result.accept(Optional.empty());
+                }
+            });
+        }
+        else{
             updateName();
 
             if (result != null)
                 result.accept(Optional.empty());
-        });
+        }
     }
 
     @Override
