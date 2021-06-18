@@ -103,9 +103,6 @@ public final class EntityUtils {
         if(name == null)
             return false;
 
-        if(!name.contains(ChatColor.COLOR_CHAR + ""))
-            name = ChatColor.WHITE + name;
-
         List<Pattern> blacklistedNames = plugin.getSettings().blacklistedEntitiesNames;
 
         for(Pattern pattern : blacklistedNames){
