@@ -15,31 +15,55 @@ public final class EntityStorage {
     private static final Map<UUID, FlagsMap> entityStorage = new ConcurrentHashMap<>();
 
     public static void setMetadata(Entity entity, EntityFlag entityFlag, Object value) {
-        entityStorage.computeIfAbsent(entity.getUniqueId(), s -> new FlagsMap()).put(entityFlag, value);
+        setMetadata(entity.getUniqueId(), entityFlag, value);
+    }
+
+    public static void setMetadata(UUID entityUUID, EntityFlag entityFlag, Object value) {
+        entityStorage.computeIfAbsent(entityUUID, s -> new FlagsMap()).put(entityFlag, value);
     }
 
     public static boolean hasMetadata(Entity entity, EntityFlag entityFlag) {
-        FlagsMap flagsMap = entityStorage.get(entity.getUniqueId());
+        return hasMetadata(entity.getUniqueId(), entityFlag);
+    }
+
+    public static boolean hasMetadata(UUID entityUUID, EntityFlag entityFlag) {
+        FlagsMap flagsMap = entityStorage.get(entityUUID);
         return flagsMap != null && flagsMap.containsKey(entityFlag);
     }
 
     public static <T> T getMetadata(Entity entity, EntityFlag entityFlag) {
-        return getMetadata(entity, entityFlag, null);
+        return getMetadata(entity.getUniqueId(), entityFlag);
+    }
+
+    public static <T> T getMetadata(UUID entityUUID, EntityFlag entityFlag) {
+        return getMetadata(entityUUID, entityFlag, null);
     }
 
     public static <T> T getMetadata(Entity entity, EntityFlag entityFlag, T def) {
-        FlagsMap flagsMap = entityStorage.get(entity.getUniqueId());
+        return getMetadata(entity.getUniqueId(), entityFlag, def);
+    }
+
+    public static <T> T getMetadata(UUID entityUUID, EntityFlag entityFlag, T def) {
+        FlagsMap flagsMap = entityStorage.get(entityUUID);
         return flagsMap == null ? null : (T) entityFlag.getValueClass().cast(flagsMap.getOrDefault(entityFlag, def));
     }
 
     public static void removeMetadata(Entity entity, EntityFlag entityFlag) {
-        FlagsMap flagsMap = entityStorage.get(entity.getUniqueId());
+        removeMetadata(entity.getUniqueId(), entityFlag);
+    }
+
+    public static void removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
+        FlagsMap flagsMap = entityStorage.get(entityUUID);
         if(flagsMap != null)
             flagsMap.remove(entityFlag);
     }
 
     public static void clearMetadata(Entity entity) {
         entityStorage.remove(entity.getUniqueId());
+    }
+
+    public static void clearMetadata(UUID entityUUID) {
+        entityStorage.remove(entityUUID);
     }
 
     public static void clearCache() {

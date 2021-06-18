@@ -69,10 +69,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     public WStackedEntity(LivingEntity livingEntity){
         super(livingEntity, 1);
-        this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
-        setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
         this.cachedUUID = livingEntity.getUniqueId();
         this.cachedEntityId = livingEntity.getEntityId();
+        this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
+        setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
     }
 
     @Override
@@ -680,27 +680,27 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean hasFlag(EntityFlag entityFlag) {
-        return EntityStorage.hasMetadata(object, entityFlag);
+        return EntityStorage.hasMetadata(cachedUUID, entityFlag);
     }
 
     @Override
     public <T> T getFlag(EntityFlag entityFlag) {
-        return EntityStorage.getMetadata(object, entityFlag);
+        return EntityStorage.getMetadata(cachedUUID, entityFlag);
     }
 
     @Override
     public void setFlag(EntityFlag entityFlag, Object value) {
-        EntityStorage.setMetadata(object, entityFlag, value);
+        EntityStorage.setMetadata(cachedUUID, entityFlag, value);
     }
 
     @Override
     public void removeFlag(EntityFlag entityFlag) {
-        EntityStorage.removeMetadata(object, entityFlag);
+        EntityStorage.removeMetadata(cachedUUID, entityFlag);
     }
 
     @Override
     public void clearFlags() {
-        EntityStorage.clearMetadata(object);
+        EntityStorage.clearMetadata(cachedUUID);
     }
 
     public void setNameTag(){
