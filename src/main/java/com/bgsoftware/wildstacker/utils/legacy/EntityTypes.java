@@ -1,15 +1,15 @@
 package com.bgsoftware.wildstacker.utils.legacy;
 
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
 
-public enum  EntityTypes {
+public enum EntityTypes {
 
     BAT,
     BEE,
@@ -83,12 +83,27 @@ public enum  EntityTypes {
     ZOMBIE_PIGMAN,
     ZOMBIE_VILLAGER;
 
-    public static EntityTypes fromName(String name){
-        try{
-            return EntityTypes.valueOf(name);
-        }catch(IllegalArgumentException ignored){}
+    private static final EntityTypes[] bukkitTypeConverter = new EntityTypes[EntityType.values().length];
 
-        switch (name){
+    static {
+        for (EntityType entityType : EntityType.values()) {
+            try {
+                bukkitTypeConverter[entityType.ordinal()] = EntityTypes.fromName(entityType.name());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        bukkitTypeConverter[EntityType.MUSHROOM_COW.ordinal()] = EntityTypes.MOOSHROOM;
+        bukkitTypeConverter[EntityType.PIG_ZOMBIE.ordinal()] = EntityTypes.ZOMBIE_PIGMAN;
+    }
+
+    public static EntityTypes fromName(String name) {
+        try {
+            return EntityTypes.valueOf(name);
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        switch (name) {
             case "MUSHROOM_COW":
                 return MOOSHROOM;
             case "ZOMBIFIED_PIGLIN":
@@ -99,8 +114,8 @@ public enum  EntityTypes {
         throw new IllegalArgumentException("Couldn't cast " + name + " into a EntityTypes enum. Contact Ome_R!");
     }
 
-    public static EntityTypes fromEntity(LivingEntity livingEntity){
-        if(ServerVersion.isLessThan(ServerVersion.v1_11)) {
+    public static EntityTypes fromEntity(LivingEntity livingEntity) {
+        if (ServerVersion.isLessThan(ServerVersion.v1_11)) {
             if (livingEntity instanceof Horse) {
                 Horse horse = (Horse) livingEntity;
                 if (horse.getVariant() == Horse.Variant.DONKEY)
@@ -125,10 +140,12 @@ public enum  EntityTypes {
             }
         }
 
-        if(livingEntity instanceof MushroomCow)
-            return EntityTypes.MOOSHROOM;
+        EntityTypes convertedType = bukkitTypeConverter[livingEntity.getType().ordinal()];
 
-        return livingEntity instanceof PigZombie ? EntityTypes.ZOMBIE_PIGMAN : valueOf(livingEntity.getType().name());
+        if(convertedType == null)
+            throw new IllegalArgumentException("No enum constant EntityTypes." + livingEntity.getType().name());
+
+        return convertedType;
     }
 
     public boolean isSlime() {
