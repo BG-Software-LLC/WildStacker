@@ -56,11 +56,12 @@ public enum StackCheck {
     ZOMBIE_PIGMAN_ANGRY(EntityTypes.ZOMBIE_PIGMAN);
 
     private boolean enabled;
-    private final EntityTypes[] allowedTypes;
+    private final boolean[] allowedTypes = new boolean[EntityTypes.values().length];
 
     StackCheck(EntityTypes... allowedTypes) {
         this.enabled = false;
-        this.allowedTypes = allowedTypes;
+        for(EntityTypes allowedType : allowedTypes)
+            this.allowedTypes[allowedType.ordinal()] = true;
     }
 
     public void setEnabled(boolean enabled) {
@@ -72,15 +73,7 @@ public enum StackCheck {
     }
 
     public boolean isTypeAllowed(EntityTypes entityType){
-        if(allowedTypes.length == 0)
-            return true;
-
-        for (EntityTypes allowedType : allowedTypes) {
-            if (entityType == allowedType)
-                return true;
-        }
-
-        return false;
+        return allowedTypes[entityType.ordinal()];
     }
 
 }
