@@ -33,6 +33,7 @@ import org.bukkit.material.MaterialData;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface NMSAdapter {
 
@@ -69,6 +70,10 @@ public interface NMSAdapter {
     boolean canSpawnOn(Entity entity, Location location);
 
     Collection<Entity> getEntitiesAtChunk(ChunkPosition chunkPosition);
+
+    default Collection<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+        return null;
+    }
 
     default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
         return entityEquipment.getItemInHandDropChance();

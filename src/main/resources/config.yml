@@ -250,12 +250,16 @@ entities:
   stack-checks:
     AGE: true
     ANIMAL_OWNER: true
+    AXOLOTL_TYPE: true
+    AXOLOTL_PLAYING_DEAD: false
     BAT_AWAKE: false
     CAN_BREED: true
     CAT_COLLAR_COLOR: true
     CAT_TYPE: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false
+    GLOW_SQUID_DARK_TICKS: false
+    GOAT_SCREAMING: false
     GUARDIAN_ELDER: true
     HORSE_CARRYING_CHEST: true
     HORSE_COLOR: true

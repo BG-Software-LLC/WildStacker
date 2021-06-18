@@ -18,11 +18,14 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.GlowSquid;
+import org.bukkit.entity.Goat;
 import org.bukkit.entity.Guardian;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
@@ -432,21 +435,28 @@ public final class EntityUtils {
                 return StackCheckResult.MOOSHROOM_TYPE;
         }
 
+        if(StackCheck.AXOLOTL_TYPE.isEnabled() && StackCheck.AXOLOTL_TYPE.isTypeAllowed(entityType)){
+            if(((Axolotl) en1).getVariant() != ((Axolotl) en2).getVariant())
+                return StackCheckResult.AXOLOTL_TYPE;
+        }
+
+        if(StackCheck.AXOLOTL_PLAYING_DEAD.isEnabled() && StackCheck.AXOLOTL_PLAYING_DEAD.isTypeAllowed(entityType)){
+            if(((Axolotl) en1).isPlayingDead() != ((Axolotl) en2).isPlayingDead())
+                return StackCheckResult.AXOLOTL_PLAYING_DEAD;
+        }
+
+        if(StackCheck.GLOW_SQUID_DARK_TICKS.isEnabled() && StackCheck.GLOW_SQUID_DARK_TICKS.isTypeAllowed(entityType)){
+            if(((GlowSquid) en1).getDarkTicksRemaining() != ((GlowSquid) en2).getDarkTicksRemaining())
+                return StackCheckResult.GLOW_SQUID_DARK_TICKS;
+        }
+
+        if(StackCheck.GOAT_SCREAMING.isEnabled() && StackCheck.GOAT_SCREAMING.isTypeAllowed(entityType)){
+            if(((Goat) en1).isScreaming() != ((Goat) en2).isScreaming())
+                return StackCheckResult.GOAT_SCREAMING;
+        }
+
         return StackCheckResult.SUCCESS;
     }
-
-//    public static CompletableFuture<Collection<Entity>> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
-//        CompletableFuture<Collection<Entity>> completableFuture = new CompletableFuture<>();
-//
-//        if(Bukkit.isPrimaryThread()){
-//            completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter));
-//        }
-//        else{
-//            Executor.sync(() -> completableFuture.complete(plugin.getNMSAdapter().getNearbyEntities(location, range, filter)));
-//        }
-//
-//        return completableFuture;
-//    }
 
     public static boolean canBeBred(Animals animal) {
         return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);

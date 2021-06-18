@@ -11,6 +11,7 @@ import org.bukkit.entity.Zombie;
 
 public enum EntityTypes {
 
+    AXOLOTL,
     BAT,
     BEE,
     BLAZE,
@@ -31,6 +32,8 @@ public enum EntityTypes {
     FOX,
     GHAST,
     GIANT,
+    GLOW_SQUID,
+    GOAT,
     GUARDIAN,
     HOGLIN,
     HORSE,

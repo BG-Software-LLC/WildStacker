@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -202,7 +203,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         setFlag(EntityFlag.REMOVED_ENTITY, true);
 
-        if(EntityTypes.fromEntity(object).isSlime()){
+        if(ServerVersion.isAtLeast(ServerVersion.v1_17) || EntityTypes.fromEntity(object).isSlime()){
             Executor.sync(object::remove);
         }
         else {

@@ -172,7 +172,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     @Override
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
-        object.remove();
+
+        if(ServerVersion.isAtLeast(ServerVersion.v1_17)){
+            Executor.sync(object::remove);
+        }
+        else {
+            object.remove();
+        }
     }
 
     @Override

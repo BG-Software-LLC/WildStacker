@@ -53,6 +53,10 @@ public final class LootHandler {
     }
 
     private void initAllLootTables(){
+        if(containsEntity("AXOLOTL")) {
+            FileUtils.saveResource("loottables/axolotl.json");
+            FileUtils.saveResource("loottables/axolotl_baby.json");
+        }
         FileUtils.saveResource("loottables/bat.json");
         if(containsEntity("BEE")) {
             FileUtils.saveResource("loottables/bee.json");
@@ -89,6 +93,13 @@ public final class LootHandler {
         }
         FileUtils.saveResource("loottables/ghast.json");
         FileUtils.saveResource("loottables/giant.json");
+        if(containsEntity("GLOW_SQUID")) {
+            FileUtils.saveResource("loottables/glow_squid.json");
+        }
+        if(containsEntity("GOAT")) {
+            FileUtils.saveResource("loottables/goat.json");
+            FileUtils.saveResource("loottables/goat_baby.json");
+        }
         FileUtils.saveResource("loottables/guardian.json");
         if(containsEntity("HOGLIN")) {
             FileUtils.saveResource("loottables/hoglin.json");
