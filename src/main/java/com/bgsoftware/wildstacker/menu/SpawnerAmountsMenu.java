@@ -83,6 +83,12 @@ public final class SpawnerAmountsMenu extends WildMenu {
         if (depositAmount == null)
             return;
 
+        if(!stackedSpawner.isCached()){
+            if(failureSound != null)
+                failureSound.playSound(e.getWhoClicked());
+            return;
+        }
+
         int limit = stackedSpawner.getStackLimit();
 
         if(stackedSpawner.getStackAmount() + depositAmount > limit)
