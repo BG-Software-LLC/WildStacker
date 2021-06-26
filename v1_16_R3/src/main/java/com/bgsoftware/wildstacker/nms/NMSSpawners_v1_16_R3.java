@@ -536,6 +536,9 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
         private void updateDemoEntity(){
             org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
 
+            if(demoEntityBukkit != null)
+                world.unregisterEntity(((CraftEntity) demoEntityBukkit).getHandle());
+
             if(demoEntityBukkit == null || !EntityUtils.isStackable(demoEntityBukkit)){
                 demoEntity = null;
                 return;
@@ -544,7 +547,6 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
             demoEntity = (WStackedEntity) WStackedEntity.of(demoEntityBukkit);
             demoEntity.setSpawnCause(SpawnCause.SPAWNER);
             demoEntity.setDemoEntity();
-            world.unregisterEntity(((CraftEntity) demoEntityBukkit).getHandle());
         }
 
     }
