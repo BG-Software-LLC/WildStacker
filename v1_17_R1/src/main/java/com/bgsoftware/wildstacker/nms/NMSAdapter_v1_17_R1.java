@@ -12,6 +12,8 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import io.papermc.paper.enchantments.EnchantmentRarity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.DynamicOpsNBT;
@@ -107,7 +109,9 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
+import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -123,6 +127,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -137,6 +142,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -284,8 +290,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.aware = !nerfed;
 
-        //try { entityLiving.spawnedViaMobSpawner = nerfed; } catch(Throwable ignored){ }
-        // TODO: Paper
+        try { entityLiving.spawnedViaMobSpawner = nerfed; } catch(Throwable ignored){ }
     }
 
     @Override
@@ -562,6 +567,30 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
                 return true;
             }
+
+            public Component displayName(int i) {
+                return null;
+            }
+
+            public boolean isTradeable() {
+                return false;
+            }
+
+            public boolean isDiscoverable() {
+                return false;
+            }
+
+            public EnchantmentRarity getRarity() {
+                return null;
+            }
+
+            public float getDamageIncrease(int i, EntityCategory entityCategory) {
+                return 0;
+            }
+
+            public Set<EquipmentSlot> getActiveSlots() {
+                return null;
+            }
         };
     }
 
@@ -729,8 +758,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         if (!mendingItem.isEmpty() && mendingItem.getItem().usesDurability()) {
             EntityExperienceOrb orb = EntityTypes.A.a(entityPlayer.getWorld());
             orb.aq = amount;
-            //orb.spawnReason = SpawnReason.CUSTOM;
-            // TODO: Paper
+            orb.spawnReason = ExperienceOrb.SpawnReason.CUSTOM;
             orb.setPositionRaw(entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ());
             int repairAmount = Math.min(amount * 2, mendingItem.getDamage());
             PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(entityPlayer, orb, mendingItem, repairAmount);
@@ -1125,6 +1153,18 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
                     mobSpawnerAbstract.d / 20,
                     ""
             );
+        }
+
+        public boolean isActivated() {
+            return false;
+        }
+
+        public void resetTimer() {
+
+        }
+
+        public void setSpawnedItem(org.bukkit.inventory.ItemStack itemStack) {
+
         }
 
         @Override
