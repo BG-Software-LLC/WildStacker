@@ -1,11 +1,8 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,19 +13,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class EntityStorage {
 
     private static final Map<UUID, FlagsMap> entityStorage = new ConcurrentHashMap<>();
-    private static List<UUID> trackUUIDs = new ArrayList<>();
 
     public static void setMetadata(Entity entity, EntityFlag entityFlag, Object value) {
         setMetadata(entity.getUniqueId(), entityFlag, value);
     }
 
     public static void setMetadata(UUID entityUUID, EntityFlag entityFlag, Object value) {
-        if(entityFlag == EntityFlag.DEMO_ENTITY)
-            trackUUIDs.add(entityUUID);
-
-        if(trackUUIDs.contains(entityUUID))
-            Bukkit.broadcastMessage(String.format("setMetadata(%s, %s, %s)", entityUUID + "", entityFlag + "", value + ""));
-
         entityStorage.computeIfAbsent(entityUUID, s -> new FlagsMap()).put(entityFlag, value);
     }
 
@@ -37,9 +27,6 @@ public final class EntityStorage {
     }
 
     public static boolean hasMetadata(UUID entityUUID, EntityFlag entityFlag) {
-        if(trackUUIDs.contains(entityUUID))
-            Bukkit.broadcastMessage(String.format("hasMetadata(%s, %s)", entityUUID + "", entityFlag + ""));
-
         FlagsMap flagsMap = entityStorage.get(entityUUID);
         return flagsMap != null && flagsMap.containsKey(entityFlag);
     }
@@ -57,9 +44,6 @@ public final class EntityStorage {
     }
 
     public static <T> T getMetadata(UUID entityUUID, EntityFlag entityFlag, T def) {
-        if(trackUUIDs.contains(entityUUID))
-            Bukkit.broadcastMessage(String.format("getMetadata(%s, %s, %s)", entityUUID + "", entityFlag + "", def + ""));
-
         FlagsMap flagsMap = entityStorage.get(entityUUID);
         return flagsMap == null ? null : (T) entityFlag.getValueClass().cast(flagsMap.getOrDefault(entityFlag, def));
     }
@@ -69,9 +53,6 @@ public final class EntityStorage {
     }
 
     public static void removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
-        if(trackUUIDs.contains(entityUUID))
-            Bukkit.broadcastMessage(String.format("removeMetadata(%s, %s)", entityUUID + "", entityFlag + ""));
-
         FlagsMap flagsMap = entityStorage.get(entityUUID);
         if(flagsMap != null)
             flagsMap.remove(entityFlag);
@@ -82,9 +63,6 @@ public final class EntityStorage {
     }
 
     public static void clearMetadata(UUID entityUUID) {
-        if(trackUUIDs.contains(entityUUID))
-            Bukkit.broadcastMessage(String.format("clearMetadata(%s)", entityUUID + ""));
-
         entityStorage.remove(entityUUID);
     }
 
