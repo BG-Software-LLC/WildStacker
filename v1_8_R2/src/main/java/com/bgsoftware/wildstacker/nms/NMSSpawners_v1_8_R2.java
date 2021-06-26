@@ -364,21 +364,21 @@ public final class NMSSpawners_v1_8_R2 implements NMSSpawners {
             short particlesAmount = 0;
 
             // Try stacking into the target entity first
-            if(targetEntity != null){
-                int limit = targetEntity.getStackLimit();
-                int newStackAmount = targetEntity.getStackAmount() + spawnCount;
+            if(targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, demoEntity)){
+                int targetEntityStackLimit = targetEntity.getStackLimit();
+                int currentStackAmount = targetEntity.getStackAmount();
+                int increaseStackAmount = Math.min(spawnCount, targetEntityStackLimit - currentStackAmount);
 
-                if(newStackAmount > limit) {
-                    mobsToSpawn = newStackAmount - limit;
-                    newStackAmount = limit;
-                    spawnedEntities += limit - targetEntity.getStackAmount();
+                if(increaseStackAmount != spawnCount) {
+                    mobsToSpawn = spawnCount - increaseStackAmount;
                 }
                 else{
                     mobsToSpawn = 0;
-                    spawnedEntities += spawnCount;
                 }
 
-                targetEntity.setStackAmount(newStackAmount, true);
+                spawnedEntities += increaseStackAmount;
+
+                targetEntity.increaseStackAmount(increaseStackAmount, true);
                 demoEntity.spawnStackParticle(true);
 
                 if(plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())

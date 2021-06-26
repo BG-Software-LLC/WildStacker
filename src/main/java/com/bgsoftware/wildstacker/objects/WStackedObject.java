@@ -10,7 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
@@ -19,37 +19,41 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     protected static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     protected final T object;
-    private int stackAmount;
+    private final AtomicInteger stackAmount = new AtomicInteger(0);
+
     protected boolean saveData = true;
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private String cachedDisplayName = "";
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
-        this.stackAmount = stackAmount;
+        this.stackAmount.set(stackAmount);
     }
 
     @Override
     public int getStackAmount(){
-        try {
-            lock.readLock().lock();
-            return Math.max(stackAmount, 0);
-        }finally {
-            lock.readLock().unlock();
-        }
+        return Math.max(stackAmount.get(), 0);
     }
 
     @Override
     public void setStackAmount(int stackAmount, boolean updateName){
-        try {
-            lock.writeLock().lock();
-            this.stackAmount = stackAmount;
-        }finally {
-            lock.writeLock().unlock();
-        }
+        this.stackAmount.set(stackAmount);
+        if(updateName)
+            updateName();
+    }
+
+    @Override
+    public int increaseStackAmount(int stackAmount, boolean updateName) {
+        int newStackAmount = this.stackAmount.addAndGet(stackAmount);
 
         if(updateName)
             updateName();
+
+        return newStackAmount;
+    }
+
+    @Override
+    public int decreaseStackAmount(int stackAmount, boolean updateName) {
+        return increaseStackAmount(-stackAmount, updateName);
     }
 
     public void setSaveData(boolean saveData){

@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
@@ -30,8 +29,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -242,12 +239,11 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             return StackResult.NOT_SIMILAR;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetSpawner.getStackAmount();
 
         if(!EventsCaller.callSpawnerStackEvent(targetSpawner, this))
             return StackResult.EVENT_CANCELLED;
 
-        targetSpawner.setStackAmount(newStackAmount, true);
+        targetSpawner.increaseStackAmount(getStackAmount(), true);
 
         this.remove();
 
@@ -261,11 +257,9 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         if(!EventsCaller.callSpawnerUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.getStackAmount() - amount;
+        int newStackAmount = decreaseStackAmount(amount, true);
 
-        setStackAmount(stackAmount, true);
-
-        if(stackAmount < 1)
+        if(newStackAmount < 1)
             remove();
 
         return UnstackResult.SUCCESS;
@@ -399,54 +393,6 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     public LivingEntity getRawLinkedEntity(){
         return linkedEntity;
-    }
-
-    public void tick(int spawnCount, Random random, Entity demoEntityBukkit, Consumer<Integer> spawnMobsMethod, Runnable onFinish){
-        final int mobsToSpawn;
-
-        if(linkedEntity != null){
-            StackedEntity linkedEntity = WStackedEntity.of(this.linkedEntity);
-            int limit = linkedEntity.getStackLimit();
-            int newStackAmount = linkedEntity.getStackAmount() + spawnCount;
-
-            if(newStackAmount > limit) {
-                mobsToSpawn = limit - linkedEntity.getStackAmount();
-                newStackAmount = limit;
-            }
-            else{
-                mobsToSpawn = spawnCount;
-            }
-
-            linkedEntity.setStackAmount(newStackAmount, true);
-        }
-        else{
-            mobsToSpawn = spawnCount;
-        }
-
-        if(demoEntityBukkit == null) {
-            onFinish.run();
-            return;
-        }
-
-        int stackAmount = getStackAmount();
-
-        StackedEntity demoEntity = WStackedEntity.of(demoEntityBukkit);
-        demoEntity.setStackAmount(stackAmount + random.nextInt(mobsToSpawn - stackAmount + 1), false);
-        ((WStackedEntity) demoEntity).setDemoEntity();
-
-        demoEntity.runStackAsync(optionalEntity -> {
-            if(optionalEntity.isPresent()) {
-                if(plugin.getSettings().linkedEntitiesEnabled)
-                    setLinkedEntity(optionalEntity.get());
-                onFinish.run();
-                return;
-            }
-
-            Executor.sync(() -> {
-                spawnMobsMethod.accept(mobsToSpawn);
-                onFinish.run();
-            });
-        });
     }
 
     public void linkInventory(SpawnersManageMenu spawnersManageMenu){

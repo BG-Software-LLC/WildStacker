@@ -309,7 +309,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if(!EventsCaller.callItemStackEvent(targetItem, this))
             return StackResult.EVENT_CANCELLED;
 
-        targetItem.setStackAmount(this.getStackAmount() + targetItem.getStackAmount(), false);
+        targetItem.increaseStackAmount(getStackAmount(), false);
 
         Executor.sync(() -> {
             if (targetItem.getItem().isValid())
@@ -364,62 +364,51 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void giveItemStack(Inventory inventory) {
-        synchronized (this) {
-            ItemStack itemStack = getItemStack();
+        ItemStack itemStack = getItemStack();
 
-            int giveAmount = getStackAmount();
+        /*
+         * I am not using ItemUtil#addItem so it won't drop the leftovers
+         * (If it will, the leftovers will get stacked again - infinite loop)
+         */
 
-            if (giveAmount <= 0) {
-                remove();
-                return;
+        int originalStackAmount = getStackAmount();
+
+        int maxStackAmount = itemStack.getMaxStackSize();
+        boolean inventoryFull = false;
+
+        if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled &&
+                !itemStack.getType().name().contains("SHULKER_BOX"))
+            maxStackAmount = 64;
+
+        itemStack.setAmount(maxStackAmount);
+
+        while (getStackAmount() >= maxStackAmount && !inventoryFull){
+            int amountLeft = giveItem(inventory, itemStack.clone());
+            decreaseStackAmount(maxStackAmount - amountLeft, true);
+            if (amountLeft > 0) {
+                inventoryFull = true;
             }
-
-            /*
-             * I am not using ItemUtil#addItem so it won't drop the leftovers
-             * (If it will, the leftovers will get stacked again - infinite loop)
-             */
-
-            int amountLeft = 0;
-            int maxStackAmount = itemStack.getMaxStackSize();
-
-            if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled &&
-                    !itemStack.getType().name().contains("SHULKER_BOX"))
-                maxStackAmount = 64;
-
-            int amountOfStacks = giveAmount / maxStackAmount;
-            int leftOvers = giveAmount % maxStackAmount;
-            boolean inventoryFull = false;
-
-            itemStack.setAmount(maxStackAmount);
-
-            for (int i = 0; i < amountOfStacks; i++) {
-                if (inventoryFull) {
-                    amountLeft += maxStackAmount;
-                } else {
-                    int _amountLeft = giveItem(inventory, itemStack.clone());
-                    if (_amountLeft > 0) {
-                        inventoryFull = true;
-                        amountLeft += _amountLeft;
-                    }
-                }
-            }
-
-            if (leftOvers > 0) {
-                itemStack.setAmount(leftOvers);
-                amountLeft += giveItem(inventory, itemStack.clone());
-            }
-
-            if(amountLeft <= 0){
-                setStackAmount(amountLeft, false);
-                remove();
-            }
-            else {
-                setStackAmount(amountLeft, true);
-            }
-
-            if(inventory instanceof PlayerInventory)
-                CoreProtectHook.recordItemPickup((Player) ((PlayerInventory) inventory).getHolder(), this, giveAmount - amountLeft);
         }
+
+        // Inventory is still not full, but there is still more items to add.
+        // However, there is less than a stack available to add.
+        if(!inventoryFull){
+            int currentStackAmount = getStackAmount();
+            itemStack.setAmount(currentStackAmount);
+            int amountLeft = giveItem(inventory, itemStack.clone());
+            decreaseStackAmount(currentStackAmount - amountLeft, true);
+        }
+
+        int finalStackAmount = getStackAmount();
+
+        if(finalStackAmount <= 0)
+            remove();
+
+        int givenAmount = originalStackAmount - finalStackAmount;
+
+        if(givenAmount > 0 && inventory instanceof PlayerInventory)
+            CoreProtectHook.recordItemPickup((Player) ((PlayerInventory) inventory).getHolder(),
+                    this, givenAmount);
     }
 
     private int giveItem(Inventory inventory, ItemStack itemStack){

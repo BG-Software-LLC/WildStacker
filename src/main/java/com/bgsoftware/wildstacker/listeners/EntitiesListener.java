@@ -628,17 +628,15 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        int amount = stackedEntity.getStackAmount();
 
         DyeColor originalColor = e.getEntity().getColor();
 
         Executor.sync(() -> {
-            if(amount > 1) {
+            if(stackedEntity.getStackAmount() > 1) {
                 e.getEntity().setColor(originalColor);
-                stackedEntity.setStackAmount(amount - 1, true);
+                stackedEntity.decreaseStackAmount(1, true);
                 StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicate.getLivingEntity()).setColor(e.getColor());
-                //EntityData.of(duplicate).loadEntityData(duplicate.getLivingEntity());
                 duplicate.runStackAsync(null);
             }else{
                 stackedEntity.runStackAsync(null);
@@ -659,15 +657,13 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
 
-        int amount = stackedEntity.getStackAmount();
-
         if(!e.getEntity().isSheared())
             return;
 
         Executor.sync(() -> {
-            if(amount > 1){
+            if(stackedEntity.getStackAmount() > 1){
                 e.getEntity().setSheared(true);
-                stackedEntity.setStackAmount(amount - 1, true);
+                stackedEntity.decreaseStackAmount(1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 ((Sheep) duplicated.getLivingEntity()).setSheared(false);
                 duplicated.runStackAsync(null);
@@ -688,12 +684,10 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
         if(plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
-            int amount = stackedEntity.getStackAmount();
-
             Executor.sync(() -> {
-                if (amount > 1) {
+                if (stackedEntity.getStackAmount() > 1) {
                     stackedEntity.setCustomName("");
-                    stackedEntity.setStackAmount(amount - 1, true);
+                    stackedEntity.decreaseStackAmount(1, true);
                     StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                     duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
                     ((WStackedEntity) duplicated).setNameTag();
@@ -720,17 +714,15 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        int amount = stackedEntity.getStackAmount();
         ItemStack inHand = e.getPlayer().getItemInHand();
 
-        if(amount > 1){
+        if(stackedEntity.getStackAmount() > 1){
             int itemsAmountToRemove;
 
             if(plugin.getSettings().smartBreeding){
-                int breedableAmount = Math.min(stackedEntity.getStackAmount(), inHand.getAmount());
-
-                if(e.getPlayer().getGameMode() == GameMode.CREATIVE)
-                    breedableAmount = stackedEntity.getStackAmount();
+                int breedableAmount = e.getPlayer().getGameMode() == GameMode.CREATIVE ?
+                        stackedEntity.getStackAmount() :
+                        Math.min(stackedEntity.getStackAmount(), inHand.getAmount());
 
                 if(breedableAmount % 2 != 0)
                     breedableAmount--;
@@ -768,7 +760,7 @@ public final class EntitiesListener implements Listener {
                 }, 50L);
             }
             else if(StackSplit.ENTITY_BREED.isEnabled()) {
-                stackedEntity.setStackAmount(amount - 1, true);
+                stackedEntity.decreaseStackAmount(1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
                 itemsAmountToRemove = 1;

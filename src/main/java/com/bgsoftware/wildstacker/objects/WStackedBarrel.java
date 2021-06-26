@@ -232,12 +232,11 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return StackResult.NOT_SIMILAR;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
         if(!EventsCaller.callBarrelStackEvent(targetBarrel, this))
             return StackResult.EVENT_CANCELLED;
 
-        targetBarrel.setStackAmount(newStackAmount, true);
+        targetBarrel.increaseStackAmount(getStackAmount(), true);
 
         this.remove();
 
@@ -251,11 +250,9 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         if(!EventsCaller.callBarrelUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.getStackAmount() - amount;
+        int newStackAmount = decreaseStackAmount(amount, true);
 
-        setStackAmount(stackAmount, true);
-
-        if(stackAmount < 1)
+        if(newStackAmount < 1)
             remove();
 
         return UnstackResult.SUCCESS;

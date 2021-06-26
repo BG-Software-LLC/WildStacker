@@ -166,7 +166,7 @@ public final class ItemsListener implements Listener {
                     stackedItem.remove();
                 }
                 else{
-                    stackedItem.setStackAmount(stackAmount - 1, true);
+                    stackedItem.decreaseStackAmount(1, true);
                 }
             }
 
@@ -181,7 +181,7 @@ public final class ItemsListener implements Listener {
                     stackedItem.remove();
                 }
                 else {
-                    stackedItem.setStackAmount(stackAmount - itemStack.getAmount(), true);
+                    stackedItem.decreaseStackAmount(itemStack.getAmount(), true);
                 }
 
                 setItemInHand(e.getEntity(), itemStack);

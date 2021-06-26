@@ -36,6 +36,22 @@ public interface StackedObject<T> {
     void setStackAmount(int stackAmount, boolean updateName);
 
     /**
+     * Increase the stack amount
+     * @param stackAmount a new stack amount
+     * @param updateName should the name of the object get updated or not
+     * @return The new stack amount.
+     */
+    int increaseStackAmount(int stackAmount, boolean updateName);
+
+    /**
+     * Decrease the stack amount
+     * @param stackAmount a new stack amount
+     * @param updateName should the name of the object get updated or not
+     * @return The new stack amount.
+     */
+    int decreaseStackAmount(int stackAmount, boolean updateName);
+
+    /**
      * Get the stack limit
      * @return stack limit
      */

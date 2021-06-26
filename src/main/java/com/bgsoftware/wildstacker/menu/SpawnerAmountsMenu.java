@@ -140,7 +140,7 @@ public final class SpawnerAmountsMenu extends WildMenu {
             return;
         }
 
-        stackedSpawner.setStackAmount(stackedSpawner.getStackAmount() + depositAmount, true);
+        stackedSpawner.increaseStackAmount(depositAmount, true);
         Locale.SPAWNER_UPDATE.send(e.getWhoClicked(), stackedSpawner.getStackAmount());
 
         if(successSound != null)

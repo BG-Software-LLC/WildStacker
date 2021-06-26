@@ -121,18 +121,18 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
         if(amount != 0) {
             int limit = stackedBarrel.getStackLimit();
-            int newStackAmount = stackedBarrel.getStackAmount() + amount;
+            int currentStackAmount = stackedBarrel.getStackAmount();
+            int increaseStackAmount = Math.min(amount, limit - currentStackAmount);
 
-            if(stackedBarrel.getStackAmount() + amount > limit){
+            if(increaseStackAmount != amount){
                 ItemStack toAdd = barrelItem.clone();
-                toAdd.setAmount(stackedBarrel.getStackAmount() + amount - limit);
+                toAdd.setAmount(amount - increaseStackAmount);
                 ItemUtils.addItem(toAdd, e.getPlayer().getInventory(), stackedBarrel.getLocation());
-                newStackAmount = limit;
             }
 
-            if(EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, newStackAmount - stackedBarrel.getStackAmount())){
-                stackedBarrel.setStackAmount(newStackAmount, true);
-                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
+            if(EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, increaseStackAmount)){
+                int newStackAmount = stackedBarrel.increaseStackAmount(increaseStackAmount, true);
+                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), newStackAmount);
             }
             else{
                 ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedBarrel.getLocation());

@@ -1110,15 +1110,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
         @Override
         public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            mobSpawnerAbstract.i = spawnerUpgrade.getMinSpawnDelay();
-            mobSpawnerAbstract.j = spawnerUpgrade.getMaxSpawnDelay();
-            mobSpawnerAbstract.k = spawnerUpgrade.getSpawnCount();
-            mobSpawnerAbstract.m = spawnerUpgrade.getMaxNearbyEntities();
-            mobSpawnerAbstract.n = spawnerUpgrade.getRequiredPlayerRange();
-            mobSpawnerAbstract.o = spawnerUpgrade.getSpawnRange();
-            if(mobSpawnerAbstract instanceof NMSSpawners_v1_17_R1.StackedMobSpawner)
-                ((NMSSpawners_v1_17_R1.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
         }
 
         @Override
@@ -1132,8 +1123,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
                     mobSpawnerAbstract.n,
                     mobSpawnerAbstract.o,
                     mobSpawnerAbstract.d / 20,
-                    mobSpawnerAbstract instanceof NMSSpawners_v1_17_R1.StackedMobSpawner ?
-                            ((NMSSpawners_v1_17_R1.StackedMobSpawner) mobSpawnerAbstract).failureReason : ""
+                    ""
             );
         }
 

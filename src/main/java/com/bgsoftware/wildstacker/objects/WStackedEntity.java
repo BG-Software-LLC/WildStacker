@@ -391,9 +391,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         double health = GeneralUtils.contains(plugin.getSettings().keepLowestHealth, this) ?
                 Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
-        int newStackAmount = getStackAmount() + targetEntity.getStackAmount();
 
-        targetEntity.setStackAmount(newStackAmount, false);
+        targetEntity.increaseStackAmount(getStackAmount(), false);
         targetEntity.setHealth(Math.max(health, 0.5D));
 
         Executor.sync(() -> {
@@ -423,10 +422,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if(!eventResult.getKey())
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.getStackAmount();
-        int newStackAmount = stackAmount - eventResult.getValue();
-
-        setStackAmount(newStackAmount, true);
+        int newStackAmount = decreaseStackAmount(eventResult.getValue(), true);
 
         if(newStackAmount >= 1){
             if(plugin.getSettings().spawnCorpses)
@@ -436,7 +432,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         else {
             Executor.sync(() -> {
                 setFlag(EntityFlag.CORPSE, true);
-                setFlag(EntityFlag.ORIGINAL_AMOUNT, stackAmount);
+                setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
                 plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);
@@ -737,9 +733,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     public void setDemoEntity(){
-        setFlag(EntityFlag.DEMO_ENTITY, true);
         // Demo entities should not be cached!
         plugin.getSystemManager().removeStackObject(this);
+        setFlag(EntityFlag.DEMO_ENTITY, true);
     }
 
     /*
