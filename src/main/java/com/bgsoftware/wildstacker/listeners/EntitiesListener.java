@@ -241,7 +241,8 @@ public final class EntitiesListener implements Listener {
         ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
         boolean creativeMode = damager != null && damager.getGameMode() == GameMode.CREATIVE;
 
-        boolean oneShot = damager != null && plugin.getSettings().entitiesOneShotEnabled &&
+        boolean oneShot = !stackedEntity.hasFlag(EntityFlag.AVOID_ONE_SHOT) && damager != null &&
+                plugin.getSettings().entitiesOneShotEnabled &&
                 GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
                 plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
 
