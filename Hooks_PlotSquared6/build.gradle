@@ -1,5 +1,11 @@
 group 'Hooks_PlotSquared6'
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
+
 repositories {
     maven { url 'https://repo.bg-software.com/repository/private-libs/' }
 
