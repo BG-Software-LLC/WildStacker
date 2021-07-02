@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -150,7 +149,16 @@ public final class ItemsListener implements Listener {
 
             int stackAmount = stackedItem.getStackAmount();
 
-            if(e.getInventory() != null) {
+            if(plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)){
+                if(stackAmount <= 1){
+                    stackedItem.remove();
+                }
+                else{
+                    stackedItem.decreaseStackAmount(1, true);
+                }
+            }
+
+            else if(e.getInventory() != null) {
                 // For no reason, villagers pickup the item and then call the event.
                 // Therefore, even if it's cancelled, the item is still in their inventory.
                 if(e.getEntityType() == EntityType.VILLAGER) {
@@ -158,16 +166,6 @@ public final class ItemsListener implements Listener {
                 }
 
                 stackedItem.giveItemStack(e.getInventory());
-            }
-
-            else if(EntityTypes.fromEntity(e.getEntity()) == EntityTypes.PIGLIN &&
-                    plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)){
-                if(stackAmount <= 1){
-                    stackedItem.remove();
-                }
-                else{
-                    stackedItem.decreaseStackAmount(1, true);
-                }
             }
 
             else{
