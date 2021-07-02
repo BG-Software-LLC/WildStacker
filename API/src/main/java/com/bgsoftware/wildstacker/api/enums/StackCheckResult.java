@@ -56,6 +56,7 @@ public enum StackCheckResult {
     BLACKLISTED_NAME,
     BREED_STATUS,
     BYPASS_STACKING,
+    @Deprecated
     CHUNK_NOT_LOADED,
     CORPSE,
     DISABLED_REGION,
@@ -79,6 +80,7 @@ public enum StackCheckResult {
     TARGET_ALREADY_DEAD,
     TARGET_BLACKLISTD_NAME,
     TARGET_BLACKLISTED,
+    @Deprecated
     TARGET_CHUNK_NOT_LOADED,
     TARGET_DISABLED_WORLD,
     TARGET_INSIDE_PORTAL,
