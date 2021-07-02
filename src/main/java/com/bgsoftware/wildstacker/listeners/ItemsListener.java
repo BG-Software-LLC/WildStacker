@@ -159,13 +159,29 @@ public final class ItemsListener implements Listener {
             }
 
             else if(e.getInventory() != null) {
-                // For no reason, villagers pickup the item and then call the event.
-                // Therefore, even if it's cancelled, the item is still in their inventory.
-                if(e.getEntityType() == EntityType.VILLAGER) {
-                    e.getInventory().removeItem(stackedItem.getItemStack());
-                }
+                ItemStack rawAddedItem = item.getItemStack();
+
+                // The item is already added by the NMS code in case of villagers.
+                // Therefore, we need to remove it.
+                if(e.getEntityType() == EntityType.VILLAGER)
+                    e.getInventory().removeItem(rawAddedItem);
+
+                // In some versions of Paper, when the event is cancelled, items are restored to their original state.
+                // Therefore, we take a snapshot of the original contents so we can add items again if it occurs.
+                ItemStack[] originalContentsSnapshot = e.getInventory().getContents();
 
                 stackedItem.giveItemStack(e.getInventory());
+
+                ItemStack[] adjustedContentsSnapshot = e.getInventory().getContents();
+
+                // Checks for reverting of items.
+                Executor.sync(() -> {
+                    ItemStack[] currentContentsSnapshot = e.getInventory().getContents();
+                    if(Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)){
+                        // Inventory was restored, we should load it again with all the new items.
+                        e.getInventory().setContents(adjustedContentsSnapshot);
+                    }
+                }, 1L);
             }
 
             else{
