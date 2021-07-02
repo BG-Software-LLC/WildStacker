@@ -117,7 +117,14 @@ public final class ProvidersHandler {
         }
         if(Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
-            if(plugin.getDescription().getVersion().startsWith("5.")){
+            if(plugin.getDescription().getVersion().startsWith("6.")){
+                try {
+                    claimsProviders.add((ClaimsProvider) Class.forName("com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV6").newInstance());
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+            else if(plugin.getDescription().getVersion().startsWith("5.")){
                 claimsProviders.add(new ClaimsProvider_PlotSquaredV5());
             }
             else if(plugin.getDescription().getMain().contains("com.github")){
