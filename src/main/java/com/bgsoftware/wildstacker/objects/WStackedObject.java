@@ -119,10 +119,6 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         if(isWorldDisabled())
             return StackCheckResult.DISABLED_WORLD;
 
-//        Removed chunk loading check, as stacked objects in unloaded chunks are not cached anymore.
-//        if(!GeneralUtils.isChunkLoaded(getLocation()))
-//            return StackCheckResult.CHUNK_NOT_LOADED;
-
         if(!stackedObject.isWhitelisted())
             return StackCheckResult.TARGET_NOT_WHITELISTED;
 
@@ -131,10 +127,6 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
         if(stackedObject.isWorldDisabled())
             return StackCheckResult.TARGET_DISABLED_WORLD;
-
-//        Removed chunk loading check, as stacked objects in unloaded chunks are not cached anymore.
-//        if(!GeneralUtils.isChunkLoaded(stackedObject.getLocation()))
-//            return StackCheckResult.TARGET_CHUNK_NOT_LOADED;
 
         int newStackAmount = this.getStackAmount() + stackedObject.getStackAmount();
 
