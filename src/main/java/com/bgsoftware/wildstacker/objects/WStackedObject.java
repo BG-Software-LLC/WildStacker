@@ -106,10 +106,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     }
 
     @Override
-    public StackCheckResult runStackCheck(StackedObject stackedObject){
-        if(equals(stackedObject) || !isSimilar(stackedObject))
-            return StackCheckResult.NOT_SIMILAR;
-
+    public StackCheckResult canGetStacked(int amountToAdd) {
         if(!isWhitelisted())
             return StackCheckResult.NOT_WHITELISTED;
 
@@ -119,21 +116,36 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         if(isWorldDisabled())
             return StackCheckResult.DISABLED_WORLD;
 
-        if(!stackedObject.isWhitelisted())
-            return StackCheckResult.TARGET_NOT_WHITELISTED;
-
-        if(stackedObject.isBlacklisted())
-            return StackCheckResult.TARGET_BLACKLISTED;
-
-        if(stackedObject.isWorldDisabled())
-            return StackCheckResult.TARGET_DISABLED_WORLD;
-
-        int newStackAmount = this.getStackAmount() + stackedObject.getStackAmount();
+        int newStackAmount = this.getStackAmount() + amountToAdd;
 
         if(newStackAmount <= 0 || getStackLimit() < newStackAmount)
             return StackCheckResult.LIMIT_EXCEEDED;
 
         return StackCheckResult.SUCCESS;
+    }
+
+    @Override
+    public StackCheckResult runStackCheck(StackedObject stackedObject){
+        if(equals(stackedObject) || !isSimilar(stackedObject))
+            return StackCheckResult.NOT_SIMILAR;
+
+        StackCheckResult canGetStackedResult = this.canGetStacked(0);
+
+        if(canGetStackedResult != StackCheckResult.SUCCESS)
+            return canGetStackedResult;
+
+        StackCheckResult targetCanGetStackedResult = stackedObject.canGetStacked(getStackAmount());
+
+        switch (targetCanGetStackedResult){
+            case NOT_WHITELISTED:
+                return StackCheckResult.TARGET_NOT_WHITELISTED;
+            case BLACKLISTED:
+                return StackCheckResult.TARGET_BLACKLISTED;
+            case DISABLED_WORLD:
+                return StackCheckResult.TARGET_DISABLED_WORLD;
+        }
+
+        return targetCanGetStackedResult;
     }
 
     @Override

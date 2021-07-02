@@ -111,6 +111,18 @@ public interface StackedObject<T> {
     boolean canStackInto(StackedObject stackedObject);
 
     /**
+     * Checks if this object can be stacked to other objects.
+     * The followings are checked for the object:
+     * - Object is whitelisted.
+     * - Object is not blacklisted.
+     * - Object is not in a disabled world.
+     * - Object will not exceed stack limit.
+     * @param amountToAdd: The amount to add to this object.
+     * @return SUCCESS if can be stacked.
+     */
+    StackCheckResult canGetStacked(int amountToAdd);
+
+    /**
      * Checks if this object can stack into another object.
      * @param stackedObject other object to check
      * @return The result for the operation.
