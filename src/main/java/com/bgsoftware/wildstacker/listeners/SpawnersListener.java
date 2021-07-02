@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -25,6 +26,7 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -78,6 +80,11 @@ public final class SpawnersListener implements Listener {
 
     public SpawnersListener(WildStackerPlugin plugin){
         this.plugin = plugin;
+
+        try{
+            Class.forName("com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent");
+            plugin.getServer().getPluginManager().registerEvents(new PaperSpawnersListener(), plugin);
+        }catch (Exception ignored){}
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -416,6 +423,9 @@ public final class SpawnersListener implements Listener {
         if(!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
+        if(plugin.getSettings().listenPaperPreSpawnEvent)
+            return;
+
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
 
         if(plugin.getSettings().spawnersOverrideEnabled){
@@ -709,6 +719,55 @@ public final class SpawnersListener implements Listener {
 
         return plugin.getSystemManager().getStackedSpawners(chunk).stream()
                 .filter(stackedSpawner -> !plugin.getSettings().perSpawnerLimit || stackedSpawner.getSpawnedType() == entityType).count() > chunkLimit;
+    }
+
+    private final class PaperSpawnersListener implements Listener{
+
+        @EventHandler
+        public void onPreSpawnSpawner(PreSpawnerSpawnEvent e){
+            if(!plugin.getSettings().listenPaperPreSpawnEvent)
+                return;
+
+            Optional<StackedEntity> targetEntityOptional = Optional.empty();
+
+            if(plugin.getSettings().linkedEntitiesEnabled){
+                StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
+
+                LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
+
+                if(linkedEntity != null) {
+                    StackedEntity stackedLinkedEntity = WStackedEntity.of(linkedEntity);
+                    if(stackedLinkedEntity.canGetStacked(1) == StackCheckResult.SUCCESS){
+                        targetEntityOptional = Optional.of(stackedLinkedEntity);
+                    }
+                }
+
+            }
+
+            if(!targetEntityOptional.isPresent()) {
+                int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
+
+                if (mergeRadius <= 0)
+                    return;
+
+                targetEntityOptional = EntitiesGetter.getNearbyEntities(e.getSpawnLocation(),
+                        mergeRadius, entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
+                        .map(WStackedEntity::of)
+                        .filter(stackedEntity -> stackedEntity.canGetStacked(1) == StackCheckResult.SUCCESS)
+                        .findFirst();
+            }
+
+            if(!targetEntityOptional.isPresent())
+                return;
+
+            StackedEntity stackedEntity = targetEntityOptional.get();
+            stackedEntity.increaseStackAmount(1, true);
+            stackedEntity.spawnStackParticle(true);
+
+            e.setCancelled(true);
+            e.setShouldAbortSpawn(true);
+        }
+
     }
 
 }
