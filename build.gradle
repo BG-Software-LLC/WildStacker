@@ -103,6 +103,7 @@ dependencies {
     compileOnly 'me.jet315:JetsMinions:latest'
     compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
     compileOnly 'me.derpy:MoreBosses:latest'
+    compileOnly 'me.hexedhero:PinataParty:latest'
 }
 
 jar {
