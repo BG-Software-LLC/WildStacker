@@ -61,15 +61,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     }
 
     @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        if(stackAmount > 0) {
+    public void onStackAmountChange(int newStackAmount) {
+        super.onStackAmountChange(newStackAmount);
+        if(newStackAmount > 0) {
             ItemStack itemStack = object.getItemStack().clone();
-            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), stackAmount));
+            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), newStackAmount));
             if(itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
                 object.setItemStack(itemStack);
-            if(saveData)
-                plugin.getSystemManager().markToBeSaved(this);
         }
     }
 

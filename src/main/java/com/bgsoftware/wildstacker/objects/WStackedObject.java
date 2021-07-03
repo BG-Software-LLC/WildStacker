@@ -39,6 +39,8 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         this.stackAmount.set(stackAmount);
         if(updateName)
             updateName();
+
+        onStackAmountChange(stackAmount);
     }
 
     @Override
@@ -48,12 +50,19 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
         if(updateName)
             updateName();
 
+        onStackAmountChange(newStackAmount);
+
         return newStackAmount;
     }
 
     @Override
     public int decreaseStackAmount(int stackAmount, boolean updateName) {
         return increaseStackAmount(-stackAmount, updateName);
+    }
+
+    public void onStackAmountChange(int newStackAmount){
+        if(saveData)
+            plugin.getSystemManager().markToBeSaved(this);
     }
 
     public void setSaveData(boolean saveData){

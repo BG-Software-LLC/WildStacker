@@ -49,13 +49,6 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     }
 
     @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        if(saveData)
-            plugin.getSystemManager().markToBeSaved(this);
-    }
-
-    @Override
     public Block getBlock() {
         return object;
     }

@@ -51,13 +51,6 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     }
 
     @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        if(saveData)
-            plugin.getSystemManager().markToBeSaved(this);
-    }
-
-    @Override
     public CreatureSpawner getSpawner(){
         return object;
     }

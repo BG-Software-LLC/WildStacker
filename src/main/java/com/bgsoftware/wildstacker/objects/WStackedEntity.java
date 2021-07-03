@@ -86,13 +86,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         return object.getWorld();
     }
 
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        if(saveData)
-            plugin.getSystemManager().markToBeSaved(this);
-    }
-
     /*
      * LivingEntity's methods
      */
