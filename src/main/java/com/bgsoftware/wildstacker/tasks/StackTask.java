@@ -3,10 +3,10 @@ package com.bgsoftware.wildstacker.tasks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -21,7 +21,7 @@ public final class StackTask extends BukkitRunnable {
 
     private StackTask(){
         if(plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
-            task = runTaskTimerAsynchronously(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
+            task = runTaskTimer(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
     }
 
     public static void start(){
@@ -41,7 +41,7 @@ public final class StackTask extends BukkitRunnable {
 
                     for (LivingEntity livingEntity : livingEntities) {
                         try {
-                            if (!livingEntity.isValid() || livingEntity.getType().name().equals("ARMOR_STAND") || livingEntity instanceof Player)
+                            if (!EntityUtils.isStackable(livingEntity))
                                 continue;
 
                             StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
