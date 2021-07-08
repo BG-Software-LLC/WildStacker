@@ -161,7 +161,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "ep");
-
+    private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(Entity.class, Entity.RemovalReason.class, "aB");
     private static final ReflectMethod<Reputation> VILLAGER_REPUTATION = new ReflectMethod<>(EntityVillager.class, "fS");
     private static final ReflectMethod<Boolean> ANIMAL_BREED_ITEM = new ReflectMethod<>(EntityAnimal.class, "n", ItemStack.class);
     private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(EntityChicken.class, Integer.class, "bY");
@@ -309,7 +309,8 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void setEntityDead(LivingEntity livingEntity, boolean dead) {
-        ((CraftLivingEntity) livingEntity).getHandle().a(dead ? Entity.RemovalReason.b : null);
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        ENTITY_REMOVE_REASON.set(entityLiving, dead ? Entity.RemovalReason.b : null);
     }
 
     @Override
