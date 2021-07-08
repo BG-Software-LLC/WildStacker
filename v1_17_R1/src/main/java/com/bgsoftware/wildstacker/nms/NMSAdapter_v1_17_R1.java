@@ -50,17 +50,22 @@ import net.minecraft.world.entity.EntityPositionTypes;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumItemSlot;
 import net.minecraft.world.entity.EnumMobSpawn;
+import net.minecraft.world.entity.SaddleStorage;
+import net.minecraft.world.entity.ai.gossip.Reputation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.EntityAnimal;
+import net.minecraft.world.entity.animal.EntityChicken;
 import net.minecraft.world.entity.animal.EntityTurtle;
 import net.minecraft.world.entity.decoration.EntityArmorStand;
 import net.minecraft.world.entity.item.EntityItem;
+import net.minecraft.world.entity.monster.EntityStrider;
 import net.minecraft.world.entity.monster.EntityZombieVillager;
 import net.minecraft.world.entity.monster.piglin.EntityPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAI;
 import net.minecraft.world.entity.npc.EntityVillager;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.raid.EntityRaider;
+import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemSword;
 import net.minecraft.world.item.Items;
@@ -157,6 +162,14 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "ep");
 
+    private static final ReflectMethod<Reputation> VILLAGER_REPUTATION = new ReflectMethod<>(EntityVillager.class, "fS");
+    private static final ReflectMethod<Boolean> ANIMAL_BREED_ITEM = new ReflectMethod<>(EntityAnimal.class, "n", ItemStack.class);
+    private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(EntityChicken.class, Integer.class, "bY");
+    private static final ReflectField<SaddleStorage> STRIDER_SADDLE_STORAGE = new ReflectField<>(EntityStrider.class, SaddleStorage.class, "cb");
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class,"fK");
+    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, "fJ");
+    private static final ReflectField<Boolean> ENTITY_PERSISTENT = new ReflectField<>(EntityInsentient.class, Boolean.class, "bZ");
+
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     /*
@@ -197,7 +210,17 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         assert entityZombieVillager != null;
         entityZombieVillager.u(entityVillager);
         entityZombieVillager.setVillagerData(entityVillager.getVillagerData());
-        entityZombieVillager.a(entityVillager.fS().a(DynamicOpsNBT.a).getValue());
+
+        Reputation villagerReputation;
+
+        if(VILLAGER_REPUTATION.isValid()){
+            villagerReputation = VILLAGER_REPUTATION.invoke(entityVillager);
+        }
+        else{
+            villagerReputation = entityVillager.fT();
+        }
+
+        entityZombieVillager.a(villagerReputation.a(DynamicOpsNBT.a).getValue());
         entityZombieVillager.setOffers(entityVillager.getOffers().a());
         entityZombieVillager.a(entityVillager.getExperience());
         entityZombieVillager.setBaby(entityVillager.isBaby());
@@ -238,8 +261,17 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
+        if(itemStack == null)
+            return false;
+
         EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
-        return itemStack != null && nmsEntity.n(CraftItemStack.asNMSCopy(itemStack));
+
+        if(ANIMAL_BREED_ITEM.isValid()){
+            return ANIMAL_BREED_ITEM.invoke(nmsEntity, CraftItemStack.asNMSCopy(itemStack));
+        }
+        else{
+            return nmsEntity.isBreedItem(CraftItemStack.asNMSCopy(itemStack));
+        }
     }
 
     @Override
@@ -282,7 +314,14 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public int getEggLayTime(Chicken chicken) {
-        return ((CraftChicken) chicken).getHandle().bY;
+        EntityChicken entityChicken = ((CraftChicken) chicken).getHandle();
+
+        if(CHICKEN_EGG_LAY_TIME.isValid()){
+            return CHICKEN_EGG_LAY_TIME.get(entityChicken);
+        }
+        else {
+            return entityChicken.bZ;
+        }
     }
 
     @Override
@@ -364,7 +403,16 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void removeStriderSaddle(Strider strider) {
-        ((CraftStrider) strider).getHandle().cb.setSaddle(false);
+        SaddleStorage saddleStorage;
+
+        if(STRIDER_SADDLE_STORAGE.isValid()){
+            saddleStorage = STRIDER_SADDLE_STORAGE.get(((CraftStrider) strider).getHandle());
+        }
+        else {
+            saddleStorage = ((CraftStrider) strider).getHandle().cc;
+        }
+
+        saddleStorage.setSaddle(false);
     }
 
     @Override
@@ -689,8 +737,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     @Override
     public void attemptJoinRaid(Player player, org.bukkit.entity.Entity raider) {
         EntityRaider entityRaider = (EntityRaider) ((CraftEntity) raider).getHandle();
-        if(entityRaider.fK())
-            entityRaider.fJ().a((Entity) ((CraftPlayer) player).getHandle());
+        boolean canJoinRaid = RAIDER_CAN_RAID.isValid() ? RAIDER_CAN_RAID.invoke(entityRaider) : entityRaider.fL();
+        if(canJoinRaid) {
+            Raid villagerRaid = RAIDER_RAID.isValid() ? RAIDER_RAID.invoke(entityRaider) : entityRaider.fK();
+            villagerRaid.a((Entity) ((CraftPlayer) player).getHandle());
+        }
     }
 
     @Override
@@ -735,7 +786,12 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             entityPiglin.d(EnumItemSlot.b);
 
             if (item != PiglinAI.c) {
-                ((EntityInsentient) entityPiglin).bZ = true;
+                if(ENTITY_PERSISTENT.isValid()){
+                    ENTITY_PERSISTENT.set(entityPiglin, true);
+                }
+                else {
+                    ((EntityInsentient) entityPiglin).ca = true;
+                }
             }
 
             entityPiglin.getBehaviorController().a(MemoryModuleType.X, true, 120L);
