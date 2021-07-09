@@ -317,11 +317,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     public int getEggLayTime(Chicken chicken) {
         EntityChicken entityChicken = ((CraftChicken) chicken).getHandle();
 
-        if(CHICKEN_EGG_LAY_TIME.isValid()){
-            return CHICKEN_EGG_LAY_TIME.get(entityChicken);
-        }
-        else {
+        try{
             return entityChicken.bZ;
+        }catch (Throwable ex){
+            return CHICKEN_EGG_LAY_TIME.get(entityChicken);
         }
     }
 
