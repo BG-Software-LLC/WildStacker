@@ -194,14 +194,20 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             object.setLeashHolder(null);
         }
 
-        setFlag(EntityFlag.REMOVED_ENTITY, true);
-
         if(ServerVersion.isAtLeast(ServerVersion.v1_17) || EntityTypes.fromEntity(object).isSlime()){
-            Executor.sync(object::remove);
+            Executor.sync(this::removeEntity);
         }
         else {
-            object.remove();
+            removeEntity();
         }
+    }
+
+    private void removeEntity(){
+        object.remove();
+
+        setFlag(EntityFlag.REMOVED_ENTITY, true);
+
+        Executor.sync(this::clearFlags, 100L);
     }
 
     @Override
