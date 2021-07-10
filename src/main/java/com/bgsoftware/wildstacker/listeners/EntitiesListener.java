@@ -451,7 +451,10 @@ public final class EntitiesListener implements Listener {
 
                         stackedEntity.setStackAmount(currentStackAmount, false);
 
-                        livingEntity.setLastDamageCause(null);
+                        // If setting this to ender dragons, the death animation doesn't happen for an unknown reason.
+                        // Cannot revert to original death event neither. This fixes death animations for all versions.
+                        if(livingEntity.getType() != EntityType.ENDER_DRAGON)
+                            livingEntity.setLastDamageCause(null);
 
                         if(isMcMMOSpawnedEntity)
                             McMMOHook.updateSpawnedEntity(livingEntity);
