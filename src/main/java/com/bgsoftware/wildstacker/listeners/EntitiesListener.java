@@ -77,6 +77,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -887,6 +888,15 @@ public final class EntitiesListener implements Listener {
         stackedEntity.decreaseStackAmount(1, true);
         StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
         e.getVehicle().setPassenger(duplicated.getLivingEntity());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVehicleExit(VehicleExitEvent e){
+        if(!EntityUtils.isStackable(e.getExited()))
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getExited());
+        stackedEntity.runStackAsync(null);
     }
 
     /*
