@@ -4,6 +4,7 @@ public enum StackSplit {
 
     BEE_AGRO,
     ENTITY_BREED,
+    ENTER_VEHICLE,
     IRON_GOLEM_AGRO,
     MUSHROOM_SHEAR,
     NAME_TAG,

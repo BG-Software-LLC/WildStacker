@@ -300,6 +300,7 @@ entities:
   stack-split:
     BEE_AGRO: false
     ENTITY_BREED: true
+    ENTER_VEHICLE: true
     IRON_GOLEM_AGRO: false
     MUSHROOM_SHEAR: true
     NAME_TAG: true

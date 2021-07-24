@@ -76,6 +76,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -869,6 +870,23 @@ public final class EntitiesListener implements Listener {
         EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
                 EntityUtils.isStackable(entity) && plugin.getNMSAdapter().isCustomNameVisible(entity))
                 .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVehicleEnter(VehicleEnterEvent e){
+        if(!EntityUtils.isStackable(e.getEntered()))
+            return;
+
+        StackedEntity stackedEntity = WStackedEntity.of(e.getEntered());
+
+        if(stackedEntity.getStackAmount() <= 1 || !StackSplit.ENTER_VEHICLE.isEnabled())
+            return;
+
+        e.setCancelled(true);
+
+        stackedEntity.decreaseStackAmount(1, true);
+        StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+        e.getVehicle().setPassenger(duplicated.getLivingEntity());
     }
 
     /*
