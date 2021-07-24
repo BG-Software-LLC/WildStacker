@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.entity.Sheep;
 import org.bukkit.inventory.ItemStack;
@@ -56,8 +57,8 @@ public class LootTableSheep extends LootTable {
 
         if(jsonObject.containsKey("exp")){
             JSONObject expObject = (JSONObject) jsonObject.get("exp");
-            minExp = (int) expObject.get("min");
-            maxExp = (int) expObject.get("max");
+            minExp = JsonUtils.getInt(expObject, "min", -1);
+            maxExp = JsonUtils.getInt(expObject, "max", -1);
             alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
         }
 
