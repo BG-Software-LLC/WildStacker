@@ -22,18 +22,41 @@ public final class EventsListener {
 
     public static void register(WildStackerPlugin plugin){
         EventsListener.plugin = plugin;
-        try{
-            Class.forName("org.bukkit.event.entity.EntityPickupItemEvent");
-            plugin.getServer().getPluginManager().registerEvents(new EntityPickup(), plugin);
-        }catch(Exception ex){
-            try{
-                Class.forName("org.bukkit.event.player.PlayerPickupItemEvent");
-                plugin.getServer().getPluginManager().registerEvents(new PlayerPickup(), plugin);
-            }catch(Exception ignored){}
+        try {
+            Class.forName("org.bukkit.event.player.PlayerAttemptPickupItemEvent");
+            plugin.getServer().getPluginManager().registerEvents(new PlayerAttemptPickup(), plugin);
+        }catch (Exception ex1){
+            try {
+                Class.forName("org.bukkit.event.entity.EntityPickupItemEvent");
+                plugin.getServer().getPluginManager().registerEvents(new EntityPickup(), plugin);
+            } catch (Exception ex2) {
+                try {
+                    Class.forName("org.bukkit.event.player.PlayerPickupItemEvent");
+                    plugin.getServer().getPluginManager().registerEvents(new PlayerPickup(), plugin);
+                } catch (Exception ignored) {
+                }
+            }
         }
         plugin.getServer().getPluginManager().registerEvents(new EggLay(), plugin);
         if(ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteDrop(), plugin);
+    }
+
+    private static class PlayerAttemptPickup implements Listener{
+
+        @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+        public void onEntityPickupEvent(org.bukkit.event.player.PlayerAttemptPickupItemEvent e){
+            if(!ItemUtils.isStackable(e.getItem()))
+                return;
+
+            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
+            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
+            if(entityPickupItemEvent.isCancelled()) {
+                e.setCancelled(true);
+                e.setFlyAtPlayer(false);
+            }
+        }
+
     }
 
     private static class EntityPickup implements Listener{
