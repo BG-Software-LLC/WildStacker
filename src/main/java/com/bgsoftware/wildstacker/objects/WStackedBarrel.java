@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -300,6 +301,11 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public void removeDisplayBlock() {
+        if(ServerVersion.isAtLeast(ServerVersion.v1_17) && !Bukkit.isPrimaryThread()){
+            Executor.sync(this::removeDisplayBlock);
+            return;
+        }
+
         Location location = getLocation();
         //Making sure there isn't already a blockDisplay
         for(Entity entity : location.getChunk().getEntities()){
