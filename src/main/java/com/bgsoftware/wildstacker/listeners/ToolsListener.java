@@ -30,13 +30,13 @@ public final class ToolsListener implements Listener {
     private final Map<UUID, StackedObject> simulateObjects = new HashMap<>();
     private final WildStackerPlugin plugin;
 
-    public ToolsListener(WildStackerPlugin plugin){
+    public ToolsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntityInspect(PlayerInteractEntityEvent e){
-        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
+    public void onEntityInspect(PlayerInteractEntityEvent e) {
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
                 !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
@@ -55,8 +55,8 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBarrelInspect(PlayerInteractEvent e){
-        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
+    public void onBarrelInspect(PlayerInteractEvent e) {
+        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
             return;
 
         e.setCancelled(true);
@@ -70,8 +70,8 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onSpawnerInspect(PlayerInteractEvent e){
-        if(e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
+    public void onSpawnerInspect(PlayerInteractEvent e) {
+        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
             return;
 
         e.setCancelled(true);
@@ -86,8 +86,8 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntitySimulate(PlayerInteractEntityEvent e){
-        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
+    public void onEntitySimulate(PlayerInteractEntityEvent e) {
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
             return;
 
         e.setCancelled(true);
@@ -96,33 +96,31 @@ public final class ToolsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBlockSimulate(PlayerInteractEvent e){
-        if(ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) || e.getClickedBlock() == null)
+    public void onBlockSimulate(PlayerInteractEvent e) {
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) || e.getClickedBlock() == null)
             return;
 
         e.setCancelled(true);
 
-        if(plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
+        if (plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
             handleSimulate(e.getPlayer(), WStackedSpawner.of(e.getClickedBlock()));
-        else if(plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
+        else if (plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
             handleSimulate(e.getPlayer(), WStackedBarrel.of(e.getClickedBlock()));
     }
 
-    private void handleSimulate(Player player, StackedObject stackedObject){
+    private void handleSimulate(Player player, StackedObject stackedObject) {
         StackedObject firstObject = simulateObjects.get(player.getUniqueId());
 
-        if(firstObject == null){
+        if (firstObject == null) {
             simulateObjects.put(player.getUniqueId(), stackedObject);
             Bukkit.getScheduler().runTaskLater(plugin, () -> simulateObjects.remove(player.getUniqueId()), 1200L);
             Locale.OBJECT_SIMULATE_CHOOSE_SECOND.send(player);
-        }
-
-        else if(stackedObject != firstObject){
+        } else if (stackedObject != firstObject) {
             simulateObjects.remove(player.getUniqueId());
 
             StackCheckResult stackCheckResult = firstObject.runStackCheck(stackedObject);
 
-            if(stackCheckResult == StackCheckResult.SUCCESS)
+            if (stackCheckResult == StackCheckResult.SUCCESS)
                 Locale.OBJECT_SIMULATE_SUCCESS_RESULT.send(player);
             else
                 Locale.OBJECT_SIMULATE_FAIL_RESULT.send(player, stackCheckResult.name());

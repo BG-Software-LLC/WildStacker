@@ -13,12 +13,17 @@ public class EntityUnstackEvent extends UnstackEvent {
 
     /**
      * The constructor for the event.
-     * @param entity The entity object.
+     *
+     * @param entity        The entity object.
      * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the entity is unstacked by.
      */
-    public EntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount){
+    public EntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount) {
         super(entity, unstackSource, unstackAmount);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -31,24 +36,21 @@ public class EntityUnstackEvent extends UnstackEvent {
     /**
      * Get the amount the entity is unstacked by.
      */
-    public int getAmount(){
+    public int getAmount() {
         return unstackAmount;
     }
 
     /**
      * Set the amount the entity will be unstacked by.
+     *
      * @param unstackAmount The amount to set.
      */
-    public void setAmount(int unstackAmount){
+    public void setAmount(int unstackAmount) {
         this.unstackAmount = unstackAmount;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

@@ -59,24 +59,24 @@ public enum StackCheck {
     ZOMBIE_BABY(EntityTypes.ZOMBIE, EntityTypes.ZOMBIE_VILLAGER),
     ZOMBIE_PIGMAN_ANGRY(EntityTypes.ZOMBIE_PIGMAN);
 
-    private boolean enabled;
     private final boolean[] allowedTypes = new boolean[EntityTypes.values().length];
+    private boolean enabled;
 
     StackCheck(EntityTypes... allowedTypes) {
         this.enabled = false;
-        for(EntityTypes allowedType : allowedTypes)
+        for (EntityTypes allowedType : allowedTypes)
             this.allowedTypes[allowedType.ordinal()] = true;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
     public boolean isEnabled() {
         return enabled;
     }
 
-    public boolean isTypeAllowed(EntityTypes entityType){
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isTypeAllowed(EntityTypes entityType) {
         return allowedTypes[entityType.ordinal()];
     }
 

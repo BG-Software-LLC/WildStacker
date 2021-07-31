@@ -12,27 +12,28 @@ public final class Updater {
 
     private static String latestVersion, versionDescription;
 
-    static{
+    static {
         setLatestVersion();
     }
 
     //Just so no one would be able to call the constructor
-    private Updater(){}
+    private Updater() {
+    }
 
-    public static boolean isOutdated(){
+    public static boolean isOutdated() {
         return !plugin.getDescription().getVersion().startsWith(latestVersion);
     }
 
-    public static String getLatestVersion(){
+    public static String getLatestVersion() {
         return latestVersion;
     }
 
-    static String getVersionDescription(){
+    static String getVersionDescription() {
         return versionDescription;
     }
 
     @SuppressWarnings("unchecked")
-    private static void setLatestVersion(){
+    private static void setLatestVersion() {
         try {
             HttpsURLConnection connection = (HttpsURLConnection) new URL("https://bg-software.com/versions.json").openConnection();
 
@@ -40,13 +41,13 @@ public final class Updater {
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB;     rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13 (.NET CLR 3.5.30729)");
             connection.setDoInput(true);
 
-            try(InputStream reader = connection.getInputStream()){
+            try (InputStream reader = connection.getInputStream()) {
                 Class jsonObjectClass, gsonClass;
 
-                try{
+                try {
                     jsonObjectClass = Class.forName("net.minecraft.util.com.google.gson.JsonObject");
                     gsonClass = Class.forName("net.minecraft.util.com.google.gson.Gson");
-                }catch(ClassNotFoundException ex){
+                } catch (ClassNotFoundException ex) {
                     jsonObjectClass = Class.forName("com.google.gson.JsonObject");
                     gsonClass = Class.forName("com.google.gson.Gson");
                 }
@@ -63,7 +64,7 @@ public final class Updater {
                 latestVersion = (String) versionElement.getClass().getMethod("getAsString").invoke(versionElement);
                 versionDescription = (String) descriptionElement.getClass().getMethod("getAsString").invoke(descriptionElement);
             }
-        } catch(Exception ex){
+        } catch (Exception ex) {
             //Something went wrong...
             latestVersion = plugin.getDescription().getVersion();
         }

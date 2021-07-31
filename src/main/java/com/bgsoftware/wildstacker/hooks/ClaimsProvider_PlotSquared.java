@@ -15,7 +15,7 @@ public final class ClaimsProvider_PlotSquared implements ClaimsProvider {
         Plot plot = API.getChunkManager().hasPlot(location.getWorld().getName(), BlockVector2.at(location.getChunk().getX(), location.getChunk().getZ()));
         Plot playerLocationPlot = API.getChunkManager().hasPlot(player.getWorld().getName(),
                 BlockVector2.at(player.getLocation().getChunk().getX(), player.getLocation().getChunk().getZ()));
-        if(plot != null && playerLocationPlot != null && !plot.getId().equals(playerLocationPlot.getId()))
+        if (plot != null && playerLocationPlot != null && !plot.getId().equals(playerLocationPlot.getId()))
             return false;
         return plot == null || player.hasPermission("plots.admin.build.other") ||
                 plot.isOwner(player.getUniqueId()) || plot.isAdded(player.getUniqueId());

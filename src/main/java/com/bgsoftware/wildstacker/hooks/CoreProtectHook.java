@@ -27,12 +27,13 @@ public final class CoreProtectHook {
     private static Plugin coreProtect;
     private static boolean pickupSupport = false;
 
-    public static void setEnabled(boolean enabled){
+    public static void setEnabled(boolean enabled) {
         coreProtect = enabled ? Bukkit.getPluginManager().getPlugin("CoreProtect") : null;
-        try{
+        try {
             Map<?, ?> map = ConfigHandler.itemsPickup;
             pickupSupport = true;
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
     }
 
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Block block, boolean place) {
@@ -40,24 +41,23 @@ public final class CoreProtectHook {
     }
 
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Location location, Material type, byte data, boolean place) {
-        if(coreProtect == null)
+        if (coreProtect == null)
             return;
 
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(() -> recordBlockChange(offlinePlayer, location, type, data, place));
             return;
         }
 
         CoreProtectAPI coreProtectAPI = ((CoreProtect) coreProtect).getAPI();
 
-        if(coreProtectAPI.APIVersion() == 5) {
-            if(!place)
+        if (coreProtectAPI.APIVersion() == 5) {
+            if (!place)
                 coreProtectAPI.logRemoval(offlinePlayer.getName(), location, type, data);
             else
                 coreProtectAPI.logPlacement(offlinePlayer.getName(), location, type, data);
-        }
-        else if(coreProtectAPI.APIVersion() == 6) {
-            if(!place)
+        } else if (coreProtectAPI.APIVersion() == 6) {
+            if (!place)
                 coreProtectAPI.logRemoval(offlinePlayer.getName(), location, type,
                         (org.bukkit.block.data.BlockData) plugin.getNMSAdapter().getBlockData(type, data));
             else
@@ -66,11 +66,11 @@ public final class CoreProtectHook {
         }
     }
 
-    public static void recordItemPickup(OfflinePlayer offlinePlayer, StackedItem stackedItem, int amount){
-        if(coreProtect == null || !pickupSupport)
+    public static void recordItemPickup(OfflinePlayer offlinePlayer, StackedItem stackedItem, int amount) {
+        if (coreProtect == null || !pickupSupport)
             return;
 
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(() -> recordItemPickup(offlinePlayer, stackedItem, amount));
             return;
         }
@@ -84,7 +84,7 @@ public final class CoreProtectHook {
         List<ItemStack> list = ConfigHandler.itemsPickup.getOrDefault(loggingItemId, new ArrayList<>());
         list.add(itemStack);
         ConfigHandler.itemsPickup.put(loggingItemId, list);
-        int time = (int)(System.currentTimeMillis() / 1000L) + 1;
+        int time = (int) (System.currentTimeMillis() / 1000L) + 1;
         queueItemTransaction(offlinePlayer.getName(), location, time, itemId);
     }
 

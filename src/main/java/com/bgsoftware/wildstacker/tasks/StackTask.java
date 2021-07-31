@@ -19,22 +19,22 @@ public final class StackTask extends BukkitRunnable {
 
     private static BukkitTask task;
 
-    private StackTask(){
-        if(plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
+    private StackTask() {
+        if (plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
             task = runTaskTimer(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
     }
 
-    public static void start(){
-        if(task != null)
+    public static void start() {
+        if (task != null)
             task.cancel();
-        
+
         new StackTask();
     }
 
     @Override
     public void run() {
-        if(Bukkit.getOnlinePlayers().size() > 0) {
-            for(World world : Bukkit.getWorlds()){
+        if (Bukkit.getOnlinePlayers().size() > 0) {
+            for (World world : Bukkit.getWorlds()) {
                 try {
                     Set<LivingEntity> livingEntities = ConcurrentHashMap.newKeySet();
                     livingEntities.addAll(world.getLivingEntities());
@@ -50,9 +50,11 @@ public final class StackTask extends BukkitRunnable {
                                 continue;
 
                             stackedEntity.runStackAsync(null);
-                        } catch (Throwable ignored) { }
+                        } catch (Throwable ignored) {
+                        }
                     }
-                }catch(Throwable ignored){}
+                } catch (Throwable ignored) {
+                }
             }
         }
     }

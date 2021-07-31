@@ -60,13 +60,24 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
+    private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes) {
+        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
+            @Override
+            public boolean test(Location location) {
+                return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
+                        new BlockPosition(location.getX(), location.getY(), location.getZ()));
+            }
+        });
+        plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
+    }
+
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
         World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
 
         TileEntity tileEntity = world.getTileEntity(new BlockPosition(location.getX(), location.getY(), location.getZ()));
-        if(tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner)) {
+        if (tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner)) {
             new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
             return true;
         }
@@ -107,7 +118,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
         );
 
         createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
-            if(world.getBiome(position) == Biomes.SWAMP)
+            if (world.getBiome(position) == Biomes.SWAMP)
                 return true;
 
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position);
@@ -174,17 +185,6 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
         }, EntityType.PARROT);
     }
 
-    private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes){
-        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
-            @Override
-            public boolean test(Location location) {
-                return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
-                        new BlockPosition(location.getX(), location.getY(), location.getZ()));
-            }
-        });
-        plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
-    }
-
     static class StackedMobSpawner extends MobSpawnerAbstract {
 
         private final World world;
@@ -195,7 +195,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
         private int spawnedEntities = 0;
         private WStackedEntity demoEntity = null;
 
-        StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner){
+        StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner) {
             this.world = tileEntityMobSpawner.getWorld();
             this.position = tileEntityMobSpawner.getPosition();
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
@@ -216,30 +216,15 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
         }
 
         @Override
-        public void a(int i) {
-            world.playBlockAction(position, Blocks.SPAWNER, i, 0);
-        }
-
-        @Override
-        public World a() {
-            return world;
-        }
-
-        @Override
-        public BlockPosition b() {
-            return position;
-        }
-
-        @Override
         public void c() {
             WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
-            if(stackedSpawner == null){
+            if (stackedSpawner == null) {
                 super.c();
                 return;
             }
 
-            if(!hasNearbyPlayers()) {
+            if (!hasNearbyPlayers()) {
                 failureReason = "There are no nearby players.";
                 return;
             }
@@ -254,24 +239,24 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
             Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(this.spawnData.getEntity());
 
-            if(!entityTypesOptional.isPresent()){
+            if (!entityTypesOptional.isPresent()) {
                 resetSpawnDelay();
                 return;
             }
 
             EntityTypes<?> entityTypes = entityTypesOptional.get();
 
-            if(demoEntity == null){
+            if (demoEntity == null) {
                 super.c();
                 return;
             }
 
             Entity demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
 
-            if(demoNMSEntity.getEntityType() != entityTypes){
+            if (demoNMSEntity.getEntityType() != entityTypes) {
                 updateDemoEntity();
 
-                if(demoEntity == null){
+                if (demoEntity == null) {
                     super.c();
                     return;
                 }
@@ -307,15 +292,14 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             short particlesAmount = 0;
 
             // Try stacking into the target entity first
-            if(targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, demoEntity)){
+            if (targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, demoEntity)) {
                 int targetEntityStackLimit = targetEntity.getStackLimit();
                 int currentStackAmount = targetEntity.getStackAmount();
                 int increaseStackAmount = Math.min(spawnCount, targetEntityStackLimit - currentStackAmount);
 
-                if(increaseStackAmount != spawnCount) {
+                if (increaseStackAmount != spawnCount) {
                     mobsToSpawn = spawnCount - increaseStackAmount;
-                }
-                else{
+                } else {
                     mobsToSpawn = 0;
                 }
 
@@ -324,22 +308,21 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                 targetEntity.increaseStackAmount(increaseStackAmount, true);
                 demoEntity.spawnStackParticle(true);
 
-                if(plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
+                if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
                     stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
                 world.triggerEffect(2004, position, 0);
                 particlesAmount++;
-            }
-            else{
+            } else {
                 mobsToSpawn = spawnCount;
             }
 
-            if(mobsToSpawn > 0 && demoEntity.isCached() && spawnStacked){
+            if (mobsToSpawn > 0 && demoEntity.isCached() && spawnStacked) {
                 amountPerEntity = Math.min(mobsToSpawn, demoEntity.getStackLimit());
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
 
-            for(int i = 0; i < mobsToSpawn; i++) {
+            for (int i = 0; i < mobsToSpawn; i++) {
                 double x = position.getX() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
                 double y = position.getY() + world.random.nextInt(3) - 1;
                 double z = position.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
@@ -348,7 +331,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
                 boolean hasSpace = world.a(entityTypes.a(x, y, z));
 
-                if(!hasSpace){
+                if (!hasSpace) {
                     failureReason = "Not enough space to spawn the entity.";
                     continue;
                 }
@@ -356,7 +339,7 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                 SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())
                         .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
 
-                if(failedCondition != null) {
+                if (failedCondition != null) {
                     failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
                     continue;
                 }
@@ -370,27 +353,42 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
 
                 int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
 
-                if(handleEntitySpawn(bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
+                if (handleEntitySpawn(bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
                     spawnedEntities += amountPerEntity;
                     particlesAmount++;
                 }
             }
 
-            if(spawnedEntities >= stackAmount)
+            if (spawnedEntities >= stackAmount)
                 resetSpawnDelay();
         }
 
-        public void updateUpgrade(int upgradeId){
-            if(demoEntity != null)
+        @Override
+        public void a(int i) {
+            world.playBlockAction(position, Blocks.SPAWNER, i, 0);
+        }
+
+        @Override
+        public World a() {
+            return world;
+        }
+
+        @Override
+        public BlockPosition b() {
+            return position;
+        }
+
+        public void updateUpgrade(int upgradeId) {
+            if (demoEntity != null)
                 demoEntity.setUpgradeId(upgradeId);
         }
 
-        private boolean hasNearbyPlayers(){
+        private boolean hasNearbyPlayers() {
             return world.isPlayerNearby(position.getX() + 0.5D, position.getY() + 0.5D,
                     position.getZ() + 0.5D, requiredPlayerRange);
         }
 
-        private void resetSpawnDelay(){
+        private void resetSpawnDelay() {
             if (maxSpawnDelay <= minSpawnDelay) {
                 spawnDelay = minSpawnDelay;
             } else {
@@ -407,12 +405,12 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             a(1);
         }
 
-        private org.bukkit.entity.Entity generateEntity(double x, double y, double z, boolean rotation){
+        private org.bukkit.entity.Entity generateEntity(double x, double y, double z, boolean rotation) {
             NBTTagCompound entityCompound = this.spawnData.getEntity();
             Entity entity = EntityTypes.a(entityCompound, world, _entity -> {
                 _entity.setPositionRotation(x, y, z, 0f, 0f);
 
-                if(rotation)
+                if (rotation)
                     _entity.yaw = world.random.nextFloat() * 360.0F;
 
                 _entity.world = world;
@@ -424,23 +422,23 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             return entity == null ? null : entity.getBukkitEntity();
         }
 
-        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, WStackedSpawner stackedSpawner, int amountPerEntity, boolean spawnParticles){
+        private boolean handleEntitySpawn(org.bukkit.entity.Entity bukkitEntity, WStackedSpawner stackedSpawner, int amountPerEntity, boolean spawnParticles) {
             Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
 
             EntityStorage.setMetadata(bukkitEntity, EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
 
-            if(amountPerEntity > 1 || stackedSpawner.getUpgradeId() != 0) {
+            if (amountPerEntity > 1 || stackedSpawner.getUpgradeId() != 0) {
                 stackedEntity = WStackedEntity.of(bukkitEntity);
                 ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 
             if (entity instanceof EntityInsentient) {
-                EntityInsentient entityinsentient = (EntityInsentient)entity;
+                EntityInsentient entityinsentient = (EntityInsentient) entity;
 
                 if (this.spawnData.getEntity().e() == 1 && this.spawnData.getEntity().hasKeyOfType("id", 8)) {
-                    ((EntityInsentient)entity).prepare(world, world.getDamageScaler(new BlockPosition(entity)), EnumMobSpawn.SPAWNER, null, null);
+                    ((EntityInsentient) entity).prepare(world, world.getDamageScaler(new BlockPosition(entity)), EnumMobSpawn.SPAWNER, null, null);
                 }
 
                 if (entityinsentient.world.spigotConfig.nerfSpawnerMobs) {
@@ -453,24 +451,22 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
                 if (vehicle != null) {
                     vehicle.dead = true;
                 }
-                for(Entity passenger : entity.getAllPassengers())
+                for (Entity passenger : entity.getAllPassengers())
                     passenger.dead = true;
-                if(stackedEntity != null)
+                if (stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
                 EntityStorage.clearMetadata(bukkitEntity);
-            }
-
-            else {
-                if(!addEntity(entity)){
+            } else {
+                if (!addEntity(entity)) {
                     EntityStorage.clearMetadata(bukkitEntity);
                     return false;
                 }
 
-                if(spawnParticles)
+                if (spawnParticles)
                     world.triggerEffect(2004, position, 0);
 
                 if (entity instanceof EntityInsentient) {
-                    ((EntityInsentient)entity).doSpawnEffect();
+                    ((EntityInsentient) entity).doSpawnEffect();
                 }
 
                 return true;
@@ -491,10 +487,10 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
         }
 
         private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                              List<? extends Entity> nearbyEntities){
+                                              List<? extends Entity> nearbyEntities) {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
-            if(linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
+            if (linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
                 return WStackedEntity.of(linkedEntity);
 
             Optional<CraftEntity> closestEntity = GeneralUtils.getClosestBukkit(stackedSpawner.getLocation(),
@@ -505,13 +501,13 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             return closestEntity.map(WStackedEntity::of).orElse(null);
         }
 
-        private void updateDemoEntity(){
+        private void updateDemoEntity() {
             org.bukkit.entity.Entity demoEntityBukkit = generateEntity(position.getX(), position.getY(), position.getZ(), false);
 
-            if(demoEntityBukkit != null)
+            if (demoEntityBukkit != null)
                 ((WorldServer) world).unregisterEntity(((CraftEntity) demoEntityBukkit).getHandle());
 
-            if(demoEntityBukkit == null || !EntityUtils.isStackable(demoEntityBukkit)){
+            if (demoEntityBukkit == null || !EntityUtils.isStackable(demoEntityBukkit)) {
                 demoEntity = null;
                 return;
             }

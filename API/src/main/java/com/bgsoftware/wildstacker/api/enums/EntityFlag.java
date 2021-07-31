@@ -20,7 +20,7 @@ public enum EntityFlag {
 
     private final Class<?> valueClass;
 
-    EntityFlag(Class<?> valueClass){
+    EntityFlag(Class<?> valueClass) {
         this.valueClass = valueClass;
     }
 

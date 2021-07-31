@@ -13,19 +13,19 @@ public final class FastEnumArray<E extends Enum<E>> {
     private boolean containsAll = false;
     private int size = 0;
 
-    public FastEnumArray(Class<E> keyType){
+    public FastEnumArray(Class<E> keyType) {
         this(FastEnumUtils.getEnumValues(keyType).length, keyType);
     }
 
-    FastEnumArray(int initSize, Class<E> keyType){
+    FastEnumArray(int initSize, Class<E> keyType) {
         arr = new Boolean[initSize];
         this.keyType = keyType;
         Arrays.fill(arr, false);
     }
 
-    public static <E extends Enum<E>> FastEnumArray<E> fromList(List<String> arr, Class<E> keyType){
+    public static <E extends Enum<E>> FastEnumArray<E> fromList(List<String> arr, Class<E> keyType) {
         FastEnumArray<E> fastEnumArray = new FastEnumArray<>(keyType);
-        if(arr != null) {
+        if (arr != null) {
             arr.forEach(line -> {
                 if (line.equalsIgnoreCase("ALL")) {
                     fastEnumArray.containsAll = true;
@@ -48,18 +48,18 @@ public final class FastEnumArray<E extends Enum<E>> {
 
     boolean add(int index) {
         boolean containedBefore = arr[index];
-        if(!containedBefore) {
+        if (!containedBefore) {
             arr[index] = true;
             size++;
         }
         return containedBefore;
     }
 
-    public boolean contains(E e){
+    public boolean contains(E e) {
         return contains(e.ordinal());
     }
 
-    boolean contains(int index){
+    boolean contains(int index) {
         return containsAll || arr[index];
     }
 
@@ -67,7 +67,7 @@ public final class FastEnumArray<E extends Enum<E>> {
         return size;
     }
 
-    public Collection<E> collect(){
+    public Collection<E> collect() {
         //noinspection unchecked
         E[] allValues = (E[]) FastEnumUtils.getEnumValues(keyType);
         return Arrays.stream(allValues).filter(e -> arr[e.ordinal()]).collect(Collectors.toSet());

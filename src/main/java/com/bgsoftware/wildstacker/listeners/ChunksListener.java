@@ -10,23 +10,22 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 @SuppressWarnings("unused")
 public final class ChunksListener implements Listener {
 
+    public static boolean loadedData = false;
     private final WildStackerPlugin plugin;
 
-    public static boolean loadedData = false;
-
-    public ChunksListener(WildStackerPlugin plugin){
+    public ChunksListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onChunkUnload(ChunkUnloadEvent e){
-        if(loadedData)
+    public void onChunkUnload(ChunkUnloadEvent e) {
+        if (loadedData)
             plugin.getSystemManager().handleChunkUnload(e.getChunk());
     }
 
     @EventHandler
-    public void onChunkLoad(ChunkLoadEvent e){
-        if(loadedData)
+    public void onChunkLoad(ChunkLoadEvent e) {
+        if (loadedData)
             plugin.getSystemManager().handleChunkLoad(e.getChunk());
     }
 

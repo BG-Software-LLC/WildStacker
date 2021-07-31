@@ -71,87 +71,87 @@ public interface NMSAdapter {
 
     Collection<Entity> getEntitiesAtChunk(ChunkPosition chunkPosition);
 
-    default Collection<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+    default Collection<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter) {
         return null;
     }
 
-    default float getItemInMainHandDropChance(EntityEquipment entityEquipment){
+    default float getItemInMainHandDropChance(EntityEquipment entityEquipment) {
         return entityEquipment.getItemInHandDropChance();
     }
 
-    default float getItemInOffHandDropChance(EntityEquipment entityEquipment){
+    default float getItemInOffHandDropChance(EntityEquipment entityEquipment) {
         return entityEquipment.getItemInHandDropChance();
     }
 
-    default void setItemInMainHand(EntityEquipment entityEquipment, ItemStack itemStack){
+    default void setItemInMainHand(EntityEquipment entityEquipment, ItemStack itemStack) {
         entityEquipment.setItemInHand(itemStack);
     }
 
-    default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack){
+    default void setItemInOffHand(EntityEquipment entityEquipment, ItemStack itemStack) {
         entityEquipment.setItemInHand(itemStack);
     }
 
-    default ItemStack getItemInOffHand(EntityEquipment entityEquipment){
+    default ItemStack getItemInOffHand(EntityEquipment entityEquipment) {
         return entityEquipment.getItemInHand();
     }
 
     boolean shouldArmorBeDamaged(ItemStack itemStack);
 
-    default boolean doesStriderHaveSaddle(Strider strider){
+    default boolean doesStriderHaveSaddle(Strider strider) {
         return false;
     }
 
-    default void removeStriderSaddle(Strider strider){
+    default void removeStriderSaddle(Strider strider) {
 
     }
 
-    default String getEndermanCarried(Enderman enderman){
+    default String getEndermanCarried(Enderman enderman) {
         MaterialData materialData = enderman.getCarriedMaterial();
         //noinspection deprecation
         return materialData.getItemType() + ":" + materialData.getData();
     }
 
-    default byte getMooshroomType(MushroomCow mushroomCow){
+    default byte getMooshroomType(MushroomCow mushroomCow) {
         return 0;
     }
 
-    default void setTurtleEgg(Entity turtle){
+    default void setTurtleEgg(Entity turtle) {
 
     }
 
-    default Location getTurtleHome(Entity turtle){
+    default Location getTurtleHome(Entity turtle) {
         return null;
     }
 
-    default void setTurtleEggsAmount(Block turtleEggBlock, int amount){
+    default void setTurtleEggsAmount(Block turtleEggBlock, int amount) {
 
     }
 
-    default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage){
+    default void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage) {
 
     }
 
-    default String getCustomName(Entity entity){
+    default String getCustomName(Entity entity) {
         return entity.getCustomName();
     }
 
-    default void setCustomName(Entity entity, String name){
+    default void setCustomName(Entity entity, String name) {
         entity.setCustomName(name);
     }
 
-    default boolean isCustomNameVisible(Entity entity){
+    default boolean isCustomNameVisible(Entity entity) {
         return entity.isCustomNameVisible();
     }
 
-    default void setCustomNameVisible(Entity entity, boolean visibleName){
+    default void setCustomNameVisible(Entity entity, boolean visibleName) {
         entity.setCustomNameVisible(visibleName);
     }
 
-    default Object getPersistentDataContainer(Entity entity){
+    default Object getPersistentDataContainer(Entity entity) {
         return null;
     }
 
-    default boolean handleTotemOfUndying(LivingEntity livingEntity){
+    default boolean handleTotemOfUndying(LivingEntity livingEntity) {
         return false;
     }
 
@@ -173,11 +173,11 @@ public interface NMSAdapter {
 
     ItemStack getPlayerSkull(ItemStack bukkitItem, String texture);
 
-    default ItemStack getPlayerSkull(String texture){
+    default ItemStack getPlayerSkull(String texture) {
         return getPlayerSkull(Materials.PLAYER_HEAD.toBukkitItem(), texture);
     }
 
-    default boolean isDroppedItem(Entity entity){
+    default boolean isDroppedItem(Entity entity) {
         return entity instanceof Item;
     }
 
@@ -185,13 +185,13 @@ public interface NMSAdapter {
      *   World methods
      */
 
-    default void grandAchievement(Player player, EntityType victim, String name){
+    default void grandAchievement(Player player, EntityType victim, String name) {
         grandAchievement(player, "", name);
     }
 
-    default void grandAchievement(Player player, String criteria, String name){
+    default void grandAchievement(Player player, String criteria, String name) {
         Achievement achievement = Achievement.valueOf(name);
-        if(!player.hasAchievement(achievement))
+        if (!player.hasAchievement(achievement))
             player.awardAchievement(achievement);
     }
 
@@ -203,31 +203,31 @@ public interface NMSAdapter {
 
     void playSpawnEffect(LivingEntity livingEntity);
 
-    default Object getBlockData(Material type, short data){
+    default Object getBlockData(Material type, short data) {
         throw new UnsupportedOperationException("Not supported in this Minecraft version.");
     }
 
-    default void attemptJoinRaid(Player player, Entity raider){
+    default void attemptJoinRaid(Player player, Entity raider) {
 
     }
 
-    default boolean attemptToWaterLog(Block block){
+    default boolean attemptToWaterLog(Block block) {
         return false;
     }
 
-    default void startEntityListen(World world){
+    default void startEntityListen(World world) {
 
     }
 
-    default boolean handlePiglinPickup(Entity bukkitPiglin, Item item){
+    default boolean handlePiglinPickup(Entity bukkitPiglin, Item item) {
         return false;
     }
 
-    default void giveExp(Player player, int amount){
-        if(amount > 0) {
+    default void giveExp(Player player, int amount) {
+        if (amount > 0) {
             PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
             Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
-            if(playerExpChangeEvent.getAmount() > 0)
+            if (playerExpChangeEvent.getAmount() > 0)
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
     }
@@ -250,7 +250,7 @@ public interface NMSAdapter {
      *   Other methods
      */
 
-    default Object getChatMessage(String message){
+    default Object getChatMessage(String message) {
         return message;
     }
 

@@ -11,7 +11,7 @@ public final class ParticleWrapper {
     private int count, offsetX, offsetY, offsetZ;
     private double extra;
 
-    public ParticleWrapper(String particle, int count, int offsetX, int offsetY, int offsetZ, double extra){
+    public ParticleWrapper(String particle, int count, int offsetX, int offsetY, int offsetZ, double extra) {
         this.particle = particle;
         this.count = count;
         this.offsetX = offsetX;
@@ -20,7 +20,7 @@ public final class ParticleWrapper {
         this.extra = extra;
     }
 
-    public void spawnParticle(Location location){
+    public void spawnParticle(Location location) {
         plugin.getNMSAdapter().playParticle(particle, location, count, offsetX, offsetY, offsetZ, extra);
     }
 

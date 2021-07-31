@@ -145,7 +145,7 @@ public enum EntityTypes {
 
         EntityTypes convertedType = bukkitTypeConverter[livingEntity.getType().ordinal()];
 
-        if(convertedType == null)
+        if (convertedType == null)
             throw new IllegalArgumentException("No enum constant EntityTypes." + livingEntity.getType().name());
 
         return convertedType;

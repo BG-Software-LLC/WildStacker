@@ -183,7 +183,7 @@ public final class EntityHelper_v1_8_R1 {
 
             if (entity != null) {
                 if (entity instanceof EntityOcelot) {
-                    ((EntityOcelot)entity).spawnBonus = false;
+                    ((EntityOcelot) entity).spawnBonus = false;
                 }
 
                 return entity;
@@ -196,13 +196,13 @@ public final class EntityHelper_v1_8_R1 {
     }
 
     static void addEntity(net.minecraft.server.v1_8_R1.Entity entity, CreatureSpawnEvent.SpawnReason reason) throws IllegalArgumentException {
-        if(entity == null)
+        if (entity == null)
             throw new IllegalArgumentException("Cannot spawn null entity");
 
         World world = entity.world;
 
         if (entity instanceof EntityInsentient) {
-            ((EntityInsentient)entity).prepare(world.E(new BlockPosition(entity)), null);
+            ((EntityInsentient) entity).prepare(world.E(new BlockPosition(entity)), null);
         }
 
         world.addEntity(entity, reason);

@@ -23,33 +23,33 @@ public abstract class WUnloadedStackedObject implements UnloadedStackedObject {
     }
 
     @Override
-    public int getStackAmount(){
-        try {
-            lock.readLock().lock();
-            return stackAmount;
-        }finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName){
-        try {
-            lock.writeLock().lock();
-            this.stackAmount = stackAmount;
-        }finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    public Location getLocation(){
+    public Location getLocation() {
         return location.clone();
     }
 
     @Override
     public World getWorld() {
         return getLocation().getWorld();
+    }
+
+    @Override
+    public int getStackAmount() {
+        try {
+            lock.readLock().lock();
+            return stackAmount;
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        try {
+            lock.writeLock().lock();
+            this.stackAmount = stackAmount;
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     @Override

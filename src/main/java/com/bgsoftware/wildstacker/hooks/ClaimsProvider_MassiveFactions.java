@@ -21,7 +21,8 @@ public final class ClaimsProvider_MassiveFactions implements ClaimsProvider {
         } catch (Throwable ex) {
             try {
                 overriding = (boolean) mPlayer.getClass().getMethod("isUsingAdminMode").invoke(mPlayer);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
 
         Faction faction = BoardColl.get().getFactionAt(PS.valueOf(location));

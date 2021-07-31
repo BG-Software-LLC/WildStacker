@@ -19,14 +19,19 @@ public class BarrelDropEvent extends Event {
 
     /**
      * The constructor for the event.
+     *
      * @param stackedBarrel The barrel that was broken.
-     * @param player The player that broke the spawner. May be null.
-     * @param itemStack The item that will be dropped.
+     * @param player        The player that broke the spawner. May be null.
+     * @param itemStack     The item that will be dropped.
      */
-    public BarrelDropEvent(StackedBarrel stackedBarrel, Player player, ItemStack itemStack){
+    public BarrelDropEvent(StackedBarrel stackedBarrel, Player player, ItemStack itemStack) {
         this.stackedBarrel = stackedBarrel;
         this.player = player;
         this.itemStack = itemStack;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -60,10 +65,6 @@ public class BarrelDropEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

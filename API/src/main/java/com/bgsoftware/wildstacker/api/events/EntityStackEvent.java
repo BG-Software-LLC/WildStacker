@@ -12,11 +12,16 @@ public class EntityStackEvent extends StackEvent {
 
     /**
      * The constructor for the event.
+     *
      * @param entity The original entity object.
      * @param target The entity object that is stacked.
      */
-    public EntityStackEvent(StackedEntity entity, StackedEntity target){
+    public EntityStackEvent(StackedEntity entity, StackedEntity target) {
         super(entity, target);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -35,10 +40,6 @@ public class EntityStackEvent extends StackEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

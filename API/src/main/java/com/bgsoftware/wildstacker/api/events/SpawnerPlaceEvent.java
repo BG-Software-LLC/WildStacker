@@ -17,24 +17,29 @@ public class SpawnerPlaceEvent extends PlaceEvent {
 
     /**
      * The constructor for the event.
-     * @param player The player who placed the spawner.
-     * @param spawner The spawner object of the placed block.
      *
+     * @param player  The player who placed the spawner.
+     * @param spawner The spawner object of the placed block.
      * @deprecated See SpawnerPlaceEvent(Player, StackedSpawner, ItemStack)
      */
-    public SpawnerPlaceEvent(Player player, StackedSpawner spawner){
+    public SpawnerPlaceEvent(Player player, StackedSpawner spawner) {
         this(player, spawner, new ItemStack(Material.AIR));
     }
 
     /**
      * The constructor for the event.
-     * @param player The player who placed the spawner.
-     * @param spawner The spawner object of the placed block.
+     *
+     * @param player     The player who placed the spawner.
+     * @param spawner    The spawner object of the placed block.
      * @param itemInHand The item that the player held.
      */
-    public SpawnerPlaceEvent(Player player, StackedSpawner spawner, ItemStack itemInHand){
+    public SpawnerPlaceEvent(Player player, StackedSpawner spawner, ItemStack itemInHand) {
         super(player, spawner);
         this.itemInHand = itemInHand.clone();
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -53,10 +58,6 @@ public class SpawnerPlaceEvent extends PlaceEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

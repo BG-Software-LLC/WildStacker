@@ -9,7 +9,7 @@ public final class DataSerializer_Default implements IDataSerializer {
 
     private final WildStackerPlugin plugin;
 
-    public DataSerializer_Default(WildStackerPlugin plugin){
+    public DataSerializer_Default(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 

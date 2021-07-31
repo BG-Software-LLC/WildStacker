@@ -10,15 +10,15 @@ public final class ChunkPosition {
     private final String world;
     private final int x, z;
 
-    public ChunkPosition(Location location){
+    public ChunkPosition(Location location) {
         this(location.getWorld().getName(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
-    public ChunkPosition(Chunk chunk){
+    public ChunkPosition(Chunk chunk) {
         this(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
     }
 
-    public ChunkPosition(String world, int x, int z){
+    public ChunkPosition(String world, int x, int z) {
         this.world = world;
         this.x = x;
         this.z = z;
@@ -37,6 +37,11 @@ public final class ChunkPosition {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(world, x, z);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -44,10 +49,5 @@ public final class ChunkPosition {
         return x == that.x &&
                 z == that.z &&
                 world.equals(that.world);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(world, x, z);
     }
 }

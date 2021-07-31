@@ -59,23 +59,22 @@ public final class CommandGive implements ICommand {
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         boolean silence = false;
 
-        if(args[1].equalsIgnoreCase("-s")){
+        if (args[1].equalsIgnoreCase("-s")) {
             silence = true;
-            if(args.length != 6 && args.length != 7){
+            if (args.length != 6 && args.length != 7) {
                 Locale.COMMAND_USAGE.send(sender, getUsage());
                 return;
             }
-            if(args.length == 7) {
+            if (args.length == 7) {
                 args = new String[]{"give", args[2], args[3], args[4], args[5], args[6]};
-            }
-            else{
-                args = new String[]{"give", args[2], args[3], args[4], args[5] };
+            } else {
+                args = new String[]{"give", args[2], args[3], args[4], args[5]};
             }
         }
 
         Player target = Bukkit.getPlayer(args[1]);
 
-        if(target == null){
+        if (target == null) {
             Locale.INVALID_PLAYER.send(sender, args[1]);
             return;
         }
@@ -85,60 +84,22 @@ public final class CommandGive implements ICommand {
 
         int stackSize;
 
-        try{
+        try {
             stackSize = Integer.parseInt(args[4]);
-        }catch(NumberFormatException ex){
+        } catch (NumberFormatException ex) {
             Locale.INVALID_NUMBER.send(sender);
             return;
         }
 
         boolean reformatItem = true;
 
-        if(args[2].equalsIgnoreCase("egg") ){
-            EntityType entityType;
-
-            try{
-                entityType = EntityType.valueOf(args[3].toUpperCase());
-                typeName = EntityUtils.getFormattedType(entityType.name());
-            }catch(IllegalArgumentException ex){
-                Locale.INVALID_ENTITY.send(sender, args[3]);
-                return;
-            }
-
-            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
-                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
-
-            if(spawnerUpgrade == null){
-                Locale.INVALID_UPGRADE.send(sender, args[5]);
-                return;
-            }
-
-            Material eggType = Materials.getSpawnEgg(entityType);
-            if(eggType == null || ServerVersion.isLegacy()){
-                if(ServerVersion.isLegacy()){
-                    itemStack = new ItemStack(Material.MONSTER_EGG);
-                    ItemUtils.setEntityType(itemStack, entityType);
-                }
-                else {
-                    itemStack = ItemUtils.getItemNMSEntityType(entityType);
-                }
-            }
-            else{
-                itemStack = new ItemStack(eggType);
-            }
-
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-            if(!spawnerUpgrade.isDefault())
-                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
-        }
-
-        else if(args[2].equalsIgnoreCase("spawner")){
+        if (args[2].equalsIgnoreCase("egg")) {
             EntityType entityType;
 
             try {
                 entityType = EntityType.valueOf(args[3].toUpperCase());
                 typeName = EntityUtils.getFormattedType(entityType.name());
-            }catch(IllegalArgumentException ex){
+            } catch (IllegalArgumentException ex) {
                 Locale.INVALID_ENTITY.send(sender, args[3]);
                 return;
             }
@@ -146,7 +107,41 @@ public final class CommandGive implements ICommand {
             SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
                     plugin.getUpgradesManager().getDefaultUpgrade(entityType);
 
-            if(spawnerUpgrade == null){
+            if (spawnerUpgrade == null) {
+                Locale.INVALID_UPGRADE.send(sender, args[5]);
+                return;
+            }
+
+            Material eggType = Materials.getSpawnEgg(entityType);
+            if (eggType == null || ServerVersion.isLegacy()) {
+                if (ServerVersion.isLegacy()) {
+                    itemStack = new ItemStack(Material.MONSTER_EGG);
+                    ItemUtils.setEntityType(itemStack, entityType);
+                } else {
+                    itemStack = ItemUtils.getItemNMSEntityType(entityType);
+                }
+            } else {
+                itemStack = new ItemStack(eggType);
+            }
+
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
+            if (!spawnerUpgrade.isDefault())
+                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
+        } else if (args[2].equalsIgnoreCase("spawner")) {
+            EntityType entityType;
+
+            try {
+                entityType = EntityType.valueOf(args[3].toUpperCase());
+                typeName = EntityUtils.getFormattedType(entityType.name());
+            } catch (IllegalArgumentException ex) {
+                Locale.INVALID_ENTITY.send(sender, args[3]);
+                return;
+            }
+
+            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
+                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+
+            if (spawnerUpgrade == null) {
                 Locale.INVALID_UPGRADE.send(sender, args[5]);
                 return;
             }
@@ -154,34 +149,30 @@ public final class CommandGive implements ICommand {
             itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade);
 
             reformatItem = false;
-        }
-
-        else if(args[2].equalsIgnoreCase("barrel")){
+        } else if (args[2].equalsIgnoreCase("barrel")) {
             Material barrelType;
 
             try {
                 barrelType = Material.getMaterial(args[3].toUpperCase());
                 typeName = ItemUtils.getFormattedType(new ItemStack(barrelType));
-            }catch(IllegalArgumentException | NullPointerException ex){
+            } catch (IllegalArgumentException | NullPointerException ex) {
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
             }
 
-            if(!WildStackerPlugin.getPlugin().getSettings().whitelistedBarrels.contains(barrelType)){
+            if (!WildStackerPlugin.getPlugin().getSettings().whitelistedBarrels.contains(barrelType)) {
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
             }
 
             itemStack = new ItemStack(barrelType);
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-        }
-
-        else{
+        } else {
             Locale.INVALID_TYPE.send(sender);
             return;
         }
 
-        if(reformatItem) {
+        if (reformatItem) {
             args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
 
             ItemMeta itemMeta = itemStack.getItemMeta();
@@ -195,10 +186,10 @@ public final class CommandGive implements ICommand {
 
         ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());
 
-        if(!silence || !(sender instanceof Player))
+        if (!silence || !(sender instanceof Player))
             Locale.STACK_GIVE_PLAYER.send(sender, target.getName(), args[4], typeName, args[2]);
 
-        if(!silence && !target.equals(sender))
+        if (!silence && !target.equals(sender))
             Locale.STACK_RECEIVE.send(target, args[4], typeName + " " + args[2], sender.getName());
     }
 
@@ -206,10 +197,10 @@ public final class CommandGive implements ICommand {
     public List<String> tabComplete(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         List<String> list = new ArrayList<>();
 
-        if(args.length >= 2 && args[1].equalsIgnoreCase("-s"))
+        if (args.length >= 2 && args[1].equalsIgnoreCase("-s"))
             return tabCompleteSilence(plugin, args);
 
-        switch(args.length){
+        switch (args.length) {
             case 2:
                 return null;
             case 3:
@@ -218,17 +209,17 @@ public final class CommandGive implements ICommand {
                         .forEach(stack -> list.add(stack.toLowerCase()));
                 break;
             case 4:
-                if(args[2].equalsIgnoreCase("egg") || args[2].equalsIgnoreCase("spawner")) {
+                if (args[2].equalsIgnoreCase("egg") || args[2].equalsIgnoreCase("spawner")) {
                     Arrays.stream(EntityType.values())
                             .filter(entityType -> entityType.name().toLowerCase().startsWith(args[3]) &&
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
-                }else if(args[2].equalsIgnoreCase("barrel")) {
+                } else if (args[2].equalsIgnoreCase("barrel")) {
                     plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
             case 6:
-                if(args[2].equalsIgnoreCase("egg") || args[2].equalsIgnoreCase("spawner")) {
+                if (args[2].equalsIgnoreCase("egg") || args[2].equalsIgnoreCase("spawner")) {
                     EntityType entityType = EntityType.valueOf(args[3].toUpperCase());
                     list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream()
                             .filter(upgrade -> !upgrade.isDefault() && upgrade.isEntityAllowed(entityType) &&
@@ -244,7 +235,7 @@ public final class CommandGive implements ICommand {
     private List<String> tabCompleteSilence(WildStackerPlugin plugin, String[] args) {
         List<String> list = new ArrayList<>();
 
-        switch(args.length){
+        switch (args.length) {
             case 3:
                 return null;
             case 4:
@@ -253,17 +244,17 @@ public final class CommandGive implements ICommand {
                         .forEach(stack -> list.add(stack.toLowerCase()));
                 break;
             case 5:
-                if(args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
+                if (args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
                     Arrays.stream(EntityType.values())
                             .filter(entityType -> entityType.name().toLowerCase().startsWith(args[4]) &&
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
-                }else if(args[3].equalsIgnoreCase("barrel")) {
+                } else if (args[3].equalsIgnoreCase("barrel")) {
                     plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
             case 7:
-                if(args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
+                if (args[3].equalsIgnoreCase("egg") || args[3].equalsIgnoreCase("spawner")) {
                     EntityType entityType = EntityType.valueOf(args[4].toUpperCase());
                     list.addAll(plugin.getUpgradesManager().getAllUpgrades().stream()
                             .filter(upgrade -> !upgrade.isDefault() && upgrade.isEntityAllowed(entityType) &&

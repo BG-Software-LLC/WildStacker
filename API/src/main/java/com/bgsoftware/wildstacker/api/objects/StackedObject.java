@@ -24,59 +24,68 @@ public interface StackedObject<T> {
 
     /**
      * Get the stack amount
+     *
      * @return stack amount
      */
     int getStackAmount();
 
     /**
      * Update the stack amount
+     *
      * @param stackAmount a new stack amount
-     * @param updateName should the name of the object get updated or not
+     * @param updateName  should the name of the object get updated or not
      */
     void setStackAmount(int stackAmount, boolean updateName);
 
     /**
      * Increase the stack amount
+     *
      * @param stackAmount a new stack amount
-     * @param updateName should the name of the object get updated or not
+     * @param updateName  should the name of the object get updated or not
      * @return The new stack amount.
      */
     int increaseStackAmount(int stackAmount, boolean updateName);
 
     /**
      * Decrease the stack amount
+     *
      * @param stackAmount a new stack amount
-     * @param updateName should the name of the object get updated or not
+     * @param updateName  should the name of the object get updated or not
      * @return The new stack amount.
      */
     int decreaseStackAmount(int stackAmount, boolean updateName);
 
     /**
      * Get the stack limit
+     *
      * @return stack limit
      */
     int getStackLimit();
 
     /**
      * Get the merge radius of the object.
+     *
      * @return merge radius
      */
     int getMergeRadius();
 
     /**
      * Checks if an object is blacklisted.
+     *
      * @return True if the object is blacklisted, otherwise false.
      */
     boolean isBlacklisted();
 
     /**
      * Checks if an object is whitelisted.
+     *
      * @return True if the object is whitelisted, otherwise false.
      */
     boolean isWhitelisted();
 
     /**
      * Checks if the world of the object is disabled.
+     *
      * @return True if the world is disabled, otherwise false.
      */
     boolean isWorldDisabled();
@@ -103,8 +112,8 @@ public interface StackedObject<T> {
 
     /**
      * Checks if this object can stack into another object.
-     * @param stackedObject other object to check
      *
+     * @param stackedObject other object to check
      * @deprecated See runStackCheck
      */
     @Deprecated
@@ -117,6 +126,7 @@ public interface StackedObject<T> {
      * - Object is not blacklisted.
      * - Object is not in a disabled world.
      * - Object will not exceed stack limit.
+     *
      * @param amountToAdd: The amount to add to this object.
      * @return SUCCESS if can be stacked.
      */
@@ -124,6 +134,7 @@ public interface StackedObject<T> {
 
     /**
      * Checks if this object can stack into another object.
+     *
      * @param stackedObject other object to check
      * @return The result for the operation.
      */
@@ -131,10 +142,10 @@ public interface StackedObject<T> {
 
     /**
      * Stack this object into other objects around it.
-     * @param result The object that this object was stacked into.
      *
+     * @param result The object that this object was stacked into.
      * @deprecated This object is not async. The async methods were moved to AsyncStackedObject.
-     *             You can use runStack() as a replacement.
+     * You can use runStack() as a replacement.
      */
     @Deprecated
     void runStackAsync(Consumer<Optional<T>> result);
@@ -146,8 +157,8 @@ public interface StackedObject<T> {
 
     /**
      * Stack this object into other objects around it.
-     * @return The object that this object was stacked into (nullable)
      *
+     * @return The object that this object was stacked into (nullable)
      * @deprecated See runStackAsync(Consumer)
      */
     @Deprecated
@@ -156,6 +167,7 @@ public interface StackedObject<T> {
     /**
      * Stack this object into another object.
      * !Usage of this method can cause issues!
+     *
      * @param stackedObject another object to stack into
      * @return The result for the stacking operation.
      */
@@ -163,9 +175,9 @@ public interface StackedObject<T> {
 
     /**
      * Stack this object into another object.
+     *
      * @param stackedObject another object to stack into
      * @return True if success, otherwise false.
-     *
      * @deprecated See runStackAsync(StackedObject, Consumer)
      */
     @Deprecated
@@ -173,6 +185,7 @@ public interface StackedObject<T> {
 
     /**
      * Unstack this object.
+     *
      * @param amount unstack by this amount
      * @return The result for the unstacking operation.
      */
@@ -180,6 +193,7 @@ public interface StackedObject<T> {
 
     /**
      * Unstack this object.
+     *
      * @param amount unstack by this amount
      * @param entity The entity that caused the unstack of the object.
      * @return The result for the unstacking operation.
@@ -188,9 +202,9 @@ public interface StackedObject<T> {
 
     /**
      * Unstack this object.
+     *
      * @param amount unstack by this amount
      * @return True if success, otherwise false.
-     *
      * @deprecated See runUnstack
      */
     @Deprecated
@@ -198,6 +212,7 @@ public interface StackedObject<T> {
 
     /**
      * Checks if this object is similar to another object.
+     *
      * @param stackedObject the object to check
      * @return True if they are similar objects, otherwise false
      */
@@ -205,6 +220,7 @@ public interface StackedObject<T> {
 
     /**
      * Spawn the stacking particle of the object.
+     *
      * @param checkEnabled When true, the particle will be spawned only if enabled in the config.
      */
     void spawnStackParticle(boolean checkEnabled);

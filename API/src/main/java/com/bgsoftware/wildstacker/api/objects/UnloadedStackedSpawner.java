@@ -13,10 +13,10 @@ public interface UnloadedStackedSpawner extends UnloadedStackedObject {
     /**
      * Set an upgrade to this object.
      * Can be null to remove the upgrades from this object.
+     *
      * @param spawnerUpgrade The upgrade to set.
      */
     void setUpgrade(SpawnerUpgrade spawnerUpgrade);
-
 
 
 }

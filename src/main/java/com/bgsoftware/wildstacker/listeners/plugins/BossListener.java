@@ -11,11 +11,11 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class BossListener {
 
-    public static void register(WildStackerPlugin plugin){
-        try{
+    public static void register(WildStackerPlugin plugin) {
+        try {
             Class.forName("org.mineacademy.boss.api.event.BossSpawnEvent");
             plugin.getServer().getPluginManager().registerEvents(new OldBossListener(), plugin);
-        }catch(Throwable ex){
+        } catch (Throwable ex) {
             plugin.getServer().getPluginManager().registerEvents(new NewBossListener(), plugin);
         }
     }

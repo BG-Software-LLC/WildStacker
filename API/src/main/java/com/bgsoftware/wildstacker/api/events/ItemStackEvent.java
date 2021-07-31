@@ -12,11 +12,16 @@ public class ItemStackEvent extends StackEvent {
 
     /**
      * The constructor for the event.
-     * @param item The original item object.
+     *
+     * @param item   The original item object.
      * @param target The item object that is stacked.
      */
-    public ItemStackEvent(StackedItem item, StackedItem target){
+    public ItemStackEvent(StackedItem item, StackedItem target) {
         super(item, target);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -35,10 +40,6 @@ public class ItemStackEvent extends StackEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

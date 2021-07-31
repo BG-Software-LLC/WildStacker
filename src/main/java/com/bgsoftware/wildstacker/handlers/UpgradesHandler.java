@@ -27,13 +27,13 @@ public final class UpgradesHandler implements UpgradesManager {
 
         SpawnerUpgrade spawnerUpgrade = spawnerUpgrades.get(nameLower);
 
-        if(spawnerUpgrade != null) {
-            if(spawnerUpgrade.getId() != upgradeId)
+        if (spawnerUpgrade != null) {
+            if (spawnerUpgrade.getId() != upgradeId)
                 throw new IllegalArgumentException("The upgrade " + name + " doesn't have the id " + upgradeId);
             return spawnerUpgrade;
         }
 
-        if(getUpgrade(upgradeId) != null)
+        if (getUpgrade(upgradeId) != null)
             throw new IllegalArgumentException("An upgrade with the id " + upgradeId + " already exists.");
 
         spawnerUpgrade = new WSpawnerUpgrade(name, upgradeId);
@@ -48,10 +48,9 @@ public final class UpgradesHandler implements UpgradesManager {
     public SpawnerUpgrade createDefault(List<String> allowedEntities) {
         SpawnerUpgrade spawnerUpgrade = new WSpawnerUpgrade("Default", 0);
 
-        if(allowedEntities.isEmpty()) {
+        if (allowedEntities.isEmpty()) {
             GLOBAL_UPGRADE = spawnerUpgrade;
-        }
-        else {
+        } else {
             spawnerUpgrade.setAllowedEntities(allowedEntities);
             defaultUpgrades.add(spawnerUpgrade);
         }
@@ -82,7 +81,7 @@ public final class UpgradesHandler implements UpgradesManager {
 
     @Override
     public void removeUpgrade(SpawnerUpgrade spawnerUpgrade) {
-        if(!spawnerUpgrade.isDefault())
+        if (!spawnerUpgrade.isDefault())
             spawnerUpgrades.remove(spawnerUpgrade.getName().toLowerCase());
     }
 

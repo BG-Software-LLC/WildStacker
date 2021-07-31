@@ -9,18 +9,18 @@ public final class FastEnumMap<E extends Enum<E>, V> {
     private V globalValue = null;
     private int size = 0;
 
-    public FastEnumMap(Class<E> keyType){
+    public FastEnumMap(Class<E> keyType) {
         this(FastEnumUtils.getEnumValues(keyType).length);
     }
 
-    FastEnumMap(int initSize){
+    FastEnumMap(int initSize) {
         //noinspection unchecked
         arr = (V[]) new Object[initSize];
     }
 
-    public static <E extends Enum<E>> FastEnumMap<E, Integer> fromSection(ConfigurationSection section, Class<E> keyType){
+    public static <E extends Enum<E>> FastEnumMap<E, Integer> fromSection(ConfigurationSection section, Class<E> keyType) {
         FastEnumMap<E, Integer> fastEnumIntMap = new FastEnumMap<>(keyType);
-        if(section != null) {
+        if (section != null) {
             for (String _key : section.getKeys(false)) {
                 if (_key.equalsIgnoreCase("ALL")) {
                     fastEnumIntMap.globalValue = section.getInt(_key);
@@ -37,34 +37,34 @@ public final class FastEnumMap<E extends Enum<E>, V> {
         return fastEnumIntMap;
     }
 
-    public V put(E e, V value){
+    public V put(E e, V value) {
         V originalValue = arr[e.ordinal()];
         arr[e.ordinal()] = value;
 
-        if(originalValue == null)
+        if (originalValue == null)
             size++;
 
         return originalValue;
     }
 
-    public V computeIfAbsent(E e, V value){
+    public V computeIfAbsent(E e, V value) {
         V curr = arr[e.ordinal()];
-        if(curr == null)
+        if (curr == null)
             curr = arr[e.ordinal()] = value;
         return curr;
     }
 
-    public V getOrDefault(E e, V def){
+    public V getOrDefault(E e, V def) {
         V value = get(e);
         return value == null ? def : value;
     }
 
-    public V get(E e){
+    public V get(E e) {
         V value = arr[e.ordinal()];
         return value == null ? globalValue : value;
     }
 
-    public void remove(E e){
+    public void remove(E e) {
         arr[e.ordinal()] = null;
     }
 

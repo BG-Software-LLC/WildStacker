@@ -24,24 +24,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public final class MenusListener implements Listener {
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onMenuClick(InventoryClickEvent e){
-        Inventory topInventory = e.getView().getTopInventory();
-        if(topInventory != null && topInventory.getHolder() instanceof WildMenu){
-            WildMenu wildMenu = (WildMenu) topInventory.getHolder();
-            wildMenu.onButtonClick(e);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onMenuClose(InventoryCloseEvent e){
-        Inventory topInventory = e.getView().getTopInventory();
-        if(topInventory != null && topInventory.getHolder() instanceof WildMenu){
-            WildMenu wildMenu = (WildMenu) topInventory.getHolder();
-            wildMenu.onMenuClose(e);
-        }
-    }
-
     /**
      * The following two events are here for patching a dupe glitch caused
      * by shift clicking and closing the inventory in the same time.
@@ -49,20 +31,38 @@ public final class MenusListener implements Listener {
 
     private final Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onMenuClickMonitor(InventoryClickEvent e){
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onMenuClick(InventoryClickEvent e) {
         Inventory topInventory = e.getView().getTopInventory();
-        if(e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu &&
-                ((WildMenu) topInventory.getHolder()).isCancelOnClick()){
+        if (topInventory != null && topInventory.getHolder() instanceof WildMenu) {
+            WildMenu wildMenu = (WildMenu) topInventory.getHolder();
+            wildMenu.onButtonClick(e);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onMenuClose(InventoryCloseEvent e) {
+        Inventory topInventory = e.getView().getTopInventory();
+        if (topInventory != null && topInventory.getHolder() instanceof WildMenu) {
+            WildMenu wildMenu = (WildMenu) topInventory.getHolder();
+            wildMenu.onMenuClose(e);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onMenuClickMonitor(InventoryClickEvent e) {
+        Inventory topInventory = e.getView().getTopInventory();
+        if (e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu &&
+                ((WildMenu) topInventory.getHolder()).isCancelOnClick()) {
             latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
             Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onMenuCloseMonitor(InventoryCloseEvent e){
+    public void onMenuCloseMonitor(InventoryCloseEvent e) {
         ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
-        if(clickedItem != null){
+        if (clickedItem != null) {
             Executor.sync(() -> {
                 e.getPlayer().getInventory().removeItem(clickedItem);
                 ((Player) e.getPlayer()).updateInventory();
@@ -75,8 +75,8 @@ public final class MenusListener implements Listener {
      */
 
     @EventHandler
-    public void onAsyncPlayerChat(AsyncPlayerChatEvent e){
-        if(!EditorMenu.configValues.containsKey(e.getPlayer().getUniqueId()))
+    public void onAsyncPlayerChat(AsyncPlayerChatEvent e) {
+        if (!EditorMenu.configValues.containsKey(e.getPlayer().getUniqueId()))
             return;
 
         e.setCancelled(true);
@@ -84,26 +84,26 @@ public final class MenusListener implements Listener {
         String path = EditorMenu.configValues.get(e.getPlayer().getUniqueId());
         Object value = e.getMessage();
 
-        if(!value.toString().equalsIgnoreCase("-cancel")){
-            if(EditorMenu.config.isConfigurationSection(path)){
+        if (!value.toString().equalsIgnoreCase("-cancel")) {
+            if (EditorMenu.config.isConfigurationSection(path)) {
                 Matcher matcher;
-                if(!(matcher = Pattern.compile("(.*):(.*)").matcher(value.toString())).matches()){
+                if (!(matcher = Pattern.compile("(.*):(.*)").matcher(value.toString())).matches()) {
                     e.getPlayer().sendMessage(ChatColor.RED + "Please follow the <sub-section>:<value> format");
-                }else {
+                } else {
                     String key = matcher.group(1);
                     path = path + "." + matcher.group(1);
                     value = matcher.group(2);
 
-                    if(EditorMenu.config.get(path) != null && EditorMenu.config.get(path).toString().equals(value.toString())){
+                    if (EditorMenu.config.get(path) != null && EditorMenu.config.get(path).toString().equals(value.toString())) {
                         e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Removed the value " + matcher.group(1) + " from " + path);
                         value = null;
-                    }else{
+                    } else {
                         e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Added the value " + value.toString() + " to " + path);
 
-                        try{
+                        try {
                             value = Integer.valueOf(value.toString());
-                        }catch(IllegalArgumentException ex){
-                            if(value.toString().equalsIgnoreCase("true") || value.toString().equalsIgnoreCase("false")){
+                        } catch (IllegalArgumentException ex) {
+                            if (value.toString().equalsIgnoreCase("true") || value.toString().equalsIgnoreCase("false")) {
                                 value = Boolean.valueOf(value.toString());
                             }
                         }
@@ -112,9 +112,7 @@ public final class MenusListener implements Listener {
 
                     EditorMenu.config.set(path, value);
                 }
-            }
-
-            else if(EditorMenu.config.isList(path)){
+            } else if (EditorMenu.config.isList(path)) {
                 List<String> list = EditorMenu.config.getStringList(path);
 
                 if (list.contains(value.toString())) {
@@ -126,38 +124,32 @@ public final class MenusListener implements Listener {
                 }
 
                 EditorMenu.config.set(path, list);
-            }
-
-            else{
+            } else {
                 boolean valid = true;
-                if(EditorMenu.config.isInt(path)){
-                    try{
+                if (EditorMenu.config.isInt(path)) {
+                    try {
                         value = Integer.valueOf(value.toString());
-                    }catch(IllegalArgumentException ex){
+                    } catch (IllegalArgumentException ex) {
                         e.getPlayer().sendMessage(ChatColor.RED + "Please specify a valid number");
                         valid = false;
                     }
-                }
-
-                else if(EditorMenu.config.isDouble(path)){
-                    try{
+                } else if (EditorMenu.config.isDouble(path)) {
+                    try {
                         value = Double.valueOf(value.toString());
-                    }catch(IllegalArgumentException ex){
+                    } catch (IllegalArgumentException ex) {
                         e.getPlayer().sendMessage(ChatColor.RED + "Please specify a valid number");
                         valid = false;
                     }
-                }
-
-                else if(EditorMenu.config.isBoolean(path)){
-                    if(value.toString().equalsIgnoreCase("true") || value.toString().equalsIgnoreCase("false")){
+                } else if (EditorMenu.config.isBoolean(path)) {
+                    if (value.toString().equalsIgnoreCase("true") || value.toString().equalsIgnoreCase("false")) {
                         value = Boolean.valueOf(value.toString());
-                    }else{
+                    } else {
                         e.getPlayer().sendMessage(ChatColor.RED + "Please specify a valid boolean");
                         valid = false;
                     }
                 }
 
-                if(valid) {
+                if (valid) {
                     EditorMenu.config.set(path, value);
                     e.getPlayer().sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker" + ChatColor.GRAY + " Changed value of " + path + " to " + value.toString());
                 }

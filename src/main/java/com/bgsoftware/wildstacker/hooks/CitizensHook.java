@@ -7,8 +7,8 @@ import org.bukkit.entity.Entity;
 public final class CitizensHook {
 
 
-    public static boolean isNPC(Entity entity){
-        if(!PluginHooks.isCitizensEnabled || !CitizensAPI.hasImplementation())
+    public static boolean isNPC(Entity entity) {
+        if (!PluginHooks.isCitizensEnabled || !CitizensAPI.hasImplementation())
             return false;
 
         NPCRegistry npcRegistry = CitizensAPI.getNPCRegistry();

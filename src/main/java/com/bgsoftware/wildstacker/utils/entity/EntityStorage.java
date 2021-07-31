@@ -54,7 +54,7 @@ public final class EntityStorage {
 
     public static void removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
         FlagsMap flagsMap = entityStorage.get(entityUUID);
-        if(flagsMap != null)
+        if (flagsMap != null)
             flagsMap.remove(entityFlag);
     }
 
@@ -109,7 +109,7 @@ public final class EntityStorage {
             }
         }
 
-        public Object remove(EntityFlag entityFlag){
+        public Object remove(EntityFlag entityFlag) {
             return put(entityFlag, null);
         }
 

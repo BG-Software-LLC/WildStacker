@@ -7,18 +7,19 @@ public final class SlimefunHook {
 
     private static boolean enabled = false;
 
-    public static void setEnabled(boolean enabled){
-        if(enabled) {
+    public static void setEnabled(boolean enabled) {
+        if (enabled) {
             try {
                 Class.forName("me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem");
                 SlimefunHook.enabled = true;
                 return;
-            } catch (ClassNotFoundException ignored) {}
+            } catch (ClassNotFoundException ignored) {
+            }
         }
         SlimefunHook.enabled = false;
     }
 
-    public static boolean isSlimefunItem(ItemStack itemStack){
+    public static boolean isSlimefunItem(ItemStack itemStack) {
         return enabled && SlimefunItem.getByItem(itemStack) != null;
     }
 

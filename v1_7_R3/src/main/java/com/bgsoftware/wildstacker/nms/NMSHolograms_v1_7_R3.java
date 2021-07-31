@@ -11,7 +11,7 @@ public final class NMSHolograms_v1_7_R3 implements NMSHolograms {
         return new EmptyHologram();
     }
 
-    private static class EmptyHologram implements Hologram{
+    private static class EmptyHologram implements Hologram {
 
         @Override
         public void setHologramName(String name) {

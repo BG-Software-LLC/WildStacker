@@ -39,37 +39,37 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     private int spawnerUpgradeId = 0;
     private EntityType cachedEntity;
 
-    public WStackedSpawner(CreatureSpawner creatureSpawner){
+    public WStackedSpawner(CreatureSpawner creatureSpawner) {
         this(creatureSpawner, 1);
     }
 
-    public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount){
+    public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount) {
         super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
-        if(plugin.getSettings().spawnersOverrideEnabled)
+        if (plugin.getSettings().spawnersOverrideEnabled)
             plugin.getNMSSpawners().updateStackedSpawner(this);
         cachedEntity = creatureSpawner.getSpawnedType();
     }
 
+    public static StackedSpawner of(Block block) {
+        if (block.getState() instanceof CreatureSpawner)
+            return of((CreatureSpawner) block.getState());
+        throw new IllegalArgumentException("Only spawners can be applied to StackedSpawner object");
+    }
+
+    public static StackedSpawner of(CreatureSpawner creatureSpawner) {
+        return plugin.getSystemManager().getStackedSpawner(creatureSpawner);
+    }
+
     @Override
-    public CreatureSpawner getSpawner(){
+    public CreatureSpawner getSpawner() {
         return object;
     }
 
     @Override
-    public EntityType getSpawnedType(){
-        if(object.getSpawnedType() == null)
+    public EntityType getSpawnedType() {
+        if (object.getSpawnedType() == null)
             object.setSpawnedType(EntityType.PIG);
         return Bukkit.isPrimaryThread() ? (cachedEntity = object.getSpawnedType()) : cachedEntity;
-    }
-
-    @Override
-    public Location getLocation() {
-        return object.getLocation();
-    }
-
-    @Override
-    public World getWorld() {
-        return object.getWorld();
     }
 
     /*
@@ -77,8 +77,58 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
      */
 
     @Override
-    public Chunk getChunk() {
-        return getLocation().getChunk();
+    public LivingEntity getLinkedEntity() {
+        if (linkedEntity != null && (!plugin.getSettings().linkedEntitiesEnabled || linkedEntity.isDead() || !linkedEntity.isValid() ||
+                linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
+            linkedEntity = null;
+        return linkedEntity;
+    }
+
+    @Override
+    public void setLinkedEntity(LivingEntity linkedEntity) {
+        this.linkedEntity = linkedEntity;
+    }
+
+    @Override
+    public List<StackedSpawner> getNearbySpawners() {
+        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+
+        Stream<StackedSpawner> spawnerStream;
+
+        if (chunkMerge) {
+            spawnerStream = plugin.getSystemManager().getStackedSpawners(getChunk()).stream();
+        } else {
+            int range = getMergeRadius();
+            Location location = getLocation();
+
+            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
+            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+
+            spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
+                    .filter(stackedSpawner -> {
+                        Location loc = stackedSpawner.getLocation();
+                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
+                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
+                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
+                    });
+        }
+
+        return spawnerStream.filter(this::canStackIntoNoLimit).collect(Collectors.toList());
+    }
+
+    @Override
+    public ItemStack getDropItem() {
+        return getDropItem(getStackAmount());
+    }
+
+    @Override
+    public ItemStack getDropItem(int amount) {
+        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade());
+    }
+
+    @Override
+    public Location getLocation() {
+        return object.getLocation();
     }
 
     @Override
@@ -116,7 +166,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public void remove() {
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::remove);
             return;
         }
@@ -129,7 +179,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         removeHologram();
 
-        if(spawnersManageMenu != null) {
+        if (spawnersManageMenu != null) {
             spawnersManageMenu.getInventory().getViewers().forEach(HumanEntity::closeInventory);
             spawnersManageMenu.stop();
             unlinkInventory();
@@ -138,7 +188,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public void updateName() {
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::updateName);
             return;
         }
@@ -150,7 +200,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         int amount = getStackAmount();
 
-        if(amount <= 1 && spawnerUpgradeId == 0) {
+        if (amount <= 1 && spawnerUpgradeId == 0) {
             removeHologram();
             return;
         }
@@ -162,20 +212,15 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if(!plugin.getSettings().spawnersStackingEnabled)
+        if (!plugin.getSettings().spawnersStackingEnabled)
             return StackCheckResult.NOT_ENABLED;
 
         return super.runStackCheck(stackedObject);
     }
 
-    private boolean canStackIntoNoLimit(StackedObject stackedObject){
-        StackCheckResult stackCheckResult = runStackCheck(stackedObject);
-        return stackCheckResult == StackCheckResult.SUCCESS || stackCheckResult == StackCheckResult.LIMIT_EXCEEDED;
-    }
-
     @Override
     public Optional<CreatureSpawner> runStack() {
-        if(getStackLimit() <= 1)
+        if (getStackLimit() <= 1)
             return Optional.empty();
 
         Chunk chunk = getChunk();
@@ -190,7 +235,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         } else {
             int range = getMergeRadius();
 
-            if(range <= 0)
+            if (range <= 0)
                 return Optional.empty();
 
             Location location = getLocation();
@@ -233,7 +278,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
 
-        if(!EventsCaller.callSpawnerStackEvent(targetSpawner, this))
+        if (!EventsCaller.callSpawnerStackEvent(targetSpawner, this))
             return StackResult.EVENT_CANCELLED;
 
         targetSpawner.increaseStackAmount(getStackAmount(), true);
@@ -247,12 +292,12 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public UnstackResult runUnstack(int amount, Entity entity) {
-        if(!EventsCaller.callSpawnerUnstackEvent(this, entity, amount))
+        if (!EventsCaller.callSpawnerUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
         int newStackAmount = decreaseStackAmount(amount, true);
 
-        if(newStackAmount < 1)
+        if (newStackAmount < 1)
             remove();
 
         return UnstackResult.SUCCESS;
@@ -264,6 +309,10 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
                 spawnerUpgradeId == ((WStackedSpawner) stackedObject).getUpgradeId();
     }
 
+    /*
+     * UpgradeableStackedObject's methods
+     */
+
     @Override
     public void spawnStackParticle(boolean checkEnabled) {
         if (!checkEnabled || plugin.getSettings().spawnersParticlesEnabled) {
@@ -272,6 +321,25 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
                 particleWrapper.spawnParticle(location);
         }
     }
+
+    @Override
+    public Chunk getChunk() {
+        return getLocation().getChunk();
+    }
+
+    @Override
+    public World getWorld() {
+        return object.getWorld();
+    }
+
+    private boolean canStackIntoNoLimit(StackedObject stackedObject) {
+        StackCheckResult stackCheckResult = runStackCheck(stackedObject);
+        return stackCheckResult == StackCheckResult.SUCCESS || stackCheckResult == StackCheckResult.LIMIT_EXCEEDED;
+    }
+
+    /*
+     * StackedSpawner's methods
+     */
 
     @Override
     public int hashCode() {
@@ -288,18 +356,10 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         return String.format("StackedSpawner{location=%s,amount=%s,type=%s}", getLocation(), getStackAmount(), getSpawnedType());
     }
 
-    /*
-     * UpgradeableStackedObject's methods
-     */
-
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
         return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType()) : currentUpgrade;
-    }
-
-    public int getUpgradeId(){
-        return spawnerUpgradeId;
     }
 
     @Override
@@ -308,106 +368,44 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         updateName();
     }
 
-    public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent){
-        if(spawnerUpgradeId != 0 && !isCached())
+    public int getUpgradeId() {
+        return spawnerUpgradeId;
+    }
+
+    public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent) {
+        if (spawnerUpgradeId != 0 && !isCached())
             plugin.getDataHandler().addStackedSpawner(this);
 
         this.spawnerUpgradeId = spawnerUpgradeId;
 
-        if(spawnerUpgradeId == 0 && !isCached())
+        if (spawnerUpgradeId == 0 && !isCached())
             plugin.getDataHandler().removeStackedSpawner(this);
 
         SpawnerUpgrade spawnerUpgrade = getUpgrade();
 
-        if(fireEvent)
+        if (fireEvent)
             EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade);
 
         SyncedCreatureSpawner.of(object).updateSpawner(spawnerUpgrade);
 
-        if(saveData)
+        if (saveData)
             plugin.getSystemManager().markToBeSaved(this);
     }
 
-    /*
-     * StackedSpawner's methods
-     */
-
-    @Override
-    public LivingEntity getLinkedEntity(){
-        if (linkedEntity != null && (!plugin.getSettings().linkedEntitiesEnabled || linkedEntity.isDead() || !linkedEntity.isValid() ||
-                linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
-            linkedEntity = null;
+    public LivingEntity getRawLinkedEntity() {
         return linkedEntity;
     }
 
-    @Override
-    public void setLinkedEntity(LivingEntity linkedEntity){
-        this.linkedEntity = linkedEntity;
-    }
-
-    @Override
-    public List<StackedSpawner> getNearbySpawners() {
-        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
-
-        Stream<StackedSpawner> spawnerStream;
-
-        if(chunkMerge){
-            spawnerStream = plugin.getSystemManager().getStackedSpawners(getChunk()).stream();
-        }
-
-        else{
-            int range = getMergeRadius();
-            Location location = getLocation();
-
-            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
-
-            spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
-                    .filter(stackedSpawner -> {
-                        Location loc = stackedSpawner.getLocation();
-                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                    });
-        }
-
-        return spawnerStream.filter(this::canStackIntoNoLimit).collect(Collectors.toList());
-    }
-
-    @Override
-    public ItemStack getDropItem() {
-        return getDropItem(getStackAmount());
-    }
-
-    @Override
-    public ItemStack getDropItem(int amount) {
-        return plugin.getProviders().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade());
-    }
-
-    public LivingEntity getRawLinkedEntity(){
-        return linkedEntity;
-    }
-
-    public void linkInventory(SpawnersManageMenu spawnersManageMenu){
+    public void linkInventory(SpawnersManageMenu spawnersManageMenu) {
         this.spawnersManageMenu = spawnersManageMenu;
     }
 
-    public SpawnersManageMenu getLinkedInventory(){
+    public SpawnersManageMenu getLinkedInventory() {
         return spawnersManageMenu;
     }
 
-    public void unlinkInventory(){
+    public void unlinkInventory() {
         this.spawnersManageMenu = null;
-    }
-
-    public static StackedSpawner of(Block block){
-        if(block.getState() instanceof CreatureSpawner)
-            return of((CreatureSpawner) block.getState());
-        throw new IllegalArgumentException("Only spawners can be applied to StackedSpawner object");
-    }
-
-    public static StackedSpawner of(CreatureSpawner creatureSpawner){
-        return plugin.getSystemManager().getStackedSpawner(creatureSpawner);
     }
 
 }

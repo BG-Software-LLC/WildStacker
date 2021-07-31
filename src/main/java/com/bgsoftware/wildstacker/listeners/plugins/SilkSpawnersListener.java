@@ -14,22 +14,22 @@ public final class SilkSpawnersListener implements Listener {
 
     private final WildStackerPlugin plugin;
 
-    public SilkSpawnersListener(WildStackerPlugin plugin){
+    public SilkSpawnersListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     //This one will run only if SilkSpawners is enabled
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onSpawnerBreak(SilkSpawnersSpawnerBreakEvent e){
-        if(plugin.getSettings().spawnersStackingEnabled) {
+    public void onSpawnerBreak(SilkSpawnersSpawnerBreakEvent e) {
+        if (plugin.getSettings().spawnersStackingEnabled) {
             e.setDrop(WStackedSpawner.of(e.getSpawner()).getDropItem(0));
         }
     }
 
     //This one will run only if SilkSpawners is enabled
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onSpawnerChange(SilkSpawnersSpawnerChangeEvent e){
-        if(plugin.getSettings().spawnersStackingEnabled)
+    public void onSpawnerChange(SilkSpawnersSpawnerChangeEvent e) {
+        if (plugin.getSettings().spawnersStackingEnabled)
             Executor.sync(() -> WStackedSpawner.of(e.getSpawner()).updateName(), 2L);
     }
 

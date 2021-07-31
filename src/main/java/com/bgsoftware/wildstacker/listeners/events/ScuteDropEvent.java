@@ -12,9 +12,13 @@ public final class ScuteDropEvent extends Event {
     private final Turtle turtle;
     private final Item scute;
 
-    public ScuteDropEvent(Item scute, Turtle turtle){
+    public ScuteDropEvent(Item scute, Turtle turtle) {
         this.turtle = turtle;
         this.scute = scute;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Item getScute() {
@@ -27,10 +31,6 @@ public final class ScuteDropEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

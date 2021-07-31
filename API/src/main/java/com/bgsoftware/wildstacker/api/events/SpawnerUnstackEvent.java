@@ -13,12 +13,17 @@ public class SpawnerUnstackEvent extends UnstackEvent {
 
     /**
      * The constructor for the event.
-     * @param spawner The spawner object.
+     *
+     * @param spawner       The spawner object.
      * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the spawner is unstacked by.
      */
-    public SpawnerUnstackEvent(StackedSpawner spawner, Entity unstackSource, int unstackAmount){
+    public SpawnerUnstackEvent(StackedSpawner spawner, Entity unstackSource, int unstackAmount) {
         super(spawner, unstackSource, unstackAmount);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -31,16 +36,12 @@ public class SpawnerUnstackEvent extends UnstackEvent {
     /**
      * Get the amount the spawner is unstacked by.
      */
-    public int getAmount(){
+    public int getAmount() {
         return unstackAmount;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

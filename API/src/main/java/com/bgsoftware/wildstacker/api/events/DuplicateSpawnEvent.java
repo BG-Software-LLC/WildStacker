@@ -16,12 +16,17 @@ public class DuplicateSpawnEvent extends Event {
 
     /**
      * The constructor for the event.
+     *
      * @param stackedEntity The original entity.
-     * @param duplicate The duplicated entity.
+     * @param duplicate     The duplicated entity.
      */
-    public DuplicateSpawnEvent(StackedEntity stackedEntity, StackedEntity duplicate){
+    public DuplicateSpawnEvent(StackedEntity stackedEntity, StackedEntity duplicate) {
         this.stackedEntity = stackedEntity;
         this.duplicate = duplicate;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -40,10 +45,6 @@ public class DuplicateSpawnEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

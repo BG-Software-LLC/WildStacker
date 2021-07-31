@@ -13,11 +13,11 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
 
     private int spawnerUpgradeId;
 
-    public WUnloadedStackedSpawner(StackedSpawner stackedSpawner){
+    public WUnloadedStackedSpawner(StackedSpawner stackedSpawner) {
         this(stackedSpawner.getLocation(), stackedSpawner.getStackAmount(), ((WStackedSpawner) stackedSpawner).getUpgradeId());
     }
 
-    public WUnloadedStackedSpawner(Location location, int stackAmount, int spawnerUpgradeId){
+    public WUnloadedStackedSpawner(Location location, int stackAmount, int spawnerUpgradeId) {
         super(location, stackAmount);
         this.spawnerUpgradeId = spawnerUpgradeId;
     }
@@ -28,20 +28,20 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
         return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(null) : currentUpgrade;
     }
 
-    public int getUpgradeId(){
-        return spawnerUpgradeId;
-    }
-
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
         this.spawnerUpgradeId = spawnerUpgrade == null ? 0 : spawnerUpgrade.getId();
+    }
+
+    public int getUpgradeId() {
+        return spawnerUpgradeId;
     }
 
     @Override
     public void remove() {
         Location location = getLocation();
         Map<Location, UnloadedStackedSpawner> cachedSpawners = plugin.getDataHandler().CACHED_SPAWNERS_RAW.get(new ChunkPosition(location));
-        if(cachedSpawners != null)
+        if (cachedSpawners != null)
             cachedSpawners.remove(location);
 
         Query.SPAWNER_DELETE.getStatementHolder()

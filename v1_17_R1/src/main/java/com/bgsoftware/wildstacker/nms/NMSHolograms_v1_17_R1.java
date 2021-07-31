@@ -43,7 +43,7 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
 
         private CraftEntity bukkitEntity;
 
-        EntityHologram(World world, double x, double y, double z){
+        EntityHologram(World world, double x, double y, double z) {
             super(world, x, y, z);
             setInvisible(true);
             setSmall(true);
@@ -67,16 +67,6 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
         }
 
         @Override
-        public void tick() {
-            // Disable normal ticking for this entity.
-
-            // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
-            if (this.z) {
-                this.z = false;
-            }
-        }
-
-        @Override
         public void inactiveTick() {
             // Disable normal ticking for this entity.
 
@@ -87,8 +77,66 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
         }
 
         @Override
+        public boolean isCollidable() {
+            return false;
+        }
+
+        @Override
+        public AxisAlignedBB cs() {
+            return EMPTY_BOUND;
+        }
+
+        @Override
+        public void setSlot(EnumItemSlot enumitemslot, ItemStack itemstack) {
+            // Prevent stand being equipped
+        }
+
+        @Override
         public void saveData(NBTTagCompound nbttagcompound) {
             // Do not save NBT.
+        }
+
+        @Override
+        public void loadData(NBTTagCompound nbttagcompound) {
+            // Do not load NBT.
+        }
+
+        @Override
+        public EnumInteractionResult a(EntityHuman human, Vec3D vec3d, EnumHand enumhand) {
+            // Prevent stand being equipped
+            return EnumInteractionResult.d;
+        }
+
+        @Override
+        public void tick() {
+            // Disable normal ticking for this entity.
+
+            // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
+            if (this.z) {
+                this.z = false;
+            }
+        }
+
+        public void forceSetBoundingBox(AxisAlignedBB boundingBox) {
+            super.a(boundingBox);
+        }
+
+        @Override
+        public CraftEntity getBukkitEntity() {
+            if (bukkitEntity == null) {
+                bukkitEntity = new CraftArmorStand((CraftServer) Bukkit.getServer(), this);
+            }
+            return bukkitEntity;
+        }
+
+        @Override
+        public void a(Entity.RemovalReason entity_removalreason) {
+            // Prevent being killed.
+        }
+
+        @Override
+        public void playSound(SoundEffect soundeffect, float f, float f1) {
+            // Remove sounds.
         }
 
         @Override
@@ -109,11 +157,6 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
         }
 
         @Override
-        public void loadData(NBTTagCompound nbttagcompound) {
-            // Do not load NBT.
-        }
-
-        @Override
         public boolean isInvulnerable(DamageSource source) {
             /*
              * The field Entity.invulnerable is private.
@@ -124,11 +167,6 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
         }
 
         @Override
-        public boolean isCollidable() {
-            return false;
-        }
-
-        @Override
         public void setCustomName(@Nullable IChatBaseComponent ichatbasecomponent) {
             // Locks the custom name.
         }
@@ -136,44 +174,6 @@ public final class NMSHolograms_v1_17_R1 implements NMSHolograms {
         @Override
         public void setCustomNameVisible(boolean flag) {
             // Locks the custom name.
-        }
-
-        @Override
-        public EnumInteractionResult a(EntityHuman human, Vec3D vec3d, EnumHand enumhand) {
-            // Prevent stand being equipped
-            return EnumInteractionResult.d;
-        }
-
-        @Override
-        public void setSlot(EnumItemSlot enumitemslot, ItemStack itemstack) {
-            // Prevent stand being equipped
-        }
-
-        @Override
-        public AxisAlignedBB cs() {
-            return EMPTY_BOUND;
-        }
-
-        public void forceSetBoundingBox(AxisAlignedBB boundingBox) {
-            super.a(boundingBox);
-        }
-
-        @Override
-        public void playSound(SoundEffect soundeffect, float f, float f1) {
-            // Remove sounds.
-        }
-
-        @Override
-        public void a(Entity.RemovalReason entity_removalreason) {
-            // Prevent being killed.
-        }
-
-        @Override
-        public CraftEntity getBukkitEntity() {
-            if (bukkitEntity == null) {
-                bukkitEntity = new CraftArmorStand((CraftServer) Bukkit.getServer(), this);
-            }
-            return bukkitEntity;
         }
 
     }

@@ -60,6 +60,19 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private boolean shouldEnable = true;
 
+    public static void log(String message) {
+        message = ChatColor.translateAlternateColorCodes('&', message);
+        if (message.contains(ChatColor.COLOR_CHAR + "")) {
+            Bukkit.getConsoleSender().sendMessage("[WildStacker] " + message);
+        } else {
+            plugin.getLogger().info(message);
+        }
+    }
+
+    public static WildStackerPlugin getPlugin() {
+        return plugin;
+    }
+
     @Override
     public void onLoad() {
         plugin = this;
@@ -68,83 +81,32 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         loadNMSAdapter();
         loadAPI();
 
-        if(!shouldEnable)
+        if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
-    }
-
-    @Override
-    public void onEnable() {
-        if(!shouldEnable) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        log("******** ENABLE START ********");
-
-        GlowEnchantment.registerEnchantment();
-
-        dataHandler = new DataHandler(this);
-        systemManager = new SystemHandler(this);
-        upgradesHandler = new UpgradesHandler();
-        settingsHandler = new SettingsHandler(this);
-        providersHandler = new ProvidersHandler(this);
-        lootHandler = new LootHandler(this);
-
-        EditorMenu.init(this);
-
-        Locale.reload();
-
-        if(ServerVersion.isAtLeast(ServerVersion.v1_8))
-            getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
-        getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
-        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
-        getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
-        getServer().getPluginManager().registerEvents(new ItemsListener(this), this);
-        getServer().getPluginManager().registerEvents(new MenusListener(), this);
-        getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
-        getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
-        getServer().getPluginManager().registerEvents(new ShulkerOversizedPatch(), this);
-        getServer().getPluginManager().registerEvents(new SpawnersListener(this), this);
-        getServer().getPluginManager().registerEvents(new StewListener(this), this);
-        getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
-        getServer().getPluginManager().registerEvents(new WorldsListener(this), this);
-        EventsListener.register(this);
-
-        CommandsHandler commandsHandler = new CommandsHandler(this);
-        getCommand("stacker").setExecutor(commandsHandler);
-        getCommand("stacker").setTabCompleter(commandsHandler);
-
-        if(Updater.isOutdated()) {
-            log("");
-            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
-            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
-            log("");
-        }
-
-        log("******** ENABLE DONE ********");
     }
 
     @Override
     public void onDisable() {
         log("Cancelling tasks...");
 
-        try{
+        try {
             Bukkit.getScheduler().cancelAllTasks();
-        }catch(Throwable ex){
+        } catch (Throwable ex) {
             try {
                 BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) {
+            }
         }
 
         log("Shutting down stacking service...");
 
         StackService.stop();
 
-        if(shouldEnable) {
+        if (shouldEnable) {
             log("Performing entity&items save");
 
-            for(World world : Bukkit.getWorlds()){
-                for(Chunk chunk : world.getLoadedChunks())
+            for (World world : Bukkit.getWorlds()) {
+                for (Chunk chunk : world.getLoadedChunks())
                     systemManager.handleChunkUnload(chunk);
             }
 
@@ -165,25 +127,77 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         EntityStorage.clearCache();
     }
 
-    private void loadAPI(){
-        try{
+    @Override
+    public void onEnable() {
+        if (!shouldEnable) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        log("******** ENABLE START ********");
+
+        GlowEnchantment.registerEnchantment();
+
+        dataHandler = new DataHandler(this);
+        systemManager = new SystemHandler(this);
+        upgradesHandler = new UpgradesHandler();
+        settingsHandler = new SettingsHandler(this);
+        providersHandler = new ProvidersHandler(this);
+        lootHandler = new LootHandler(this);
+
+        EditorMenu.init(this);
+
+        Locale.reload();
+
+        if (ServerVersion.isAtLeast(ServerVersion.v1_8))
+            getServer().getPluginManager().registerEvents(new BarrelsListener(this), this);
+        getServer().getPluginManager().registerEvents(new BucketsListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChunksListener(this), this);
+        getServer().getPluginManager().registerEvents(new EntitiesListener(this), this);
+        getServer().getPluginManager().registerEvents(new ItemsListener(this), this);
+        getServer().getPluginManager().registerEvents(new MenusListener(), this);
+        getServer().getPluginManager().registerEvents(new NoClaimConflictListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayersListener(this), this);
+        getServer().getPluginManager().registerEvents(new ShulkerOversizedPatch(), this);
+        getServer().getPluginManager().registerEvents(new SpawnersListener(this), this);
+        getServer().getPluginManager().registerEvents(new StewListener(this), this);
+        getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
+        getServer().getPluginManager().registerEvents(new WorldsListener(this), this);
+        EventsListener.register(this);
+
+        CommandsHandler commandsHandler = new CommandsHandler(this);
+        getCommand("stacker").setExecutor(commandsHandler);
+        getCommand("stacker").setTabCompleter(commandsHandler);
+
+        if (Updater.isOutdated()) {
+            log("");
+            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
+            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
+            log("");
+        }
+
+        log("******** ENABLE DONE ********");
+    }
+
+    private void loadAPI() {
+        try {
             Field instance = WildStackerAPI.class.getDeclaredField("instance");
             instance.setAccessible(true);
             instance.set(null, this);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log("Failed to set-up API - disabling plugin...");
             ex.printStackTrace();
             shouldEnable = false;
         }
     }
 
-    private void loadNMSAdapter(){
+    private void loadNMSAdapter() {
         String bukkitVersion = ServerVersion.getBukkitVersion();
-        try{
+        try {
             nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
             nmsHolograms = (NMSHolograms) Class.forName("com.bgsoftware.wildstacker.nms.NMSHolograms_" + bukkitVersion).newInstance();
             nmsSpawners = (NMSSpawners) Class.forName("com.bgsoftware.wildstacker.nms.NMSSpawners_" + bukkitVersion).newInstance();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
         }
@@ -193,7 +207,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return nmsAdapter;
     }
 
-    public NMSHolograms getNMSHolograms(){
+    public NMSHolograms getNMSHolograms() {
         return nmsHolograms;
     }
 
@@ -205,20 +219,20 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return lootHandler;
     }
 
-    public void setLootHandler(LootHandler lootHandler){
+    public void setLootHandler(LootHandler lootHandler) {
         this.lootHandler = lootHandler;
     }
 
-    public ProvidersHandler getProviders(){
+    public ProvidersHandler getProviders() {
         return providersHandler;
     }
 
-    public DataHandler getDataHandler(){
+    public DataHandler getDataHandler() {
         return dataHandler;
     }
 
     @Override
-    public SystemHandler getSystemManager(){
+    public SystemHandler getSystemManager() {
         return systemManager;
     }
 
@@ -227,26 +241,12 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return upgradesHandler;
     }
 
-    public SettingsHandler getSettings(){
+    public SettingsHandler getSettings() {
         return settingsHandler;
     }
 
-    public void setSettings(SettingsHandler settingsHandler){
+    public void setSettings(SettingsHandler settingsHandler) {
         this.settingsHandler = settingsHandler;
-    }
-
-    public static void log(String message){
-        message = ChatColor.translateAlternateColorCodes('&', message);
-        if(message.contains(ChatColor.COLOR_CHAR + "")){
-            Bukkit.getConsoleSender().sendMessage("[WildStacker] " + message);
-        }
-        else {
-            plugin.getLogger().info(message);
-        }
-    }
-
-    public static WildStackerPlugin getPlugin(){
-        return plugin;
     }
 
 }

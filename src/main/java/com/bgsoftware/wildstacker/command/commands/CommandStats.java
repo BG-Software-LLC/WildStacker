@@ -51,10 +51,10 @@ public final class CommandStats implements ICommand {
 
         int spawnersUnloadedAmount = 0, barrelsUnloadedAmount = 0;
 
-        for(Map<?, ?> map : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
+        for (Map<?, ?> map : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
             spawnersUnloadedAmount += map.size();
 
-        for(Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
+        for (Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
             barrelsUnloadedAmount += map.size();
 
         String message = "&eWildStacker Stats:" +

@@ -29,15 +29,15 @@ public final class EntitiesGetter {
                 }
             });
 
-    public static void handleEntitySpawn(Entity entity){
+    public static void handleEntitySpawn(Entity entity) {
         ChunkPosition chunkPosition = new ChunkPosition(entity.getLocation());
         entitiesCache.getUnchecked(chunkPosition).add(entity);
     }
 
-    public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter){
+    public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter) {
         Collection<Entity> entities = plugin.getNMSAdapter().getNearbyEntities(location, range, filter);
 
-        if(entities != null){
+        if (entities != null) {
             return entities.stream();
         }
 
@@ -54,15 +54,15 @@ public final class EntitiesGetter {
 
         entities = new ArrayList<>();
 
-        for (int x = minChunkX; x <= maxChunkX; x++){
-            for (int z = minChunkZ; z <= maxChunkZ; z++){
+        for (int x = minChunkX; x <= maxChunkX; x++) {
+            for (int z = minChunkZ; z <= maxChunkZ; z++) {
                 entities.addAll(entitiesCache.getUnchecked(new ChunkPosition(worldName, x, z)));
             }
         }
 
         return entities.stream().filter(entity ->
                 isInRange(entity.getLocation(), minX, minY, minZ, maxX, maxY, maxZ) &&
-                (filter == null || filter.test(entity))
+                        (filter == null || filter.test(entity))
         );
     }
 

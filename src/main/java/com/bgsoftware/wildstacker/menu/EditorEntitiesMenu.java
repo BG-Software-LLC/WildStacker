@@ -10,15 +10,15 @@ public final class EditorEntitiesMenu extends EditorMenu {
 
     private final static EditorEntitiesMenu NULL_HOLDER = new EditorEntitiesMenu(null);
 
-    private final static String[] sectionsPaths = new String[] { "merge-radius", "limits", "minimum-required",
-            "stack-checks", "stack-split", "default-unstack" };
+    private final static String[] sectionsPaths = new String[]{"merge-radius", "limits", "minimum-required",
+            "stack-checks", "stack-split", "default-unstack"};
 
-    private EditorEntitiesMenu(Inventory inventory){
+    private EditorEntitiesMenu(Inventory inventory) {
         super(inventory, "ENTITIES_SLOT_", "entitiesEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

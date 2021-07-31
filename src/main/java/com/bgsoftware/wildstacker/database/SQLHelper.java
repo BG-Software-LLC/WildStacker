@@ -18,14 +18,14 @@ public final class SQLHelper {
 
     private static Connection conn;
 
-    private SQLHelper(){
+    private SQLHelper() {
 
     }
 
-    public static void waitForConnection(){
+    public static void waitForConnection() {
         try {
             ready.get();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -41,41 +41,41 @@ public final class SQLHelper {
         ready.complete(null);
     }
 
-    public static void executeUpdate(String statement){
+    public static void executeUpdate(String statement) {
         executeUpdate(statement, ex -> {
             System.out.println(statement);
             ex.printStackTrace();
         });
     }
 
-    public static void executeUpdate(String statement, Consumer<SQLException> onError){
-        if(conn == null)
+    public static void executeUpdate(String statement, Consumer<SQLException> onError) {
+        if (conn == null)
             return;
 
         PreparedStatement preparedStatement = null;
-        try{
+        try {
             preparedStatement = conn.prepareStatement(statement);
             preparedStatement.executeUpdate();
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             onError.accept(ex);
         } finally {
             close(preparedStatement);
         }
     }
 
-    public static boolean doesConditionExist(String statement){
-        if(conn == null)
+    public static boolean doesConditionExist(String statement) {
+        if (conn == null)
             return false;
 
         boolean ret = false;
 
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             preparedStatement = conn.prepareStatement(statement);
             resultSet = preparedStatement.executeQuery();
             ret = resultSet.next();
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {
             close(resultSet);
@@ -85,22 +85,22 @@ public final class SQLHelper {
         return ret;
     }
 
-    public static void executeQuery(String statement, QueryConsumer<ResultSet> callback){
+    public static void executeQuery(String statement, QueryConsumer<ResultSet> callback) {
         executeQuery(statement, callback, Throwable::printStackTrace);
     }
 
-    public static void executeQuery(String statement, QueryConsumer<ResultSet> callback, Consumer<SQLException> onError){
-        if(conn == null)
+    public static void executeQuery(String statement, QueryConsumer<ResultSet> callback, Consumer<SQLException> onError) {
+        if (conn == null)
             return;
 
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
-        try{
+        try {
             preparedStatement = conn.prepareStatement(statement);
             resultSet = preparedStatement.executeQuery();
             callback.accept(resultSet);
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             onError.accept(ex);
         } finally {
             close(resultSet);
@@ -108,39 +108,40 @@ public final class SQLHelper {
         }
     }
 
-    public static void close(){
+    public static void close() {
         try {
             conn.close();
-        }catch (SQLException ex){
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
 
-    public static void buildStatement(String query, QueryConsumer<PreparedStatement> consumer, Consumer<SQLException> failure){
+    public static void buildStatement(String query, QueryConsumer<PreparedStatement> consumer, Consumer<SQLException> failure) {
         PreparedStatement preparedStatement = null;
-        try{
+        try {
             preparedStatement = conn.prepareStatement(query);
             consumer.accept(preparedStatement);
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             failure.accept(ex);
         } finally {
-          close(preparedStatement);
+            close(preparedStatement);
         }
     }
 
-    private static void close(AutoCloseable closeable){
-        if(closeable != null){
+    private static void close(AutoCloseable closeable) {
+        if (closeable != null) {
             try {
-                if(!(closeable instanceof Connection))
+                if (!(closeable instanceof Connection))
                     closeable.close();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 
-    public static void setAutoCommit(boolean autoCommit){
+    public static void setAutoCommit(boolean autoCommit) {
         try {
             conn.setAutoCommit(autoCommit);
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
@@ -149,7 +150,7 @@ public final class SQLHelper {
         conn.commit();
     }
 
-    public interface QueryConsumer<T>{
+    public interface QueryConsumer<T> {
 
         void accept(T value) throws SQLException;
 

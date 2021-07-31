@@ -24,17 +24,18 @@ public final class DataSerializer_NBTInjector implements IDataSerializer, Listen
         try {
             ENTITY_FIELD = EntityEvent.class.getDeclaredField("entity");
             ENTITY_FIELD.setAccessible(true);
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
     }
 
-    public static void register(WildStackerPlugin plugin){
-        if(NBTInjector.isInjected())
-            plugin.getSystemManager().setDataSerializer(new DataSerializer_NBTInjector(plugin));
-    }
-
-    private DataSerializer_NBTInjector(WildStackerPlugin plugin){
+    private DataSerializer_NBTInjector(WildStackerPlugin plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         WildStackerPlugin.log("- Using NBTInjector to store entity data.");
+    }
+
+    public static void register(WildStackerPlugin plugin) {
+        if (NBTInjector.isInjected())
+            plugin.getSystemManager().setDataSerializer(new DataSerializer_NBTInjector(plugin));
     }
 
     @Override
@@ -42,18 +43,18 @@ public final class DataSerializer_NBTInjector implements IDataSerializer, Listen
         NBTCompound nbtCompound = NBTInjector.getNbtData(stackedEntity.getLivingEntity());
         nbtCompound.setInteger("ws:stack-amount", stackedEntity.getStackAmount());
         nbtCompound.setString("ws:stack-cause", stackedEntity.getSpawnCause().name());
-        if(stackedEntity.hasNameTag())
+        if (stackedEntity.hasNameTag())
             nbtCompound.setBoolean("ws:name-tag", true);
     }
 
     @Override
     public void loadEntity(StackedEntity stackedEntity) {
         NBTCompound nbtCompound = NBTInjector.getNbtData(stackedEntity.getLivingEntity());
-        if(nbtCompound.hasKey("ws:stack-amount"))
+        if (nbtCompound.hasKey("ws:stack-amount"))
             stackedEntity.setStackAmount(nbtCompound.getInteger("ws:stack-amount"), false);
-        if(nbtCompound.hasKey("ws:stack-cause"))
+        if (nbtCompound.hasKey("ws:stack-cause"))
             stackedEntity.setSpawnCause(SpawnCause.valueOf(nbtCompound.getString("ws:stack-cause")));
-        if(nbtCompound.hasKey("ws:name-tag"))
+        if (nbtCompound.hasKey("ws:name-tag"))
             ((WStackedEntity) stackedEntity).setNameTag();
     }
 
@@ -66,16 +67,17 @@ public final class DataSerializer_NBTInjector implements IDataSerializer, Listen
     @Override
     public void loadItem(StackedItem stackedItem) {
         NBTCompound nbtCompound = NBTInjector.getNbtData(stackedItem.getItem());
-        if(nbtCompound.hasKey("ws:stack-amount"))
+        if (nbtCompound.hasKey("ws:stack-amount"))
             stackedItem.setStackAmount(nbtCompound.getInteger("ws:stack-amount"), false);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onEntitySpawn(EntitySpawnEvent e){
-        if(ENTITY_FIELD != null){
+    public void onEntitySpawn(EntitySpawnEvent e) {
+        if (ENTITY_FIELD != null) {
             try {
                 ENTITY_FIELD.set(e, NBTInjector.patchEntity(e.getEntity()));
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
     }
 

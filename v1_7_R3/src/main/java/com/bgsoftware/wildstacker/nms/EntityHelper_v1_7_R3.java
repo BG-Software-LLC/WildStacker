@@ -174,13 +174,13 @@ public final class EntityHelper_v1_7_R3 {
     }
 
     static void addEntity(net.minecraft.server.v1_7_R3.Entity entity, CreatureSpawnEvent.SpawnReason reason) throws IllegalArgumentException {
-        if(entity == null)
+        if (entity == null)
             throw new IllegalArgumentException("Cannot spawn null entity");
 
         World world = entity.world;
 
         if (entity instanceof EntityInsentient) {
-            ((EntityInsentient)entity).a((GroupDataEntity) null);
+            ((EntityInsentient) entity).a((GroupDataEntity) null);
         }
 
         world.addEntity(entity, reason);

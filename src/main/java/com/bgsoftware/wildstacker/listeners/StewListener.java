@@ -14,13 +14,13 @@ public final class StewListener implements Listener {
 
     private WildStackerPlugin plugin;
 
-    public StewListener(WildStackerPlugin plugin){
+    public StewListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onStewEat(PlayerItemConsumeEvent e){
-        if(e.getItem().getType().name().contains("STEW") || e.getItem().getType().name().contains("SOUP")){
+    public void onStewEat(PlayerItemConsumeEvent e) {
+        if (e.getItem().getType().name().contains("STEW") || e.getItem().getType().name().contains("SOUP")) {
             ItemStack inHand = e.getPlayer().getItemInHand().clone();
             inHand.setAmount(inHand.getAmount() - 1);
 

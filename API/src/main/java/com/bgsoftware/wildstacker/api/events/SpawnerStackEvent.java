@@ -12,11 +12,16 @@ public class SpawnerStackEvent extends StackEvent {
 
     /**
      * The constructor for the event.
+     *
      * @param spawner The original spawner object.
-     * @param target The spawner object that is stacked.
+     * @param target  The spawner object that is stacked.
      */
-    public SpawnerStackEvent(StackedSpawner spawner, StackedSpawner target){
+    public SpawnerStackEvent(StackedSpawner spawner, StackedSpawner target) {
         super(spawner, target);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -35,10 +40,6 @@ public class SpawnerStackEvent extends StackEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

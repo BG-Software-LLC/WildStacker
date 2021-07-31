@@ -7,7 +7,7 @@ public final class Pair<K, V> implements Map.Entry<K, V> {
     private final K key;
     private final V value;
 
-    public Pair(K key, V value){
+    public Pair(K key, V value) {
         this.key = key;
         this.value = value;
     }
@@ -21,13 +21,13 @@ public final class Pair<K, V> implements Map.Entry<K, V> {
     }
 
     @Override
-    public String toString() {
-        return "Pair{" + key + "=" + value + '}';
+    public V setValue(V value) {
+        throw new UnsupportedOperationException("Cannot use the setValue method of Pair");
     }
 
     @Override
-    public V setValue(V value) {
-        throw new UnsupportedOperationException("Cannot use the setValue method of Pair");
+    public String toString() {
+        return "Pair{" + key + "=" + value + '}';
     }
 
 }

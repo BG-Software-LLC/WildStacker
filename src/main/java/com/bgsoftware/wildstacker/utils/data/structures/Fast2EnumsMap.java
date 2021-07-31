@@ -12,33 +12,32 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
     private V globalValue;
     private int size = 0;
 
-    public Fast2EnumsMap(Class<E> firstKeyType, Class<T> secondKeyType){
+    public Fast2EnumsMap(Class<E> firstKeyType, Class<T> secondKeyType) {
         int firstKeyTypeLength = FastEnumUtils.getEnumValues(firstKeyType).length;
         this.secondKeyLength = FastEnumUtils.getEnumValues(secondKeyType).length;
 
         this.firstKeyArray = new FastEnumMap<>(firstKeyTypeLength);
-        this.secondKeyArray =  new FastEnumMap<>(secondKeyLength);
+        this.secondKeyArray = new FastEnumMap<>(secondKeyLength);
 
         //noinspection unchecked
         this.combinedKeyArray = (V[]) new Object[firstKeyTypeLength * secondKeyLength];
     }
 
     public static <E extends Enum<E>, T extends Enum<T>> Fast2EnumsMap<E, T, Integer> fromSectionToInt(
-            ConfigurationSection section, Class<E> firstType, Class<T> secondType){
+            ConfigurationSection section, Class<E> firstType, Class<T> secondType) {
         Fast2EnumsMap<E, T, Integer> fast2EnumsIntMap = new Fast2EnumsMap<>(firstType, secondType);
-        if(section != null) {
+        if (section != null) {
             for (String key : section.getKeys(false))
                 fast2EnumsIntMap.put(key, section.getInt(key), firstType, secondType);
         }
         return fast2EnumsIntMap;
     }
 
-    private void put(String raw, V value, Class<E> firstType, Class<T> secondType){
-        if(raw.equalsIgnoreCase("ALL")){
+    private void put(String raw, V value, Class<E> firstType, Class<T> secondType) {
+        if (raw.equalsIgnoreCase("ALL")) {
             globalValue = value;
             size++;
-        }
-        else {
+        } else {
             String[] sections = raw.split(":");
             E first = FastEnumUtils.getEnum(firstType, sections[0]);
 
@@ -62,14 +61,14 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
 
     public V putFirst(E e, V value) {
         V originalValue = firstKeyArray.put(e, value);
-        if(originalValue == null)
+        if (originalValue == null)
             size++;
         return originalValue;
     }
 
     public V putSecond(T t, V value) {
         V originalValue = secondKeyArray.put(t, value);
-        if(originalValue == null)
+        if (originalValue == null)
             size++;
         return originalValue;
     }
@@ -79,25 +78,25 @@ public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
         V originalValue = combinedKeyArray[index];
         combinedKeyArray[index] = value;
 
-        if(originalValue == null)
+        if (originalValue == null)
             size++;
 
         return originalValue;
     }
 
-    public V getOrDefault(E e, T t, V def){
+    public V getOrDefault(E e, T t, V def) {
         V value = get(e, t);
         return value == null ? def : value;
     }
 
-    public V get(E e, T t){
+    public V get(E e, T t) {
         V value = firstKeyArray.get(e);
 
-        if(value == null) {
+        if (value == null) {
             value = secondKeyArray.get(t);
-            if(value == null) {
+            if (value == null) {
                 value = combinedKeyArray[(secondKeyLength * t.ordinal()) + e.ordinal()];
-                if(value == null){
+                if (value == null) {
                     value = globalValue;
                 }
             }

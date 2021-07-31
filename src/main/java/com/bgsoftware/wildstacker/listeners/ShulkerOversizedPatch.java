@@ -10,31 +10,31 @@ import org.bukkit.inventory.ItemStack;
 public final class ShulkerOversizedPatch implements Listener {
 
     @EventHandler
-    public void onShulkerClick(InventoryClickEvent e){
+    public void onShulkerClick(InventoryClickEvent e) {
         Inventory shulkerBox = e.getView().getTopInventory();
 
-        if(shulkerBox == null || !shulkerBox.getType().name().equals("SHULKER_BOX"))
+        if (shulkerBox == null || !shulkerBox.getType().name().equals("SHULKER_BOX"))
             return;
 
         ItemStack overSizeItem = null;
 
-        switch (e.getClick()){
+        switch (e.getClick()) {
             case LEFT:
-                if(e.getClickedInventory() == shulkerBox)
+                if (e.getClickedInventory() == shulkerBox)
                     overSizeItem = e.getCursor();
                 break;
             case SHIFT_LEFT:
             case SHIFT_RIGHT:
-                if(e.getClickedInventory() != shulkerBox)
+                if (e.getClickedInventory() != shulkerBox)
                     overSizeItem = e.getCurrentItem();
                 break;
             case NUMBER_KEY:
-                if(e.getClickedInventory() == shulkerBox)
+                if (e.getClickedInventory() == shulkerBox)
                     overSizeItem = e.getView().getBottomInventory().getItem(e.getHotbarButton());
                 break;
         }
 
-        if(overSizeItem != null && overSizeItem.getType() != Material.AIR && overSizeItem.getAmount() > overSizeItem.getMaxStackSize())
+        if (overSizeItem != null && overSizeItem.getType() != Material.AIR && overSizeItem.getAmount() > overSizeItem.getMaxStackSize())
             e.setCancelled(true);
     }
 

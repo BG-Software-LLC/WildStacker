@@ -4,20 +4,20 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class Random {
 
-    public static int nextChance(double chance, int bound){
+    public static int nextChance(double chance, int bound) {
         int result = 0;
 
-        for(int i = 0; i < bound; i++)
+        for (int i = 0; i < bound; i++)
             result += ThreadLocalRandom.current().nextDouble() < (chance / 100) ? 1 : 0;
 
         return result;
     }
 
-    public static int nextInt(int bound){
+    public static int nextInt(int bound) {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
-    public static int nextInt(int min, int max, int amount, double exp){
+    public static int nextInt(int min, int max, int amount, double exp) {
         min *= amount;
         max *= amount;
 
@@ -28,36 +28,35 @@ public final class Random {
         return nextInt(rounded) + min;
     }
 
-    public static int nextInt(int min, int max, int amount){
+    public static int nextInt(int min, int max, int amount) {
         min *= amount;
         max *= amount;
 
-        if(amount < 10){
+        if (amount < 10) {
             return nextInt(max - min + 1) + min;
-        }
-        else {
+        } else {
             int avg = getAverage(min, max);
             return ensureRange(min, max, (int) Math.round(nextGaussian() * getSD(max, avg) + avg));
         }
     }
 
-    private static double nextGaussian(){
+    private static double nextGaussian() {
         return ThreadLocalRandom.current().nextGaussian();
     }
 
-    private static float nextFloat(){
+    private static float nextFloat() {
         return ThreadLocalRandom.current().nextFloat();
     }
 
-    private static int getAverage(int min, int max){
+    private static int getAverage(int min, int max) {
         return (max + min) / 2;
     }
 
-    private static int getSD(int max, int avg){
+    private static int getSD(int max, int avg) {
         return (max - avg) / 3;
     }
 
-    private static int ensureRange(int min, int max, int num){
+    private static int ensureRange(int min, int max, int num) {
         return Math.min(max, Math.max(min, num));
     }
 

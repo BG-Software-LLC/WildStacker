@@ -15,65 +15,65 @@ public final class Executor {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static boolean shutdown = false, dataShutdown = false;
 
-    public static void sync(Runnable runnable){
-        if(shutdown)
+    public static void sync(Runnable runnable) {
+        if (shutdown)
             return;
 
-        if(!Bukkit.isPrimaryThread())
+        if (!Bukkit.isPrimaryThread())
             Bukkit.getScheduler().runTask(plugin, runnable);
         else
             runnable.run();
     }
 
-    public static void sync(Runnable runnable, long delayedTime){
-        if(shutdown)
+    public static void sync(Runnable runnable, long delayedTime) {
+        if (shutdown)
             return;
 
         Bukkit.getScheduler().runTaskLater(plugin, runnable, delayedTime);
     }
 
-    public static void async(Runnable runnable){
-        if(shutdown)
+    public static void async(Runnable runnable) {
+        if (shutdown)
             return;
 
-        if(!Bukkit.isPrimaryThread())
+        if (!Bukkit.isPrimaryThread())
             runnable.run();
         else
             Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
 
-    public static void async(Runnable runnable, long delay){
-        if(shutdown)
+    public static void async(Runnable runnable, long delay) {
+        if (shutdown)
             return;
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, runnable, delay);
     }
 
-    public static BukkitTask timer(Runnable runnable, long period){
+    public static BukkitTask timer(Runnable runnable, long period) {
         return Bukkit.getScheduler().runTaskTimer(plugin, runnable, 0L, period);
     }
 
-    public static boolean isDataThread(){
+    public static boolean isDataThread() {
         return Thread.currentThread().getName().contains("WildStacker Database Thread");
     }
 
-    public static void data(Runnable runnable){
-        if(dataShutdown)
+    public static void data(Runnable runnable) {
+        if (dataShutdown)
             return;
 
         dataService.execute(runnable);
     }
 
-    public static void stop(){
+    public static void stop() {
         shutdown = true;
     }
 
-    public static void stopData(){
-        try{
+    public static void stopData() {
+        try {
             dataShutdown = true;
             System.out.println("Shutting down database executor");
             shutdownAndAwaitTermination();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

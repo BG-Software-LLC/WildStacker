@@ -124,7 +124,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         Entity nmsEntity = world.createEntity(location, type);
         org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
 
-        if(beforeSpawnConsumer != null) {
+        if (beforeSpawnConsumer != null) {
             //noinspection unchecked
             beforeSpawnConsumer.accept((T) bukkitEntity);
         }
@@ -133,7 +133,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
 
         WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
-        if(afterSpawnConsumer != null) {
+        if (afterSpawnConsumer != null) {
             //noinspection unchecked
             afterSpawnConsumer.accept((T) bukkitEntity);
         }
@@ -166,7 +166,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     public void setInLove(Animals entity, Player breeder, boolean inLove) {
         EntityAnimal nmsEntity = ((CraftAnimals) entity).getHandle();
         EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
-        if(inLove)
+        if (inLove)
             nmsEntity.c((EntityHuman) entityPlayer);
         else
             nmsEntity.resetLove();
@@ -196,7 +196,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     }
 
     @Override
-    public boolean canDropExp(LivingEntity livingEntity){
+    public boolean canDropExp(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         int lastDamageByPlayerTime = LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving);
         boolean alwaysGivesExp = ALWAYS_GIVES_EXP.invoke(entityLiving);
@@ -244,7 +244,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         World world = ((CraftWorld) location.getWorld()).getHandle();
         Entity entity = EntityTypes.a(((CraftEntity) bukkitEntity).getHandle().getClass(), world);
 
-        if(entity == null){
+        if (entity == null) {
             WildStackerPlugin.log("Failed to get entity type from " + bukkitEntity.getType());
             return true;
         }
@@ -259,7 +259,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
 
         Chunk chunk = world.getChunkIfLoaded(chunkPosition.getX(), chunkPosition.getZ());
 
-        if(chunk == null)
+        if (chunk == null)
             return new ArrayList<>();
 
         return Arrays.stream(chunk.entitySlices)
@@ -305,13 +305,13 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         EntityHuman entityHuman = ((CraftPlayer) attacker).getHandle();
 
         // Making sure the player used a sword.
-        if(usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
+        if (usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
             return;
 
         List<EntityLiving> nearbyEntities = targetLiving.world.a(EntityLiving.class, targetLiving.getBoundingBox().grow(1.0D, 0.25D, 1.0D));
 
-        for(EntityLiving nearby : nearbyEntities){
-            if(nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D){
+        for (EntityLiving nearby : nearbyEntities) {
+            if (nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D) {
                 nearby.damageEntity(DamageSource.playerAttack(entityHuman), 1.0F);
             }
         }
@@ -335,13 +335,13 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         event.setCancelled(totemOfUndying.isEmpty());
         Bukkit.getPluginManager().callEvent(event);
 
-        if(event.isCancelled())
+        if (event.isCancelled())
             return false;
 
-        if(!totemOfUndying.isEmpty()) {
+        if (!totemOfUndying.isEmpty()) {
             totemOfUndying.subtract(1);
 
-            if(entityLiving instanceof EntityPlayer)
+            if (entityLiving instanceof EntityPlayer)
                 ((EntityPlayer) entityLiving).b(StatisticList.b(Items.cY));
 
             entityLiving.setHealth(1.0F);
@@ -486,7 +486,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         float soundVolume = GET_SOUND_VOLUME.invoke(entityLiving);
         float soundPitch = GET_SOUND_PITCH.invoke(entityLiving);
 
-        if(deathSound != null)
+        if (deathSound != null)
             entityLiving.a(deathSound, soundVolume, soundPitch);
     }
 
@@ -580,10 +580,10 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             mendingItem.setData(mendingItem.getData() - repairAmount);
         }
 
-        if(amount > 0) {
+        if (amount > 0) {
             PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
             Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
-            if(playerExpChangeEvent.getAmount() > 0)
+            if (playerExpChangeEvent.getAmount() > 0)
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
     }
@@ -608,7 +608,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         nbtTagCompound.remove("HandItems");
         nbtTagCompound.remove("Leash");
         nbtTagCompound.remove("Leashed");
-        if(targetBukkit instanceof Zombie)
+        if (targetBukkit instanceof Zombie)
             ((Zombie) targetBukkit).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
 
         target.a(nbtTagCompound);
@@ -627,7 +627,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
 
         try {
             NBTCompressedStreamTools.a(tagCompound, dataOutput);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
 
@@ -644,7 +644,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             ItemStack nmsItem = new ItemStack(nbtTagCompoundRoot);
 
             return CraftItemStack.asBukkitCopy(nmsItem);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
 
@@ -656,21 +656,21 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        if(value instanceof Boolean)
+        if (value instanceof Boolean)
             tagCompound.setBoolean(key, (boolean) value);
-        else if(value instanceof Integer)
+        else if (value instanceof Integer)
             tagCompound.setInt(key, (int) value);
-        else if(value instanceof String)
+        else if (value instanceof String)
             tagCompound.setString(key, (String) value);
-        else if(value instanceof Double)
+        else if (value instanceof Double)
             tagCompound.setDouble(key, (double) value);
-        else if(value instanceof Short)
+        else if (value instanceof Short)
             tagCompound.setShort(key, (short) value);
-        else if(value instanceof Byte)
+        else if (value instanceof Byte)
             tagCompound.setByte(key, (byte) value);
-        else if(value instanceof Float)
+        else if (value instanceof Float)
             tagCompound.setFloat(key, (float) value);
-        else if(value instanceof Long)
+        else if (value instanceof Long)
             tagCompound.setLong(key, (long) value);
 
         nmsItem.setTag(tagCompound);
@@ -682,13 +682,13 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType, Object def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
 
-        if(nmsItem == null)
+        if (nmsItem == null)
             return valueType.cast(def);
 
         NBTTagCompound tagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
 
-        if(tagCompound != null) {
-            if(!tagCompound.hasKey(key))
+        if (tagCompound != null) {
+            if (!tagCompound.hasKey(key))
                 return valueType.cast(def);
             else if (valueType.equals(Boolean.class))
                 return valueType.cast(tagCompound.getBoolean(key));
@@ -724,18 +724,18 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
 
         entityLiving.a("ws:stack-amount=" + stackedEntity.getStackAmount());
         entityLiving.a("ws:stack-cause=" + stackedEntity.getSpawnCause().name());
-        if(stackedEntity.hasNameTag())
+        if (stackedEntity.hasNameTag())
             entityLiving.a("ws:name-tag=true");
         int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
-        if(upgradeId != 0)
+        if (upgradeId != 0)
             entityLiving.a("ws:upgrade=" + upgradeId);
     }
 
     @Override
     public void loadEntity(StackedEntity stackedEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
-        for(String scoreboardTag : entityLiving.P()){
-            if(scoreboardTag.startsWith("ws:")) {
+        for (String scoreboardTag : entityLiving.P()) {
+            if (scoreboardTag.startsWith("ws:")) {
                 String[] tagSections = scoreboardTag.split("=");
                 if (tagSections.length == 2) {
                     try {
@@ -769,8 +769,8 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     @Override
     public void loadItem(StackedItem stackedItem) {
         EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
-        for(String scoreboardTag : entityItem.P()){
-            if(scoreboardTag.startsWith("ws:")) {
+        for (String scoreboardTag : entityItem.P()) {
+            if (scoreboardTag.startsWith("ws:")) {
                 String[] tagSections = scoreboardTag.split("=");
                 if (tagSections.length == 2) {
                     try {
@@ -785,14 +785,14 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         }
     }
 
-    private boolean shouldNotDrop(ItemStack itemStack){
-        try{
+    private boolean shouldNotDrop(ItemStack itemStack) {
+        try {
             return EnchantmentManager.c(itemStack);
-        }catch(Throwable ex){
-            try{
+        } catch (Throwable ex) {
+            try {
                 //noinspection JavaReflectionMemberAccess
                 return (Boolean) EnchantmentManager.class.getMethod("e", ItemStack.class).invoke(null, itemStack);
-            }catch(Exception ex1){
+            } catch (Exception ex1) {
                 ex1.printStackTrace();
             }
         }
@@ -801,12 +801,12 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
     }
 
     @SuppressWarnings("deprecation")
-    private static class SyncedCreatureSpawnerImpl extends CraftBlockState implements SyncedCreatureSpawner{
+    private static class SyncedCreatureSpawnerImpl extends CraftBlockState implements SyncedCreatureSpawner {
 
         private final World world;
         private final BlockPosition blockPosition;
 
-        SyncedCreatureSpawnerImpl(Block block){
+        SyncedCreatureSpawnerImpl(Block block) {
             super(block);
             world = ((CraftWorld) block.getWorld()).getHandle();
             blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
@@ -817,7 +817,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             try {
                 MinecraftKey key = getSpawner().getSpawner().getMobName();
                 return key == null ? EntityType.PIG : EntityType.fromName(key.a());
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 return EntityType.PIG;
             }
         }
@@ -834,7 +834,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         @Override
         public void setCreatureTypeByName(String s) {
             EntityType entityType = EntityType.fromName(s);
-            if(entityType != null && entityType != EntityType.UNKNOWN)
+            if (entityType != null && entityType != EntityType.UNKNOWN)
                 setSpawnedType(entityType);
         }
 
@@ -857,7 +857,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         @Override
         public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
             MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            if(mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner){
+            if (mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner) {
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).spawnCount = spawnerUpgrade.getSpawnCount();
@@ -865,8 +865,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).spawnRange = spawnerUpgrade.getSpawnRange();
                 ((NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
-            }
-            else{
+            } else {
                 NBTTagCompound nbtTagCompound = new NBTTagCompound();
                 mobSpawnerAbstract.b(nbtTagCompound);
 
@@ -884,7 +883,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
         @Override
         public SpawnerCachedData readData() {
             MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            if(mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner){
+            if (mobSpawnerAbstract instanceof NMSSpawners_v1_11_R1.StackedMobSpawner) {
                 NMSSpawners_v1_11_R1.StackedMobSpawner stackedMobSpawner = (NMSSpawners_v1_11_R1.StackedMobSpawner) mobSpawnerAbstract;
                 return new SpawnerCachedData(
                         stackedMobSpawner.minSpawnDelay,
@@ -896,8 +895,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
                         stackedMobSpawner.spawnDelay / 20,
                         stackedMobSpawner.failureReason
                 );
-            }
-            else{
+            } else {
                 NBTTagCompound nbtTagCompound = new NBTTagCompound();
                 mobSpawnerAbstract.b(nbtTagCompound);
                 return new SpawnerCachedData(
@@ -912,7 +910,7 @@ public final class NMSAdapter_v1_11_R1 implements NMSAdapter {
             }
         }
 
-        TileEntityMobSpawner getSpawner(){
+        TileEntityMobSpawner getSpawner() {
             return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
         }
 

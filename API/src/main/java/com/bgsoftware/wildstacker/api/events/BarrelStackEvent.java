@@ -12,11 +12,16 @@ public class BarrelStackEvent extends StackEvent {
 
     /**
      * The constructor for the event.
+     *
      * @param barrel The original barrel object.
      * @param target The barrel object that is stacked.
      */
-    public BarrelStackEvent(StackedBarrel barrel, StackedBarrel target){
+    public BarrelStackEvent(StackedBarrel barrel, StackedBarrel target) {
         super(barrel, target);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -35,10 +40,6 @@ public class BarrelStackEvent extends StackEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

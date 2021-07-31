@@ -17,11 +17,16 @@ public class SpawnerStackedEntitySpawnEvent extends Event {
 
     /**
      * The constructor for the event.
+     *
      * @param creatureSpawner The spawner that will spawn the entity.
      */
-    public SpawnerStackedEntitySpawnEvent(CreatureSpawner creatureSpawner){
+    public SpawnerStackedEntitySpawnEvent(CreatureSpawner creatureSpawner) {
         super(!Bukkit.isPrimaryThread());
         this.creatureSpawner = creatureSpawner;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -34,23 +39,19 @@ public class SpawnerStackedEntitySpawnEvent extends Event {
     /**
      * Check whether or not the entity should be spawned as a stacked entity.
      */
-    public boolean shouldBeStacked(){
+    public boolean shouldBeStacked() {
         return shouldBeStacked;
     }
 
     /**
      * Set whether or not the entity should be spawned as a stacked entity.
      */
-    public void setShouldBeStacked(boolean shouldBeStacked){
+    public void setShouldBeStacked(boolean shouldBeStacked) {
         this.shouldBeStacked = shouldBeStacked;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

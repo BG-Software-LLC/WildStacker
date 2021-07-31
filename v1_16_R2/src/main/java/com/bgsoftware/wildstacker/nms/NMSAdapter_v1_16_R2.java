@@ -156,6 +156,11 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     /*
      *   Entity methods
      */
+    private static final NamespacedKey
+            STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
+            SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
+            NAME_TAG = new NamespacedKey(plugin, "nameTag"),
+            UPGRADE = new NamespacedKey(plugin, "upgrade");
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -454,6 +459,10 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         return entity.getPersistentDataContainer();
     }
 
+    /*
+     *   Spawner methods
+     */
+
     @Override
     public boolean handleTotemOfUndying(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
@@ -494,24 +503,20 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         return true;
     }
 
-    /*
-     *   Spawner methods
-     */
-
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
+
+    /*
+     *   Item methods
+     */
 
     @Override
     public boolean isRotatable(Block block) {
         World world = ((CraftWorld) block.getWorld()).getHandle();
         return world.getType(new BlockPosition(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockRotatable;
     }
-
-    /*
-     *   Item methods
-     */
 
     @Override
     public StackedItem createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer) {
@@ -576,6 +581,10 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         };
     }
 
+    /*
+     *   World methods
+     */
+
     @Override
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
@@ -602,10 +611,6 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
-
-    /*
-     *   World methods
-     */
 
     @Override
     public void grandAchievement(Player player, EntityType victim, String name) {
@@ -729,14 +734,14 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         return true;
     }
 
+    /*
+     *   Tag methods
+     */
+
     @Override
     public void giveExp(Player player, int amount) {
         player.giveExp(amount, true);
     }
-
-    /*
-     *   Tag methods
-     */
 
     @Override
     public void updateEntity(LivingEntity sourceBukkit, LivingEntity targetBukkit) {
@@ -824,6 +829,10 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
 
+    /*
+     *   Other methods
+     */
+
     @Override
     public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType, Object def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
@@ -858,23 +867,13 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     }
 
     /*
-     *   Other methods
+     *   Data methods
      */
 
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
     }
-
-    /*
-     *   Data methods
-     */
-
-    private static final NamespacedKey
-            STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
-            SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
-            NAME_TAG = new NamespacedKey(plugin, "nameTag"),
-            UPGRADE = new NamespacedKey(plugin, "upgrade");
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {

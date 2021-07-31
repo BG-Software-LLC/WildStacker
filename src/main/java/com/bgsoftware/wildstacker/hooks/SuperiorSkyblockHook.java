@@ -13,8 +13,8 @@ public final class SuperiorSkyblockHook {
 
     private static IslandFlag ENTITIES_STACKING;
 
-    public static void register(WildStackerPlugin plugin){
-        if(plugin.getSettings().superiorSkyblockHook) {
+    public static void register(WildStackerPlugin plugin) {
+        if (plugin.getSettings().superiorSkyblockHook) {
             IslandFlag.register("ENTITIES_STACKING");
             ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
             SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
@@ -25,16 +25,16 @@ public final class SuperiorSkyblockHook {
     private static class EntityListener implements Listener {
 
         @EventHandler
-        public void onEntityStack(EntityStackEvent e){
+        public void onEntityStack(EntityStackEvent e) {
             Island island = SuperiorSkyblockAPI.getIslandAt(e.getTarget().getLocation());
-            if(island != null && !island.hasSettingsEnabled(ENTITIES_STACKING))
+            if (island != null && !island.hasSettingsEnabled(ENTITIES_STACKING))
                 e.setCancelled(true);
         }
 
         @EventHandler
-        public void onEntityStackedSpawn(SpawnerStackedEntitySpawnEvent e){
+        public void onEntityStackedSpawn(SpawnerStackedEntitySpawnEvent e) {
             Island island = SuperiorSkyblockAPI.getIslandAt(e.getSpawner().getLocation());
-            if(island != null && !island.hasSettingsEnabled(ENTITIES_STACKING))
+            if (island != null && !island.hasSettingsEnabled(ENTITIES_STACKING))
                 e.setShouldBeStacked(false);
         }
 

@@ -14,14 +14,14 @@ public final class ClearLaggListener implements Listener {
 
     private long lastTime = 0;
 
-    public ClearLaggListener(WildStackerPlugin plugin){
+    public ClearLaggListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void onClearLaggTask(EntityRemoveEvent e){
+    public void onClearLaggTask(EntityRemoveEvent e) {
         e.getEntityList().forEach(entity -> {
-            if(EntityUtils.isStackable(entity))
+            if (EntityUtils.isStackable(entity))
                 WStackedEntity.of(entity).remove();
         });
         if (plugin.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {

@@ -16,7 +16,7 @@ public enum Query {
         this.parametersCount = parametersCount;
     }
 
-    String getStatement(){
+    String getStatement() {
         return query;
     }
 
@@ -24,7 +24,7 @@ public enum Query {
         return parametersCount;
     }
 
-    public StatementHolder getStatementHolder(){
+    public StatementHolder getStatementHolder() {
         return new StatementHolder(this);
     }
 

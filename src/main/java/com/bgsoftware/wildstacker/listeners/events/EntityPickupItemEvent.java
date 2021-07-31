@@ -21,10 +21,15 @@ public final class EntityPickupItemEvent extends EntityEvent implements Cancella
 
     private boolean cancelled = false;
 
-    public EntityPickupItemEvent(LivingEntity entity, StackedItem stackedItem){
+    public EntityPickupItemEvent(LivingEntity entity, StackedItem stackedItem) {
         super(entity);
         this.stackedItem = stackedItem;
         this.inventory = entity instanceof InventoryHolder ? ((InventoryHolder) entity).getInventory() : null;
+    }
+
+    @NotNull
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public StackedItem getItem() {
@@ -43,7 +48,7 @@ public final class EntityPickupItemEvent extends EntityEvent implements Cancella
     }
 
     @Nullable
-    public Player getPlayer(){
+    public Player getPlayer() {
         return entity instanceof Player ? (Player) entity : null;
     }
 
@@ -59,11 +64,6 @@ public final class EntityPickupItemEvent extends EntityEvent implements Cancella
 
     @NotNull
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    @NotNull
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

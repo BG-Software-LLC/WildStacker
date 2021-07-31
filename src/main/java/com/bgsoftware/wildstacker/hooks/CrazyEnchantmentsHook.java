@@ -17,10 +17,10 @@ public final class CrazyEnchantmentsHook {
     private static Bows bowsListener;
     private static Axes axesListener;
 
-    public static void register(){
+    public static void register() {
         Main crazyMain = JavaPlugin.getPlugin(Main.class);
-        for(RegisteredListener registeredListener : EntityDamageByEntityEvent.getHandlerList().getRegisteredListeners()){
-            if(registeredListener.getPlugin().equals(crazyMain)) {
+        for (RegisteredListener registeredListener : EntityDamageByEntityEvent.getHandlerList().getRegisteredListeners()) {
+            if (registeredListener.getPlugin().equals(crazyMain)) {
                 EntityDamageByEntityEvent.getHandlerList().unregister(registeredListener);
                 if (registeredListener.getListener() instanceof Swords)
                     swordsListener = (Swords) registeredListener.getListener();
@@ -36,28 +36,28 @@ public final class CrazyEnchantmentsHook {
         crazyMain.getServer().getPluginManager().registerEvents(new MyAxesListener(), crazyMain);
     }
 
-    private static class MySwordsListener implements Listener{
+    private static class MySwordsListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGH)
-        public void onPlayerDamage(EntityDamageByEntityEvent e){
+        public void onPlayerDamage(EntityDamageByEntityEvent e) {
             swordsListener.onPlayerDamage(e);
         }
 
     }
 
-    private static class MyBowsListener implements Listener{
+    private static class MyBowsListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGH)
-        public void onPlayerDamage(EntityDamageByEntityEvent e){
+        public void onPlayerDamage(EntityDamageByEntityEvent e) {
             bowsListener.onArrowDamage(e);
         }
 
     }
 
-    private static class MyAxesListener implements Listener{
+    private static class MyAxesListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGH)
-        public void onPlayerDamage(EntityDamageByEntityEvent e){
+        public void onPlayerDamage(EntityDamageByEntityEvent e) {
             axesListener.onPlayerDamage(e);
         }
 

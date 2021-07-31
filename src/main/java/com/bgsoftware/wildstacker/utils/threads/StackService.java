@@ -57,6 +57,28 @@ public final class StackService {
         stackServiceWorldMap.clear();
     }
 
+    public enum StackType {
+
+        ITEMS("Items"),
+        ENTITIES("Entities");
+
+        private final String name;
+
+        StackType(String name) {
+            this.name = name;
+        }
+
+        static StackType fromObject(StackedObject stackedObject) {
+            return stackedObject instanceof StackedItem ? ITEMS : ENTITIES;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+    }
+
     private static final class StackServiceWorld {
 
         private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -78,28 +100,6 @@ public final class StackService {
 
         void stop() {
             executorServiceMap.values().forEach(ExecutorService::shutdownNow);
-        }
-
-    }
-
-    public enum StackType {
-
-        ITEMS("Items"),
-        ENTITIES("Entities");
-
-        private final String name;
-
-        StackType(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-
-        static StackType fromObject(StackedObject stackedObject) {
-            return stackedObject instanceof StackedItem ? ITEMS : ENTITIES;
         }
 
     }

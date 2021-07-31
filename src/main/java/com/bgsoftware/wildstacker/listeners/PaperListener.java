@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 public final class PaperListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onEntityRemove(EntityRemoveFromWorldEvent e){
+    public void onEntityRemove(EntityRemoveFromWorldEvent e) {
         EntitiesListener.IMP.handleEntityRemove(e.getEntity());
     }
 

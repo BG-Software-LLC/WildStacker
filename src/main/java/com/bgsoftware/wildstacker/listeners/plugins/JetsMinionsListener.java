@@ -10,7 +10,7 @@ import org.bukkit.event.Listener;
 public final class JetsMinionsListener implements Listener {
 
     @EventHandler
-    public void onSlayerAction(SlayerSlayEvent e){
+    public void onSlayerAction(SlayerSlayEvent e) {
         e.getEntitiesToKill().removeIf(livingEntity -> EntityUtils.isStackable(livingEntity) &&
                 WStackedEntity.of(livingEntity).hasFlag(EntityFlag.DEAD_ENTITY));
     }

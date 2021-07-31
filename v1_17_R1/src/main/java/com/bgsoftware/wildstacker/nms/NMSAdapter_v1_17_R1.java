@@ -175,6 +175,13 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     /*
      *   Entity methods
      */
+    private static final DataWatcherObject<Boolean> HAS_TURTLE_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
+    private static final DataWatcherObject<BlockPosition> TURTLE_HOME_POS = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
+    private static final NamespacedKey
+            STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
+            SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
+            NAME_TAG = new NamespacedKey(plugin, "nameTag"),
+            UPGRADE = new NamespacedKey(plugin, "upgrade");
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -340,6 +347,15 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     }
 
     @Override
+    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+        assert location.getWorld() != null;
+        World world = ((CraftWorld) location.getWorld()).getHandle();
+        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
+        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.c,
+                new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
+    }
+
+    @Override
     public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
         return new ArrayList<>();
     }
@@ -430,9 +446,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         return (byte) mushroomCow.getVariant().ordinal();
     }
 
-    private static final DataWatcherObject<Boolean> HAS_TURTLE_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
-    private static final DataWatcherObject<BlockPosition> TURTLE_HOME_POS = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
-
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
         ((CraftTurtle) turtle).getHandle().getDataWatcher().set(HAS_TURTLE_EGG, true);
@@ -449,15 +462,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         TurtleEgg turtleEgg = (TurtleEgg) turtleEggBlock.getBlockData();
         turtleEgg.setEggs(amount);
         turtleEggBlock.setBlockData(turtleEgg, true);
-    }
-
-    @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
-        assert location.getWorld() != null;
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
-        return EntityPositionTypes.a(entityTypes, world.getMinecraftWorld(), EnumMobSpawn.c,
-                new BlockPosition(location.getX(), location.getY(), location.getZ()), world.getRandom());
     }
 
     @Override
@@ -500,6 +504,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         return entity.getPersistentDataContainer();
     }
 
+    /*
+     *   Spawner methods
+     */
+
     @Override
     public boolean handleTotemOfUndying(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
@@ -540,24 +548,20 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         return true;
     }
 
-    /*
-     *   Spawner methods
-     */
-
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
+
+    /*
+     *   Item methods
+     */
 
     @Override
     public boolean isRotatable(Block block) {
         World world = ((CraftWorld) block.getWorld()).getHandle();
         return world.getType(new BlockPosition(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockRotatable;
     }
-
-    /*
-     *   Item methods
-     */
 
     @Override
     public StackedItem createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer) {
@@ -646,6 +650,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         };
     }
 
+    /*
+     *   World methods
+     */
+
     @Override
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
@@ -672,10 +680,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
-
-    /*
-     *   World methods
-     */
 
     @Override
     public void grandAchievement(Player player, EntityType victim, String name) {
@@ -806,6 +810,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         return true;
     }
 
+    /*
+     *   Tag methods
+     */
+
     @Override
     public void giveExp(Player player, int amount) {
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
@@ -835,10 +843,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
     }
-
-    /*
-     *   Tag methods
-     */
 
     @Override
     public void updateEntity(LivingEntity sourceBukkit, LivingEntity targetBukkit) {
@@ -926,6 +930,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
 
+    /*
+     *   Other methods
+     */
+
     @Override
     public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType, Object def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
@@ -960,23 +968,13 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     }
 
     /*
-     *   Other methods
+     *   Data methods
      */
 
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
     }
-
-    /*
-     *   Data methods
-     */
-
-    private static final NamespacedKey
-            STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
-            SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
-            NAME_TAG = new NamespacedKey(plugin, "nameTag"),
-            UPGRADE = new NamespacedKey(plugin, "upgrade");
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
@@ -1194,6 +1192,18 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             getSpawner().getSpawner().o = i;
         }
 
+        public boolean isActivated() {
+            return false;
+        }
+
+        public void resetTimer() {
+
+        }
+
+        public void setSpawnedItem(org.bukkit.inventory.ItemStack itemStack) {
+
+        }
+
         @Override
         public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
         }
@@ -1211,18 +1221,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
                     mobSpawnerAbstract.d / 20,
                     ""
             );
-        }
-
-        public boolean isActivated() {
-            return false;
-        }
-
-        public void resetTimer() {
-
-        }
-
-        public void setSpawnedItem(org.bukkit.inventory.ItemStack itemStack) {
-
         }
 
         @Override

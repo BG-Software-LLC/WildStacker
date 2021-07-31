@@ -26,7 +26,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     private final SilkSpawners ss;
     private final SilkUtil silkUtil;
 
-    public SpawnersProvider_SilkSpawners(){
+    public SpawnersProvider_SilkSpawners() {
         WildStackerPlugin.log(" - Using SilkSpawners as SpawnersProvider.");
         ss = JavaPlugin.getPlugin(SilkSpawners.class);
         silkUtil = SilkUtil.hookIntoSilkSpanwers();
@@ -39,7 +39,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             //noinspection deprecation
             String entityID = silkUtil.getDisplayNameToMobID().get(entityType.getName());
             itemStack = silkUtil.newSpawnerItem(entityID, silkUtil.getCustomSpawnerName(entityID), amount, false);
-        }catch(Throwable ex){
+        } catch (Throwable ex) {
             //noinspection deprecation
             short entityID = entityType.getTypeId();
             itemStack = newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
@@ -58,7 +58,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     @Override
     public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
-        if(stackedSpawner.getStackAmount() <= brokenAmount)
+        if (stackedSpawner.getStackAmount() <= brokenAmount)
             brokenAmount = brokenAmount - 1;
 
         Object entityId = getSpawnerEntityID(stackedSpawner.getSpawner());
@@ -110,43 +110,43 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         }
     }
 
-    private Object getSpawnerEntityID(CreatureSpawner spawner){
+    private Object getSpawnerEntityID(CreatureSpawner spawner) {
         Object entityId;
-        try{
+        try {
             entityId = SilkUtil.class.getMethod("getSpawnerEntityID", Block.class).invoke(silkUtil, spawner.getBlock());
-        }catch(Exception ex){
+        } catch (Exception ex) {
             throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
         }
         return entityId == null || entityId.equals(0) ? silkUtil.getDefaultEntityID() : entityId;
     }
 
-    private Object getStoredSpawnerItemEntityID(ItemStack itemStack){
+    private Object getStoredSpawnerItemEntityID(ItemStack itemStack) {
         Object entityId;
-        try{
+        try {
             entityId = SilkUtil.class.getMethod("getStoredSpawnerItemEntityID", ItemStack.class).invoke(silkUtil, itemStack);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
         }
         return entityId == null || entityId.equals(0) ? silkUtil.getDefaultEntityID() : entityId;
     }
 
-    private String getCreatureName(Object entityId){
+    private String getCreatureName(Object entityId) {
         Class objectClass = entityId instanceof String ? String.class : short.class;
-        try{
+        try {
             Method method = SilkUtil.class.getMethod("getCreatureName", objectClass);
             return (String) method.invoke(silkUtil, entityId);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    private ItemStack newSpawnerItem(Object entityId, String customName, int amount, boolean forceLore){
+    private ItemStack newSpawnerItem(Object entityId, String customName, int amount, boolean forceLore) {
         Class objectClass = entityId instanceof String ? String.class : short.class;
-        try{
+        try {
             return (ItemStack) SilkUtil.class.getMethod("newSpawnerItem", objectClass, String.class, int.class, boolean.class)
                     .invoke(silkUtil, entityId, customName, amount, forceLore);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
         }
     }

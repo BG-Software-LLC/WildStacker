@@ -10,12 +10,12 @@ public final class EditorBucketsMenu extends EditorMenu {
 
     private final static EditorBucketsMenu NULL_HOLDER = new EditorBucketsMenu(null);
 
-    private EditorBucketsMenu(Inventory inventory){
+    private EditorBucketsMenu(Inventory inventory) {
         super(inventory, "BUCKETS_SLOT_", "bucketsEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

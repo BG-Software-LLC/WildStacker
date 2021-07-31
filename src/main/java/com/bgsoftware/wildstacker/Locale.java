@@ -82,15 +82,44 @@ public final class Locale {
     public static Locale OBJECT_SIMULATE_CHOOSE_SECOND = new Locale("OBJECT_SIMULATE_CHOOSE_SECOND");
     public static Locale OBJECT_SIMULATE_SUCCESS_RESULT = new Locale("OBJECT_SIMULATE_SUCCESS_RESULT");
     public static Locale OBJECT_SIMULATE_FAIL_RESULT = new Locale("OBJECT_SIMULATE_FAIL_RESULT");
+    private String message;
 
-    private Locale(String identifier){
+    private Locale(String identifier) {
         localeMap.put(identifier, this);
     }
 
-    private String message;
+    public static void reload() {
+        WildStackerPlugin.log("Loading messages started...");
+        long startTime = System.currentTimeMillis();
+        int messagesAmount = 0;
+        File file = new File(plugin.getDataFolder(), "lang.yml");
 
-    public String getMessage(Object... objects){
-        if(message != null && !message.equals("")) {
+        if (!file.exists())
+            FileUtils.saveResource("lang.yml");
+
+        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
+
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        for (String identifier : localeMap.keySet()) {
+            localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));
+            messagesAmount++;
+        }
+
+        WildStackerPlugin.log(" - Found " + messagesAmount + " messages in lang.yml.");
+        WildStackerPlugin.log("Loading messages done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
+    }
+
+    public static void sendMessage(CommandSender sender, String message) {
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    }
+
+    public String getMessage(Object... objects) {
+        if (message != null && !message.equals("")) {
             String msg = message;
 
             for (int i = 0; i < objects.length; i++)
@@ -102,44 +131,14 @@ public final class Locale {
         return null;
     }
 
-    public void send(CommandSender sender, Object... objects){
+    public void send(CommandSender sender, Object... objects) {
         String message = getMessage(objects);
-        if(message != null && sender != null)
+        if (message != null && sender != null)
             sender.sendMessage(message);
     }
 
-    private void setMessage(String message){
+    private void setMessage(String message) {
         this.message = message;
-    }
-
-    public static void reload(){
-        WildStackerPlugin.log("Loading messages started...");
-        long startTime = System.currentTimeMillis();
-        int messagesAmount = 0;
-        File file = new File(plugin.getDataFolder(), "lang.yml");
-
-        if(!file.exists())
-            FileUtils.saveResource("lang.yml");
-
-        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
-
-        try {
-            cfg.syncWithConfig(file, plugin.getResource("lang.yml"));
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-
-        for(String identifier : localeMap.keySet()){
-            localeMap.get(identifier).setMessage(ChatColor.translateAlternateColorCodes('&', cfg.getString(identifier, "")));
-            messagesAmount++;
-        }
-
-        WildStackerPlugin.log(" - Found " + messagesAmount + " messages in lang.yml.");
-        WildStackerPlugin.log("Loading messages done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
-    }
-
-    public static void sendMessage(CommandSender sender, String message){
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 
 }

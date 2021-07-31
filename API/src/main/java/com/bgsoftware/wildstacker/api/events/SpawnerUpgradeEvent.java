@@ -17,12 +17,17 @@ public class SpawnerUpgradeEvent extends Event {
 
     /**
      * The constructor for the event.
+     *
      * @param stackedSpawner The spawner that was broken.
      * @param spawnerUpgrade The new upgrade.
      */
-    public SpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade){
+    public SpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade) {
         this.stackedSpawner = stackedSpawner;
         this.spawnerUpgrade = spawnerUpgrade;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -41,10 +46,6 @@ public class SpawnerUpgradeEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

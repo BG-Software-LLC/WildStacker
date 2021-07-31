@@ -13,12 +13,17 @@ public class BarrelUnstackEvent extends UnstackEvent {
 
     /**
      * The constructor for the event.
-     * @param barrel The barrel object.
+     *
+     * @param barrel        The barrel object.
      * @param unstackSource Get the source for the unstack.
      * @param unstackAmount The amount the barrel is unstacked by.
      */
-    public BarrelUnstackEvent(StackedBarrel barrel, Entity unstackSource, int unstackAmount){
+    public BarrelUnstackEvent(StackedBarrel barrel, Entity unstackSource, int unstackAmount) {
         super(barrel, unstackSource, unstackAmount);
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -31,16 +36,12 @@ public class BarrelUnstackEvent extends UnstackEvent {
     /**
      * Get the amount the barrel is unstacked by.
      */
-    public int getAmount(){
+    public int getAmount() {
         return unstackAmount;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

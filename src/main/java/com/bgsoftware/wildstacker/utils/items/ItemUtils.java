@@ -35,29 +35,29 @@ import java.util.HashMap;
 public final class ItemUtils {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final int MAX_PICKUP_DELAY = 32767;
     private static Method IS_UNBREAKABLE_METHOD = null;
 
     static {
-        try{
+        try {
             //noinspection JavaReflectionMemberAccess
             IS_UNBREAKABLE_METHOD = ItemMeta.class.getMethod("isUnbreakable");
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
     }
 
-    private static final int MAX_PICKUP_DELAY = 32767;
-
-    public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location){
+    public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location) {
         Arrays.stream(itemStacks)
                 .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR)
                 .forEach(itemStack -> addItem(itemStack, inventory, location));
     }
 
-    public static void addItem(ItemStack itemStack, Inventory inventory, Location location){
+    public static void addItem(ItemStack itemStack, Inventory inventory, Location location) {
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
 
-        if(itemStack.getType().name().contains("BUCKET"))
+        if (itemStack.getType().name().contains("BUCKET"))
             stackBucket(itemStack, inventory);
-        if(itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
+        if (itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
             stackStew(itemStack, inventory);
 
         if (location != null && !additionalItems.isEmpty()) {
@@ -66,13 +66,13 @@ public final class ItemUtils {
         }
     }
 
-    public static void dropItem(ItemStack itemStack, Location location){
-        if(!Bukkit.isPrimaryThread()){
+    public static void dropItem(ItemStack itemStack, Location location) {
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(() -> dropItem(itemStack, location));
             return;
         }
 
-        if(itemStack.getType() == Material.AIR || itemStack.getAmount() <= 0)
+        if (itemStack.getType() == Material.AIR || itemStack.getAmount() <= 0)
             return;
 
         int amount = itemStack.getAmount();
@@ -95,37 +95,37 @@ public final class ItemUtils {
                     plugin.getSystemManager().spawnItemWithAmount(location, cloned);
                 }
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             System.out.println("Error while dropping " + itemStack + ":");
             ex.printStackTrace();
         }
     }
 
-    public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount){
+    public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount) {
         return plugin.getNMSAdapter().setTag(itemStack, "spawners-amount", amount);
     }
 
-    public static ItemStack setSpawnerUpgrade(ItemStack itemStack, int upgradeId){
+    public static ItemStack setSpawnerUpgrade(ItemStack itemStack, int upgradeId) {
         return plugin.getNMSAdapter().setTag(itemStack, "spawners-upgrade", upgradeId);
     }
 
-    public static int getSpawnerItemAmount(ItemStack itemStack){
+    public static int getSpawnerItemAmount(ItemStack itemStack) {
         int spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1);
         return Math.max(1, spawnersAmount);
     }
 
-    public static int getSpawnerUpgrade(ItemStack itemStack){
+    public static int getSpawnerUpgrade(ItemStack itemStack) {
         int spawnerUpgrade = plugin.getNMSAdapter().getTag(itemStack, "spawners-upgrade", Integer.class, 0);
         return Math.max(0, spawnerUpgrade);
     }
 
-    public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade){
+    public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
         return plugin.getProviders().getSpawnerItem(entityType, amount, spawnerUpgrade);
     }
 
     @SuppressWarnings("deprecation")
-    public static EntityTypes getEntityType(ItemStack itemStack){
-        if(!Materials.isValidAndSpawnEgg(itemStack))
+    public static EntityTypes getEntityType(ItemStack itemStack) {
+        if (!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
         try {
@@ -139,17 +139,17 @@ public final class ItemUtils {
             } else {
                 return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
             }
-        }catch(NullPointerException ex){
+        } catch (NullPointerException ex) {
             return null;
         }
     }
 
     @SuppressWarnings("deprecation")
-    public static void setEntityType(ItemStack itemStack, EntityType entityType){
-        if(!Materials.isValidAndSpawnEgg(itemStack))
+    public static void setEntityType(ItemStack itemStack, EntityType entityType) {
+        if (!Materials.isValidAndSpawnEgg(itemStack))
             throw new IllegalArgumentException("Only spawn-eggs can be used in ItemUtil#getEntityType");
 
-        if(ServerVersion.isLegacy()) {
+        if (ServerVersion.isLegacy()) {
             try {
                 SpawnEggMeta spawnEggMeta = (SpawnEggMeta) itemStack.getItemMeta();
                 spawnEggMeta.setSpawnedType(entityType);
@@ -157,48 +157,48 @@ public final class ItemUtils {
             } catch (NoClassDefFoundError error) {
                 itemStack.setDurability(entityType.getTypeId());
             }
-        }else{
+        } else {
             itemStack.setType(Material.valueOf(EntityTypes.fromName(entityType.name()).name() + "_SPAWN_EGG"));
         }
     }
 
-    public static ItemStack getItemNMSEntityType(EntityType entityType){
+    public static ItemStack getItemNMSEntityType(EntityType entityType) {
         ItemStack itemStack = new ItemStack(Materials.getSpawnEgg(EntityType.GHAST));
         return plugin.getNMSAdapter().setTag(itemStack, "entity-type", entityType.name());
     }
 
-    public static EntityType getNMSEntityType(ItemStack itemStack){
+    public static EntityType getNMSEntityType(ItemStack itemStack) {
         String entityType = plugin.getNMSAdapter().getTag(itemStack, "entity-type", String.class, "");
         return entityType.isEmpty() ? null : EntityType.valueOf(entityType);
     }
 
-    public static String getFormattedType(ItemStack itemStack){
+    public static String getFormattedType(ItemStack itemStack) {
         String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
         String customName = plugin.getSettings().customNames.get(typeName);
-        if(customName == null)
+        if (customName == null)
             customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
 
         return EntityUtils.getFormattedType(customName == null ? typeName : customName);
     }
 
-    public static void stackBucket(ItemStack bucket, Inventory inventory){
-        if(plugin.getSettings().bucketsStackerEnabled)
+    public static void stackBucket(ItemStack bucket, Inventory inventory) {
+        if (plugin.getSettings().bucketsStackerEnabled)
             stackItems(bucket, inventory, plugin.getSettings().bucketsMaxStack);
     }
 
-    public static void stackStew(ItemStack stew, Inventory inventory){
-        if(plugin.getSettings().stewsStackingEnabled)
+    public static void stackStew(ItemStack stew, Inventory inventory) {
+        if (plugin.getSettings().stewsStackingEnabled)
             stackItems(stew, inventory, plugin.getSettings().stewsMaxStack);
     }
 
-    private static void stackItems(ItemStack item, Inventory inventory, int maxStack){
+    private static void stackItems(ItemStack item, Inventory inventory, int maxStack) {
         int amountOfItems = 0;
         int slotToSetFirstItem = -1;
 
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack itemStack = inventory.getItem(slot);
             if (itemStack != null && itemStack.isSimilar(item)) {
-                if(slotToSetFirstItem == -1)
+                if (slotToSetFirstItem == -1)
                     slotToSetFirstItem = slot;
                 amountOfItems += itemStack.getAmount();
                 inventory.setItem(slot, new ItemStack(Material.AIR));
@@ -210,21 +210,20 @@ public final class ItemUtils {
         ItemStack cloned = item.clone();
         cloned.setAmount(maxStack);
 
-        for(int i = 0; i < amountOfItems / maxStack; i++) {
-            if(slotToSetFirstItem != -1){
+        for (int i = 0; i < amountOfItems / maxStack; i++) {
+            if (slotToSetFirstItem != -1) {
                 inventory.setItem(slotToSetFirstItem, cloned);
                 slotToSetFirstItem = -1;
-            }else {
+            } else {
                 inventory.addItem(cloned);
             }
         }
 
-        if(amountOfItems % maxStack > 0){
+        if (amountOfItems % maxStack > 0) {
             cloned.setAmount(amountOfItems % maxStack);
-            if(slotToSetFirstItem != -1){
+            if (slotToSetFirstItem != -1) {
                 inventory.setItem(slotToSetFirstItem, cloned);
-            }
-            else {
+            } else {
                 inventory.addItem(cloned);
             }
         }
@@ -232,73 +231,75 @@ public final class ItemUtils {
         updateInventory(inventory);
     }
 
-    public static ItemStack getFromBlock(Block block){
+    public static ItemStack getFromBlock(Block block) {
         ItemStack itemStack = ServerVersion.isLegacy() ? block.getState().getData().toItemStack(1) : new ItemStack(block.getType());
-        if(plugin.getNMSAdapter().isRotatable(block))
+        if (plugin.getNMSAdapter().isRotatable(block))
             itemStack.setDurability((short) 0);
         return itemStack;
     }
 
-    private static void updateInventory(Inventory inventory){
+    private static void updateInventory(Inventory inventory) {
         inventory.getViewers().stream().filter(humanEntity -> humanEntity instanceof Player)
                 .forEach(player -> ((Player) player).updateInventory());
     }
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
-    public static void removeItem(ItemStack itemStack, PlayerInteractEvent event){
-        try{
+    public static void removeItem(ItemStack itemStack, PlayerInteractEvent event) {
+        try {
             EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEvent.class.getMethod("getHand").invoke(event);
-            if(equipmentSlot.name().equals("OFF_HAND")){
+            if (equipmentSlot.name().equals("OFF_HAND")) {
                 ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
-                if(offHand.isSimilar(itemStack)){
+                if (offHand.isSimilar(itemStack)) {
                     offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
                     PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
                             .invoke(event.getPlayer().getInventory(), offHand);
                 }
             }
-        }catch(Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
         event.getPlayer().getInventory().removeItem(itemStack);
     }
 
     @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
-    public static void removeItem(ItemStack itemStack, PlayerInteractEntityEvent event){
-        try{
+    public static void removeItem(ItemStack itemStack, PlayerInteractEntityEvent event) {
+        try {
             EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEntityEvent.class.getMethod("getHand").invoke(event);
-            if(equipmentSlot.name().equals("OFF_HAND")){
+            if (equipmentSlot.name().equals("OFF_HAND")) {
                 ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
-                if(offHand.isSimilar(itemStack)){
+                if (offHand.isSimilar(itemStack)) {
                     offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
                     PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
                             .invoke(event.getPlayer().getInventory(), offHand);
                 }
             }
-        }catch(Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
         event.getPlayer().getInventory().removeItem(itemStack);
     }
 
-    public static int countItem(Inventory inventory, ItemStack itemStack){
+    public static int countItem(Inventory inventory, ItemStack itemStack) {
         int counter = 0;
 
-        for(ItemStack _itemStack : inventory.getContents()){
-            if(_itemStack != null && _itemStack.isSimilar(itemStack))
+        for (ItemStack _itemStack : inventory.getContents()) {
+            if (_itemStack != null && _itemStack.isSimilar(itemStack))
                 counter += _itemStack.getAmount();
         }
 
         return counter;
     }
 
-    public static void removeItem(Inventory inventory, ItemStack itemStack, int amount){
+    public static void removeItem(Inventory inventory, ItemStack itemStack, int amount) {
         int amountRemoved = 0;
 
-        for(int i = 0; i < inventory.getSize() && amountRemoved < amount; i++){
+        for (int i = 0; i < inventory.getSize() && amountRemoved < amount; i++) {
             ItemStack _itemStack = inventory.getItem(i);
-            if(_itemStack != null && _itemStack.isSimilar(itemStack)){
-                if(amountRemoved + _itemStack.getAmount() <= amount){
+            if (_itemStack != null && _itemStack.isSimilar(itemStack)) {
+                if (amountRemoved + _itemStack.getAmount() <= amount) {
                     amountRemoved += _itemStack.getAmount();
                     inventory.setItem(i, new ItemStack(Material.AIR));
-                }else{
+                } else {
                     _itemStack.setAmount(_itemStack.getAmount() - amount + amountRemoved);
                     amountRemoved = amount;
                 }
@@ -306,44 +307,45 @@ public final class ItemUtils {
         }
     }
 
-    public static int getHeldItemSlot(PlayerInventory inventory, Material material){
+    public static int getHeldItemSlot(PlayerInventory inventory, Material material) {
         ItemStack itemStack;
 
-        if((itemStack = inventory.getItem(inventory.getHeldItemSlot())) != null && itemStack.getType() == material)
+        if ((itemStack = inventory.getItem(inventory.getHeldItemSlot())) != null && itemStack.getType() == material)
             return inventory.getHeldItemSlot();
 
-        else try{
-            if((itemStack = inventory.getItem(40)) != null && itemStack.getType() == material)
+        else try {
+            if ((itemStack = inventory.getItem(40)) != null && itemStack.getType() == material)
                 return 40;
-        }catch(ArrayIndexOutOfBoundsException ignored){}
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+        }
 
         return -1;
     }
 
-    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack){
+    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack) {
         int slot = getHeldItemSlot(inventory, inHand.getType());
-        if(slot != -1)
+        if (slot != -1)
             inventory.setItem(slot, itemStack);
     }
 
-    public static boolean canPickup(Item item){
+    public static boolean canPickup(Item item) {
         return item.getPickupDelay() < MAX_PICKUP_DELAY && !item.hasMetadata("ChestShop_Display") && !item.hasMetadata("no_pickup");
     }
 
-    public static boolean isOffHand(Event event){
-        try{
+    public static boolean isOffHand(Event event) {
+        try {
             return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        }catch(Throwable ex){
+        } catch (Throwable ex) {
             return false;
         }
     }
 
-    public static boolean isSword(Material material){
+    public static boolean isSword(Material material) {
         return material.name().contains("SWORD");
     }
 
-    public static boolean isTool(Material material){
-        switch (material.name()){
+    public static boolean isTool(Material material) {
+        switch (material.name()) {
             case "IRON_SPADE":
             case "IRON_PICKAXE":
             case "IRON_AXE":
@@ -368,42 +370,43 @@ public final class ItemUtils {
         }
     }
 
-    public static boolean isPickaxeAndHasSilkTouch(ItemStack itemStack){
-        if(itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
+    public static boolean isPickaxeAndHasSilkTouch(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
         return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= plugin.getSettings().silkTouchMinimumLevel;
     }
 
-    public static Location getSafeDropLocation(Location origin){
+    public static Location getSafeDropLocation(Location origin) {
         Location location;
 
-        if((location = origin.clone().add(0, 0.5, 0)).getBlock().getType() == Material.AIR)
+        if ((location = origin.clone().add(0, 0.5, 0)).getBlock().getType() == Material.AIR)
             return location;
-        else if((location = origin.clone().subtract(0, 0.5, 0)).getBlock().getType() == Material.AIR)
+        else if ((location = origin.clone().subtract(0, 0.5, 0)).getBlock().getType() == Material.AIR)
             return location;
 
         return origin;
     }
 
-    public static boolean isUnbreakable(ItemStack itemStack){
-        if(!itemStack.hasItemMeta() || IS_UNBREAKABLE_METHOD == null)
+    public static boolean isUnbreakable(ItemStack itemStack) {
+        if (!itemStack.hasItemMeta() || IS_UNBREAKABLE_METHOD == null)
             return false;
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
         try {
             return (boolean) IS_UNBREAKABLE_METHOD.invoke(itemMeta);
-        }catch(Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
         return false;
     }
 
-    public static boolean isStackable(Entity entity){
+    public static boolean isStackable(Entity entity) {
         return entity.isValid() && !entity.isDead() && plugin.getNMSAdapter().isDroppedItem(entity);
     }
 
-    private static boolean canBeStacked(ItemStack itemStack, World world){
+    private static boolean canBeStacked(ItemStack itemStack, World world) {
         Material itemType = itemStack.getType();
         return !plugin.getSettings().blacklistedItems.contains(itemType) &&
                 (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&
