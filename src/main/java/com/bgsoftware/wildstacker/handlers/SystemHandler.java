@@ -462,12 +462,6 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
-//        ThreadLocalRandom random = ThreadLocalRandom.current();
-
-//        location.setX(location.getX() + (random.nextFloat() * 0.5F) + 0.25D);
-//        location.setY(location.getY() + (random.nextFloat() * 0.5F) + 0.25D);
-//        location.setZ(location.getZ() + (random.nextFloat() * 0.5F) + 0.25D);
-
         int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE);
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
 
