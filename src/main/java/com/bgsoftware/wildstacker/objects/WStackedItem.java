@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.objects;
 
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
@@ -9,6 +10,7 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -142,6 +144,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         } else {
             object.remove();
         }
+
+        EntityStorage.setMetadata(object, EntityFlag.REMOVED_ENTITY, true);
+        Executor.sync(() -> EntityStorage.clearMetadata(object), 100L);
     }
 
     @Override
@@ -201,7 +206,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(object))
             return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
-        if (object.isDead())
+        if (isRemoved() || object.isDead())
             return StackCheckResult.ALREADY_DEAD;
 
         StackedItem targetItem = (StackedItem) stackedObject;
@@ -209,7 +214,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(targetItem.getItem()))
             return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
 
-        if (targetItem.getItem().isDead())
+        if (((WStackedItem) targetItem).isRemoved() || targetItem.getItem().isDead())
             return StackCheckResult.TARGET_ALREADY_DEAD;
 
         return StackCheckResult.SUCCESS;
@@ -420,6 +425,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     @Override
     public String toString() {
         return String.format("StackedItem{uuid=%s,amount=%s,item=%s}", getUniqueId(), getStackAmount(), object.getItemStack());
+    }
+
+    public boolean isRemoved(){
+        return EntityStorage.hasMetadata(object, EntityFlag.REMOVED_ENTITY);
     }
 
     private int giveItem(Inventory inventory, ItemStack itemStack) {

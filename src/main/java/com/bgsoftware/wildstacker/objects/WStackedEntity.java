@@ -151,6 +151,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         } else {
             removeEntity();
         }
+
+        setFlag(EntityFlag.REMOVED_ENTITY, true);
     }
 
     @Override
@@ -200,7 +202,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (isNameBlacklisted())
             return StackCheckResult.BLACKLISTED_NAME;
 
-        if (!hasFlag(EntityFlag.DEMO_ENTITY) && (object.isDead() || !object.isValid()))
+        if (!hasFlag(EntityFlag.DEMO_ENTITY) && (hasFlag(EntityFlag.REMOVED_ENTITY) || object.isDead() || !object.isValid()))
             return StackCheckResult.ALREADY_DEAD;
 
         if (StackCheck.NAME_TAG.isEnabled() && hasNameTag())
@@ -214,7 +216,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (targetEntity.isNameBlacklisted())
             return StackCheckResult.TARGET_BLACKLISTD_NAME;
 
-        if (targetEntity.getLivingEntity().isDead() || !targetEntity.getLivingEntity().isValid())
+        if (targetEntity.hasFlag(EntityFlag.REMOVED_ENTITY) || targetEntity.getLivingEntity().isDead() ||
+                !targetEntity.getLivingEntity().isValid())
             return StackCheckResult.TARGET_ALREADY_DEAD;
 
         if (hasFlag(EntityFlag.CORPSE))
@@ -662,9 +665,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     private void removeEntity() {
         object.remove();
-
-        setFlag(EntityFlag.REMOVED_ENTITY, true);
-
         Executor.sync(this::clearFlags, 100L);
     }
 
