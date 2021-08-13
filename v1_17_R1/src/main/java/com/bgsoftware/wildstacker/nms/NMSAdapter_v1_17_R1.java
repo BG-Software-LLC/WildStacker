@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import io.papermc.paper.enchantments.EnchantmentRarity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.CriterionTriggers;
@@ -570,6 +571,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
 
         entityItem.ap = 10;
+
+        try{
+            entityItem.canMobPickup = false;
+            Executor.sync(() -> entityItem.canMobPickup = true, 20L);
+        }catch (Throwable ignored){}
 
         StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
