@@ -75,6 +75,7 @@ public final class SpawnersListener implements Listener {
     private final Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
     private final Set<UUID> alreadySpawnersPlacedPlayers = new HashSet<>();
     private final Map<Entity, UUID> explodableSources = new WeakHashMap<>();
+    private final Set<Location> paperPreSpawnChecked = new HashSet<>();
 
     private final WildStackerPlugin plugin;
     private boolean listenToSpawnEvent = true;
@@ -421,7 +422,7 @@ public final class SpawnersListener implements Listener {
         if (!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
-        if (plugin.getSettings().listenPaperPreSpawnEvent)
+        if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.contains(e.getSpawner().getLocation()))
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
@@ -727,7 +728,6 @@ public final class SpawnersListener implements Listener {
 
             if (plugin.getSettings().linkedEntitiesEnabled) {
                 StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
-
                 LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
                 if (linkedEntity != null) {
@@ -752,8 +752,10 @@ public final class SpawnersListener implements Listener {
                         .findFirst();
             }
 
-            if (!targetEntityOptional.isPresent())
+            if (!targetEntityOptional.isPresent()) {
+                paperPreSpawnChecked.add(e.getSpawnerLocation());
                 return;
+            }
 
             StackedEntity stackedEntity = targetEntityOptional.get();
             stackedEntity.increaseStackAmount(1, true);
