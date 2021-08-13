@@ -215,7 +215,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         EntityZombieVillager entityZombieVillager = EntityTypes.bg.a(entityVillager.getWorld());
 
         assert entityZombieVillager != null;
-        entityZombieVillager.u(entityVillager);
+        entityZombieVillager.s(entityVillager);
         entityZombieVillager.setVillagerData(entityVillager.getVillagerData());
 
         Reputation villagerReputation;
