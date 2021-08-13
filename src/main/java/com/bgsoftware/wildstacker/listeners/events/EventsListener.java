@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Turtle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,21 +23,25 @@ public final class EventsListener {
 
     public static void register(WildStackerPlugin plugin) {
         EventsListener.plugin = plugin;
+        boolean registeredPlayerPickup = false;
+
         try {
             Class.forName("org.bukkit.event.player.PlayerAttemptPickupItemEvent");
             plugin.getServer().getPluginManager().registerEvents(new PlayerAttemptPickup(), plugin);
-        } catch (Exception ex1) {
+            registeredPlayerPickup = true;
+        } catch (Exception ignored) {}
+
+        try {
+            Class.forName("org.bukkit.event.entity.EntityPickupItemEvent");
+            plugin.getServer().getPluginManager().registerEvents(new EntityPickup(!registeredPlayerPickup), plugin);
+        } catch (Exception ex) {
             try {
-                Class.forName("org.bukkit.event.entity.EntityPickupItemEvent");
-                plugin.getServer().getPluginManager().registerEvents(new EntityPickup(), plugin);
-            } catch (Exception ex2) {
-                try {
-                    Class.forName("org.bukkit.event.player.PlayerPickupItemEvent");
-                    plugin.getServer().getPluginManager().registerEvents(new PlayerPickup(), plugin);
-                } catch (Exception ignored) {
-                }
+                Class.forName("org.bukkit.event.player.PlayerPickupItemEvent");
+                plugin.getServer().getPluginManager().registerEvents(new PlayerPickup(), plugin);
+            } catch (Exception ignored) {
             }
         }
+
         plugin.getServer().getPluginManager().registerEvents(new EggLay(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteDrop(), plugin);
@@ -61,8 +66,17 @@ public final class EventsListener {
 
     private static class EntityPickup implements Listener {
 
+        private final boolean listenToPlayersPickup;
+
+        private EntityPickup(boolean listenToPlayersPickup){
+            this.listenToPlayersPickup = listenToPlayersPickup;
+        }
+
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.entity.EntityPickupItemEvent e) {
+            if(!listenToPlayersPickup && e.getEntity() instanceof Player)
+                return;
+
             if (!ItemUtils.isStackable(e.getItem()))
                 return;
 
