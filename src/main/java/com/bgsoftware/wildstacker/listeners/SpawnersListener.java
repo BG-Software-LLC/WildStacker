@@ -422,7 +422,7 @@ public final class SpawnersListener implements Listener {
         if (!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
-        if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.contains(e.getSpawner().getLocation()))
+        if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.remove(e.getSpawner().getLocation()))
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
