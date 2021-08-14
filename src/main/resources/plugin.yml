@@ -5,7 +5,7 @@ main: com.bgsoftware.wildstacker.WildStackerPlugin
 description: Stacking drops, entities, blocks and spawners into one object!
 website: https://bg-software.com/
 author: Ome_R
-softdepend: [Arconix, Boss, Citizens, ClearLag, CMI, CoreProtect, CrazyEnchantments, CustomBosses, EpicBosses, EpicSpawners, Factions, Holograms, HolographicDisplays, MassiveCore, mcMMO, MineableSpawners, MyPet, MythicMobs, FactionsTop, PlotSquared, ProtocolLib, ShopGUIPlus, SilkSpawners, Vault, WildStackerEnchantsPatch, WildTools, WorldEdit, WorldGuard]
+softdepend: [Arconix, Boss, Citizens, ClearLag, CMI, CoreProtect, CrazyEnchantments, CustomBosses, EpicBosses, EpicSpawners, Factions, Holograms, HolographicDisplays, MassiveCore, mcMMO, MineableSpawners, MyPet, MythicMobs, FactionsTop, PlotSquared, ProtocolLib, ShopGUIPlus, SilkSpawners, Vault, WildStackerEnchantsPatch, WildTools, WorldEdit, WorldGuard, SuperiorSkyblock2]
 loadbefore: [ShopGUIPlus]
 commands:
   stacker:

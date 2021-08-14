@@ -15,11 +15,14 @@ public final class SuperiorSkyblockHook {
 
     public static void register(WildStackerPlugin plugin) {
         if (plugin.getSettings().superiorSkyblockHook) {
-            IslandFlag.register("ENTITIES_STACKING");
-            ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
             SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
             plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
         }
+    }
+
+    public static void registerIslandFlag(){
+        IslandFlag.register("ENTITIES_STACKING");
+        ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
     }
 
     private static class EntityListener implements Listener {

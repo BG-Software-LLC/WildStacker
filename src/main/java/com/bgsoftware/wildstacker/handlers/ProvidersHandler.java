@@ -43,6 +43,7 @@ import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
+import com.bgsoftware.wildstacker.listeners.plugins.SuperiorSkyblockListener;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -82,6 +83,9 @@ public final class ProvidersHandler {
 
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 0L);
+
+        if(plugin.getSettings().superiorSkyblockHook)
+            Bukkit.getPluginManager().registerEvents(new SuperiorSkyblockListener(), plugin);
 
         Executor.sync(() -> {
             if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
