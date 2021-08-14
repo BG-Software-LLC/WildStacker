@@ -654,10 +654,6 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         return false;
     }
 
-    /*
-     *   Tag methods
-     */
-
     @Override
     public void giveExp(Player player, int amount) {
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
@@ -688,6 +684,10 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
     }
+
+    /*
+     *   Tag methods
+     */
 
     @Override
     public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {

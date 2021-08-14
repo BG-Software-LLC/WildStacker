@@ -765,14 +765,14 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         return true;
     }
 
-    /*
-     *   Tag methods
-     */
-
     @Override
     public void giveExp(Player player, int amount) {
         player.giveExp(amount, true);
     }
+
+    /*
+     *   Tag methods
+     */
 
     @Override
     public void updateEntity(LivingEntity sourceBukkit, LivingEntity targetBukkit) {
