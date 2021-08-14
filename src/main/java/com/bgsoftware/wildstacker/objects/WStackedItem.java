@@ -314,6 +314,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void giveItemStack(Inventory inventory) {
+        if(isRemoved())
+            return;
+
         ItemStack itemStack = getItemStack();
 
         /*
