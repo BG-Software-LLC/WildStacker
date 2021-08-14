@@ -78,6 +78,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -589,6 +590,11 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
             if (playerExpChangeEvent.getAmount() > 0)
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
+    }
+
+    @Override
+    public void enterVehicle(Vehicle vehicle, org.bukkit.entity.Entity entity) {
+        vehicle.addPassenger(entity);
     }
 
     /*

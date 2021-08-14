@@ -24,6 +24,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -230,6 +231,10 @@ public interface NMSAdapter {
             if (playerExpChangeEvent.getAmount() > 0)
                 player.giveExp(playerExpChangeEvent.getAmount());
         }
+    }
+
+    default void enterVehicle(Vehicle vehicle, Entity entity){
+        vehicle.setPassenger(entity);
     }
 
     /*

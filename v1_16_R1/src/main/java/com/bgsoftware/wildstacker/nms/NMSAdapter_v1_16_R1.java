@@ -112,6 +112,7 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -746,6 +747,11 @@ public final class NMSAdapter_v1_16_R1 implements NMSAdapter {
     @Override
     public void giveExp(Player player, int amount) {
         player.giveExp(amount, true);
+    }
+
+    @Override
+    public void enterVehicle(Vehicle vehicle, org.bukkit.entity.Entity entity) {
+        vehicle.addPassenger(entity);
     }
 
     /*

@@ -889,7 +889,7 @@ public final class EntitiesListener implements Listener {
 
         stackedEntity.decreaseStackAmount(1, true);
         StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-        e.getVehicle().setPassenger(duplicated.getLivingEntity());
+        plugin.getNMSAdapter().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());
     }
 
     /*
