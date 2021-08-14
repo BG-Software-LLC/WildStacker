@@ -469,6 +469,8 @@ public final class EntitiesListener implements Listener {
                         if (isMcMMOSpawnedEntity)
                             McMMOHook.updateSpawnedEntity(livingEntity);
 
+                        McMMOHook.cancelRuptureTask(livingEntity);
+
                         JobsHook.updateSpawnReason(livingEntity, stackedEntity.getSpawnCause());
 
                         finalDrops.removeIf(itemStack -> itemStack == null || itemStack.getType() == Material.AIR);

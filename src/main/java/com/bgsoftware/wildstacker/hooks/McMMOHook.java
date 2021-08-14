@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.gmail.nossr50.config.experience.ExperienceConfig;
 import com.gmail.nossr50.datatypes.experience.XPGainReason;
 import com.gmail.nossr50.datatypes.experience.XPGainSource;
+import com.gmail.nossr50.datatypes.meta.RuptureTaskMeta;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.datatypes.skills.SkillType;
@@ -20,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
@@ -34,6 +36,8 @@ public final class McMMOHook {
     // Multiplier tags
     private static final String SPAWNER_ENTITY_KEY = "mcMMO: Spawned Entity";
     private static final String BRED_ANIMAL_KEY = "mcMMO: Bred Animal";
+
+    private static final String RUPTURE_TASK_KEY = "mcMMO: RuptureTask";
 
     private static Plugin mcMMO;
     private static Method gainXPMethod = null;
@@ -165,6 +169,16 @@ public final class McMMOHook {
                 persistentDataLayer.flagMetadata(com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType.MOB_SPAWNER_MOB, livingEntity);
             } else {
                 livingEntity.setMetadata(SPAWNER_ENTITY_KEY, new FixedMetadataValue(mcMMO, true));
+            }
+        }
+    }
+
+    public static void cancelRuptureTask(LivingEntity livingEntity) {
+        if (mcMMO != null) {
+            for(MetadataValue metadataValue : livingEntity.getMetadata(RUPTURE_TASK_KEY)){
+                if(metadataValue instanceof RuptureTaskMeta){
+                    ((RuptureTaskMeta) metadataValue).getRuptureTimerTask().cancel();
+                }
             }
         }
     }
