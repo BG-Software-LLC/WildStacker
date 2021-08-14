@@ -49,8 +49,6 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieVillager;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -191,11 +189,6 @@ public final class EntityUtils {
             player.removePotionEffect(PotionEffectType.getByName("BAD_OMEN"));
 
         return Math.max(0, Math.min(5, amplifier));
-    }
-
-    public static boolean killedByZombie(LivingEntity livingEntity) {
-        EntityDamageEvent entityDamageEvent = livingEntity.getLastDamageCause();
-        return entityDamageEvent instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) entityDamageEvent).getDamager() instanceof Zombie;
     }
 
     @SuppressWarnings("all")

@@ -5,10 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
-import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.JobsHook;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
@@ -19,10 +16,10 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -35,11 +32,9 @@ import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Statistic;
 import org.bukkit.block.Beehive;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.EnderDragon;
@@ -53,8 +48,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -79,15 +72,10 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -102,7 +90,6 @@ public final class EntitiesListener implements Listener {
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
     private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
-    private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
 
     public static EntitiesListener IMP;
 
@@ -135,15 +122,6 @@ public final class EntitiesListener implements Listener {
     /*
      *  Event handlers
      */
-
-    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager) {
-        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
-        if (damager == null) {
-            return new EntityDamageEvent(entity, damageCause, damageModifiers, damageModifiersFunctions);
-        } else {
-            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
-        }
-    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e) {
@@ -261,265 +239,14 @@ public final class EntitiesListener implements Listener {
         if (stackedEntity.getHealth() - e.getFinalDamage() > 0 && !oneShot)
             return;
 
-        if (plugin.getSettings().entitiesStackingEnabled || stackedEntity.getStackAmount() > 1) {
-            EntityDamageEvent.DamageCause lastDamageCause = e.getCause();
 
-            if (lastDamageCause != EntityDamageEvent.DamageCause.VOID && plugin.getNMSAdapter().handleTotemOfUndying(livingEntity)) {
-                e.setCancelled(true);
-                return;
-            }
+        DeathSimulation.Result deathSimulationResult = DeathSimulation.simulateDeath(stackedEntity, e.getCause(),
+                damagerTool, damager, entityDamager, creativeMode, e.getDamage(), e.getFinalDamage(), noDeathEvent);
 
-            int stackAmount;
-            double damageToNextStack;
+        if (deathSimulationResult.isCancelEvent())
+            e.setCancelled(true);
 
-            boolean instantKill = stackedEntity.isInstantKill(lastDamageCause);
-
-            if (plugin.getSettings().spreadDamage && !instantKill) {
-                double finalDamage = e.getFinalDamage();
-
-                if (SWEEPING_EDGE != null && damagerTool != null) {
-                    int sweepingEdgeLevel = damagerTool.getEnchantmentLevel(SWEEPING_EDGE);
-                    if (sweepingEdgeLevel > 0)
-                        finalDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
-                }
-
-                double leftDamage = Math.max(0, finalDamage - livingEntity.getHealth());
-                stackAmount = Math.min(stackedEntity.getStackAmount(), 1 + (int) (leftDamage / livingEntity.getMaxHealth()));
-                damageToNextStack = leftDamage % livingEntity.getMaxHealth();
-            } else {
-                stackAmount = Math.min(stackedEntity.getStackAmount(),
-                        instantKill ? stackedEntity.getStackAmount() : stackedEntity.getDefaultUnstack());
-                damageToNextStack = 0;
-            }
-
-            int fireTicks = livingEntity.getFireTicks();
-
-            if (plugin.getSettings().entitiesFastKill) {
-                e.setCancelled(true);
-
-                if (damager != null) {
-                    // We make sure the entity has no damage ticks, so it can always be hit.
-                    livingEntity.setMaximumNoDamageTicks(0);
-                }
-
-                // We make sure the entity doesn't get any knockback by setting the velocity to 0.
-                Executor.sync(() -> livingEntity.setVelocity(new Vector()), 1L);
-            }
-
-            if (damager != null)
-                McMMOHook.handleCombat(damager, entityDamager, livingEntity, e.getFinalDamage());
-
-            EntityDamageEvent clonedEvent = createDamageEvent(e.getEntity(), e.getCause(), e.getDamage(), entityDamager);
-
-            double originalDamage = e.getDamage();
-
-            e.setDamage(0);
-            livingEntity.setHealth(livingEntity.getMaxHealth() - damageToNextStack);
-
-            //Villager was killed by a zombie - should be turned into a zombie villager.
-            if (livingEntity.getType() == EntityType.VILLAGER && EntityUtils.killedByZombie(livingEntity)) {
-                boolean spawnZombie = false;
-
-                switch (livingEntity.getWorld().getDifficulty()) {
-                    case NORMAL:
-                        spawnZombie = ThreadLocalRandom.current().nextBoolean();
-                        break;
-                    case HARD:
-                        spawnZombie = true;
-                        break;
-                }
-
-                if (spawnZombie) {
-                    Zombie zombieVillager = plugin.getNMSAdapter().spawnZombieVillager((Villager) livingEntity);
-                    if (zombieVillager != null) {
-                        StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
-                        if (StackSplit.VILLAGER_INFECTION.isEnabled()) {
-                            stackedEntity.runUnstack(1, entityDamager);
-                        } else {
-                            stackedZombie.setStackAmount(stackedEntity.getStackAmount(), true);
-                            stackedEntity.remove();
-                        }
-                        stackedZombie.updateName();
-                        stackedZombie.runStackAsync(null);
-                    }
-
-                    return;
-                }
-            }
-
-            int originalAmount = stackedEntity.getStackAmount();
-
-            if (stackedEntity.runUnstack(stackAmount, entityDamager) == UnstackResult.SUCCESS) {
-                int unstackAmount = originalAmount - stackedEntity.getStackAmount();
-
-                ((WStackedEntity) stackedEntity).setDeadFlag(true);
-
-                EntityUtils.setKiller(livingEntity, damager);
-
-                int lootBonusLevel = damagerTool == null ? 0 : damagerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
-
-                if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
-                    livingEntity.setFireTicks(160);
-
-                if (livingEntity.getKiller() != null) {
-                    Player killer = livingEntity.getKiller();
-
-                    try {
-                        StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, unstackAmount);
-                        StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, stackedEntity.getType(), unstackAmount);
-                    } catch (IllegalArgumentException ignored) {
-                    }
-
-                    //Achievements
-                    EntityType victimType = livingEntity.getType();
-
-                    //Monster Hunter
-                    grandAchievement(killer, victimType, "KILL_ENEMY");
-                    grandAchievement(killer, victimType, "adventure/kill_a_mob");
-                    //Monsters Hunted
-                    grandAchievement(killer, victimType, "adventure/kill_all_mobs");
-                    //Sniper Duel
-                    if (killer.getLocation().distanceSquared(livingEntity.getLocation()) >= 50 * 50) {
-                        grandAchievement(killer, "", "SNIPE_SKELETON");
-                        grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
-                    }
-
-                }
-
-                // Handle sweeping edge enchantment
-                if (e.isCancelled() && damagerTool != null && damager != null)
-                    plugin.getNMSAdapter().handleSweepingEdge(damager, damagerTool, stackedEntity.getLivingEntity(), originalDamage);
-
-                //Decrease durability when next-stack-knockback is false
-                if (e.isCancelled() && damagerTool != null && !creativeMode && !ItemUtils.isUnbreakable(damagerTool)) {
-                    int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
-                    ThreadLocalRandom random = ThreadLocalRandom.current();
-                    if (damage > 0) {
-                        int unbreakingLevel = damagerTool.getEnchantmentLevel(Enchantment.DURABILITY);
-                        int damageDecrease = 0;
-
-                        for (int i = 0; unbreakingLevel > 0 && i < damage; i++) {
-                            if (random.nextInt(unbreakingLevel + 1) > 0)
-                                damageDecrease++;
-                        }
-
-                        damage -= damageDecrease;
-
-                        if (damage > 0) {
-                            if (damagerTool.getDurability() + damage > damagerTool.getType().getMaxDurability())
-                                livingEntity.getKiller().setItemInHand(new ItemStack(Material.AIR));
-                            else
-                                damagerTool.setDurability((short) (damagerTool.getDurability() + damage));
-                        }
-                    }
-                }
-
-                Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
-
-                Executor.async(() -> {
-                    livingEntity.setLastDamageCause(clonedEvent);
-                    livingEntity.setFireTicks(fireTicks);
-
-                    List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
-                    int droppedExp = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
-
-                    Executor.sync(() -> {
-                        plugin.getNMSAdapter().setEntityDead(livingEntity, true);
-
-                        int currentStackAmount = stackedEntity.getStackAmount();
-
-                        stackedEntity.setStackAmount(unstackAmount, false);
-
-                        McMMOHook.updateCachedName(livingEntity);
-                        boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnerEntity(livingEntity);
-
-                        // I set the health to 0 so it will be 0 in the EntityDeathEvent
-                        // Some plugins, such as MyPet, check for that value
-                        double originalHealth = livingEntity.getHealth();
-                        plugin.getNMSAdapter().setHealthDirectly(livingEntity, 0);
-
-                        boolean spawnDuplicate = false;
-                        List<ItemStack> finalDrops;
-                        int finalExp;
-
-                        if (!noDeathEvent.contains(e.getEntity().getUniqueId())) {
-                            EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
-                            Bukkit.getPluginManager().callEvent(entityDeathEvent);
-                            finalDrops = entityDeathEvent.getDrops();
-                            finalExp = entityDeathEvent.getDroppedExp();
-                        } else {
-                            spawnDuplicate = true;
-                            noDeathEvent.remove(e.getEntity().getUniqueId());
-                            finalDrops = drops;
-                            Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
-                            finalExp = expToDropFlag == null ? 0 : expToDropFlag;
-                            stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
-                        }
-
-                        plugin.getNMSAdapter().setEntityDead(livingEntity, false);
-                        plugin.getNMSAdapter().setHealthDirectly(livingEntity, originalHealth);
-
-                        stackedEntity.setStackAmount(currentStackAmount, false);
-
-                        // If setting this to ender dragons, the death animation doesn't happen for an unknown reason.
-                        // Cannot revert to original death event neither. This fixes death animations for all versions.
-                        if (livingEntity.getType() != EntityType.ENDER_DRAGON)
-                            livingEntity.setLastDamageCause(null);
-
-                        if (isMcMMOSpawnedEntity)
-                            McMMOHook.updateSpawnedEntity(livingEntity);
-
-                        McMMOHook.cancelRuptureTask(livingEntity);
-
-                        JobsHook.updateSpawnReason(livingEntity, stackedEntity.getSpawnCause());
-
-                        finalDrops.removeIf(itemStack -> itemStack == null || itemStack.getType() == Material.AIR);
-
-                        // Multiply items that weren't added in the first place
-                        // We should call this only when the event was called - aka finalDrops != drops.
-                        if (plugin.getSettings().multiplyDrops && finalDrops != drops) {
-                            subtract(drops, finalDrops).forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
-                        }
-
-                        finalDrops.forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
-
-                        if (finalExp > 0) {
-                            if (GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
-                                EntityUtils.giveExp(livingEntity.getKiller(), finalExp);
-                                if (plugin.getSettings().entitiesExpPickupSound != null)
-                                    livingEntity.getKiller().playSound(livingEntity.getLocation(),
-                                            plugin.getSettings().entitiesExpPickupSound, 0.1F, 0.1F);
-                            } else {
-                                EntityUtils.spawnExp(livingEntity.getLocation(), finalExp);
-                            }
-                        }
-
-                        if (livingEntity.getKiller() != null && EntityTypes.fromEntity(livingEntity).isRaider()) {
-                            org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) livingEntity;
-                            if (raider.isPatrolLeader()) {
-                                livingEntity.getKiller().addPotionEffect(new PotionEffect(
-                                        PotionEffectType.getByName("BAD_OMEN"),
-                                        120000,
-                                        EntityUtils.getBadOmenAmplifier(livingEntity.getKiller()),
-                                        false
-                                ));
-                            }
-
-                            plugin.getNMSAdapter().attemptJoinRaid(livingEntity.getKiller(), raider);
-                        }
-
-                        ((WStackedEntity) stackedEntity).setDeadFlag(false);
-
-                        if (!stackedEntity.hasFlag(EntityFlag.REMOVED_ENTITY) && (livingEntity.getHealth() <= 0 ||
-                                (spawnDuplicate && stackedEntity.getStackAmount() > 1))) {
-                            stackedEntity.spawnDuplicate(stackedEntity.getStackAmount());
-                            stackedEntity.remove();
-                        }
-
-                    });
-                });
-            }
-        }
+        e.setDamage(deathSimulationResult.getEventDamage());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -889,7 +616,7 @@ public final class EntitiesListener implements Listener {
 
         e.setCancelled(true);
 
-        if(!plugin.getSettings().entitiesFillVehicles &&
+        if (!plugin.getSettings().entitiesFillVehicles &&
                 plugin.getNMSAdapter().getPassengersCount(e.getVehicle()) >= 1 && stackedEntity.getStackAmount() > 1)
             return;
 
@@ -1082,24 +809,13 @@ public final class EntitiesListener implements Listener {
         return (int) Arrays.stream(chunk.getEntities()).filter(EntityUtils::isStackable).count() > chunkLimit;
     }
 
-    private void grandAchievement(Player killer, EntityType entityType, String name) {
-        try {
-            plugin.getNMSAdapter().grandAchievement(killer, entityType, name);
-        } catch (Throwable ignored) {
+    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager) {
+        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
+        if (damager == null) {
+            return new EntityDamageEvent(entity, damageCause, damageModifiers, damageModifiersFunctions);
+        } else {
+            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, damageModifiersFunctions);
         }
-    }
-
-    private void grandAchievement(Player killer, String criteria, String name) {
-        try {
-            plugin.getNMSAdapter().grandAchievement(killer, criteria, name);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    private List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2) {
-        List<ItemStack> toReturn = new ArrayList<>(list2);
-        toReturn.removeAll(list1);
-        return toReturn;
     }
 
     private class TransformListener implements Listener {
