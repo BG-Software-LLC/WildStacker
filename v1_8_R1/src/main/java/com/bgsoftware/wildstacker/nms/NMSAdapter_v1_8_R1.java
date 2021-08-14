@@ -425,10 +425,6 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
             entityLiving.makeSound(deathSound, soundVolume, soundPitch);
     }
 
-    /*
-     *   Tag methods
-     */
-
     @Override
     public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
         WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
@@ -506,6 +502,10 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
             }
         });
     }
+
+    /*
+     *   Tag methods
+     */
 
     @Override
     public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {
