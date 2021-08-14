@@ -237,6 +237,10 @@ public interface NMSAdapter {
         vehicle.setPassenger(entity);
     }
 
+    default int getPassengersCount(Vehicle vehicle){
+        return vehicle.getPassenger() == null ? 0 : 1;
+    }
+
     /*
      *   Tag methods
      */

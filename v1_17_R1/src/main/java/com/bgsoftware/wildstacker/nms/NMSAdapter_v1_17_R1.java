@@ -852,6 +852,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         vehicle.addPassenger(entity);
     }
 
+    @Override
+    public int getPassengersCount(Vehicle vehicle) {
+        return (int) vehicle.getPassengers().stream().filter(entity -> !(entity instanceof Player)).count();
+    }
+
     /*
      *   Tag methods
      */

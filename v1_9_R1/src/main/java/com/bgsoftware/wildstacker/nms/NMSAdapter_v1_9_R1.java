@@ -504,6 +504,12 @@ public final class NMSAdapter_v1_9_R1 implements NMSAdapter {
         ((CraftVehicle) vehicle).getHandle().a(((CraftEntity) entity).getHandle(), true);
     }
 
+    @Override
+    public int getPassengersCount(Vehicle vehicle) {
+        return (int) ((CraftVehicle) vehicle).getHandle().passengers.stream()
+                .filter(entity -> !(entity instanceof EntityPlayer)).count();
+    }
+
     /*
      *   Tag methods
      */

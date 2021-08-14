@@ -462,6 +462,11 @@ entities:
   - 'CURED'
   - 'PIGLIN_ZOMBIFIED'
 
+  # Should entities fill vehicles entirely by stacked entities?
+  # When enabled, vehicles will be able to get filled with two entities.
+  # This can cause players to not be able to enter these vehicles.
+  entities-fill-vehicles: false
+
 # Here you can configurable all features related to stacked spawners.
 spawners:
   # Should spawners get stacked on the server?

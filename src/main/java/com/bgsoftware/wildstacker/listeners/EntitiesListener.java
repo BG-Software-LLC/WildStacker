@@ -887,6 +887,10 @@ public final class EntitiesListener implements Listener {
 
         e.setCancelled(true);
 
+        if(!plugin.getSettings().entitiesFillVehicles &&
+                plugin.getNMSAdapter().getPassengersCount(e.getVehicle()) >= 1 && stackedEntity.getStackAmount() > 1)
+            return;
+
         stackedEntity.decreaseStackAmount(1, true);
         StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
         plugin.getNMSAdapter().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());

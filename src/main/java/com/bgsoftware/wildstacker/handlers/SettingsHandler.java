@@ -94,7 +94,7 @@ public final class SettingsHandler {
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreeding,
             entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill, eggLayMultiply, scuteMultiply,
             entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
-            multiplyDrops, multiplyExp, spreadDamage;
+            multiplyDrops, multiplyExp, spreadDamage, entitiesFillVehicles;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -300,6 +300,7 @@ public final class SettingsHandler {
         multiplyExp = cfg.getBoolean("entities.multiply-exp", true);
         spreadDamage = cfg.getBoolean("entities.spread-damage", false);
         entitiesFilteredTransforms = cfg.getStringList("entities.filtered-transforms");
+        entitiesFillVehicles = cfg.getBoolean("entities.entities-fill-vehicles");
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
         spawnersMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("spawners.merge-radius"), EntityType.class);

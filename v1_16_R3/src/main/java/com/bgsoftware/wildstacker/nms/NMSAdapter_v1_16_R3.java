@@ -94,6 +94,7 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVehicle;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
@@ -774,6 +775,12 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public void enterVehicle(Vehicle vehicle, org.bukkit.entity.Entity entity) {
         vehicle.addPassenger(entity);
+    }
+
+    @Override
+    public int getPassengersCount(Vehicle vehicle) {
+        return (int) ((CraftVehicle) vehicle).getHandle().passengers.stream()
+                .filter(entity -> !(entity instanceof EntityPlayer)).count();
     }
 
     /*
