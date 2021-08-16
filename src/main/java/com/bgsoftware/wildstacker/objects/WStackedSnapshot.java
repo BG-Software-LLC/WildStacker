@@ -11,8 +11,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class WStackedSnapshot implements StackedSnapshot {
 
@@ -21,13 +23,20 @@ public final class WStackedSnapshot implements StackedSnapshot {
     private final Map<Location, Pair<Integer, EntityType>> stackedSpawners = new HashMap<>();
     private final Map<Location, Pair<Integer, ItemStack>> stackedBarrels = new HashMap<>();
 
-    public WStackedSnapshot(Chunk chunk) {
-        for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners(chunk)) {
-            stackedSpawners.put(stackedSpawner.getLocation(), new Pair<>(stackedSpawner.getStackAmount(), stackedSpawner.getSpawnedType()));
-        }
-
-        for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels(chunk)) {
-            stackedBarrels.put(stackedBarrel.getLocation(), new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+    public WStackedSnapshot(Chunk chunk, SnapshotOptions... snapshotOptions) {
+        for (SnapshotOptions loadingOption : snapshotOptions) {
+            switch (loadingOption) {
+                case LOAD_SPAWNERS:
+                    for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners(chunk)) {
+                        stackedSpawners.put(stackedSpawner.getLocation(), new Pair<>(stackedSpawner.getStackAmount(), stackedSpawner.getSpawnedType()));
+                    }
+                    break;
+                case LOAD_BARRELS:
+                    for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels(chunk)) {
+                        stackedBarrels.put(stackedBarrel.getLocation(), new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+                    }
+                    break;
+            }
         }
     }
 
@@ -59,18 +68,19 @@ public final class WStackedSnapshot implements StackedSnapshot {
 
     @Override
     public Map<Location, Map.Entry<Integer, EntityType>> getAllSpawners() {
-        return new HashMap<>(stackedSpawners);
+        return Collections.unmodifiableMap(stackedSpawners);
     }
 
     @Override
     public Map<Location, Map.Entry<Integer, Material>> getAllBarrels() {
-        Map<Location, Map.Entry<Integer, Material>> map = new HashMap<>();
-        getAllBarrelsItems().forEach((location, pair) -> map.put(location, new Pair<>(pair.getKey(), pair.getValue().getType())));
-        return map;
+        return Collections.unmodifiableMap(getAllBarrelsItems().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> new Pair<>(entry.getValue().getKey(), entry.getValue().getValue().getType())
+        )));
     }
 
     @Override
     public Map<Location, Map.Entry<Integer, ItemStack>> getAllBarrelsItems() {
-        return new HashMap<>(stackedBarrels);
+        return Collections.unmodifiableMap(stackedBarrels);
     }
 }

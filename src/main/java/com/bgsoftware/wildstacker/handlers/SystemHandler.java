@@ -603,8 +603,14 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk) {
+        return getStackedSnapshot(chunk, StackedSnapshot.SnapshotOptions.LOAD_BARRELS,
+                StackedSnapshot.SnapshotOptions.LOAD_SPAWNERS);
+    }
+
+    @Override
+    public StackedSnapshot getStackedSnapshot(Chunk chunk, StackedSnapshot.SnapshotOptions... snapshotOptions) {
         chunk.load(false);
-        return new WStackedSnapshot(chunk);
+        return new WStackedSnapshot(chunk, snapshotOptions);
     }
 
     @Override

@@ -312,11 +312,19 @@ public interface SystemManager {
 
     /**
      * Get a stacked snapshot of a chunk.
+     * This method will load spawners and barrels in the chunk.
      *
-     * @param chunk The chunk
-     * @return StackedSnapshot object
+     * @param chunk The chunk to take a snapshot of.
      */
     StackedSnapshot getStackedSnapshot(Chunk chunk);
+
+    /**
+     * Get a stacked snapshot of a chunk.
+     *
+     * @param chunk The chunk to take a snapshot of.
+     * @param snapshotOptions Options for loading data.
+     */
+    StackedSnapshot getStackedSnapshot(Chunk chunk, StackedSnapshot.SnapshotOptions... snapshotOptions);
 
     /**
      * Check whether or not a player has item names toggled off.

@@ -72,4 +72,11 @@ public interface StackedSnapshot {
      */
     Map<Location, Map.Entry<Integer, ItemStack>> getAllBarrelsItems();
 
+    enum SnapshotOptions {
+
+        LOAD_SPAWNERS,
+        LOAD_BARRELS
+
+    }
+
 }
