@@ -6,7 +6,7 @@ description: Stacking drops, entities, blocks and spawners into one object!
 website: https://bg-software.com/
 author: Ome_R
 softdepend: [Arconix, Boss, Citizens, ClearLag, CMI, CoreProtect, CrazyEnchantments, CustomBosses, EpicBosses, EpicSpawners, Factions, Holograms, HolographicDisplays, MassiveCore, mcMMO, MineableSpawners, MyPet, MythicMobs, FactionsTop, PlotSquared, ProtocolLib, ShopGUIPlus, SilkSpawners, Vault, WildStackerEnchantsPatch, WildTools, WorldEdit, WorldGuard, SuperiorSkyblock2]
-loadbefore: [ShopGUIPlus]
+loadbefore: [ShopGUIPlus, SuperiorSkyblock2]
 commands:
   stacker:
     description: Main command for the plugin
