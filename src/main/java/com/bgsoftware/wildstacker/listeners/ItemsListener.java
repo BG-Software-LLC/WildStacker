@@ -173,13 +173,13 @@ public final class ItemsListener implements Listener {
                 ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
 
                 // Checks for reverting of items.
-                Executor.sync(() -> {
+                Executor.runAtEndOfTick(() -> {
                     ItemStack[] currentContentsSnapshot = e.getInventory().getContents();
                     if (Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)) {
                         // Inventory was restored, we should load it again with all the new items.
                         e.getInventory().setContents(adjustedContentsSnapshot);
                     }
-                }, 1L);
+                });
             } else {
                 ItemStack itemStack = stackedItem.getItemStack();
                 int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
