@@ -170,7 +170,7 @@ public final class ItemsListener implements Listener {
 
                 stackedItem.giveItemStack(e.getInventory());
 
-                ItemStack[] adjustedContentsSnapshot = e.getInventory().getContents();
+                ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
 
                 // Checks for reverting of items.
                 Executor.sync(() -> {
@@ -219,11 +219,6 @@ public final class ItemsListener implements Listener {
             if (stackedItem.getStackAmount() <= 0) {
                 item.setPickupDelay(5);
                 EntityStorage.setMetadata(item, EntityFlag.RECENTLY_PICKED_UP, true);
-
-                Executor.sync(() -> {
-                    e.getItem().remove();
-                    stackedItem.remove();
-                }, 2L);
             }
         }
     }

@@ -406,6 +406,15 @@ public final class ItemUtils {
         return entity.isValid() && !entity.isDead() && plugin.getNMSAdapter().isDroppedItem(entity);
     }
 
+    public static ItemStack[] cloneItems(ItemStack[] original) {
+        ItemStack[] clonedArray = new ItemStack[original.length];
+        for (int i = 0; i < clonedArray.length; ++i) {
+            if (clonedArray[i] != null)
+                clonedArray[i] = clonedArray[i].clone();
+        }
+        return clonedArray;
+    }
+
     private static boolean canBeStacked(ItemStack itemStack, World world) {
         Material itemType = itemStack.getType();
         return !plugin.getSettings().blacklistedItems.contains(itemType) &&
