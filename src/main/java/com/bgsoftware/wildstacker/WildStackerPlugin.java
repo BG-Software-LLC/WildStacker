@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.listeners.ItemsListener;
 import com.bgsoftware.wildstacker.listeners.MenusListener;
 import com.bgsoftware.wildstacker.listeners.NoClaimConflictListener;
 import com.bgsoftware.wildstacker.listeners.PlayersListener;
+import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.listeners.ShulkerOversizedPatch;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
 import com.bgsoftware.wildstacker.listeners.StewListener;
@@ -163,6 +164,12 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new StewListener(this), this);
         getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldsListener(this), this);
+
+        try{
+            Class.forName("com.destroystokyo.paper.event.server.ServerTickEndEvent");
+            getServer().getPluginManager().registerEvents(new ServerTickListener(), this);
+        }catch (Throwable ignored) {}
+
         EventsListener.register(this);
 
         CommandsHandler commandsHandler = new CommandsHandler(this);

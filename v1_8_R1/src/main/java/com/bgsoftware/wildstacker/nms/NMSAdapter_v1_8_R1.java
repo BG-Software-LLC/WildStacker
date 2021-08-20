@@ -631,6 +631,11 @@ public final class NMSAdapter_v1_8_R1 implements NMSAdapter {
     }
 
     @Override
+    public void runAtEndOfTick(Runnable code) {
+        ((CraftServer) Bukkit.getServer()).getServer().a(code::run);
+    }
+
+    @Override
     public void saveEntity(StackedEntity stackedEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) stackedEntity.getLivingEntity()).getHandle();
         setEffect(entityLiving, new CustomMobEffect(STACK_AMOUNT, stackedEntity.getStackAmount()));

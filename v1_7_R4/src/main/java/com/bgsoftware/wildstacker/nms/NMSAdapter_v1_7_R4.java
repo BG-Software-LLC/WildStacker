@@ -574,6 +574,12 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
     public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
         return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
+
+    @Override
+    public void runAtEndOfTick(Runnable code) {
+        ((CraftServer) Bukkit.getServer()).getServer().a(code::run);
+    }
+
     /*
      *   Data methods
      */

@@ -32,6 +32,13 @@ public final class Executor {
         Bukkit.getScheduler().runTaskLater(plugin, runnable, delayedTime);
     }
 
+    public static void runAtEndOfTick(Runnable code) {
+        if (shutdown)
+            return;
+
+        plugin.getNMSAdapter().runAtEndOfTick(code);
+    }
+
     public static void async(Runnable runnable) {
         if (shutdown)
             return;

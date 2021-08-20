@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
@@ -265,6 +266,10 @@ public interface NMSAdapter {
     }
 
     MetadataStoreBase<Entity> getEntityMetadataStore();
+
+    default void runAtEndOfTick(Runnable code){
+        ServerTickListener.addTickEndTask(code);
+    }
 
     /*
      *   Data methods
