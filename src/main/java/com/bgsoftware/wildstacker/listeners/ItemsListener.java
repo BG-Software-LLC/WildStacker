@@ -20,7 +20,6 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -201,20 +200,8 @@ public final class ItemsListener implements Listener {
             }
 
             if (stackAmount != stackedItem.getStackAmount()) {
-                if (e.getPlayer() != null && plugin.getSettings().itemsSoundEnabled) {
-                    Sound pickUpItem;
-
-                    //Different name on 1.12
-                    try {
-                        pickUpItem = Sound.valueOf("ITEM_PICKUP");
-                    } catch (IllegalArgumentException ex) {
-                        pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
-                    }
-
-                    e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
-                            plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
-                }
-
+                if (plugin.getSettings().itemsSoundEnabled)
+                    ItemUtils.playPickupSound(e.getEntity().getLocation());
                 //Pick up animation
                 plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), item);
             }

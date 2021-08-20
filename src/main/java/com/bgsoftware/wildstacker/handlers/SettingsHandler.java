@@ -85,7 +85,6 @@ public final class SettingsHandler {
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final NameBuilder<StackedItem> itemsNameBuilder;
     public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
-    public final float itemsSoundVolume, itemsSoundPitch;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
 
@@ -217,9 +216,7 @@ public final class SettingsHandler {
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
-        itemsSoundEnabled = cfg.getBoolean("items.pickup-sound.enabled", true);
-        itemsSoundVolume = (float) cfg.getDouble("items.pickup-sound.volume");
-        itemsSoundPitch = (float) cfg.getDouble("items.pickup-sound.pitch");
+        itemsSoundEnabled = cfg.getBoolean("items.pickup-sound", true);
         itemsMaxPickupDelay = cfg.getBoolean("items.max-pickup-delay", false);
         itemsStackInterval = cfg.getLong("items.stack-interval", 0L);
         storeItems = cfg.getBoolean("items.store-items", true);
@@ -712,6 +709,9 @@ public final class SettingsHandler {
         if (cfg.contains("entities.next-stack-knockback")) {
             cfg.set("entities.fast-kill", !cfg.getBoolean("entities.next-stack-knockback"));
             cfg.set("entities.next-stack-knockback", null);
+        }
+        if(cfg.contains("items.pickup-sound.enabled")){
+            cfg.set("items.pickup-sound", cfg.getBoolean("items.pickup-sound.enabled"));
         }
     }
 

@@ -151,16 +151,8 @@ items:
     # What the toggle command will be?
     command: 'stacker names item'
 
-  # When enabled, a pickup sound will be played to the player.
-  pickup-sound:
-    # Should pickup-sound be enabled for stacked items?
-    enabled: true
-
-    # The volume of the sound.
-    volume: 1.0
-
-    # The pitch of the volume.
-    pitch: 1.0
+  # Should pickup-sound be enabled for stacked items?
+  pickup-sound: true
 
   # Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)
   max-pickup-delay: false
