@@ -48,6 +48,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.craftbukkit.v1_9_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftAnimals;
@@ -73,6 +74,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.metadata.MetadataStoreBase;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -628,6 +630,15 @@ public final class NMSAdapter_v1_9_R1 implements NMSAdapter {
             return valueType.cast(tagCompound.getLong(key));
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
+    }
+
+    /*
+     *   Other methods
+     */
+
+    @Override
+    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
+        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*

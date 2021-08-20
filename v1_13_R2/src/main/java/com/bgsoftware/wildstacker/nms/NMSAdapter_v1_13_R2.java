@@ -77,6 +77,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_13_R2.CraftParticle;
+import org.bukkit.craftbukkit.v1_13_R2.CraftServer;
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
@@ -112,6 +113,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.metadata.MetadataStoreBase;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -849,6 +851,11 @@ public final class NMSAdapter_v1_13_R2 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
+    }
+
+    @Override
+    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
+        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*

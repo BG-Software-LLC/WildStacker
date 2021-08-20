@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
@@ -53,13 +54,16 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -70,6 +74,7 @@ public final class EntityUtils {
     private static final ReflectMethod<Void> SET_SHOULDER_ENTITY_RIGHT = new ReflectMethod<>(HumanEntity.class, "setShoulderEntityRight", Entity.class);
     private static final ReflectMethod<Entity> GET_SHOULDER_ENTITY_LEFT = new ReflectMethod<>(HumanEntity.class, "getShoulderEntityLeft");
     private static final ReflectMethod<Void> SET_SHOULDER_ENTITY_LEFT = new ReflectMethod<>(HumanEntity.class, "setShoulderEntityLeft", Entity.class);
+    private static final ReflectField<Map<String, ?>> METADATA_STORAGE = new ReflectField<>(MetadataStoreBase.class, Map.class, "metadataMap");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final Object NULL = new Object();
@@ -573,6 +578,16 @@ public final class EntityUtils {
             }
         }
 
+    }
+
+    public static void clearBukkitMetadata(UUID entityUUID) {
+        MetadataStoreBase<Entity> metadataStoreBase = plugin.getNMSAdapter().getEntityMetadataStore();
+        Map<String, ?> metadataMap = METADATA_STORAGE.get(metadataStoreBase);
+        String entityUUIDString = entityUUID.toString();
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (metadataStoreBase){
+            metadataMap.entrySet().removeIf(entry -> entry.getKey().contains(entityUUIDString));
+        }
     }
 
     private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance) {

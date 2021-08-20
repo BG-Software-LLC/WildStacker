@@ -31,6 +31,7 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.metadata.MetadataStoreBase;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -262,6 +263,8 @@ public interface NMSAdapter {
     default Object getChatMessage(String message) {
         return message;
     }
+
+    MetadataStoreBase<Entity> getEntityMetadataStore();
 
     /*
      *   Data methods

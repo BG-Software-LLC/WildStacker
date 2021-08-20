@@ -79,6 +79,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_14_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_14_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_14_R1.block.CraftBlockEntityState;
@@ -115,6 +116,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -786,10 +788,6 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
         return CraftItemStack.asBukkitCopy(nmsItem);
     }
 
-    /*
-     *   Other methods
-     */
-
     @Override
     public <T> T getTag(org.bukkit.inventory.ItemStack itemStack, String key, Class<T> valueType, Object def) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
@@ -824,13 +822,22 @@ public final class NMSAdapter_v1_14_R1 implements NMSAdapter {
     }
 
     /*
-     *   Data methods
+     *   Other methods
      */
 
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
     }
+
+    @Override
+    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
+        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
+    }
+
+    /*
+     *   Data methods
+     */
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
