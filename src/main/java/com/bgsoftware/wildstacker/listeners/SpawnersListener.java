@@ -727,18 +727,18 @@ public final class SpawnersListener implements Listener {
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
+            int spawnerStackSize = stackedSpawner.getStackAmount();
+
             if (plugin.getSettings().linkedEntitiesEnabled) {
                 LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
                 if (linkedEntity != null) {
                     StackedEntity stackedLinkedEntity = WStackedEntity.of(linkedEntity);
-                    if (stackedLinkedEntity.canGetStacked(1) == StackCheckResult.SUCCESS) {
+                    if (stackedLinkedEntity.canGetStacked(spawnerStackSize) == StackCheckResult.SUCCESS) {
                         targetEntityOptional = Optional.of(stackedLinkedEntity);
                     }
                 }
             }
-
-            int spawnerStackSize = stackedSpawner.getStackAmount();
 
             if (!targetEntityOptional.isPresent()) {
                 int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
