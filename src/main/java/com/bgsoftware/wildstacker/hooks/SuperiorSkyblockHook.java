@@ -15,6 +15,11 @@ public final class SuperiorSkyblockHook {
 
     public static void register(WildStackerPlugin plugin) {
         if (plugin.getSettings().superiorSkyblockHook) {
+            if (ENTITIES_STACKING == null){
+               WildStackerPlugin.log("&cCouldn't register a custom island-flag into SuperiorSkyblock - open an issue on github.");
+               return;
+            }
+
             SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
             plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
         }
