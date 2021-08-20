@@ -724,10 +724,10 @@ public final class SpawnersListener implements Listener {
             if (!plugin.getSettings().listenPaperPreSpawnEvent)
                 return;
 
+            StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
             if (plugin.getSettings().linkedEntitiesEnabled) {
-                StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
                 LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
                 if (linkedEntity != null) {
@@ -736,8 +736,9 @@ public final class SpawnersListener implements Listener {
                         targetEntityOptional = Optional.of(stackedLinkedEntity);
                     }
                 }
-
             }
+
+            int spawnerStackSize = stackedSpawner.getStackAmount();
 
             if (!targetEntityOptional.isPresent()) {
                 int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
@@ -748,7 +749,8 @@ public final class SpawnersListener implements Listener {
                 targetEntityOptional = EntitiesGetter.getNearbyEntities(e.getSpawnLocation(),
                                 mergeRadius, entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
                         .map(WStackedEntity::of)
-                        .filter(stackedEntity -> stackedEntity.canGetStacked(1) == StackCheckResult.SUCCESS)
+                        .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
+                                stackedEntity.canGetStacked(spawnerStackSize) == StackCheckResult.SUCCESS)
                         .findFirst();
             }
 
@@ -758,7 +760,7 @@ public final class SpawnersListener implements Listener {
             }
 
             StackedEntity stackedEntity = targetEntityOptional.get();
-            stackedEntity.increaseStackAmount(1, true);
+            stackedEntity.increaseStackAmount(spawnerStackSize, true);
             stackedEntity.spawnStackParticle(true);
 
             e.setCancelled(true);
