@@ -16,6 +16,7 @@ import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -25,6 +26,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import org.bukkit.Bukkit;
@@ -725,16 +727,18 @@ public final class SpawnersListener implements Listener {
                 return;
 
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
+            SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
-            int spawnerStackSize = stackedSpawner.getStackAmount();
+            int spawnMobsCount = Random.nextInt(1, creatureSpawner.readData().getSpawnCount(),
+                    stackedSpawner.getStackAmount(), 1.5);
 
             if (plugin.getSettings().linkedEntitiesEnabled) {
                 LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
                 if (linkedEntity != null) {
                     StackedEntity stackedLinkedEntity = WStackedEntity.of(linkedEntity);
-                    if (stackedLinkedEntity.canGetStacked(spawnerStackSize) == StackCheckResult.SUCCESS) {
+                    if (stackedLinkedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
                         targetEntityOptional = Optional.of(stackedLinkedEntity);
                     }
                 }
@@ -750,7 +754,7 @@ public final class SpawnersListener implements Listener {
                                 mergeRadius, entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
                         .map(WStackedEntity::of)
                         .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
-                                stackedEntity.canGetStacked(spawnerStackSize) == StackCheckResult.SUCCESS)
+                                stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS)
                         .findFirst();
             }
 
@@ -760,7 +764,7 @@ public final class SpawnersListener implements Listener {
             }
 
             StackedEntity stackedEntity = targetEntityOptional.get();
-            stackedEntity.increaseStackAmount(spawnerStackSize, true);
+            stackedEntity.increaseStackAmount(spawnMobsCount, true);
             stackedEntity.spawnStackParticle(true);
 
             e.setCancelled(true);
