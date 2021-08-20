@@ -407,12 +407,12 @@ public final class ItemUtils {
     }
 
     public static ItemStack[] cloneItems(ItemStack[] original) {
-        ItemStack[] clonedArray = new ItemStack[original.length];
-        for (int i = 0; i < clonedArray.length; ++i) {
-            if (clonedArray[i] != null)
-                clonedArray[i] = clonedArray[i].clone();
-        }
-        return clonedArray;
+//        ItemStack[] clonedArray = new ItemStack[original.length];
+//        for (int i = 0; i < clonedArray.length; ++i) {
+//            if (clonedArray[i] != null)
+//                clonedArray[i] = clonedArray[i].clone();
+//        }
+        return original;
     }
 
     private static boolean canBeStacked(ItemStack itemStack, World world) {
