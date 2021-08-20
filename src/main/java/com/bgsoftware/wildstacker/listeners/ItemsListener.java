@@ -37,6 +37,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,16 +171,18 @@ public final class ItemsListener implements Listener {
 
                 stackedItem.giveItemStack(e.getInventory());
 
-                ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
+                if(!(e.getInventory() instanceof PlayerInventory)) {
+                    ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
 
-                // Checks for reverting of items.
-                Executor.runAtEndOfTick(() -> {
-                    ItemStack[] currentContentsSnapshot = e.getInventory().getContents();
-                    if (Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)) {
-                        // Inventory was restored, we should load it again with all the new items.
-                        e.getInventory().setContents(adjustedContentsSnapshot);
-                    }
-                });
+                    // Checks for reverting of items.
+                    Executor.runAtEndOfTick(() -> {
+                        ItemStack[] currentContentsSnapshot = e.getInventory().getContents();
+                        if (Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)) {
+                            // Inventory was restored, we should load it again with all the new items.
+                            e.getInventory().setContents(adjustedContentsSnapshot);
+                        }
+                    });
+                }
             } else {
                 ItemStack itemStack = stackedItem.getItemStack();
                 int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
