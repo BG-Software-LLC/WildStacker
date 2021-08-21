@@ -40,6 +40,7 @@ import net.minecraft.server.v1_13_R1.EntityTypes;
 import net.minecraft.server.v1_13_R1.EntityVillager;
 import net.minecraft.server.v1_13_R1.EntityZombieVillager;
 import net.minecraft.server.v1_13_R1.EnumHand;
+import net.minecraft.server.v1_13_R1.EnumItemSlot;
 import net.minecraft.server.v1_13_R1.FluidTypes;
 import net.minecraft.server.v1_13_R1.IBlockAccess;
 import net.minecraft.server.v1_13_R1.IBlockData;
@@ -125,6 +126,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -141,6 +143,7 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "cs");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "cD");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "cE");
+    private static final ReflectField<Boolean> ENTITY_FORCE_DROPS = new ReflectField<>(EntityLiving.class, Boolean.class, "forceDrops");
 
     private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
     private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
@@ -670,6 +673,39 @@ public final class NMSAdapter_v1_13_R1 implements NMSAdapter {
 
             }
         });
+    }
+
+    @Override
+    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        itemStack.setCount(1);
+
+        EnumItemSlot equipmentSlotForItem = EntityInsentient.e(itemStack);
+
+        if (equipmentSlotForItem.a() != EnumItemSlot.Function.ARMOR) {
+            return false;
+        }
+
+        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+
+        double equipmentDropChance = entityLiving.dropChanceArmor[equipmentSlotForItem.b()];
+
+        Random random = new Random();
+        if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
+            ENTITY_FORCE_DROPS.set(entityLiving, true);
+            entityLiving.a_(equipmentItem);
+            ENTITY_FORCE_DROPS.set(entityLiving, false);
+        }
+
+        entityLiving.setSlot(equipmentSlotForItem, itemStack);
+        entityLiving.dropChanceArmor[equipmentSlotForItem.b()] = 2.0F;
+
+        entityLiving.persistent = true;
+        entityLiving.receive(entityItem, itemStack.getCount());
+
+        return true;
     }
 
     @Override

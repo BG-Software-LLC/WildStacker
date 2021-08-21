@@ -79,6 +79,7 @@ import net.minecraft.world.level.block.BlockRotatable;
 import net.minecraft.world.level.block.IFluidContainer;
 import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
 import net.minecraft.world.level.block.state.IBlockData;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidTypes;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Bukkit;
@@ -151,6 +152,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -575,10 +577,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
         entityItem.ap = 10;
 
-        try{
+        try {
             entityItem.canMobPickup = false;
             Executor.sync(() -> entityItem.canMobPickup = true, 20L);
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
         StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
@@ -814,6 +817,47 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         } else if ((item == Items.nJ || item == Items.nK) && !
                 entityPiglin.getBehaviorController().hasMemory(MemoryModuleType.ap)) {
             entityPiglin.getBehaviorController().a(MemoryModuleType.ap, true, 200L);
+        } else {
+            handleEquipmentPickup((LivingEntity) bukkitPiglin, bukkitItem);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
+        if(livingEntity instanceof Player)
+            return false;
+
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        itemStack.setCount(1);
+
+        EnumItemSlot equipmentSlotForItem = EntityInsentient.getEquipmentSlotForItem(itemStack);
+
+        if (equipmentSlotForItem.a() != EnumItemSlot.Function.b) {
+            return false;
+        }
+
+        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+
+        double equipmentDropChance = entityLiving.bS[equipmentSlotForItem.b()];
+
+        Random random = new Random();
+        if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
+            entityLiving.forceDrops = true;
+            entityLiving.b(equipmentItem);
+            entityLiving.forceDrops = false;
+        }
+
+        entityLiving.setSlot(equipmentSlotForItem, itemStack);
+        entityLiving.d(equipmentSlotForItem);
+
+        SoundEffect equipSoundEffect = itemStack.M();
+        if (!itemStack.isEmpty() && equipSoundEffect != null) {
+            entityLiving.a(GameEvent.u);
+            entityLiving.playSound(equipSoundEffect, 1.0F, 1.0F);
         }
 
         return true;

@@ -21,9 +21,11 @@ import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,6 +36,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -99,6 +102,15 @@ public final class ItemsListener implements Listener {
         });
     }
 
+    @EventHandler
+    public void g(PlayerInteractEvent e){
+        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
+            for(Entity entity : e.getPlayer().getNearbyEntities(5, 5, 5)){
+                if(entity instanceof Zombie)
+                    ((Zombie) entity).setCanPickupItems(true);
+            }
+        }
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerItemDrop(PlayerDropItemEvent e) {
@@ -170,7 +182,7 @@ public final class ItemsListener implements Listener {
 
                 stackedItem.giveItemStack(e.getInventory());
 
-                if(!(e.getInventory() instanceof PlayerInventory)) {
+                if (!(e.getInventory() instanceof PlayerInventory)) {
                     ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
 
                     // Checks for reverting of items.
@@ -181,6 +193,13 @@ public final class ItemsListener implements Listener {
                             e.getInventory().setContents(adjustedContentsSnapshot);
                         }
                     });
+                }
+            } else if (plugin.getNMSAdapter().handleEquipmentPickup(e.getEntity(), item)) {
+                if(stackAmount <= 1){
+                    stackedItem.remove();
+                }
+                else {
+                    stackedItem.decreaseStackAmount(1, true);
                 }
             } else {
                 ItemStack itemStack = stackedItem.getItemStack();

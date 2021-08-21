@@ -49,6 +49,7 @@ import net.minecraft.server.v1_16_R2.GameRules;
 import net.minecraft.server.v1_16_R2.IBlockData;
 import net.minecraft.server.v1_16_R2.IChatBaseComponent;
 import net.minecraft.server.v1_16_R2.IFluidContainer;
+import net.minecraft.server.v1_16_R2.ItemArmor;
 import net.minecraft.server.v1_16_R2.ItemStack;
 import net.minecraft.server.v1_16_R2.ItemSword;
 import net.minecraft.server.v1_16_R2.Items;
@@ -66,6 +67,7 @@ import net.minecraft.server.v1_16_R2.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R2.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R2.PiglinAI;
 import net.minecraft.server.v1_16_R2.SoundEffect;
+import net.minecraft.server.v1_16_R2.SoundEffects;
 import net.minecraft.server.v1_16_R2.StatisticList;
 import net.minecraft.server.v1_16_R2.TagsItem;
 import net.minecraft.server.v1_16_R2.TileEntityMobSpawner;
@@ -136,6 +138,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -152,6 +155,7 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "dG");
+    private static final ReflectField<Boolean> ENTITY_FORCE_DROPS = new ReflectField<>(EntityLiving.class, Boolean.class, "forceDrops");
 
     private static final DataWatcherObject<Boolean> TURTLE_HAS_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
     private static final DataWatcherObject<BlockPosition> TURTLE_HOME = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
@@ -531,10 +535,11 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
 
         entityItem.pickupDelay = 10;
 
-        try{
+        try {
             entityItem.canMobPickup = false;
             Executor.sync(() -> entityItem.canMobPickup = true, 20L);
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
         StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
@@ -739,6 +744,51 @@ public final class NMSAdapter_v1_16_R2 implements NMSAdapter {
         } else if ((item == Items.PORKCHOP || item == Items.COOKED_PORKCHOP) && !
                 entityPiglin.getBehaviorController().hasMemory(MemoryModuleType.ATE_RECENTLY)) {
             entityPiglin.getBehaviorController().a(MemoryModuleType.ATE_RECENTLY, true, 200L);
+        } else {
+            handleEquipmentPickup((LivingEntity) bukkitPiglin, bukkitItem);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        itemStack.setCount(1);
+
+        EnumItemSlot equipmentSlotForItem = EntityInsentient.j(itemStack);
+
+        if (equipmentSlotForItem.a() != EnumItemSlot.Function.ARMOR) {
+            return false;
+        }
+
+        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+
+        double equipmentDropChance = entityLiving.dropChanceArmor[equipmentSlotForItem.b()];
+
+        Random random = new Random();
+        if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
+            ENTITY_FORCE_DROPS.set(entityLiving, true);
+            entityLiving.a(equipmentItem);
+            ENTITY_FORCE_DROPS.set(entityLiving, false);
+        }
+
+        entityLiving.setSlot(equipmentSlotForItem, itemStack);
+        entityLiving.d(equipmentSlotForItem);
+
+        if (!itemStack.isEmpty()) {
+            SoundEffect equipSoundEffect = SoundEffects.ITEM_ARMOR_EQUIP_GENERIC;
+            net.minecraft.server.v1_16_R2.Item item = itemStack.getItem();
+
+            if (item instanceof ItemArmor) {
+                equipSoundEffect = ((ItemArmor) item).ab_().b();
+            } else if (item == Items.ELYTRA) {
+                equipSoundEffect = SoundEffects.ITEM_ARMOR_EQUIP_ELYTRA;
+            }
+
+            entityLiving.playSound(equipSoundEffect, 1.0F, 1.0F);
         }
 
         return true;

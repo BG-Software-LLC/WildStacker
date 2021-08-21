@@ -226,6 +226,8 @@ public interface NMSAdapter {
         return false;
     }
 
+    boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem);
+
     default void giveExp(Player player, int amount) {
         if (amount > 0) {
             PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);

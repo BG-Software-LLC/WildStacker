@@ -29,6 +29,7 @@ import net.minecraft.server.v1_8_R3.EntityZombie;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
 import net.minecraft.server.v1_8_R3.IWorldAccess;
+import net.minecraft.server.v1_8_R3.ItemArmor;
 import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.MinecraftKey;
 import net.minecraft.server.v1_8_R3.MobEffect;
@@ -83,6 +84,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -495,6 +497,36 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
             }
         });
+    }
+
+    @Override
+    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
+        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
+        itemStack.count = 1;
+
+        if(!(itemStack.getItem() instanceof ItemArmor))
+            return false;
+
+        int equipmentSlotForItem = EntityInsentient.c(itemStack);
+
+        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+
+        double equipmentDropChance = entityLiving.dropChances[equipmentSlotForItem];
+
+        Random random = new Random();
+        if (equipmentItem != null && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
+            entityLiving.a(equipmentItem, 0F);
+        }
+
+        entityLiving.setEquipment(equipmentSlotForItem, itemStack);
+        entityLiving.dropChances[equipmentSlotForItem] = 2.0F;
+
+        entityLiving.persistent = true;
+        entityLiving.receive(entityItem, itemStack.count);
+
+        return true;
     }
 
     /*
