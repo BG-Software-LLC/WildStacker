@@ -39,7 +39,8 @@ public final class ItemUtils {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int MAX_PICKUP_DELAY = 32767;
     private static Method IS_UNBREAKABLE_METHOD = null;
-    private static final Sound ITEM_PICKUP_SOUND = ServerVersion.isLegacy() ? Sound.ITEM_PICKUP : Sound.valueOf("ENTITY_ITEM_PICKUP");
+    private static final Sound ITEM_PICKUP_SOUND = ServerVersion.isLessThan(ServerVersion.v1_9) ?
+            Sound.ITEM_PICKUP : Sound.valueOf("ENTITY_ITEM_PICKUP");
 
     static {
         try {
