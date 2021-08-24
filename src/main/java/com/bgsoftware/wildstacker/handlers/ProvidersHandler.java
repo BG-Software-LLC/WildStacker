@@ -219,7 +219,7 @@ public final class ProvidersHandler {
             JobsHook.setEnabled(enable);
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
             PluginHook_FabledSkyblock.register(plugin);
-        if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
+        if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && doesClassExist("com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI"))
             SuperiorSkyblockHook.register(plugin);
         if (enable && isPlugin(toCheck, "NBTInjector") && doesClassExist("de.tr7zw.nbtinjector.NBTInjector"))
             DataSerializer_NBTInjector.register(plugin);
