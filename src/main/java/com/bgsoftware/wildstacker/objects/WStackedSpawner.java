@@ -200,7 +200,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         int amount = getStackAmount();
 
-        if (amount <= 1 && spawnerUpgradeId == 0) {
+        if ((amount < 1 || (amount == 1 && !plugin.getSettings().spawnersUnstackedCustomName)) && spawnerUpgradeId == 0) {
             removeHologram();
             return;
         }

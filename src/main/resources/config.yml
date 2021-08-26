@@ -766,6 +766,9 @@ spawners:
   # If this feature is enabled, entity attributes will not be checked, but only types will be considered for stacking.
   listen-paper-pre-spawn-event: true
 
+  # When enabled, all spawners will have a custom name (even if not stacked)
+  unstacked-custom-name: false
+
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:
   # Should blocks get stacked into barrels on the server?
