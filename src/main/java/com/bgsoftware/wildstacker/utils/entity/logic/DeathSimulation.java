@@ -98,8 +98,6 @@ public final class DeathSimulation {
 
         int unstackAmount = originalAmount - stackedEntity.getStackAmount();
 
-        ((WStackedEntity) stackedEntity).setDeadFlag(true);
-
         EntityUtils.setKiller(livingEntity, killer);
 
         if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
@@ -128,6 +126,7 @@ public final class DeathSimulation {
 
             Executor.sync(() -> {
                 plugin.getNMSAdapter().setEntityDead(livingEntity, true);
+                ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 // Setting the stack amount of the entity to the unstack amount.
                 int realStackAmount = stackedEntity.getStackAmount();
