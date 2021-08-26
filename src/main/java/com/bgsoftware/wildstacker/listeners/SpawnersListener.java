@@ -573,7 +573,12 @@ public final class SpawnersListener implements Listener {
             SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
             e.setCancelled(true);
         } else {
-            if (!plugin.getSettings().floatingSpawnerNames || stackedSpawner.getStackAmount() <= 1)
+            if (!plugin.getSettings().floatingSpawnerNames)
+                return;
+
+            int spawnerAmount = stackedSpawner.getStackAmount();
+
+            if(spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().spawnersUnstackedCustomName))
                 return;
 
             String customName = plugin.getSettings().spawnersCustomName;
