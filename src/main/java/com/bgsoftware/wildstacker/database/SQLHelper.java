@@ -35,6 +35,13 @@ public final class SQLHelper {
     }
 
     public static void createConnection(WildStackerPlugin plugin) throws SQLException {
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException error) {
+            throw new RuntimeException("Failed to find SQLite driver on your server.");
+        }
+
         File file = new File(plugin.getDataFolder(), "database.db");
         conn = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath().replace("\\", "/"));
 
