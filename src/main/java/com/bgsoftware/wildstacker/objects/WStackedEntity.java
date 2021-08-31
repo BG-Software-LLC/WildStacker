@@ -170,9 +170,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
-                if (saveData)
-                    plugin.getSystemManager().markToBeSaved(this);
-
                 //We update cached values of mcmmo
                 McMMOHook.updateCachedName(object);
             });

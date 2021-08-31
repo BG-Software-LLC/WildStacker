@@ -403,32 +403,28 @@ public final class SystemHandler implements SystemManager {
             return;
         }
 
-        try {
-            dataHandler.saveLock.writeLock().lock();
+        Set<StackedObject> savedObjects = new HashSet<>(dataHandler.OBJECTS_TO_SAVE);
+        dataHandler.OBJECTS_TO_SAVE.clear();
 
-            dataHandler.OBJECTS_TO_SAVE.forEach(stackedObject -> {
-                if (stackedObject instanceof StackedEntity) {
-                    dataSerializer.saveEntity((StackedEntity) stackedObject);
-                } else if (stackedObject instanceof StackedItem) {
-                    dataSerializer.saveItem((StackedItem) stackedObject);
-                } else if (stackedObject instanceof StackedSpawner) {
-                    Query.SPAWNER_INSERT.getStatementHolder()
-                            .setLocation(stackedObject.getLocation())
-                            .setInt(stackedObject.getStackAmount())
-                            .setInt(((WStackedSpawner) stackedObject).getUpgradeId())
-                            .execute(true);
-                } else if (stackedObject instanceof StackedBarrel) {
-                    Query.BARREL_INSERT.getStatementHolder()
-                            .setLocation(stackedObject.getLocation())
-                            .setInt(stackedObject.getStackAmount())
-                            .setItemStack(((StackedBarrel) stackedObject).getBarrelItem(1))
-                            .execute(true);
-                }
-            });
-            dataHandler.OBJECTS_TO_SAVE.clear();
-        } finally {
-            dataHandler.saveLock.writeLock().unlock();
-        }
+        savedObjects.forEach(stackedObject -> {
+            if (stackedObject instanceof StackedEntity) {
+                dataSerializer.saveEntity((StackedEntity) stackedObject);
+            } else if (stackedObject instanceof StackedItem) {
+                dataSerializer.saveItem((StackedItem) stackedObject);
+            } else if (stackedObject instanceof StackedSpawner) {
+                Query.SPAWNER_INSERT.getStatementHolder()
+                        .setLocation(stackedObject.getLocation())
+                        .setInt(stackedObject.getStackAmount())
+                        .setInt(((WStackedSpawner) stackedObject).getUpgradeId())
+                        .execute(true);
+            } else if (stackedObject instanceof StackedBarrel) {
+                Query.BARREL_INSERT.getStatementHolder()
+                        .setLocation(stackedObject.getLocation())
+                        .setInt(stackedObject.getStackAmount())
+                        .setItemStack(((StackedBarrel) stackedObject).getBarrelItem(1))
+                        .execute(true);
+            }
+        });
     }
 
     @Override
@@ -689,12 +685,7 @@ public final class SystemHandler implements SystemManager {
     }
 
     public void markToBeSaved(StackedObject stackedObject) {
-        try {
-            dataHandler.saveLock.readLock().lock();
-            dataHandler.OBJECTS_TO_SAVE.add(stackedObject);
-        } finally {
-            dataHandler.saveLock.readLock().unlock();
-        }
+        dataHandler.OBJECTS_TO_SAVE.add(stackedObject);
     }
 
     /*
@@ -702,12 +693,7 @@ public final class SystemHandler implements SystemManager {
      */
 
     public void markToBeUnsaved(StackedObject stackedObject) {
-        try {
-            dataHandler.saveLock.readLock().lock();
-            dataHandler.OBJECTS_TO_SAVE.remove(stackedObject);
-        } finally {
-            dataHandler.saveLock.readLock().unlock();
-        }
+        dataHandler.OBJECTS_TO_SAVE.remove(stackedObject);
     }
 
     public void loadSpawners(Chunk chunk) {

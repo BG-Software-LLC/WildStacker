@@ -186,11 +186,12 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         Executor.sync(() -> {
             if (updateName) {
                 setCustomName(CUSTOM_NAME);
-                if (saveData)
-                    plugin.getSystemManager().markToBeSaved(this);
             }
             setCustomNameVisible(updateName);
         });
+
+        if (saveData)
+            plugin.getSystemManager().markToBeSaved(this);
     }
 
     @Override

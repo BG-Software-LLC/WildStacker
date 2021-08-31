@@ -33,8 +33,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @SuppressWarnings({"WeakerAccess", "all"})
 public final class DataHandler {
@@ -45,7 +43,6 @@ public final class DataHandler {
     public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
     public final Map<Location, StackedBarrel> CACHED_BARRELS = new ConcurrentHashMap<>();
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
-    public final ReadWriteLock saveLock = new ReentrantReadWriteLock();
     public final Set<StackedObject> OBJECTS_TO_SAVE = Sets.newConcurrentHashSet();
     //References for all the data from database
     public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
