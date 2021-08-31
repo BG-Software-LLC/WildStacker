@@ -12,6 +12,8 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -579,13 +581,15 @@ public final class EntityUtils {
     }
 
     public static void clearBukkitMetadata(UUID entityUUID) {
+        if(!Bukkit.isPrimaryThread()) {
+            Executor.sync(() -> clearBukkitMetadata(entityUUID));
+            return;
+        }
+
         MetadataStoreBase<Entity> metadataStoreBase = plugin.getNMSAdapter().getEntityMetadataStore();
         Map<String, ?> metadataMap = METADATA_STORAGE.get(metadataStoreBase);
         String entityUUIDString = entityUUID.toString();
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (metadataStoreBase){
-            metadataMap.entrySet().removeIf(entry -> entry.getKey().contains(entityUUIDString));
-        }
+        metadataMap.entrySet().removeIf(entry -> entry.getKey().contains(entityUUIDString));
     }
 
     private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance) {
