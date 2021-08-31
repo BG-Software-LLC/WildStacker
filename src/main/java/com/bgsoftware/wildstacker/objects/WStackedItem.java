@@ -32,10 +32,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
+
+    private static final Pattern DISPLAY_NAME_PLACEHOLDER = Pattern.compile(Pattern.quote("{0}"));
 
     private final UUID cachedUUID;
     private final int cachedEntityId;
@@ -176,7 +179,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             if (plugin.getSettings().itemsDisplayEnabled)
                 cachedDisplayName = displayName;
 
-            setCachedDisplayName(cachedDisplayName.replace("{0}", displayName));
+            setCachedDisplayName(DISPLAY_NAME_PLACEHOLDER.matcher(cachedDisplayName).replaceAll(displayName));
 
             customName = plugin.getSettings().itemsNameBuilder.build(this);
         }
