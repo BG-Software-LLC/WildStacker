@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
-import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -33,7 +32,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
@@ -394,10 +392,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         }
 
         Location itemLocation = getItem().getLocation();
-        Stream<Entity> nearbyEntities = EntitiesGetter.getNearbyEntities(itemLocation, range, ItemUtils::isStackable);
-        Optional<StackedItem> itemOptional = GeneralUtils.getClosest(itemLocation, nearbyEntities
+        Optional<StackedItem> itemOptional = EntitiesGetter.getNearbyEntities(itemLocation, range, ItemUtils::isStackable)
                 .map(entity -> WStackedItem.ofBypass((Item) entity))
-                .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS));
+                .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
+                .findFirst();
 
         if (itemOptional.isPresent()) {
             runStackAsync(itemOptional.get(), stackResult -> {

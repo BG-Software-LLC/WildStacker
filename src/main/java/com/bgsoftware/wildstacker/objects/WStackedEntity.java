@@ -622,11 +622,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 .map(WStackedEntity::of).filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
                 .collect(Collectors.toList());
 
-        Optional<StackedEntity> entityOptional = GeneralUtils.getClosest(entityLocation, nearbyEntities);
-
-        if (entityOptional.isPresent()) {
+        if (!nearbyEntities.isEmpty()) {
             int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
-            StackedEntity targetEntity = entityOptional.get();
+            StackedEntity targetEntity = nearbyEntities.get(0);
 
             if (minimumStackSize > 2) {
                 int totalStackSize = getStackAmount();
@@ -651,12 +649,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                         result.accept(Optional.empty());
                 } else {
                     if (result != null)
-                        result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+                        result.accept(Optional.of(targetEntity.getLivingEntity()));
                 }
             });
         } else {
             if (result != null)
-                result.accept(entityOptional.map(StackedEntity::getLivingEntity));
+                result.accept(Optional.empty());
         }
     }
 

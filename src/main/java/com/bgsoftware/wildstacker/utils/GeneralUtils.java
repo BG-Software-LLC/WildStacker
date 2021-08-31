@@ -17,7 +17,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,19 +68,26 @@ public final class GeneralUtils {
         return location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
-    public static <T extends StackedObject> Optional<T> getClosest(Location origin, Collection<T> objects) {
-        return getClosest(origin, objects.stream());
-    }
-
     public static <T extends StackedObject> Optional<T> getClosest(Location origin, Stream<T> objects) {
         Map<T, Double> distances = new HashMap<>();
         return objects.min((o1, o2) -> {
-            if (!distances.containsKey(o1))
-                distances.put(o1, distance(o1.getLocation(), origin));
-            if (!distances.containsKey(o2))
-                distances.put(o2, distance(o2.getLocation(), origin));
+            double firstDistance = -1, secondDistance = -1;
 
-            return distances.get(o1).compareTo(distances.get(o2));
+            if (!distances.containsKey(o1)) {
+                firstDistance = distance(o1.getLocation(), origin);
+                distances.put(o1, firstDistance);
+            }
+            if (!distances.containsKey(o2)) {
+                secondDistance = distance(o2.getLocation(), origin);
+                distances.put(o2, secondDistance);
+            }
+
+            if(firstDistance == -1)
+                firstDistance = distances.get(o1);
+            if(secondDistance == -1)
+                secondDistance = distances.get(o2);
+
+            return Double.compare(firstDistance, secondDistance);
         });
     }
 
