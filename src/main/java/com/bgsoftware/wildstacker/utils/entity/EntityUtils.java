@@ -139,8 +139,8 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return (MythicMobsHook.isMythicMob(entity) ||
-                (entity instanceof LivingEntity && !entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
+        return entity instanceof LivingEntity && (MythicMobsHook.isMythicMob(entity) ||
+                (!entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
     }
 
     public static void giveExp(Player player, int amount) {
