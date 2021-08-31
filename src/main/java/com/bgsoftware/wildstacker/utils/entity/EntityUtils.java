@@ -96,8 +96,6 @@ public final class EntityUtils {
     public static String format(String type) {
         StringBuilder name = new StringBuilder();
 
-        type = type.replace(" ", "_");
-
         for (String section : type.split("_")) {
             name.append(section.substring(0, 1).toUpperCase()).append(section.substring(1).toLowerCase()).append(" ");
         }
