@@ -20,7 +20,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
-import org.bukkit.block.Block;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -38,6 +38,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -242,8 +243,9 @@ public final class ItemsListener implements Listener {
         if (stackedItem.getStackAmount() > 1) {
             e.setCancelled(true);
             stackedItem.giveItemStack(e.getInventory());
-            Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
-            hopper.getState().update();
+            InventoryHolder inventoryHolder = e.getInventory().getHolder();
+            if(inventoryHolder instanceof Hopper)
+                ((Hopper) inventoryHolder).getBlock().getState().update();
         }
     }
 
