@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 
 public final class StewListener implements Listener {
 
-    private WildStackerPlugin plugin;
+    private final WildStackerPlugin plugin;
 
     public StewListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -21,11 +21,15 @@ public final class StewListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onStewEat(PlayerItemConsumeEvent e) {
         if (e.getItem().getType().name().contains("STEW") || e.getItem().getType().name().contains("SOUP")) {
-            ItemStack inHand = e.getPlayer().getItemInHand().clone();
+            ItemStack inHand = e.getItem().clone();
             inHand.setAmount(inHand.getAmount() - 1);
 
+            int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
+
+            int consumedItemSlot = e.getItem().equals(e.getPlayer().getInventory().getItem(heldSlot)) ? heldSlot : 40;
+
             Bukkit.getScheduler().runTask(plugin, () -> {
-                e.getPlayer().setItemInHand(inHand);
+                e.getPlayer().getInventory().setItem(consumedItemSlot, inHand);
                 e.getPlayer().getInventory().addItem(new ItemStack(Material.BOWL));
                 ItemUtils.stackStew(e.getItem(), e.getPlayer().getInventory());
             });
