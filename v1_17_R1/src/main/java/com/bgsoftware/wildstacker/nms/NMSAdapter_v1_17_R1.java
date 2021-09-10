@@ -174,7 +174,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     private static final ReflectField<SaddleStorage> STRIDER_SADDLE_STORAGE = new ReflectField<>(EntityStrider.class, SaddleStorage.class, "cb");
     private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, Boolean.class, "fK");
     private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fJ");
-    private static final ReflectField<Boolean> ENTITY_PERSISTENT = new ReflectField<>(EntityInsentient.class, Boolean.class, "bZ");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -806,11 +805,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             entityPiglin.d(EnumItemSlot.b);
 
             if (item != PiglinAI.c) {
-                if (ENTITY_PERSISTENT.isValid()) {
-                    ENTITY_PERSISTENT.set(entityPiglin, true);
-                } else {
-                    ((EntityInsentient) entityPiglin).ca = true;
-                }
+                entityPiglin.setPersistent();
             }
 
             entityPiglin.getBehaviorController().a(MemoryModuleType.X, true, 120L);
