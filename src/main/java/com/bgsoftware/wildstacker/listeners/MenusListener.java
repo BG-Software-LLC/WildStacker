@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.menu.WildMenu;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -12,24 +11,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public final class MenusListener implements Listener {
-
-    /**
-     * The following two events are here for patching a dupe glitch caused
-     * by shift clicking and closing the inventory in the same time.
-     */
-
-    private final Map<UUID, ItemStack> latestClickedItem = new HashMap<>();
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onMenuClick(InventoryClickEvent e) {
@@ -46,27 +34,6 @@ public final class MenusListener implements Listener {
         if (topInventory != null && topInventory.getHolder() instanceof WildMenu) {
             WildMenu wildMenu = (WildMenu) topInventory.getHolder();
             wildMenu.onMenuClose(e);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onMenuClickMonitor(InventoryClickEvent e) {
-        Inventory topInventory = e.getView().getTopInventory();
-        if (e.getCurrentItem() != null && e.isCancelled() && topInventory != null && topInventory.getHolder() instanceof WildMenu &&
-                ((WildMenu) topInventory.getHolder()).isCancelOnClick()) {
-            latestClickedItem.put(e.getWhoClicked().getUniqueId(), e.getCurrentItem());
-            Executor.sync(() -> latestClickedItem.remove(e.getWhoClicked().getUniqueId()), 20L);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onMenuCloseMonitor(InventoryCloseEvent e) {
-        ItemStack clickedItem = latestClickedItem.get(e.getPlayer().getUniqueId());
-        if (clickedItem != null) {
-            Executor.sync(() -> {
-                e.getPlayer().getInventory().removeItem(clickedItem);
-                ((Player) e.getPlayer()).updateInventory();
-            }, 1L);
         }
     }
 
