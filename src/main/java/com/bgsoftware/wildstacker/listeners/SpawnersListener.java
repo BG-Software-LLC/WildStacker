@@ -280,11 +280,10 @@ public final class SpawnersListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlock());
         CreatureSpawner creatureSpawner = (CreatureSpawner) e.getBlock().getState();
 
-        e.setCancelled(true);
-
         if(e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().spawnersMineRequireSilk &&
                 !ItemUtils.isPickaxeAndHasSilkTouch(e.getPlayer().getItemInHand())){
             Locale.SPAWNER_BREAK_WITHOUT_SILK.send(e.getPlayer());
+            e.setCancelled(true);
             return;
         }
 
@@ -292,6 +291,10 @@ public final class SpawnersListener implements Listener {
         int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().shiftGetWholeSpawnerStack ? originalAmount : 1;
 
         handleSpawnerBreak(plugin, stackedSpawner, stackAmount, e.getPlayer(), false);
+
+        if (stackedSpawner.getStackAmount() > 0) {
+            e.setCancelled(true);
+        }
     }
 
     public static boolean handleSpawnerBreak(WildStackerPlugin plugin, StackedSpawner stackedSpawner, int breakAmount, Player player, boolean breakMenu){
@@ -313,9 +316,6 @@ public final class SpawnersListener implements Listener {
             plugin.getProviders().handleSpawnerBreak(stackedSpawner, player, breakAmount, breakMenu);
 
             EntityType entityType = stackedSpawner.getSpawnedType();
-
-            if(stackedSpawner.getStackAmount() <= 0)
-                block.setType(Material.AIR);
 
             if(amountToCharge > 0)
                 EconomyHook.withdrawMoney(player, amountToCharge);
