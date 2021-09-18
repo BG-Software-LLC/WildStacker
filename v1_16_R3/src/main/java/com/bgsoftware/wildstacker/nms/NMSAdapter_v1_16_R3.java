@@ -36,6 +36,7 @@ import net.minecraft.server.v1_16_R3.EntityPiglin;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EntityPositionTypes;
 import net.minecraft.server.v1_16_R3.EntityRaider;
+import net.minecraft.server.v1_16_R3.EntityTurtle;
 import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EntityVillager;
 import net.minecraft.server.v1_16_R3.EntityZombieVillager;
@@ -97,6 +98,7 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVehicle;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
@@ -158,6 +160,8 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "getSoundVolume");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "dH");
+    private static final ReflectMethod<BlockPosition> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "setHasEgg", boolean.class);
+    private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -415,12 +419,24 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
-        ((Turtle) turtle).setHasEgg(true);
+        try {
+            ((Turtle) turtle).setHasEgg(true);
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            TURTLE_SET_HAS_EGG.invoke(entityTurtle, true);
+        }
     }
 
     @Override
     public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
-        return ((Turtle) turtle).getHome();
+        try {
+            return ((Turtle) turtle).getHome();
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            BlockPosition homePosition = TURTLE_HOME_POS.invoke(entityTurtle);
+            return new Location(entityTurtle.getWorld().getWorld(), homePosition.getX(),
+                    homePosition.getY(), homePosition.getZ());
+        }
     }
 
     @Override

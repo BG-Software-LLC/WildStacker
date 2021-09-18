@@ -28,9 +28,6 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.game.PacketPlayOutCollect;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
-import net.minecraft.network.syncher.DataWatcher;
-import net.minecraft.network.syncher.DataWatcherObject;
-import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.server.level.ChunkProviderServer;
 import net.minecraft.server.level.EntityPlayer;
@@ -126,6 +123,7 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -174,14 +172,14 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     private static final ReflectField<SaddleStorage> STRIDER_SADDLE_STORAGE = new ReflectField<>(EntityStrider.class, SaddleStorage.class, "cb");
     private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, Boolean.class, "fK");
     private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fJ");
+    private static final ReflectMethod<BlockPosition> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "setHasEgg", boolean.class);
+    private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     /*
      *   Entity methods
      */
-    private static final DataWatcherObject<Boolean> HAS_TURTLE_EGG = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.i);
-    private static final DataWatcherObject<BlockPosition> TURTLE_HOME_POS = DataWatcher.a(EntityTurtle.class, DataWatcherRegistry.l);
     private static final NamespacedKey
             STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount"),
             SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
@@ -453,13 +451,24 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
-        ((CraftTurtle) turtle).getHandle().getDataWatcher().set(HAS_TURTLE_EGG, true);
+        try {
+            ((Turtle) turtle).setHasEgg(true);
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            TURTLE_SET_HAS_EGG.invoke(entityTurtle, true);
+        }
     }
 
     @Override
     public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
-        BlockPosition homePos = ((CraftTurtle) turtle).getHandle().getDataWatcher().get(TURTLE_HOME_POS);
-        return new Location(turtle.getWorld(), homePos.getX(), homePos.getY(), homePos.getZ());
+        try {
+            return ((Turtle) turtle).getHome();
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            BlockPosition homePosition = TURTLE_HOME_POS.invoke(entityTurtle);
+            return new Location(entityTurtle.getWorld().getWorld(), homePosition.getX(),
+                    homePosition.getY(), homePosition.getZ());
+        }
     }
 
     @Override
