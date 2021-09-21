@@ -104,6 +104,7 @@ dependencies {
     compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
     compileOnly 'me.derpy:MoreBosses:latest'
     compileOnly 'me.hexedhero:PinataParty:latest'
+    compileOnly 'com.kirelcodes:MiniaturePets:2.5.9'
 }
 
 jar {

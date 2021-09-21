@@ -59,7 +59,8 @@ public enum SpawnCause {
     MY_PET(107),
     ECHO_PET(108),
     ELITE_BOSSES(109),
-    MORE_BOSSES(110);
+    MORE_BOSSES(110),
+    MINIATURE_PETS(111);
 
     private final int id;
 
