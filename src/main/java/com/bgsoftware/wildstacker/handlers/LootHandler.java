@@ -41,6 +41,12 @@ public final class LootHandler {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
                 String key = file.getName().replace(".json", "").toUpperCase();
+
+                if(!isValidEntityType(key.replace("_BABY", ""))) {
+                    WildStackerPlugin.log("&cWarning: The file " + file.getName() + " doesn't seem like a valid loot table name.");
+                    WildStackerPlugin.log("&cDetected entity of this file is " + key);
+                }
+
                 lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject, file.getName()) : LootTable.fromJson(jsonObject, file.getName()));
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -50,6 +56,15 @@ public final class LootHandler {
         }
 
         WildStackerPlugin.log("Loading loot-tables done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
+    }
+
+    private static boolean isValidEntityType(String entityType) {
+        try {
+            EntityTypes.fromName(entityType.replace("_baby", ""));
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     public static void reload() {
