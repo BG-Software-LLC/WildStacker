@@ -60,8 +60,10 @@ public final class EntitiesGetter {
             }
         }
 
+        Location entityLocation = new Location(null, 0, 0, 0);
+
         return entities.stream().filter(entity ->
-                isInRange(entity.getLocation(), minX, minY, minZ, maxX, maxY, maxZ) &&
+                isInRange(entity.getLocation(entityLocation), minX, minY, minZ, maxX, maxY, maxZ) &&
                         (filter == null || filter.test(entity))
         );
     }
