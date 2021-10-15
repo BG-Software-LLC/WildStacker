@@ -564,7 +564,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+        org.bukkit.World bukkitWorld = creatureSpawner.getWorld();
+        World world = ((CraftWorld) bukkitWorld).getHandle();
+        BlockPosition blockPosition = new BlockPosition(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
+        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) world.getTileEntity(blockPosition);
+        return new SyncedCreatureSpawnerImpl(bukkitWorld, tileEntityMobSpawner);
     }
 
     /*
@@ -665,6 +669,10 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             }
 
             public Set<EquipmentSlot> getActiveSlots() {
+                return null;
+            }
+
+            public String translationKey() {
                 return null;
             }
         };
@@ -1154,11 +1162,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         private final BlockPosition blockPosition;
         private final Location blockLocation;
 
-        SyncedCreatureSpawnerImpl(Block block) {
-            super(block, TileEntityMobSpawner.class);
-            world = ((CraftWorld) block.getWorld()).getHandle();
-            blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
-            blockLocation = block.getLocation();
+        SyncedCreatureSpawnerImpl(org.bukkit.World bukkitWorld, TileEntityMobSpawner tileEntityMobSpawner) {
+            super(bukkitWorld, tileEntityMobSpawner);
+            this.world = ((CraftWorld) bukkitWorld).getHandle();
+            blockPosition = tileEntityMobSpawner.getPosition();
+            blockLocation = new Location(bukkitWorld, blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
         }
 
         @Override
