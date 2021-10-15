@@ -314,7 +314,8 @@ public final class DeathSimulation {
         grandAchievement(killer, victimType, "adventure/kill_all_mobs");
 
         //Sniper Duel
-        if (killer.getLocation().distanceSquared(stackedEntity.getLocation()) >= 2500) {
+        if (stackedEntity.getWorld().equals(killer.getWorld()) &&
+                killer.getLocation().distanceSquared(stackedEntity.getLocation()) >= 2500) {
             grandAchievement(killer, "", "SNIPE_SKELETON");
             grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
         }
