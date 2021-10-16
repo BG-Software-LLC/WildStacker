@@ -146,6 +146,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "ConstantConditions"})
@@ -164,6 +165,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("§x(?>§[0-9a-f]){6}");
 
     /*
      *   Entity methods
@@ -474,8 +476,13 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void setCustomName(org.bukkit.entity.Entity entity, String name) {
-        // Much more optimized way than Bukkit's method.
-        ((CraftEntity) entity).getHandle().setCustomName(name == null || name.isEmpty() ? null : new ChatComponentText(name));
+        if(HEX_COLOR_PATTERN.matcher(name).find()) {
+            // When hex color is found in the name of the entity, we should use the regular bukkit's method instead.
+            entity.setCustomName(name);
+        } else {
+            // Much more optimized way than Bukkit's method.
+            ((CraftEntity) entity).getHandle().setCustomName(name == null || name.isEmpty() ? null : new ChatComponentText(name));
+        }
     }
 
     @Override
