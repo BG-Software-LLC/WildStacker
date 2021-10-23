@@ -12,7 +12,7 @@ public final class KillTask extends BukkitRunnable {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static BukkitTask task = null;
-    private long timeLeft;
+    private static long timeLeft;
 
     private KillTask() {
         timeLeft = plugin.getSettings().killTaskInterval;
@@ -24,6 +24,10 @@ public final class KillTask extends BukkitRunnable {
             task.cancel();
 
         new KillTask();
+    }
+
+    public static long getTimeLeft() {
+        return timeLeft;
     }
 
     @Override

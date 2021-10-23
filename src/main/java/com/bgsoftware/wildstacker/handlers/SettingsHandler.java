@@ -66,7 +66,7 @@ public final class SettingsHandler {
             "spawner-upgrades.ladders"};
 
     //Global settings
-    public final String giveItemName;
+    public final String giveItemName, killTaskTimeCommand;
     public final ItemStack inspectTool, simulateTool;
     public final boolean deleteInvalidWorlds, killTaskStackedEntities, killTaskUnstackedEntities,
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
@@ -184,6 +184,7 @@ public final class SettingsHandler {
         killTaskStackedItems = cfg.getBoolean("kill-task.stacked-items", true);
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
+        killTaskTimeCommand = cfg.getString("kill-task.time-command", "stacker timeleft");
         killTaskEntitiesWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.whitelist"),
                 EntityType.class, SpawnCause.class);
         killTaskEntitiesBlacklist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.blacklist"),

@@ -49,6 +49,10 @@ kill-task:
   # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
   # This feature will work if the interval is set to 0 - these are two different features!
   sync-clear-lagg: true
+  # Set a command for getting the next time until kill task will happen.
+  # You can split multiple commands using ",".
+  # You can set it to '' in order to disable this feature.
+  time-command: 'stacker timeleft'
   # All settings related to the kill-all task of entities.
   kill-entities:
     # A list of entities that will be cleared.
