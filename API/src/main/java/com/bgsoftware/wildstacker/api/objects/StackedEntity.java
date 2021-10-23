@@ -93,6 +93,15 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity>, Upgrade
     StackedEntity spawnDuplicate(int amount);
 
     /**
+     * Spawn a duplicate entity with a specific stack amount and a specific spawn cause.
+     *
+     * @param amount the stack amount it will have
+     * @param spawnCause The spawn cause of the new entity.
+     * @return The stacked entity object of the new entity that was spawned
+     */
+    StackedEntity spawnDuplicate(int amount, SpawnCause spawnCause);
+
+    /**
      * Spawn a corpse for this entity.
      */
     void spawnCorpse();

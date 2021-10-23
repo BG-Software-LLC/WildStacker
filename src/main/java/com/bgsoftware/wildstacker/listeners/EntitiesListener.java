@@ -485,7 +485,7 @@ public final class EntitiesListener implements Listener {
                         plugin.getNMSAdapter().setTurtleEgg(stackedEntity.getLivingEntity());
                         stackedEntity.setFlag(EntityFlag.BREEDABLE_AMOUNT, babiesAmount);
                     } else {
-                        StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount);
+                        StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount, SpawnCause.BREEDING);
                         ((Animals) duplicated.getLivingEntity()).setBaby();
                         plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), false);
                     }
@@ -500,7 +500,7 @@ public final class EntitiesListener implements Listener {
                 }, 50L);
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
                 stackedEntity.decreaseStackAmount(1, true);
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1, SpawnCause.BREEDING);
                 plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
                 itemsAmountToRemove = 1;
             } else {
