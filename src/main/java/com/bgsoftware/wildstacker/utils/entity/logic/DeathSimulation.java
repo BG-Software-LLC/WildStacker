@@ -52,6 +52,7 @@ public final class DeathSimulation {
     private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
     private static final Map<EntityDamageEvent.DamageModifier, ? extends Function<? super Double, Double>> DAMAGE_MODIFIERS_FUNCTIONS =
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
+    private static boolean sweepingEdgeHandled = false;
 
     private DeathSimulation() {
     }
@@ -106,8 +107,14 @@ public final class DeathSimulation {
         giveStatisticsToKiller(killer, unstackAmount, stackedEntity);
 
         // Handle sweeping edge enchantment
-        if (result.cancelEvent && killerTool != null && killer != null)
-            plugin.getNMSAdapter().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
+        if (!sweepingEdgeHandled && result.cancelEvent && killerTool != null && killer != null) {
+            try {
+                sweepingEdgeHandled = true;
+                plugin.getNMSAdapter().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
+            } finally {
+                sweepingEdgeHandled = false;
+            }
+        }
 
         //Decrease durability when next-stack-knockback is false
         if (result.cancelEvent && killerTool != null && !creativeMode && !ItemUtils.isUnbreakable(killerTool))
