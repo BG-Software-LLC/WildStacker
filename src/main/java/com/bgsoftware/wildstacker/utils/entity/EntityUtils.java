@@ -12,6 +12,8 @@ import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -518,6 +520,11 @@ public final class EntityUtils {
     }
 
     public static void clearEquipment(LivingEntity livingEntity) {
+        if(!Bukkit.isPrimaryThread()) {
+            Executor.sync(() -> clearEquipment(livingEntity));
+            return;
+        }
+
         boolean clearEquipment = plugin.getSettings().entitiesClearEquipment;
         EntityEquipment entityEquipment = livingEntity.getEquipment();
 
