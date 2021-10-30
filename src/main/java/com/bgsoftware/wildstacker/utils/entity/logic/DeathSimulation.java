@@ -70,6 +70,9 @@ public final class DeathSimulation {
             return new Result(true, originalDamage);
         }
 
+        if(stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
+            return new Result(true, originalDamage);
+
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
                 stackedEntity.isInstantKill(lastDamageCause), finalDamage, killerTool);
 
@@ -96,6 +99,8 @@ public final class DeathSimulation {
 
         if (stackedEntity.runUnstack(entitiesToKill, entityKiller) != UnstackResult.SUCCESS)
             return result;
+
+        stackedEntity.setFlag(EntityFlag.ATTACKED_ENTITY, true);
 
         int unstackAmount = originalAmount - stackedEntity.getStackAmount();
 
@@ -207,10 +212,12 @@ public final class DeathSimulation {
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
+                stackedEntity.removeFlag(EntityFlag.ATTACKED_ENTITY);
+
                 if (!stackedEntity.hasFlag(EntityFlag.REMOVED_ENTITY) && (livingEntity.getHealth() <= 0 ||
                         (spawnDuplicate && stackedEntity.getStackAmount() > 1))) {
                     stackedEntity.spawnDuplicate(stackedEntity.getStackAmount());
-                    stackedEntity.remove();
+                    Executor.sync(stackedEntity::remove, 1L);
                 }
             });
         });
