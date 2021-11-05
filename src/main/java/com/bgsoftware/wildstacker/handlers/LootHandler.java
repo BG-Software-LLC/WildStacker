@@ -151,8 +151,10 @@ public final class LootHandler {
             FileUtils.saveResource("loottables/phantom.json");
         FileUtils.saveResource("loottables/pig.json");
         FileUtils.saveResource("loottables/pig_baby.json");
-        if (containsEntity("PIGLIN"))
+        if (containsEntity("PIGLIN")) {
             FileUtils.saveResource("loottables/piglin.json");
+            FileUtils.saveResource("loottables/piglin_baby.json");
+        }
         if (containsEntity("PIGLIN_BRUTE"))
             FileUtils.saveResource("loottables/piglin_brute.json");
         if (containsEntity("PILLAGER"))
@@ -210,8 +212,10 @@ public final class LootHandler {
         if (containsEntity("ZOGLIN"))
             FileUtils.saveResource("loottables/zoglin.json");
         FileUtils.saveResource("loottables/zombie.json");
+        FileUtils.saveResource("loottables/zombie_baby.json");
         FileUtils.saveResource("loottables/zombie_horse.json");
         FileUtils.saveResource("loottables/zombie_pigman.json");
+        FileUtils.saveResource("loottables/zombie_pigman_baby.json");
         FileUtils.saveResource("loottables/zombie_villager.json");
     }
 
