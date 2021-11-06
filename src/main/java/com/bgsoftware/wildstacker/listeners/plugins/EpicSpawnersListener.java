@@ -17,7 +17,7 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class EpicSpawnersListener implements Listener {
 
-    public static void register(WildStackerPlugin plugin){
+    public static void register(WildStackerPlugin plugin) {
         PluginHooks.isEpicSpawnersEnabled = true;
         String version = Bukkit.getPluginManager().getPlugin("EpicSpawners").getDescription().getVersion();
         Listener listener;
@@ -31,16 +31,16 @@ public final class EpicSpawnersListener implements Listener {
                 listener = new EpicSpawners7Listener();
             }
             Bukkit.getPluginManager().registerEvents(listener, plugin);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private static class EpicSpawners7Listener implements Listener{
+    private static class EpicSpawners7Listener implements Listener {
 
         @EventHandler
-        public void onSpawnerSpawn(SpawnerSpawnEvent e){
-            if(!EntityUtils.isStackable(e.getEntity()))
+        public void onSpawnerSpawn(SpawnerSpawnEvent e) {
+            if (!EntityUtils.isStackable(e.getEntity()))
                 return;
 
             StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());

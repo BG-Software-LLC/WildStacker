@@ -13,28 +13,28 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class EpicBossesListener implements Listener {
 
-    public EpicBossesListener(){
+    public EpicBossesListener() {
         PluginHooks.isEpicBossesEnabled = true;
     }
 
     @EventHandler
-    public void onBossSpawn(BossSpawnEvent e){
+    public void onBossSpawn(BossSpawnEvent e) {
         LivingEntity livingEntity = e.getActiveBossHolder().getLivingEntity();
-        if(EntityUtils.isStackable(livingEntity))
+        if (EntityUtils.isStackable(livingEntity))
             WStackedEntity.of(livingEntity).setSpawnCause(SpawnCause.EPIC_BOSSES);
     }
 
     @EventHandler
-    public void onBossSkill(BossSkillEvent e){
-        if(!e.getSkill().getDisplayName().equals("Minions"))
+    public void onBossSkill(BossSkillEvent e) {
+        if (!e.getSkill().getDisplayName().equals("Minions"))
             return;
 
         e.getActiveBossHolder().getActiveMinionHolderMap().values().forEach(activeMinionHolder ->
-            activeMinionHolder.getLivingEntityMap().keySet().forEach(position -> {
-                LivingEntity livingEntity = activeMinionHolder.getLivingEntity(position);
-                if(EntityUtils.isStackable(livingEntity))
-                    WStackedEntity.of(livingEntity).setSpawnCause(SpawnCause.EPIC_BOSSES_MINION);
-            }));
+                activeMinionHolder.getLivingEntityMap().keySet().forEach(position -> {
+                    LivingEntity livingEntity = activeMinionHolder.getLivingEntity(position);
+                    if (EntityUtils.isStackable(livingEntity))
+                        WStackedEntity.of(livingEntity).setSpawnCause(SpawnCause.EPIC_BOSSES_MINION);
+                }));
     }
 
 }

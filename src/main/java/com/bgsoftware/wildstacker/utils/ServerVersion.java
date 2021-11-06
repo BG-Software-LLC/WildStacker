@@ -29,28 +29,28 @@ public enum ServerVersion {
 
     private final int code;
 
-    ServerVersion(int code){
+    ServerVersion(int code) {
         this.code = code;
     }
 
 
-    public static boolean isAtLeast(ServerVersion serverVersion){
+    public static boolean isAtLeast(ServerVersion serverVersion) {
         return currentVersion.code >= serverVersion.code;
     }
 
-    public static boolean isLessThan(ServerVersion serverVersion){
+    public static boolean isLessThan(ServerVersion serverVersion) {
         return currentVersion.code < serverVersion.code;
     }
 
-    public static boolean isEquals(ServerVersion serverVersion){
+    public static boolean isEquals(ServerVersion serverVersion) {
         return currentVersion.code == serverVersion.code;
     }
 
-    public static boolean isLegacy(){
+    public static boolean isLegacy() {
         return legacy;
     }
 
-    public static String getBukkitVersion(){
+    public static String getBukkitVersion() {
         return bukkitVersion;
     }
 

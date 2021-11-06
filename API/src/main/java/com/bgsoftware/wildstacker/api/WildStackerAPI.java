@@ -20,89 +20,99 @@ public final class WildStackerAPI {
 
     /**
      * Get a stacked-item object for an item.
+     *
      * @param item an item to check
      */
-    public static StackedItem getStackedItem(Item item){
+    public static StackedItem getStackedItem(Item item) {
         return instance.getSystemManager().getStackedItem(item);
     }
 
     /**
      * Get a stacked-amount for an item.
+     *
      * @param item an item to check
      */
-    public static int getItemAmount(Item item){
+    public static int getItemAmount(Item item) {
         return getStackedItem(item).getStackAmount();
     }
 
     /**
      * Get a stacked-entity object for a living entity.
+     *
      * @param livingEntity a living-entity to check
      */
-    public static StackedEntity getStackedEntity(LivingEntity livingEntity){
+    public static StackedEntity getStackedEntity(LivingEntity livingEntity) {
         return instance.getSystemManager().getStackedEntity(livingEntity);
     }
 
     /**
      * Get a stacked-amount for an entity.
+     *
      * @param livingEntity an entity to check
      */
-    public static int getEntityAmount(LivingEntity livingEntity){
+    public static int getEntityAmount(LivingEntity livingEntity) {
         return getStackedEntity(livingEntity).getStackAmount();
     }
 
     /**
      * Get a stacked-spawner object for a spawner.
+     *
      * @param spawner a spawner to check
      */
-    public static StackedSpawner getStackedSpawner(CreatureSpawner spawner){
+    public static StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
         return instance.getSystemManager().getStackedSpawner(spawner);
     }
 
     /**
      * Get a stacked-amount for a spawner.
+     *
      * @param spawner a spawner to check
      */
-    public static int getSpawnersAmount(CreatureSpawner spawner){
+    public static int getSpawnersAmount(CreatureSpawner spawner) {
         return getStackedSpawner(spawner).getStackAmount();
     }
 
     /**
      * Get a stacked-barrel object for a block.
+     *
      * @param block a block to check
      */
-    public static StackedBarrel getStackedBarrel(Block block){
+    public static StackedBarrel getStackedBarrel(Block block) {
         return instance.getSystemManager().getStackedBarrel(block);
     }
 
     /**
      * Get a stacked-amount for a barrel.
+     *
      * @param block a barrel to check
      */
-    public static int getBarrelAmount(Block block){
+    public static int getBarrelAmount(Block block) {
         return getStackedBarrel(block).getStackAmount();
     }
 
     /**
      * This method will spawn an entity without stacking it to another entity.
+     *
      * @param location location to spawn the entity in
-     * @param type type of entity to spawn
+     * @param type     type of entity to spawn
      */
-    public static Entity spawnEntityWithoutStacking(Location location, EntityType type){
+    public static Entity spawnEntityWithoutStacking(Location location, EntityType type) {
         return instance.getSystemManager().spawnEntityWithoutStacking(location, type.getEntityClass());
     }
 
     /**
      * Returns the loot loot of an entity.
+     *
      * @param livingEntity An entity to check
      */
-    public static LootTable getLootTable(LivingEntity livingEntity){
+    public static LootTable getLootTable(LivingEntity livingEntity) {
         return instance.getSystemManager().getLootTable(livingEntity);
     }
 
     /**
      * Get the wildstacker object.
      */
-    public static WildStacker getWildStacker(){
+    public static WildStacker getWildStacker() {
         return instance;
     }
 

@@ -10,15 +10,15 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
     private boolean containsAll = false;
     private int size = 0;
 
-    public Fast3EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType, Class<S> thirdKeyType){
+    public Fast3EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType, Class<S> thirdKeyType) {
         this.firstKeyArray = new Fast2EnumsArray<>(firstKeyType, secondKeyType);
         this.secondKeyArray = new Fast2EnumsArray<>(firstKeyType, thirdKeyType);
     }
 
     public static <E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> Fast3EnumsArray<E, T, S> fromList(
-            List<String> arr, Class<E> firstType, Class<T> secondType, Class<S> thirdType){
+            List<String> arr, Class<E> firstType, Class<T> secondType, Class<S> thirdType) {
         Fast3EnumsArray<E, T, S> fast2EnumsArray = new Fast3EnumsArray<>(firstType, secondType, thirdType);
-        if(arr != null) {
+        if (arr != null) {
             arr.forEach(line -> {
                 if (line.equalsIgnoreCase("ALL")) {
                     fast2EnumsArray.containsAll = true;
@@ -63,7 +63,7 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
                             added = true;
                         }
 
-                        if(!added)
+                        if (!added)
                             fast2EnumsArray.size++;
                     }
                 }
@@ -74,26 +74,26 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
 
     public void addFirst(E e) {
         boolean containedBefore = firstKeyArray.addFirst(e);
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
     }
 
     public void addSecond(T t) {
         boolean containedBefore = firstKeyArray.addSecond(t);
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
     }
 
     public void addThird(S s) {
         boolean containedBefore = secondKeyArray.addSecond(s);
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
     }
 
     public boolean addFirst(E e, T t) {
         boolean containedBefore = firstKeyArray.add(e, t);
 
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
 
         return containedBefore;
@@ -102,18 +102,18 @@ public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S exten
     public boolean addSecond(E e, S s) {
         boolean containedBefore = secondKeyArray.add(e, s);
 
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
 
         return containedBefore;
     }
 
-    public boolean containsFirst(E e, T t){
+    public boolean containsFirst(E e, T t) {
         return containsAll || firstKeyArray.contains(e, t);
     }
 
 
-    public boolean containsSecond(E e, S s){
+    public boolean containsSecond(E e, S s) {
         return containsAll || secondKeyArray.contains(e, s);
     }
 

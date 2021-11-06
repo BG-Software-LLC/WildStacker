@@ -47,16 +47,16 @@ public class CommandInspect implements ICommand {
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         Player targetPlayer = Bukkit.getPlayer(args[1]);
 
-        if(targetPlayer == null){
+        if (targetPlayer == null) {
             Locale.INVALID_PLAYER.send(sender, args[1]);
             return;
         }
 
         int amount = 1;
-        if(args.length == 3){
-            try{
+        if (args.length == 3) {
+            try {
                 amount = Integer.valueOf(args[2]);
-            }catch(IllegalArgumentException ex){
+            } catch (IllegalArgumentException ex) {
                 Locale.INVALID_NUMBER.send(sender, args[2]);
                 return;
             }
@@ -64,7 +64,7 @@ public class CommandInspect implements ICommand {
 
         targetPlayer.getInventory().addItem(new ItemBuilder(plugin.getSettings().inspectTool).build(amount));
         Locale.INSPECT_GIVE_PLAYER.send(sender, targetPlayer.getName(), amount);
-        if(!targetPlayer.equals(sender))
+        if (!targetPlayer.equals(sender))
             Locale.INSPECT_RECEIVE.send(targetPlayer, amount, sender.getName());
     }
 

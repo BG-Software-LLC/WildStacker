@@ -27,7 +27,7 @@ public final class NMSHolograms_v1_8_R3 implements NMSHolograms {
 
     private static final class EntityHologram extends EntityArmorStand implements Hologram {
 
-        EntityHologram(World world, double x, double y, double z){
+        EntityHologram(World world, double x, double y, double z) {
             super(world, x, y, z);
             setInvisible(true);
             setSmall(true);
@@ -51,16 +51,6 @@ public final class NMSHolograms_v1_8_R3 implements NMSHolograms {
         }
 
         @Override
-        public void t_() {
-            // Disable normal ticking for this entity.
-
-            // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
-            if (this.onGround) {
-                this.onGround = false;
-            }
-        }
-
-        @Override
         public void inactiveTick() {
             // Disable normal ticking for this entity.
 
@@ -71,8 +61,45 @@ public final class NMSHolograms_v1_8_R3 implements NMSHolograms {
         }
 
         @Override
+        public void setEquipment(int i, ItemStack item) {
+            // Prevent stand being equipped
+        }
+
+        @Override
+        public boolean d(int i, ItemStack item) {
+            // Prevent stand being equipped
+            return false;
+        }
+
+        @Override
         public void b(NBTTagCompound nbttagcompound) {
             // Do not save NBT.
+        }
+
+        @Override
+        public boolean a(EntityHuman human, Vec3D vec3d) {
+            // Prevent stand being equipped
+            return true;
+        }
+
+        @Override
+        public void t_() {
+            // Disable normal ticking for this entity.
+
+            // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
+            if (this.onGround) {
+                this.onGround = false;
+            }
+        }
+
+        @Override
+        public void die() {
+            // Prevent being killed.
+        }
+
+        @Override
+        public void makeSound(String sound, float f1, float f2) {
+            // Remove sounds.
         }
 
         @Override
@@ -90,6 +117,14 @@ public final class NMSHolograms_v1_8_R3 implements NMSHolograms {
         @Override
         public void e(NBTTagCompound nbttagcompound) {
             // Do not save NBT.
+        }
+
+        @Override
+        public CraftEntity getBukkitEntity() {
+            if (super.bukkitEntity == null) {
+                this.bukkitEntity = new CraftArmorStand(this.world.getServer(), this);
+            }
+            return this.bukkitEntity;
         }
 
         @Override
@@ -113,43 +148,8 @@ public final class NMSHolograms_v1_8_R3 implements NMSHolograms {
         }
 
         @Override
-        public boolean a(EntityHuman human, Vec3D vec3d) {
-            // Prevent stand being equipped
-            return true;
-        }
-
-        @Override
-        public boolean d(int i, ItemStack item) {
-            // Prevent stand being equipped
-            return false;
-        }
-
-        @Override
-        public void setEquipment(int i, ItemStack item) {
-            // Prevent stand being equipped
-        }
-
-        @Override
         public void a(AxisAlignedBB boundingBox) {
             // Do not change it!
-        }
-
-        @Override
-        public void makeSound(String sound, float f1, float f2) {
-            // Remove sounds.
-        }
-
-        @Override
-        public void die() {
-            // Prevent being killed.
-        }
-
-        @Override
-        public CraftEntity getBukkitEntity() {
-            if (super.bukkitEntity == null) {
-                this.bukkitEntity = new CraftArmorStand(this.world.getServer(), this);
-            }
-            return this.bukkitEntity;
         }
 
     }

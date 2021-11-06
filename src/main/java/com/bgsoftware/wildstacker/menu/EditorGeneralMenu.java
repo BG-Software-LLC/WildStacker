@@ -10,16 +10,16 @@ public final class EditorGeneralMenu extends EditorMenu {
 
     private final static EditorGeneralMenu NULL_HOLDER = new EditorGeneralMenu(null);
 
-    private final static String[] ignorePaths = new String[] {
+    private final static String[] ignorePaths = new String[]{
             "inspect-tool", "simulate-tool", "items", "entities", "spawners", "barrels", "buckets", "stews"
     };
 
-    private EditorGeneralMenu(Inventory inventory){
+    private EditorGeneralMenu(Inventory inventory) {
         super(inventory, "GENERAL_SLOT_", "generalEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

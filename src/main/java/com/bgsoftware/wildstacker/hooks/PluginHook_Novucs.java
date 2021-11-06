@@ -29,10 +29,19 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
     private final WildStackerPlugin instance;
     private final FactionsTopPlugin plugin;
 
-    private PluginHook_Novucs(WildStackerPlugin instance){
+    private PluginHook_Novucs(WildStackerPlugin instance) {
         this.instance = instance;
         this.plugin = JavaPlugin.getPlugin(FactionsTopPlugin.class);
         Bukkit.getPluginManager().registerEvents(this, instance);
+    }
+
+    public static void setEnabled(WildStackerPlugin plugin) {
+        try {
+            Field field = FactionsTopPlugin.class.getDeclaredField("spawnerStackerHook");
+            field.setAccessible(true);
+            field.set(JavaPlugin.getPlugin(FactionsTopPlugin.class), new PluginHook_Novucs(plugin));
+        } catch (NoClassDefFoundError | Exception ignored) {
+        }
     }
 
     @Override
@@ -64,18 +73,10 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
         updateWorth(e.getSpawner().getLocation().getBlock(), RecalculateReason.BREAK, e.getAmount());
     }
 
-    public static void setEnabled(WildStackerPlugin plugin){
-        try{
-            Field field = FactionsTopPlugin.class.getDeclaredField("spawnerStackerHook");
-            field.setAccessible(true);
-            field.set(JavaPlugin.getPlugin(FactionsTopPlugin.class), new PluginHook_Novucs(plugin));
-        }catch(NoClassDefFoundError | Exception ignored){}
-    }
-
     private void updateWorth(Block block, RecalculateReason reason, int amount) {
         String factionId = plugin.getFactionsHook().getFactionAt(block);
 
-        if(plugin.getSettings().getIgnoredFactionIds().contains(factionId))
+        if (plugin.getSettings().getIgnoredFactionIds().contains(factionId))
             return;
 
         int multiplier = reason == RecalculateReason.BREAK ? -amount : amount;
@@ -85,7 +86,7 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
         plugin.getWorthManager().add(block.getChunk(), reason, WorthType.BLOCK, price,
                 ImmutableMap.of(block.getType(), multiplier), new HashMap<>());
 
-        CreatureSpawner creatureSpawner = (CreatureSpawner)block.getState();
+        CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
         EntityType spawnedType = creatureSpawner.getSpawnedType();
         price = multiplier * plugin.getSettings().getSpawnerPrice(spawnedType);
 

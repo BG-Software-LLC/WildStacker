@@ -14,8 +14,8 @@ import org.bukkit.event.Listener;
 public final class EpicSpawners6Listener implements Listener {
 
     @EventHandler
-    public void onSpawnerSpawn(SpawnerSpawnEvent e){
-        if(!EntityUtils.isStackable(e.getEntity()))
+    public void onSpawnerSpawn(SpawnerSpawnEvent e) {
+        if (!EntityUtils.isStackable(e.getEntity()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());

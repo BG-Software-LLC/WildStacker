@@ -8,7 +8,7 @@ public interface SyncedCreatureSpawner extends CreatureSpawner {
 
     WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    static SyncedCreatureSpawner of(CreatureSpawner creatureSpawner){
+    static SyncedCreatureSpawner of(CreatureSpawner creatureSpawner) {
         return creatureSpawner instanceof SyncedCreatureSpawner ? (SyncedCreatureSpawner) creatureSpawner :
                 plugin.getNMSAdapter().createSyncedSpawner(creatureSpawner);
     }

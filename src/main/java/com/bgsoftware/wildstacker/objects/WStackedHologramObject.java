@@ -10,16 +10,16 @@ public abstract class WStackedHologramObject<T> extends WStackedObject<T> {
         super(object, stackAmount);
     }
 
-    public void removeHologram(){
-        if(hologram != null){
+    public void removeHologram() {
+        if (hologram != null) {
             hologram.removeHologram();
             hologram = null;
         }
     }
 
-    public void setHologramName(String name, boolean createIfNull){
-        if(hologram == null) {
-            if(!createIfNull)
+    public void setHologramName(String name, boolean createIfNull) {
+        if (hologram == null) {
+            if (!createIfNull)
                 return;
             hologram = plugin.getNMSHolograms().createHologram(getLocation().add(0.5, 1, 0.5));
         }
@@ -27,7 +27,7 @@ public abstract class WStackedHologramObject<T> extends WStackedObject<T> {
         hologram.setHologramName(name);
     }
 
-    public Hologram createHologram(){
+    public Hologram createHologram() {
         hologram = plugin.getNMSHolograms().createHologram(getLocation().add(0.5, 1, 0.5));
         return hologram;
     }

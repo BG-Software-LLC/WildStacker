@@ -10,14 +10,14 @@ public final class EditorItemsMenu extends EditorMenu {
 
     private final static EditorItemsMenu NULL_HOLDER = new EditorItemsMenu(null);
 
-    private final static String[] sectionsPaths = new String[] { "merge-radius", "limits" };
+    private final static String[] sectionsPaths = new String[]{"merge-radius", "limits"};
 
-    private EditorItemsMenu(Inventory inventory){
+    private EditorItemsMenu(Inventory inventory) {
         super(inventory, "ITEMS_SLOT_", "itemsEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

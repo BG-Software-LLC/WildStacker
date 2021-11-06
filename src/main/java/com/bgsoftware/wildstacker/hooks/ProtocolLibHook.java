@@ -24,9 +24,9 @@ public final class ProtocolLibHook {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    public static void setEnabled(boolean enabled){
+    public static void setEnabled(boolean enabled) {
         PluginHooks.isProtocolLibEnabled = enabled;
-        if(enabled) {
+        if (enabled) {
             ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA) {
                 @Override
                 public void onPacketSending(PacketEvent event) {
@@ -56,7 +56,7 @@ public final class ProtocolLibHook {
         }
     }
 
-    public static void updateName(Player player, Entity entity){
+    public static void updateName(Player player, Entity entity) {
         PacketContainer packetContainer = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
         packetContainer.getIntegers().write(0, entity.getEntityId());
         WrappedDataWatcher watcher = new WrappedDataWatcher();
@@ -80,11 +80,11 @@ public final class ProtocolLibHook {
         }
     }
 
-    private static Object getCustomName(String customName){
+    private static Object getCustomName(String customName) {
         return ServerVersion.isLegacy() ? customName : customName.isEmpty() ? Optional.empty() : Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
     }
 
-    private static WrappedDataWatcher.Serializer getNameSerializer(){
+    private static WrappedDataWatcher.Serializer getNameSerializer() {
         return ServerVersion.isLegacy() ? WrappedDataWatcher.Registry.get(String.class) : WrappedDataWatcher.Registry.getChatComponentSerializer(true);
     }
 

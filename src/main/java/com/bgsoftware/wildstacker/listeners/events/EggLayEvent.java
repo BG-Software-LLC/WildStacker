@@ -12,9 +12,13 @@ public final class EggLayEvent extends Event {
     private final Chicken chicken;
     private final Item egg;
 
-    public EggLayEvent(Item egg, Chicken chicken){
+    public EggLayEvent(Item egg, Chicken chicken) {
         this.chicken = chicken;
         this.egg = egg;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Item getEgg() {
@@ -27,10 +31,6 @@ public final class EggLayEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

@@ -34,15 +34,15 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     private boolean allSamePrice = false;
     private double globalPrice = 0.0;
 
-    public SpawnersProvider_MineableSpawners(){
+    public SpawnersProvider_MineableSpawners() {
         WildStackerPlugin.log(" - Using MineableSpawners as SpawnersProvider.");
         plugin = JavaPlugin.getPlugin(MineableSpawners.class);
         Listener spawnerMineListener = Arrays.stream(BlockBreakEvent.getHandlerList().getRegisteredListeners())
                 .filter(registeredListener -> registeredListener.getPlugin() == plugin)
                 .map(RegisteredListener::getListener).findFirst().orElse(null);
 
-        try{
-            if(spawnerMineListener == null)
+        try {
+            if (spawnerMineListener == null)
                 throw new NullPointerException("Error while trying to find the listener instance.");
 
             /* Permission Chances */
@@ -74,7 +74,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
                 globalPriceField.setAccessible(true);
                 globalPrice = (Double) globalPriceField.get(spawnerMineListener);
             }
-        }catch (Throwable ex){
+        } catch (Throwable ex) {
             WildStackerPlugin.log("&cError while hooking into MS - can cause conflicts / unintended bypasses.");
             ex.printStackTrace();
         }
@@ -114,7 +114,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
         EntityType entityType = stackedSpawner.getSpawnedType();
         boolean bypassing = breakMenu || player.getGameMode().equals(GameMode.CREATIVE) || player.hasPermission("mineablespawners.bypass");
 
-        if(!bypassing){
+        if (!bypassing) {
             if (plugin.getConfigurationHandler().getList("mining", "blacklisted-worlds").contains(player.getWorld().getName()))
                 return;
 
@@ -139,13 +139,11 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
                     int requiredLevel = plugin.getConfigurationHandler().getInteger("mining", "required-level");
                     if (silkTouchLevel < requiredLevel && !WildToolsHook.hasSilkTouch(heldItem))
                         return;
-                }
-
-                else if (silkTouchLevel < 1)
+                } else if (silkTouchLevel < 1)
                     return;
             }
 
-            if(plugin.getEcon() != null && plugin.getConfigurationHandler().getBoolean("mining", "charge")){
+            if (plugin.getEcon() != null && plugin.getConfigurationHandler().getBoolean("mining", "charge")) {
                 double cost = !allSamePrice ? globalPrice : prices.getOrDefault(entityType, globalPrice);
 
                 if (!plugin.getEcon().withdrawPlayer(player, cost).transactionSuccess())
@@ -161,8 +159,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
                         dropChance = Math.max(dropChance, permissionChances.get(perm) / 100.0);
                     }
                 }
-            }
-            else {
+            } else {
                 dropChance = plugin.getConfigurationHandler().getDouble("mining", "chance") / 100.0;
             }
 
@@ -188,8 +185,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
 
         if (plugin.getConfigurationHandler().getBoolean("mining", "drop-to-inventory")) {
             ItemUtils.addItem(dropItem, player.getInventory(), toDrop);
-        }
-        else{
+        } else {
             ItemUtils.dropItem(dropItem, toDrop);
         }
     }

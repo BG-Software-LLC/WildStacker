@@ -17,25 +17,30 @@ public class BarrelPlaceEvent extends PlaceEvent {
 
     /**
      * The constructor for the event.
+     *
      * @param player The player who placed the barrel.
      * @param barrel The barrel object of the placed block.
-     *
      * @deprecated See BarrelPlaceEvent(Player, StackedBarrel, ItemStack)
      */
     @Deprecated
-    public BarrelPlaceEvent(Player player, StackedBarrel barrel){
+    public BarrelPlaceEvent(Player player, StackedBarrel barrel) {
         this(player, barrel, new ItemStack(Material.AIR));
     }
 
     /**
      * The constructor for the event.
-     * @param player The player who placed the barrel.
-     * @param barrel The barrel object of the placed block.
+     *
+     * @param player     The player who placed the barrel.
+     * @param barrel     The barrel object of the placed block.
      * @param itemInHand The item that the player held.
      */
-    public BarrelPlaceEvent(Player player, StackedBarrel barrel, ItemStack itemInHand){
+    public BarrelPlaceEvent(Player player, StackedBarrel barrel, ItemStack itemInHand) {
         super(player, barrel);
         this.itemInHand = itemInHand.clone();
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -54,10 +59,6 @@ public class BarrelPlaceEvent extends PlaceEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

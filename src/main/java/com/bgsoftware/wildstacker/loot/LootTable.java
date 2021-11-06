@@ -29,7 +29,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     private final int min, max, minExp, maxExp;
     private final boolean dropEquipment, alwaysDropsExp;
 
-    public LootTable(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment, boolean alwaysDropsExp){
+    public LootTable(List<LootPair> lootPairs, int min, int max, int minExp, int maxExp, boolean dropEquipment, boolean alwaysDropsExp) {
         this.lootPairs.addAll(lootPairs);
         this.min = min;
         this.max = max;
@@ -39,16 +39,79 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         this.alwaysDropsExp = alwaysDropsExp;
     }
 
+    static boolean isBurning(StackedEntity stackedEntity) {
+        return stackedEntity.getLivingEntity().getFireTicks() > 0;
+    }
+
+    static String getEntityKiller(StackedEntity stackedEntity) {
+        EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
+        String returnType = "UNKNOWN";
+
+        if (damageEvent instanceof EntityDamageByEntityEvent) {
+            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
+            Entity damager = entityDamageByEntityEvent.getDamager();
+            if (damager instanceof Projectile) {
+                Projectile projectile = (Projectile) damager;
+                if (projectile.getShooter() instanceof Entity)
+                    returnType = ((Entity) projectile.getShooter()).getType().name();
+                else
+                    returnType = projectile.getType().name();
+            } else {
+                if (damager instanceof Creeper && ((Creeper) damager).isPowered())
+                    returnType = "CHARGED_CREEPER";
+                else
+                    returnType = damager.getType().name();
+            }
+        }
+
+        return returnType;
+    }
+
+    static boolean isKilledByPlayer(StackedEntity stackedEntity) {
+        return getKiller(stackedEntity) != null;
+    }
+
+    static Player getKiller(StackedEntity stackedEntity) {
+        return stackedEntity.getLivingEntity().getKiller();
+    }
+
+    static String getDeathCause(StackedEntity stackedEntity) {
+        EntityDamageEvent lastCause = stackedEntity.getLivingEntity().getLastDamageCause();
+        return lastCause == null ? "" : lastCause.getCause().name();
+    }
+
+    public static LootTable fromJson(JSONObject jsonObject, String lootTableName) {
+        boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
+        boolean alwaysDropsExp = false;
+        int min = JsonUtils.getInt(jsonObject, "min", -1);
+        int max = JsonUtils.getInt(jsonObject, "max", -1);
+        int minExp = -1, maxExp = -1;
+
+        if (jsonObject.containsKey("exp")) {
+            JSONObject expObject = (JSONObject) jsonObject.get("exp");
+            minExp = JsonUtils.getInt(expObject, "min", -1);
+            maxExp = JsonUtils.getInt(expObject, "max", -1);
+            alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
+        }
+
+        List<LootPair> lootPairs = new ArrayList<>();
+        if (jsonObject.containsKey("pairs")) {
+            ((JSONArray) jsonObject.get("pairs")).forEach(element -> lootPairs.add(LootPair.fromJson(((JSONObject) element), lootTableName)));
+        }
+
+        return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);
+    }
+
     @Override
-    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount){
+    public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new ArrayList<>();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-            (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
-            (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
-            (lootPair.getRequiredUpgrade().isEmpty() || stackedEntity.getUpgrade().getName().equalsIgnoreCase(lootPair.getRequiredUpgrade())) &&
-            GeneralUtils.containsOrEmpty(lootPair.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()) &&
-            GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
+                (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
+                        (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
+                        (lootPair.getRequiredUpgrade().isEmpty() || stackedEntity.getUpgrade().getName().equalsIgnoreCase(lootPair.getRequiredUpgrade())) &&
+                        GeneralUtils.containsOrEmpty(lootPair.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()) &&
+                        GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
@@ -66,7 +129,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
                 lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
         }
 
-        if(dropEquipment) {
+        if (dropEquipment) {
             drops.addAll(EntityUtils.getEquipment(stackedEntity.getLivingEntity(), lootBonusLevel));
         }
 
@@ -79,13 +142,12 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
         int exp = 0;
 
-        if(minExp >= 0 && maxExp >= 0){
-            if(alwaysDropsExp || plugin.getNMSAdapter().canDropExp(stackedEntity.getLivingEntity())) {
+        if (minExp >= 0 && maxExp >= 0) {
+            if (alwaysDropsExp || plugin.getNMSAdapter().canDropExp(stackedEntity.getLivingEntity())) {
                 for (int i = 0; i < stackAmount; i++)
                     exp += Random.nextInt(maxExp - minExp + 1) + minExp;
             }
-        }
-        else{
+        } else {
             exp = stackAmount * plugin.getNMSAdapter().getEntityExp(stackedEntity.getLivingEntity());
         }
 
@@ -95,69 +157,6 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     @Override
     public String toString() {
         return "LootTable{pairs=" + lootPairs + "}";
-    }
-
-    static boolean isBurning(StackedEntity stackedEntity){
-        return stackedEntity.getLivingEntity().getFireTicks() > 0;
-    }
-
-    static String getEntityKiller(StackedEntity stackedEntity){
-        EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
-        String returnType = "UNKNOWN";
-
-        if(damageEvent instanceof EntityDamageByEntityEvent){
-            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
-            Entity damager = entityDamageByEntityEvent.getDamager();
-            if(damager instanceof Projectile) {
-                Projectile projectile = (Projectile) damager;
-                if(projectile.getShooter() instanceof Entity)
-                    returnType = ((Entity) projectile.getShooter()).getType().name();
-                else
-                    returnType = projectile.getType().name();
-            }else{
-                if(damager instanceof Creeper && ((Creeper) damager).isPowered())
-                    returnType = "CHARGED_CREEPER";
-                else
-                    returnType = damager.getType().name();
-            }
-        }
-
-        return returnType;
-    }
-
-    static boolean isKilledByPlayer(StackedEntity stackedEntity){
-        return getKiller(stackedEntity) != null;
-    }
-
-    static Player getKiller(StackedEntity stackedEntity){
-        return stackedEntity.getLivingEntity().getKiller();
-    }
-
-    static String getDeathCause(StackedEntity stackedEntity){
-        EntityDamageEvent lastCause = stackedEntity.getLivingEntity().getLastDamageCause();
-        return lastCause == null ? "" : lastCause.getCause().name();
-    }
-
-    public static LootTable fromJson(JSONObject jsonObject, String lootTableName){
-        boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
-        boolean alwaysDropsExp = false;
-        int min = JsonUtils.getInt(jsonObject, "min", -1);
-        int max = JsonUtils.getInt(jsonObject, "max", -1);
-        int minExp = -1, maxExp = -1;
-
-        if(jsonObject.containsKey("exp")){
-            JSONObject expObject = (JSONObject) jsonObject.get("exp");
-            minExp = JsonUtils.getInt(expObject, "min", -1);
-            maxExp = JsonUtils.getInt(expObject, "max", -1);
-            alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
-        }
-
-        List<LootPair> lootPairs = new ArrayList<>();
-        if(jsonObject.containsKey("pairs")){
-            ((JSONArray) jsonObject.get("pairs")).forEach(element -> lootPairs.add(LootPair.fromJson(((JSONObject) element), lootTableName)));
-        }
-
-        return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);
     }
 
 }

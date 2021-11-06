@@ -15,13 +15,18 @@ public class SpawnerPlaceInventoryEvent extends PlaceEvent {
 
     /**
      * The constructor for the event.
-     * @param player The player who placed the spawner.
-     * @param spawner The spawner object.
+     *
+     * @param player         The player who placed the spawner.
+     * @param spawner        The spawner object.
      * @param increaseAmount The amount that the spawner is increased by.
      */
-    public SpawnerPlaceInventoryEvent(Player player, StackedSpawner spawner, int increaseAmount){
+    public SpawnerPlaceInventoryEvent(Player player, StackedSpawner spawner, int increaseAmount) {
         super(player, spawner);
         this.increaseAmount = increaseAmount;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -40,10 +45,6 @@ public class SpawnerPlaceInventoryEvent extends PlaceEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

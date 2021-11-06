@@ -19,6 +19,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Check if this upgrade is a default upgrade.
+     *
      * @return This returns true if the id is set to 0.
      */
     boolean isDefault();
@@ -31,6 +32,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the next upgrade in the ladder.
+     *
      * @param nextUpgrade The next upgrade to set.
      */
     void setNextUpgrade(SpawnerUpgrade nextUpgrade);
@@ -44,6 +46,7 @@ public interface SpawnerUpgrade {
     /**
      * Set the icon of the upgrade that will be displayed on the upgrade menu.
      * If set to null, the default icon will be used.
+     *
      * @param icon The icon to set.
      */
     void setIcon(ItemStack icon);
@@ -56,6 +59,7 @@ public interface SpawnerUpgrade {
     /**
      * Set the cost of the upgrade.
      * If you want this upgrade to be free of charge, use 0 or below.
+     *
      * @param cost The cost to set.
      */
     void setCost(double cost);
@@ -67,12 +71,14 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the display name of the upgrade.
+     *
      * @param displayName The display name.
      */
     void setDisplayName(String displayName);
 
     /**
      * Check if an entity is allowed to be upgraded to this upgrade.
+     *
      * @param entityType The type of the entity.
      */
     boolean isEntityAllowed(EntityType entityType);
@@ -80,6 +86,7 @@ public interface SpawnerUpgrade {
     /**
      * Set all the allowed entities for this upgrade.
      * If the list is null or empty, all the entities will be allowed.
+     *
      * @param allowedEntities The allowed entities.
      */
     void setAllowedEntities(List<String> allowedEntities);
@@ -91,6 +98,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the minimum spawn delay of spawners.
+     *
      * @param minSpawnDelay The minimum spawn delay.
      */
     void setMinSpawnDelay(int minSpawnDelay);
@@ -102,6 +110,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the maximum spawn delay of spwaners.
+     *
      * @param maxSpawnDelay The maximum spawn delay.
      */
     void setMaxSpawnDelay(int maxSpawnDelay);
@@ -113,6 +122,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the maximum spawn count of spawners.
+     *
      * @param spawnCount The spawn count.
      */
     void setSpawnCount(int spawnCount);
@@ -124,6 +134,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the maximum nearby entities allowed around spawners.
+     *
      * @param maxNearbyEntities The maximum allowed nearby entities.
      */
     void setMaxNearbyEntities(int maxNearbyEntities);
@@ -135,6 +146,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the required player range from spawners.
+     *
      * @param requiredPlayerRange The required player range.
      */
     void setRequiredPlayerRange(int requiredPlayerRange);
@@ -146,6 +158,7 @@ public interface SpawnerUpgrade {
 
     /**
      * Set the spawn range of spawners.
+     *
      * @param spawnRange The spawn range.
      */
     void setSpawnRange(int spawnRange);

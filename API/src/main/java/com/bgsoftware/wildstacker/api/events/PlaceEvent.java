@@ -11,17 +11,17 @@ import org.bukkit.event.Event;
  */
 public abstract class PlaceEvent extends Event implements Cancellable {
 
-    private boolean cancelled;
-
     protected final StackedObject object;
     protected final Player player;
+    private boolean cancelled;
 
     /**
      * The constructor for the event.
+     *
      * @param player The player who placed the object.
      * @param object The stacked object that was placed.
      */
-    public PlaceEvent(Player player, StackedObject object){
+    public PlaceEvent(Player player, StackedObject object) {
         super(!Bukkit.isPrimaryThread());
         this.player = player;
         this.object = object;

@@ -59,38 +59,40 @@ public enum SpawnCause {
     MY_PET(107),
     ECHO_PET(108),
     ELITE_BOSSES(109),
-    MORE_BOSSES(110);
+    MORE_BOSSES(110),
+    MINIATURE_PETS(111);
 
     private final int id;
 
-    SpawnCause(int id){
+    SpawnCause(int id) {
         this.id = id;
     }
 
-    public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason){
+    public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason) {
         return matchCause(spawnReason.name());
     }
 
-    public static SpawnCause valueOf(int id){
+    public static SpawnCause valueOf(int id) {
         return Arrays.stream(values()).filter(spawnCause -> spawnCause.getId() == id).findFirst().orElse(DEFAULT);
     }
 
     /**
      * Returns a spawn cause from string. If not found, returning DEFAULT.
+     *
      * @param name The name to check.
      */
-    public static SpawnCause matchCause(String name){
-        try{
+    public static SpawnCause matchCause(String name) {
+        try {
             return valueOf(name);
-        }catch(IllegalArgumentException ex){
+        } catch (IllegalArgumentException ex) {
             return DEFAULT;
         }
     }
 
-    public CreatureSpawnEvent.SpawnReason toSpawnReason(){
-        try{
+    public CreatureSpawnEvent.SpawnReason toSpawnReason() {
+        try {
             return CreatureSpawnEvent.SpawnReason.valueOf(name());
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return CreatureSpawnEvent.SpawnReason.CUSTOM;
         }
     }

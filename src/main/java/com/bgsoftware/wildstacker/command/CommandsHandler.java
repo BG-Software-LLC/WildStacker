@@ -24,7 +24,7 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
     private WildStackerPlugin plugin;
     private List<ICommand> subCommands = new ArrayList<>();
 
-    public CommandsHandler(WildStackerPlugin plugin){
+    public CommandsHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
         subCommands.add(new CommandGive());
         subCommands.add(new CommandInfo());
@@ -40,14 +40,14 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        if(args.length > 0){
-            for(ICommand subCommand : subCommands) {
-                if (subCommand.getLabel().equalsIgnoreCase(args[0])){
-                    if(subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())){
+        if (args.length > 0) {
+            for (ICommand subCommand : subCommands) {
+                if (subCommand.getLabel().equalsIgnoreCase(args[0])) {
+                    if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
                         Locale.NO_PERMISSION.send(sender);
                         return false;
                     }
-                    if(args.length < subCommand.getMinArgs() || args.length > subCommand.getMaxArgs()){
+                    if (args.length < subCommand.getMinArgs() || args.length > subCommand.getMaxArgs()) {
                         Locale.COMMAND_USAGE.send(sender, subCommand.getUsage());
                         return false;
                     }
@@ -58,13 +58,13 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
         }
 
         //Checking that the player has permission to use at least one of the commands.
-        for(ICommand subCommand : subCommands){
-            if(sender.hasPermission(subCommand.getPermission())){
+        for (ICommand subCommand : subCommands) {
+            if (sender.hasPermission(subCommand.getPermission())) {
                 //Player has permission
                 Locale.HELP_COMMAND_HEADER.send(sender);
 
-                for(ICommand cmd : subCommands) {
-                    if(sender.hasPermission(subCommand.getPermission()))
+                for (ICommand cmd : subCommands) {
+                    if (sender.hasPermission(subCommand.getPermission()))
                         Locale.HELP_COMMAND_LINE.send(sender, cmd.getUsage(), cmd.getDescription());
                 }
 
@@ -80,10 +80,10 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-        if(args.length > 0){
-            for(ICommand subCommand : subCommands) {
-                if (subCommand.getLabel().equalsIgnoreCase(args[0])){
-                    if(subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())){
+        if (args.length > 0) {
+            for (ICommand subCommand : subCommands) {
+                if (subCommand.getLabel().equalsIgnoreCase(args[0])) {
+                    if (subCommand.getPermission() != null && !sender.hasPermission(subCommand.getPermission())) {
                         return new ArrayList<>();
                     }
                     return subCommand.tabComplete(plugin, sender, args);
@@ -93,9 +93,9 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
 
         List<String> list = new ArrayList<>();
 
-        for(ICommand subCommand : subCommands)
-            if(subCommand.getPermission() == null || sender.hasPermission(subCommand.getPermission()))
-                if(subCommand.getLabel().startsWith(args[0]))
+        for (ICommand subCommand : subCommands)
+            if (subCommand.getPermission() == null || sender.hasPermission(subCommand.getPermission()))
+                if (subCommand.getLabel().startsWith(args[0]))
                     list.add(subCommand.getLabel());
 
         return list;

@@ -10,8 +10,8 @@ import org.bukkit.event.Listener;
 public final class MoreBossesListener implements Listener {
 
     @EventHandler
-    public void onBossSpawn(BossSpawnEvent e){
-        if(EntityUtils.isStackable(e.getEntity()))
+    public void onBossSpawn(BossSpawnEvent e) {
+        if (EntityUtils.isStackable(e.getEntity()))
             WStackedEntity.of(e.getEntity()).setSpawnCause(SpawnCause.MORE_BOSSES);
     }
 

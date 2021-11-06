@@ -6,7 +6,7 @@ public final class MultiPair<X, Y, Z> {
     private final Y y;
     private final Z z;
 
-    public MultiPair(X x, Y y, Z z){
+    public MultiPair(X x, Y y, Z z) {
         this.x = x;
         this.y = y;
         this.z = z;

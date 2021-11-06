@@ -10,19 +10,21 @@ public final class GlowEnchantment {
     private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static Enchantment glowEnchant;
 
-    public static void registerEnchantment(){
+    public static void registerEnchantment() {
         glowEnchant = plugin.getNMSAdapter().getGlowEnchant();
 
-        try{
+        try {
             Field field = Enchantment.class.getDeclaredField("acceptingNew");
             field.setAccessible(true);
             field.set(null, true);
             field.setAccessible(false);
-        }catch(Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
-        try{
+        try {
             Enchantment.registerEnchantment(glowEnchant);
-        }catch(Exception ignored){}
+        } catch (Exception ignored) {
+        }
     }
 
     public static Enchantment getGlowEnchant() {

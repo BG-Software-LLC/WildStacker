@@ -10,12 +10,12 @@ public final class EditorStewsMenu extends EditorMenu {
 
     private final static EditorStewsMenu NULL_HOLDER = new EditorStewsMenu(null);
 
-    private EditorStewsMenu(Inventory inventory){
+    private EditorStewsMenu(Inventory inventory) {
         super(inventory, "STEWS_SLOT_", "stewsEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

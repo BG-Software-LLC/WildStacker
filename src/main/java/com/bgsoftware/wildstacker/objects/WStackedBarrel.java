@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -38,21 +39,22 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     private final ItemStack barrelItem;
     private ArmorStand blockDisplay;
 
-    public WStackedBarrel(Block block, ItemStack itemStack){
+    public WStackedBarrel(Block block, ItemStack itemStack) {
         this(block, itemStack, 1);
     }
 
-    public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount){
+    public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount) {
         super(block, stackAmount);
         this.barrelItem = itemStack;
         setCachedDisplayName(ItemUtils.getFormattedType(barrelItem));
     }
 
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName) {
-        super.setStackAmount(stackAmount, updateName);
-        if(saveData)
-            plugin.getSystemManager().markToBeSaved(this);
+    public static StackedBarrel of(Block block) {
+        return plugin.getSystemManager().getStackedBarrel(block);
+    }
+
+    public static StackedBarrel of(Location location) {
+        return plugin.getSystemManager().getStackedBarrel(location);
     }
 
     @Override
@@ -71,13 +73,72 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     }
 
     @Override
-    public Location getLocation() {
-        return object.getLocation();
+    public void createDisplayBlock() {
+        Location location = getLocation();
+
+        removeDisplayBlock();
+
+        if (location.getBlock().getType() == Material.CAULDRON) {
+            blockDisplay = location.getWorld().spawn(location.add(0.5, 0, 0.5), ArmorStand.class);
+            blockDisplay.setVisible(false);
+            blockDisplay.setSmall(true);
+            blockDisplay.setGravity(false);
+            blockDisplay.setHelmet(barrelItem);
+            plugin.getNMSAdapter().setCustomName(blockDisplay, "BlockDisplay");
+            plugin.getNMSAdapter().setCustomNameVisible(blockDisplay, false);
+        }
     }
 
     @Override
-    public World getWorld() {
-        return object.getWorld();
+    public void removeDisplayBlock() {
+        if (ServerVersion.isAtLeast(ServerVersion.v1_17) && !Bukkit.isPrimaryThread()) {
+            Executor.sync(this::removeDisplayBlock);
+            return;
+        }
+
+        Location location = getLocation();
+        //Making sure there isn't already a blockDisplay
+        for (Entity entity : location.getChunk().getEntities()) {
+            //Entity should be on this barrel
+            if (entity instanceof ArmorStand && ((ArmorStand) entity).getHelmet() != null &&
+                    !((ArmorStand) entity).isVisible() && ((ArmorStand) entity).isSmall() &&
+                    entity.getLocation().getBlock().getLocation().equals(location)) {
+                entity.remove();
+            }
+        }
+    }
+
+    @Override
+    public ArmorStand getDisplayBlock() {
+        return blockDisplay;
+    }
+
+    @Override
+    public ItemStack getBarrelItem(int amount) {
+        ItemStack itemStack = barrelItem.clone();
+
+        if (plugin.getSettings().dropStackedItem) {
+            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
+            itemStack.setAmount(1);
+
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+                    .replace("{0}", amount + "")
+                    .replace("{1}", ItemUtils.getFormattedType(new ItemStack(getType())))
+                    .replace("{2}", "Barrel")
+            );
+
+            itemStack.setItemMeta(itemMeta);
+        } else {
+            itemStack.setAmount(amount);
+        }
+
+        return itemStack;
+    }
+
+    @Override
+    public Location getLocation() {
+        return object.getLocation();
     }
 
     @Override
@@ -120,7 +181,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public void remove() {
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::remove);
             return;
         }
@@ -135,7 +196,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         removeDisplayBlock();
 
         List<HumanEntity> viewers = new ArrayList<>();
-        linkedInventories.forEach(i ->  viewers.addAll(i.getViewers()));
+        linkedInventories.forEach(i -> viewers.addAll(i.getViewers()));
 
         viewers.forEach(HumanEntity::closeInventory);
 
@@ -144,7 +205,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public void updateName() {
-        if(!Bukkit.isPrimaryThread()){
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::updateName);
             return;
         }
@@ -156,7 +217,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         int amount = getStackAmount();
 
-        if(amount < 1) {
+        if (amount < 1) {
             removeHologram();
             return;
         }
@@ -167,7 +228,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if(!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().barrelsStackingEnabled)
             return StackCheckResult.NOT_ENABLED;
 
         return super.runStackCheck(stackedObject);
@@ -175,7 +236,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public Optional<Block> runStack() {
-        if(getStackLimit() <= 1)
+        if (getStackLimit() <= 1)
             return Optional.empty();
 
         Chunk chunk = getChunk();
@@ -190,7 +251,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         } else {
             int range = getMergeRadius();
 
-            if(range <= 0)
+            if (range <= 0)
                 return Optional.empty();
 
             Location location = getLocation();
@@ -232,12 +293,11 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return StackResult.NOT_SIMILAR;
 
         StackedBarrel targetBarrel = (StackedBarrel) stackedObject;
-        int newStackAmount = this.getStackAmount() + targetBarrel.getStackAmount();
 
-        if(!EventsCaller.callBarrelStackEvent(targetBarrel, this))
+        if (!EventsCaller.callBarrelStackEvent(targetBarrel, this))
             return StackResult.EVENT_CANCELLED;
 
-        targetBarrel.setStackAmount(newStackAmount, true);
+        targetBarrel.increaseStackAmount(getStackAmount(), true);
 
         this.remove();
 
@@ -248,14 +308,12 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public UnstackResult runUnstack(int amount, Entity entity) {
-        if(!EventsCaller.callBarrelUnstackEvent(this, entity, amount))
+        if (!EventsCaller.callBarrelUnstackEvent(this, entity, amount))
             return UnstackResult.EVENT_CANCELLED;
 
-        int stackAmount = this.getStackAmount() - amount;
+        int newStackAmount = decreaseStackAmount(amount, true);
 
-        setStackAmount(stackAmount, true);
-
-        if(stackAmount < 1)
+        if (newStackAmount < 1)
             remove();
 
         return UnstackResult.SUCCESS;
@@ -277,6 +335,11 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     }
 
     @Override
+    public World getWorld() {
+        return object.getWorld();
+    }
+
+    @Override
     public int hashCode() {
         return getLocation().hashCode();
     }
@@ -291,80 +354,12 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         return String.format("StackedBarrel{location=%s,amount=%s,type=%s,data=%s}", getLocation(), getStackAmount(), getType().name(), getData());
     }
 
-    @Override
-    public void createDisplayBlock() {
-        Location location = getLocation();
-
-        removeDisplayBlock();
-
-        if(location.getBlock().getType() == Material.CAULDRON) {
-            blockDisplay = location.getWorld().spawn(location.add(0.5, 0, 0.5), ArmorStand.class);
-            blockDisplay.setVisible(false);
-            blockDisplay.setSmall(true);
-            blockDisplay.setGravity(false);
-            blockDisplay.setHelmet(barrelItem);
-            plugin.getNMSAdapter().setCustomName(blockDisplay, "BlockDisplay");
-            plugin.getNMSAdapter().setCustomNameVisible(blockDisplay, false);
-        }
-    }
-
-    @Override
-    public void removeDisplayBlock() {
-        Location location = getLocation();
-        //Making sure there isn't already a blockDisplay
-        for(Entity entity : location.getChunk().getEntities()){
-            //Entity should be on this barrel
-            if(entity instanceof ArmorStand && ((ArmorStand) entity).getHelmet() != null &&
-                    !((ArmorStand) entity).isVisible() && ((ArmorStand) entity).isSmall() &&
-                    entity.getLocation().getBlock().getLocation().equals(location)){
-                entity.remove();
-            }
-        }
-    }
-
-    @Override
-    public ArmorStand getDisplayBlock() {
-        return blockDisplay;
-    }
-
-    @Override
-    public ItemStack getBarrelItem(int amount) {
-        ItemStack itemStack = barrelItem.clone();
-
-        if(plugin.getSettings().dropStackedItem){
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
-            itemStack.setAmount(1);
-
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
-                    .replace("{0}", amount + "")
-                    .replace("{1}", ItemUtils.getFormattedType(new ItemStack(getType())))
-                    .replace("{2}", "Barrel")
-            );
-
-            itemStack.setItemMeta(itemMeta);
-        }
-        else {
-            itemStack.setAmount(amount);
-        }
-
-        return itemStack;
-    }
-
-    public void linkInventory(Inventory inventory){
+    public void linkInventory(Inventory inventory) {
         this.linkedInventories.add(inventory);
     }
 
-    public void unlinkInventory(Inventory inventory){
+    public void unlinkInventory(Inventory inventory) {
         this.linkedInventories.remove(inventory);
-    }
-
-    public static StackedBarrel of(Block block){
-        return plugin.getSystemManager().getStackedBarrel(block);
-    }
-
-    public static StackedBarrel of(Location location){
-        return plugin.getSystemManager().getStackedBarrel(location);
     }
 
 }

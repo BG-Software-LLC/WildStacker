@@ -26,50 +26,49 @@ public final class NoClaimConflictListener implements Listener {
     private final WildStackerPlugin plugin;
     private final Map<Location, UUID> placers = new WeakHashMap<>();
 
-    public NoClaimConflictListener(WildStackerPlugin plugin){
+    public NoClaimConflictListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBlockPlace(BlockPlaceEvent e){
-        if(plugin.getSettings().spawnersStackingEnabled && e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
+    public void onBlockPlace(BlockPlaceEvent e) {
+        if (plugin.getSettings().spawnersStackingEnabled && e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
             placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
-        }
-        else if(plugin.getSettings().barrelsStackingEnabled &&
-                plugin.getSystemManager().isBarrelBlock(e.getItemInHand().getType(), e.getPlayer().getWorld())){
+        } else if (plugin.getSettings().barrelsStackingEnabled &&
+                plugin.getSystemManager().isBarrelBlock(e.getItemInHand().getType(), e.getPlayer().getWorld())) {
             placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
         }
         Executor.sync(() -> placers.remove(e.getBlockPlaced().getLocation()), 2L);
     }
 
     @EventHandler
-    public void onSpawnerStack(SpawnerStackEvent e){
-        if(placers.containsKey(e.getTarget().getLocation())){
+    public void onSpawnerStack(SpawnerStackEvent e) {
+        if (placers.containsKey(e.getTarget().getLocation())) {
             Player placer = Bukkit.getPlayer(placers.get(e.getTarget().getLocation()));
-            if(placer == null)
+            if (placer == null)
                 return;
-            if(!plugin.getProviders().hasClaimAccess(placer, e.getSpawner().getLocation()))
+            if (!plugin.getProviders().hasClaimAccess(placer, e.getSpawner().getLocation()))
                 e.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onBarrelStack(BarrelStackEvent e){
-        if(placers.containsKey(e.getTarget().getLocation())){
+    public void onBarrelStack(BarrelStackEvent e) {
+        if (placers.containsKey(e.getTarget().getLocation())) {
             Player placer = Bukkit.getPlayer(placers.get(e.getTarget().getLocation()));
-            if(placer == null)
+            if (placer == null)
                 return;
-            if(!plugin.getProviders().hasClaimAccess(placer, e.getBarrel().getLocation()))
+            if (!plugin.getProviders().hasClaimAccess(placer, e.getBarrel().getLocation()))
                 e.setCancelled(true);
         }
     }
 
     @EventHandler
     @SuppressWarnings("all")
-    public void onInventoryOpen(InventoryOpenEvent e){
-        if(e.getInventory().getHolder() != null &&
-                e.getInventory().getHolder().getClass().toString().contains("ultimatestacker")){
-            try{
+    public void onInventoryOpen(InventoryOpenEvent e) {
+        if (e.getInventory().getHolder() != null &&
+                e.getInventory().getHolder().getClass().toString().contains("ultimatestacker")) {
+            try {
                 Class holderClass = e.getInventory().getHolder().getClass();
                 Method guiMethod = holderClass.getMethod("getGUI");
                 Object gui = guiMethod.invoke(e.getInventory().getHolder());
@@ -78,7 +77,7 @@ public final class NoClaimConflictListener implements Listener {
                 clickableFields.setAccessible(true);
                 ((Map) clickableFields.get(gui)).clear();
                 clickableFields.setAccessible(false);
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }

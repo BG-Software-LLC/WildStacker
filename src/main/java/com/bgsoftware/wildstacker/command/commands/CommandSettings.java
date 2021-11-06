@@ -43,7 +43,7 @@ public final class CommandSettings implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        if(!(sender instanceof Player)){
+        if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Only players can perform this command.");
             return;
         }

@@ -11,6 +11,7 @@ public interface StackedSnapshot {
 
     /**
      * Get spawner information for a location.
+     *
      * @param location The location to get info about.
      * @return Entry that contains the stack size and the type of the spawner.
      */
@@ -18,6 +19,7 @@ public interface StackedSnapshot {
 
     /**
      * Checks if a location has spawner data.
+     *
      * @param location The location to check.
      * @return True if location is a valid spawner, otherwise false.
      */
@@ -25,9 +27,9 @@ public interface StackedSnapshot {
 
     /**
      * Get barrel information for a location.
+     *
      * @param location The location to get info about.
      * @return Entry that contains the stack size and the type of the barrel.
-     *
      * @deprecated See getStackedBarrelItem(Location)
      */
     @Deprecated
@@ -35,6 +37,7 @@ public interface StackedSnapshot {
 
     /**
      * Get barrel information for a location.
+     *
      * @param location The location to get info about.
      * @return Entry that contains the stack size and the item of the barrel.
      */
@@ -42,6 +45,7 @@ public interface StackedSnapshot {
 
     /**
      * Checks if a location has barrel data.
+     *
      * @param location The location to check.
      * @return True if location is a valid barrel, otherwise false.
      */
@@ -49,20 +53,30 @@ public interface StackedSnapshot {
 
     /**
      * Get all spawners inside the chunk.
+     *
      * @return A map with locations and entries about all spawners.
      */
     Map<Location, Map.Entry<Integer, EntityType>> getAllSpawners();
 
     /**
      * Get all barrels inside the chunk.
+     *
      * @return A map with locations and entries about all barrels.
      */
     Map<Location, Map.Entry<Integer, Material>> getAllBarrels();
 
     /**
      * Get all barrels inside the chunk.
+     *
      * @return A map with locations and entries about all barrels.
      */
     Map<Location, Map.Entry<Integer, ItemStack>> getAllBarrelsItems();
+
+    enum SnapshotOptions {
+
+        LOAD_SPAWNERS,
+        LOAD_BARRELS
+
+    }
 
 }

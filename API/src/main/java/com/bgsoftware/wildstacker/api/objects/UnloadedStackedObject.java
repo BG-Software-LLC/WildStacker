@@ -17,14 +17,16 @@ public interface UnloadedStackedObject {
 
     /**
      * Get the stack amount
+     *
      * @return stack amount
      */
     int getStackAmount();
 
     /**
      * Update the stack amount
+     *
      * @param stackAmount a new stack amount
-     * @param updateName should the name of the object get updated or not
+     * @param updateName  should the name of the object get updated or not
      */
     void setStackAmount(int stackAmount, boolean updateName);
 

@@ -8,45 +8,45 @@ public final class NameBuilder<T> {
 
     private NamePart<T> namePart;
 
-    public NameBuilder(String pattern, NamePlaceholder<T>... placeholders){
+    public NameBuilder(String pattern, NamePlaceholder<T>... placeholders) {
         String[] words = pattern.split(" ");
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        for(String word : words){
+        for (String word : words) {
             stringBuilder.append(" ");
             stringBuilder = handleWord(word, stringBuilder, placeholders);
         }
 
-        if(namePart == null)
+        if (namePart == null)
             namePart = new StaticPart<>(stringBuilder.toString());
         else
             namePart.addPart(new StaticPart<>(stringBuilder.toString()));
     }
 
-    public String build(T argument){
+    public String build(T argument) {
         return namePart.build(argument);
     }
 
-    private StringBuilder handleWord(String word, StringBuilder stringBuilder, NamePlaceholder<T>... placeholders){
+    private StringBuilder handleWord(String word, StringBuilder stringBuilder, NamePlaceholder<T>... placeholders) {
         Optional<NamePlaceholder<T>> placeholder = Arrays.stream(placeholders)
                 .filter(_placeholder -> word.contains(_placeholder.getPlaceholder()))
                 .findFirst();
 
-        if(placeholder.isPresent()){
+        if (placeholder.isPresent()) {
             String rawPlaceholder = placeholder.get().getPlaceholder();
             int placeholderIndex = word.indexOf(rawPlaceholder);
 
             // Add string before the placeholder
-            if(placeholderIndex > 0){
+            if (placeholderIndex > 0) {
                 stringBuilder.append(word, 0, placeholderIndex);
-                if(namePart == null)
+                if (namePart == null)
                     namePart = new StaticPart<>(stringBuilder.length() != 0 ? stringBuilder.substring(1) : stringBuilder.toString());
                 else
                     namePart.addPart(new StaticPart<>(stringBuilder.toString()));
             }
 
-            if(namePart == null)
+            if (namePart == null)
                 namePart = new PlaceholderPart<>(placeholder.get().getParser());
             else
                 namePart.addPart(new PlaceholderPart<>(placeholder.get().getParser()));
@@ -54,11 +54,10 @@ public final class NameBuilder<T> {
             stringBuilder = new StringBuilder();
 
             // Add string after the placeholder
-            if(placeholderIndex + rawPlaceholder.length() < word.length()){
+            if (placeholderIndex + rawPlaceholder.length() < word.length()) {
                 stringBuilder = handleWord(word.substring(placeholderIndex + rawPlaceholder.length()), stringBuilder, placeholders);
             }
-        }
-        else{
+        } else {
             stringBuilder.append(word);
         }
 
@@ -71,11 +70,10 @@ public final class NameBuilder<T> {
 
         abstract String build(T argument);
 
-        void addPart(NamePart<T> nextPart){
-            if(this.nextPart == null) {
+        void addPart(NamePart<T> nextPart) {
+            if (this.nextPart == null) {
                 this.nextPart = nextPart;
-            }
-            else{
+            } else {
                 this.nextPart.addPart(nextPart);
             }
         }
@@ -86,7 +84,7 @@ public final class NameBuilder<T> {
 
         private final String value;
 
-        StaticPart(String value){
+        StaticPart(String value) {
             this.value = value;
         }
 
@@ -101,7 +99,7 @@ public final class NameBuilder<T> {
 
         private final Function<T, String> parser;
 
-        PlaceholderPart(Function<T, String> parser){
+        PlaceholderPart(Function<T, String> parser) {
             this.parser = parser;
         }
 

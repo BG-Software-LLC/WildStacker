@@ -12,13 +12,13 @@ public final class JobsHook {
 
     private static Plugin jobs;
 
-    public static void updateSpawnReason(LivingEntity livingEntity, SpawnCause spawnCause){
-        if(jobs != null && (spawnCause == SpawnCause.SPAWNER || spawnCause == SpawnCause.SPAWNER_EGG)){
+    public static void updateSpawnReason(LivingEntity livingEntity, SpawnCause spawnCause) {
+        if (jobs != null && (spawnCause == SpawnCause.SPAWNER || spawnCause == SpawnCause.SPAWNER_EGG)) {
             livingEntity.setMetadata(SPAWNER_KEY, new FixedMetadataValue(jobs, true));
         }
     }
 
-    public static void setEnabled(boolean enabled){
+    public static void setEnabled(boolean enabled) {
         jobs = enabled ? Bukkit.getPluginManager().getPlugin("Jobs") : null;
     }
 

@@ -12,6 +12,8 @@ public enum EntityFlag {
     BREEDABLE_AMOUNT(Integer.class),
     BYPASS_STACKING(Boolean.class),
     EXP_TO_DROP(Integer.class),
+    AVOID_ONE_SHOT(Boolean.class),
+    ATTACKED_ENTITY(Boolean.class),
 
     // Items related flags
     DROPPED_BY_PLAYER(Boolean.class),
@@ -19,7 +21,7 @@ public enum EntityFlag {
 
     private final Class<?> valueClass;
 
-    EntityFlag(Class<?> valueClass){
+    EntityFlag(Class<?> valueClass) {
         this.valueClass = valueClass;
     }
 

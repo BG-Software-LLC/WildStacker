@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'WildStacker'
-version = "3.6.0"
+version = "3.6.1"
 
 subprojects {
     apply plugin: 'java'
@@ -103,6 +103,8 @@ dependencies {
     compileOnly 'me.jet315:JetsMinions:latest'
     compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
     compileOnly 'me.derpy:MoreBosses:latest'
+    compileOnly 'me.hexedhero:PinataParty:latest'
+    compileOnly 'com.kirelcodes:MiniaturePets:2.6.0'
 }
 
 jar {
@@ -115,7 +117,7 @@ jar {
 
 processResources {
     outputs.upToDateWhen {false}
-    String versionNumber = System.getenv("BUILD_NUMBER") == null ? version : version + "-DEVb" + System.getenv("BUILD_NUMBER")
+    String versionNumber = System.getenv("BUILD_NUMBER") == null ? version : version + "." + System.getenv("BUILD_NUMBER")
     eachFile { details ->
         if (details.name.contentEquals('plugin.yml')) {
             filter { String line ->

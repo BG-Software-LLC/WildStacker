@@ -12,18 +12,22 @@ public final class KillTask extends BukkitRunnable {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static BukkitTask task = null;
-    private long timeLeft;
+    private static long timeLeft;
 
-    private KillTask(){
+    private KillTask() {
         timeLeft = plugin.getSettings().killTaskInterval;
-        task = runTaskTimer(plugin, 20L,20L);
+        task = runTaskTimer(plugin, 20L, 20L);
     }
 
-    public static void start(){
-        if(task != null)
+    public static void start() {
+        if (task != null)
             task.cancel();
 
         new KillTask();
+    }
+
+    public static long getTimeLeft() {
+        return timeLeft;
     }
 
     @Override
@@ -32,7 +36,7 @@ public final class KillTask extends BukkitRunnable {
             if (timeLeft == 0) {
                 if (Bukkit.getOnlinePlayers().size() > 0) {
                     plugin.getSystemManager().performKillAll(true);
-                    for(Player player : Bukkit.getOnlinePlayers())
+                    for (Player player : Bukkit.getOnlinePlayers())
                         Locale.KILL_ALL_ANNOUNCEMENT.send(player);
                 }
 
@@ -41,7 +45,7 @@ public final class KillTask extends BukkitRunnable {
             }
 
             if (timeLeft == 10 || timeLeft == 30 || timeLeft == 60) {
-                for(Player player : Bukkit.getOnlinePlayers())
+                for (Player player : Bukkit.getOnlinePlayers())
                     Locale.KILL_ALL_REMAINING_TIME.send(player, timeLeft);
             }
 

@@ -26,26 +26,26 @@ public final class BucketsListener implements Listener {
 
     private final WildStackerPlugin plugin;
 
-    public BucketsListener(WildStackerPlugin plugin){
+    public BucketsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onBucketUse(PlayerBucketFillEvent e){
-        if(plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+    public void onBucketUse(PlayerBucketFillEvent e) {
+        if (plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTask(plugin, () -> ItemUtils.stackBucket(e.getItemStack(), e.getPlayer().getInventory()));
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onBucketUse(PlayerBucketEmptyEvent e){
+    public void onBucketUse(PlayerBucketEmptyEvent e) {
         PlayerInventory inventory = e.getPlayer().getInventory();
         ItemStack itemInHand = inventory.getItem(ItemUtils.getHeldItemSlot(inventory, e.getBucket()));
 
-        if(itemInHand.getAmount() > 1){
+        if (itemInHand.getAmount() > 1) {
             Executor.sync(() -> {
                 int newHeldSlot = ItemUtils.getHeldItemSlot(inventory, Material.BUCKET);
-                if(newHeldSlot != -1){
+                if (newHeldSlot != -1) {
                     itemInHand.setAmount(itemInHand.getAmount() - 1);
                     inventory.setItem(newHeldSlot, itemInHand);
                     ItemUtils.addItem(new ItemStack(Material.BUCKET), inventory, e.getPlayer().getLocation());
@@ -55,23 +55,23 @@ public final class BucketsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent e){
-        if(!plugin.getSettings().bucketsStackerEnabled)
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (!plugin.getSettings().bucketsStackerEnabled)
             return;
 
         //Current Item - in slot, Cursor - holded item
-        if(e.getCurrentItem() == null || (e.getCurrentItem().getType() != Material.WATER_BUCKET && e.getCurrentItem().getType() != Material.LAVA_BUCKET))
+        if (e.getCurrentItem() == null || (e.getCurrentItem().getType() != Material.WATER_BUCKET && e.getCurrentItem().getType() != Material.LAVA_BUCKET))
             return;
 
-        if(e.getView().getTopInventory().getType() != InventoryType.CHEST)
+        if (e.getView().getTopInventory().getType() != InventoryType.CHEST)
             return;
 
         ItemStack cursor, clicked;
         int maxStack = plugin.getSettings().bucketsMaxStack;
 
-        switch (e.getClick()){
+        switch (e.getClick()) {
             case MIDDLE:
-                if(e.getWhoClicked().getGameMode() != GameMode.CREATIVE)
+                if (e.getWhoClicked().getGameMode() != GameMode.CREATIVE)
                     return;
 
                 clicked = e.getCurrentItem().clone();
@@ -81,21 +81,21 @@ public final class BucketsListener implements Listener {
                 break;
             case RIGHT:
             case LEFT:
-                if(e.getCursor() == null || (e.getCursor().getType() != Material.WATER_BUCKET && e.getCursor().getType() != Material.LAVA_BUCKET) ||
+                if (e.getCursor() == null || (e.getCursor().getType() != Material.WATER_BUCKET && e.getCursor().getType() != Material.LAVA_BUCKET) ||
                         !e.getCursor().isSimilar(e.getCurrentItem()))
                     return;
 
                 e.setCancelled(true);
 
-                if(e.getCurrentItem().getAmount() >= maxStack)
+                if (e.getCurrentItem().getAmount() >= maxStack)
                     return;
 
                 int toAdd = maxStack - e.getCurrentItem().getAmount();
 
-                if(toAdd > e.getCursor().getAmount())
+                if (toAdd > e.getCursor().getAmount())
                     toAdd = e.getCursor().getAmount();
 
-                if(e.getClick() == ClickType.RIGHT)
+                if (e.getClick() == ClickType.RIGHT)
                     toAdd = 1;
 
                 e.getCurrentItem().setAmount(e.getCurrentItem().getAmount() + toAdd);
@@ -117,18 +117,18 @@ public final class BucketsListener implements Listener {
                 return;
         }
 
-        for(HumanEntity humanEntity : e.getInventory().getViewers()) {
+        for (HumanEntity humanEntity : e.getInventory().getViewers()) {
             if (humanEntity instanceof Player)
                 ((Player) humanEntity).updateInventory();
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void g(PlayerItemConsumeEvent e){
-        if(!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET)
+    public void g(PlayerItemConsumeEvent e) {
+        if (!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET)
             return;
 
-        if(e.getItem().getAmount() > 1)
+        if (e.getItem().getAmount() > 1)
             e.getPlayer().getInventory().addItem(new ItemStack(Material.BUCKET));
     }
 

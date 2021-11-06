@@ -27,6 +27,7 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner>, Upgradea
 
     /**
      * Set an entity to be linked into this spawner.
+     *
      * @param linkedEntity an entity to link
      */
     void setLinkedEntity(LivingEntity linkedEntity);
@@ -43,6 +44,7 @@ public interface StackedSpawner extends StackedObject<CreatureSpawner>, Upgradea
 
     /**
      * Get the drop item of the spawner.
+     *
      * @param amount the amount of the item to drop.
      */
     ItemStack getDropItem(int amount);

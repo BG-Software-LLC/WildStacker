@@ -10,18 +10,18 @@ public final class EditorSpawnersMenu extends EditorMenu {
 
     private final static EditorSpawnersMenu NULL_HOLDER = new EditorSpawnersMenu(null);
 
-    private final static String[] ignorePaths = new String[] { "spawners.break-menu",
+    private final static String[] ignorePaths = new String[]{"spawners.break-menu",
             "spawners.break-charge", "spawners.place-charge", "spawners.spawner-upgrades",
-            "spawners.spawners-override.spawn-conditions" };
+            "spawners.spawners-override.spawn-conditions"};
 
-    private final static String[] sectionsPaths = new String[] { "merge-radius", "limits" };
+    private final static String[] sectionsPaths = new String[]{"merge-radius", "limits"};
 
-    private EditorSpawnersMenu(Inventory inventory){
+    private EditorSpawnersMenu(Inventory inventory) {
         super(inventory, "SPAWNERS_SLOT_", "spawnersEditor");
     }
 
-    public static void open(Player player){
-        if(Bukkit.isPrimaryThread()){
+    public static void open(Player player) {
+        if (Bukkit.isPrimaryThread()) {
             Executor.async(() -> open(player));
             return;
         }

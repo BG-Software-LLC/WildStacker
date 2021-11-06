@@ -13,10 +13,10 @@ import org.bukkit.event.Listener;
 public final class EchoPetListener implements Listener {
 
     @EventHandler
-    public void onEchoPetSpawn(PetPreSpawnEvent e){
+    public void onEchoPetSpawn(PetPreSpawnEvent e) {
         Executor.sync(() -> {
             Entity entity = e.getPet().getEntityPet().getBukkitEntity();
-            if(EntityUtils.isStackable(entity))
+            if (EntityUtils.isStackable(entity))
                 WStackedEntity.of(entity).setSpawnCause(SpawnCause.ECHO_PET);
         }, 1L);
     }

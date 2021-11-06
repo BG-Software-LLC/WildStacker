@@ -26,7 +26,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
     private boolean closeFlag = false;
 
-    private BarrelsPlaceMenu(Location location, ItemStack barrelItem){
+    private BarrelsPlaceMenu(Location location, ItemStack barrelItem) {
         super("barrelsPlace");
         this.location = location;
         this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().barrelsPlaceInventoryTitle
@@ -35,17 +35,23 @@ public final class BarrelsPlaceMenu extends WildMenu {
         this.cancelOnClick = false;
     }
 
+    public static void open(Player player, StackedBarrel stackedBarrel) {
+        BarrelsPlaceMenu barrelsPlaceMenu = new BarrelsPlaceMenu(stackedBarrel.getLocation(), stackedBarrel.getBarrelItem(1));
+        ((WStackedBarrel) stackedBarrel).linkInventory(barrelsPlaceMenu.inventory);
+        player.openInventory(barrelsPlaceMenu.inventory);
+    }
+
     @Override
     public void onPlayerClick(InventoryClickEvent e) {
-        if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+        if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
             e.setCancelled(true);
             Locale.BARREL_NO_PERMISSION.send(e.getWhoClicked());
             Executor.sync(() -> e.getWhoClicked().closeInventory(), 1L);
             return;
         }
 
-        if(!plugin.getSystemManager().isStackedBarrel(location)){
+        if (!plugin.getSystemManager().isStackedBarrel(location)) {
             e.setCancelled(true);
             Executor.sync(() -> e.getWhoClicked().closeInventory(), 1L);
             return;
@@ -53,7 +59,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
         ItemStack barrelItem;
 
-        switch (e.getAction()){
+        switch (e.getAction()) {
             case HOTBAR_SWAP:
                 barrelItem = e.getWhoClicked().getInventory().getItem(e.getHotbarButton());
                 break;
@@ -73,17 +79,17 @@ public final class BarrelsPlaceMenu extends WildMenu {
                 return;
         }
 
-        if(barrelItem == null)
+        if (barrelItem == null)
             return;
 
-        if(!isSimilar(barrelItem)){
+        if (!isSimilar(barrelItem)) {
             e.setCancelled(true);
         }
 
         Executor.sync(() -> {
             if (closeFlag) {
-                for(ItemStack itemStack : e.getWhoClicked().getInventory().getContents()){
-                    if(barrelItem.equals(itemStack))
+                for (ItemStack itemStack : e.getWhoClicked().getInventory().getContents()) {
+                    if (barrelItem.equals(itemStack))
                         return;
                 }
 
@@ -101,40 +107,38 @@ public final class BarrelsPlaceMenu extends WildMenu {
         int amount = 0;
         boolean dropAll = false;
 
-        if(!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)){
+        if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
+                !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
             Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
             dropAll = true;
         }
 
-        if(!plugin.getSystemManager().isStackedBarrel(location))
+        if (!plugin.getSystemManager().isStackedBarrel(location))
             dropAll = true;
 
-        for(ItemStack itemStack : e.getInventory().getContents()){
-            if(isSimilar(itemStack) && !dropAll) {
+        for (ItemStack itemStack : e.getInventory().getContents()) {
+            if (isSimilar(itemStack) && !dropAll) {
                 amount += (itemStack.getAmount() * ItemUtils.getSpawnerItemAmount(itemStack));
-            }
-            else if(itemStack != null && itemStack.getType() != Material.AIR) {
+            } else if (itemStack != null && itemStack.getType() != Material.AIR) {
                 ItemUtils.addItem(itemStack, e.getPlayer().getInventory(), stackedBarrel.getLocation());
             }
         }
 
-        if(amount != 0) {
+        if (amount != 0) {
             int limit = stackedBarrel.getStackLimit();
-            int newStackAmount = stackedBarrel.getStackAmount() + amount;
+            int currentStackAmount = stackedBarrel.getStackAmount();
+            int increaseStackAmount = Math.min(amount, limit - currentStackAmount);
 
-            if(stackedBarrel.getStackAmount() + amount > limit){
+            if (increaseStackAmount != amount) {
                 ItemStack toAdd = barrelItem.clone();
-                toAdd.setAmount(stackedBarrel.getStackAmount() + amount - limit);
+                toAdd.setAmount(amount - increaseStackAmount);
                 ItemUtils.addItem(toAdd, e.getPlayer().getInventory(), stackedBarrel.getLocation());
-                newStackAmount = limit;
             }
 
-            if(EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, newStackAmount - stackedBarrel.getStackAmount())){
-                stackedBarrel.setStackAmount(newStackAmount, true);
-                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), stackedBarrel.getStackAmount());
-            }
-            else{
+            if (EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, increaseStackAmount)) {
+                int newStackAmount = stackedBarrel.increaseStackAmount(increaseStackAmount, true);
+                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), newStackAmount);
+            } else {
                 ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedBarrel.getLocation());
             }
         }
@@ -149,16 +153,10 @@ public final class BarrelsPlaceMenu extends WildMenu {
         return inventory;
     }
 
-    private boolean isSimilar(ItemStack barrelItem){
+    private boolean isSimilar(ItemStack barrelItem) {
         return barrelItem != null && !SlimefunHook.isSlimefunItem(barrelItem) &&
                 this.barrelItem.getType() == barrelItem.getType() &&
                 (!ServerVersion.isLegacy() || this.barrelItem.getDurability() == barrelItem.getDurability());
-    }
-
-    public static void open(Player player, StackedBarrel stackedBarrel){
-        BarrelsPlaceMenu barrelsPlaceMenu = new BarrelsPlaceMenu(stackedBarrel.getLocation(), stackedBarrel.getBarrelItem(1));
-        ((WStackedBarrel) stackedBarrel).linkInventory(barrelsPlaceMenu.inventory);
-        player.openInventory(barrelsPlaceMenu.inventory);
     }
 
 }

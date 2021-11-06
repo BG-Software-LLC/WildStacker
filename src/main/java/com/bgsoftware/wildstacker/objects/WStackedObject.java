@@ -10,7 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 @SuppressWarnings("WeakerAccess")
@@ -19,55 +19,66 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     protected static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     protected final T object;
-    private int stackAmount;
+    private final AtomicInteger stackAmount = new AtomicInteger(0);
+
     protected boolean saveData = true;
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private String cachedDisplayName = "";
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
-        this.stackAmount = stackAmount;
+        this.stackAmount.set(stackAmount);
     }
 
-    @Override
-    public int getStackAmount(){
-        try {
-            lock.readLock().lock();
-            return Math.max(stackAmount, 0);
-        }finally {
-            lock.readLock().unlock();
-        }
+    public void onStackAmountChange(int newStackAmount) {
+        if (saveData)
+            plugin.getSystemManager().markToBeSaved(this);
     }
 
-    @Override
-    public void setStackAmount(int stackAmount, boolean updateName){
-        try {
-            lock.writeLock().lock();
-            this.stackAmount = stackAmount;
-        }finally {
-            lock.writeLock().unlock();
-        }
-
-        if(updateName)
-            updateName();
-    }
-
-    public void setSaveData(boolean saveData){
+    public void setSaveData(boolean saveData) {
         this.saveData = saveData && isCached();
     }
 
-    public String getCachedDisplayName(){
+    public String getCachedDisplayName() {
         return cachedDisplayName;
     }
 
-    public void setCachedDisplayName(String cachedDisplayName){
+    public void setCachedDisplayName(String cachedDisplayName) {
         this.cachedDisplayName = cachedDisplayName;
     }
 
     @Override
     public abstract Location getLocation();
 
-    public abstract Chunk getChunk();
+    @Override
+    public int getStackAmount() {
+        return Math.max(stackAmount.get(), 0);
+    }
+
+    @Override
+    public void setStackAmount(int stackAmount, boolean updateName) {
+        this.stackAmount.set(stackAmount);
+        if (updateName)
+            updateName();
+
+        onStackAmountChange(stackAmount);
+    }
+
+    @Override
+    public int increaseStackAmount(int stackAmount, boolean updateName) {
+        int newStackAmount = this.stackAmount.addAndGet(stackAmount);
+
+        if (updateName)
+            updateName();
+
+        onStackAmountChange(newStackAmount);
+
+        return newStackAmount;
+    }
+
+    @Override
+    public int decreaseStackAmount(int stackAmount, boolean updateName) {
+        return increaseStackAmount(-stackAmount, updateName);
+    }
 
     @Override
     public abstract int getStackLimit();
@@ -85,7 +96,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract boolean isWorldDisabled();
 
     @Override
-    public boolean isCached(){
+    public boolean isCached() {
         return !isBlacklisted() && isWhitelisted() && !isWorldDisabled();
     }
 
@@ -96,55 +107,59 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract void updateName();
 
     @Override
-    public boolean canStackInto(StackedObject stackedObject){
+    public boolean canStackInto(StackedObject stackedObject) {
         new UnsupportedOperationException("canStackInto method is no longer supported.").printStackTrace();
         return runStackCheck(stackedObject) == StackCheckResult.SUCCESS;
     }
 
     @Override
-    public StackCheckResult runStackCheck(StackedObject stackedObject){
-        if(equals(stackedObject) || !isSimilar(stackedObject))
-            return StackCheckResult.NOT_SIMILAR;
-
-        if(!isWhitelisted())
+    public StackCheckResult canGetStacked(int amountToAdd) {
+        if (!isWhitelisted())
             return StackCheckResult.NOT_WHITELISTED;
 
-        if(isBlacklisted())
+        if (isBlacklisted())
             return StackCheckResult.BLACKLISTED;
 
-        if(isWorldDisabled())
+        if (isWorldDisabled())
             return StackCheckResult.DISABLED_WORLD;
 
-//        Removed chunk loading check, as stacked objects in unloaded chunks are not cached anymore.
-//        if(!GeneralUtils.isChunkLoaded(getLocation()))
-//            return StackCheckResult.CHUNK_NOT_LOADED;
+        int newStackAmount = this.getStackAmount() + amountToAdd;
 
-        if(!stackedObject.isWhitelisted())
-            return StackCheckResult.TARGET_NOT_WHITELISTED;
-
-        if(stackedObject.isBlacklisted())
-            return StackCheckResult.TARGET_BLACKLISTED;
-
-        if(stackedObject.isWorldDisabled())
-            return StackCheckResult.TARGET_DISABLED_WORLD;
-
-//        Removed chunk loading check, as stacked objects in unloaded chunks are not cached anymore.
-//        if(!GeneralUtils.isChunkLoaded(stackedObject.getLocation()))
-//            return StackCheckResult.TARGET_CHUNK_NOT_LOADED;
-
-        int newStackAmount = this.getStackAmount() + stackedObject.getStackAmount();
-
-        if(newStackAmount <= 0 || getStackLimit() < newStackAmount)
+        if (newStackAmount <= 0 || getStackLimit() < newStackAmount)
             return StackCheckResult.LIMIT_EXCEEDED;
 
         return StackCheckResult.SUCCESS;
     }
 
     @Override
+    public StackCheckResult runStackCheck(StackedObject stackedObject) {
+        if (equals(stackedObject) || !isSimilar(stackedObject))
+            return StackCheckResult.NOT_SIMILAR;
+
+        StackCheckResult canGetStackedResult = this.canGetStacked(0);
+
+        if (canGetStackedResult != StackCheckResult.SUCCESS)
+            return canGetStackedResult;
+
+        StackCheckResult targetCanGetStackedResult = stackedObject.canGetStacked(getStackAmount());
+
+        switch (targetCanGetStackedResult) {
+            case NOT_WHITELISTED:
+                return StackCheckResult.TARGET_NOT_WHITELISTED;
+            case BLACKLISTED:
+                return StackCheckResult.TARGET_BLACKLISTED;
+            case DISABLED_WORLD:
+                return StackCheckResult.TARGET_DISABLED_WORLD;
+        }
+
+        return targetCanGetStackedResult;
+    }
+
+    @Override
     @Deprecated
     public void runStackAsync(Consumer<Optional<T>> result) {
         Optional<T> stackResult = runStack();
-        if(result != null)
+        if (result != null)
             result.accept(stackResult);
     }
 
@@ -152,7 +167,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract Optional<T> runStack();
 
     @Override
-    public T tryStack(){
+    public T tryStack() {
         new UnsupportedOperationException("tryStack method is no longer supported.").printStackTrace();
         return runStack().orElse(null);
     }
@@ -161,13 +176,13 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract StackResult runStack(StackedObject stackedObject);
 
     @Override
-    public boolean tryStackInto(StackedObject stackedObject){
+    public boolean tryStackInto(StackedObject stackedObject) {
         new UnsupportedOperationException("tryStackInto method is no longer supported.").printStackTrace();
         return runStack(stackedObject) == StackResult.SUCCESS;
     }
 
     @Override
-    public UnstackResult runUnstack(int amount){
+    public UnstackResult runUnstack(int amount) {
         return runUnstack(amount, null);
     }
 
@@ -175,7 +190,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
     public abstract UnstackResult runUnstack(int amount, Entity entity);
 
     @Override
-    public boolean tryUnstack(int amount){
+    public boolean tryUnstack(int amount) {
         new UnsupportedOperationException("tryUnstack method is no longer supported.").printStackTrace();
         return runUnstack(amount, null) == UnstackResult.SUCCESS;
     }
@@ -185,5 +200,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     @Override
     public abstract void spawnStackParticle(boolean checkEnabled);
+
+    public abstract Chunk getChunk();
 
 }

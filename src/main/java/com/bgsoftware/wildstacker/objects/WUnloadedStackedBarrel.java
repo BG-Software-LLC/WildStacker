@@ -13,11 +13,11 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
 
     private final ItemStack barrelItem;
 
-    public WUnloadedStackedBarrel(StackedBarrel stackedBarrel){
+    public WUnloadedStackedBarrel(StackedBarrel stackedBarrel) {
         this(stackedBarrel.getLocation(), stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1));
     }
 
-    public WUnloadedStackedBarrel(Location location, int stackAmount, ItemStack barrelItem){
+    public WUnloadedStackedBarrel(Location location, int stackAmount, ItemStack barrelItem) {
         super(location, stackAmount);
         this.barrelItem = barrelItem;
     }
@@ -33,7 +33,7 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
     public void remove() {
         Location location = getLocation();
         Map<Location, UnloadedStackedBarrel> cachedBarrels = plugin.getDataHandler().CACHED_BARRELS_RAW.get(new ChunkPosition(location));
-        if(cachedBarrels != null)
+        if (cachedBarrels != null)
             cachedBarrels.remove(location);
 
         Query.BARREL_DELETE.getStatementHolder()

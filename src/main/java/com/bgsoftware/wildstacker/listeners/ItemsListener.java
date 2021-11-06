@@ -17,15 +17,15 @@ import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
-import org.bukkit.Sound;
-import org.bukkit.block.Block;
+import org.bukkit.block.Hopper;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -36,8 +36,11 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,32 +56,33 @@ public final class ItemsListener implements Listener {
     public ItemsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
 
-        if(ServerVersion.isAtLeast(ServerVersion.v1_13))
+        if (ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteListener(plugin), plugin);
-        if(ServerVersion.isAtLeast(ServerVersion.v1_8))
+        if (ServerVersion.isAtLeast(ServerVersion.v1_8))
             plugin.getServer().getPluginManager().registerEvents(new MergeListener(plugin), plugin);
 
-        try{
+        try {
             Class.forName("org.bukkit.event.block.BlockDropItemEvent");
             plugin.getServer().getPluginManager().registerEvents(new BlockDropItemListener(plugin), plugin);
-        }catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onItemSpawn(ItemSpawnEvent e){
-        if(!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSAdapter().isDroppedItem(e.getEntity()))
+    public void onItemSpawn(ItemSpawnEvent e) {
+        if (!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSAdapter().isDroppedItem(e.getEntity()))
             return;
 
         StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
 
-        if(!stackedItem.isCached())
+        if (!stackedItem.isCached())
             return;
 
         EntitiesGetter.handleEntitySpawn(e.getEntity());
 
         int limit = stackedItem.getStackLimit();
 
-        if(stackedItem.getStackAmount() > limit){
+        if (stackedItem.getStackAmount() > limit) {
             ItemStack cloned = stackedItem.getItemStack().clone();
             cloned.setAmount(cloned.getAmount() - limit);
             stackedItem.setStackAmount(limit, true);
@@ -87,31 +91,40 @@ public final class ItemsListener implements Listener {
         }
 
         stackedItem.runStackAsync(optionalItem -> {
-            if(optionalItem.isPresent())
+            if (optionalItem.isPresent())
                 return;
 
             Executor.sync(() -> {
-                if(EntityStorage.hasMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER))
+                if (EntityStorage.hasMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER))
                     EntityStorage.removeMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER);
-                else if(isChunkLimit(e.getLocation().getChunk()))
+                else if (isChunkLimit(e.getLocation().getChunk()))
                     stackedItem.remove();
             });
         });
     }
 
+    @EventHandler
+    public void g(PlayerInteractEvent e){
+        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
+            for(Entity entity : e.getPlayer().getNearbyEntities(5, 5, 5)){
+                if(entity instanceof Zombie)
+                    ((Zombie) entity).setCanPickupItems(true);
+            }
+        }
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerItemDrop(PlayerDropItemEvent e){
+    public void onPlayerItemDrop(PlayerDropItemEvent e) {
         EntityStorage.setMetadata(e.getItemDrop(), EntityFlag.DROPPED_BY_PLAYER, true);
     }
 
     @EventHandler
-    public void onEggLay(EggLayEvent e){
-        if(!plugin.getSettings().eggLayMultiply || !EntityUtils.isStackable(e.getChicken()))
+    public void onEggLay(EggLayEvent e) {
+        if (!plugin.getSettings().eggLayMultiply || !EntityUtils.isStackable(e.getChicken()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getChicken());
-        if(stackedEntity.getStackAmount() > 1) {
+        if (stackedEntity.getStackAmount() > 1) {
             ItemStack eggItem = e.getEgg().getItemStack();
             eggItem.setAmount(stackedEntity.getStackAmount());
             e.getEgg().setItemStack(eggItem);
@@ -120,8 +133,8 @@ public final class ItemsListener implements Listener {
 
     //This method will be fired even if stacking-drops is disabled.
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onItemDespawn(ItemDespawnEvent e){
-        if(ItemUtils.isStackable(e.getEntity()))
+    public void onItemDespawn(ItemDespawnEvent e) {
+        if (ItemUtils.isStackable(e.getEntity()))
             WStackedItem.of(e.getEntity()).remove();
     }
 
@@ -130,7 +143,7 @@ public final class ItemsListener implements Listener {
         StackedItem stackedItem = e.getItem();
         Item item = stackedItem.getItem();
 
-        if(EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)){
+        if (EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)) {
             EntityStorage.removeMetadata(item, EntityFlag.RECENTLY_PICKED_UP);
             stackedItem.remove();
 
@@ -140,69 +153,75 @@ public final class ItemsListener implements Listener {
         }
 
         //Should run only if the item is 1 (stacked item)
-        if(plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
+        if (plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
                 (plugin.getSettings().bucketsStackerEnabled && e.getItem().getItemStack().getType().name().contains("BUCKET")))) {
             e.setCancelled(true);
 
             //Causes too many issues
-            if(e.getEntityType().name().equals("DOLPHIN"))
+            if (e.getEntityType().name().equals("DOLPHIN"))
                 return;
 
             int stackAmount = stackedItem.getStackAmount();
 
-            if(e.getInventory() != null) {
-                // For no reason, villagers pickup the item and then call the event.
-                // Therefore, even if it's cancelled, the item is still in their inventory.
-                if(e.getEntityType() == EntityType.VILLAGER) {
-                    e.getInventory().removeItem(stackedItem.getItemStack());
+            if (plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)) {
+                if (stackAmount <= 1) {
+                    stackedItem.remove();
+                } else {
+                    stackedItem.decreaseStackAmount(1, true);
                 }
+            } else if (e.getInventory() != null) {
+                ItemStack rawAddedItem = item.getItemStack();
+
+                // The item is already added by the NMS code in case of villagers.
+                // Therefore, we need to remove it.
+                if (e.getEntityType() == EntityType.VILLAGER)
+                    e.getInventory().removeItem(rawAddedItem);
+
+                // In some versions of Paper, when the event is cancelled, items are restored to their original state.
+                // Therefore, we take a snapshot of the original contents so we can add items again if it occurs.
+                ItemStack[] originalContentsSnapshot = e.getInventory().getContents();
 
                 stackedItem.giveItemStack(e.getInventory());
-            }
 
-            else if(EntityTypes.fromEntity(e.getEntity()) == EntityTypes.PIGLIN &&
-                    plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)){
+                if (!(e.getInventory() instanceof PlayerInventory)) {
+                    ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(e.getInventory().getContents());
+
+                    // Checks for reverting of items.
+                    Executor.runAtEndOfTick(() -> {
+                        ItemStack[] currentContentsSnapshot = e.getInventory().getContents();
+                        if (Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)) {
+                            // Inventory was restored, we should load it again with all the new items.
+                            e.getInventory().setContents(adjustedContentsSnapshot);
+                        }
+                    });
+                }
+            } else if (plugin.getNMSAdapter().handleEquipmentPickup(e.getEntity(), item)) {
                 if(stackAmount <= 1){
                     stackedItem.remove();
                 }
-                else{
-                    stackedItem.setStackAmount(stackAmount - 1, true);
+                else {
+                    stackedItem.decreaseStackAmount(1, true);
                 }
-            }
-
-            else{
+            } else {
                 ItemStack itemStack = stackedItem.getItemStack();
                 int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
 
-                if(itemStack.getAmount() > maxStackSize)
+                if (itemStack.getAmount() > maxStackSize)
                     itemStack.setAmount(maxStackSize);
 
-                if(itemStack.getAmount() == stackedItem.getStackAmount()){
+                if (itemStack.getAmount() == stackedItem.getStackAmount()) {
                     stackedItem.remove();
-                }
-                else {
-                    stackedItem.setStackAmount(stackAmount - itemStack.getAmount(), true);
+                } else {
+                    stackedItem.decreaseStackAmount(itemStack.getAmount(), true);
                 }
 
                 setItemInHand(e.getEntity(), itemStack);
                 e.getEntity().getEquipment().setItemInHandDropChance(2.0f);
             }
 
-            if(stackAmount != stackedItem.getStackAmount()) {
-                if (e.getPlayer() != null && plugin.getSettings().itemsSoundEnabled) {
-                    Sound pickUpItem;
-
-                    //Different name on 1.12
-                    try {
-                        pickUpItem = Sound.valueOf("ITEM_PICKUP");
-                    } catch (IllegalArgumentException ex) {
-                        pickUpItem = Sound.valueOf("ENTITY_ITEM_PICKUP");
-                    }
-
-                    e.getPlayer().playSound(e.getPlayer().getLocation(), pickUpItem,
-                            plugin.getSettings().itemsSoundVolume, plugin.getSettings().itemsSoundPitch);
-                }
-
+            if (stackAmount != stackedItem.getStackAmount()) {
+                if (plugin.getSettings().itemsSoundEnabled)
+                    ItemUtils.playPickupSound(e.getEntity().getLocation());
                 //Pick up animation
                 plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), item);
             }
@@ -210,51 +229,46 @@ public final class ItemsListener implements Listener {
             if (stackedItem.getStackAmount() <= 0) {
                 item.setPickupDelay(5);
                 EntityStorage.setMetadata(item, EntityFlag.RECENTLY_PICKED_UP, true);
-
-                Executor.sync(() -> {
-                    e.getItem().remove();
-                    stackedItem.remove();
-                }, 2L);
             }
         }
     }
 
     //This method will be fired even if stacking-drops is disabled.
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryPickup(InventoryPickupItemEvent e){
-        if(!ItemUtils.isStackable(e.getItem()))
+    public void onInventoryPickup(InventoryPickupItemEvent e) {
+        if (!ItemUtils.isStackable(e.getItem()))
             return;
 
         StackedItem stackedItem = WStackedItem.of(e.getItem());
         if (stackedItem.getStackAmount() > 1) {
             e.setCancelled(true);
             stackedItem.giveItemStack(e.getInventory());
-            Block hopper = e.getItem().getLocation().subtract(0, 1, 0).getBlock();
-            hopper.getState().update();
+            InventoryHolder inventoryHolder = e.getInventory().getHolder();
+            if(inventoryHolder instanceof Hopper)
+                ((Hopper) inventoryHolder).getBlock().getState().update();
         }
     }
 
     @EventHandler
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e){
-        if(!plugin.getSettings().itemsNamesToggleEnabled)
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
+        if (!plugin.getSettings().itemsNamesToggleEnabled)
             return;
 
         String commandSyntax = "/" + plugin.getSettings().itemsNamesToggleCommand;
 
-        if(!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
+        if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
             return;
 
         e.setCancelled(true);
 
-        if(!PluginHooks.isProtocolLibEnabled){
+        if (!PluginHooks.isProtocolLibEnabled) {
             e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
             return;
         }
 
-        if(plugin.getSystemManager().hasItemNamesToggledOff(e.getPlayer())){
+        if (plugin.getSystemManager().hasItemNamesToggledOff(e.getPlayer())) {
             Locale.ITEM_NAMES_TOGGLE_ON.send(e.getPlayer());
-        }
-        else{
+        } else {
             Locale.ITEM_NAMES_TOGGLE_OFF.send(e.getPlayer());
         }
 
@@ -262,52 +276,52 @@ public final class ItemsListener implements Listener {
 
         //Refresh item names
         EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
-                entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
+                        entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
                 .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
-    private boolean isChunkLimit(Chunk chunk){
+    private boolean isChunkLimit(Chunk chunk) {
         int chunkLimit = plugin.getSettings().itemsChunkLimit;
 
-        if(chunkLimit <= 0)
+        if (chunkLimit <= 0)
             return false;
 
         return (int) Arrays.stream(chunk.getEntities()).filter(entity -> entity instanceof Item).count() > chunkLimit;
     }
 
-    private void setItemInHand(LivingEntity entity, ItemStack itemStack){
-        try{
+    private void setItemInHand(LivingEntity entity, ItemStack itemStack) {
+        try {
             //noinspection JavaReflectionMemberAccess
             EntityEquipment.class.getMethod("setItemInMainHand", ItemStack.class).invoke(entity.getEquipment(), itemStack);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             entity.getEquipment().setItemInHand(itemStack);
         }
     }
 
-    private static class MergeListener implements Listener{
+    private static class MergeListener implements Listener {
 
         private final WildStackerPlugin plugin;
 
-        private MergeListener(WildStackerPlugin plugin){
+        private MergeListener(WildStackerPlugin plugin) {
             this.plugin = plugin;
         }
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-        public void onItemMerge(ItemMergeEvent e){
-            if(!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()) ||
+        public void onItemMerge(ItemMergeEvent e) {
+            if (!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()) ||
                     !ItemUtils.isStackable(e.getTarget()))
                 return;
 
             StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
 
-            if(!stackedItem.isCached())
+            if (!stackedItem.isCached())
                 return;
 
             //We are overriding the merge system
             e.setCancelled(true);
 
             Executor.sync(() -> {
-                if(e.getEntity().isValid() && e.getTarget().isValid()){
+                if (e.getEntity().isValid() && e.getTarget().isValid()) {
                     StackedItem targetItem = WStackedItem.ofBypass(e.getTarget());
                     stackedItem.runStackAsync(targetItem, null);
                 }
@@ -316,17 +330,17 @@ public final class ItemsListener implements Listener {
 
     }
 
-    private static class ScuteListener implements Listener{
+    private static class ScuteListener implements Listener {
 
         private final WildStackerPlugin plugin;
 
-        ScuteListener(WildStackerPlugin plugin){
+        ScuteListener(WildStackerPlugin plugin) {
             this.plugin = plugin;
         }
 
         @EventHandler
-        public void onScoutDrop(ScuteDropEvent e){
-            if(!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(e.getTurtle()))
+        public void onScoutDrop(ScuteDropEvent e) {
+            if (!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(e.getTurtle()))
                 return;
 
             StackedEntity stackedEntity = WStackedEntity.of(e.getTurtle());
@@ -337,35 +351,34 @@ public final class ItemsListener implements Listener {
 
     }
 
-    private static class BlockDropItemListener implements Listener{
+    private static class BlockDropItemListener implements Listener {
 
         private final WildStackerPlugin plugin;
 
-        private BlockDropItemListener(WildStackerPlugin plugin){
+        private BlockDropItemListener(WildStackerPlugin plugin) {
             this.plugin = plugin;
         }
 
         @EventHandler
-        public void onBlockDropItem(BlockDropItemEvent e){
-            if(!plugin.getSettings().itemsStackingEnabled)
+        public void onBlockDropItem(BlockDropItemEvent e) {
+            if (!plugin.getSettings().itemsStackingEnabled)
                 return;
 
             Map<ItemStack, Item> itemsMap = new HashMap<>();
             List<Item> itemsToRemove = new ArrayList<>();
 
-            for(Item item : e.getItems()){
+            for (Item item : e.getItems()) {
                 ItemStack clone = item.getItemStack().clone();
                 clone.setAmount(1);
 
                 StackedItem stackedItem = WStackedItem.ofBypass(item);
 
-                if(stackedItem.isCached()){
+                if (stackedItem.isCached()) {
                     Item currentItem = itemsMap.get(clone);
 
-                    if(currentItem == null){
+                    if (currentItem == null) {
                         itemsMap.put(clone, item);
-                    }
-                    else{
+                    } else {
                         itemsToRemove.add(item);
                         currentItem.getItemStack().setAmount(currentItem.getItemStack().getAmount() + item.getItemStack().getAmount());
                     }

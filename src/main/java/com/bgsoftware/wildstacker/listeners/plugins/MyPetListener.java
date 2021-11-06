@@ -20,14 +20,15 @@ public final class MyPetListener implements Listener {
     private static Method GET_ENTITY_METHOD = null;
 
     static {
-        try{
+        try {
             GET_ENTITY_METHOD = MyPet.class.getMethod("getEntity");
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
     }
 
     @EventHandler
-    public void onMyPetSpawn(MyPetCallEvent e){
-        if(!(e.getMyPet() instanceof MyPet))
+    public void onMyPetSpawn(MyPetCallEvent e) {
+        if (!(e.getMyPet() instanceof MyPet))
             return;
 
         MyPet myPet = (MyPet) e.getMyPet();
@@ -35,15 +36,15 @@ public final class MyPetListener implements Listener {
         Executor.sync(() -> {
             Entity entity;
 
-            try{
+            try {
                 //noinspection all
                 Optional<MyPetBukkitEntity> optional = (Optional<MyPetBukkitEntity>) GET_ENTITY_METHOD.invoke(myPet);
                 entity = optional.orNull();
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 entity = myPet.getEntity().orElse(null);
             }
 
-            if(entity != null && EntityUtils.isStackable(entity))
+            if (entity != null && EntityUtils.isStackable(entity))
                 WStackedEntity.of(entity).setSpawnCause(SpawnCause.MY_PET);
         }, 1L);
     }

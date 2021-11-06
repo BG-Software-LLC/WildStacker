@@ -49,6 +49,10 @@ kill-task:
   # When enabled, the plugin will remove all stacked-entities when clearlagg removes items & entities.
   # This feature will work if the interval is set to 0 - these are two different features!
   sync-clear-lagg: true
+  # Set a command for getting the next time until kill task will happen.
+  # You can split multiple commands using ",".
+  # You can set it to '' in order to disable this feature.
+  time-command: 'stacker timeleft'
   # All settings related to the kill-all task of entities.
   kill-entities:
     # A list of entities that will be cleared.
@@ -151,16 +155,8 @@ items:
     # What the toggle command will be?
     command: 'stacker names item'
 
-  # When enabled, a pickup sound will be played to the player.
-  pickup-sound:
-    # Should pickup-sound be enabled for stacked items?
-    enabled: true
-
-    # The volume of the sound.
-    volume: 1.0
-
-    # The pitch of the volume.
-    pitch: 1.0
+  # Should pickup-sound be enabled for stacked items?
+  pickup-sound: true
 
   # Should items with the max pickup delay get stacked (items that shouldn't be picked up in first place)
   max-pickup-delay: false
@@ -300,6 +296,7 @@ entities:
   stack-split:
     BEE_AGRO: false
     ENTITY_BREED: true
+    ENTER_VEHICLE: true
     IRON_GOLEM_AGRO: false
     MUSHROOM_SHEAR: true
     NAME_TAG: true
@@ -460,6 +457,11 @@ entities:
   - 'DROWNED'
   - 'CURED'
   - 'PIGLIN_ZOMBIFIED'
+
+  # Should entities fill vehicles entirely by stacked entities?
+  # When enabled, vehicles will be able to get filled with two entities.
+  # This can cause players to not be able to enter these vehicles.
+  entities-fill-vehicles: false
 
 # Here you can configurable all features related to stacked spawners.
 spawners:
@@ -763,6 +765,13 @@ spawners:
               - '&7Max Nearby Entities&f: &b%max-nearby-entities%'
               - '&7Required Player Range&f: &b%required-player-range%'
               - '&7Spawn Range&f: &b%spawn-range%'
+
+  # Should the plugin listen to Paper's PreSpawnerSpawnEvent and stack entities there?
+  # If this feature is enabled, entity attributes will not be checked, but only types will be considered for stacking.
+  listen-paper-pre-spawn-event: true
+
+  # When enabled, all spawners will have a custom name (even if not stacked)
+  unstacked-custom-name: false
 
 # Here you can configurable all features related to stacked barrels (aka stacked blocks).
 barrels:

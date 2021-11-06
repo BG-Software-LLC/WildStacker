@@ -15,13 +15,18 @@ public class BarrelPlaceInventoryEvent extends PlaceEvent {
 
     /**
      * The constructor for the event.
-     * @param player The player who placed the barrel.
-     * @param barrel The barrel object.
+     *
+     * @param player         The player who placed the barrel.
+     * @param barrel         The barrel object.
      * @param increaseAmount The amount that the barrel is increased by.
      */
-    public BarrelPlaceInventoryEvent(Player player, StackedBarrel barrel, int increaseAmount){
+    public BarrelPlaceInventoryEvent(Player player, StackedBarrel barrel, int increaseAmount) {
         super(player, barrel);
         this.increaseAmount = increaseAmount;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -40,10 +45,6 @@ public class BarrelPlaceInventoryEvent extends PlaceEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

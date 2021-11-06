@@ -19,14 +19,19 @@ public class SpawnerDropEvent extends Event {
 
     /**
      * The constructor for the event.
+     *
      * @param stackedSpawner The spawner that was broken.
-     * @param player The player that broke the spawner. May be null.
-     * @param itemStack The item that will be dropped.
+     * @param player         The player that broke the spawner. May be null.
+     * @param itemStack      The item that will be dropped.
      */
-    public SpawnerDropEvent(StackedSpawner stackedSpawner, Player player, ItemStack itemStack){
+    public SpawnerDropEvent(StackedSpawner stackedSpawner, Player player, ItemStack itemStack) {
         this.stackedSpawner = stackedSpawner;
         this.player = player;
         this.itemStack = itemStack;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
     }
 
     /**
@@ -60,10 +65,6 @@ public class SpawnerDropEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return HANDLERS;
-    }
-
-    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

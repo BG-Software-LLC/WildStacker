@@ -6,13 +6,13 @@ public final class SpawnerCachedData {
     private final String failureReason;
 
     public SpawnerCachedData(int minSpawnDelay, int maxSpawnDelay, int spawnCount, int maxNearbyEntities,
-                             int requiredPlayerRange, int spawnRange, int ticksLeft){
+                             int requiredPlayerRange, int spawnRange, int ticksLeft) {
         this(minSpawnDelay, maxSpawnDelay, spawnCount, maxNearbyEntities, requiredPlayerRange,
                 spawnRange, ticksLeft, "");
     }
 
     public SpawnerCachedData(int minSpawnDelay, int maxSpawnDelay, int spawnCount, int maxNearbyEntities,
-                             int requiredPlayerRange, int spawnRange, int ticksLeft, String failureReason){
+                             int requiredPlayerRange, int spawnRange, int ticksLeft, String failureReason) {
         this.minSpawnDelay = minSpawnDelay;
         this.maxSpawnDelay = maxSpawnDelay;
         this.spawnCount = spawnCount;

@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemStack;
 
 public final class WildToolsHook {
 
-    public static boolean hasSilkTouch(ItemStack itemStack){
-        if(PluginHooks.isWildToolsEnabled){
+    public static boolean hasSilkTouch(ItemStack itemStack) {
+        if (PluginHooks.isWildToolsEnabled) {
             Tool tool = WildToolsAPI.getTool(itemStack);
             return tool != null && tool.hasSilkTouch();
         }

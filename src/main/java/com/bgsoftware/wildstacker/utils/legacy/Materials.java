@@ -32,52 +32,31 @@ public enum Materials {
     MUSHROOM_STEW("MUSHROOM_SOUP"),
     LEAD("LEASH");
 
-    Materials(String bukkitType){
+    private final String bukkitType;
+    private final short bukkitData;
+
+    Materials(String bukkitType) {
         this(bukkitType, 0);
     }
-
-    Materials(String bukkitType, int bukkitData){
+    Materials(String bukkitType, int bukkitData) {
         this.bukkitType = bukkitType;
         this.bukkitData = (short) bukkitData;
     }
 
-    private final String bukkitType;
-    private final short bukkitData;
-
-    public Material toBukkitType(){
-        try {
-            try {
-                return Material.valueOf(bukkitType);
-            } catch (IllegalArgumentException ex) {
-                return Material.valueOf(name());
-            }
-        }catch(Exception ex){
-            throw new IllegalArgumentException("Couldn't cast " + name() + " into a bukkit enum. Contact Ome_R!");
-        }
+    public static Material getSpawnEgg(EntityType entityType) {
+        return Material.matchMaterial((ServerVersion.isLegacy() ? "MONSTER_EGG" : EntityTypes.fromName(entityType.name()) + "_SPAWN_EGG"));
     }
 
-    public ItemStack toBukkitItem(){
-        return toBukkitItem(1);
-    }
-
-    public ItemStack toBukkitItem(int amount){
-        return bukkitData == 0 ? new ItemStack(toBukkitType(), amount) : new ItemStack(toBukkitType(), amount, bukkitData);
-    }
-
-    public static Material getSpawnEgg(EntityType entityType){
-        return Material.matchMaterial((ServerVersion.isLegacy() ? "MONSTER_EGG" : EntityTypes.fromName(entityType.name())  + "_SPAWN_EGG"));
-    }
-
-    public static boolean isValidAndSpawnEgg(ItemStack itemStack){
+    public static boolean isValidAndSpawnEgg(ItemStack itemStack) {
         return !itemStack.getType().isBlock() && itemStack.getType().name().contains(ServerVersion.isLegacy() ? "MONSTER_EGG" : "SPAWN_EGG");
     }
 
-    public static ItemStack getWool(DyeColor dyeColor){
+    public static ItemStack getWool(DyeColor dyeColor) {
         return ServerVersion.isLegacy() ? new ItemStack(Material.matchMaterial("WOOL"), 1, dyeColor.getWoolData()) : new ItemStack(Material.matchMaterial(dyeColor.name() + "_WOOL"));
     }
 
-    public static boolean isFishBucket(ItemStack itemStack){
-        switch (itemStack.getType().name()){
+    public static boolean isFishBucket(ItemStack itemStack) {
+        switch (itemStack.getType().name()) {
             case "COD_BUCKET":
             case "PUFFERFISH_BUCKET":
             case "SALMON_BUCKET":
@@ -86,6 +65,26 @@ public enum Materials {
             default:
                 return false;
         }
+    }
+
+    public Material toBukkitType() {
+        try {
+            try {
+                return Material.valueOf(bukkitType);
+            } catch (IllegalArgumentException ex) {
+                return Material.valueOf(name());
+            }
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Couldn't cast " + name() + " into a bukkit enum. Contact Ome_R!");
+        }
+    }
+
+    public ItemStack toBukkitItem() {
+        return toBukkitItem(1);
+    }
+
+    public ItemStack toBukkitItem(int amount) {
+        return bukkitData == 0 ? new ItemStack(toBukkitType(), amount) : new ItemStack(toBukkitType(), amount, bukkitData);
     }
 
 }

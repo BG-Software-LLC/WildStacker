@@ -11,13 +11,13 @@ import org.bukkit.event.Listener;
 @SuppressWarnings("unused")
 public final class MythicMobsListener implements Listener {
 
-    public MythicMobsListener(){
+    public MythicMobsListener() {
         PluginHooks.isMythicMobsEnabled = true;
     }
 
     @EventHandler
-    public void onMythicMobSpawn(MythicMobSpawnEvent e){
-        if(EntityUtils.isStackable(e.getEntity()))
+    public void onMythicMobSpawn(MythicMobSpawnEvent e) {
+        if (EntityUtils.isStackable(e.getEntity()))
             WStackedEntity.of(e.getEntity()).setSpawnCause(SpawnCause.MYTHIC_MOBS);
     }
 

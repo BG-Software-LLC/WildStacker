@@ -20,7 +20,19 @@ public abstract class WAsyncStackedObject<T> extends WStackedObject<T> implement
     public abstract int getId();
 
     @Override
-    public Optional<T> runStack(){
+    public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult) {
+        StackService.execute(this, stackedObject, () -> {
+            StackResult _stackResult = runStack(stackedObject);
+            if (stackResult != null)
+                stackResult.accept(_stackResult);
+        });
+    }
+
+    @Override
+    public abstract void runStackAsync(Consumer<Optional<T>> result);
+
+    @Override
+    public Optional<T> runStack() {
         throw new UnsupportedOperationException("Cannot stack async object using the sync method.");
     }
 
@@ -30,18 +42,6 @@ public abstract class WAsyncStackedObject<T> extends WStackedObject<T> implement
         runStackAsync(null);
         return null;
     }
-
-    @Override
-    public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResult){
-        StackService.execute(this, stackedObject, () -> {
-            StackResult _stackResult = runStack(stackedObject);
-            if(stackResult != null)
-                stackResult.accept(_stackResult);
-        });
-    }
-
-    @Override
-    public abstract void runStackAsync(Consumer<Optional<T>> result);
 
     public Object getMutex() {
         return mutex;

@@ -12,7 +12,7 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
     private boolean containsAll = false;
     private int size = 0;
 
-    public Fast2EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType){
+    public Fast2EnumsArray(Class<E> firstKeyType, Class<T> secondKeyType) {
         int firstKeyTypeLength = FastEnumUtils.getEnumValues(firstKeyType).length;
         int secondKeyTypeLength = FastEnumUtils.getEnumValues(secondKeyType).length;
 
@@ -23,9 +23,9 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
     }
 
     public static <E extends Enum<E>, T extends Enum<T>> Fast2EnumsArray<E, T> fromList(
-            List<String> arr, Class<E> firstType, Class<T> secondType){
+            List<String> arr, Class<E> firstType, Class<T> secondType) {
         Fast2EnumsArray<E, T> fast2EnumsArray = new Fast2EnumsArray<>(firstType, secondType);
-        if(arr != null) {
+        if (arr != null) {
             arr.forEach(line -> {
                 if (line.equalsIgnoreCase("ALL")) {
                     fast2EnumsArray.containsAll = true;
@@ -58,14 +58,14 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
 
     public boolean addFirst(E e) {
         boolean containedBefore = firstKeyArray.add(e);
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
         return containedBefore;
     }
 
     public boolean addSecond(T t) {
         boolean containedBefore = secondKeyArray.add(t);
-        if(!containedBefore)
+        if (!containedBefore)
             size++;
         return containedBefore;
     }
@@ -73,7 +73,7 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
     public boolean add(E e, T t) {
         byte[] combinedKeyArray = this.combinedKeyArray[e.ordinal()];
         boolean containedBefore = contains(e, t);
-        if(!containedBefore) {
+        if (!containedBefore) {
             this.combinedKeyArray[e.ordinal()] = combinedKeyArray = Arrays.copyOf(combinedKeyArray, combinedKeyArray.length + 1);
             combinedKeyArray[combinedKeyArray.length - 1] = (byte) t.ordinal();
             size++;
@@ -81,12 +81,12 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
         return containedBefore;
     }
 
-    public boolean contains(T t){
+    public boolean contains(T t) {
         return containsAll || secondKeyArray.contains(t);
     }
 
-    public boolean contains(E e, T t){
-        if(containsAll || firstKeyArray.contains(e) || contains(t))
+    public boolean contains(E e, T t) {
+        if (containsAll || firstKeyArray.contains(e) || contains(t))
             return true;
 
         byte[] combinedKeyArray = this.combinedKeyArray[e.ordinal()];
@@ -99,7 +99,7 @@ public final class Fast2EnumsArray<E extends Enum<E>, T extends Enum<T>> {
         return false;
     }
 
-    public byte[][] combinedKeyArray(){
+    public byte[][] combinedKeyArray() {
         return combinedKeyArray;
     }
 

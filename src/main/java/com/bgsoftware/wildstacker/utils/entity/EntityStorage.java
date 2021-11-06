@@ -54,16 +54,17 @@ public final class EntityStorage {
 
     public static void removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
         FlagsMap flagsMap = entityStorage.get(entityUUID);
-        if(flagsMap != null)
+        if (flagsMap != null)
             flagsMap.remove(entityFlag);
     }
 
     public static void clearMetadata(Entity entity) {
-        entityStorage.remove(entity.getUniqueId());
+        clearMetadata(entity.getUniqueId());
     }
 
     public static void clearMetadata(UUID entityUUID) {
         entityStorage.remove(entityUUID);
+        EntityUtils.clearBukkitMetadata(entityUUID);
     }
 
     public static void clearCache() {
@@ -109,7 +110,7 @@ public final class EntityStorage {
             }
         }
 
-        public Object remove(EntityFlag entityFlag){
+        public Object remove(EntityFlag entityFlag) {
             return put(entityFlag, null);
         }
 

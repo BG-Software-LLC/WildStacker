@@ -32,9 +32,9 @@ public final class PluginHook_FabledSkyblock implements Calculator {
     private Map<Island, QueuedIslandScan> inScan = new HashMap<>();
     private Field amountsField;
 
-    private PluginHook_FabledSkyblock(WildStackerPlugin plugin){
+    private PluginHook_FabledSkyblock(WildStackerPlugin plugin) {
         this.plugin = plugin;
-        try{
+        try {
             Field scanField = IslandLevelManager.class.getDeclaredField("inScan");
             scanField.setAccessible(true);
             //noinspection unchecked
@@ -42,20 +42,26 @@ public final class PluginHook_FabledSkyblock implements Calculator {
 
             amountsField = QueuedIslandScan.class.getDeclaredField("amounts");
             amountsField.setAccessible(true);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
+    public static void register(WildStackerPlugin plugin) {
+        PluginHook_FabledSkyblock calculator = new PluginHook_FabledSkyblock(plugin);
+        CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.SPAWNER);
+        CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.CAULDRON);
+        Bukkit.getPluginManager().registerEvents(new FabledListener(), plugin);
+    }
+
     @Override
     public long getAmount(Block block) {
-        if(plugin.getSystemManager().isStackedSpawner(block)){
+        if (plugin.getSystemManager().isStackedSpawner(block)) {
             return WStackedSpawner.of(block).getStackAmount();
-        }
-        else if(plugin.getSystemManager().isStackedBarrel(block)){
+        } else if (plugin.getSystemManager().isStackedBarrel(block)) {
             Island island = SkyBlockAPI.getIslandManager().getIslandAtLocation(block.getLocation()).getIsland();
             QueuedIslandScan islandScan = inScan.get(island);
-            if(islandScan != null) {
+            if (islandScan != null) {
                 try {
                     //noinspection unchecked
                     Map<CompatibleMaterial, BlockAmount> amounts = (Map<CompatibleMaterial, BlockAmount>) amountsField.get(islandScan);
@@ -64,7 +70,7 @@ public final class PluginHook_FabledSkyblock implements Calculator {
                     amounts.computeIfAbsent(barrelMaterial, s -> new BlockAmount(0)).increaseAmount(stackedBarrel.getStackAmount());
                     BlockAmount cauldronAmount = amounts.computeIfAbsent(CompatibleMaterial.CAULDRON, s -> new BlockAmount(0));
                     cauldronAmount.setAmount(cauldronAmount.getAmount() - 1);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -73,25 +79,18 @@ public final class PluginHook_FabledSkyblock implements Calculator {
         return 0;
     }
 
-    public static void register(WildStackerPlugin plugin){
-        PluginHook_FabledSkyblock calculator = new PluginHook_FabledSkyblock(plugin);
-        CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.SPAWNER);
-        CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.CAULDRON);
-        Bukkit.getPluginManager().registerEvents(new FabledListener(), plugin);
-    }
-
-    private static final class FabledListener implements Listener{
+    private static final class FabledListener implements Listener {
 
         @EventHandler(priority = EventPriority.LOW)
-        public void onCauldronInteract(PlayerInteractEvent e){
-            if(e.getClickedBlock() == null || (!e.getClickedBlock().getType().name().contains("CAULDRON") &&
+        public void onCauldronInteract(PlayerInteractEvent e) {
+            if (e.getClickedBlock() == null || (!e.getClickedBlock().getType().name().contains("CAULDRON") &&
                     !e.getClickedBlock().getType().name().contains("SPAWNER")))
                 return;
 
             Island island = SkyBlock.getInstance().getIslandManager().getIslandAtLocation(e.getClickedBlock().getLocation());
             BasicPermission destroyPermission = SkyBlock.getInstance().getPermissionManager().getPermission("Destroy");
 
-            if(island != null && !island.hasPermission(island.getRole(e.getPlayer()), destroyPermission))
+            if (island != null && !island.hasPermission(island.getRole(e.getPlayer()), destroyPermission))
                 e.setCancelled(true);
         }
 

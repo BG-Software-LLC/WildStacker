@@ -28,7 +28,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     private final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    public SpawnersProvider_Default(){
+    public SpawnersProvider_Default() {
         WildStackerPlugin.log(" - Couldn't find any spawners providers, using default one.");
     }
 
@@ -36,17 +36,16 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(1);
 
-        if(spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {
+        if (spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {
             itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
         }
 
         int perStackAmount = amount;
 
-        if(plugin.getSettings().getStackedItem) {
+        if (plugin.getSettings().getStackedItem) {
             itemStack.setAmount(1);
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
-        }
-        else {
+        } else {
             itemStack.setAmount(amount);
             perStackAmount = 1;
         }
@@ -60,11 +59,12 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             creatureSpawner.setSpawnedType(entityType);
 
             blockStateMeta.setBlockState(creatureSpawner);
-        }catch(Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
         String customName = plugin.getSettings().spawnerItemName;
 
-        if(!customName.equals("")) {
+        if (!customName.equals("")) {
             itemMeta.setDisplayName(customName.replace("{0}", perStackAmount + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name()))
                     .replace("{2}", spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
@@ -72,9 +72,9 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         List<String> customLore = plugin.getSettings().spawnerItemLore;
 
-        if(!customLore.isEmpty()){
+        if (!customLore.isEmpty()) {
             List<String> lore = new ArrayList<>();
-            for(String line : customLore)
+            for (String line : customLore)
                 lore.add(line.replace("{0}", perStackAmount + "")
                         .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
             itemMeta.setLore(lore);
@@ -93,17 +93,18 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         try {
             BlockStateMeta blockStateMeta = (BlockStateMeta) itemMeta;
             spawnType = ((CreatureSpawner) blockStateMeta.getBlockState()).getSpawnedType();
-        }catch(Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
-        if((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemMeta.hasDisplayName()){
+        if ((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemMeta.hasDisplayName()) {
             String displayName = itemMeta.getDisplayName();
             Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
-            if(matcher.matches()) {
+            if (matcher.matches()) {
                 List<String> indexes = Stream.of("0", "1", "2")
                         .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
                 try {
                     spawnType = EntityType.valueOf(matcher.group(indexes.indexOf("1") + 1).toUpperCase().replace(" ", "_"));
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     spawnType = EntityType.PIG;
                 }
             }
@@ -114,24 +115,24 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
-        if(!plugin.getSettings().explosionsDropSpawner || (!plugin.getSettings().explosionsWorlds.isEmpty() &&
+        if (!plugin.getSettings().explosionsDropSpawner || (!plugin.getSettings().explosionsWorlds.isEmpty() &&
                 !plugin.getSettings().explosionsWorlds.contains(stackedSpawner.getWorld().getName())))
             return;
 
-        if(plugin.getSettings().explosionsBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance)
+        if (plugin.getSettings().explosionsBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance)
             dropSpawner(stackedSpawner, ignite, brokenAmount);
     }
 
     @Override
     public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
-        if(!breakMenu && (!plugin.getSettings().silkTouchSpawners || (!plugin.getSettings().silkWorlds.isEmpty() &&
+        if (!breakMenu && (!plugin.getSettings().silkTouchSpawners || (!plugin.getSettings().silkWorlds.isEmpty() &&
                 !plugin.getSettings().silkWorlds.contains(stackedSpawner.getWorld().getName()))))
             return;
 
-        if(breakMenu || (
+        if (breakMenu || (
                 (plugin.getSettings().silkTouchBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) &&
-                ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
-                (ItemUtils.isPickaxeAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))))) {
+                        ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
+                                (ItemUtils.isPickaxeAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))))) {
             dropSpawner(stackedSpawner, player, brokenAmount);
         }
     }

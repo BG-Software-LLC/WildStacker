@@ -43,7 +43,7 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
     private double cost;
     private String displayName = "";
 
-    public WSpawnerUpgrade(String name, int id){
+    public WSpawnerUpgrade(String name, int id) {
         this.name = name;
         this.id = id;
     }
@@ -73,7 +73,7 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
         setNextUpgrade(nextUpgrade == null ? 0 : nextUpgrade.getId());
     }
 
-    public void setNextUpgrade(int nextId){
+    public void setNextUpgrade(int nextId) {
         this.nextId = Math.max(0, nextId);
     }
 
