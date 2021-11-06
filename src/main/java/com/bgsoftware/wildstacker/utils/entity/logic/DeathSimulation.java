@@ -61,17 +61,17 @@ public final class DeathSimulation {
                                        ItemStack killerTool, Player killer, Entity entityKiller, boolean creativeMode,
                                        double originalDamage, double finalDamage, Set<UUID> noDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
-            return new Result(false, originalDamage);
+            return new Result(false, -1);
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
         if (lastDamageCause != EntityDamageEvent.DamageCause.VOID &&
                 plugin.getNMSAdapter().handleTotemOfUndying(livingEntity)) {
-            return new Result(true, originalDamage);
+            return new Result(true, -1);
         }
 
         if(stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
-            return new Result(true, originalDamage);
+            return new Result(true, -1);
 
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
                 stackedEntity.isInstantKill(lastDamageCause), finalDamage, killerTool);

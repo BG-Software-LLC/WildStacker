@@ -246,7 +246,8 @@ public final class EntitiesListener implements Listener {
         if (deathSimulationResult.isCancelEvent())
             e.setCancelled(true);
 
-        e.setDamage(Math.min(stackedEntity.getHealth(), deathSimulationResult.getEventDamage()));
+        if(deathSimulationResult.getEventDamage() >= 0)
+            e.setDamage(deathSimulationResult.getEventDamage());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
