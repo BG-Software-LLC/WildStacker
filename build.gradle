@@ -131,10 +131,10 @@ shadowJar {
     dependsOn(jar)
 
     if(System.getenv("BUILD_NUMBER") == null){
-        archiveName = rootProject.name + ".jar"
+        archiveName = rootProject.name + "-" + version + ".jar"
     }
     else{
-        archiveName = rootProject.name + "-b" + System.getenv("BUILD_NUMBER") + ".jar"
+        archiveName = rootProject.name + "-" + version + "-b" + System.getenv("BUILD_NUMBER") + ".jar"
     }
 
     delete fileTree('./target/') {
