@@ -97,6 +97,7 @@ public final class EntitiesListener implements Listener {
     private final WildStackerPlugin plugin;
 
     private int mooshroomFlag = -1;
+    private boolean mushroomSpawn = false;
     private int nextEntityStackAmount = -1;
     private EntityTypes nextEntityType = null;
     private int nextUpgradeId = 0;
@@ -272,6 +273,13 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e) {
+        if(mushroomSpawn && e.getEntityType() == EntityType.COW) {
+            mushroomSpawn = false;
+            e.setCancelled(true);
+            e.getEntity().getWorld().spawnEntity(e.getLocation(), EntityType.COW);
+            return;
+        }
+
         handleEntitySpawn(e.getEntity(), e.getSpawnReason());
     }
 
@@ -770,8 +778,14 @@ public final class EntitiesListener implements Listener {
 
         if (entity instanceof MushroomCow) {
             if (StackSplit.MUSHROOM_SHEAR.isEnabled()) {
-                stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
-                stackedEntity.remove();
+                /* When mushroom cows are sheared, they are removed from the world and a new cow is spawned.
+                Therefore, we need to do two things. First, spawn a duplicate of the mushroom cow so it doesn't disappear.
+                Secondly, we want to spawn a new cow. This is because the original cow is considered invalid when the
+                spawn event is called. The mushroomSpawn is used to determine when the cow is spawned and to spawn another. */
+                if(stackedEntity.getStackAmount() > 1) {
+                    stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
+                }
+                mushroomSpawn = true;
             } else {
                 int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
                 ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
