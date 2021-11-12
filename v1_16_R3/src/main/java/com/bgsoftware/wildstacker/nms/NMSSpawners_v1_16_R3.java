@@ -269,6 +269,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
 
             if (!entityTypesOptional.isPresent()) {
                 resetSpawnDelay();
+                failureReason = "";
                 return;
             }
 
@@ -276,6 +277,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
 
             if (demoEntity == null) {
                 super.c();
+                failureReason = "";
                 return;
             }
 
@@ -286,6 +288,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
 
                 if (demoEntity == null) {
                     super.c();
+                    failureReason = "";
                     return;
                 }
 
