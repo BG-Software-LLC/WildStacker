@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -25,7 +24,6 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -146,11 +144,14 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             object.setLeashHolder(null);
         }
 
-        if (ServerVersion.isAtLeast(ServerVersion.v1_17) || EntityTypes.fromEntity(object).isSlime()) {
-            Executor.sync(this::removeEntity);
-        } else {
-            removeEntity();
-        }
+        /* Entities must be removed sync, otherwise they are not properly removed from chunks.
+        Also, in 1.17, the remove() function must be called sync.
+        Other than that, slimes must be removed sync as well.
+        */
+        Executor.sync(() -> {
+            object.remove();
+            Executor.sync(this::clearFlags, 100L);
+        });
 
         setFlag(EntityFlag.REMOVED_ENTITY, true);
     }
@@ -662,11 +663,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             if (result != null)
                 result.accept(Optional.empty());
         }
-    }
-
-    private void removeEntity() {
-        object.remove();
-        Executor.sync(this::clearFlags, 100L);
     }
 
     @Override

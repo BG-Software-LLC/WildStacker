@@ -140,11 +140,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
 
-        if (ServerVersion.isAtLeast(ServerVersion.v1_17)) {
-            Executor.sync(object::remove);
-        } else {
-            object.remove();
-        }
+        /* Items must be removed sync, otherwise they are not properly removed from chunks.
+        Also, in 1.17, the remove() function must be called sync. */
+        Executor.sync(object::remove);
 
         EntityStorage.setMetadata(object, EntityFlag.REMOVED_ENTITY, true);
         Executor.sync(() -> EntityStorage.clearMetadata(object), 100L);
