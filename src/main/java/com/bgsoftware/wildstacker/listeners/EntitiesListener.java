@@ -457,14 +457,16 @@ public final class EntitiesListener implements Listener {
         if (!(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
             return;
 
-        if (!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
+        ItemStack inHand = e.getPlayer().getItemInHand();
+
+        if (!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), inHand))
             return;
 
         if (!EntityUtils.canBeBred((Animals) e.getRightClicked()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        ItemStack inHand = e.getPlayer().getItemInHand();
+        int inHandItemsAmount = ItemUtils.countItem(e.getPlayer().getInventory(), inHand);
 
         if (stackedEntity.getStackAmount() > 1) {
             int itemsAmountToRemove;
@@ -472,7 +474,7 @@ public final class EntitiesListener implements Listener {
             if (plugin.getSettings().smartBreeding) {
                 int breedableAmount = e.getPlayer().getGameMode() == GameMode.CREATIVE ?
                         stackedEntity.getStackAmount() :
-                        Math.min(stackedEntity.getStackAmount(), inHand.getAmount());
+                        Math.min(stackedEntity.getStackAmount(), inHandItemsAmount);
 
                 if (breedableAmount % 2 != 0)
                     breedableAmount--;
@@ -519,9 +521,7 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                ItemStack newHand = e.getPlayer().getItemInHand().clone();
-                newHand.setAmount(newHand.getAmount() - itemsAmountToRemove);
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newHand);
+                ItemUtils.removeItem(e.getPlayer().getInventory(), inHand, itemsAmountToRemove);
             }
         }
     }
