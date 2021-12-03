@@ -1287,6 +1287,13 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
 
         @Override
         public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
+            MobSpawnerAbstract mobSpawnerAbstract = NMSMappings_v1_18_R1.getSpawner(getSpawner());
+            mobSpawnerAbstract.h = spawnerUpgrade.getMinSpawnDelay();
+            mobSpawnerAbstract.i = spawnerUpgrade.getMaxSpawnDelay();
+            mobSpawnerAbstract.j = spawnerUpgrade.getSpawnCount();
+            mobSpawnerAbstract.l = spawnerUpgrade.getMaxNearbyEntities();
+            mobSpawnerAbstract.m = spawnerUpgrade.getRequiredPlayerRange();
+            mobSpawnerAbstract.n = spawnerUpgrade.getSpawnRange();
         }
 
         @Override
