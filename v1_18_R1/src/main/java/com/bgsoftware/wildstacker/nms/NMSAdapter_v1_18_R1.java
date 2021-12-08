@@ -12,6 +12,9 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
+import io.papermc.paper.enchantments.EnchantmentRarity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.CriterionTriggers;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.DynamicOpsNBT;
@@ -117,13 +120,16 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
+import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -134,6 +140,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -150,6 +157,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -325,11 +333,10 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
         entityLiving.aware = !nerfed;
 
-//        try {
-//            entityLiving.spawnedViaMobSpawner = nerfed;
-//        } catch (Throwable ignored) {
-//        }
-        // TODO: Paper
+        try {
+            entityLiving.spawnedViaMobSpawner = nerfed;
+        } catch (Throwable ignored) {
+        }
     }
 
     @Override
@@ -433,31 +440,24 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
 
     @Override
     public void setTurtleEgg(org.bukkit.entity.Entity turtle) {
-//        try {
-//            ((Turtle) turtle).setHasEgg(true);
-//        } catch (Throwable ex) {
-//            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
-//            TURTLE_SET_HAS_EGG.invoke(entityTurtle, true);
-//        }
-        // TODO: Paper
-        TURTLE_SET_HAS_EGG.invoke(((CraftTurtle) turtle).getHandle(), true);
+        try {
+            ((Turtle) turtle).setHasEgg(true);
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            TURTLE_SET_HAS_EGG.invoke(entityTurtle, true);
+        }
     }
 
     @Override
     public Location getTurtleHome(org.bukkit.entity.Entity turtle) {
-//        try {
-//            return ((Turtle) turtle).getHome();
-//        } catch (Throwable ex) {
-//            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
-//            BlockPosition homePosition = TURTLE_HOME_POS.invoke(entityTurtle);
-//            return new Location(entityTurtle.getWorld().getWorld(), homePosition.getX(),
-//                    homePosition.getY(), homePosition.getZ());
-//        }
-        // TODO: Paper
-        EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
-        BlockPosition homePosition = TURTLE_HOME_POS.invoke(entityTurtle);
-        return new Location(getWorld(entityTurtle).getWorld(),
-                getX(homePosition), getY(homePosition), getZ(homePosition));
+        try {
+            return ((Turtle) turtle).getHome();
+        } catch (Throwable ex) {
+            EntityTurtle entityTurtle = ((CraftTurtle) turtle).getHandle();
+            BlockPosition homePosition = TURTLE_HOME_POS.invoke(entityTurtle);
+            return new Location(getWorld(entityTurtle).getWorld(),
+                    getX(homePosition), getY(homePosition), getZ(homePosition));
+        }
     }
 
     @Override
@@ -586,12 +586,11 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
 
         entityItem.aq = 10;
 
-//        try {
-//            entityItem.canMobPickup = false;
-//            Executor.sync(() -> entityItem.canMobPickup = true, 20L);
-//        } catch (Throwable ignored) {
-//        }
-        // TODO: Paper
+        try {
+            entityItem.canMobPickup = false;
+            Executor.sync(() -> entityItem.canMobPickup = true, 20L);
+        } catch (Throwable ignored) {
+        }
 
         StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
@@ -646,34 +645,33 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
                 return true;
             }
 
-//            public Component displayName(int i) {
-//                return null;
-//            }
-//
-//            public boolean isTradeable() {
-//                return false;
-//            }
-//
-//            public boolean isDiscoverable() {
-//                return false;
-//            }
-//
-//            public EnchantmentRarity getRarity() {
-//                return null;
-//            }
-//
-//            public float getDamageIncrease(int i, EntityCategory entityCategory) {
-//                return 0;
-//            }
-//
-//            public Set<EquipmentSlot> getActiveSlots() {
-//                return null;
-//            }
-//
-//            public String translationKey() {
-//                return null;
-//            }
-            // TODO: Paper
+            public Component displayName(int i) {
+                return null;
+            }
+
+            public boolean isTradeable() {
+                return false;
+            }
+
+            public boolean isDiscoverable() {
+                return false;
+            }
+
+            public EnchantmentRarity getRarity() {
+                return null;
+            }
+
+            public float getDamageIncrease(int i, EntityCategory entityCategory) {
+                return 0;
+            }
+
+            public Set<EquipmentSlot> getActiveSlots() {
+                return null;
+            }
+
+            public String translationKey() {
+                return null;
+            }
         };
     }
 
@@ -885,8 +883,7 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
         if (!isEmpty(mendingItem) && usesDurability(getItem(mendingItem))) {
             EntityExperienceOrb orb = EntityTypes.A.a(getWorld(entityPlayer));
             orb.ar = amount;
-            //orb.spawnReason = ExperienceOrb.SpawnReason.CUSTOM;
-            // TODO: Paper
+            orb.spawnReason = ExperienceOrb.SpawnReason.CUSTOM;
             setPositionRaw(orb, locX(entityPlayer), locY(entityPlayer), locZ(entityPlayer));
             int repairAmount = Math.min(amount * 2, getDamage(mendingItem));
             PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(entityPlayer, orb, mendingItem, repairAmount);
@@ -1272,18 +1269,17 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
             NMSMappings_v1_18_R1.getSpawner(getSpawner()).n = i;
         }
 
-//        public boolean isActivated() {
-//            return false;
-//        }
-//
-//        public void resetTimer() {
-//
-//        }
-//
-//        public void setSpawnedItem(org.bukkit.inventory.ItemStack itemStack) {
-//
-//        }
-        // TODO: Paper
+        public boolean isActivated() {
+            return false;
+        }
+
+        public void resetTimer() {
+
+        }
+
+        public void setSpawnedItem(org.bukkit.inventory.ItemStack itemStack) {
+
+        }
 
         @Override
         public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
