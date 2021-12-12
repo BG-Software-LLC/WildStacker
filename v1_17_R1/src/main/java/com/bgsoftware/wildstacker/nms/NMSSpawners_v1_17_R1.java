@@ -7,12 +7,11 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
 
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
-        throw new UnsupportedOperationException("Not supported in 1.17.");
+        return true;
     }
 
     @Override
     public void registerSpawnConditions() {
-        throw new UnsupportedOperationException("Not supported in 1.17.");
     }
 
 }
