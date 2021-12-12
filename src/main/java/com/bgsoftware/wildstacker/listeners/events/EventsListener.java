@@ -54,11 +54,17 @@ public final class EventsListener {
             if (!ItemUtils.isStackable(e.getItem()))
                 return;
 
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
-            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
-            if (entityPickupItemEvent.isCancelled()) {
-                e.setCancelled(true);
-                e.setFlyAtPlayer(false);
+            org.bukkit.event.entity.EntityPickupItemEvent bukkitEntityPickupItemEvent =
+                    new org.bukkit.event.entity.EntityPickupItemEvent(e.getPlayer(), e.getItem(), e.getRemaining());
+            Bukkit.getPluginManager().callEvent(bukkitEntityPickupItemEvent);
+
+            if(!bukkitEntityPickupItemEvent.isCancelled()) {
+                EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
+                Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
+                if (entityPickupItemEvent.isCancelled()) {
+                    e.setCancelled(true);
+                    e.setFlyAtPlayer(false);
+                }
             }
         }
 
