@@ -804,7 +804,7 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
         BehaviorController<EntityPiglin> behaviorController = getBehaviorController(entityPiglin);
 
         removeMemory(behaviorController, MemoryModuleType.m);
-        getNavigation(entityPiglin).o();
+        getNavigation(entityPiglin).n();
 
         receive(entityPiglin, entityItem, 1);
 
