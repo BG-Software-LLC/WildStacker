@@ -117,11 +117,6 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
             return getLightLevel(world, position, 0) > 8 && (coldBiome ? blockData.a(Blocks.i) : blockData.a(Blocks.cL));
         }, EntityType.POLAR_BEAR);
 
-        createCondition("COMPLETE_DARKNESS",
-                (world, position) -> (world.Y() ? world.c(position, 10) : getLightLevel(world, position)) == 0,
-                EntityType.AXOLOTL
-        );
-
         createCondition("ON_AXOLOTL_SPAWNABLE",
                 (world, position) -> isTagged(TagsBlock.bt, getBlock(getType(world, position.c()))),
                 EntityType.AXOLOTL
@@ -190,9 +185,9 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
                 EntityType.TROPICAL_FISH
         );
 
-        createCondition("MONSTER_LIGHT",
-                (world, position) -> getLightLevel(world, position) == 0,
-                EntityType.DROWNED, EntityType.CAVE_SPIDER, EntityType.CREEPER,
+        createCondition("COMPLETE_DARKNESS",
+                (world, position) -> (world.Y() ? world.c(position, 10) : getLightLevel(world, position)) == 0,
+                EntityType.AXOLOTL, EntityType.DROWNED, EntityType.CAVE_SPIDER, EntityType.CREEPER,
                 EntityType.ENDERMAN, EntityType.GIANT, EntityType.HUSK, EntityType.SKELETON, EntityType.SPIDER,
                 EntityType.STRAY, EntityType.WITCH, EntityType.WITHER, EntityType.WITHER_SKELETON, EntityType.ZOMBIE,
                 EntityType.ZOMBIE_VILLAGER, EntityType.EVOKER, EntityType.ILLUSIONER, EntityType.RAVAGER, EntityType.VEX,
@@ -254,11 +249,6 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
         createCondition("ON_SAND",
                 (world, position) -> getBlockBelow(world, position).a(Blocks.C),
                 EntityType.TURTLE
-        );
-
-        createCondition("ON_CLAY",
-                (world, position) -> getBlockBelow(world, position).a(Blocks.cO),
-                EntityType.AXOLOTL
         );
 
         createCondition("ON_TREE_OR_AIR", (world, position) -> {
