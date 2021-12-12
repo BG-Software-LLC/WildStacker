@@ -160,6 +160,12 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
             return biomeBase == null || (!biomeBase.equals(Biomes.OCEAN) && !biomeBase.equals(Biomes.DEEP_OCEAN));
         }, EntityType.DOLPHIN);
 
+        createCondition("IN_RIVER", (world, position) -> {
+            Optional<ResourceKey<BiomeBase>> biomeBase = world.i(position);
+            return Objects.equals(biomeBase, Optional.of(Biomes.RIVER)) ||
+                    Objects.equals(biomeBase, Optional.of(Biomes.FROZEN_RIVER));
+        }, EntityType.DOLPHIN);
+
         createCondition("NOT_IN_OCEAN_DEEP",
                 (world, position) -> position.getY() > 45,
                 EntityType.DOLPHIN

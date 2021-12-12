@@ -146,6 +146,11 @@ public final class NMSSpawners_v1_15_R1 implements NMSSpawners {
             return biomeBase != Biomes.OCEAN && biomeBase != Biomes.DEEP_OCEAN;
         }, EntityType.DOLPHIN);
 
+        createCondition("IN_RIVER", (world, position) -> {
+            BiomeBase biomeBase = world.getBiome(position);
+            return biomeBase == Biomes.RIVER || biomeBase == Biomes.FROZEN_RIVER;
+        }, EntityType.DOLPHIN);
+
         createCondition("NOT_PEACEFUL",
                 (world, position) -> world.getDifficulty() != EnumDifficulty.PEACEFUL,
                 EntityType.DROWNED, EntityType.GUARDIAN, EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
