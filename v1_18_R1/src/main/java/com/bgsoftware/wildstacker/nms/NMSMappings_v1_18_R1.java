@@ -13,6 +13,8 @@ import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.sounds.SoundEffect;
 import net.minecraft.tags.Tag;
+import net.minecraft.world.DifficultyDamageScaler;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.INamableTileEntity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -21,6 +23,8 @@ import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityLiving;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumItemSlot;
+import net.minecraft.world.entity.EnumMobSpawn;
+import net.minecraft.world.entity.GroupDataEntity;
 import net.minecraft.world.entity.SaddleStorage;
 import net.minecraft.world.entity.ai.BehaviorController;
 import net.minecraft.world.entity.ai.gossip.Reputation;
@@ -38,12 +42,14 @@ import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.EnumSkyBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GeneratorAccess;
 import net.minecraft.world.level.IEntityAccess;
 import net.minecraft.world.level.MobSpawnerAbstract;
 import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.level.World;
+import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.IFluidContainer;
 import net.minecraft.world.level.block.entity.TileEntity;
@@ -55,6 +61,7 @@ import net.minecraft.world.phys.AxisAlignedBB;
 import net.minecraft.world.phys.Vec3D;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -69,12 +76,16 @@ public final class NMSMappings_v1_18_R1 {
         world.b(entity);
     }
 
-    public static void addEntity(World world, Entity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
-        world.addFreshEntity(entity, spawnReason);
+    public static boolean addEntity(World world, Entity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
+        return world.addFreshEntity(entity, spawnReason);
     }
 
     public static World getWorld(Entity entity) {
         return entity.t;
+    }
+
+    public static World getWorld(TileEntity tileEntity) {
+        return tileEntity.k();
     }
 
     public static VillagerData getVillagerData(EntityVillager entityVillager) {
@@ -277,6 +288,10 @@ public final class NMSMappings_v1_18_R1 {
 
     public static boolean hasKey(NBTTagCompound nbtTagCompound, String key) {
         return nbtTagCompound.e(key);
+    }
+
+    public static boolean hasKeyOfType(NBTTagCompound nbtTagCompound, String key, int type) {
+        return nbtTagCompound.b(key, type);
     }
 
     public static NBTTagCompound getCompound(NBTTagCompound nbtTagCompound, String key) {
@@ -486,6 +501,64 @@ public final class NMSMappings_v1_18_R1 {
 
     public static NBTTagCompound getEntity(MobSpawnerData mobSpawnerData) {
         return mobSpawnerData.a();
+    }
+
+    public static int getLightLevel(World world, BlockPosition position, int ambientDarkness) {
+        return world.b(position, ambientDarkness);
+    }
+
+    public static int getLightLevel(World world, BlockPosition position) {
+        return world.B(position);
+    }
+
+    public static int getSeaLevel(World world) {
+        return world.m_();
+    }
+
+    public static int getBrightness(World world, EnumSkyBlock skyBlock, BlockPosition position) {
+        return world.a(skyBlock, position);
+    }
+
+    public static EnumDifficulty getDifficulty(World world) {
+        return world.af();
+    }
+
+    public static Fluid getFluid(World world, BlockPosition blockPosition) {
+        return world.b_(blockPosition);
+    }
+
+    public static void triggerEffect(World world, int i, BlockPosition position, int j) {
+        world.c(i, position, j);
+    }
+
+    public static void setPositionRotation(Entity entity, double x, double y, double z, float yaw, float pitch) {
+        entity.b(x, y, z, yaw, pitch);
+    }
+
+    public static GroupDataEntity prepare(EntityInsentient entityInsentient, WorldAccess worldAccess,
+                                          DifficultyDamageScaler difficulty, EnumMobSpawn spawnReason,
+                                          @Nullable GroupDataEntity entityData, @Nullable NBTTagCompound entityNbt) {
+        return entityInsentient.a(worldAccess, difficulty, spawnReason, entityData, entityNbt);
+    }
+
+    public static BlockPosition getChunkCoordinates(Entity entity) {
+        return entity.cW();
+    }
+
+    public static DifficultyDamageScaler getDamageScaler(World world, BlockPosition blockPosition) {
+        return world.d_(blockPosition);
+    }
+
+    public static Entity getVehicle(Entity entity) {
+        return entity.cN();
+    }
+
+    public static Iterable<Entity> getAllPassengers(Entity entity) {
+        return entity.cJ();
+    }
+
+    public static List<Entity> getPassengers(Entity entity) {
+        return entity.cF();
     }
 
 }

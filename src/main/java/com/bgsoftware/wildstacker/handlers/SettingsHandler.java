@@ -374,12 +374,7 @@ public final class SettingsHandler {
         inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
-        boolean spawnersOverrideEnabled = spawnersStackingEnabled && cfg.getBoolean("spawners.spawners-override.enabled");
-        if (spawnersOverrideEnabled && canHaveSpawnerOverride()) {
-            WildStackerPlugin.log("&cThe 'spawners-override' feature is not supported in your Java version, disabling...");
-            spawnersOverrideEnabled = false;
-        }
-        this.spawnersOverrideEnabled = spawnersOverrideEnabled;
+        spawnersOverrideEnabled = spawnersStackingEnabled && cfg.getBoolean("spawners.spawners-override.enabled");
         if (spawnersOverrideEnabled) {
             plugin.getNMSSpawners().registerSpawnConditions();
             for (String entityTypeRaw : cfg.getConfigurationSection("spawners.spawners-override.spawn-conditions").getKeys(false)) {
