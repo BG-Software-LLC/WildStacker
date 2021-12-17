@@ -177,12 +177,18 @@ public final class ItemUtils {
     }
 
     public static String getFormattedType(ItemStack itemStack) {
-        String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
-        String customName = plugin.getSettings().customNames.get(typeName);
-        if (customName == null)
-            customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
+        String typeName = itemStack.getType().name().contains("LEGACY") ?
+                itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 
-        return EntityUtils.getFormattedType(customName == null ? typeName : customName);
+        String customName = plugin.getSettings().customNames.get(typeName);
+        if(customName != null)
+            return customName;
+
+        customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
+        if(customName != null)
+            return customName;
+
+        return EntityUtils.getFormattedType(typeName);
     }
 
     public static void stackBucket(ItemStack bucket, Inventory inventory) {
