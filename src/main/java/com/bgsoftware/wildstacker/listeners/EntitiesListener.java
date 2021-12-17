@@ -909,7 +909,8 @@ public final class EntitiesListener implements Listener {
             if (plugin.getSettings().smartBreeding && e.getEntity() instanceof org.bukkit.entity.Turtle &&
                     e.getTo().name().equals("TURTLE_EGG")) {
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-                int breedableAmount = stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
+                int breedableAmount = !stackedEntity.hasFlag(EntityFlag.BREEDABLE_AMOUNT) ? 0 :
+                        stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
                 stackedEntity.removeFlag(EntityFlag.BREEDABLE_AMOUNT);
                 if (breedableAmount > 1) {
                     Executor.sync(() -> plugin.getNMSAdapter().setTurtleEggsAmount(e.getBlock(), 1), 1L);
