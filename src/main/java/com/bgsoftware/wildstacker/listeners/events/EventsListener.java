@@ -66,6 +66,7 @@ public final class EventsListener {
                     e.setFlyAtPlayer(false);
                 }
             }
+            else e.setCancelled(true);
         }
 
     }
