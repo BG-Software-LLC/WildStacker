@@ -58,6 +58,12 @@ public final class EventsListener {
                     new org.bukkit.event.entity.EntityPickupItemEvent(e.getPlayer(), e.getItem(), e.getRemaining());
             Bukkit.getPluginManager().callEvent(bukkitEntityPickupItemEvent);
 
+            if(bukkitEntityPickupItemEvent.isCancelled()){
+                e.setCancelled(true);
+                e.setFlyAtPlayer(false);
+                return;
+            }
+
             if(!bukkitEntityPickupItemEvent.isCancelled()) {
                 EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
                 Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
@@ -66,7 +72,6 @@ public final class EventsListener {
                     e.setFlyAtPlayer(false);
                 }
             }
-            else e.setCancelled(true);
         }
 
     }
