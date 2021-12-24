@@ -29,7 +29,8 @@ public final class EventsListener {
             Class.forName("org.bukkit.event.player.PlayerAttemptPickupItemEvent");
             plugin.getServer().getPluginManager().registerEvents(new PlayerAttemptPickup(), plugin);
             registeredPlayerPickup = true;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         try {
             Class.forName("org.bukkit.event.entity.EntityPickupItemEvent");
@@ -58,29 +59,32 @@ public final class EventsListener {
                     new org.bukkit.event.entity.EntityPickupItemEvent(e.getPlayer(), e.getItem(), e.getRemaining());
             Bukkit.getPluginManager().callEvent(bukkitEntityPickupItemEvent);
 
-            if(!bukkitEntityPickupItemEvent.isCancelled()) {
-                EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
-                Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
-                if (entityPickupItemEvent.isCancelled()) {
-                    e.setCancelled(true);
-                    e.setFlyAtPlayer(false);
-                }
+            if (bukkitEntityPickupItemEvent.isCancelled()) {
+                e.setCancelled(true);
+                e.setFlyAtPlayer(false);
+                return;
+            }
+
+            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
+            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
+            if (entityPickupItemEvent.isCancelled()) {
+                e.setCancelled(true);
+                e.setFlyAtPlayer(false);
             }
         }
-
     }
 
     private static class EntityPickup implements Listener {
 
         private final boolean listenToPlayersPickup;
 
-        private EntityPickup(boolean listenToPlayersPickup){
+        private EntityPickup(boolean listenToPlayersPickup) {
             this.listenToPlayersPickup = listenToPlayersPickup;
         }
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.entity.EntityPickupItemEvent e) {
-            if(!listenToPlayersPickup && e.getEntity() instanceof Player)
+            if (!listenToPlayersPickup && e.getEntity() instanceof Player)
                 return;
 
             if (!ItemUtils.isStackable(e.getItem()))
