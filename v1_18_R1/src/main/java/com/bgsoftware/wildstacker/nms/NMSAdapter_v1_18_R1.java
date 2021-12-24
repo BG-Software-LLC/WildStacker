@@ -178,7 +178,7 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "ev");
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(Entity.class, Entity.RemovalReason.class, "aD");
     private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(EntityChicken.class, Integer.class, "cc");
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, Boolean.class, "fN");
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, boolean.class, "fN");
     private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fM");
     private static final ReflectMethod<BlockPosition> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "v", boolean.class);
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "h");
