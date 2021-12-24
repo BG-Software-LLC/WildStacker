@@ -317,7 +317,7 @@ public final class SpawnersListener implements Listener {
     }
 
     //Priority is high so it can be fired before SilkSpawners
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
         if (!plugin.getSettings().spawnersStackingEnabled || e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;

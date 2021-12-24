@@ -3,11 +3,14 @@ package com.bgsoftware.wildstacker.listeners.plugins;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerBreakEvent;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerChangeEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 @SuppressWarnings("unused")
 public final class SilkSpawnersListener implements Listener {
@@ -16,6 +19,8 @@ public final class SilkSpawnersListener implements Listener {
 
     public SilkSpawnersListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
+        if(plugin.getSettings().spawnersStackingEnabled)
+            BlockBreakEvent.getHandlerList().unregister(JavaPlugin.getPlugin(SilkSpawners.class));
     }
 
     //This one will run only if SilkSpawners is enabled
