@@ -25,8 +25,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -364,7 +366,12 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
-        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId(), true);
+        setUpgrade(spawnerUpgrade, null);
+    }
+
+    @Override
+    public void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
+        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId(), player, true);
         updateName();
     }
 
@@ -372,7 +379,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         return spawnerUpgradeId;
     }
 
-    public void setUpgradeId(int spawnerUpgradeId, boolean fireEvent) {
+    public void setUpgradeId(int spawnerUpgradeId, @Nullable Player who, boolean fireEvent) {
         if (spawnerUpgradeId != 0 && !isCached())
             plugin.getDataHandler().addStackedSpawner(this);
 
@@ -384,7 +391,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         SpawnerUpgrade spawnerUpgrade = getUpgrade();
 
         if (fireEvent)
-            EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade);
+            EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade, who);
 
         SyncedCreatureSpawner.of(object).updateSpawner(spawnerUpgrade);
 

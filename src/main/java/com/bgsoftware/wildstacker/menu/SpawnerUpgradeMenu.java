@@ -99,7 +99,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
             return;
         }
 
-        stackedSpawner.setUpgrade(nextUpgrade);
+        stackedSpawner.setUpgrade(nextUpgrade, player);
 
         if (successSound != null)
             successSound.playSound(player);

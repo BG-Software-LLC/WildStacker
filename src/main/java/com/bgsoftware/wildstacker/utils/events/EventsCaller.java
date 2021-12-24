@@ -117,8 +117,8 @@ public final class EventsCaller {
         return !spawnerUnstackEvent.isCancelled();
     }
 
-    public static void callSpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade) {
-        SpawnerUpgradeEvent spawnerUpgradeEvent = new SpawnerUpgradeEvent(stackedSpawner, spawnerUpgrade);
+    public static void callSpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade, Player who) {
+        SpawnerUpgradeEvent spawnerUpgradeEvent = new SpawnerUpgradeEvent(stackedSpawner, spawnerUpgrade, who);
         Bukkit.getPluginManager().callEvent(spawnerUpgradeEvent);
     }
 

@@ -39,8 +39,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -752,6 +754,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
+        setUpgrade(spawnerUpgrade, null);
+    }
+
+    @Override
+    public void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
         setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId());
         updateName();
     }

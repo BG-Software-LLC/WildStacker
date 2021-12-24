@@ -150,7 +150,7 @@ public final class SpawnersListener implements Listener {
             EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
 
             int upgradeId = ItemUtils.getSpawnerUpgrade(itemInHand);
-            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, false);
+            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, e.getPlayer(), false);
 
             SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(upgradeId);
             if (spawnerUpgrade == null)
