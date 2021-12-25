@@ -60,7 +60,6 @@ dependencies {
     compileOnly 'org.spigotmc:v1_17_R1:latest'
 
     // Plugin hooks
-    compileOnly 'com.songoda:EpicBosses:latest'
     compileOnly 'com.songoda:EpicSpawners-7:latest'
     compileOnly 'de.keyle:MyPet:latest'
     compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'

@@ -53,4 +53,5 @@ include 'Hook_Clearlagg'
 include 'Hook_CustomBosses'
 include 'Hook_EchoPet'
 include 'Hook_EliteBosses'
+include 'Hook_EpicBosses'
 
