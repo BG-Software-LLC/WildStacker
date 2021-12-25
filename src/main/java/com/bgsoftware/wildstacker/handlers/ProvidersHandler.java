@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
@@ -160,7 +159,8 @@ public final class ProvidersHandler {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared4");
                 claimsProvider.ifPresent(claimsProviders::add);
             } else {
-                claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquaredLegacy");
+                claimsProvider.ifPresent(claimsProviders::add);
             }
         }
         if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))

@@ -25,4 +25,5 @@ include 'Hook_MassiveFactions'
 include 'Hook_PlotSquared4'
 include 'Hook_PlotSquared5'
 include 'Hook_PlotSquared6'
+include 'Hook_PlotSquaredLegacy'
 
