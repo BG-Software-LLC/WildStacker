@@ -38,4 +38,6 @@ include 'Hook_MythicMobs'
 include 'Hook_FabledSkyblock'
 include 'Hook_Novucs'
 include 'Hook_ProtocolLib'
+include 'Hook_ShopGUIPlus18'
+include 'Hook_ShopGUIPlus20'
 

@@ -76,7 +76,6 @@ dependencies {
     compileOnly 'com.dnyferguson:MineableSpawners:latest'
     compileOnly 'de.keyle:MyPet:latest'
 
-    compileOnly 'net.brcdev:ShopGUIPlus-1.18:latest'
     compileOnly 'net.brcdev:ShopGUIPlus-1.20:latest'
     compileOnly 'de.dustplanet:SilkSpawners:latest'
     compileOnly 'com.bgsoftware:SuperiorSkyblockAPI:latest'

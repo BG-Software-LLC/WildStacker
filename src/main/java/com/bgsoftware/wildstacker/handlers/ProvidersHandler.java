@@ -12,7 +12,6 @@ import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
-import com.bgsoftware.wildstacker.hooks.ShopGUIPlusHook;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
@@ -291,10 +290,9 @@ public final class ProvidersHandler {
         //Load plugin hooks
         if (isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO")) {
             Plugin mcmmo = pluginManager.getPlugin("mcMMO");
-            if(mcmmo.getDescription().getVersion().startsWith("1")) {
+            if (mcmmo.getDescription().getVersion().startsWith("1")) {
                 registerHook("McMMOHook");
-            }
-            else {
+            } else {
                 registerHook("McMMO2Hook");
             }
         }
@@ -314,8 +312,14 @@ public final class ProvidersHandler {
             PluginHooks.isFastAsyncWorldEditEnabled = enable;
         if (enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
             registerHook("NovucsHook");
-        if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin"))
-            ShopGUIPlusHook.setEnabled();
+        if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin")) {
+            Plugin shopGUIPlus = pluginManager.getPlugin("ShopGUIPlus");
+            if (shopGUIPlus.getDescription().getVersion().startsWith("1.18")) {
+                registerHook("ShopGUIPlus18Hook");
+            } else {
+                registerHook("ShopGUIPlus20Hook");
+            }
+        }
         if (isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
             registerHook("JobsHook");
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
@@ -358,9 +362,9 @@ public final class ProvidersHandler {
 
     @Nullable
     public String getCustomName(LivingEntity livingEntity) {
-        for(EntityNameProvider entityNameProvider : entityNameProviders) {
+        for (EntityNameProvider entityNameProvider : entityNameProviders) {
             String customName = entityNameProvider.getCustomName(livingEntity);
-            if(customName != null)
+            if (customName != null)
                 return customName;
         }
 
@@ -368,9 +372,9 @@ public final class ProvidersHandler {
     }
 
     public StackCheckResult areSimilar(Entity entity, Entity other) {
-        for(EntitySimilarityProvider entitySimilarityProvider : entitySimilarityProviders) {
+        for (EntitySimilarityProvider entitySimilarityProvider : entitySimilarityProviders) {
             StackCheckResult stackCheckResult = entitySimilarityProvider.areSimilar(entity, other);
-            if(stackCheckResult != StackCheckResult.SUCCESS)
+            if (stackCheckResult != StackCheckResult.SUCCESS)
                 return stackCheckResult;
         }
 
@@ -434,9 +438,9 @@ public final class ProvidersHandler {
 
     @Nullable
     public <T extends LivingEntity> T tryDuplicateEntity(T entity) {
-        for(IEntityDuplicateListener entityDuplicateListener : entityDuplicateListeners) {
+        for (IEntityDuplicateListener entityDuplicateListener : entityDuplicateListeners) {
             T duplicated = entityDuplicateListener.duplicateEntity(entity);
-            if(duplicated != null)
+            if (duplicated != null)
                 return duplicated;
         }
 
