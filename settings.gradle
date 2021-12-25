@@ -49,4 +49,5 @@ include 'Hook_Slimefun'
 include 'Hook_Vault'
 include 'Hook_Boss34'
 include 'Hook_Boss39'
+include 'Hook_Clearlagg'
 

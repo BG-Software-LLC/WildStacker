@@ -25,7 +25,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EchoPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EliteBossesListener;
@@ -313,7 +312,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "Citizens") && pluginManager.isPluginEnabled("Citizens"))
             PluginHooks.isCitizensEnabled = true;
         if (enable && isPlugin(toCheck, "ClearLag") && pluginManager.isPluginEnabled("ClearLag"))
-            pluginManager.registerEvents(new ClearLaggListener(plugin), plugin);
+            registerHook("ClearLaggHook");
         if (enable && isPlugin(toCheck, "SilkSpawners") && pluginManager.isPluginEnabled("SilkSpawners"))
             registerHook("SilkSpawnersHook");
         if (enable && isPlugin(toCheck, "CustomBosses") && pluginManager.isPluginEnabled("CustomBosses"))
