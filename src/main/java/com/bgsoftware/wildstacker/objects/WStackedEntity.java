@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
@@ -240,7 +239,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                         plugin.getNMSAdapter().isInLove((Animals) targetEntity.getLivingEntity())))
             return StackCheckResult.IN_LOVE_STATUS;
 
-        if (PluginHooks.isWorldGuardEnabled && !plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
+        if (!plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
             Set<String> regions = new HashSet<>();
             regions.addAll(plugin.getProviders().getRegionNames(targetEntity.getLivingEntity().getLocation()));
             regions.addAll(plugin.getProviders().getRegionNames(object.getLocation()));

@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
@@ -69,6 +68,9 @@ public final class ProvidersHandler {
     private final List<IEntityCombatListener> entityCombatListeners = new ArrayList<>();
     private final List<INameChangeListener> nameChangeListeners = new ArrayList<>();
     private final List<IEntityDuplicateListener> entityDuplicateListeners = new ArrayList<>();
+
+    private boolean handleEntityStackingInsideEvent = true;
+    private boolean handleEntityStackingWithDelay = false;
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -299,31 +301,31 @@ public final class ProvidersHandler {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
 
         // Load listeners
-        if (enable && isPlugin(toCheck, "Citizens") && pluginManager.isPluginEnabled("Citizens"))
-            PluginHooks.isCitizensEnabled = true;
         if (enable && isPlugin(toCheck, "ClearLag") && pluginManager.isPluginEnabled("ClearLag"))
             registerHook("ClearLaggHook");
         if (enable && isPlugin(toCheck, "SilkSpawners") && pluginManager.isPluginEnabled("SilkSpawners"))
             registerHook("SilkSpawnersHook");
         if (enable && isPlugin(toCheck, "CustomBosses") && pluginManager.isPluginEnabled("CustomBosses"))
             registerHook("CustomBossesHook");
-        if (enable && isPlugin(toCheck, "EpicBosses") && pluginManager.isPluginEnabled("EpicBosses"))
+        if (enable && isPlugin(toCheck, "EpicBosses") && pluginManager.isPluginEnabled("EpicBosses")) {
             registerHook("EpicBossesHook");
-        if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
+            handleEntityStackingWithDelay = true;
+        }
+        if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs")) {
             registerHook("MythicMobs");
+            handleEntityStackingWithDelay = true;
+        }
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
             registerHook("MyPetHook");
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
         if (enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners")) {
             Plugin epicSpawners = pluginManager.getPlugin("EpicSpawners");
-            if(epicSpawners.getDescription().getVersion().startsWith("5")) {
+            if (epicSpawners.getDescription().getVersion().startsWith("5")) {
                 registerHook("EpicSpawners5Hook");
-            }
-            else if(epicSpawners.getDescription().getVersion().startsWith("6")) {
+            } else if (epicSpawners.getDescription().getVersion().startsWith("6")) {
                 registerHook("EpicSpawners6Hook");
-            }
-            else if(epicSpawners.getDescription().getVersion().startsWith("7")) {
+            } else if (epicSpawners.getDescription().getVersion().startsWith("7")) {
                 registerHook("EpicSpawners7Hook");
             }
         }
@@ -331,10 +333,9 @@ public final class ProvidersHandler {
             registerHook("CrazyEnchantmentsHook");
         if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss")) {
             Plugin boss = pluginManager.getPlugin("Boss");
-            if(boss.getDescription().getVersion().startsWith("3.4")) {
+            if (boss.getDescription().getVersion().startsWith("3.4")) {
                 registerHook("Boss34Hook");
-            }
-            else {
+            } else {
                 registerHook("Boss39Hook");
             }
         }
@@ -360,14 +361,10 @@ public final class ProvidersHandler {
         }
         if (isPlugin(toCheck, "CoreProtect") && pluginManager.isPluginEnabled("CoreProtect"))
             registerHook("CoreProtectHook");
-        if (isPlugin(toCheck, "WorldGuard") && pluginManager.isPluginEnabled("WorldGuard"))
-            PluginHooks.isWorldGuardEnabled = enable;
-        if (isPlugin(toCheck, "WildTools") && pluginManager.isPluginEnabled("WildTools"))
-            PluginHooks.isWildToolsEnabled = enable;
         if (isPlugin(toCheck, "ProtocolLib") && pluginManager.isPluginEnabled("ProtocolLib"))
             registerHook("ProtocolLibHook");
         if (isPlugin(toCheck, "MergedSpawner") && pluginManager.isPluginEnabled("MergedSpawner"))
-            PluginHooks.isMergedSpawnersEnabled = enable;
+            handleEntityStackingInsideEvent = enable;
         if (enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
             registerHook("NovucsHook");
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin")) {
@@ -451,8 +448,8 @@ public final class ProvidersHandler {
     }
 
     public boolean canCreateBarrel(ItemStack itemStack) {
-        for(CustomItemProvider customItemProvider : customItemProviders) {
-            if(!customItemProvider.canCreateBarrel(itemStack))
+        for (CustomItemProvider customItemProvider : customItemProviders) {
+            if (!customItemProvider.canCreateBarrel(itemStack))
                 return false;
         }
 
@@ -523,6 +520,14 @@ public final class ProvidersHandler {
         }
 
         return null;
+    }
+
+    public boolean handleEntityStackingInsideEvent() {
+        return handleEntityStackingInsideEvent;
+    }
+
+    public boolean handleEntityStackingWithDelay() {
+        return handleEntityStackingWithDelay;
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {

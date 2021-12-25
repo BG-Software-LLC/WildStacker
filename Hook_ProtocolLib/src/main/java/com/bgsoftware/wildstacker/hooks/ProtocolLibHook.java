@@ -14,7 +14,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -73,11 +72,6 @@ public final class ProtocolLibHook {
 
             event.setCancelled(true);
 
-            if (!PluginHooks.isProtocolLibEnabled) {
-                event.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-                return;
-            }
-
             if (plugin.getSystemManager().hasEntityNamesToggledOff(event.getPlayer())) {
                 Locale.ENTITY_NAMES_TOGGLE_ON.send(event.getPlayer());
             } else {
@@ -102,11 +96,6 @@ public final class ProtocolLibHook {
                 return;
 
             event.setCancelled(true);
-
-            if (!PluginHooks.isProtocolLibEnabled) {
-                event.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-                return;
-            }
 
             if (plugin.getSystemManager().hasItemNamesToggledOff(event.getPlayer())) {
                 Locale.ITEM_NAMES_TOGGLE_ON.send(event.getPlayer());

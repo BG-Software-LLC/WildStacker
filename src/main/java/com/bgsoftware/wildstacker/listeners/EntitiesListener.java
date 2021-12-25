@@ -5,7 +5,6 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -717,7 +716,7 @@ public final class EntitiesListener implements Listener {
         if (stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!plugin.getSettings().spawnersStackingEnabled && !PluginHooks.isMergedSpawnersEnabled &&
+        if (!plugin.getSettings().spawnersStackingEnabled && plugin.getProviders().handleEntityStackingInsideEvent() &&
                 spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
@@ -729,7 +728,7 @@ public final class EntitiesListener implements Listener {
         //Need to add a delay so eggs will get removed from inventory
         if (spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
                 entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
-                entity.getType() == EntityType.SNOWMAN || PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
+                entity.getType() == EntityType.SNOWMAN || plugin.getProviders().handleEntityStackingWithDelay())
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
