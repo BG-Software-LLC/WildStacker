@@ -25,7 +25,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
 import com.bgsoftware.wildstacker.listeners.plugins.ClearLaggListener;
 import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EchoPetListener;
@@ -331,8 +330,15 @@ public final class ProvidersHandler {
             EpicSpawnersListener.register(plugin);
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
             registerHook("CrazyEnchantmentsHook");
-        if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss"))
-            BossListener.register(plugin);
+        if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss")) {
+            Plugin boss = pluginManager.getPlugin("Boss");
+            if(boss.getDescription().getVersion().startsWith("3.4")) {
+                registerHook("Boss34Hook");
+            }
+            else {
+                registerHook("Boss39Hook");
+            }
+        }
         if (enable && isPlugin(toCheck, "EliteBosses") && pluginManager.isPluginEnabled("EliteBosses"))
             pluginManager.registerEvents(new EliteBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "JetsMinions") && pluginManager.isPluginEnabled("JetsMinions"))

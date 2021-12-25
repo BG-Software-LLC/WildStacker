@@ -47,4 +47,6 @@ include 'Hook_WildTools'
 include 'Hook_FastAsyncWorldEdit'
 include 'Hook_Slimefun'
 include 'Hook_Vault'
+include 'Hook_Boss34'
+include 'Hook_Boss39'
 
