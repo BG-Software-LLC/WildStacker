@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -154,7 +153,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
     }
 
     private boolean isSimilar(ItemStack barrelItem) {
-        return barrelItem != null && !SlimefunHook.isSlimefunItem(barrelItem) &&
+        return barrelItem != null && !plugin.getProviders().canCreateBarrel(barrelItem) &&
                 this.barrelItem.getType() == barrelItem.getType() &&
                 (!ServerVersion.isLegacy() || this.barrelItem.getDurability() == barrelItem.getDurability());
     }

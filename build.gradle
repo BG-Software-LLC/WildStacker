@@ -73,7 +73,6 @@ dependencies {
     compileOnly 'com.sk89q:WorldEdit-7:latest'
     compileOnly 'net.splodgebox:EliteBosses:latest'
     compileOnly 'me.jet315:JetsMinions:latest'
-    compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
     compileOnly 'me.derpy:MoreBosses:latest'
     compileOnly 'me.hexedhero:PinataParty:latest'
     compileOnly 'com.kirelcodes:MiniaturePets:2.6.0'

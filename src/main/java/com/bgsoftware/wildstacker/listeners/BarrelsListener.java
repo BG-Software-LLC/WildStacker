@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -58,7 +57,7 @@ public final class BarrelsListener implements Listener {
         if (!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if (!isBarrelBlock(e.getBlock()) || SlimefunHook.isSlimefunItem(e.getItemInHand()))
+        if (!isBarrelBlock(e.getBlock()) || !plugin.getProviders().canCreateBarrel(e.getItemInHand()))
             return;
 
         if (ItemUtils.isOffHand(e)) {

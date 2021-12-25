@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ConflictPluginFixer;
+import com.bgsoftware.wildstacker.hooks.CustomItemProvider;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.EntityNameProvider;
 import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
@@ -13,7 +14,6 @@ import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
-import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
@@ -70,6 +70,7 @@ public final class ProvidersHandler {
     private final List<EntitySimilarityProvider> entitySimilarityProviders = new ArrayList<>();
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
+    private final List<CustomItemProvider> customItemProviders = new ArrayList<>();
     private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
@@ -264,6 +265,15 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadCustomItemProviders() {
+        customItemProviders.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("Slimefun")) {
+            Optional<CustomItemProvider> customItemProvider = createInstance("CustomItemProvider_Slimefun");
+            customItemProvider.ifPresent(customItemProviders::add);
+        }
+    }
+
     private void loadDataSerializers() {
         if (Bukkit.getPluginManager().isPluginEnabled("NBTInjector")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
@@ -353,8 +363,6 @@ public final class ProvidersHandler {
             registerHook("FabledSkyblockHook");
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             registerHook("SuperiorSkyblockHook");
-        if (isPlugin(toCheck, "Slimefun") && pluginManager.isPluginEnabled("Slimefun"))
-            SlimefunHook.setEnabled(enable);
     }
 
     public SpawnersProvider getSpawnersProvider() {
@@ -415,6 +423,15 @@ public final class ProvidersHandler {
         }
 
         return false;
+    }
+
+    public boolean canCreateBarrel(ItemStack itemStack) {
+        for(CustomItemProvider customItemProvider : customItemProviders) {
+            if(!customItemProvider.canCreateBarrel(itemStack))
+                return false;
+        }
+
+        return true;
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
