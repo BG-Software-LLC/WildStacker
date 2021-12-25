@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
+import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
@@ -41,10 +42,12 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -66,6 +69,7 @@ public final class ProvidersHandler {
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
     private final List<EntitySimilarityProvider> entitySimilarityProviders = new ArrayList<>();
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
+    private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
@@ -251,6 +255,15 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadItemEnchantProviders() {
+        itemEnchantProviders.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("WildTools")) {
+            Optional<ItemEnchantProvider> itemEnchantProvider = createInstance("ItemEnchantProvider_WildTools");
+            itemEnchantProvider.ifPresent(itemEnchantProviders::add);
+        }
+    }
+
     private void loadDataSerializers() {
         if (Bukkit.getPluginManager().isPluginEnabled("NBTInjector")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
@@ -386,6 +399,15 @@ public final class ProvidersHandler {
         }
 
         return StackCheckResult.SUCCESS;
+    }
+
+    public boolean hasEnchantmentLevel(ItemStack itemStack, Enchantment enchantment, int requiredLevel) {
+        for(ItemEnchantProvider itemEnchantProvider : itemEnchantProviders) {
+            if(itemEnchantProvider.hasEnchantmentLevel(itemStack, enchantment, requiredLevel))
+                return true;
+        }
+
+        return false;
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {

@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.WildToolsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -384,7 +383,10 @@ public final class ItemUtils {
         if (itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
-        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= plugin.getSettings().silkTouchMinimumLevel;
+        int requiredLevel = plugin.getSettings().silkTouchMinimumLevel;
+
+        return plugin.getProviders().hasEnchantmentLevel(itemStack, Enchantment.SILK_TOUCH, requiredLevel) ||
+                itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= requiredLevel;
     }
 
     public static Location getSafeDropLocation(Location origin) {
