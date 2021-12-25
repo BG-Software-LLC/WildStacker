@@ -25,7 +25,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.CustomBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EchoPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EliteBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicBossesListener;
@@ -316,7 +315,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "SilkSpawners") && pluginManager.isPluginEnabled("SilkSpawners"))
             registerHook("SilkSpawnersHook");
         if (enable && isPlugin(toCheck, "CustomBosses") && pluginManager.isPluginEnabled("CustomBosses"))
-            pluginManager.registerEvents(new CustomBossesListener(), plugin);
+            registerHook("CustomBossesHook");
         if (enable && isPlugin(toCheck, "EpicBosses") && pluginManager.isPluginEnabled("EpicBosses"))
             pluginManager.registerEvents(new EpicBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))

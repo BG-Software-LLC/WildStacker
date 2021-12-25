@@ -1,0 +1,13 @@
+group 'Hook_CustomBosses'
+
+dependencies {
+    compileOnly 'net.aminecraftdev:CustomBosses:latest'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_custombosses') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_custombosses").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}
