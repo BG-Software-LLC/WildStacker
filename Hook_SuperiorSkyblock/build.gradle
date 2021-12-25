@@ -1,7 +1,7 @@
 group 'Hook_SuperiorSkyblock'
 
 dependencies {
-    compileOnly 'com.bgsoftware:SuperiorSkyblockAPI:1.8.2.415'
+    compileOnly 'com.bgsoftware:SuperiorSkyblockAPI:1.8.2'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent
