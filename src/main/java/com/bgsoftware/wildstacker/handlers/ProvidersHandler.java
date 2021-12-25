@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
@@ -322,7 +321,7 @@ public final class ProvidersHandler {
         if (isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
             registerHook("JobsHook");
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
-            PluginHook_FabledSkyblock.register(plugin);
+            registerHook("FabledSkyblockHook");
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             SuperiorSkyblockHook.register(plugin);
         if (isPlugin(toCheck, "Slimefun") && pluginManager.isPluginEnabled("Slimefun"))

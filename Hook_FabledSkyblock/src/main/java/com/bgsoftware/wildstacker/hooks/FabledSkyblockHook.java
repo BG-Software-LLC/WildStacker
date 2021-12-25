@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -21,62 +22,49 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class PluginHook_FabledSkyblock implements Calculator {
+public final class FabledSkyblockHook {
 
-    private final WildStackerPlugin plugin;
-    private Map<Island, QueuedIslandScan> inScan = new HashMap<>();
-    private Field amountsField;
+    private static final ReflectField<Map<CompatibleMaterial, BlockAmount>> ISLAND_SCAN_AMOUNTS =
+            new ReflectField<>(QueuedIslandScan.class, Map.class, "amounts");
 
-    private PluginHook_FabledSkyblock(WildStackerPlugin plugin) {
-        this.plugin = plugin;
-        try {
-            Field scanField = IslandLevelManager.class.getDeclaredField("inScan");
-            scanField.setAccessible(true);
-            //noinspection unchecked
-            inScan = (Map<Island, QueuedIslandScan>) scanField.get(SkyBlock.getInstance().getLevellingManager());
-
-            amountsField = QueuedIslandScan.class.getDeclaredField("amounts");
-            amountsField.setAccessible(true);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+    private static WildStackerPlugin plugin;
+    private static Map<Island, QueuedIslandScan> inScan;
 
     public static void register(WildStackerPlugin plugin) {
-        PluginHook_FabledSkyblock calculator = new PluginHook_FabledSkyblock(plugin);
+        FabledSkyblockHook.plugin = plugin;
+        WildStackerCalculator calculator = new WildStackerCalculator();
         CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.SPAWNER);
         CalculatorRegistry.registerCalculator(calculator, CompatibleMaterial.CAULDRON);
         Bukkit.getPluginManager().registerEvents(new FabledListener(), plugin);
+        inScan = new ReflectField<Map<Island, QueuedIslandScan>>(IslandLevelManager.class,
+                Map.class, "inScan").get(SkyBlock.getInstance().getLevellingManager());
     }
 
-    @Override
-    public long getAmount(Block block) {
-        if (plugin.getSystemManager().isStackedSpawner(block)) {
-            return WStackedSpawner.of(block).getStackAmount();
-        } else if (plugin.getSystemManager().isStackedBarrel(block)) {
-            Island island = SkyBlockAPI.getIslandManager().getIslandAtLocation(block.getLocation()).getIsland();
-            QueuedIslandScan islandScan = inScan.get(island);
-            if (islandScan != null) {
-                try {
-                    //noinspection unchecked
-                    Map<CompatibleMaterial, BlockAmount> amounts = (Map<CompatibleMaterial, BlockAmount>) amountsField.get(islandScan);
+    private static final class WildStackerCalculator implements Calculator {
+
+        @Override
+        public long getAmount(Block block) {
+            if (plugin.getSystemManager().isStackedSpawner(block)) {
+                return WStackedSpawner.of(block).getStackAmount();
+            } else if (plugin.getSystemManager().isStackedBarrel(block)) {
+                Island island = SkyBlockAPI.getIslandManager().getIslandAtLocation(block.getLocation()).getIsland();
+                QueuedIslandScan islandScan = inScan.get(island);
+                if (islandScan != null) {
+                    Map<CompatibleMaterial, BlockAmount> amounts = ISLAND_SCAN_AMOUNTS.get(islandScan);
                     StackedBarrel stackedBarrel = WStackedBarrel.of(block);
                     CompatibleMaterial barrelMaterial = CompatibleMaterial.getMaterial(stackedBarrel.getBarrelItem(1));
                     amounts.computeIfAbsent(barrelMaterial, s -> new BlockAmount(0)).increaseAmount(stackedBarrel.getStackAmount());
                     BlockAmount cauldronAmount = amounts.computeIfAbsent(CompatibleMaterial.CAULDRON, s -> new BlockAmount(0));
                     cauldronAmount.setAmount(cauldronAmount.getAmount() - 1);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
                 }
             }
+
+            return 0;
         }
 
-        return 0;
     }
 
     private static final class FabledListener implements Listener {

@@ -69,7 +69,6 @@ dependencies {
     compileOnly 'com.dsh105:EchoPet:latest'
     compileOnly 'com.songoda:EpicBosses:latest'
     compileOnly 'com.songoda:EpicSpawners-7:latest'
-    compileOnly 'com.songoda:FabledSkyblock:latest'
 
     compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
 
