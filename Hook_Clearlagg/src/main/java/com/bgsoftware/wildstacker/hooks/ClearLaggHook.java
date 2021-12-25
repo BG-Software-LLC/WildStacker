@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 @SuppressWarnings("unused")
-public final class ClearLaggHook implements Listener {
+public final class ClearLaggHook {
 
     private static long lastTime = 0;
 
