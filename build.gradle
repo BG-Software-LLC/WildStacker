@@ -81,7 +81,6 @@ dependencies {
     compileOnly 'io.lumine:MythicMobs:latest'
     compileOnly 'net.novucs:FactionsTop:latest'
 
-    compileOnly 'com.github.intellectualsites:PlotSquared-5:latest'
     compileOnly 'com.github.intellectualsites:PlotSquared-Legacy:latest'
 
     compileOnly 'com.comphenix:ProtocolLib:latest'

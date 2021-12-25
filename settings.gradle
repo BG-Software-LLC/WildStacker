@@ -24,4 +24,5 @@ include 'Hook_Citizens'
 include 'Hook_FactionsUUID'
 include 'Hook_MassiveFactions'
 include 'Hook_PlotSquared4'
+include 'Hook_PlotSquared5'
 

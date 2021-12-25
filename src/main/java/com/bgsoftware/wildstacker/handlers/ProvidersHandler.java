@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV5;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
@@ -154,7 +153,8 @@ public final class ProvidersHandler {
                     ex.printStackTrace();
                 }
             } else if (plugin.getDescription().getVersion().startsWith("5.")) {
-                claimsProviders.add(new ClaimsProvider_PlotSquaredV5());
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared5");
+                claimsProvider.ifPresent(claimsProviders::add);
             } else if (plugin.getDescription().getMain().contains("com.github")) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared4");
                 claimsProvider.ifPresent(claimsProviders::add);
