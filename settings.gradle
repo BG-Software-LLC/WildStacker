@@ -9,7 +9,6 @@
 
 rootProject.name = 'WildStacker'
 include 'API'
-include 'Hooks_WorldGuardOld'
 include 'Hooks_EpicSpawners5Listener'
 include 'Hooks_EpicSpawners6Listener'
 include 'v1_7_R4'
@@ -26,4 +25,6 @@ include 'Hook_PlotSquared4'
 include 'Hook_PlotSquared5'
 include 'Hook_PlotSquared6'
 include 'Hook_PlotSquaredLegacy'
+include 'Hook_WorldGuard7'
+include 'Hook_WorldGuard6'
 

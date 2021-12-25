@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
 import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
@@ -15,6 +14,7 @@ import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
+import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.ShopGUIPlusHook;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
@@ -61,8 +61,9 @@ public final class ProvidersHandler {
     private final WildStackerPlugin plugin;
 
     private SpawnersProvider spawnersProvider;
-    private List<ClaimsProvider> claimsProviders;
+    private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
     private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
+    private final List<RegionsProvider> regionsProviders = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -73,6 +74,8 @@ public final class ProvidersHandler {
 
             loadSpawnersProvider();
             loadClaimsProvider();
+            loadEntityTypeProviders();
+            loadRegionsProviders();
             loadPluginHooks(plugin, null, true);
 
             Bukkit.getPluginManager().registerEvents(new ProvidersListener(plugin), plugin);
@@ -131,7 +134,7 @@ public final class ProvidersHandler {
     }
 
     private void loadClaimsProvider() {
-        claimsProviders = new ArrayList<>();
+        claimsProviders.clear();
 
         if (Bukkit.getPluginManager().isPluginEnabled("Factions")) {
             if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock")) {
@@ -163,15 +166,41 @@ public final class ProvidersHandler {
                 claimsProvider.ifPresent(claimsProviders::add);
             }
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
-            claimsProviders.add(new ClaimsProvider_WorldGuard());
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("WorldGuard");
+            if (plugin.getDescription().getVersion().startsWith("6")) {
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_WorldGuard6");
+                claimsProvider.ifPresent(claimsProviders::add);
+            }
+            else {
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_WorldGuard7");
+                claimsProvider.ifPresent(claimsProviders::add);
+            }
+        }
     }
 
     private void loadEntityTypeProviders() {
         entityTypeProviders.clear();
+
         if (Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
             Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_Citizens");
             entityTypeProvider.ifPresent(entityTypeProviders::add);
+        }
+    }
+
+    private void loadRegionsProviders() {
+        regionsProviders.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("WorldGuard");
+            if (plugin.getDescription().getVersion().startsWith("6")) {
+                Optional<RegionsProvider> regionsProvider = createInstance("RegionsProvider_WorldGuard6");
+                regionsProvider.ifPresent(regionsProviders::add);
+            }
+            else {
+                Optional<RegionsProvider> regionsProvider = createInstance("RegionsProvider_WorldGuard7");
+                regionsProvider.ifPresent(regionsProviders::add);
+            }
         }
     }
 
@@ -269,6 +298,12 @@ public final class ProvidersHandler {
         }
 
         return null;
+    }
+
+    public List<String> getRegionNames(Location location) {
+        List<String> regions = new ArrayList<>();
+        regionsProviders.forEach(regionsProvider -> regions.addAll(regionsProvider.getRegionNames(location)));
+        return regions;
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {

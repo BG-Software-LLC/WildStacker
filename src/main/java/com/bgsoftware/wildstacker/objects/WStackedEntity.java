@@ -13,7 +13,6 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
@@ -246,8 +245,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         if (PluginHooks.isWorldGuardEnabled && !plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
             Set<String> regions = new HashSet<>();
-            regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
-            regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
+            regions.addAll(plugin.getProviders().getRegionNames(targetEntity.getLivingEntity().getLocation()));
+            regions.addAll(plugin.getProviders().getRegionNames(object.getLocation()));
             if (regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
                 return StackCheckResult.DISABLED_REGION;
         }
