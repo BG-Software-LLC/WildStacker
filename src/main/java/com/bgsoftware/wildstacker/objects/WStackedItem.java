@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -359,9 +358,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         int givenAmount = originalStackAmount - finalStackAmount;
 
-        if (givenAmount > 0 && inventory instanceof PlayerInventory)
-            CoreProtectHook.recordItemPickup((Player) ((PlayerInventory) inventory).getHolder(),
-                    this, givenAmount);
+        if (givenAmount > 0 && inventory instanceof PlayerInventory) {
+            plugin.getProviders().notifyStackedItemListeners((Player) ((PlayerInventory) inventory).getHolder(),
+                    object, givenAmount);
+        }
     }
 
     @Override

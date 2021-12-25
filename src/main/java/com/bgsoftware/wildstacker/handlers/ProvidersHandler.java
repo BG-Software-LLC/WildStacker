@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
@@ -22,6 +21,8 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
+import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.BossListener;
@@ -43,7 +44,11 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -64,6 +69,8 @@ public final class ProvidersHandler {
     private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
     private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
+    private final List<IStackedBlockListener> stackedBlocksListener = new ArrayList<>();
+    private final List<IStackedItemListener> stackedItemsListener = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -140,8 +147,7 @@ public final class ProvidersHandler {
             if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock")) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_FactionsUUID");
                 claimsProvider.ifPresent(claimsProviders::add);
-            }
-            else {
+            } else {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_MassiveFactions");
                 claimsProvider.ifPresent(claimsProviders::add);
             }
@@ -171,8 +177,7 @@ public final class ProvidersHandler {
             if (plugin.getDescription().getVersion().startsWith("6")) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_WorldGuard6");
                 claimsProvider.ifPresent(claimsProviders::add);
-            }
-            else {
+            } else {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_WorldGuard7");
                 claimsProvider.ifPresent(claimsProviders::add);
             }
@@ -196,8 +201,7 @@ public final class ProvidersHandler {
             if (plugin.getDescription().getVersion().startsWith("6")) {
                 Optional<RegionsProvider> regionsProvider = createInstance("RegionsProvider_WorldGuard6");
                 regionsProvider.ifPresent(regionsProviders::add);
-            }
-            else {
+            } else {
                 Optional<RegionsProvider> regionsProvider = createInstance("RegionsProvider_WorldGuard7");
                 regionsProvider.ifPresent(regionsProviders::add);
             }
@@ -247,7 +251,7 @@ public final class ProvidersHandler {
         if (isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO"))
             McMMOHook.setEnabled(enable);
         if (isPlugin(toCheck, "CoreProtect") && pluginManager.isPluginEnabled("CoreProtect"))
-            CoreProtectHook.setEnabled(enable);
+            registerHook("CoreProtectHook");
         if (isPlugin(toCheck, "WorldGuard") && pluginManager.isPluginEnabled("WorldGuard"))
             PluginHooks.isWorldGuardEnabled = enable;
         if (isPlugin(toCheck, "WildTools") && pluginManager.isPluginEnabled("WildTools"))
@@ -304,6 +308,31 @@ public final class ProvidersHandler {
         List<String> regions = new ArrayList<>();
         regionsProviders.forEach(regionsProvider -> regions.addAll(regionsProvider.getRegionNames(location)));
         return regions;
+    }
+
+    public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
+        this.stackedBlocksListener.add(stackedBlockListener);
+    }
+
+    public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Block block,
+                                            IStackedBlockListener.Action action) {
+        // noinspection deprecation
+        notifyStackedBlockListeners(offlinePlayer, block.getLocation(), block.getType(), block.getData(), action);
+    }
+
+    public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Location location, Material type, byte data,
+                                            IStackedBlockListener.Action action) {
+        this.stackedBlocksListener.forEach(stackedBlockListener -> stackedBlockListener
+                .recordBlockChange(offlinePlayer, location, type, data, action));
+    }
+
+    public void registerStackedItemListener(IStackedItemListener stackedItemListener) {
+        this.stackedItemsListener.add(stackedItemListener);
+    }
+
+    public void notifyStackedItemListeners(OfflinePlayer offlinePlayer, Item item, int amount) {
+        this.stackedItemsListener.forEach(stackedItemListener -> stackedItemListener
+                .recordItemPickup(offlinePlayer, item, amount));
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {

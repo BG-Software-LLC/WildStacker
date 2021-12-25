@@ -27,4 +27,5 @@ include 'Hook_PlotSquared6'
 include 'Hook_PlotSquaredLegacy'
 include 'Hook_WorldGuard7'
 include 'Hook_WorldGuard6'
+include 'Hook_CoreProtect'
 

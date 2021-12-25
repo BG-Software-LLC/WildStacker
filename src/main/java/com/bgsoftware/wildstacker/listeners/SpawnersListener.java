@@ -9,9 +9,9 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
+import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
@@ -106,7 +106,7 @@ public final class SpawnersListener implements Listener {
         if (stackedSpawner.runUnstack(breakAmount, player) == UnstackResult.SUCCESS) {
             Block block = stackedSpawner.getLocation().getBlock();
 
-            CoreProtectHook.recordBlockChange(player, block, false);
+            plugin.getProviders().notifyStackedBlockListeners(player, block, IStackedBlockListener.Action.BLOCK_BREAK);
 
             plugin.getProviders().getSpawnersProvider().handleSpawnerBreak(stackedSpawner, player, breakAmount, breakMenu);
 
@@ -280,7 +280,8 @@ public final class SpawnersListener implements Listener {
 
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
-                CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getLocation(), Materials.SPAWNER.toBukkitType(), (byte) 0, true);
+                plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), targetSpawner.getLocation(),
+                        Materials.SPAWNER.toBukkitType(), (byte) 0, IStackedBlockListener.Action.BLOCK_PLACE);
 
                 spawnerItemAmount = targetSpawner.getStackAmount();
             }
