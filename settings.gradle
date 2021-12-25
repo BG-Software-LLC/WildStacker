@@ -55,4 +55,5 @@ include 'Hook_EchoPet'
 include 'Hook_EliteBosses'
 include 'Hook_EpicBosses'
 include 'Hook_JetsMinions'
+include 'Hook_MiniaturePets'
 
