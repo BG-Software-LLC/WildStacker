@@ -1,8 +1,6 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
@@ -14,6 +12,7 @@ import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
@@ -49,24 +48,30 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class ProvidersHandler {
 
+    private final WildStackerPlugin plugin;
+
     private SpawnersProvider spawnersProvider;
     private List<ClaimsProvider> claimsProviders;
+    private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
+        this.plugin = plugin;
+
         Executor.sync(() -> {
             WildStackerPlugin.log("Loading providers started...");
             long startTime = System.currentTimeMillis();
@@ -158,6 +163,14 @@ public final class ProvidersHandler {
             claimsProviders.add(new ClaimsProvider_WorldGuard());
     }
 
+    private void loadEntityTypeProviders() {
+        entityTypeProviders.clear();
+        if(Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
+            Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_Citizens");
+            entityTypeProvider.ifPresent(entityTypeProviders::add);
+        }
+    }
+
     public void loadPluginHooks(WildStackerPlugin plugin, Plugin toCheck, boolean enable) {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
 
@@ -230,11 +243,31 @@ public final class ProvidersHandler {
             SlimefunHook.setEnabled(enable);
     }
 
-    /*
-     * Spawners Provider
-     */
+    public SpawnersProvider getSpawnersProvider() {
+        return spawnersProvider;
+    }
 
-    private boolean isPlugin(Plugin plugin, String pluginName) {
+    public boolean hasClaimAccess(Player player, Location location) {
+        for (ClaimsProvider claimsProvider : claimsProviders) {
+            if (!claimsProvider.hasClaimAccess(player, location))
+                return false;
+        }
+
+        return true;
+    }
+
+    @Nullable
+    public String checkStackEntity(Entity entity) {
+        for(EntityTypeProvider entityTypeProvider : entityTypeProviders) {
+            String failureReason = entityTypeProvider.checkStackEntity(entity);
+            if(failureReason != null)
+                return failureReason;
+        }
+
+        return null;
+    }
+
+    private static boolean isPlugin(Plugin plugin, String pluginName) {
         return plugin == null || plugin.getName().equals(pluginName);
     }
 
@@ -264,37 +297,39 @@ public final class ProvidersHandler {
 
     }
 
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
-        return spawnersProvider.getSpawnerItem(entityType, amount, spawnerUpgrade);
-    }
-
-    public EntityType getSpawnerType(ItemStack itemStack) {
-        return spawnersProvider.getSpawnerType(itemStack);
-    }
-
-    public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
-        spawnersProvider.handleSpawnerExplode(stackedSpawner, entity, ignite, brokenAmount);
-    }
-
-    /*
-     * Claims Provider
-     */
-
-    public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
-        spawnersProvider.handleSpawnerBreak(stackedSpawner, player, brokenAmount, breakMenu);
-    }
-
-    public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack) {
-        spawnersProvider.handleSpawnerPlace(creatureSpawner, itemStack);
-    }
-
-    public boolean hasClaimAccess(Player player, Location location) {
-        for (ClaimsProvider claimsProvider : claimsProviders) {
-            if (!claimsProvider.hasClaimAccess(player, location))
-                return false;
+    private void registerHook(String className) {
+        try {
+            Class<?> clazz = Class.forName("com.bgsoftware.wildstacker.hooks." + className);
+            Method registerMethod = clazz.getMethod("register", WildStackerPlugin.class);
+            registerMethod.invoke(null, plugin);
+        } catch (Exception ignored) {
         }
+    }
 
-        return true;
+    private <T> Optional<T> createInstance(String className) {
+        try {
+            Class<?> clazz = Class.forName("com.bgsoftware.wildstacker.hooks." + className);
+            try {
+                Method compatibleMethod = clazz.getDeclaredMethod("isCompatible");
+                if (!(boolean) compatibleMethod.invoke(null))
+                    return Optional.empty();
+            } catch (Exception ignored) {
+            }
+
+            try {
+                Constructor<?> constructor = clazz.getConstructor(WildStackerPlugin.class);
+                // noinspection unchecked
+                return Optional.of((T) constructor.newInstance(plugin));
+            } catch (Exception error) {
+                // noinspection unchecked
+                return Optional.of((T) clazz.newInstance());
+            }
+        } catch (ClassNotFoundException ignored) {
+            return Optional.empty();
+        } catch (Exception error) {
+            error.printStackTrace();
+            return Optional.empty();
+        }
     }
 
 }

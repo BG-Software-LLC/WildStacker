@@ -66,7 +66,6 @@ dependencies {
     // Plugin hooks
     compileOnly 'org.mineacademy:Boss:latest'
     compileOnly 'org.mineacademy:Boss-3.9.7:latest'
-    compileOnly 'net.citizensnpcs:Citizens:latest'
     compileOnly 'me.minebuilders:Clearlag:latest'
     compileOnly 'net.coreprotect:CoreProtect-6:latest'
     compileOnly 'me.badbones69:CrazyEnchantments:latest'

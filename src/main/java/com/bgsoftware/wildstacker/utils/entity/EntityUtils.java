@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.CitizensHook;
 import com.bgsoftware.wildstacker.hooks.LevelledMobsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -140,7 +139,8 @@ public final class EntityUtils {
 
     public static boolean isStackable(Entity entity) {
         return entity instanceof LivingEntity && (MythicMobsHook.isMythicMob(entity) ||
-                (!entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
+                (!entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) &&
+                        plugin.getProviders().checkStackEntity(entity) == null));
     }
 
     public static void giveExp(Player player, int amount) {
