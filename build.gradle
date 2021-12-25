@@ -58,10 +58,6 @@ dependencies {
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly 'org.spigotmc:v1_16_R3-Tuinity:latest'
     compileOnly 'org.spigotmc:v1_17_R1:latest'
-
-    // Plugin hooks
-    compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
-    compileOnly 'com.sk89q:WorldEdit-7:latest'
 }
 
 jar {
