@@ -15,7 +15,6 @@ import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
-import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDuplicateListener;
@@ -36,7 +35,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.MiniaturePetsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MoreBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
-import com.bgsoftware.wildstacker.listeners.plugins.SuperiorSkyblockListener;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -103,7 +101,7 @@ public final class ProvidersHandler {
         }, 0L);
 
         if (plugin.getSettings().superiorSkyblockHook)
-            Bukkit.getPluginManager().registerEvents(new SuperiorSkyblockListener(), plugin);
+            registerHook("SuperiorSkyblockHook");
 
         Executor.sync(() -> {
             if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
@@ -334,7 +332,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
             registerHook("FabledSkyblockHook");
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
-            SuperiorSkyblockHook.register(plugin);
+            registerHook("SuperiorSkyblockHook");
         if (isPlugin(toCheck, "Slimefun") && pluginManager.isPluginEnabled("Slimefun"))
             SlimefunHook.setEnabled(enable);
     }

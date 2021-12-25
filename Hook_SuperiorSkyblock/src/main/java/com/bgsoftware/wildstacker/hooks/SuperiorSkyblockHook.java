@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
+import com.bgsoftware.superiorskyblock.api.events.PluginInitializeEvent;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.island.IslandFlag;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -12,22 +13,37 @@ import org.bukkit.event.Listener;
 public final class SuperiorSkyblockHook {
 
     private static IslandFlag ENTITIES_STACKING;
+    private static boolean firstTime = true;
+    private static boolean registered = false;
 
     public static void register(WildStackerPlugin plugin) {
-        if (plugin.getSettings().superiorSkyblockHook) {
-            if (ENTITIES_STACKING == null){
-               WildStackerPlugin.log("&cCouldn't register a custom island-flag into SuperiorSkyblock - open an issue on github.");
-               return;
-            }
+        if (!plugin.getSettings().superiorSkyblockHook)
+            return;
 
-            SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
-            plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
+        if (firstTime) {
+            plugin.getServer().getPluginManager().registerEvents(new Listener() {
+                @EventHandler
+                public void onPluginInit(PluginInitializeEvent e) {
+                    IslandFlag.register("ENTITIES_STACKING");
+                    ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
+                }
+            }, plugin);
+            firstTime = false;
+            return;
         }
-    }
 
-    public static void registerIslandFlag(){
-        IslandFlag.register("ENTITIES_STACKING");
-        ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
+        if (registered)
+            return;
+
+        if (ENTITIES_STACKING == null) {
+            WildStackerPlugin.log("&cCouldn't register a custom island-flag into SuperiorSkyblock - open an issue on github.");
+            return;
+        }
+
+        SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
+        plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
+
+        registered = true;
     }
 
     private static class EntityListener implements Listener {
