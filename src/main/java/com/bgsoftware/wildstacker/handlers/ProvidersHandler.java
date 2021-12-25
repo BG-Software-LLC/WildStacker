@@ -15,8 +15,6 @@ import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
-import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
-import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
@@ -142,12 +140,25 @@ public final class ProvidersHandler {
     }
 
     private void loadSpawnersProvider() {
-        if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") &&
-                Bukkit.getPluginManager().getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx"))
-            spawnersProvider = new SpawnersProvider_SilkSpawners();
-        else if (Bukkit.getPluginManager().isPluginEnabled("MineableSpawners"))
-            spawnersProvider = new SpawnersProvider_MineableSpawners();
-        else spawnersProvider = new SpawnersProvider_Default();
+        Optional<SpawnersProvider> spawnersProvider;
+
+        if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && Bukkit.getPluginManager()
+                .getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx")) {
+            //spawnersProvider = new SpawnersProvider_SilkSpawners();
+            spawnersProvider = Optional.empty();
+        }
+        else if (Bukkit.getPluginManager().isPluginEnabled("MineableSpawners")) {
+            spawnersProvider = createInstance("SpawnersProvider_MineableSpawners");
+        }
+        else {
+            spawnersProvider = Optional.of(new SpawnersProvider_Default());
+        }
+
+        spawnersProvider.ifPresent(this::registerSpawnersProvider);
+    }
+
+    private void registerSpawnersProvider(SpawnersProvider spawnersProvider) {
+        this.spawnersProvider = spawnersProvider;
     }
 
     private void loadClaimsProvider() {

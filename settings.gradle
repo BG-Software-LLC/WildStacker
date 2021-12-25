@@ -40,4 +40,5 @@ include 'Hook_Novucs'
 include 'Hook_ProtocolLib'
 include 'Hook_ShopGUIPlus18'
 include 'Hook_ShopGUIPlus20'
+include 'Hook_MinableSpawners'
 

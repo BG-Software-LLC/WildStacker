@@ -73,7 +73,7 @@ dependencies {
     compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
 
 
-    compileOnly 'com.dnyferguson:MineableSpawners:latest'
+
     compileOnly 'de.keyle:MyPet:latest'
 
     compileOnly 'net.brcdev:ShopGUIPlus-1.20:latest'
