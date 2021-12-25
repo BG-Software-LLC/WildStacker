@@ -153,7 +153,7 @@ public final class SpawnerAmountsMenu extends WildMenu {
                 ItemStack itemStack = inventory.getItem(i);
 
                 if (itemStack == null || itemStack.getType() != Materials.SPAWNER.toBukkitType() ||
-                        plugin.getProviders().getSpawnerType(itemStack) != stackedSpawner.getSpawnedType() ||
+                        plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack) != stackedSpawner.getSpawnedType() ||
                         ItemUtils.getSpawnerUpgrade(itemStack) != ((WStackedSpawner) stackedSpawner).getUpgradeId())
                     continue;
 

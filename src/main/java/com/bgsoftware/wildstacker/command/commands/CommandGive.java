@@ -146,7 +146,8 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = plugin.getProviders().getSpawnerItem(entityType, stackSize, spawnerUpgrade);
+            itemStack = plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType,
+                    stackSize, spawnerUpgrade);
 
             reformatItem = false;
         } else if (args[2].equalsIgnoreCase("barrel")) {

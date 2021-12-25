@@ -124,7 +124,7 @@ public final class ItemUtils {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
-        return plugin.getProviders().getSpawnerItem(entityType, amount, spawnerUpgrade);
+        return plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType, amount, spawnerUpgrade);
     }
 
     @SuppressWarnings("deprecation")

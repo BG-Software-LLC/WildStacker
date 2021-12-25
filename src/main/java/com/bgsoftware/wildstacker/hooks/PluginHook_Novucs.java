@@ -50,7 +50,7 @@ public final class PluginHook_Novucs implements SpawnerStackerHook, Listener {
 
     @Override
     public EntityType getSpawnedType(ItemStack itemStack) {
-        return instance.getProviders().getSpawnerType(itemStack);
+        return instance.getProviders().getSpawnersProvider().getSpawnerType(itemStack);
     }
 
     @Override

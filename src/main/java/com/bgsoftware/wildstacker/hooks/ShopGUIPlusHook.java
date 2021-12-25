@@ -37,12 +37,12 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(EntityType entityType) {
-            return plugin.getProviders().getSpawnerItem(entityType, 1, null);
+            return plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType, 1, null);
         }
 
         @Override
         public EntityType getSpawnerEntityType(ItemStack itemStack) {
-            return plugin.getProviders().getSpawnerType(itemStack);
+            return plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack);
         }
 
         boolean register() {
@@ -68,12 +68,13 @@ public final class ShopGUIPlusHook {
 
         @Override
         public ItemStack getSpawnerItem(String entityId, String customName) {
-            return plugin.getProviders().getSpawnerItem(EntityType.valueOf(entityId), 1, null);
+            return plugin.getProviders().getSpawnersProvider().getSpawnerItem(EntityType.valueOf(entityId),
+                    1, null);
         }
 
         @Override
         public String getSpawnerEntityId(ItemStack itemStack) {
-            return plugin.getProviders().getSpawnerType(itemStack).name();
+            return plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack).name();
         }
 
         @Override
