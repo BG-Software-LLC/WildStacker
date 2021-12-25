@@ -16,4 +16,5 @@ public final class ClaimsProvider_FactionsUUID implements ClaimsProvider {
         Faction faction = Board.getInstance().getFactionAt(new FLocation(location));
         return faction.isWilderness() || fPlayer.isAdminBypassing() || (fPlayer.hasFaction() && fPlayer.getFaction().equals(faction));
     }
+
 }

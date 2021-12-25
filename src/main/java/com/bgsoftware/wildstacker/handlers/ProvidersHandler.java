@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_FactionsUUID;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
@@ -90,7 +89,7 @@ public final class ProvidersHandler {
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 0L);
 
-        if(plugin.getSettings().superiorSkyblockHook)
+        if (plugin.getSettings().superiorSkyblockHook)
             Bukkit.getPluginManager().registerEvents(new SuperiorSkyblockListener(), plugin);
 
         Executor.sync(() -> {
@@ -137,11 +136,15 @@ public final class ProvidersHandler {
 
     private void loadClaimsProvider() {
         claimsProviders = new ArrayList<>();
+
         if (Bukkit.getPluginManager().isPluginEnabled("Factions")) {
-            if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock"))
-                claimsProviders.add(new ClaimsProvider_FactionsUUID());
-            else
+            if (Bukkit.getPluginManager().getPlugin("Factions").getDescription().getAuthors().contains("drtshock")) {
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_FactionsUUID");
+                claimsProvider.ifPresent(claimsProviders::add);
+            }
+            else {
                 claimsProviders.add(new ClaimsProvider_MassiveFactions());
+            }
         }
         if (Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
@@ -165,7 +168,7 @@ public final class ProvidersHandler {
 
     private void loadEntityTypeProviders() {
         entityTypeProviders.clear();
-        if(Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
             Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_Citizens");
             entityTypeProvider.ifPresent(entityTypeProviders::add);
         }
@@ -258,9 +261,9 @@ public final class ProvidersHandler {
 
     @Nullable
     public String checkStackEntity(Entity entity) {
-        for(EntityTypeProvider entityTypeProvider : entityTypeProviders) {
+        for (EntityTypeProvider entityTypeProvider : entityTypeProviders) {
             String failureReason = entityTypeProvider.checkStackEntity(entity);
-            if(failureReason != null)
+            if (failureReason != null)
                 return failureReason;
         }
 

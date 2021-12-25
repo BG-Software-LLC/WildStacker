@@ -71,7 +71,6 @@ dependencies {
     compileOnly 'com.songoda:EpicSpawners-7:latest'
     compileOnly 'com.songoda:FabledSkyblock:latest'
     compileOnly 'com.massivecraft:Factions:latest'
-    compileOnly 'com.drtshock:FactionsUUID:latest'
     compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
     compileOnly 'de.tr7zw:ItemNBTAPI:latest'
     compileOnly 'com.massivecraft:MassiveCore:latest'
