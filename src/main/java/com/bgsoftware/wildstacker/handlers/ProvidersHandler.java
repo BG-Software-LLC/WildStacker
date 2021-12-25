@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV5;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_WorldGuard;
@@ -157,7 +156,8 @@ public final class ProvidersHandler {
             } else if (plugin.getDescription().getVersion().startsWith("5.")) {
                 claimsProviders.add(new ClaimsProvider_PlotSquaredV5());
             } else if (plugin.getDescription().getMain().contains("com.github")) {
-                claimsProviders.add(new ClaimsProvider_PlotSquared());
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared4");
+                claimsProvider.ifPresent(claimsProviders::add);
             } else {
                 claimsProviders.add(new ClaimsProvider_PlotSquaredLegacy());
             }

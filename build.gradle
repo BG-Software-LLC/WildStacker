@@ -80,9 +80,10 @@ dependencies {
     compileOnly 'de.keyle:MyPet:latest'
     compileOnly 'io.lumine:MythicMobs:latest'
     compileOnly 'net.novucs:FactionsTop:latest'
-    compileOnly 'com.github.intellectualsites:PlotSquared-4:latest'
+
     compileOnly 'com.github.intellectualsites:PlotSquared-5:latest'
     compileOnly 'com.github.intellectualsites:PlotSquared-Legacy:latest'
+
     compileOnly 'com.comphenix:ProtocolLib:latest'
     compileOnly 'net.brcdev:ShopGUIPlus-1.18:latest'
     compileOnly 'net.brcdev:ShopGUIPlus-1.20:latest'

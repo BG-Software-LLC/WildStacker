@@ -23,4 +23,5 @@ include 'v1_18_R1'
 include 'Hook_Citizens'
 include 'Hook_FactionsUUID'
 include 'Hook_MassiveFactions'
+include 'Hook_PlotSquared4'
 
