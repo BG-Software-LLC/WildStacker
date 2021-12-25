@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.CrazyEnchantmentsHook;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
@@ -233,7 +232,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "EpicSpawners") && doesClassExist("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))
             EpicSpawnersListener.register(plugin);
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
-            CrazyEnchantmentsHook.register();
+            registerHook("CrazyEnchantmentsHook");
         if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss"))
             BossListener.register(plugin);
         if (enable && isPlugin(toCheck, "EliteBosses") && pluginManager.isPluginEnabled("EliteBosses"))

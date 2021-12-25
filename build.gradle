@@ -64,7 +64,7 @@ dependencies {
     compileOnly 'org.mineacademy:Boss-3.9.7:latest'
     compileOnly 'me.minebuilders:Clearlag:latest'
 
-    compileOnly 'me.badbones69:CrazyEnchantments:latest'
+
     compileOnly 'net.aminecraftdev:CustomBosses:latest'
     compileOnly 'com.dsh105:EchoPet:latest'
     compileOnly 'com.songoda:EpicBosses:latest'

@@ -1,0 +1,13 @@
+group 'Hook_CrazyEnchantments'
+
+dependencies {
+    compileOnly 'me.badbones69:CrazyEnchantments:latest'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_crazyenchantments') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_crazyenchantments").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}
