@@ -44,4 +44,5 @@ include 'Hook_MinableSpawners'
 include 'Hook_SilkSpawners'
 include 'Hook_SuperiorSkyblock'
 include 'Hook_WildTools'
+include 'Hook_FastAsyncWorldEdit'
 

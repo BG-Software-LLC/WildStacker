@@ -4,11 +4,11 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
+import com.bgsoftware.wildstacker.hooks.ConflictPluginFixer;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.EntityNameProvider;
 import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
-import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -70,6 +70,7 @@ public final class ProvidersHandler {
     private final List<EntitySimilarityProvider> entitySimilarityProviders = new ArrayList<>();
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
+    private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
@@ -92,11 +93,12 @@ public final class ProvidersHandler {
             loadEntitySimilarityProviders();
             loadEntityNameProviders();
             loadDataSerializers();
+            loadConflictPluginFixers();
             loadPluginHooks(plugin, null, true);
 
             Bukkit.getPluginManager().registerEvents(new ProvidersListener(plugin), plugin);
 
-            fixConflicts(plugin);
+            this.conflictPluginFixers.forEach(ConflictPluginFixer::fixConflict);
 
             if (hasPaperEntityRemoveSupport())
                 Bukkit.getPluginManager().registerEvents(new PaperListener(), plugin);
@@ -146,11 +148,9 @@ public final class ProvidersHandler {
         if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && Bukkit.getPluginManager()
                 .getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx")) {
             spawnersProvider = createInstance("SpawnersProvider_SilkSpawners");
-        }
-        else if (Bukkit.getPluginManager().isPluginEnabled("MineableSpawners")) {
+        } else if (Bukkit.getPluginManager().isPluginEnabled("MineableSpawners")) {
             spawnersProvider = createInstance("SpawnersProvider_MineableSpawners");
-        }
-        else {
+        } else {
             spawnersProvider = Optional.of(new SpawnersProvider_Default());
         }
 
@@ -270,6 +270,15 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadConflictPluginFixers() {
+        conflictPluginFixers.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit")) {
+            Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit");
+            conflictPluginFixer.ifPresent(conflictPluginFixers::add);
+        }
+    }
+
     public void loadPluginHooks(WildStackerPlugin plugin, Plugin toCheck, boolean enable) {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
 
@@ -328,8 +337,6 @@ public final class ProvidersHandler {
             EconomyHook.setEnabled(enable);
         if (isPlugin(toCheck, "MergedSpawner") && pluginManager.isPluginEnabled("MergedSpawner"))
             PluginHooks.isMergedSpawnersEnabled = enable;
-        if (isPlugin(toCheck, "FastAsyncWorldEdit") && pluginManager.isPluginEnabled("FastAsyncWorldEdit"))
-            PluginHooks.isFastAsyncWorldEditEnabled = enable;
         if (enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
             registerHook("NovucsHook");
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin")) {
@@ -402,8 +409,8 @@ public final class ProvidersHandler {
     }
 
     public boolean hasEnchantmentLevel(ItemStack itemStack, Enchantment enchantment, int requiredLevel) {
-        for(ItemEnchantProvider itemEnchantProvider : itemEnchantProviders) {
-            if(itemEnchantProvider.hasEnchantmentLevel(itemStack, enchantment, requiredLevel))
+        for (ItemEnchantProvider itemEnchantProvider : itemEnchantProviders) {
+            if (itemEnchantProvider.hasEnchantmentLevel(itemStack, enchantment, requiredLevel))
                 return true;
         }
 
@@ -478,32 +485,6 @@ public final class ProvidersHandler {
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {
         return plugin == null || plugin.getName().equals(pluginName);
-    }
-
-    private void fixConflicts(WildStackerPlugin plugin) {
-        List<String> messages = new ArrayList<>();
-        if (PluginHooks.isEpicSpawnersEnabled) {
-            messages.add("Detected EpicSpawners - Disabling spawners stacking...");
-        }
-        if (PluginHooks.isMergedSpawnersEnabled) {
-            messages.add("Detected MergedSpawner - Disabling spawners stacking...");
-        }
-        if (PluginHooks.isFastAsyncWorldEditEnabled && plugin.getSettings().itemsStackingEnabled) {
-            //WildStacker disabled the tick limiter for items.
-            try {
-                FastAsyncWEHook.disableTicksLimiter();
-                messages.add("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");
-            } catch (Throwable ignored) {
-            }
-        }
-
-        if (!messages.isEmpty()) {
-            WildStackerPlugin.log("");
-            for (String msg : messages)
-                WildStackerPlugin.log(msg);
-            WildStackerPlugin.log("");
-        }
-
     }
 
     private void registerHook(String className) {
