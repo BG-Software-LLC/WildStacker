@@ -59,4 +59,7 @@ include 'Hook_MiniaturePets'
 include 'Hook_MoreBosses'
 include 'Hook_MyPet'
 include 'Hook_PinataParty'
+include 'Hook_EpicSpawners5'
+include 'Hook_EpicSpawners6'
+include 'Hook_EpicSpawners7'
 

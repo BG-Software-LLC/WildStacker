@@ -25,7 +25,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -316,8 +315,18 @@ public final class ProvidersHandler {
             registerHook("MyPetHook");
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
-        if (enable && isPlugin(toCheck, "EpicSpawners") && doesClassExist("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))
-            EpicSpawnersListener.register(plugin);
+        if (enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners")) {
+            Plugin epicSpawners = pluginManager.getPlugin("EpicSpawners");
+            if(epicSpawners.getDescription().getVersion().startsWith("5")) {
+                registerHook("EpicSpawners5Hook");
+            }
+            else if(epicSpawners.getDescription().getVersion().startsWith("6")) {
+                registerHook("EpicSpawners6Hook");
+            }
+            else if(epicSpawners.getDescription().getVersion().startsWith("7")) {
+                registerHook("EpicSpawners7Hook");
+            }
+        }
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
             registerHook("CrazyEnchantmentsHook");
         if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss")) {
