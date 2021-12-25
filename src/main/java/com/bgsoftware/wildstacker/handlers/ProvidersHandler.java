@@ -24,6 +24,7 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
+import com.bgsoftware.wildstacker.hooks.listeners.IEntityDuplicateListener;
 import com.bgsoftware.wildstacker.hooks.listeners.INameChangeListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
@@ -40,7 +41,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.JetsMinionsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MiniaturePetsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MoreBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
-import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SuperiorSkyblockListener;
@@ -75,11 +75,13 @@ public final class ProvidersHandler {
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
     private final List<EntitySimilarityProvider> entitySimilarityProviders = new ArrayList<>();
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
+
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
     private final List<IEntityDeathListener> entityDeathListeners = new ArrayList<>();
     private final List<IEntityCombatListener> entityCombatListeners = new ArrayList<>();
     private final List<INameChangeListener> nameChangeListeners = new ArrayList<>();
+    private final List<IEntityDuplicateListener> entityDuplicateListeners = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -92,6 +94,8 @@ public final class ProvidersHandler {
             loadClaimsProvider();
             loadEntityTypeProviders();
             loadRegionsProviders();
+            loadEntitySimilarityProviders();
+            loadEntityNameProviders();
             loadDataSerializers();
             loadPluginHooks(plugin, null, true);
 
@@ -225,13 +229,21 @@ public final class ProvidersHandler {
             Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_LevelledMobs");
             entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
         }
+        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
+            Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs");
+            entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
+        }
     }
 
     private void loadEntityNameProviders() {
         entityNameProviders.clear();
 
         if (Bukkit.getPluginManager().isPluginEnabled("LevelledMobs")) {
-            Optional<EntityNameProvider> entityNameProvider = createInstance("EntitySimilarityProvider_LevelledMobs");
+            Optional<EntityNameProvider> entityNameProvider = createInstance("EntityNameProvider_LevelledMobs");
+            entityNameProvider.ifPresent(entityNameProviders::add);
+        }
+        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
+            Optional<EntityNameProvider> entityNameProvider = createInstance("EntityNameProvider_MythicMobs");
             entityNameProvider.ifPresent(entityNameProviders::add);
         }
     }
@@ -257,7 +269,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "EpicBosses") && pluginManager.isPluginEnabled("EpicBosses"))
             pluginManager.registerEvents(new EpicBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
-            pluginManager.registerEvents(new MythicMobsListener(), plugin);
+            registerHook("MythicMobs");
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
             pluginManager.registerEvents(new MyPetListener(), plugin);
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
@@ -417,6 +429,21 @@ public final class ProvidersHandler {
 
     public void notifyNameChangeListeners(Entity entity) {
         this.nameChangeListeners.forEach(nameChangeListener -> nameChangeListener.notifyNameChange(entity));
+    }
+
+    public void registerEntityDuplicateListener(IEntityDuplicateListener entityDuplicateListener) {
+        this.entityDuplicateListeners.add(entityDuplicateListener);
+    }
+
+    @Nullable
+    public <T extends LivingEntity> T tryDuplicateEntity(T entity) {
+        for(IEntityDuplicateListener entityDuplicateListener : entityDuplicateListeners) {
+            T duplicated = entityDuplicateListener.duplicateEntity(entity);
+            if(duplicated != null)
+                return duplicated;
+        }
+
+        return null;
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {

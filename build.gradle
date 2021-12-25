@@ -76,7 +76,6 @@ dependencies {
 
     compileOnly 'com.dnyferguson:MineableSpawners:latest'
     compileOnly 'de.keyle:MyPet:latest'
-    compileOnly 'io.lumine:MythicMobs:latest'
     compileOnly 'net.novucs:FactionsTop:latest'
 
     compileOnly 'com.comphenix:ProtocolLib:latest'

@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -440,23 +439,24 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (amount <= 0)
             return null;
 
-        LivingEntity _duplicate;
+        StackedEntity duplicate;
 
-        if (getSpawnCause() == SpawnCause.MYTHIC_MOBS && (_duplicate = MythicMobsHook.tryDuplicate(object)) != null) {
-            StackedEntity duplicate = WStackedEntity.of(_duplicate);
+        LivingEntity customDuplicate = plugin.getProviders().tryDuplicateEntity(object);
+        if(customDuplicate != null) {
+            duplicate = WStackedEntity.of(customDuplicate);
             duplicate.setStackAmount(amount, true);
-            return duplicate;
         }
+        else {
+            duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
+                    object.getLocation(), getType().getEntityClass(), spawnCause));
 
-        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
-                object.getLocation(), getType().getEntityClass(), spawnCause));
+            duplicate.setStackAmount(amount, true);
 
-        duplicate.setStackAmount(amount, true);
+            plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());
 
-        plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());
-
-        if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
-            duplicate.getLivingEntity().setFireTicks(160);
+            if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
+                duplicate.getLivingEntity().setFireTicks(160);
+        }
 
         EventsCaller.callDuplicateSpawnEvent(this, duplicate);
 
