@@ -6,7 +6,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.ConflictPluginFixer;
 import com.bgsoftware.wildstacker.hooks.CustomItemProvider;
-import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.hooks.EconomyProvider;
+import com.bgsoftware.wildstacker.hooks.EconomyProvider_Default;
 import com.bgsoftware.wildstacker.hooks.EntityNameProvider;
 import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
@@ -64,6 +65,7 @@ public final class ProvidersHandler {
     private final WildStackerPlugin plugin;
 
     private SpawnersProvider spawnersProvider;
+    private EconomyProvider economyProvider;
     private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
     private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
@@ -160,6 +162,22 @@ public final class ProvidersHandler {
 
     private void registerSpawnersProvider(SpawnersProvider spawnersProvider) {
         this.spawnersProvider = spawnersProvider;
+    }
+
+    private void loadEconomyProvider() {
+        Optional<EconomyProvider> economyProvider;
+
+        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+            economyProvider = createInstance("EconomyProvider_Vault");
+        } else {
+            economyProvider = Optional.of(new EconomyProvider_Default());
+        }
+
+        economyProvider.ifPresent(this::registerEconomyProvider);
+    }
+
+    private void registerEconomyProvider(EconomyProvider economyProvider) {
+        this.economyProvider = economyProvider;
     }
 
     private void loadClaimsProvider() {
@@ -343,8 +361,6 @@ public final class ProvidersHandler {
             PluginHooks.isWildToolsEnabled = enable;
         if (isPlugin(toCheck, "ProtocolLib") && pluginManager.isPluginEnabled("ProtocolLib"))
             registerHook("ProtocolLibHook");
-        if (isPlugin(toCheck, "Vault") && pluginManager.isPluginEnabled("Vault"))
-            EconomyHook.setEnabled(enable);
         if (isPlugin(toCheck, "MergedSpawner") && pluginManager.isPluginEnabled("MergedSpawner"))
             PluginHooks.isMergedSpawnersEnabled = enable;
         if (enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
@@ -367,6 +383,10 @@ public final class ProvidersHandler {
 
     public SpawnersProvider getSpawnersProvider() {
         return spawnersProvider;
+    }
+
+    public EconomyProvider getEconomyProvider() {
+        return economyProvider;
     }
 
     public boolean hasClaimAccess(Player player, Location location) {

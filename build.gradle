@@ -68,7 +68,6 @@ dependencies {
     compileOnly 'com.songoda:EpicBosses:latest'
     compileOnly 'com.songoda:EpicSpawners-7:latest'
     compileOnly 'de.keyle:MyPet:latest'
-    compileOnly 'net.milkbowl:Vault:latest'
     compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
     compileOnly 'com.sk89q:WorldEdit-7:latest'
     compileOnly 'net.splodgebox:EliteBosses:latest'
