@@ -1,0 +1,13 @@
+group 'Hook_EliteBosses'
+
+dependencies {
+    compileOnly 'net.splodgebox:EliteBosses:latest'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_elitebosses') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_elitebosses").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

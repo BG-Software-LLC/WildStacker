@@ -65,7 +65,6 @@ dependencies {
     compileOnly 'de.keyle:MyPet:latest'
     compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
     compileOnly 'com.sk89q:WorldEdit-7:latest'
-    compileOnly 'net.splodgebox:EliteBosses:latest'
     compileOnly 'me.jet315:JetsMinions:latest'
     compileOnly 'me.derpy:MoreBosses:latest'
     compileOnly 'me.hexedhero:PinataParty:latest'
