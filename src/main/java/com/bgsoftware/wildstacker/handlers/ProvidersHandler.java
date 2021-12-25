@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.ShopGUIPlusHook;
 import com.bgsoftware.wildstacker.hooks.SlimefunHook;
@@ -306,7 +305,7 @@ public final class ProvidersHandler {
         if (isPlugin(toCheck, "WildTools") && pluginManager.isPluginEnabled("WildTools"))
             PluginHooks.isWildToolsEnabled = enable;
         if (isPlugin(toCheck, "ProtocolLib") && pluginManager.isPluginEnabled("ProtocolLib"))
-            ProtocolLibHook.setEnabled(enable);
+            registerHook("ProtocolLibHook");
         if (isPlugin(toCheck, "Vault") && pluginManager.isPluginEnabled("Vault"))
             EconomyHook.setEnabled(enable);
         if (isPlugin(toCheck, "MergedSpawner") && pluginManager.isPluginEnabled("MergedSpawner"))

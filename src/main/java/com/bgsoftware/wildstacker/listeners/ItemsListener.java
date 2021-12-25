@@ -1,12 +1,9 @@
 package com.bgsoftware.wildstacker.listeners;
 
-import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EggLayEvent;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.listeners.events.ScuteDropEvent;
@@ -18,7 +15,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
@@ -34,7 +30,6 @@ import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -104,10 +99,10 @@ public final class ItemsListener implements Listener {
     }
 
     @EventHandler
-    public void g(PlayerInteractEvent e){
-        if(e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")){
-            for(Entity entity : e.getPlayer().getNearbyEntities(5, 5, 5)){
-                if(entity instanceof Zombie)
+    public void g(PlayerInteractEvent e) {
+        if (e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")) {
+            for (Entity entity : e.getPlayer().getNearbyEntities(5, 5, 5)) {
+                if (entity instanceof Zombie)
                     ((Zombie) entity).setCanPickupItems(true);
             }
         }
@@ -196,10 +191,9 @@ public final class ItemsListener implements Listener {
                     });
                 }
             } else if (plugin.getNMSAdapter().handleEquipmentPickup(e.getEntity(), item)) {
-                if(stackAmount <= 1){
+                if (stackAmount <= 1) {
                     stackedItem.remove();
-                }
-                else {
+                } else {
                     stackedItem.decreaseStackAmount(1, true);
                 }
             } else {
@@ -244,40 +238,9 @@ public final class ItemsListener implements Listener {
             e.setCancelled(true);
             stackedItem.giveItemStack(e.getInventory());
             InventoryHolder inventoryHolder = e.getInventory().getHolder();
-            if(inventoryHolder instanceof Hopper)
+            if (inventoryHolder instanceof Hopper)
                 ((Hopper) inventoryHolder).getBlock().getState().update();
         }
-    }
-
-    @EventHandler
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (!plugin.getSettings().itemsNamesToggleEnabled)
-            return;
-
-        String commandSyntax = "/" + plugin.getSettings().itemsNamesToggleCommand;
-
-        if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
-            return;
-
-        e.setCancelled(true);
-
-        if (!PluginHooks.isProtocolLibEnabled) {
-            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-            return;
-        }
-
-        if (plugin.getSystemManager().hasItemNamesToggledOff(e.getPlayer())) {
-            Locale.ITEM_NAMES_TOGGLE_ON.send(e.getPlayer());
-        } else {
-            Locale.ITEM_NAMES_TOGGLE_OFF.send(e.getPlayer());
-        }
-
-        plugin.getSystemManager().toggleItemNames(e.getPlayer());
-
-        //Refresh item names
-        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
-                        entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
-                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
     private boolean isChunkLimit(Chunk chunk) {

@@ -1,13 +1,11 @@
 package com.bgsoftware.wildstacker.listeners;
 
-import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -26,7 +24,6 @@ import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
@@ -65,7 +62,6 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
@@ -580,37 +576,6 @@ public final class EntitiesListener implements Listener {
             }
         }
 
-    }
-
-    @EventHandler
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (!plugin.getSettings().entitiesNamesToggleEnabled)
-            return;
-
-        String commandSyntax = "/" + plugin.getSettings().entitiesNamesToggleCommand;
-
-        if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
-            return;
-
-        e.setCancelled(true);
-
-        if (!PluginHooks.isProtocolLibEnabled) {
-            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-            return;
-        }
-
-        if (plugin.getSystemManager().hasEntityNamesToggledOff(e.getPlayer())) {
-            Locale.ENTITY_NAMES_TOGGLE_ON.send(e.getPlayer());
-        } else {
-            Locale.ENTITY_NAMES_TOGGLE_OFF.send(e.getPlayer());
-        }
-
-        plugin.getSystemManager().toggleEntityNames(e.getPlayer());
-
-        //Refresh item names
-        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
-                        EntityUtils.isStackable(entity) && plugin.getNMSAdapter().isCustomNameVisible(entity))
-                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

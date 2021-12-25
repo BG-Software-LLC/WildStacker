@@ -37,4 +37,5 @@ include 'Hook_McMMO2'
 include 'Hook_MythicMobs'
 include 'Hook_FabledSkyblock'
 include 'Hook_Novucs'
+include 'Hook_ProtocolLib'
 
