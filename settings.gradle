@@ -58,4 +58,5 @@ include 'Hook_JetsMinions'
 include 'Hook_MiniaturePets'
 include 'Hook_MoreBosses'
 include 'Hook_MyPet'
+include 'Hook_PinataParty'
 
