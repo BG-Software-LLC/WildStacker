@@ -51,4 +51,5 @@ include 'Hook_Boss34'
 include 'Hook_Boss39'
 include 'Hook_Clearlagg'
 include 'Hook_CustomBosses'
+include 'Hook_EchoPet'
 
