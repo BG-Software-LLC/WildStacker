@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -8,34 +9,24 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import de.tr7zw.nbtapi.NBTCompound;
 import de.tr7zw.nbtinjector.NBTInjector;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 
-import java.lang.reflect.Field;
-
+@SuppressWarnings("unused")
 public final class DataSerializer_NBTInjector implements IDataSerializer, Listener {
 
-    private static Field ENTITY_FIELD = null;
+    private static final ReflectField<Entity> ENTITY_FIELD = new ReflectField<>(EntityEvent.class, Entity.class, "entity");
 
-    static {
-        try {
-            ENTITY_FIELD = EntityEvent.class.getDeclaredField("entity");
-            ENTITY_FIELD.setAccessible(true);
-        } catch (Throwable ignored) {
+    public DataSerializer_NBTInjector(WildStackerPlugin plugin) {
+        if (NBTInjector.isInjected()) {
+            plugin.getSystemManager().setDataSerializer(this);
+            Bukkit.getPluginManager().registerEvents(this, plugin);
+            WildStackerPlugin.log("- Using NBTInjector to store entity data.");
         }
-    }
-
-    private DataSerializer_NBTInjector(WildStackerPlugin plugin) {
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-        WildStackerPlugin.log("- Using NBTInjector to store entity data.");
-    }
-
-    public static void register(WildStackerPlugin plugin) {
-        if (NBTInjector.isInjected())
-            plugin.getSystemManager().setDataSerializer(new DataSerializer_NBTInjector(plugin));
     }
 
     @Override
@@ -72,13 +63,9 @@ public final class DataSerializer_NBTInjector implements IDataSerializer, Listen
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onEntitySpawn(EntitySpawnEvent e) {
-        if (ENTITY_FIELD != null) {
-            try {
-                ENTITY_FIELD.set(e, NBTInjector.patchEntity(e.getEntity()));
-            } catch (Exception ignored) {
-            }
-        }
+    public void onEntitySpawn(EntitySpawnEvent event) {
+        if(ENTITY_FIELD.isValid())
+            ENTITY_FIELD.set(event, NBTInjector.patchEntity(event.getEntity()));
     }
 
 }

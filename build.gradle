@@ -72,7 +72,6 @@ dependencies {
     compileOnly 'com.songoda:FabledSkyblock:latest'
 
     compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
-    compileOnly 'de.tr7zw:ItemNBTAPI:latest'
 
     compileOnly 'com.nossr50:mcMMO-2:latest'
     compileOnly 'com.nossr50:mcMMO-1:latest'

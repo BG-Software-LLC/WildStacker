@@ -2,10 +2,10 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.DataSerializer_NBTInjector;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
+import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
@@ -82,6 +82,7 @@ public final class ProvidersHandler {
             loadClaimsProvider();
             loadEntityTypeProviders();
             loadRegionsProviders();
+            loadDataSerializers();
             loadPluginHooks(plugin, null, true);
 
             Bukkit.getPluginManager().registerEvents(new ProvidersListener(plugin), plugin);
@@ -207,6 +208,12 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadDataSerializers() {
+        if (Bukkit.getPluginManager().isPluginEnabled("NBTInjector")) {
+            Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
+        }
+    }
+
     public void loadPluginHooks(WildStackerPlugin plugin, Plugin toCheck, boolean enable) {
         PluginManager pluginManager = plugin.getServer().getPluginManager();
 
@@ -273,8 +280,6 @@ public final class ProvidersHandler {
             PluginHook_FabledSkyblock.register(plugin);
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             SuperiorSkyblockHook.register(plugin);
-        if (enable && isPlugin(toCheck, "NBTInjector") && doesClassExist("de.tr7zw.nbtinjector.NBTInjector"))
-            DataSerializer_NBTInjector.register(plugin);
         if (isPlugin(toCheck, "Slimefun") && pluginManager.isPluginEnabled("Slimefun"))
             SlimefunHook.setEnabled(enable);
     }
