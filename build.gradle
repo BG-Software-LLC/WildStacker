@@ -75,7 +75,6 @@ dependencies {
 
     compileOnly 'com.dnyferguson:MineableSpawners:latest'
     compileOnly 'de.keyle:MyPet:latest'
-    compileOnly 'net.novucs:FactionsTop:latest'
 
     compileOnly 'com.comphenix:ProtocolLib:latest'
     compileOnly 'net.brcdev:ShopGUIPlus-1.18:latest'

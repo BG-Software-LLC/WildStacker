@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
@@ -315,7 +314,7 @@ public final class ProvidersHandler {
         if (isPlugin(toCheck, "FastAsyncWorldEdit") && pluginManager.isPluginEnabled("FastAsyncWorldEdit"))
             PluginHooks.isFastAsyncWorldEditEnabled = enable;
         if (enable && isPlugin(toCheck, "FactionsTop") && doesClassExist("net.novucs.ftop.FactionsTopPlugin"))
-            PluginHook_Novucs.setEnabled(plugin);
+            registerHook("NovucsHook");
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin"))
             ShopGUIPlusHook.setEnabled();
         if (isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
