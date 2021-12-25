@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.loot.LootTable;
@@ -172,8 +171,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
-                //We update cached values of mcmmo
-                McMMOHook.updateCachedName(object);
+                plugin.getProviders().notifyNameChangeListeners(object);
             });
         } catch (NullPointerException ignored) {
         }

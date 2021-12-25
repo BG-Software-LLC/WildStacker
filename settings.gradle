@@ -32,4 +32,6 @@ include 'Hook_CrazyEnchantments'
 include 'Hook_NBTInjector'
 include 'Hook_Jobs'
 include 'Hook_LevelledMobs'
+include 'Hook_McMMO'
+include 'Hook_McMMO2'
 

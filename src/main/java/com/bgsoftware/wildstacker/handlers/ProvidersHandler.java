@@ -10,7 +10,6 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
 import com.bgsoftware.wildstacker.hooks.PluginHooks;
@@ -23,7 +22,9 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
+import com.bgsoftware.wildstacker.hooks.listeners.INameChangeListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
@@ -77,6 +78,8 @@ public final class ProvidersHandler {
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
     private final List<IEntityDeathListener> entityDeathListeners = new ArrayList<>();
+    private final List<IEntityCombatListener> entityCombatListeners = new ArrayList<>();
+    private final List<INameChangeListener> nameChangeListeners = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -277,8 +280,15 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new MiniaturePetsListener(), plugin);
 
         //Load plugin hooks
-        if (isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO"))
-            McMMOHook.setEnabled(enable);
+        if (isPlugin(toCheck, "mcMMO") && pluginManager.isPluginEnabled("mcMMO")) {
+            Plugin mcmmo = pluginManager.getPlugin("mcMMO");
+            if(mcmmo.getDescription().getVersion().startsWith("1")) {
+                registerHook("McMMOHook");
+            }
+            else {
+                registerHook("McMMO2Hook");
+            }
+        }
         if (isPlugin(toCheck, "CoreProtect") && pluginManager.isPluginEnabled("CoreProtect"))
             registerHook("CoreProtectHook");
         if (isPlugin(toCheck, "WorldGuard") && pluginManager.isPluginEnabled("WorldGuard"))
@@ -389,6 +399,24 @@ public final class ProvidersHandler {
 
     public void notifyEntityDeathListeners(StackedEntity stackedEntity, IEntityDeathListener.Type type) {
         this.entityDeathListeners.forEach(entityDeathListener -> entityDeathListener.handleDeath(stackedEntity, type));
+    }
+
+    public void registerEntityCombatListener(IEntityCombatListener entityCombatListener) {
+        this.entityCombatListeners.add(entityCombatListener);
+    }
+
+    public void notifyEntityCombatListeners(LivingEntity livingEntity, Player killer,
+                                            Entity entityDamager, double finalDamage) {
+        this.entityCombatListeners.forEach(entityCombatListener -> entityCombatListener.handleCombat(livingEntity,
+                killer, entityDamager, finalDamage));
+    }
+
+    public void registerNameChangeListener(INameChangeListener nameChangeListener) {
+        this.nameChangeListeners.add(nameChangeListener);
+    }
+
+    public void notifyNameChangeListeners(Entity entity) {
+        this.nameChangeListeners.forEach(nameChangeListener -> nameChangeListener.notifyNameChange(entity));
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {
