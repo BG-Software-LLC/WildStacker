@@ -148,9 +148,10 @@ public final class ProvidersHandler {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
             if (plugin.getDescription().getVersion().startsWith("6.")) {
                 try {
-                    claimsProviders.add((ClaimsProvider) Class.forName("com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV6").newInstance());
+                    Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared6");
+                    claimsProvider.ifPresent(claimsProviders::add);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    WildStackerPlugin.log("&cYour version of PlotSquared is not supported. Please contact Ome_R for support.");
                 }
             } else if (plugin.getDescription().getVersion().startsWith("5.")) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared5");

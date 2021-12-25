@@ -7,7 +7,7 @@ import com.plotsquared.core.plot.Plot;
 import com.plotsquared.core.plot.PlotArea;
 import org.bukkit.entity.Player;
 
-public final class ClaimsProvider_PlotSquaredV6 implements ClaimsProvider {
+public final class ClaimsProvider_PlotSquared6 implements ClaimsProvider {
 
     private final PlotSquared instance = PlotSquared.get();
 
@@ -15,8 +15,10 @@ public final class ClaimsProvider_PlotSquaredV6 implements ClaimsProvider {
     public boolean hasClaimAccess(Player player, org.bukkit.Location location) {
         Plot plot = getPlot(location);
         Plot playerLocationPlot = getPlot(player.getLocation());
+
         if (plot != null && playerLocationPlot != null && !plot.getId().equals(playerLocationPlot.getId()))
             return false;
+
         return plot == null || player.hasPermission("plots.admin.build.other") ||
                 plot.isOwner(player.getUniqueId()) || plot.isAdded(player.getUniqueId());
     }
