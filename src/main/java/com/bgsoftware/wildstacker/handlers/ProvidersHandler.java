@@ -26,7 +26,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.JetsMinionsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MiniaturePetsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MoreBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
@@ -337,7 +336,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "EliteBosses") && pluginManager.isPluginEnabled("EliteBosses"))
             registerHook("EliteBossesHook");
         if (enable && isPlugin(toCheck, "JetsMinions") && pluginManager.isPluginEnabled("JetsMinions"))
-            pluginManager.registerEvents(new JetsMinionsListener(), plugin);
+            registerHook("JetsMinionsHook");
         if (enable && isPlugin(toCheck, "Morebosses") && pluginManager.isPluginEnabled("Morebosses"))
             pluginManager.registerEvents(new MoreBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "PinataParty") && pluginManager.isPluginEnabled("PinataParty"))
