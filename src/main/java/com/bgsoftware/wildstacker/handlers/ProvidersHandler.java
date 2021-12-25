@@ -26,7 +26,6 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.EpicSpawnersListener;
-import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -315,7 +314,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
             registerHook("MythicMobs");
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
-            pluginManager.registerEvents(new MyPetListener(), plugin);
+            registerHook("MyPetHook");
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
         if (enable && isPlugin(toCheck, "EpicSpawners") && doesClassExist("com.songoda.epicspawners.api.events.SpawnerSpawnEvent"))

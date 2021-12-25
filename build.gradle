@@ -61,7 +61,6 @@ dependencies {
 
     // Plugin hooks
     compileOnly 'com.songoda:EpicSpawners-7:latest'
-    compileOnly 'de.keyle:MyPet:latest'
     compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
     compileOnly 'com.sk89q:WorldEdit-7:latest'
     compileOnly 'me.hexedhero:PinataParty:latest'
