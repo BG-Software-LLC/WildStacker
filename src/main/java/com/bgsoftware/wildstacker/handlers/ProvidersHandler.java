@@ -36,7 +36,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.MiniaturePetsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MoreBossesListener;
 import com.bgsoftware.wildstacker.listeners.plugins.MyPetListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
-import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SuperiorSkyblockListener;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -144,8 +143,7 @@ public final class ProvidersHandler {
 
         if (Bukkit.getPluginManager().isPluginEnabled("SilkSpawners") && Bukkit.getPluginManager()
                 .getPlugin("SilkSpawners").getDescription().getAuthors().contains("xGhOsTkiLLeRx")) {
-            //spawnersProvider = new SpawnersProvider_SilkSpawners();
-            spawnersProvider = Optional.empty();
+            spawnersProvider = createInstance("SpawnersProvider_SilkSpawners");
         }
         else if (Bukkit.getPluginManager().isPluginEnabled("MineableSpawners")) {
             spawnersProvider = createInstance("SpawnersProvider_MineableSpawners");
@@ -270,7 +268,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "ClearLag") && pluginManager.isPluginEnabled("ClearLag"))
             pluginManager.registerEvents(new ClearLaggListener(plugin), plugin);
         if (enable && isPlugin(toCheck, "SilkSpawners") && pluginManager.isPluginEnabled("SilkSpawners"))
-            pluginManager.registerEvents(new SilkSpawnersListener(plugin), plugin);
+            registerHook("SilkSpawnersHook");
         if (enable && isPlugin(toCheck, "CustomBosses") && pluginManager.isPluginEnabled("CustomBosses"))
             pluginManager.registerEvents(new CustomBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "EpicBosses") && pluginManager.isPluginEnabled("EpicBosses"))

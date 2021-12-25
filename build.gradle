@@ -76,8 +76,6 @@ dependencies {
 
     compileOnly 'de.keyle:MyPet:latest'
 
-    compileOnly 'net.brcdev:ShopGUIPlus-1.20:latest'
-    compileOnly 'de.dustplanet:SilkSpawners:latest'
     compileOnly 'com.bgsoftware:SuperiorSkyblockAPI:latest'
     compileOnly 'net.milkbowl:Vault:latest'
     compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
