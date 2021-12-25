@@ -70,10 +70,10 @@ dependencies {
     compileOnly 'com.songoda:EpicBosses:latest'
     compileOnly 'com.songoda:EpicSpawners-7:latest'
     compileOnly 'com.songoda:FabledSkyblock:latest'
-    compileOnly 'com.massivecraft:Factions:latest'
+
     compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
     compileOnly 'de.tr7zw:ItemNBTAPI:latest'
-    compileOnly 'com.massivecraft:MassiveCore:latest'
+
     compileOnly 'com.nossr50:mcMMO-2:latest'
     compileOnly 'com.nossr50:mcMMO-1:latest'
     compileOnly 'com.dnyferguson:MineableSpawners:latest'

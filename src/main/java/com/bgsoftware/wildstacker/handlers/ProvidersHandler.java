@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
-import com.bgsoftware.wildstacker.hooks.ClaimsProvider_MassiveFactions;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquared;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredLegacy;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider_PlotSquaredV5;
@@ -143,7 +142,8 @@ public final class ProvidersHandler {
                 claimsProvider.ifPresent(claimsProviders::add);
             }
             else {
-                claimsProviders.add(new ClaimsProvider_MassiveFactions());
+                Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_MassiveFactions");
+                claimsProvider.ifPresent(claimsProviders::add);
             }
         }
         if (Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
