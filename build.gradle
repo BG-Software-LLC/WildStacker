@@ -7,22 +7,32 @@ plugins {
 group 'WildStacker'
 version = "3.6.1"
 
-subprojects {
+allprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
         maven { url 'https://repo.bg-software.com/repository/nms/' }
+        maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
+        maven { url 'https://repo.bg-software.com/repository/public-libs/' }
+
+        String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
+        String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
+
+        if (mavenUsername != null && mavenPassword != null) {
+            maven {
+                url 'https://repo.bg-software.com/repository/private-libs/'
+                credentials {
+                    username mavenUsername
+                    password mavenPassword
+                }
+            }
+        }
     }
 
     dependencies {
-        compileOnly 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
-    }
-
-    shadowJar {
-        archiveFileName = "${project.name}.jar"
-        destinationDirectory = file("../archive/")
+        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
     }
 
     build {
@@ -30,25 +40,11 @@ subprojects {
     }
 }
 
-repositories {
-    maven { url 'https://repo.bg-software.com/repository/nms/' }
-    maven { url 'https://repo.bg-software.com/repository/api/' }
-    maven { url 'https://repo.bg-software.com/repository/common/' }
-    maven { url 'https://repo.bg-software.com/repository/public-libs/' }
-
-    String mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : System.getenv('mavenUsername');
-    String mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : System.getenv('mavenPassword');
-
-    if(mavenUsername != null && mavenPassword != null) {
-        maven {
-            url 'https://repo.bg-software.com/repository/private-libs/'
-            credentials {
-                username mavenUsername
-                password mavenPassword
-            }
-        }
+subprojects {
+    shadowJar {
+        archiveFileName = "${project.name}.jar"
+        destinationDirectory = file("../archive/")
     }
-
 }
 
 dependencies {
