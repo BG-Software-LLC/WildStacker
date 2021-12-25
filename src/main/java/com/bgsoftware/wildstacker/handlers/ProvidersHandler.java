@@ -1,12 +1,12 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.hooks.JobsHook;
 import com.bgsoftware.wildstacker.hooks.McMMOHook;
 import com.bgsoftware.wildstacker.hooks.PluginHook_FabledSkyblock;
 import com.bgsoftware.wildstacker.hooks.PluginHook_Novucs;
@@ -20,6 +20,7 @@ import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_MineableSpawners;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_SilkSpawners;
 import com.bgsoftware.wildstacker.hooks.SuperiorSkyblockHook;
+import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
@@ -68,8 +69,9 @@ public final class ProvidersHandler {
     private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
     private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
-    private final List<IStackedBlockListener> stackedBlocksListener = new ArrayList<>();
-    private final List<IStackedItemListener> stackedItemsListener = new ArrayList<>();
+    private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
+    private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
+    private final List<IEntityDeathListener> entityDeathListeners = new ArrayList<>();
 
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -275,7 +277,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "ShopGUIPlus") && doesClassExist("net.brcdev.shopgui.ShopGuiPlugin"))
             ShopGUIPlusHook.setEnabled();
         if (isPlugin(toCheck, "Jobs") && pluginManager.isPluginEnabled("Jobs"))
-            JobsHook.setEnabled(enable);
+            registerHook("JobsHook");
         if (enable && isPlugin(toCheck, "FabledSkyBlock") && pluginManager.isPluginEnabled("FabledSkyBlock"))
             PluginHook_FabledSkyblock.register(plugin);
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
@@ -315,7 +317,7 @@ public final class ProvidersHandler {
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
-        this.stackedBlocksListener.add(stackedBlockListener);
+        this.stackedBlocksListeners.add(stackedBlockListener);
     }
 
     public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Block block,
@@ -326,17 +328,25 @@ public final class ProvidersHandler {
 
     public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Location location, Material type, byte data,
                                             IStackedBlockListener.Action action) {
-        this.stackedBlocksListener.forEach(stackedBlockListener -> stackedBlockListener
+        this.stackedBlocksListeners.forEach(stackedBlockListener -> stackedBlockListener
                 .recordBlockChange(offlinePlayer, location, type, data, action));
     }
 
     public void registerStackedItemListener(IStackedItemListener stackedItemListener) {
-        this.stackedItemsListener.add(stackedItemListener);
+        this.stackedItemsListeners.add(stackedItemListener);
     }
 
     public void notifyStackedItemListeners(OfflinePlayer offlinePlayer, Item item, int amount) {
-        this.stackedItemsListener.forEach(stackedItemListener -> stackedItemListener
+        this.stackedItemsListeners.forEach(stackedItemListener -> stackedItemListener
                 .recordItemPickup(offlinePlayer, item, amount));
+    }
+
+    public void registerEntityDeathListener(IEntityDeathListener entityDeathListener) {
+        this.entityDeathListeners.add(entityDeathListener);
+    }
+
+    public void notifyEntityDeathListeners(StackedEntity stackedEntity, IEntityDeathListener.Type type) {
+        this.entityDeathListeners.forEach(entityDeathListener -> entityDeathListener.handleDeath(stackedEntity, type));
     }
 
     private static boolean isPlugin(Plugin plugin, String pluginName) {

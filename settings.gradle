@@ -30,4 +30,5 @@ include 'Hook_WorldGuard6'
 include 'Hook_CoreProtect'
 include 'Hook_CrazyEnchantments'
 include 'Hook_NBTInjector'
+include 'Hook_Jobs'
 
