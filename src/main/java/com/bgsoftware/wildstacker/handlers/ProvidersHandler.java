@@ -1,9 +1,12 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.ClaimsProvider;
 import com.bgsoftware.wildstacker.hooks.EconomyHook;
+import com.bgsoftware.wildstacker.hooks.EntityNameProvider;
+import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.FastAsyncWEHook;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
@@ -40,7 +43,6 @@ import com.bgsoftware.wildstacker.listeners.plugins.MythicMobsListener;
 import com.bgsoftware.wildstacker.listeners.plugins.PinataPartyListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SilkSpawnersListener;
 import com.bgsoftware.wildstacker.listeners.plugins.SuperiorSkyblockListener;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -49,6 +51,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -69,6 +72,8 @@ public final class ProvidersHandler {
     private final List<ClaimsProvider> claimsProviders = new ArrayList<>();
     private final List<EntityTypeProvider> entityTypeProviders = new ArrayList<>();
     private final List<RegionsProvider> regionsProviders = new ArrayList<>();
+    private final List<EntitySimilarityProvider> entitySimilarityProviders = new ArrayList<>();
+    private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
     private final List<IEntityDeathListener> entityDeathListeners = new ArrayList<>();
@@ -210,6 +215,24 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadEntitySimilarityProviders() {
+        entitySimilarityProviders.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("LevelledMobs")) {
+            Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_LevelledMobs");
+            entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
+        }
+    }
+
+    private void loadEntityNameProviders() {
+        entityNameProviders.clear();
+
+        if (Bukkit.getPluginManager().isPluginEnabled("LevelledMobs")) {
+            Optional<EntityNameProvider> entityNameProvider = createInstance("EntitySimilarityProvider_LevelledMobs");
+            entityNameProvider.ifPresent(entityNameProviders::add);
+        }
+    }
+
     private void loadDataSerializers() {
         if (Bukkit.getPluginManager().isPluginEnabled("NBTInjector")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
@@ -232,8 +255,6 @@ public final class ProvidersHandler {
             pluginManager.registerEvents(new EpicBossesListener(), plugin);
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs"))
             pluginManager.registerEvents(new MythicMobsListener(), plugin);
-        if (enable && isPlugin(toCheck, "LevelledMobs") && pluginManager.isPluginEnabled("LevelledMobs"))
-            PluginHooks.isLevelledMobsEnabled = ServerVersion.isAtLeast(ServerVersion.v1_14);
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
             pluginManager.registerEvents(new MyPetListener(), plugin);
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
@@ -314,6 +335,27 @@ public final class ProvidersHandler {
         List<String> regions = new ArrayList<>();
         regionsProviders.forEach(regionsProvider -> regions.addAll(regionsProvider.getRegionNames(location)));
         return regions;
+    }
+
+    @Nullable
+    public String getCustomName(LivingEntity livingEntity) {
+        for(EntityNameProvider entityNameProvider : entityNameProviders) {
+            String customName = entityNameProvider.getCustomName(livingEntity);
+            if(customName != null)
+                return customName;
+        }
+
+        return null;
+    }
+
+    public StackCheckResult areSimilar(Entity entity, Entity other) {
+        for(EntitySimilarityProvider entitySimilarityProvider : entitySimilarityProviders) {
+            StackCheckResult stackCheckResult = entitySimilarityProvider.areSimilar(entity, other);
+            if(stackCheckResult != StackCheckResult.SUCCESS)
+                return stackCheckResult;
+        }
+
+        return StackCheckResult.SUCCESS;
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {

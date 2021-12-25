@@ -6,9 +6,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.LevelledMobsHook;
 import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -166,10 +164,12 @@ public final class EntityUtils {
         int stackAmount = stackedEntity.getStackAmount();
 
         if (stackedEntity.getCustomName() != null) {
+            String customNameProvider = plugin.getProviders().getCustomName(stackedEntity.getLivingEntity());
+            if(customNameProvider != null)
+                return customNameProvider.replace("{}", String.valueOf(stackAmount));
+
             if (stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS) {
                 return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
-            } else if (PluginHooks.isLevelledMobsEnabled && LevelledMobsHook.isLevelledMob(stackedEntity.getLivingEntity())) {
-                return plugin.getNMSAdapter().getCustomName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
             }
         }
 
@@ -203,11 +203,12 @@ public final class EntityUtils {
         if (en1.getType() != en2.getType())
             return StackCheckResult.NOT_SIMILAR;
 
+        StackCheckResult customSimilarityResult = plugin.getProviders().areSimilar(en1, en2);
+        if(customSimilarityResult != StackCheckResult.SUCCESS)
+            return customSimilarityResult;
+
         if (!MythicMobsHook.areSimilar(en1.getUniqueId(), en2.getUniqueId()))
             return StackCheckResult.MYTHIC_MOB_TYPE;
-
-        if (PluginHooks.isLevelledMobsEnabled && !LevelledMobsHook.areSimilar(en1, en2))
-            return StackCheckResult.LEVELLED_MOB_LEVEL;
 
         if (StackCheck.AGE.isEnabled() && en1 instanceof Ageable) {
             if ((((Ageable) en1).getAge() >= 0) != (((Ageable) en2).getAge() >= 0))
