@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.utils.items;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.WildToolsHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -124,7 +123,7 @@ public final class ItemUtils {
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
-        return plugin.getProviders().getSpawnerItem(entityType, amount, spawnerUpgrade);
+        return plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType, amount, spawnerUpgrade);
     }
 
     @SuppressWarnings("deprecation")
@@ -177,12 +176,18 @@ public final class ItemUtils {
     }
 
     public static String getFormattedType(ItemStack itemStack) {
-        String typeName = itemStack.getType().name().contains("LEGACY") ? itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
-        String customName = plugin.getSettings().customNames.get(typeName);
-        if (customName == null)
-            customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
+        String typeName = itemStack.getType().name().contains("LEGACY") ?
+                itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 
-        return EntityUtils.getFormattedType(customName == null ? typeName : customName);
+        String customName = plugin.getSettings().customNames.get(typeName);
+        if(customName != null)
+            return customName;
+
+        customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
+        if(customName != null)
+            return customName;
+
+        return EntityUtils.getFormattedType(typeName);
     }
 
     public static void stackBucket(ItemStack bucket, Inventory inventory) {
@@ -378,7 +383,10 @@ public final class ItemUtils {
         if (itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
-        return WildToolsHook.hasSilkTouch(itemStack) || itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= plugin.getSettings().silkTouchMinimumLevel;
+        int requiredLevel = plugin.getSettings().silkTouchMinimumLevel;
+
+        return plugin.getProviders().hasEnchantmentLevel(itemStack, Enchantment.SILK_TOUCH, requiredLevel) ||
+                itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= requiredLevel;
     }
 
     public static Location getSafeDropLocation(Location origin) {

@@ -1,0 +1,13 @@
+group 'Hook_WildTools'
+
+dependencies {
+    compileOnly 'com.bgsoftware:WildToolsAPI:2.11.1'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_wildtools') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_wildtools").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

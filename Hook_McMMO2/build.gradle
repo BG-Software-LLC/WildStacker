@@ -1,0 +1,13 @@
+group 'Hook_McMMO2'
+
+dependencies {
+    compileOnly 'com.nossr50:mcMMO-2:latest'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_mcmmo2') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_mcmmo2").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

@@ -5,8 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.JobsHook;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
+import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -86,8 +85,9 @@ public final class DeathSimulation {
         if(handleFastKill(livingEntity, killer))
             result.cancelEvent = true;
 
-        if (killer != null)
-            McMMOHook.handleCombat(killer, entityKiller, livingEntity, finalDamage);
+        if (killer != null) {
+            plugin.getProviders().notifyEntityCombatListeners(livingEntity, killer, entityKiller, finalDamage);
+        }
 
         livingEntity.setHealth(livingEntity.getMaxHealth() - damageToNextStack);
 
@@ -144,8 +144,8 @@ public final class DeathSimulation {
                 int realStackAmount = stackedEntity.getStackAmount();
                 stackedEntity.setStackAmount(unstackAmount, false);
 
-                McMMOHook.updateCachedName(livingEntity);
-                boolean isMcMMOSpawnedEntity = McMMOHook.isSpawnerEntity(livingEntity);
+                plugin.getProviders().notifyEntityDeathListeners(stackedEntity,
+                        IEntityDeathListener.Type.BEFORE_DEATH_EVENT);
 
                 // I set the health to 0, so it will be 0 in the EntityDeathEvent
                 // Some plugins, such as MyPet, check for that value
@@ -180,12 +180,8 @@ public final class DeathSimulation {
                 if (livingEntity.getType() != EntityType.ENDER_DRAGON)
                     livingEntity.setLastDamageCause(null);
 
-                if (isMcMMOSpawnedEntity)
-                    McMMOHook.updateSpawnedEntity(livingEntity);
-
-                McMMOHook.cancelRuptureTask(livingEntity);
-
-                JobsHook.updateSpawnReason(livingEntity, stackedEntity.getSpawnCause());
+                plugin.getProviders().notifyEntityDeathListeners(stackedEntity,
+                        IEntityDeathListener.Type.AFTER_DEATH_EVENT);
 
                 finalDrops.removeIf(itemStack -> itemStack == null || itemStack.getType() == Material.AIR);
 

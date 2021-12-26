@@ -9,9 +9,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
-import com.bgsoftware.wildstacker.hooks.EconomyHook;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
+import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
@@ -98,7 +96,7 @@ public final class SpawnersListener implements Listener {
 
         double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
 
-        if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < amountToCharge) {
+        if (amountToCharge > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(player) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(player, amountToCharge);
             return false;
         }
@@ -106,9 +104,9 @@ public final class SpawnersListener implements Listener {
         if (stackedSpawner.runUnstack(breakAmount, player) == UnstackResult.SUCCESS) {
             Block block = stackedSpawner.getLocation().getBlock();
 
-            CoreProtectHook.recordBlockChange(player, block, false);
+            plugin.getProviders().notifyStackedBlockListeners(player, block, IStackedBlockListener.Action.BLOCK_BREAK);
 
-            plugin.getProviders().handleSpawnerBreak(stackedSpawner, player, breakAmount, breakMenu);
+            plugin.getProviders().getSpawnersProvider().handleSpawnerBreak(stackedSpawner, player, breakAmount, breakMenu);
 
             EntityType entityType = stackedSpawner.getSpawnedType();
 
@@ -116,7 +114,7 @@ public final class SpawnersListener implements Listener {
                 block.setType(Material.AIR);
 
             if (amountToCharge > 0)
-                EconomyHook.withdrawMoney(player, amountToCharge);
+                plugin.getProviders().getEconomyProvider().withdrawMoney(player, amountToCharge);
 
             Locale.SPAWNER_BREAK.send(player, EntityUtils.getFormattedType(entityType.name()), breakAmount, GeneralUtils.format(amountToCharge));
 
@@ -146,11 +144,11 @@ public final class SpawnersListener implements Listener {
 
             ItemStack itemInHand = e.getItemInHand().clone();
 
-            plugin.getProviders().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
-            EntityType spawnerType = plugin.getProviders().getSpawnerType(itemInHand);
+            plugin.getProviders().getSpawnersProvider().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
+            EntityType spawnerType = plugin.getProviders().getSpawnersProvider().getSpawnerType(itemInHand);
 
             int upgradeId = ItemUtils.getSpawnerUpgrade(itemInHand);
-            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, false);
+            ((WStackedSpawner) stackedSpawner).setUpgradeId(upgradeId, e.getPlayer(), false);
 
             SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(upgradeId);
             if (spawnerUpgrade == null)
@@ -190,8 +188,9 @@ public final class SpawnersListener implements Listener {
                 int limit = stackedSpawner.getStackLimit();
                 //If the spawnerItemAmount is larger than the spawner limit, we want to give to the player the leftovers
                 if (limit < spawnerItemAmount) {
-                    limitItem = plugin.getProviders().getSpawnerItem(stackedSpawner.getSpawner().getSpawnedType(),
-                            spawnerItemAmount - limit, stackedSpawner.getUpgrade());
+                    limitItem = plugin.getProviders().getSpawnersProvider().getSpawnerItem(
+                            stackedSpawner.getSpawner().getSpawnedType(), spawnerItemAmount - limit,
+                            stackedSpawner.getUpgrade());
                     //Adding the item to the inventory after the spawner is placed
                     spawnerItemAmount = limit;
                 }
@@ -202,7 +201,7 @@ public final class SpawnersListener implements Listener {
 
             double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
 
-            if (amountToCharge > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(e.getPlayer()) < amountToCharge) {
+            if (amountToCharge > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(e.getPlayer()) < amountToCharge) {
                 Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
                 e.setCancelled(true);
                 stackedSpawner.remove();
@@ -279,7 +278,8 @@ public final class SpawnersListener implements Listener {
 
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
-                CoreProtectHook.recordBlockChange(e.getPlayer(), targetSpawner.getLocation(), Materials.SPAWNER.toBukkitType(), (byte) 0, true);
+                plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), targetSpawner.getLocation(),
+                        Materials.SPAWNER.toBukkitType(), (byte) 0, IStackedBlockListener.Action.BLOCK_PLACE);
 
                 spawnerItemAmount = targetSpawner.getStackAmount();
             }
@@ -302,7 +302,7 @@ public final class SpawnersListener implements Listener {
 
     private void finishSpawnerPlace(Player player, double amountToCharge, boolean replaceAir, ItemStack itemInHand, ItemStack limitItem, EntityType spawnerType, int spawnerItemAmount) {
         if (amountToCharge > 0)
-            EconomyHook.withdrawMoney(player, amountToCharge);
+            plugin.getProviders().getEconomyProvider().withdrawMoney(player, amountToCharge);
 
         //Removing item from player's inventory
         if (player.getGameMode() != GameMode.CREATIVE && replaceAir)
@@ -317,7 +317,7 @@ public final class SpawnersListener implements Listener {
     }
 
     //Priority is high so it can be fired before SilkSpawners
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
         if (!plugin.getSettings().spawnersStackingEnabled || e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;
@@ -376,7 +376,8 @@ public final class SpawnersListener implements Listener {
             // Should fix issues with amount-percentage being below 100 on low stack sizes.
             dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
 
-            plugin.getProviders().handleSpawnerExplode(stackedSpawner, e.getEntity(), sourcePlayer, dropAmount);
+            plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
+                    e.getEntity(), sourcePlayer, dropAmount);
 
             stackedSpawner.runUnstack(breakAmount, e.getEntity());
 
@@ -578,7 +579,7 @@ public final class SpawnersListener implements Listener {
 
             int spawnerAmount = stackedSpawner.getStackAmount();
 
-            if(spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().spawnersUnstackedCustomName))
+            if (spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().spawnersUnstackedCustomName))
                 return;
 
             String customName = plugin.getSettings().spawnersCustomName;
@@ -619,7 +620,7 @@ public final class SpawnersListener implements Listener {
                     if (spawnersAmount > 1 && e.getCurrentItem().getAmount() == 1) {
                         e.setCancelled(true);
                         SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
-                        EntityType entityType = plugin.getProviders().getSpawnerType(e.getCurrentItem());
+                        EntityType entityType = plugin.getProviders().getSpawnersProvider().getSpawnerType(e.getCurrentItem());
                         e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(entityType,
                                 spawnersAmount / 2, spawnerUpgrade));
                         e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType,
@@ -638,7 +639,7 @@ public final class SpawnersListener implements Listener {
                         if (cursorAmount > 1 && e.getCursor().getAmount() == 1) {
                             e.setCancelled(true);
                             SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
-                            EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
+                            EntityType entityType = plugin.getProviders().getSpawnersProvider().getSpawnerType(e.getCursor());
                             e.getWhoClicked().setItemOnCursor(ItemUtils.getSpawnerItem(entityType,
                                     cursorAmount - 1, spawnerUpgrade));
                             e.getClickedInventory().setItem(e.getSlot(), ItemUtils.getSpawnerItem(
@@ -651,7 +652,8 @@ public final class SpawnersListener implements Listener {
                 if (e.getCurrentItem().getType() == Materials.SPAWNER.toBukkitType() && e.getCursor().getType() == Materials.SPAWNER.toBukkitType()) {
                     int currentAmount = ItemUtils.getSpawnerItemAmount(e.getCurrentItem()) * e.getCurrentItem().getAmount(),
                             cursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor()) * e.getCursor().getAmount();
-                    EntityType currentType = plugin.getProviders().getSpawnerType(e.getCurrentItem()), cursorType = plugin.getProviders().getSpawnerType(e.getCursor());
+                    EntityType currentType = plugin.getProviders().getSpawnersProvider().getSpawnerType(e.getCurrentItem());
+                    EntityType cursorType = plugin.getProviders().getSpawnersProvider().getSpawnerType(e.getCursor());
                     if (currentType == cursorType) {
                         e.setCancelled(true);
                         SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
@@ -666,12 +668,12 @@ public final class SpawnersListener implements Listener {
                     int newCursorAmount = ItemUtils.getSpawnerItemAmount(e.getCursor());
                     if (e.getCursor().getAmount() == 1) {
                         e.setCancelled(true);
-                        EntityType entityType = plugin.getProviders().getSpawnerType(e.getCursor());
+                        EntityType entityType = plugin.getProviders().getSpawnersProvider().getSpawnerType(e.getCursor());
                         SpawnerUpgrade spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(ItemUtils.getSpawnerUpgrade(e.getCurrentItem()));
                         for (int i = 0; i < e.getClickedInventory().getSize(); i++) {
                             ItemStack itemStack = e.getClickedInventory().getItem(i);
                             if (itemStack != null && itemStack.getType() == Materials.SPAWNER.toBukkitType()) {
-                                if (plugin.getProviders().getSpawnerType(itemStack) == entityType) {
+                                if (plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack) == entityType) {
                                     newCursorAmount += ItemUtils.getSpawnerItemAmount(itemStack) * itemStack.getAmount();
                                     e.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
                                 }

@@ -1,0 +1,13 @@
+group 'Hook_NBTInjector'
+
+dependencies {
+    compileOnly 'de.tr7zw:ItemNBTAPI:latest'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_nbtinjector') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_nbtinjector").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

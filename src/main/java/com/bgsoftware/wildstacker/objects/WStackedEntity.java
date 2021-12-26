@@ -10,14 +10,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.CitizensHook;
-import com.bgsoftware.wildstacker.hooks.McMMOHook;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.WorldGuardHook;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -25,7 +19,6 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -41,8 +34,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,10 +79,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (EntityUtils.isStackable(livingEntity))
             return plugin.getSystemManager().getStackedEntity(livingEntity);
 
-        if (CitizensHook.isNPC(livingEntity))
-            throw new IllegalArgumentException("Cannot get a stacked entity from an NPC of Citizens.");
-        else
-            throw new IllegalArgumentException("The entity-type " + livingEntity.getType() + " is not a stackable entity.");
+        String customFailureReason = plugin.getProviders().checkStackEntity(livingEntity);
+        if(customFailureReason != null)
+            throw new IllegalArgumentException(customFailureReason);
+
+        throw new IllegalArgumentException("The entity-type " + livingEntity.getType() + " is not a stackable entity.");
     }
 
     /*
@@ -146,11 +142,14 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             object.setLeashHolder(null);
         }
 
-        if (ServerVersion.isAtLeast(ServerVersion.v1_17) || EntityTypes.fromEntity(object).isSlime()) {
-            Executor.sync(this::removeEntity);
-        } else {
-            removeEntity();
-        }
+        /* Entities must be removed sync, otherwise they are not properly removed from chunks.
+        Also, in 1.17, the remove() function must be called sync.
+        Other than that, slimes must be removed sync as well.
+        */
+        Executor.sync(() -> {
+            object.remove();
+            Executor.sync(this::clearFlags, 100L);
+        });
 
         setFlag(EntityFlag.REMOVED_ENTITY, true);
     }
@@ -170,8 +169,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             Executor.sync(() -> {
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
-                //We update cached values of mcmmo
-                McMMOHook.updateCachedName(object);
+                plugin.getProviders().notifyNameChangeListeners(object);
             });
         } catch (NullPointerException ignored) {
         }
@@ -241,10 +239,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                         plugin.getNMSAdapter().isInLove((Animals) targetEntity.getLivingEntity())))
             return StackCheckResult.IN_LOVE_STATUS;
 
-        if (PluginHooks.isWorldGuardEnabled && !plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
+        if (!plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
             Set<String> regions = new HashSet<>();
-            regions.addAll(WorldGuardHook.getRegionsName(targetEntity.getLivingEntity().getLocation()));
-            regions.addAll(WorldGuardHook.getRegionsName(object.getLocation()));
+            regions.addAll(plugin.getProviders().getRegionNames(targetEntity.getLivingEntity().getLocation()));
+            regions.addAll(plugin.getProviders().getRegionNames(object.getLocation()));
             if (regions.stream().anyMatch(region -> plugin.getSettings().entitiesDisabledRegions.contains(region)))
                 return StackCheckResult.DISABLED_REGION;
         }
@@ -440,23 +438,24 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (amount <= 0)
             return null;
 
-        LivingEntity _duplicate;
+        StackedEntity duplicate;
 
-        if (getSpawnCause() == SpawnCause.MYTHIC_MOBS && (_duplicate = MythicMobsHook.tryDuplicate(object)) != null) {
-            StackedEntity duplicate = WStackedEntity.of(_duplicate);
+        LivingEntity customDuplicate = plugin.getProviders().tryDuplicateEntity(object);
+        if(customDuplicate != null) {
+            duplicate = WStackedEntity.of(customDuplicate);
             duplicate.setStackAmount(amount, true);
-            return duplicate;
         }
+        else {
+            duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
+                    object.getLocation(), getType().getEntityClass(), spawnCause));
 
-        StackedEntity duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
-                object.getLocation(), getType().getEntityClass(), spawnCause));
+            duplicate.setStackAmount(amount, true);
 
-        duplicate.setStackAmount(amount, true);
+            plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());
 
-        plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());
-
-        if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
-            duplicate.getLivingEntity().setFireTicks(160);
+            if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
+                duplicate.getLivingEntity().setFireTicks(160);
+        }
 
         EventsCaller.callDuplicateSpawnEvent(this, duplicate);
 
@@ -664,11 +663,6 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         }
     }
 
-    private void removeEntity() {
-        object.remove();
-        Executor.sync(this::clearFlags, 100L);
-    }
-
     @Override
     public int hashCode() {
         return getUniqueId().hashCode();
@@ -756,6 +750,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade) {
+        setUpgrade(spawnerUpgrade, null);
+    }
+
+    @Override
+    public void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
         setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId());
         updateName();
     }

@@ -1,13 +1,10 @@
 package com.bgsoftware.wildstacker.listeners;
 
-import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
-import com.bgsoftware.wildstacker.hooks.ProtocolLibHook;
 import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -26,7 +23,6 @@ import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
@@ -65,7 +61,6 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
@@ -457,14 +452,16 @@ public final class EntitiesListener implements Listener {
         if (!(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
             return;
 
-        if (!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), e.getPlayer().getItemInHand()))
+        ItemStack inHand = e.getPlayer().getItemInHand();
+
+        if (!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), inHand))
             return;
 
         if (!EntityUtils.canBeBred((Animals) e.getRightClicked()))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        ItemStack inHand = e.getPlayer().getItemInHand();
+        int inHandItemsAmount = ItemUtils.countItem(e.getPlayer().getInventory(), inHand);
 
         if (stackedEntity.getStackAmount() > 1) {
             int itemsAmountToRemove;
@@ -472,7 +469,7 @@ public final class EntitiesListener implements Listener {
             if (plugin.getSettings().smartBreeding) {
                 int breedableAmount = e.getPlayer().getGameMode() == GameMode.CREATIVE ?
                         stackedEntity.getStackAmount() :
-                        Math.min(stackedEntity.getStackAmount(), inHand.getAmount());
+                        Math.min(stackedEntity.getStackAmount(), inHandItemsAmount);
 
                 if (breedableAmount % 2 != 0)
                     breedableAmount--;
@@ -519,9 +516,7 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                ItemStack newHand = e.getPlayer().getItemInHand().clone();
-                newHand.setAmount(newHand.getAmount() - itemsAmountToRemove);
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newHand);
+                ItemUtils.removeItem(e.getPlayer().getInventory(), inHand, itemsAmountToRemove);
             }
         }
     }
@@ -580,37 +575,6 @@ public final class EntitiesListener implements Listener {
             }
         }
 
-    }
-
-    @EventHandler
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (!plugin.getSettings().entitiesNamesToggleEnabled)
-            return;
-
-        String commandSyntax = "/" + plugin.getSettings().entitiesNamesToggleCommand;
-
-        if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
-            return;
-
-        e.setCancelled(true);
-
-        if (!PluginHooks.isProtocolLibEnabled) {
-            e.getPlayer().sendMessage(ChatColor.RED + "The command is enabled but ProtocolLib is not installed. Please contact the administrators of the server to solve the issue.");
-            return;
-        }
-
-        if (plugin.getSystemManager().hasEntityNamesToggledOff(e.getPlayer())) {
-            Locale.ENTITY_NAMES_TOGGLE_ON.send(e.getPlayer());
-        } else {
-            Locale.ENTITY_NAMES_TOGGLE_OFF.send(e.getPlayer());
-        }
-
-        plugin.getSystemManager().toggleEntityNames(e.getPlayer());
-
-        //Refresh item names
-        EntitiesGetter.getNearbyEntities(e.getPlayer().getLocation(), 48, entity ->
-                        EntityUtils.isStackable(entity) && plugin.getNMSAdapter().isCustomNameVisible(entity))
-                .forEach(entity -> ProtocolLibHook.updateName(e.getPlayer(), entity));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -752,7 +716,7 @@ public final class EntitiesListener implements Listener {
         if (stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!plugin.getSettings().spawnersStackingEnabled && !PluginHooks.isMergedSpawnersEnabled &&
+        if (!plugin.getSettings().spawnersStackingEnabled && plugin.getProviders().handleEntityStackingInsideEvent() &&
                 spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
@@ -764,7 +728,7 @@ public final class EntitiesListener implements Listener {
         //Need to add a delay so eggs will get removed from inventory
         if (spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
                 entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
-                entity.getType() == EntityType.SNOWMAN || PluginHooks.isMythicMobsEnabled || PluginHooks.isEpicBossesEnabled)
+                entity.getType() == EntityType.SNOWMAN || plugin.getProviders().handleEntityStackingWithDelay())
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
@@ -909,7 +873,8 @@ public final class EntitiesListener implements Listener {
             if (plugin.getSettings().smartBreeding && e.getEntity() instanceof org.bukkit.entity.Turtle &&
                     e.getTo().name().equals("TURTLE_EGG")) {
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-                int breedableAmount = stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
+                int breedableAmount = !stackedEntity.hasFlag(EntityFlag.BREEDABLE_AMOUNT) ? 0 :
+                        stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
                 stackedEntity.removeFlag(EntityFlag.BREEDABLE_AMOUNT);
                 if (breedableAmount > 1) {
                     Executor.sync(() -> plugin.getNMSAdapter().setTurtleEggsAmount(e.getBlock(), 1), 1L);

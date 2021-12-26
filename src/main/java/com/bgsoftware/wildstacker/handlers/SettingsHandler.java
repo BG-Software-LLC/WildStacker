@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
-import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
@@ -53,12 +52,6 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
-
-    private static final String TILE_ENTITY_MOB_SPAWNER_CLASS = ServerVersion.isAtLeast(ServerVersion.v1_17) ?
-            "net.minecraft.world.level.block.entity.TileEntityMobSpawner" :
-            "net.minecraft.server.VERSION.TileEntityMobSpawner";
-    private static final ReflectField<Object> MOB_SPAWNER_ABSTRACT = new ReflectField<>(
-            TILE_ENTITY_MOB_SPAWNER_CLASS, Object.class, "a").removeFinal();
 
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = {"merge-radius", "limits", "minimum-required", "default-unstack",
@@ -381,12 +374,7 @@ public final class SettingsHandler {
         inventoryTweaksEnabled = cfg.getBoolean("spawners.inventory-tweaks.enabled", true);
         inventoryTweaksPermission = cfg.getString("spawners.inventory-tweaks.permission", "");
         inventoryTweaksCommand = cfg.getString("spawners.inventory-tweaks.toggle-command", "stacker inventorytweaks,stacker it");
-        boolean spawnersOverrideEnabled = spawnersStackingEnabled && cfg.getBoolean("spawners.spawners-override.enabled");
-        if (spawnersOverrideEnabled && !MOB_SPAWNER_ABSTRACT.isValid()) {
-            WildStackerPlugin.log("&cThe 'spawners-override' feature is not supported in your Java version, disabling...");
-            spawnersOverrideEnabled = false;
-        }
-        this.spawnersOverrideEnabled = spawnersOverrideEnabled;
+        spawnersOverrideEnabled = spawnersStackingEnabled && cfg.getBoolean("spawners.spawners-override.enabled");
         if (spawnersOverrideEnabled) {
             plugin.getNMSSpawners().registerSpawnConditions();
             for (String entityTypeRaw : cfg.getConfigurationSection("spawners.spawners-override.spawn-conditions").getKeys(false)) {
@@ -714,6 +702,21 @@ public final class SettingsHandler {
         }
         if(cfg.contains("items.pickup-sound.enabled")){
             cfg.set("items.pickup-sound", cfg.getBoolean("items.pickup-sound.enabled"));
+        }
+    }
+
+    private static boolean canHaveSpawnerOverride() {
+        String version = System.getProperty("java.version");
+
+        if(!version.contains("."))
+            return true;
+
+        try {
+            int javaVersionNum = Integer.parseInt(version.split("\\.")[0]);
+            return javaVersionNum < 12;
+        } catch (NumberFormatException error) {
+            error.printStackTrace();
+            return true;
         }
     }
 

@@ -5,24 +5,34 @@ plugins {
 }
 
 group 'WildStacker'
-version = "3.6.1"
+version = "3.6.2"
 
-subprojects {
+allprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
 
     repositories {
         maven { url 'https://repo.bg-software.com/repository/nms/' }
+        maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
+        maven { url 'https://repo.bg-software.com/repository/public-libs/' }
+
+        String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
+        String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
+
+        if (mavenUsername != null && mavenPassword != null) {
+            maven {
+                url 'https://repo.bg-software.com/repository/private-libs/'
+                credentials {
+                    username mavenUsername
+                    password mavenPassword
+                }
+            }
+        }
     }
 
     dependencies {
-        compileOnly 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
-    }
-
-    shadowJar {
-        archiveFileName = "${project.name}.jar"
-        destinationDirectory = file("../archive/")
+        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
     }
 
     build {
@@ -30,25 +40,11 @@ subprojects {
     }
 }
 
-repositories {
-    maven { url 'https://repo.bg-software.com/repository/nms/' }
-    maven { url 'https://repo.bg-software.com/repository/api/' }
-    maven { url 'https://repo.bg-software.com/repository/common/' }
-    maven { url 'https://repo.bg-software.com/repository/public-libs/' }
-
-    String mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : System.getenv('mavenUsername');
-    String mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : System.getenv('mavenPassword');
-
-    if(mavenUsername != null && mavenPassword != null) {
-        maven {
-            url 'https://repo.bg-software.com/repository/private-libs/'
-            credentials {
-                username mavenUsername
-                password mavenPassword
-            }
-        }
+subprojects {
+    shadowJar {
+        archiveFileName = "${project.name}.jar"
+        destinationDirectory = file("../archive/")
     }
-
 }
 
 dependencies {
@@ -62,49 +58,6 @@ dependencies {
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly 'org.spigotmc:v1_16_R3-Tuinity:latest'
     compileOnly 'org.spigotmc:v1_17_R1:latest'
-
-    // Plugin hooks
-    compileOnly 'org.mineacademy:Boss:latest'
-    compileOnly 'org.mineacademy:Boss-3.9.7:latest'
-    compileOnly 'net.citizensnpcs:Citizens:latest'
-    compileOnly 'me.minebuilders:Clearlag:latest'
-    compileOnly 'net.coreprotect:CoreProtect-6:latest'
-    compileOnly 'me.badbones69:CrazyEnchantments:latest'
-    compileOnly 'net.aminecraftdev:CustomBosses:latest'
-    compileOnly 'com.dsh105:EchoPet:latest'
-    compileOnly 'com.songoda:EpicBosses:latest'
-    compileOnly 'com.songoda:EpicSpawners-7:latest'
-    compileOnly 'com.songoda:FabledSkyblock:latest'
-    compileOnly 'com.massivecraft:Factions:latest'
-    compileOnly 'com.drtshock:FactionsUUID:latest'
-    compileOnly 'com.boydti:FastAsyncWorldEdit:latest'
-    compileOnly 'de.tr7zw:ItemNBTAPI:latest'
-    compileOnly 'com.massivecraft:MassiveCore:latest'
-    compileOnly 'com.nossr50:mcMMO-2:latest'
-    compileOnly 'com.nossr50:mcMMO-1:latest'
-    compileOnly 'com.dnyferguson:MineableSpawners:latest'
-    compileOnly 'de.keyle:MyPet:latest'
-    compileOnly 'io.lumine:MythicMobs:latest'
-    compileOnly 'net.novucs:FactionsTop:latest'
-    compileOnly 'com.github.intellectualsites:PlotSquared-4:latest'
-    compileOnly 'com.github.intellectualsites:PlotSquared-5:latest'
-    compileOnly 'com.github.intellectualsites:PlotSquared-Legacy:latest'
-    compileOnly 'com.comphenix:ProtocolLib:latest'
-    compileOnly 'net.brcdev:ShopGUIPlus-1.18:latest'
-    compileOnly 'net.brcdev:ShopGUIPlus-1.20:latest'
-    compileOnly 'de.dustplanet:SilkSpawners:latest'
-    compileOnly 'com.bgsoftware:SuperiorSkyblockAPI:latest'
-    compileOnly 'net.milkbowl:Vault:latest'
-    compileOnly 'com.ome_r:WildStacker-EnchantsPatch:latest'
-    compileOnly 'com.bgsoftware:WildToolsAPI:latest'
-    compileOnly 'com.sk89q:WorldEdit-7:latest'
-    compileOnly 'com.sk89q:WorldGuard-7:latest'
-    compileOnly 'net.splodgebox:EliteBosses:latest'
-    compileOnly 'me.jet315:JetsMinions:latest'
-    compileOnly 'me.mrcookieslime:Slimefun4-Dev:latest'
-    compileOnly 'me.derpy:MoreBosses:latest'
-    compileOnly 'me.hexedhero:PinataParty:latest'
-    compileOnly 'com.kirelcodes:MiniaturePets:2.6.0'
 }
 
 jar {
@@ -131,10 +84,10 @@ shadowJar {
     dependsOn(jar)
 
     if(System.getenv("BUILD_NUMBER") == null){
-        archiveName = rootProject.name + ".jar"
+        archiveName = rootProject.name + "-" + version + ".jar"
     }
     else{
-        archiveName = rootProject.name + "-b" + System.getenv("BUILD_NUMBER") + ".jar"
+        archiveName = rootProject.name + "-" + version + "-b" + System.getenv("BUILD_NUMBER") + ".jar"
     }
 
     delete fileTree('./target/') {

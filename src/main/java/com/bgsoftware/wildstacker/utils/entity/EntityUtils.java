@@ -3,13 +3,8 @@ package com.bgsoftware.wildstacker.utils.entity;
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.hooks.CitizensHook;
-import com.bgsoftware.wildstacker.hooks.LevelledMobsHook;
-import com.bgsoftware.wildstacker.hooks.MythicMobsHook;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -139,8 +134,8 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return entity instanceof LivingEntity && (MythicMobsHook.isMythicMob(entity) ||
-                (!entity.getType().name().equals("ARMOR_STAND") && !(entity instanceof Player) && !CitizensHook.isNPC(entity)));
+        return entity instanceof LivingEntity && (!entity.getType().name().equals("ARMOR_STAND") &&
+                !(entity instanceof Player) && plugin.getProviders().checkStackEntity(entity) == null);
     }
 
     public static void giveExp(Player player, int amount) {
@@ -166,11 +161,9 @@ public final class EntityUtils {
         int stackAmount = stackedEntity.getStackAmount();
 
         if (stackedEntity.getCustomName() != null) {
-            if (stackedEntity.getSpawnCause() == SpawnCause.MYTHIC_MOBS) {
-                return MythicMobsHook.getMythicName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
-            } else if (PluginHooks.isLevelledMobsEnabled && LevelledMobsHook.isLevelledMob(stackedEntity.getLivingEntity())) {
-                return plugin.getNMSAdapter().getCustomName(stackedEntity.getLivingEntity()).replace("{}", String.valueOf(stackAmount));
-            }
+            String customNameProvider = plugin.getProviders().getCustomName(stackedEntity.getLivingEntity());
+            if (customNameProvider != null)
+                return customNameProvider.replace("{}", String.valueOf(stackAmount));
         }
 
         if (plugin.getSettings().entitiesCustomName.isEmpty())
@@ -203,11 +196,9 @@ public final class EntityUtils {
         if (en1.getType() != en2.getType())
             return StackCheckResult.NOT_SIMILAR;
 
-        if (!MythicMobsHook.areSimilar(en1.getUniqueId(), en2.getUniqueId()))
-            return StackCheckResult.MYTHIC_MOB_TYPE;
-
-        if (PluginHooks.isLevelledMobsEnabled && !LevelledMobsHook.areSimilar(en1, en2))
-            return StackCheckResult.LEVELLED_MOB_LEVEL;
+        StackCheckResult customSimilarityResult = plugin.getProviders().areSimilar(en1, en2);
+        if (customSimilarityResult != StackCheckResult.SUCCESS)
+            return customSimilarityResult;
 
         if (StackCheck.AGE.isEnabled() && en1 instanceof Ageable) {
             if ((((Ageable) en1).getAge() >= 0) != (((Ageable) en2).getAge() >= 0))
@@ -520,7 +511,7 @@ public final class EntityUtils {
     }
 
     public static void clearEquipment(LivingEntity livingEntity) {
-        if(!Bukkit.isPrimaryThread()) {
+        if (!Bukkit.isPrimaryThread()) {
             Executor.sync(() -> clearEquipment(livingEntity));
             return;
         }

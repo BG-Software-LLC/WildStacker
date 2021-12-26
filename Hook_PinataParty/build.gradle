@@ -1,0 +1,13 @@
+group 'Hook_PinataParty'
+
+dependencies {
+    compileOnly 'me.hexedhero:PinataParty:latest'
+    compileOnly "org.spigotmc:v1_16_R3:latest"
+    compileOnly project(":API")
+    compileOnly parent
+}
+
+if (project.hasProperty('hook.compile_pinataparty') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_pinataparty").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

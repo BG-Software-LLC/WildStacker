@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -140,11 +139,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
 
-        if (ServerVersion.isAtLeast(ServerVersion.v1_17)) {
-            Executor.sync(object::remove);
-        } else {
-            object.remove();
-        }
+        /* Items must be removed sync, otherwise they are not properly removed from chunks.
+        Also, in 1.17, the remove() function must be called sync. */
+        Executor.sync(object::remove);
 
         EntityStorage.setMetadata(object, EntityFlag.REMOVED_ENTITY, true);
         Executor.sync(() -> EntityStorage.clearMetadata(object), 100L);
@@ -361,9 +358,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         int givenAmount = originalStackAmount - finalStackAmount;
 
-        if (givenAmount > 0 && inventory instanceof PlayerInventory)
-            CoreProtectHook.recordItemPickup((Player) ((PlayerInventory) inventory).getHolder(),
-                    this, givenAmount);
+        if (givenAmount > 0 && inventory instanceof PlayerInventory) {
+            plugin.getProviders().notifyStackedItemListeners((Player) ((PlayerInventory) inventory).getHolder(),
+                    object, givenAmount);
+        }
     }
 
     @Override

@@ -2,8 +2,12 @@ package com.bgsoftware.wildstacker.api.events;
 
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * SpawnerUpgradeEvent is called when a spawner is upgraded.
@@ -14,6 +18,7 @@ public class SpawnerUpgradeEvent extends Event {
 
     private final StackedSpawner stackedSpawner;
     private final SpawnerUpgrade spawnerUpgrade;
+    private final Player player;
 
     /**
      * The constructor for the event.
@@ -22,12 +27,20 @@ public class SpawnerUpgradeEvent extends Event {
      * @param spawnerUpgrade The new upgrade.
      */
     public SpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade) {
-        this.stackedSpawner = stackedSpawner;
-        this.spawnerUpgrade = spawnerUpgrade;
+        this(stackedSpawner, spawnerUpgrade, null);
     }
 
-    public static HandlerList getHandlerList() {
-        return HANDLERS;
+    /**
+     * The constructor for the event.
+     *
+     * @param stackedSpawner The spawner that was broken.
+     * @param spawnerUpgrade The new upgrade.
+     * @param player The player that upgraded the spawner.
+     */
+    public SpawnerUpgradeEvent(StackedSpawner stackedSpawner, SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
+        this.stackedSpawner = stackedSpawner;
+        this.spawnerUpgrade = spawnerUpgrade;
+        this.player = player;
     }
 
     /**
@@ -44,8 +57,19 @@ public class SpawnerUpgradeEvent extends Event {
         return spawnerUpgrade;
     }
 
+    /**
+     * Get the player that upgraded the spawner.
+     */
+    public Optional<Player> getPlayer() {
+        return Optional.ofNullable(player);
+    }
+
     @Override
     public HandlerList getHandlers() {
+        return HANDLERS;
+    }
+
+    public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 

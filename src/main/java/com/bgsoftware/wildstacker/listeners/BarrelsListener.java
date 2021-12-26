@@ -4,8 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.hooks.CoreProtectHook;
-import com.bgsoftware.wildstacker.hooks.SlimefunHook;
+import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -58,7 +57,7 @@ public final class BarrelsListener implements Listener {
         if (!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if (!isBarrelBlock(e.getBlock()) || SlimefunHook.isSlimefunItem(e.getItemInHand()))
+        if (!isBarrelBlock(e.getBlock()) || !plugin.getProviders().canCreateBarrel(e.getItemInHand()))
             return;
 
         if (ItemUtils.isOffHand(e)) {
@@ -175,7 +174,8 @@ public final class BarrelsListener implements Listener {
         if (player.getGameMode() != GameMode.CREATIVE && replaceAir)
             ItemUtils.setItemInHand(player.getInventory(), inHand, new ItemStack(Material.AIR));
 
-        CoreProtectHook.recordBlockChange(player, stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), true);
+        plugin.getProviders().notifyStackedBlockListeners(player, stackedBarrel.getLocation(),
+                stackedBarrel.getType(), (byte) stackedBarrel.getData(), IStackedBlockListener.Action.BLOCK_PLACE);
 
         alreadyBarrelsPlacedPlayers.remove(player.getUniqueId());
     }
@@ -204,7 +204,8 @@ public final class BarrelsListener implements Listener {
         e.setCancelled(true);
 
         if (stackedBarrel.runUnstack(stackedBarrel.getStackAmount(), e.getPlayer()) == UnstackResult.SUCCESS) {
-            CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
+            plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), stackedBarrel.getLocation(),
+                    stackedBarrel.getType(), (byte) stackedBarrel.getData(), IStackedBlockListener.Action.BLOCK_BREAK);
 
             e.getBlock().setType(Material.AIR);
 
@@ -233,7 +234,8 @@ public final class BarrelsListener implements Listener {
         } else {
             stackedBarrel.runUnstack(1, e.getPlayer());
 
-            CoreProtectHook.recordBlockChange(e.getPlayer(), stackedBarrel.getLocation(), stackedBarrel.getType(), (byte) stackedBarrel.getData(), false);
+            plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), stackedBarrel.getLocation(),
+                    stackedBarrel.getType(), (byte) stackedBarrel.getData(), IStackedBlockListener.Action.BLOCK_BREAK);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 ItemStack dropStack = EventsCaller.callBarrelDropEvent(stackedBarrel, e.getPlayer(), 1);

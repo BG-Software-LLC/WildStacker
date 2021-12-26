@@ -4,8 +4,6 @@ import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.hooks.EconomyHook;
-import com.bgsoftware.wildstacker.hooks.PluginHooks;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
@@ -92,14 +90,14 @@ public final class SpawnerUpgradeMenu extends WildMenu {
         if (plugin.getSettings().spawnerUpgradesMultiplyStackAmount)
             upgradeCost *= stackedSpawner.getStackAmount();
 
-        if (upgradeCost > 0 && PluginHooks.isVaultEnabled && EconomyHook.getMoneyInBank(player) < upgradeCost) {
+        if (upgradeCost > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(player) < upgradeCost) {
             Locale.SPAWNER_UPGRADE_NOT_ENOUGH_MONEY.send(player, GeneralUtils.format(upgradeCost));
             if (failureSound != null)
                 failureSound.playSound(player);
             return;
         }
 
-        stackedSpawner.setUpgrade(nextUpgrade);
+        stackedSpawner.setUpgrade(nextUpgrade, player);
 
         if (successSound != null)
             successSound.playSound(player);
@@ -107,7 +105,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
         Locale.SPAWNER_UPGRADE_SUCCESS.send(player);
 
         if (upgradeCost > 0)
-            EconomyHook.withdrawMoney(player, upgradeCost);
+            plugin.getProviders().getEconomyProvider().withdrawMoney(player, upgradeCost);
 
         open(player, stackedSpawner);
     }

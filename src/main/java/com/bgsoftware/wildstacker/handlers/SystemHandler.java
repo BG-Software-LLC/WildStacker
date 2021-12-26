@@ -710,7 +710,7 @@ public final class SystemHandler implements SystemManager {
                         WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
                         try {
                             stackedSpawner.setSaveData(false);
-                            stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), false);
+                            stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), null, false);
                             stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
                             dataHandler.addStackedSpawner(stackedSpawner);
                         } finally {

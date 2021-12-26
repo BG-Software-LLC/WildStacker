@@ -120,7 +120,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             return;
 
         if (plugin.getSettings().explosionsBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance)
-            dropSpawner(stackedSpawner, ignite, brokenAmount);
+            _dropSpawner(stackedSpawner, ignite, brokenAmount, plugin.getSettings().explosionsDropToInventory);
     }
 
     @Override
@@ -146,13 +146,18 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public void dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount) {
+        _dropSpawner(stackedSpawner, player, brokenAmount, plugin.getSettings().dropToInventory);
+    }
+
+    private void _dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean dropToInventory) {
         ItemStack dropItem = EventsCaller.callSpawnerDropEvent(stackedSpawner, player, brokenAmount);
         Location toDrop = ItemUtils.getSafeDropLocation(stackedSpawner.getLocation());
 
-        if (plugin.getSettings().dropToInventory && player != null) {
+        if (dropToInventory && player != null) {
             ItemUtils.addItem(dropItem, player.getInventory(), toDrop);
         } else {
             ItemUtils.dropItem(dropItem, toDrop);
         }
     }
+
 }
