@@ -292,8 +292,15 @@ public final class ProvidersHandler {
         conflictPluginFixers.clear();
 
         if (Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit")) {
-            Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit");
-            conflictPluginFixer.ifPresent(conflictPluginFixers::add);
+            Plugin fastAsyncWorldEdit = Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit");
+            if(fastAsyncWorldEdit.getDescription().getVersion().startsWith("2")) {
+                Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit2");
+                conflictPluginFixer.ifPresent(conflictPluginFixers::add);
+            }
+            else {
+                Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit");
+                conflictPluginFixer.ifPresent(conflictPluginFixers::add);
+            }
         }
     }
 
