@@ -80,6 +80,7 @@ public final class ProvidersHandler {
             long startTime = System.currentTimeMillis();
 
             loadSpawnersProvider();
+            loadEconomyProvider();
             loadClaimsProvider();
             loadEntityTypeProviders();
             loadRegionsProviders();
