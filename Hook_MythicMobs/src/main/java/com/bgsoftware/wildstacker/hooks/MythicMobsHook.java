@@ -15,9 +15,10 @@ public final class MythicMobsHook {
 
     public static void register(WildStackerPlugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(new MythicMobsListener(), plugin);
+        plugin.getProviders().registerEntityDuplicateListener(MythicMobsHook::tryDuplicate);
     }
 
-    public static LivingEntity tryDuplicate(LivingEntity livingEntity) {
+    private static LivingEntity tryDuplicate(LivingEntity livingEntity) {
         if (WStackedEntity.of(livingEntity).getSpawnCause() == SpawnCause.MYTHIC_MOBS) {
             ActiveMob activeMob = MythicMobs.inst().getMobManager().getMythicMobInstance(livingEntity);
             ActiveMob duplicate = MythicMobs.inst().getMobManager().spawnMob(activeMob.getType().getInternalName(), livingEntity.getLocation());

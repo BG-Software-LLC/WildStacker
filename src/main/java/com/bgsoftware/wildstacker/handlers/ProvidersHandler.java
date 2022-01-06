@@ -320,7 +320,7 @@ public final class ProvidersHandler {
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs")) {
-            registerHook("MythicMobs");
+            registerHook("MythicMobsHook");
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
@@ -520,9 +520,9 @@ public final class ProvidersHandler {
     }
 
     @Nullable
-    public <T extends LivingEntity> T tryDuplicateEntity(T entity) {
+    public LivingEntity tryDuplicateEntity(LivingEntity entity) {
         for (IEntityDuplicateListener entityDuplicateListener : entityDuplicateListeners) {
-            T duplicated = entityDuplicateListener.duplicateEntity(entity);
+            LivingEntity duplicated = entityDuplicateListener.duplicateEntity(entity);
             if (duplicated != null)
                 return duplicated;
         }

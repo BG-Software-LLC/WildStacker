@@ -7,6 +7,6 @@ import javax.annotation.Nullable;
 public interface IEntityDuplicateListener {
 
     @Nullable
-    <T extends LivingEntity> T duplicateEntity(T entity);
+    LivingEntity duplicateEntity(LivingEntity entity);
 
 }
