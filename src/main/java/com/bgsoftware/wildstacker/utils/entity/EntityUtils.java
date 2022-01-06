@@ -161,7 +161,7 @@ public final class EntityUtils {
         int stackAmount = stackedEntity.getStackAmount();
 
         if (stackedEntity.getCustomName() != null) {
-            String customNameProvider = plugin.getProviders().getCustomName(stackedEntity.getLivingEntity());
+            String customNameProvider = plugin.getProviders().getCustomName(stackedEntity);
             if (customNameProvider != null)
                 return customNameProvider.replace("{}", String.valueOf(stackAmount));
         }

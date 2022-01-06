@@ -485,11 +485,6 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
         }
     }
 
-    @Override
-    public Object getPersistentDataContainer(org.bukkit.entity.Entity entity) {
-        return entity.getPersistentDataContainer();
-    }
-
     /*
      *   Spawner methods
      */

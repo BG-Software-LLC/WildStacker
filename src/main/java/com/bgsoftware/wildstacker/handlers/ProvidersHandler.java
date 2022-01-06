@@ -426,9 +426,9 @@ public final class ProvidersHandler {
     }
 
     @Nullable
-    public String getCustomName(LivingEntity livingEntity) {
+    public String getCustomName(StackedEntity stackedEntity) {
         for (EntityNameProvider entityNameProvider : entityNameProviders) {
-            String customName = entityNameProvider.getCustomName(livingEntity);
+            String customName = entityNameProvider.getCustomName(stackedEntity);
             if (customName != null)
                 return customName;
         }

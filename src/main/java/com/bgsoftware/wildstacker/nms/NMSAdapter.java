@@ -150,10 +150,6 @@ public interface NMSAdapter {
         entity.setCustomNameVisible(visibleName);
     }
 
-    default Object getPersistentDataContainer(Entity entity) {
-        return null;
-    }
-
     default boolean handleTotemOfUndying(LivingEntity livingEntity) {
         return false;
     }

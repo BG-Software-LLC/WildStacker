@@ -12,11 +12,9 @@ import org.bukkit.plugin.Plugin;
 @SuppressWarnings("unused")
 public final class EntitySimilarityProvider_LevelledMobs implements EntitySimilarityProvider {
 
-    private final WildStackerPlugin plugin;
     private final NamespacedKey levelKey;
 
     public EntitySimilarityProvider_LevelledMobs(WildStackerPlugin plugin) {
-        this.plugin = plugin;
         Plugin levelledMobs = Bukkit.getPluginManager().getPlugin("LevelledMobs");
         assert levelledMobs != null;
         this.levelKey = new NamespacedKey(levelledMobs, "level");
@@ -29,10 +27,8 @@ public final class EntitySimilarityProvider_LevelledMobs implements EntitySimila
     }
 
     private int getLevelledMobLevel(Entity livingEntity) {
-        PersistentDataContainer dataContainer = (PersistentDataContainer) plugin.getNMSAdapter()
-                .getPersistentDataContainer(livingEntity);
-
-        return dataContainer == null ? -1 : dataContainer.getOrDefault(levelKey, PersistentDataType.INTEGER, -1);
+        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
+        return dataContainer.getOrDefault(levelKey, PersistentDataType.INTEGER, -1);
     }
 
 }
