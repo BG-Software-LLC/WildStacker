@@ -64,7 +64,6 @@ public final class EntityStorage {
 
     public static void clearMetadata(UUID entityUUID) {
         entityStorage.remove(entityUUID);
-        EntityUtils.clearBukkitMetadata(entityUUID);
     }
 
     public static void clearCache() {
