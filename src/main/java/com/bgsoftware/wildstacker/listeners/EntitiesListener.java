@@ -691,10 +691,19 @@ public final class EntitiesListener implements Listener {
             Location homeLocation = plugin.getNMSAdapter().getTurtleHome(entity);
             Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
             if (cachedEggs != null && cachedEggs > 1) {
-                Executor.async(() -> {
-                    int newBabiesAmount = Random.nextInt(1, 4, cachedEggs);
+                int newBabiesAmount = Random.nextInt(1, 4, cachedEggs);
+                int stackLimit = stackedEntity.getStackLimit();
+
+                if(newBabiesAmount > stackLimit) {
+                    int amountOfNewEntities = newBabiesAmount / stackLimit;
+                    for(int i = 0; i < amountOfNewEntities; ++i) {
+                        stackedEntity.spawnDuplicate(stackLimit, SpawnCause.EGG);
+                    }
+                    newBabiesAmount -= (stackLimit * amountOfNewEntities);
+                }
+
+                if(newBabiesAmount > 0)
                     WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
-                });
             }
         }
 
