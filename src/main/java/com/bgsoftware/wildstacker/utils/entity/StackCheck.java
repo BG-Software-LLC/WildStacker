@@ -23,6 +23,7 @@ public enum StackCheck {
     CAN_BREED(),
     CAT_COLLAR_COLOR(EntityTypes.CAT),
     CAT_TYPE(EntityTypes.CAT),
+    CREEPER_CHARGED(EntityTypes.CREEPER),
     ENDERMAN_CARRIED_BLOCK(EntityTypes.ENDERMAN),
     EXACT_AGE(),
     GLOW_SQUID_DARK_TICKS(EntityTypes.GLOW_SQUID),

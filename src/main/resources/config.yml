@@ -252,6 +252,7 @@ entities:
     CAN_BREED: true
     CAT_COLLAR_COLOR: true
     CAT_TYPE: true
+    CREEPER_CHARGED: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false
     GLOW_SQUID_DARK_TICKS: false

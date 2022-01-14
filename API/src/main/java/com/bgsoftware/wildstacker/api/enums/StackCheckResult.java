@@ -13,6 +13,7 @@ public enum StackCheckResult {
     CAN_BREED,
     CAT_COLLAR_COLOR,
     CAT_TYPE,
+    CREEPER_CHARGED,
     ENDERMAN_CARRIED_BLOCK,
     EXACT_AGE,
     GLOW_SQUID_DARK_TICKS,
