@@ -82,6 +82,8 @@ public final class Locale {
     public static Locale OBJECT_SIMULATE_CHOOSE_SECOND = new Locale("OBJECT_SIMULATE_CHOOSE_SECOND");
     public static Locale OBJECT_SIMULATE_SUCCESS_RESULT = new Locale("OBJECT_SIMULATE_SUCCESS_RESULT");
     public static Locale OBJECT_SIMULATE_FAIL_RESULT = new Locale("OBJECT_SIMULATE_FAIL_RESULT");
+    public static Locale UPGRADE_CURRENT = new Locale("UPGRADE_CURRENT");
+    public static Locale UPGRADE_NEXT = new Locale("UPGRADE_NEXT");
     private String message;
 
     private Locale(String identifier) {

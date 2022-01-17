@@ -115,3 +115,7 @@ ENTITY_INFO_FOOTER: '&8&m---------------&6&l WildStacker &8&m---------------'
 OBJECT_SIMULATE_CHOOSE_SECOND: '&6&lWildStacker &7Please click another object.'
 OBJECT_SIMULATE_SUCCESS_RESULT: '&6&lWildStacker &7Result: &aSUCCESS&7. They can stack together.'
 OBJECT_SIMULATE_FAIL_RESULT: '&6&lWildStacker &7Result: &c{0}&7. They cannot stack together.'
+
+# Called on upgrade menu
+UPGRADE_CURRENT: '&6Current Upgrade: &7'
+UPGRADE_NEXT: '&6Next Upgrade: &7'
