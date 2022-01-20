@@ -154,6 +154,7 @@ public final class SettingsHandler {
 
         try {
             cfg.syncWithConfig(file, plugin.getResource("config.yml"), CONFIG_IGNORED_SECTIONS);
+            cfg.save(file);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
