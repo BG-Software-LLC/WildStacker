@@ -51,7 +51,7 @@ dependencies {
     implementation project(":API")
     implementation fileTree("archive")
 
-    implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.2'
+    implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
 
     // Spigot jars
