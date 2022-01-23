@@ -126,7 +126,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
                 ItemStack rawCurrentIcon = spawnerUpgrade.getIcon();
                 ItemMeta rawCurrentItemMeta = rawCurrentIcon.getItemMeta();
                 ItemStack currentIcon = new ItemBuilder(rawCurrentIcon)
-                        .withName(Locale.UPGRADE_CURRENT + rawCurrentItemMeta.getDisplayName())
+                        .withName(Locale.UPGRADE_CURRENT.getMessage() + rawCurrentItemMeta.getDisplayName())
                         .withLore(rawCurrentItemMeta.getLore().stream().filter(line -> !line.contains("%cost%"))
                                 .collect(Collectors.toList()))
                         .replaceName("%cost%", "")
@@ -143,7 +143,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
 
                 ItemStack rawNextIcon = nextUpgrade.getIcon();
                 ItemStack nextIcon = new ItemBuilder(rawNextIcon)
-                        .withName(Locale.UPGRADE_NEXT + rawNextIcon.getItemMeta().getDisplayName())
+                        .withName(Locale.UPGRADE_NEXT.getMessage() + rawNextIcon.getItemMeta().getDisplayName())
                         .replaceAll("%cost%", GeneralUtils.format(upgradeCost))
                         .build();
                 nextUpgradeSlots.forEach(slot -> inventory.setItem(slot, nextIcon));
