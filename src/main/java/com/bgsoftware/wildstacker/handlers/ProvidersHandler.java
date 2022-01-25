@@ -364,7 +364,12 @@ public final class ProvidersHandler {
             if (mcmmo.getDescription().getVersion().startsWith("1")) {
                 registerHook("McMMOHook");
             } else {
-                registerHook("McMMO2Hook");
+                try {
+                    Class.forName("com.gmail.nossr50.metadata.MobMetaFlagType");
+                    registerHook("McMMO210Hook");
+                } catch (ClassNotFoundException error) {
+                    registerHook("McMMO2Hook");
+                }
             }
         }
         if (isPlugin(toCheck, "CoreProtect") && pluginManager.isPluginEnabled("CoreProtect"))
