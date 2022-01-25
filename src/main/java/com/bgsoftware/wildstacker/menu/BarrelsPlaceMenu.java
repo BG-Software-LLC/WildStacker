@@ -153,7 +153,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
     }
 
     private boolean isSimilar(ItemStack barrelItem) {
-        return barrelItem != null && !plugin.getProviders().canCreateBarrel(barrelItem) &&
+        return barrelItem != null && plugin.getProviders().canCreateBarrel(barrelItem) &&
                 this.barrelItem.getType() == barrelItem.getType() &&
                 (!ServerVersion.isLegacy() || this.barrelItem.getDurability() == barrelItem.getDurability());
     }
