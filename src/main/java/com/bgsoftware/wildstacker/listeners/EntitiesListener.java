@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.entity.SlimeSplitTracker;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -43,7 +44,6 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -89,6 +89,7 @@ public final class EntitiesListener implements Listener {
     public static EntitiesListener IMP;
 
     private final Set<UUID> noDeathEvent = new HashSet<>();
+    private final SlimeSplitTracker slimeSplitTracker = new SlimeSplitTracker();
     private final WildStackerPlugin plugin;
 
     private int mooshroomFlag = -1;
@@ -242,7 +243,7 @@ public final class EntitiesListener implements Listener {
         if (deathSimulationResult.isCancelEvent())
             e.setCancelled(true);
 
-        if(deathSimulationResult.getEventDamage() >= 0)
+        if (deathSimulationResult.getEventDamage() >= 0)
             e.setDamage(deathSimulationResult.getEventDamage());
     }
 
@@ -252,23 +253,23 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntitySpawnLow(CreatureSpawnEvent e) {
-        if (EntityUtils.isStackable(e.getEntity()) && EntityTypes.fromEntity(e.getEntity()).isSlime()) {
-            int originalSize = ((Slime) e.getEntity()).getSize();
-            EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
-                            entity -> entity instanceof Slime && originalSize * 2 == ((Slime) entity).getSize() && EntityStorage.hasMetadata(entity, EntityFlag.ORIGINAL_AMOUNT))
-                    .findFirst().ifPresent(entity -> {
-                        int originalAmount = EntityStorage.getMetadata(entity, EntityFlag.ORIGINAL_AMOUNT, -1);
-                        if (originalAmount > 0)
-                            WStackedEntity.of(e.getEntity()).setStackAmount(originalAmount, true);
-                    });
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onSlimeSplit(SlimeSplitEvent event) {
+        if (!EntityUtils.isStackable(event.getEntity()) ||
+                !EntityStorage.hasMetadata(event.getEntity(), EntityFlag.ORIGINAL_AMOUNT))
+            return;
+
+        int stackAmount = EntityStorage.removeMetadata(event.getEntity(), EntityFlag.ORIGINAL_AMOUNT, -1);
+
+        if (stackAmount > 1) {
+            this.slimeSplitTracker.startTracking(stackAmount, event.getCount());
+            Executor.sync(this.slimeSplitTracker::resetTracker, 1L);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e) {
-        if(mushroomSpawn && e.getEntityType() == EntityType.COW) {
+        if (mushroomSpawn && e.getEntityType() == EntityType.COW) {
             mushroomSpawn = false;
             e.setCancelled(true);
             e.getEntity().getWorld().spawnEntity(e.getLocation(), EntityType.COW);
@@ -363,7 +364,7 @@ public final class EntitiesListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onSlimeSplit(SlimeSplitEvent e) {
+    public void onSlimeSplitAsyncCatch(SlimeSplitEvent e) {
         //Fixes a async catch exception with auto-clear task
         if (!Bukkit.isPrimaryThread())
             e.setCancelled(true);
@@ -673,6 +674,13 @@ public final class EntitiesListener implements Listener {
             mooshroomFlag = -1;
         }
 
+        if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
+            this.slimeSplitTracker.getOriginalSlimeStackAmount().ifPresent(originalStackAmount -> {
+                stackedEntity.setStackAmount(originalStackAmount, true);
+                this.slimeSplitTracker.decreaseSpawnCount();
+            });
+        }
+
         if (spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(entity) == EntityTypes.BEE) {
             org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) entity;
             Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
@@ -694,15 +702,15 @@ public final class EntitiesListener implements Listener {
                 int newBabiesAmount = Random.nextInt(1, 4, cachedEggs);
                 int stackLimit = stackedEntity.getStackLimit();
 
-                if(newBabiesAmount > stackLimit) {
+                if (newBabiesAmount > stackLimit) {
                     int amountOfNewEntities = newBabiesAmount / stackLimit;
-                    for(int i = 0; i < amountOfNewEntities; ++i) {
+                    for (int i = 0; i < amountOfNewEntities; ++i) {
                         stackedEntity.spawnDuplicate(stackLimit, SpawnCause.EGG);
                     }
                     newBabiesAmount -= (stackLimit * amountOfNewEntities);
                 }
 
-                if(newBabiesAmount > 0)
+                if (newBabiesAmount > 0)
                     WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
             }
         }
@@ -755,7 +763,7 @@ public final class EntitiesListener implements Listener {
                 Therefore, we need to do two things. First, spawn a duplicate of the mushroom cow so it doesn't disappear.
                 Secondly, we want to spawn a new cow. This is because the original cow is considered invalid when the
                 spawn event is called. The mushroomSpawn is used to determine when the cow is spawned and to spawn another. */
-                if(stackedEntity.getStackAmount() > 1) {
+                if (stackedEntity.getStackAmount() > 1) {
                     stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
                 }
                 mushroomSpawn = true;

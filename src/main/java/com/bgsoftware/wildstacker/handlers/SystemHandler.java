@@ -375,7 +375,7 @@ public final class SystemHandler implements SystemManager {
                 StackedEntity stackedEntity = (StackedEntity) stackedObject;
                 if (stackedEntity.getLivingEntity() == null || (
                         GeneralUtils.isChunkLoaded(stackedEntity.getLivingEntity().getLocation()) &&
-                                (stackedEntity.getLivingEntity().isDead() && !stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY))) ||
+                                (stackedEntity.getLivingEntity().isDead() && !hasImportantFlags(stackedEntity))) ||
                         !EntityUtils.isStackable(stackedEntity.getLivingEntity())) {
                     removeStackObject(stackedObject);
                 } else {
@@ -836,6 +836,10 @@ public final class SystemHandler implements SystemManager {
 
     public void setDataSerializer(IDataSerializer dataSerializer) {
         this.dataSerializer = dataSerializer;
+    }
+
+    private static boolean hasImportantFlags(StackedEntity stackedEntity) {
+        return stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY) || stackedEntity.hasFlag(EntityFlag.ORIGINAL_AMOUNT);
     }
 
 }

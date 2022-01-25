@@ -48,14 +48,28 @@ public final class EntityStorage {
         return flagsMap == null ? null : (T) entityFlag.getValueClass().cast(flagsMap.getOrDefault(entityFlag, def));
     }
 
-    public static void removeMetadata(Entity entity, EntityFlag entityFlag) {
-        removeMetadata(entity.getUniqueId(), entityFlag);
+    public static <T> T removeMetadata(Entity entity, EntityFlag entityFlag) {
+        return removeMetadata(entity.getUniqueId(), entityFlag);
     }
 
-    public static void removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
+    public static <T> T removeMetadata(UUID entityUUID, EntityFlag entityFlag) {
+        return removeMetadata(entityUUID, entityFlag, null);
+    }
+
+    public static <T> T removeMetadata(Entity entity, EntityFlag entityFlag, T def) {
+        return removeMetadata(entity.getUniqueId(), entityFlag, def);
+    }
+
+    public static <T> T removeMetadata(UUID entityUUID, EntityFlag entityFlag, T def) {
         FlagsMap flagsMap = entityStorage.get(entityUUID);
-        if (flagsMap != null)
-            flagsMap.remove(entityFlag);
+
+        if (flagsMap != null) {
+            Object retVal = flagsMap.remove(entityFlag);
+            if(retVal != null)
+                return (T) entityFlag.getValueClass().cast(retVal);
+        }
+
+        return def;
     }
 
     public static void clearMetadata(Entity entity) {

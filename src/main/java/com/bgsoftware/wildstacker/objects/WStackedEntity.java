@@ -19,6 +19,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
@@ -80,7 +81,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return plugin.getSystemManager().getStackedEntity(livingEntity);
 
         String customFailureReason = plugin.getProviders().checkStackEntity(livingEntity);
-        if(customFailureReason != null)
+        if (customFailureReason != null)
             throw new IllegalArgumentException(customFailureReason);
 
         throw new IllegalArgumentException("The entity-type " + livingEntity.getType() + " is not a stackable entity.");
@@ -314,7 +315,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         } else {
             Executor.sync(() -> {
                 setFlag(EntityFlag.CORPSE, true);
-                setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
+                if (EntityTypes.fromEntity(object).isSlime())
+                    setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
                 plugin.getNMSAdapter().setHealthDirectly(object, 0);
                 plugin.getNMSAdapter().playDeathSound(object);
             }, 2L);
@@ -441,11 +443,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         StackedEntity duplicate;
 
         LivingEntity customDuplicate = plugin.getProviders().tryDuplicateEntity(object);
-        if(customDuplicate != null) {
+        if (customDuplicate != null) {
             duplicate = WStackedEntity.of(customDuplicate);
             duplicate.setStackAmount(amount, true);
-        }
-        else {
+        } else {
             duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
                     object.getLocation(), getType().getEntityClass(), spawnCause));
 
