@@ -1,5 +1,11 @@
 group 'Hook_McMMO210'
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 dependencies {
     compileOnly 'com.nossr50:mcMMO-2:2.1.210'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
