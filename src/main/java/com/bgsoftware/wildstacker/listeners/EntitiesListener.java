@@ -90,11 +90,11 @@ public final class EntitiesListener implements Listener {
 
     private final Set<UUID> noDeathEvent = new HashSet<>();
     private final FutureEntityTracker slimeSplitTracker = new FutureEntityTracker();
+    private final FutureEntityTracker mushroomTracker = new FutureEntityTracker();
+    private final FutureEntityTracker spawnEggTracker = new FutureEntityTracker();
     private final WildStackerPlugin plugin;
 
-    private int mooshroomFlag = -1;
-    private boolean mushroomSpawn = false;
-    private int nextEntityStackAmount = -1;
+    private boolean duplicateCow = false;
     private EntityTypes nextEntityType = null;
     private int nextUpgradeId = 0;
 
@@ -269,8 +269,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e) {
-        if (mushroomSpawn && e.getEntityType() == EntityType.COW) {
-            mushroomSpawn = false;
+        if (duplicateCow && e.getEntityType() == EntityType.COW) {
+            duplicateCow = false;
             e.setCancelled(true);
             e.getEntity().getWorld().spawnEntity(e.getLocation(), EntityType.COW);
             return;
@@ -292,13 +292,15 @@ public final class EntitiesListener implements Listener {
         if (!EntityUtils.isStackable(e.getEntity()))
             return;
 
-        if (e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG || nextEntityStackAmount <= 0 ||
+        Optional<Integer> spawnEggCount = spawnEggTracker.getOriginalStackAmount();
+
+        if (!spawnEggCount.isPresent() || e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG ||
                 (nextEntityType != null && EntityTypes.fromEntity(e.getEntity()) != nextEntityType))
             return;
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(nextEntityStackAmount, false);
+        stackedEntity.setStackAmount(spawnEggCount.get(), false);
 
         if (nextUpgradeId != 0)
             ((WStackedEntity) stackedEntity).setUpgradeId(nextUpgradeId);
@@ -309,7 +311,8 @@ public final class EntitiesListener implements Listener {
             stackedEntity.updateName();
         }, 1L);
 
-        nextEntityStackAmount = -1;
+        spawnEggTracker.resetTracker();
+
         nextUpgradeId = 0;
         nextEntityType = null;
     }
@@ -618,14 +621,14 @@ public final class EntitiesListener implements Listener {
                 (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
             return false;
 
-        nextEntityStackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        this.spawnEggTracker.startTracking(ItemUtils.getSpawnerItemAmount(usedItem), 1);
         nextUpgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
 
         if (Materials.isValidAndSpawnEgg(usedItem)) {
             nextEntityType = ItemUtils.getEntityType(usedItem);
 
             if (nextEntityType == null) {
-                nextEntityStackAmount = -1;
+                this.spawnEggTracker.resetTracker();
                 nextUpgradeId = 0;
                 return false;
             }
@@ -669,15 +672,15 @@ public final class EntitiesListener implements Listener {
         EntityStorage.setMetadata(entity, EntityFlag.SPAWN_CAUSE, spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(entity);
 
-        if (mooshroomFlag != -1) {
-            stackedEntity.setStackAmount(mooshroomFlag, true);
-            mooshroomFlag = -1;
-        }
+        mushroomTracker.getOriginalStackAmount().ifPresent(mushroomCount -> {
+            stackedEntity.setStackAmount(mushroomCount, true);
+            mushroomTracker.resetTracker();
+        });
 
         if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
             this.slimeSplitTracker.getOriginalStackAmount().ifPresent(originalStackAmount -> {
                 stackedEntity.setStackAmount(originalStackAmount, true);
-                this.slimeSplitTracker.decreaseSpawnCount();
+                this.slimeSplitTracker.decreaseTrackCount();
             });
         }
 
@@ -766,12 +769,12 @@ public final class EntitiesListener implements Listener {
                 if (stackedEntity.getStackAmount() > 1) {
                     stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
                 }
-                mushroomSpawn = true;
+                duplicateCow = true;
             } else {
                 int mushroomAmount = 5 * (stackedEntity.getStackAmount() - 1);
                 ItemStack mushroomItem = new ItemStack(Material.RED_MUSHROOM, mushroomAmount);
                 ItemUtils.dropItem(mushroomItem, entity.getLocation());
-                mooshroomFlag = stackedEntity.getStackAmount();
+                mushroomTracker.startTracking(stackedEntity.getStackAmount(), 1);
             }
         } else if (entity instanceof Sheep) {
             int stackAmount = stackedEntity.getStackAmount();

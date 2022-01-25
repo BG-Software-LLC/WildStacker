@@ -5,19 +5,19 @@ import java.util.Optional;
 public final class FutureEntityTracker {
 
     private int originalStackAmount;
-    private int entitiesToSpawn;
+    private int entitiesToTrack;
 
     public FutureEntityTracker() {
     }
 
-    public void startTracking(int originalStackAmount, int entitiesToSpawn) {
+    public void startTracking(int originalStackAmount, int entitiesToTrack) {
         this.originalStackAmount = originalStackAmount;
-        this.entitiesToSpawn = entitiesToSpawn;
+        this.entitiesToTrack = entitiesToTrack;
     }
 
     public void resetTracker() {
-        if(entitiesToSpawn > 0) {
-            originalStackAmount = 0;
+        if (entitiesToTrack > 0) {
+            entitiesToTrack = 0;
         }
     }
 
@@ -25,8 +25,8 @@ public final class FutureEntityTracker {
         return Optional.ofNullable(originalStackAmount <= 0 ? null : originalStackAmount);
     }
 
-    public void decreaseSpawnCount() {
-        if (--this.entitiesToSpawn == 0)
+    public void decreaseTrackCount() {
+        if (--this.entitiesToTrack == 0)
             this.originalStackAmount = 0;
     }
 
