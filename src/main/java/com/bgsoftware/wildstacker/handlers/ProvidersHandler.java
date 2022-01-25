@@ -293,12 +293,11 @@ public final class ProvidersHandler {
         conflictPluginFixers.clear();
 
         if (Bukkit.getPluginManager().isPluginEnabled("FastAsyncWorldEdit")) {
-            Plugin fastAsyncWorldEdit = Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit");
-            if(fastAsyncWorldEdit.getDescription().getVersion().startsWith("2")) {
+            try {
+                Class.forName("com.fastasyncworldedit.core.configuration.Settings");
                 Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit2");
                 conflictPluginFixer.ifPresent(conflictPluginFixers::add);
-            }
-            else {
+            } catch (ClassNotFoundException error) {
                 Optional<ConflictPluginFixer> conflictPluginFixer = createInstance("ConflictPluginFixer_FastAsyncWorldEdit");
                 conflictPluginFixer.ifPresent(conflictPluginFixers::add);
             }
