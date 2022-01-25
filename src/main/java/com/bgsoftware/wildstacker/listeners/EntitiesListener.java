@@ -13,7 +13,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.entity.SlimeSplitTracker;
+import com.bgsoftware.wildstacker.utils.entity.FutureEntityTracker;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -89,7 +89,7 @@ public final class EntitiesListener implements Listener {
     public static EntitiesListener IMP;
 
     private final Set<UUID> noDeathEvent = new HashSet<>();
-    private final SlimeSplitTracker slimeSplitTracker = new SlimeSplitTracker();
+    private final FutureEntityTracker slimeSplitTracker = new FutureEntityTracker();
     private final WildStackerPlugin plugin;
 
     private int mooshroomFlag = -1;
@@ -675,7 +675,7 @@ public final class EntitiesListener implements Listener {
         }
 
         if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
-            this.slimeSplitTracker.getOriginalSlimeStackAmount().ifPresent(originalStackAmount -> {
+            this.slimeSplitTracker.getOriginalStackAmount().ifPresent(originalStackAmount -> {
                 stackedEntity.setStackAmount(originalStackAmount, true);
                 this.slimeSplitTracker.decreaseSpawnCount();
             });
