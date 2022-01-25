@@ -89,14 +89,12 @@ public final class EntitiesListener implements Listener {
     public static EntitiesListener IMP;
 
     private final Set<UUID> noDeathEvent = new HashSet<>();
-    private final FutureEntityTracker slimeSplitTracker = new FutureEntityTracker();
-    private final FutureEntityTracker mushroomTracker = new FutureEntityTracker();
-    private final FutureEntityTracker spawnEggTracker = new FutureEntityTracker();
+    private final FutureEntityTracker<Integer> slimeSplitTracker = new FutureEntityTracker<>();
+    private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
+    private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
-    private EntityTypes nextEntityType = null;
-    private int nextUpgradeId = 0;
 
     public EntitiesListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -261,9 +259,8 @@ public final class EntitiesListener implements Listener {
 
         int stackAmount = EntityStorage.removeMetadata(event.getEntity(), EntityFlag.ORIGINAL_AMOUNT, -1);
 
-        if (stackAmount > 1) {
+        if (stackAmount > 1 && event.getCount() > 0) {
             this.slimeSplitTracker.startTracking(stackAmount, event.getCount());
-            Executor.sync(this.slimeSplitTracker::resetTracker, 1L);
         }
     }
 
@@ -292,18 +289,22 @@ public final class EntitiesListener implements Listener {
         if (!EntityUtils.isStackable(e.getEntity()))
             return;
 
-        Optional<Integer> spawnEggCount = spawnEggTracker.getOriginalStackAmount();
+        Optional<SpawnEggTrackedData> spawnEggDataOptional = spawnEggTracker.getTrackedData();
 
-        if (!spawnEggCount.isPresent() || e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG ||
-                (nextEntityType != null && EntityTypes.fromEntity(e.getEntity()) != nextEntityType))
+        if (!spawnEggDataOptional.isPresent() || e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
+            return;
+
+        SpawnEggTrackedData spawnEggData = spawnEggDataOptional.get();
+
+        if (spawnEggData.entityType != null && EntityTypes.fromEntity(e.getEntity()) != spawnEggData.entityType)
             return;
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(spawnEggCount.get(), false);
+        stackedEntity.setStackAmount(spawnEggData.stackAmount, false);
 
-        if (nextUpgradeId != 0)
-            ((WStackedEntity) stackedEntity).setUpgradeId(nextUpgradeId);
+        if (spawnEggData.upgradeId != 0)
+            ((WStackedEntity) stackedEntity).setUpgradeId(spawnEggData.upgradeId);
 
         Executor.sync(() -> {
             //Resetting the name, so updateName will work.
@@ -312,9 +313,6 @@ public final class EntitiesListener implements Listener {
         }, 1L);
 
         spawnEggTracker.resetTracker();
-
-        nextUpgradeId = 0;
-        nextEntityType = null;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -621,29 +619,30 @@ public final class EntitiesListener implements Listener {
                 (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
             return false;
 
-        this.spawnEggTracker.startTracking(ItemUtils.getSpawnerItemAmount(usedItem), 1);
-        nextUpgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
+        SpawnEggTrackedData trackedData = new SpawnEggTrackedData();
+        trackedData.stackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        trackedData.upgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
 
         if (Materials.isValidAndSpawnEgg(usedItem)) {
-            nextEntityType = ItemUtils.getEntityType(usedItem);
+            trackedData.entityType = ItemUtils.getEntityType(usedItem);
 
-            if (nextEntityType == null) {
+            if (trackedData.entityType == null) {
                 this.spawnEggTracker.resetTracker();
-                nextUpgradeId = 0;
                 return false;
             }
 
             EntityType nmsEntityType = ItemUtils.getNMSEntityType(usedItem);
             if (nmsEntityType != null) {
                 event.setCancelled(true);
-                nextEntityType = EntityTypes.fromName(nmsEntityType.name());
+                trackedData.entityType = EntityTypes.fromName(nmsEntityType.name());
                 Location toSpawn = clickedBlock.getRelative(blockFace).getLocation().add(0.5, 0, 0.5);
                 if (toSpawn.getBlock().getType() != Material.AIR)
                     toSpawn = toSpawn.add(0, 1, 0);
                 plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, nmsEntityType.getEntityClass(), SpawnCause.SPAWNER_EGG);
-                return true;
             }
         }
+
+        this.spawnEggTracker.startTracking(trackedData, 1);
 
         return true;
     }
@@ -672,13 +671,13 @@ public final class EntitiesListener implements Listener {
         EntityStorage.setMetadata(entity, EntityFlag.SPAWN_CAUSE, spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(entity);
 
-        mushroomTracker.getOriginalStackAmount().ifPresent(mushroomCount -> {
+        mushroomTracker.getTrackedData().ifPresent(mushroomCount -> {
             stackedEntity.setStackAmount(mushroomCount, true);
             mushroomTracker.resetTracker();
         });
 
         if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
-            this.slimeSplitTracker.getOriginalStackAmount().ifPresent(originalStackAmount -> {
+            this.slimeSplitTracker.getTrackedData().ifPresent(originalStackAmount -> {
                 stackedEntity.setStackAmount(originalStackAmount, true);
                 this.slimeSplitTracker.decreaseTrackCount();
             });
@@ -910,6 +909,18 @@ public final class EntitiesListener implements Listener {
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onBlockShearEntity(BlockShearEntityEvent e) {
             handleEntityShear(e, e.getEntity());
+        }
+
+    }
+
+    private static class SpawnEggTrackedData {
+
+        private int stackAmount;
+        private int upgradeId;
+        private EntityTypes entityType;
+
+        public SpawnEggTrackedData() {
+
         }
 
     }

@@ -2,16 +2,16 @@ package com.bgsoftware.wildstacker.utils.entity;
 
 import java.util.Optional;
 
-public final class FutureEntityTracker {
+public final class FutureEntityTracker<T> {
 
-    private int originalStackAmount;
+    private T trackedData;
     private int entitiesToTrack;
 
     public FutureEntityTracker() {
     }
 
-    public void startTracking(int originalStackAmount, int entitiesToTrack) {
-        this.originalStackAmount = originalStackAmount;
+    public void startTracking(T trackedData, int entitiesToTrack) {
+        this.trackedData = trackedData;
         this.entitiesToTrack = entitiesToTrack;
     }
 
@@ -21,13 +21,13 @@ public final class FutureEntityTracker {
         }
     }
 
-    public Optional<Integer> getOriginalStackAmount() {
-        return Optional.ofNullable(originalStackAmount <= 0 ? null : originalStackAmount);
+    public Optional<T> getTrackedData() {
+        return Optional.ofNullable(trackedData);
     }
 
     public void decreaseTrackCount() {
         if (--this.entitiesToTrack == 0)
-            this.originalStackAmount = 0;
+            this.trackedData = null;
     }
 
 }
