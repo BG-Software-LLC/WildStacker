@@ -112,7 +112,7 @@ public final class DataHandler {
         if (chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
         stackedBarrel.removeDisplayBlock();
-        ((WStackedBarrel) stackedBarrel).removeHologram();
+        Executor.sync(() -> ((WStackedBarrel) stackedBarrel).removeHologram());
     }
 
     public List<StackedObject> getStackedObjects() {
