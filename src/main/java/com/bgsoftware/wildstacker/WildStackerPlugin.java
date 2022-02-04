@@ -77,6 +77,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     @Override
     public void onLoad() {
         plugin = this;
+
+        // Setting the default locale to English will fix issues related to using upper case in Turkish.
+        // https://stackoverflow.com/questions/11063102/using-locales-with-javas-tolowercase-and-touppercase
+        java.util.Locale.setDefault(java.util.Locale.ENGLISH);
+
         new Metrics(this);
 
         loadNMSAdapter();
