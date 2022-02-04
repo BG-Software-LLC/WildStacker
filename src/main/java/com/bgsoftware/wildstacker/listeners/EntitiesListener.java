@@ -586,7 +586,8 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntered());
 
-        if (stackedEntity.getStackAmount() <= 1 || !StackSplit.ENTER_VEHICLE.isEnabled())
+        if (stackedEntity.getStackAmount() <= 1 || !StackSplit.ENTER_VEHICLE.isEnabled() ||
+                stackedEntity.hasFlag(EntityFlag.ADD_TO_VEHICLE))
             return;
 
         e.setCancelled(true);
@@ -597,7 +598,13 @@ public final class EntitiesListener implements Listener {
 
         stackedEntity.decreaseStackAmount(1, true);
         StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-        plugin.getNMSAdapter().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());
+
+        try {
+            stackedEntity.setFlag(EntityFlag.ADD_TO_VEHICLE, true);
+            plugin.getNMSAdapter().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());
+        } finally {
+            stackedEntity.removeFlag(EntityFlag.ADD_TO_VEHICLE);
+        }
     }
 
     /*

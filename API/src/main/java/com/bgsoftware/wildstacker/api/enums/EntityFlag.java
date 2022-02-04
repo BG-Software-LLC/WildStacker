@@ -14,6 +14,7 @@ public enum EntityFlag {
     EXP_TO_DROP(Integer.class),
     AVOID_ONE_SHOT(Boolean.class),
     ATTACKED_ENTITY(Boolean.class),
+    ADD_TO_VEHICLE(Boolean.class),
 
     // Items related flags
     DROPPED_BY_PLAYER(Boolean.class),
