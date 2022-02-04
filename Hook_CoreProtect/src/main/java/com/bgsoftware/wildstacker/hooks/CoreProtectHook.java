@@ -49,7 +49,7 @@ public final class CoreProtectHook {
 
         CoreProtectAPI coreProtectAPI = ((CoreProtect) coreProtect).getAPI();
 
-        if (coreProtectAPI.APIVersion() == 5) {
+        if (coreProtectAPI.APIVersion() <= 5) {
             switch (action) {
                 case BLOCK_BREAK:
                     coreProtectAPI.logRemoval(offlinePlayer.getName(), location, type, data);
