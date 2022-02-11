@@ -77,7 +77,6 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.io.ByteArrayInputStream;
@@ -597,11 +596,6 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     /*
      *   Other methods
      */
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
-    }
 
     @Override
     public void runAtEndOfTick(Runnable code) {

@@ -93,7 +93,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.metadata.MetadataStoreBase;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -803,11 +802,6 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
     /*
      *   Other methods
      */
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
-    }
 
     @Override
     public void runAtEndOfTick(Runnable code) {

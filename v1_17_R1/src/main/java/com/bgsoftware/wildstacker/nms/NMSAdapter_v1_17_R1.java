@@ -75,11 +75,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.MobSpawnerAbstract;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.BlockRotatable;
-import net.minecraft.world.level.block.IFluidContainer;
 import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
-import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.FluidTypes;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -91,9 +88,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_17_R1.CraftParticle;
-import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftAnimals;
@@ -139,7 +134,6 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -515,7 +509,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void setCustomName(org.bukkit.entity.Entity entity, String name) {
-        if(HEX_COLOR_PATTERN.matcher(name).find()) {
+        if (HEX_COLOR_PATTERN.matcher(name).find()) {
             // When hex color is found in the name of the entity, we should use the regular bukkit's method instead.
             entity.setCustomName(name);
         } else {
@@ -799,20 +793,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     }
 
     @Override
-    public boolean attemptToWaterLog(Block block) {
-        World world = ((CraftWorld) block.getWorld()).getHandle();
-        BlockPosition blockPosition = ((CraftBlock) block).getPosition();
-        IBlockData blockData = ((CraftBlock) block).getNMS();
-
-        if (blockData.getBlock() instanceof IFluidContainer) {
-            ((IFluidContainer) blockData.getBlock()).place(world, blockPosition, blockData, FluidTypes.c.a(false));
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item bukkitItem) {
         if (!(bukkitPiglin instanceof Piglin))
             return false;
@@ -856,7 +836,7 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
-        if(livingEntity instanceof Player)
+        if (livingEntity instanceof Player)
             return false;
 
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
@@ -1063,11 +1043,6 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
-    }
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*

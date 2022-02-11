@@ -45,11 +45,8 @@ import net.minecraft.server.v1_16_R3.EntityZombieVillager;
 import net.minecraft.server.v1_16_R3.EnumHand;
 import net.minecraft.server.v1_16_R3.EnumItemSlot;
 import net.minecraft.server.v1_16_R3.EnumMobSpawn;
-import net.minecraft.server.v1_16_R3.FluidTypes;
 import net.minecraft.server.v1_16_R3.GameRules;
-import net.minecraft.server.v1_16_R3.IBlockData;
 import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.IFluidContainer;
 import net.minecraft.server.v1_16_R3.ItemArmor;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
@@ -85,9 +82,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
-import org.bukkit.craftbukkit.v1_16_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftAnimals;
@@ -130,7 +125,6 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -755,20 +749,6 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     }
 
     @Override
-    public boolean attemptToWaterLog(Block block) {
-        World world = ((CraftWorld) block.getWorld()).getHandle();
-        BlockPosition blockPosition = ((CraftBlock) block).getPosition();
-        IBlockData blockData = ((CraftBlock) block).getNMS();
-
-        if (blockData.getBlock() instanceof IFluidContainer) {
-            ((IFluidContainer) blockData.getBlock()).place(world, blockPosition, blockData, FluidTypes.WATER.a(false));
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item bukkitItem) {
         if (!(bukkitPiglin instanceof Piglin))
             return false;
@@ -999,11 +979,6 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
-    }
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*

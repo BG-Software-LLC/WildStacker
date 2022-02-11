@@ -45,11 +45,8 @@ import net.minecraft.server.v1_15_R1.EntityZombieVillager;
 import net.minecraft.server.v1_15_R1.EnumHand;
 import net.minecraft.server.v1_15_R1.EnumItemSlot;
 import net.minecraft.server.v1_15_R1.EnumMobSpawn;
-import net.minecraft.server.v1_15_R1.FluidTypes;
 import net.minecraft.server.v1_15_R1.GameRules;
-import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
-import net.minecraft.server.v1_15_R1.IFluidContainer;
 import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.ItemSword;
 import net.minecraft.server.v1_15_R1.Items;
@@ -78,9 +75,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_15_R1.CraftParticle;
-import org.bukkit.craftbukkit.v1_15_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftAnimals;
@@ -116,7 +111,6 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -496,10 +490,11 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
         entityItem.pickupDelay = 10;
 
-        try{
+        try {
             entityItem.canMobPickup = false;
             Executor.sync(() -> entityItem.canMobPickup = true, 20L);
-        }catch (Throwable ignored){}
+        } catch (Throwable ignored) {
+        }
 
         StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
@@ -666,20 +661,6 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
         EntityRaider entityRaider = (EntityRaider) ((CraftEntity) raider).getHandle();
         if (entityRaider.eF())
             entityRaider.eE().a((Entity) ((CraftPlayer) player).getHandle());
-    }
-
-    @Override
-    public boolean attemptToWaterLog(Block block) {
-        World world = ((CraftWorld) block.getWorld()).getHandle();
-        BlockPosition blockPosition = ((CraftBlock) block).getPosition();
-        IBlockData blockData = ((CraftBlock) block).getNMS();
-
-        if (blockData.getBlock() instanceof IFluidContainer) {
-            ((IFluidContainer) blockData.getBlock()).place(world, blockPosition, blockData, FluidTypes.WATER.a(false));
-            return true;
-        }
-
-        return false;
     }
 
     @Override
@@ -859,11 +840,6 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
-    }
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*

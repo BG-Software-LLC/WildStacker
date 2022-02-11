@@ -83,11 +83,9 @@ import net.minecraft.world.level.MobSpawnerAbstract;
 import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.BlockRotatable;
-import net.minecraft.world.level.block.IFluidContainer;
 import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.FluidTypes;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -99,9 +97,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_18_R1.CraftParticle;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftAnimals;
@@ -147,7 +143,6 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -791,20 +786,6 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
     }
 
     @Override
-    public boolean attemptToWaterLog(Block block) {
-        World world = ((CraftWorld) block.getWorld()).getHandle();
-        BlockPosition blockPosition = ((CraftBlock) block).getPosition();
-        IBlockData blockData = ((CraftBlock) block).getNMS();
-
-        if (getBlock(blockData) instanceof IFluidContainer) {
-            place((IFluidContainer) getBlock(blockData), world, blockPosition, blockData, FluidTypes.c.a(false));
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item bukkitItem) {
         if (!(bukkitPiglin instanceof Piglin))
             return false;
@@ -1053,11 +1034,6 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
     @Override
     public Object getChatMessage(String message) {
         return new ChatMessage(message);
-    }
-
-    @Override
-    public MetadataStoreBase<org.bukkit.entity.Entity> getEntityMetadataStore() {
-        return ((CraftServer) Bukkit.getServer()).getEntityMetadata();
     }
 
     /*
