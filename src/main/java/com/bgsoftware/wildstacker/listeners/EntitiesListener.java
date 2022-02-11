@@ -61,6 +61,7 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
@@ -607,10 +608,6 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    /*
-     *  General methods
-     */
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onVehicleExit(VehicleExitEvent e) {
         if (!EntityUtils.isStackable(e.getExited()))
@@ -619,6 +616,22 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(e.getExited());
         stackedEntity.runStackAsync(null);
     }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onCreatureSpawnMonitor(CreatureSpawnEvent event) {
+        if (event.isCancelled())
+            handleEntityCacheClear(event.getEntity());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onSpawnerSpawnMonitor(SpawnerSpawnEvent event) {
+        if (event.isCancelled() && event.getEntity() instanceof LivingEntity)
+            handleEntityCacheClear((LivingEntity) event.getEntity());
+    }
+
+    /*
+     *  General methods
+     */
 
     public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event) {
         if (!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
@@ -758,6 +771,11 @@ public final class EntitiesListener implements Listener {
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
+    }
+
+    private void handleEntityCacheClear(LivingEntity livingEntity) {
+        // Removing the entity from cache.
+        plugin.getDataHandler().CACHED_ENTITIES.remove(livingEntity.getUniqueId());
     }
 
     private void handleEntityShear(Cancellable cancellable, Entity entity) {
