@@ -183,6 +183,10 @@ public interface NMSAdapter {
 
     void awardKillScore(Entity bukkitDamaged, Entity damagerEntity);
 
+    default void awardPickupScore(Player player, Item pickItem) {
+
+    }
+
     void playPickupAnimation(LivingEntity livingEntity, Item item);
 
     void playDeathSound(LivingEntity entity);

@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -189,6 +190,8 @@ public final class ItemsListener implements Listener {
                             e.getInventory().setContents(adjustedContentsSnapshot);
                         }
                     });
+                } else {
+                    plugin.getNMSAdapter().awardPickupScore((Player) ((PlayerInventory) e.getInventory()).getHolder(), item);
                 }
             } else if (plugin.getNMSAdapter().handleEquipmentPickup(e.getEntity(), item)) {
                 if (stackAmount <= 1) {

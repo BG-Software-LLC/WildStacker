@@ -12,8 +12,10 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import net.minecraft.server.v1_8_R3.AchievementList;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.BlockRotatable;
+import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.Chunk;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
@@ -29,8 +31,10 @@ import net.minecraft.server.v1_8_R3.EntityZombie;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
 import net.minecraft.server.v1_8_R3.IWorldAccess;
+import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.ItemArmor;
 import net.minecraft.server.v1_8_R3.ItemStack;
+import net.minecraft.server.v1_8_R3.Items;
 import net.minecraft.server.v1_8_R3.MinecraftKey;
 import net.minecraft.server.v1_8_R3.MobEffect;
 import net.minecraft.server.v1_8_R3.MobEffectList;
@@ -69,7 +73,6 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -322,7 +325,7 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
         entityItem.pickupDelay = 10;
 
-        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
+        StackedItem stackedItem = WStackedItem.ofBypass((org.bukkit.entity.Item) entityItem.getBukkitEntity());
 
         itemConsumer.accept(stackedItem);
 
@@ -416,7 +419,41 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     }
 
     @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
+    public void awardPickupScore(Player player, org.bukkit.entity.Item pickItem) {
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) pickItem).getHandle();
+        ItemStack itemStack = CraftItemStack.asNMSCopy(pickItem.getItemStack());
+
+        if (itemStack.getItem() == Item.getItemOf(Blocks.LOG)) {
+            entityPlayer.b(AchievementList.g);
+        }
+
+        if (itemStack.getItem() == Item.getItemOf(Blocks.LOG2)) {
+            entityPlayer.b(AchievementList.g);
+        }
+
+        if (itemStack.getItem() == Items.LEATHER) {
+            entityPlayer.b(AchievementList.t);
+        }
+
+        if (itemStack.getItem() == Items.DIAMOND) {
+            entityPlayer.b(AchievementList.w);
+        }
+
+        if (itemStack.getItem() == Items.BLAZE_ROD) {
+            entityPlayer.b(AchievementList.A);
+        }
+
+        if (itemStack.getItem() == Items.DIAMOND && entityItem.n() != null) {
+            EntityHuman otherPlayer = entityPlayer.world.a(entityItem.n());
+            if (otherPlayer != null && otherPlayer != entityPlayer) {
+                otherPlayer.b(AchievementList.x);
+            }
+        }
+    }
+
+    @Override
+    public void playPickupAnimation(LivingEntity livingEntity, org.bukkit.entity.Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
         EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
@@ -517,7 +554,7 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
     }
 
     @Override
-    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
+    public boolean handleEquipmentPickup(LivingEntity livingEntity, org.bukkit.entity.Item bukkitItem) {
         EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
