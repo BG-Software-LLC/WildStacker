@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import org.bukkit.Achievement;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,7 +18,6 @@ import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -184,15 +182,7 @@ public interface NMSAdapter {
      *   World methods
      */
 
-    default void grandAchievement(Player player, EntityType victim, String name) {
-        grandAchievement(player, "", name);
-    }
-
-    default void grandAchievement(Player player, String criteria, String name) {
-        Achievement achievement = Achievement.valueOf(name);
-        if (!player.hasAchievement(achievement))
-            player.awardAchievement(achievement);
-    }
+    void awardKillScore(Entity bukkitDamaged, Entity damagerEntity);
 
     void playPickupAnimation(LivingEntity livingEntity, Item item);
 
@@ -233,11 +223,11 @@ public interface NMSAdapter {
         }
     }
 
-    default void enterVehicle(Vehicle vehicle, Entity entity){
+    default void enterVehicle(Vehicle vehicle, Entity entity) {
         vehicle.setPassenger(entity);
     }
 
-    default int getPassengersCount(Vehicle vehicle){
+    default int getPassengersCount(Vehicle vehicle) {
         return vehicle.getPassenger() == null ? 0 : 1;
     }
 
@@ -265,7 +255,7 @@ public interface NMSAdapter {
 
     MetadataStoreBase<Entity> getEntityMetadataStore();
 
-    default void runAtEndOfTick(Runnable code){
+    default void runAtEndOfTick(Runnable code) {
         ServerTickListener.addTickEndTask(code);
     }
 

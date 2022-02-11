@@ -23,6 +23,8 @@ import net.minecraft.server.v1_12_R1.Enchantments;
 import net.minecraft.server.v1_12_R1.Entity;
 import net.minecraft.server.v1_12_R1.EntityAnimal;
 import net.minecraft.server.v1_12_R1.EntityArmorStand;
+import net.minecraft.server.v1_12_R1.EntityArrow;
+import net.minecraft.server.v1_12_R1.EntityFireball;
 import net.minecraft.server.v1_12_R1.EntityHuman;
 import net.minecraft.server.v1_12_R1.EntityInsentient;
 import net.minecraft.server.v1_12_R1.EntityItem;
@@ -76,11 +78,14 @@ import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -471,6 +476,36 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
         itemStack.setTag(nbtTagCompound);
 
         return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    @Override
+    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity damagerEntity) {
+        Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
+        Entity damager = ((CraftEntity) damagerEntity).getHandle();
+
+        DamageSource damageSource = null;
+
+        if (damagerEntity instanceof Player) {
+            damageSource = DamageSource.playerAttack((EntityHuman) damager);
+        } else if (damagerEntity instanceof Projectile) {
+            Projectile projectile = (Projectile) damagerEntity;
+            if (projectile instanceof Arrow) {
+                damageSource = DamageSource.arrow((EntityArrow) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            } else if (projectile instanceof Fireball) {
+                damageSource = DamageSource.fireball((EntityFireball) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            }
+        }
+
+        if (damageSource == null) {
+            if (damager instanceof EntityLiving) {
+                damageSource = DamageSource.mobAttack((EntityLiving) damager);
+            } else {
+                return;
+            }
+        }
+
+        damager.a(damaged, 0, damageSource);
     }
 
     /*

@@ -69,7 +69,7 @@ public final class DeathSimulation {
             return new Result(true, -1);
         }
 
-        if(stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
+        if (stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
             return new Result(true, -1);
 
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
@@ -82,7 +82,7 @@ public final class DeathSimulation {
 
         Result result = new Result(false, 0);
 
-        if(handleFastKill(livingEntity, killer))
+        if (handleFastKill(livingEntity, killer))
             result.cancelEvent = true;
 
         if (killer != null) {
@@ -92,7 +92,7 @@ public final class DeathSimulation {
         livingEntity.setHealth(livingEntity.getMaxHealth() - damageToNextStack);
 
         //Villager was killed by a zombie - should be turned into a zombie villager.
-        if(checkForZombieVillager(stackedEntity, entityKiller))
+        if (checkForZombieVillager(stackedEntity, entityKiller))
             return result;
 
         int originalAmount = stackedEntity.getStackAmount();
@@ -223,7 +223,7 @@ public final class DeathSimulation {
 
     private static Pair<Integer, Double> checkForSpreadDamage(StackedEntity stackedEntity,
                                                               boolean instantKill, double finalDamage,
-                                                              ItemStack damagerTool){
+                                                              ItemStack damagerTool) {
         int entitiesToKill;
         double damageToNextStack;
 
@@ -252,7 +252,7 @@ public final class DeathSimulation {
         return new Pair<>(entitiesToKill, damageToNextStack);
     }
 
-    private static boolean handleFastKill(LivingEntity livingEntity, Player damager){
+    private static boolean handleFastKill(LivingEntity livingEntity, Player damager) {
         if (plugin.getSettings().entitiesFastKill) {
 
             if (damager != null) {
@@ -269,15 +269,15 @@ public final class DeathSimulation {
         return false;
     }
 
-    private static boolean checkForZombieVillager(StackedEntity stackedEntity, Entity entityDamager){
+    private static boolean checkForZombieVillager(StackedEntity stackedEntity, Entity entityDamager) {
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
-        if(livingEntity.getType() != EntityType.VILLAGER || !(entityDamager instanceof Zombie))
+        if (livingEntity.getType() != EntityType.VILLAGER || !(entityDamager instanceof Zombie))
             return false;
 
         switch (livingEntity.getWorld().getDifficulty()) {
             case NORMAL:
-                if(!ThreadLocalRandom.current().nextBoolean())
+                if (!ThreadLocalRandom.current().nextBoolean())
                     return false;
                 break;
             case EASY:
@@ -287,7 +287,7 @@ public final class DeathSimulation {
 
         Zombie zombieVillager = plugin.getNMSAdapter().spawnZombieVillager((Villager) livingEntity);
 
-        if(zombieVillager == null)
+        if (zombieVillager == null)
             return false;
 
         StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
@@ -305,33 +305,22 @@ public final class DeathSimulation {
         return true;
     }
 
-    private static void giveStatisticsToKiller(Player killer, int unstackAmount, StackedEntity stackedEntity){
-        if(killer == null)
-            return;
-
+    private static void giveStatisticsToKiller(Entity entityKiller, int unstackAmount, StackedEntity stackedEntity) {
         EntityType victimType = stackedEntity.getType();
 
-        try {
-            StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, unstackAmount);
-            StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, victimType, unstackAmount);
-        } catch (IllegalArgumentException ignored) {}
-
-        //Monster Hunter
-        grandAchievement(killer, victimType, "KILL_ENEMY");
-        grandAchievement(killer, victimType, "adventure/kill_a_mob");
-
-        //Monsters Hunted
-        grandAchievement(killer, victimType, "adventure/kill_all_mobs");
-
-        //Sniper Duel
-        if (stackedEntity.getWorld().equals(killer.getWorld()) &&
-                killer.getLocation().distanceSquared(stackedEntity.getLocation()) >= 2500) {
-            grandAchievement(killer, "", "SNIPE_SKELETON");
-            grandAchievement(killer, "killed_skeleton", "adventure/sniper_duel");
+        if (entityKiller instanceof Player) {
+            Player killer = (Player) entityKiller;
+            try {
+                StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, unstackAmount);
+                StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, victimType, unstackAmount);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
+
+        plugin.getNMSAdapter().awardKillScore(stackedEntity.getLivingEntity(), entityKiller);
     }
 
-    private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer){
+    private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {
         int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (damage > 0) {
@@ -354,8 +343,8 @@ public final class DeathSimulation {
         }
     }
 
-    private static void attemptJoinRaid(Player killer, LivingEntity livingEntity){
-        if(killer == null || !EntityTypes.fromEntity(livingEntity).isRaider())
+    private static void attemptJoinRaid(Player killer, LivingEntity livingEntity) {
+        if (killer == null || !EntityTypes.fromEntity(livingEntity).isRaider())
             return;
 
         org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) livingEntity;
@@ -378,20 +367,6 @@ public final class DeathSimulation {
             return new EntityDamageEvent(entity, damageCause, damageModifiers, DAMAGE_MODIFIERS_FUNCTIONS);
         } else {
             return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, DAMAGE_MODIFIERS_FUNCTIONS);
-        }
-    }
-
-    private static void grandAchievement(Player killer, EntityType entityType, String name) {
-        try {
-            plugin.getNMSAdapter().grandAchievement(killer, entityType, name);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    private static void grandAchievement(Player killer, String criteria, String name) {
-        try {
-            plugin.getNMSAdapter().grandAchievement(killer, criteria, name);
-        } catch (Throwable ignored) {
         }
     }
 

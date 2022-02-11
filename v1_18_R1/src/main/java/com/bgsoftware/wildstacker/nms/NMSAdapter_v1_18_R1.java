@@ -42,6 +42,7 @@ import net.minecraft.stats.StatisticList;
 import net.minecraft.tags.TagsItem;
 import net.minecraft.util.UtilColor;
 import net.minecraft.world.EnumHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -67,6 +68,8 @@ import net.minecraft.world.entity.monster.piglin.PiglinAI;
 import net.minecraft.world.entity.npc.EntityVillager;
 import net.minecraft.world.entity.npc.EntityVillagerAbstract;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.entity.projectile.EntityArrow;
+import net.minecraft.world.entity.projectile.EntityFireballFireball;
 import net.minecraft.world.entity.raid.EntityRaider;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
@@ -91,8 +94,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
@@ -119,17 +120,21 @@ import org.bukkit.craftbukkit.v1_18_R1.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Trident;
 import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
@@ -704,22 +709,34 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
     }
 
     @Override
-    public void grandAchievement(Player player, EntityType victim, String name) {
-        grandAchievement(player, victim.getKey().toString(), name);
-    }
+    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity damagerEntity) {
+        Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
+        Entity damager = ((CraftEntity) damagerEntity).getHandle();
 
-    @Override
-    public void grandAchievement(Player player, String criteria, String name) {
-        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft(name));
+        DamageSource damageSource = null;
 
-        if (advancement == null)
-            throw new NullPointerException("Invalid advancement " + name);
-
-        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
-
-        if (!advancementProgress.isDone()) {
-            advancementProgress.awardCriteria(criteria);
+        if (damagerEntity instanceof Player) {
+            damageSource = DamageSource.a((EntityHuman) damager);
+        } else if (damagerEntity instanceof Projectile projectile) {
+            if (projectile instanceof Arrow) {
+                damageSource = DamageSource.a((EntityArrow) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            } else if (projectile instanceof Trident) {
+                damageSource = DamageSource.a(damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            } else if (projectile instanceof Fireball) {
+                damageSource = DamageSource.a((EntityFireballFireball) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            }
         }
+
+        if (damageSource == null) {
+            if (damager instanceof EntityLiving damagerLiving) {
+                damageSource = DamageSource.c(damagerLiving);
+            } else {
+                return;
+            }
+        }
+
+        damager.a(damaged, 0, damageSource);
     }
 
     @Override

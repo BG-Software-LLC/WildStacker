@@ -28,6 +28,8 @@ import net.minecraft.server.v1_16_R3.EnchantmentManager;
 import net.minecraft.server.v1_16_R3.Entity;
 import net.minecraft.server.v1_16_R3.EntityAnimal;
 import net.minecraft.server.v1_16_R3.EntityArmorStand;
+import net.minecraft.server.v1_16_R3.EntityArrow;
+import net.minecraft.server.v1_16_R3.EntityFireballFireball;
 import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.EntityInsentient;
 import net.minecraft.server.v1_16_R3.EntityItem;
@@ -77,8 +79,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
@@ -106,16 +106,20 @@ import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Strider;
+import org.bukkit.entity.Trident;
 import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
@@ -476,7 +480,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void setCustomName(org.bukkit.entity.Entity entity, String name) {
-        if(HEX_COLOR_PATTERN.matcher(name).find()) {
+        if (HEX_COLOR_PATTERN.matcher(name).find()) {
             // When hex color is found in the name of the entity, we should use the regular bukkit's method instead.
             entity.setCustomName(name);
         } else {
@@ -670,22 +674,35 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     }
 
     @Override
-    public void grandAchievement(Player player, EntityType victim, String name) {
-        grandAchievement(player, victim.getKey().toString(), name);
-    }
+    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity damagerEntity) {
+        Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
+        Entity damager = ((CraftEntity) damagerEntity).getHandle();
 
-    @Override
-    public void grandAchievement(Player player, String criteria, String name) {
-        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft(name));
+        DamageSource damageSource = null;
 
-        if (advancement == null)
-            throw new NullPointerException("Invalid advancement " + name);
-
-        AdvancementProgress advancementProgress = player.getAdvancementProgress(advancement);
-
-        if (!advancementProgress.isDone()) {
-            advancementProgress.awardCriteria(criteria);
+        if (damagerEntity instanceof Player) {
+            damageSource = DamageSource.playerAttack((EntityHuman) damager);
+        } else if (damagerEntity instanceof Projectile) {
+            Projectile projectile = (Projectile) damagerEntity;
+            if (projectile instanceof Arrow) {
+                damageSource = DamageSource.arrow((EntityArrow) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            } else if (projectile instanceof Trident) {
+                damageSource = DamageSource.a(damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            } else if (projectile instanceof Fireball) {
+                damageSource = DamageSource.fireball((EntityFireballFireball) damager, ((CraftEntity) projectile.getShooter()).getHandle());
+            }
         }
+
+        if (damageSource == null) {
+            if (damager instanceof EntityLiving) {
+                damageSource = DamageSource.mobAttack((EntityLiving) damager);
+            } else {
+                return;
+            }
+        }
+
+        damager.a(damaged, 0, damageSource);
     }
 
     @Override

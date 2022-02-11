@@ -43,6 +43,7 @@ import net.minecraft.server.v1_7_R4.ScoreboardObjective;
 import net.minecraft.server.v1_7_R4.TileEntityMobSpawner;
 import net.minecraft.server.v1_7_R4.World;
 import net.minecraft.server.v1_7_R4.WorldServer;
+import org.bukkit.Achievement;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -61,16 +62,20 @@ import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.CreatureType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.metadata.MetadataStoreBase;
+import org.bukkit.projectiles.ProjectileSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -420,6 +425,19 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
     }
 
     @Override
+    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity damagerEntity) {
+        if (damagerEntity instanceof Player && bukkitDamaged instanceof Monster) {
+            ((Player) damagerEntity).awardAchievement(Achievement.KILL_ENEMY);
+        } else if (damagerEntity instanceof Arrow && bukkitDamaged instanceof Skeleton) {
+            ProjectileSource shooter = ((Arrow) damagerEntity).getShooter();
+            if (shooter instanceof Player && ((Player) shooter).getWorld().equals(damagerEntity.getWorld()) &&
+                    ((Player) shooter).getLocation().distanceSquared(damagerEntity.getLocation()) >= 2500)
+                ((Player) shooter).awardAchievement(Achievement.SNIPE_SKELETON);
+        }
+    }
+
+    @Override
     public void playPickupAnimation(LivingEntity livingEntity, Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
@@ -531,7 +549,7 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
         itemStack.count = 1;
 
-        if(!(itemStack.getItem() instanceof ItemArmor))
+        if (!(itemStack.getItem() instanceof ItemArmor))
             return false;
 
         int equipmentSlotForItem = EntityInsentient.b(itemStack);
