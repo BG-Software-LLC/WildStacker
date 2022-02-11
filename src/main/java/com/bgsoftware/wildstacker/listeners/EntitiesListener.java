@@ -872,7 +872,7 @@ public final class EntitiesListener implements Listener {
                     transformed.setStackAmount(stackedEntity.getStackAmount(), true);
                     transformed.setSpawnCause(spawnCause);
                     transformed.updateNerfed();
-                    transformed.runStackAsync(null);
+                    Executor.sync(() -> transformed.runStackAsync(null), 1L);
                 }
 
                 stackedEntity.remove();
