@@ -340,16 +340,18 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                     mobsToSpawn = 0;
                 }
 
-                spawnedEntities += increaseStackAmount;
+                if(increaseStackAmount > 0) {
+                    spawnedEntities += increaseStackAmount;
 
-                targetEntity.increaseStackAmount(increaseStackAmount, true);
-                demoEntity.spawnStackParticle(true);
+                    targetEntity.increaseStackAmount(increaseStackAmount, true);
+                    demoEntity.spawnStackParticle(true);
 
-                if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
-                    stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
+                    if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
+                        stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
-                world.triggerEffect(2004, position, 0);
-                particlesAmount++;
+                    world.triggerEffect(2004, position, 0);
+                    particlesAmount++;
+                }
             } else {
                 mobsToSpawn = spawnCount;
             }
