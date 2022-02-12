@@ -109,7 +109,8 @@ public final class DeathSimulation {
         if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
             livingEntity.setFireTicks(160);
 
-        giveStatisticsToKiller(killer, unstackAmount, stackedEntity);
+        if(entityKiller != null)
+            giveStatisticsToKiller(entityKiller, unstackAmount, stackedEntity);
 
         // Handle sweeping edge enchantment
         if (!sweepingEdgeHandled && result.cancelEvent && killerTool != null && killer != null) {
