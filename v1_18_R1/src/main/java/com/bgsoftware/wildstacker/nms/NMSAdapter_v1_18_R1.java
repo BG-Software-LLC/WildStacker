@@ -66,7 +66,6 @@ import net.minecraft.world.entity.monster.EntityZombieVillager;
 import net.minecraft.world.entity.monster.piglin.EntityPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAI;
 import net.minecraft.world.entity.npc.EntityVillager;
-import net.minecraft.world.entity.npc.EntityVillagerAbstract;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.projectile.EntityArrow;
 import net.minecraft.world.entity.projectile.EntityFireballFireball;
@@ -77,7 +76,6 @@ import net.minecraft.world.item.ItemSword;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentManager;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.trading.MerchantRecipeList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.MobSpawnerAbstract;
 import net.minecraft.world.level.MobSpawnerData;
@@ -169,7 +167,6 @@ import static com.bgsoftware.wildstacker.nms.NMSMappings_v1_18_R1.*;
 @SuppressWarnings("ConstantConditions")
 public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
 
-    private static final ReflectField<MerchantRecipeList> GET_VILLAGER_OFFERS = new ReflectField<>(EntityVillagerAbstract.class, MerchantRecipeList.class, "bX");
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "bM");
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "be");
     private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "dH");
@@ -233,7 +230,7 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
         Reputation villagerReputation = getReputation(entityVillager);
 
         entityZombieVillager.a(villagerReputation.a(DynamicOpsNBT.a).getValue());
-        setOffers(entityZombieVillager, GET_VILLAGER_OFFERS.get(entityVillager).a());
+        setOffers(entityZombieVillager, getOffers(entityVillager).a());
         setExperience(entityZombieVillager, getExperience(entityVillager));
         setBaby(entityZombieVillager, isBaby(entityVillager));
         setNoAI(entityZombieVillager, isNoAI(entityVillager));

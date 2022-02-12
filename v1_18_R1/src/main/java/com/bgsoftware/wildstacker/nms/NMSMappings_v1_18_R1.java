@@ -42,6 +42,7 @@ import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantRecipeList;
 import net.minecraft.world.level.EnumSkyBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GeneratorAccess;
@@ -102,6 +103,10 @@ public final class NMSMappings_v1_18_R1 {
 
     public static void setOffers(EntityZombieVillager entityZombieVillager, NBTTagCompound offerTag) {
         entityZombieVillager.c(offerTag);
+    }
+
+    public static MerchantRecipeList getOffers(EntityVillager entityVillager) {
+        return entityVillager.fA();
     }
 
     public static int getExperience(EntityVillager entityVillager) {
