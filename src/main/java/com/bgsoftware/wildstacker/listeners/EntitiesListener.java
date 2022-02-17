@@ -791,7 +791,7 @@ public final class EntitiesListener implements Listener {
                 Secondly, we want to spawn a new cow. This is because the original cow is considered invalid when the
                 spawn event is called. The mushroomSpawn is used to determine when the cow is spawned and to spawn another. */
                 if (stackedEntity.getStackAmount() > 1) {
-                    stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1);
+                    stackedEntity.spawnDuplicate(stackedEntity.getStackAmount() - 1, SpawnCause.SHEARED);
                 }
                 duplicateCow = true;
             } else {
@@ -807,7 +807,7 @@ public final class EntitiesListener implements Listener {
                     if (stackAmount > 1) {
                         ((Sheep) entity).setSheared(false);
                         stackedEntity.setStackAmount(stackAmount - 1, true);
-                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
+                        StackedEntity duplicate = stackedEntity.spawnDuplicate(1, SpawnCause.SHEARED);
                         ((Sheep) duplicate.getLivingEntity()).setSheared(true);
                         duplicate.runStackAsync(null);
                     } else {
