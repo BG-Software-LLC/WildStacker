@@ -78,14 +78,11 @@ import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -485,15 +482,14 @@ public final class NMSAdapter_v1_12_R1 implements NMSAdapter {
 
         DamageSource damageSource = null;
 
-        if (damagerEntity instanceof Player) {
+        if (damager instanceof EntityHuman) {
             damageSource = DamageSource.playerAttack((EntityHuman) damager);
-        } else if (damagerEntity instanceof Projectile) {
-            Projectile projectile = (Projectile) damagerEntity;
-            if (projectile instanceof Arrow) {
-                damageSource = DamageSource.arrow((EntityArrow) damager, ((CraftEntity) projectile.getShooter()).getHandle());
-            } else if (projectile instanceof Fireball) {
-                damageSource = DamageSource.fireball((EntityFireball) damager, ((CraftEntity) projectile.getShooter()).getHandle());
-            }
+        } else if (damager instanceof EntityArrow) {
+            EntityArrow entityArrow = (EntityArrow) damager;
+            damageSource = DamageSource.arrow(entityArrow, entityArrow.shooter);
+        } else if (damager instanceof EntityFireball) {
+            EntityFireball entityFireball = (EntityFireball) damager;
+            damageSource = DamageSource.fireball(entityFireball, entityFireball.shooter);
         }
 
         if (damageSource == null) {

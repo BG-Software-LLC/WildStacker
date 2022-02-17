@@ -69,6 +69,7 @@ import net.minecraft.world.entity.npc.EntityVillager;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.projectile.EntityArrow;
 import net.minecraft.world.entity.projectile.EntityFireballFireball;
+import net.minecraft.world.entity.projectile.EntityThrownTrident;
 import net.minecraft.world.entity.raid.EntityRaider;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.ItemStack;
@@ -114,21 +115,17 @@ import org.bukkit.craftbukkit.v1_18_R1.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Strider;
-import org.bukkit.entity.Trident;
 import org.bukkit.entity.Turtle;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
@@ -708,16 +705,14 @@ public final class NMSAdapter_v1_18_R1 implements NMSAdapter {
 
         DamageSource damageSource = null;
 
-        if (damagerEntity instanceof Player) {
-            damageSource = DamageSource.a((EntityHuman) damager);
-        } else if (damagerEntity instanceof Projectile projectile) {
-            if (projectile instanceof Arrow) {
-                damageSource = DamageSource.a((EntityArrow) damager, ((CraftEntity) projectile.getShooter()).getHandle());
-            } else if (projectile instanceof Trident) {
-                damageSource = DamageSource.a(damager, ((CraftEntity) projectile.getShooter()).getHandle());
-            } else if (projectile instanceof Fireball) {
-                damageSource = DamageSource.a((EntityFireballFireball) damager, ((CraftEntity) projectile.getShooter()).getHandle());
-            }
+        if (damager instanceof EntityHuman entityHuman) {
+            damageSource = DamageSource.a(entityHuman);
+        } else if (damager instanceof EntityArrow entityArrow) {
+            damageSource = DamageSource.a(entityArrow, entityArrow.x());
+        } else if (damager instanceof EntityThrownTrident entityThrownTrident) {
+            damageSource = DamageSource.a(damager, entityThrownTrident.x());
+        } else if (damager instanceof EntityFireballFireball entityFireballFireball) {
+            damageSource = DamageSource.a(entityFireballFireball, entityFireballFireball.x());
         }
 
         if (damageSource == null) {
