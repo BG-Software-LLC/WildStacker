@@ -19,6 +19,20 @@ public final class WildStackerAPI {
     private static WildStacker instance;
 
     /**
+     * Set the plugin's instance for the API.
+     * Do not use this method on your own, as it may cause an undefined behavior when using the API.
+     *
+     * @param instance The instance of the plugin to set to the API.
+     */
+    public static void setPluginInstance(WildStacker instance) {
+        if (WildStackerAPI.instance != null) {
+            throw new UnsupportedOperationException("You cannot initialize the plugin instance after it was initialized.");
+        }
+
+        WildStackerAPI.instance = instance;
+    }
+
+    /**
      * Get a stacked-item object for an item.
      *
      * @param item an item to check

@@ -42,8 +42,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import java.lang.reflect.Field;
-
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private static WildStackerPlugin plugin;
@@ -193,10 +191,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private void loadAPI() {
         try {
-            Field instance = WildStackerAPI.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, this);
-        } catch (Exception ex) {
+            WildStackerAPI.setPluginInstance(this);
+        } catch (UnsupportedOperationException ex) {
             log("Failed to set-up API - disabling plugin...");
             ex.printStackTrace();
             shouldEnable = false;
