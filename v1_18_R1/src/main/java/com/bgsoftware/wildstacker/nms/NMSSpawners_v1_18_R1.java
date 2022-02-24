@@ -496,7 +496,7 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
 
             if (entity instanceof EntityInsentient entityInsentient) {
                 if (getEntity(this.e).e() == 1 && hasKeyOfType(getEntity(this.e), "id", 8)) {
-                    prepare((EntityInsentient) entity, world, getDamageScaler(world, getChunkCoordinates(entity)),
+                    prepare(entityInsentient, world, getDamageScaler(world, getChunkCoordinates(entity)),
                             EnumMobSpawn.c, null, null);
                 }
 
@@ -526,8 +526,8 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
                 if (spawnParticles)
                     triggerEffect(world, 2004, position, 0);
 
-                if (entity instanceof EntityInsentient) {
-                    doSpawnEffect((EntityInsentient) entity);
+                if (entity instanceof EntityInsentient entityInsentient) {
+                    doSpawnEffect(entityInsentient);
                 }
 
                 return true;

@@ -503,14 +503,14 @@ public final class NMSSpawners_v1_12_R1 implements NMSSpawners {
             }
 
             if (entity instanceof EntityInsentient) {
-                EntityInsentient entityinsentient = (EntityInsentient) entity;
+                EntityInsentient entityInsentient = (EntityInsentient) entity;
 
                 if (this.spawnData.b().d() == 1 && this.spawnData.b().hasKeyOfType("id", 8)) {
-                    ((EntityInsentient) entity).prepare(world.D(new BlockPosition(entity)), null);
+                    entityInsentient.prepare(world.D(new BlockPosition(entity)), null);
                 }
 
-                if (entityinsentient.world.spigotConfig.nerfSpawnerMobs) {
-                    entityinsentient.fromMobSpawner = true;
+                if (entityInsentient.world.spigotConfig.nerfSpawnerMobs) {
+                    entityInsentient.fromMobSpawner = true;
                 }
             }
 

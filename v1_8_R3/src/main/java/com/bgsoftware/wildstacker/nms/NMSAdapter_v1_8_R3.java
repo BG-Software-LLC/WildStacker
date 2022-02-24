@@ -211,12 +211,17 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
     @Override
     public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        int defaultEntityExp = ENTITY_EXP.get(entityLiving);
-        int exp = entityLiving.getExpReward();
+        if (!(entityLiving instanceof EntityInsentient))
+            return 0;
 
-        ENTITY_EXP.set(entityLiving, defaultEntityExp);
+        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
+
+        int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
+        int exp = entityInsentient.getExpReward();
+
+        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
 
         return exp;
     }
@@ -484,8 +489,9 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
     @Override
     public void playSpawnEffect(LivingEntity livingEntity) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityInsentient.y();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        if (entityLiving instanceof EntityInsentient)
+            ((EntityInsentient) entityLiving).y();
     }
 
     @Override
@@ -555,7 +561,12 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
     @Override
     public boolean handleEquipmentPickup(LivingEntity livingEntity, org.bukkit.entity.Item bukkitItem) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        if(!(entityLiving instanceof EntityInsentient))
+            return false;
+
+        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
         EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
         itemStack.count = 1;
@@ -565,20 +576,20 @@ public final class NMSAdapter_v1_8_R3 implements NMSAdapter {
 
         int equipmentSlotForItem = EntityInsentient.c(itemStack);
 
-        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
 
-        double equipmentDropChance = entityLiving.dropChances[equipmentSlotForItem];
+        double equipmentDropChance = entityInsentient.dropChances[equipmentSlotForItem];
 
         Random random = new Random();
         if (equipmentItem != null && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            entityLiving.a(equipmentItem, 0F);
+            entityInsentient.a(equipmentItem, 0F);
         }
 
-        entityLiving.setEquipment(equipmentSlotForItem, itemStack);
-        entityLiving.dropChances[equipmentSlotForItem] = 2.0F;
+        entityInsentient.setEquipment(equipmentSlotForItem, itemStack);
+        entityInsentient.dropChances[equipmentSlotForItem] = 2.0F;
 
-        entityLiving.persistent = true;
-        entityLiving.receive(entityItem, itemStack.count);
+        entityInsentient.persistent = true;
+        entityInsentient.receive(entityItem, itemStack.count);
 
         return true;
     }

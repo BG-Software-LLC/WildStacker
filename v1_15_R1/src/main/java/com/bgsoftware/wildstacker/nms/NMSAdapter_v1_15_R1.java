@@ -235,12 +235,17 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        int defaultEntityExp = ENTITY_EXP.get(entityLiving);
-        int exp = entityLiving.getExpReward();
+        if (!(entityLiving instanceof EntityInsentient))
+            return 0;
 
-        ENTITY_EXP.set(entityLiving, defaultEntityExp);
+        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
+
+        int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
+        int exp = entityInsentient.getExpReward();
+
+        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
 
         return exp;
     }
@@ -279,18 +284,24 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        if (!(entityLiving instanceof EntityInsentient))
+            return;
+
+        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
+
         try {
-            entityLiving.aware = !nerfed;
+            entityInsentient.aware = !nerfed;
         } catch (Throwable ignored) {
         }
         try {
-            entityLiving.spawnedViaMobSpawner = nerfed;
+            entityInsentient.spawnedViaMobSpawner = nerfed;
         } catch (Throwable ignored) {
         }
 
         if (FROM_MOB_SPAWNER.isValid())
-            FROM_MOB_SPAWNER.set(entityLiving, nerfed);
+            FROM_MOB_SPAWNER.set(entityInsentient, nerfed);
     }
 
     @Override
@@ -644,8 +655,9 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public void playSpawnEffect(LivingEntity livingEntity) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityInsentient.doSpawnEffect();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        if (entityLiving instanceof EntityInsentient)
+            ((EntityInsentient) entityLiving).doSpawnEffect();
     }
 
     @Override
@@ -662,7 +674,12 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
 
     @Override
     public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        if(!(entityLiving instanceof EntityInsentient))
+            return false;
+
+        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
         EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
         itemStack.setCount(1);
@@ -673,22 +690,22 @@ public final class NMSAdapter_v1_15_R1 implements NMSAdapter {
             return false;
         }
 
-        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
 
-        double equipmentDropChance = entityLiving.dropChanceArmor[equipmentSlotForItem.b()];
+        double equipmentDropChance = entityInsentient.dropChanceArmor[equipmentSlotForItem.b()];
 
         Random random = new Random();
         if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            ENTITY_FORCE_DROPS.set(entityLiving, true);
-            entityLiving.a(equipmentItem);
-            ENTITY_FORCE_DROPS.set(entityLiving, false);
+            ENTITY_FORCE_DROPS.set(entityInsentient, true);
+            entityInsentient.a(equipmentItem);
+            ENTITY_FORCE_DROPS.set(entityInsentient, false);
         }
 
-        entityLiving.setSlot(equipmentSlotForItem, itemStack);
-        entityLiving.dropChanceArmor[equipmentSlotForItem.b()] = 2.0F;
+        entityInsentient.setSlot(equipmentSlotForItem, itemStack);
+        entityInsentient.dropChanceArmor[equipmentSlotForItem.b()] = 2.0F;
 
-        entityLiving.persistent = true;
-        entityLiving.receive(entityItem, itemStack.getCount());
+        entityInsentient.persistent = true;
+        entityInsentient.receive(entityItem, itemStack.getCount());
 
         return true;
     }

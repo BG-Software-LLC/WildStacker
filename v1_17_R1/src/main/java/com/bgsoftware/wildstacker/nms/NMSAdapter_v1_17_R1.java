@@ -281,12 +281,15 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public int getEntityExp(LivingEntity livingEntity) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        int defaultEntityExp = ENTITY_EXP.get(entityLiving);
-        int exp = entityLiving.getExpReward();
+        if (!(entityLiving instanceof EntityInsentient entityInsentient))
+            return 0;
 
-        ENTITY_EXP.set(entityLiving, defaultEntityExp);
+        int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
+        int exp = entityInsentient.getExpReward();
+
+        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
 
         return exp;
     }
@@ -331,11 +334,15 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.aware = !nerfed;
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        if (!(entityLiving instanceof EntityInsentient entityInsentient))
+            return;
+
+        entityInsentient.aware = !nerfed;
 
         try {
-            entityLiving.spawnedViaMobSpawner = nerfed;
+            entityInsentient.spawnedViaMobSpawner = nerfed;
         } catch (Throwable ignored) {
         }
     }
@@ -768,8 +775,9 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
 
     @Override
     public void playSpawnEffect(LivingEntity livingEntity) {
-        EntityInsentient entityInsentient = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
-        entityInsentient.doSpawnEffect();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        if (entityLiving instanceof EntityInsentient entityInsentient)
+            entityInsentient.doSpawnEffect();
     }
 
     @Override
@@ -834,7 +842,11 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
         if (livingEntity instanceof Player)
             return false;
 
-        EntityInsentient entityLiving = (EntityInsentient) ((CraftLivingEntity) livingEntity).getHandle();
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+
+        if(!(entityLiving instanceof EntityInsentient entityInsentient))
+            return false;
+
         EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
         ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
         itemStack.setCount(1);
@@ -845,24 +857,24 @@ public final class NMSAdapter_v1_17_R1 implements NMSAdapter {
             return false;
         }
 
-        ItemStack equipmentItem = entityLiving.getEquipment(equipmentSlotForItem);
+        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
 
-        double equipmentDropChance = entityLiving.bS[equipmentSlotForItem.b()];
+        double equipmentDropChance = entityInsentient.bS[equipmentSlotForItem.b()];
 
         Random random = new Random();
         if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            entityLiving.forceDrops = true;
-            entityLiving.b(equipmentItem);
-            entityLiving.forceDrops = false;
+            entityInsentient.forceDrops = true;
+            entityInsentient.b(equipmentItem);
+            entityInsentient.forceDrops = false;
         }
 
-        entityLiving.setSlot(equipmentSlotForItem, itemStack);
-        entityLiving.d(equipmentSlotForItem);
+        entityInsentient.setSlot(equipmentSlotForItem, itemStack);
+        entityInsentient.d(equipmentSlotForItem);
 
         SoundEffect equipSoundEffect = itemStack.M();
         if (!itemStack.isEmpty() && equipSoundEffect != null) {
-            entityLiving.a(GameEvent.u);
-            entityLiving.playSound(equipSoundEffect, 1.0F, 1.0F);
+            entityInsentient.a(GameEvent.u);
+            entityInsentient.playSound(equipSoundEffect, 1.0F, 1.0F);
         }
 
         return true;

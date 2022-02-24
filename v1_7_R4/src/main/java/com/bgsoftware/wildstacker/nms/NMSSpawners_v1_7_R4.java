@@ -506,12 +506,12 @@ public final class NMSSpawners_v1_7_R4 implements NMSSpawners {
             }
 
             if (entity instanceof EntityInsentient) {
-                EntityInsentient entityinsentient = (EntityInsentient) entity;
+                EntityInsentient entityInsentient = (EntityInsentient) entity;
 
-                ((EntityInsentient) entity).prepare(null);
+                entityInsentient.prepare(null);
 
-                if (entityinsentient.world.spigotConfig.nerfSpawnerMobs) {
-                    entityinsentient.fromMobSpawner = true;
+                if (entityInsentient.world.spigotConfig.nerfSpawnerMobs) {
+                    entityInsentient.fromMobSpawner = true;
                 }
             }
 
