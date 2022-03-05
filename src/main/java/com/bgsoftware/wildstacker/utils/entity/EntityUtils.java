@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -148,7 +149,8 @@ public final class EntityUtils {
             experienceOrb = (ExperienceOrb) closestOrb.get();
             experienceOrb.setExperience(experienceOrb.getExperience() + amount);
         } else {
-            experienceOrb = location.getWorld().spawn(location, ExperienceOrb.class);
+            experienceOrb = plugin.getNMSAdapter().createEntity(location, ExperienceOrb.class,
+                    SpawnCause.DEFAULT, null, null);
             experienceOrb.setExperience(amount);
         }
     }
