@@ -595,7 +595,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
 
         EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
 
-        entityItem.aq = 10;
+        entityItem.ap = 10;
 
         try {
             entityItem.canMobPickup = false;
