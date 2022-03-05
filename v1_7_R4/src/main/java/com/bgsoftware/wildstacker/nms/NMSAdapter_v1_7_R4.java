@@ -169,6 +169,20 @@ public final class NMSAdapter_v1_7_R4 implements NMSAdapter {
     }
 
     @Override
+    public <T extends org.bukkit.entity.Entity> T spawnEntity(Location location, Class<T> type, SpawnCause spawnCause) {
+        CraftWorld world = (CraftWorld) location.getWorld();
+
+        assert world != null;
+
+        Entity nmsEntity = EntityHelper_v1_7_R4.createEntity(location, type);
+        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
+
+        EntityHelper_v1_7_R4.addEntity(nmsEntity, spawnCause.toSpawnReason());
+
+        return type.cast(bukkitEntity);
+    }
+
+    @Override
     public Zombie spawnZombieVillager(Villager villager) {
         EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
         EntityZombie entityZombie = new EntityZombie(entityVillager.world);

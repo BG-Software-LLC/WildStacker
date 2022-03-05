@@ -149,8 +149,7 @@ public final class EntityUtils {
             experienceOrb = (ExperienceOrb) closestOrb.get();
             experienceOrb.setExperience(experienceOrb.getExperience() + amount);
         } else {
-            experienceOrb = plugin.getNMSAdapter().createEntity(location, ExperienceOrb.class,
-                    SpawnCause.DEFAULT, null, null);
+            experienceOrb = plugin.getNMSAdapter().spawnEntity(location, ExperienceOrb.class, SpawnCause.DEFAULT);
             experienceOrb.setExperience(amount);
         }
     }
