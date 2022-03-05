@@ -52,4 +52,5 @@ include 'v1_17_R1'
 include 'v1_18_R1'
 include 'Hook_FastAsyncWorldEdit2'
 include 'Hook_McMMO210'
+include 'v1_18_R2'
 
