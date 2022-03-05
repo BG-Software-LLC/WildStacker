@@ -196,7 +196,7 @@ public final class NMSSpawners_v1_18_R1 implements NMSSpawners {
 
         createCondition("NOT_IN_OCEAN", (world, position) -> {
             ResourceKey<BiomeBase> biomeBase = world.i(position).orElse(null);
-            return biomeBase == null || (!biomeBase.equals(Biomes.a) && !biomeBase.equals(Biomes.y));
+            return biomeBase == null || (!biomeBase.equals(Biomes.Q) && !biomeBase.equals(Biomes.R));
         }, EntityType.DOLPHIN);
 
         createCondition("IN_RIVER", (world, position) -> {
