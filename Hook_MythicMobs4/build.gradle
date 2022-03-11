@@ -1,4 +1,4 @@
-group 'Hook_MythicMobs'
+group 'Hook_MythicMobs4'
 
 dependencies {
     compileOnly 'io.lumine:MythicMobs:latest'
@@ -7,7 +7,7 @@ dependencies {
     compileOnly parent
 }
 
-if (project.hasProperty('hook.compile_mythicmobs') &&
-        !Boolean.valueOf(project.findProperty("hook.compile_mythicmobs").toString())) {
+if (project.hasProperty('hook.compile_mythicmobs4') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_mythicmobs4").toString())) {
     project.tasks.all { task -> task.enabled = false }
 }

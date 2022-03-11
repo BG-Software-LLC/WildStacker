@@ -247,7 +247,7 @@ public final class ProvidersHandler {
             entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs");
+            Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs4");
             entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
         }
     }
@@ -260,7 +260,7 @@ public final class ProvidersHandler {
             entityNameProvider.ifPresent(entityNameProviders::add);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            Optional<EntityNameProvider> entityNameProvider = createInstance("EntityNameProvider_MythicMobs");
+            Optional<EntityNameProvider> entityNameProvider = createInstance("EntityNameProvider_MythicMobs4");
             entityNameProvider.ifPresent(entityNameProviders::add);
         }
     }
@@ -319,7 +319,7 @@ public final class ProvidersHandler {
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs")) {
-            registerHook("MythicMobsHook");
+            registerHook("MythicMobsHook4");
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))

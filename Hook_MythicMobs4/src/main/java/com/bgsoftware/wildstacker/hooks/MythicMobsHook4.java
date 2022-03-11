@@ -11,11 +11,11 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public final class MythicMobsHook {
+public final class MythicMobsHook4 {
 
     public static void register(WildStackerPlugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(new MythicMobsListener(), plugin);
-        plugin.getProviders().registerEntityDuplicateListener(MythicMobsHook::tryDuplicate);
+        plugin.getProviders().registerEntityDuplicateListener(MythicMobsHook4::tryDuplicate);
     }
 
     private static LivingEntity tryDuplicate(LivingEntity livingEntity) {

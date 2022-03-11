@@ -5,7 +5,7 @@ import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.entity.Entity;
 
-public final class EntitySimilarityProvider_MythicMobs implements EntitySimilarityProvider {
+public final class EntitySimilarityProvider_MythicMobs4 implements EntitySimilarityProvider {
 
     @Override
     public StackCheckResult areSimilar(Entity entity, Entity other) {

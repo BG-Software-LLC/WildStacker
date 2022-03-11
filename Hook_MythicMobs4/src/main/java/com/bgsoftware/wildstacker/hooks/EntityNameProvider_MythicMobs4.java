@@ -9,11 +9,11 @@ import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
-public final class EntityNameProvider_MythicMobs implements EntityNameProvider {
+public final class EntityNameProvider_MythicMobs4 implements EntityNameProvider {
 
     private final WildStackerPlugin plugin;
 
-    public EntityNameProvider_MythicMobs(WildStackerPlugin plugin) {
+    public EntityNameProvider_MythicMobs4(WildStackerPlugin plugin) {
         this.plugin = plugin;
     }
 
