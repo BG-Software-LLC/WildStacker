@@ -247,7 +247,13 @@ public final class ProvidersHandler {
             entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            Optional<EntitySimilarityProvider> entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs4");
+            Plugin mythicMobs = Bukkit.getPluginManager().getPlugin("MythicMobs");
+            Optional<EntitySimilarityProvider> entitySimilarityProvider;
+            if (mythicMobs.getDescription().getVersion().startsWith("5")) {
+                entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs5");
+            } else {
+                entitySimilarityProvider = createInstance("EntitySimilarityProvider_MythicMobs4");
+            }
             entitySimilarityProvider.ifPresent(entitySimilarityProviders::add);
         }
     }
@@ -260,7 +266,13 @@ public final class ProvidersHandler {
             entityNameProvider.ifPresent(entityNameProviders::add);
         }
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            Optional<EntityNameProvider> entityNameProvider = createInstance("EntityNameProvider_MythicMobs4");
+            Plugin mythicMobs = Bukkit.getPluginManager().getPlugin("MythicMobs");
+            Optional<EntityNameProvider> entityNameProvider;
+            if (mythicMobs.getDescription().getVersion().startsWith("5")) {
+                entityNameProvider = createInstance("EntityNameProvider_MythicMobs5");
+            } else {
+                entityNameProvider = createInstance("EntityNameProvider_MythicMobs4");
+            }
             entityNameProvider.ifPresent(entityNameProviders::add);
         }
     }
@@ -319,7 +331,12 @@ public final class ProvidersHandler {
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MythicMobs") && pluginManager.isPluginEnabled("MythicMobs")) {
-            registerHook("MythicMobsHook4");
+            Plugin mythicMobs = Bukkit.getPluginManager().getPlugin("MythicMobs");
+            if (mythicMobs.getDescription().getVersion().startsWith("5")) {
+                registerHook("MythicMobsHook5");
+            } else {
+                registerHook("MythicMobsHook4");
+            }
             handleEntityStackingWithDelay = true;
         }
         if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
