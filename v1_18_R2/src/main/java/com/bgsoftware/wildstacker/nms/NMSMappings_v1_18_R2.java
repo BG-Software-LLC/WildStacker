@@ -52,7 +52,6 @@ import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.WorldAccess;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.IFluidContainer;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
 import net.minecraft.world.level.block.state.IBlockData;
@@ -179,7 +178,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static void resetLove(EntityAnimal entityAnimal) {
-        entityAnimal.fF();
+        entityAnimal.fG();
     }
 
     public static boolean isInLove(EntityAnimal entityAnimal) {
@@ -288,7 +287,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static NBTTagCompound getOrCreateTag(ItemStack itemStack) {
-        return itemStack.t();
+        return itemStack.u();
     }
 
     public static boolean hasKey(NBTTagCompound nbtTagCompound, String key) {
@@ -320,7 +319,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static int getId(Entity entity) {
-        return entity.ae();
+        return entity.getBukkitEntity().getEntityId();
     }
 
     public static void broadcast(ChunkProviderServer chunkProviderServer, Entity entity, Packet<?> packet) {
@@ -337,11 +336,6 @@ public final class NMSMappings_v1_18_R2 {
 
     public static void doSpawnEffect(EntityInsentient entityInsentient) {
         entityInsentient.L();
-    }
-
-    public static void place(IFluidContainer fluidContainer, GeneratorAccess generatorAccess,
-                             BlockPosition blockPosition, IBlockData blockData, Fluid fluid) {
-        fluidContainer.a(generatorAccess, blockPosition, blockData, fluid);
     }
 
     public static BehaviorController<EntityPiglin> getBehaviorController(EntityPiglin entityPiglin) {
@@ -372,7 +366,7 @@ public final class NMSMappings_v1_18_R2 {
         itemStack.e(count);
     }
 
-    public static <T> boolean isTagged(TagKey<Block> tag, Block block) {
+    public static boolean isTagged(TagKey<Block> tag, Block block) {
         return block.n().a(tag);
     }
 
@@ -381,7 +375,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static ItemStack getItemInOffHand(EntityLiving entityLiving) {
-        return entityLiving.es();
+        return entityLiving.et();
     }
 
     public static void setSlot(EntityLiving entityLiving, EnumItemSlot itemSlot, ItemStack itemStack) {
@@ -389,7 +383,7 @@ public final class NMSMappings_v1_18_R2 {
     }
 
     public static void setPersistent(EntityInsentient entityInsentient) {
-        entityInsentient.fg();
+        entityInsentient.fh();
     }
 
     public static boolean hasMemory(BehaviorController<?> behaviorController, MemoryModuleType<?> memoryModuleType) {
