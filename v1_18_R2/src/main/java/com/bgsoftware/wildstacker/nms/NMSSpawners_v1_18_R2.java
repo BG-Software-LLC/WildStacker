@@ -84,7 +84,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
         World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
 
-        TileEntity tileEntity = getTileEntity(world, new BlockPosition(location.getX(), location.getY(), location.getZ()));
+        TileEntity tileEntity = getBlockEntity(world, new BlockPosition(location.getX(), location.getY(), location.getZ()));
         if (tileEntity instanceof TileEntityMobSpawner tileEntityMobSpawner &&
                 !(getSpawner(tileEntityMobSpawner) instanceof StackedMobSpawner)) {
             new StackedMobSpawner(tileEntityMobSpawner, stackedSpawner);
@@ -95,13 +95,13 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
     }
 
     private static IBlockData getBlockBelow(World world, BlockPosition position) {
-        return getType(world, position.c());
+        return getBlockState(world, position.c());
     }
 
     @Override
     public void registerSpawnConditions() {
         createCondition("ANIMAL_LIGHT",
-                (world, position) -> getLightLevel(world, position, 0) > 8,
+                (world, position) -> getRawBrightness(world, position, 0) > 8,
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.GOAT, EntityType.HORSE,
                 EntityType.LLAMA, EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG,
                 EntityType.RABBIT, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.TURTLE, EntityType.WOLF,
@@ -112,26 +112,26 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
             Holder<BiomeBase> biomeBaseHolder = world.v(position);
             boolean coldBiome = biomeBaseHolder.a(Biomes.U) || biomeBaseHolder.a(Biomes.V);
             IBlockData blockData = getBlockBelow(world, position);
-            return getLightLevel(world, position, 0) > 8 && (coldBiome ? blockData.a(Blocks.i) : blockData.a(Blocks.cL));
+            return getRawBrightness(world, position, 0) > 8 && (coldBiome ? blockData.a(Blocks.i) : blockData.a(Blocks.cL));
         }, EntityType.POLAR_BEAR);
 
         createCondition("ON_AXOLOTL_SPAWNABLE",
-                (world, position) -> isTagged(TagsBlock.bt, getBlock(getType(world, position.c()))),
+                (world, position) -> is(TagsBlock.bt, getBlock(getBlockState(world, position.c()))),
                 EntityType.AXOLOTL
         );
 
         createCondition("ON_FOX_SPAWNABLE",
-                (world, position) -> isTagged(TagsBlock.bz, getBlock(getType(world, position.c()))),
+                (world, position) -> is(TagsBlock.bz, getBlock(getBlockState(world, position.c()))),
                 EntityType.FOX
         );
 
         createCondition("ON_GOAT_SPAWNABLE",
-                (world, position) -> isTagged(TagsBlock.bu, getBlock(getType(world, position.c()))),
+                (world, position) -> is(TagsBlock.bu, getBlock(getBlockState(world, position.c()))),
                 EntityType.GOAT
         );
 
         createCondition("ON_RABBITS_SPAWNABLE",
-                (world, position) -> isTagged(TagsBlock.by, getBlock(getType(world, position.c()))),
+                (world, position) -> is(TagsBlock.by, getBlock(getBlockState(world, position.c()))),
                 EntityType.RABBIT
         );
 
@@ -150,9 +150,9 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
 
             do {
                 mutableBlockPosition.c(EnumDirection.b);
-            } while (getFluid(world, mutableBlockPosition).a(TagsFluid.b));
+            } while (getFluidState(world, mutableBlockPosition).a(TagsFluid.b));
 
-            return getType(world, mutableBlockPosition).g(); //isAir
+            return getBlockState(world, mutableBlockPosition).g(); //isAir
         }, EntityType.STRIDER);
 
         createCondition("IN_SEA_SURFACE",
@@ -173,20 +173,20 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
         }, EntityType.SLIME);
 
         createCondition("IN_FISH_WATER",
-                (world, position) -> getFluid(world, position.c()).a(TagsFluid.b) && getType(world, position.b()).a(Blocks.A) &&
+                (world, position) -> getFluidState(world, position.c()).a(TagsFluid.b) && getBlockState(world, position.b()).a(Blocks.A) &&
                         position.v() >= getSeaLevel(world) - 13 && position.v() <= getSeaLevel(world),
                 EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.DOLPHIN
         );
 
         createCondition("IN_FISH_WATER_OR_LUSH_CAVES",
-                (world, position) -> getFluid(world, position.c()).a(TagsFluid.b) &&
+                (world, position) -> getFluidState(world, position.c()).a(TagsFluid.b) &&
                         (world.v(position).a(Biomes.Y) ||
-                                (getType(world, position.b()).a(Blocks.A) && position.v() >= getSeaLevel(world) - 13 && position.v() <= getSeaLevel(world))),
+                                (getBlockState(world, position.b()).a(Blocks.A) && position.v() >= getSeaLevel(world) - 13 && position.v() <= getSeaLevel(world))),
                 EntityType.TROPICAL_FISH
         );
 
         createCondition("COMPLETE_DARKNESS",
-                (world, position) -> (world.Y() ? world.c(position, 10) : getLightLevel(world, position)) == 0,
+                (world, position) -> (world.Y() ? world.c(position, 10) : getMaxLocalRawBrightness(world, position)) == 0,
                 EntityType.AXOLOTL, EntityType.DROWNED, EntityType.CAVE_SPIDER, EntityType.CREEPER,
                 EntityType.ENDERMAN, EntityType.GIANT, EntityType.HUSK, EntityType.SKELETON, EntityType.SPIDER,
                 EntityType.STRAY, EntityType.WITCH, EntityType.WITHER, EntityType.WITHER_SKELETON, EntityType.ZOMBIE,
@@ -210,7 +210,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
         );
 
         createCondition("IN_OCEAN_DEEP",
-                (world, position) -> getType(world, position).a(Blocks.A) && getY(position) <= 30,
+                (world, position) -> getBlockState(world, position).a(Blocks.A) && getY(position) <= 30,
                 EntityType.GLOW_SQUID
         );
 
@@ -280,7 +280,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
             this.m = originalSpawner.m;
             this.n = originalSpawner.n;
 
-            updateDemoEntity((WorldServer) getWorld(tileEntityMobSpawner), getPosition(tileEntityMobSpawner));
+            updateDemoEntity((WorldServer) getWorld(tileEntityMobSpawner), getBlockPos(tileEntityMobSpawner));
             updateUpgrade(((WStackedSpawner) stackedSpawner).getUpgradeId());
         }
 
@@ -306,7 +306,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
                 return;
             }
 
-            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(getEntity(this.e));
+            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(getEntityToSpawn(this.e));
 
             if (!entityTypesOptional.isPresent()) {
                 resetSpawnDelay(world, position);
@@ -324,7 +324,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
 
             Entity demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
 
-            if (getEntityType(demoNMSEntity) != entityTypes) {
+            if (NMSMappings_v1_18_R2.getType(demoNMSEntity) != entityTypes) {
                 updateDemoEntity(world, position);
 
                 if (demoEntity == null) {
@@ -384,7 +384,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
                     if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
                         stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
-                    triggerEffect(world, 2004, position, 0);
+                    NMSMappings_v1_18_R2.levelEvent(world, 2004, position, 0);
                     particlesAmount++;
                 }
             } else {
@@ -468,9 +468,9 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
         }
 
         private org.bukkit.entity.Entity generateEntity(World world, double x, double y, double z, boolean rotation) {
-            NBTTagCompound entityCompound = getEntity(this.e);
+            NBTTagCompound entityCompound = getEntityToSpawn(this.e);
             Entity entity = EntityTypes.a(entityCompound, world, _entity -> {
-                setPositionRotation(_entity, x, y, z, rotation ? getRandom(world).nextFloat() * 360.0F : 0f, 0f);
+                moveTo(_entity, x, y, z, rotation ? getRandom(world).nextFloat() * 360.0F : 0f, 0f);
 
                 _entity.s = world;
                 _entity.valid = true;
@@ -495,8 +495,8 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
             }
 
             if (entity instanceof EntityInsentient entityInsentient) {
-                if (getEntity(this.e).e() == 1 && hasKeyOfType(getEntity(this.e), "id", 8)) {
-                    prepare(entityInsentient, world, getDamageScaler(world, getChunkCoordinates(entity)),
+                if (getEntityToSpawn(this.e).e() == 1 && NMSMappings_v1_18_R2.contains(getEntityToSpawn(this.e), "id", 8)) {
+                    finalizeSpawn(entityInsentient, world, getCurrentDifficultyAt(world, blockPosition(entity)),
                             EnumMobSpawn.c, null, null);
                 }
 
@@ -508,11 +508,11 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
             if (CraftEventFactory.callSpawnerSpawnEvent(entity, position).isCancelled()) {
                 Entity vehicle = getVehicle(entity);
                 if (vehicle != null) {
-                    die(vehicle);
+                    discard(vehicle);
                 }
 
-                for (Entity passenger : getAllPassengers(entity))
-                    die(passenger);
+                for (Entity passenger : getIndirectPassengers(entity))
+                    discard(passenger);
 
                 if (stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
@@ -524,10 +524,10 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
                 }
 
                 if (spawnParticles)
-                    triggerEffect(world, 2004, position, 0);
+                    NMSMappings_v1_18_R2.levelEvent(world, 2004, position, 0);
 
                 if (entity instanceof EntityInsentient entityInsentient) {
-                    doSpawnEffect(entityInsentient);
+                    spawnAnim(entityInsentient);
                 }
 
                 return true;
@@ -539,7 +539,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
         private boolean addEntity(World world, Entity entity) {
             entity.valid = false;
 
-            if (NMSMappings_v1_18_R2.addEntity(world, entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+            if (NMSMappings_v1_18_R2.addFreshEntity(world, entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
                 getPassengers(entity).forEach(passenger -> addEntity(world, passenger));
                 return true;
             }

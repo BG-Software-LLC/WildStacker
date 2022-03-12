@@ -23,8 +23,6 @@ import org.bukkit.craftbukkit.v1_18_R2.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_18_R2.util.CraftChatMessage;
 
-import static com.bgsoftware.wildstacker.nms.NMSMappings_v1_18_R2.addEntity;
-
 @SuppressWarnings("unused")
 public final class NMSHolograms_v1_18_R2 implements NMSHolograms {
 
@@ -33,7 +31,7 @@ public final class NMSHolograms_v1_18_R2 implements NMSHolograms {
         assert location.getWorld() != null;
         WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
         EntityHologram entityHologram = new EntityHologram(world, location.getX(), location.getY(), location.getZ());
-        addEntity(world, entityHologram);
+        NMSMappings_v1_18_R2.addFreshEntity(world, entityHologram);
         return entityHologram;
     }
 
