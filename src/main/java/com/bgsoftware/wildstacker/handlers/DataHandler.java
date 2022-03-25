@@ -97,7 +97,7 @@ public final class DataHandler {
         Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(stackedSpawner.getLocation()));
         if (chunkSpawners != null)
             chunkSpawners.remove(stackedSpawner);
-        ((WStackedSpawner) stackedSpawner).removeHologram();
+        Executor.sync(() -> ((WStackedSpawner) stackedSpawner).removeHologram());
     }
 
     public void addStackedBarrel(StackedBarrel stackedBarrel) {
