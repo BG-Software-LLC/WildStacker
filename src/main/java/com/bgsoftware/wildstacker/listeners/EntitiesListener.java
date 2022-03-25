@@ -41,6 +41,8 @@ import org.bukkit.entity.Fish;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Pig;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
@@ -67,17 +69,20 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public final class EntitiesListener implements Listener {
@@ -629,6 +634,29 @@ public final class EntitiesListener implements Listener {
             handleEntityCacheClear((LivingEntity) event.getEntity());
     }
 
+    // When a lightning hits pigs, the EntityTransformEvent is not called for no reason.
+    // This trick should do the job.
+    // For reference, https://github.com/BG-Software-LLC/WildStacker/issues/481
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onLightningStrike(LightningStrikeEvent event) {
+        if (event.getLightning().isEffect())
+            return;
+
+        List<Integer> nearbyEntitiesAmounts = event.getWorld().getNearbyEntities(event.getLightning().getLocation(), 2, 2, 2)
+                .stream().filter(entity -> entity instanceof Pig).map(entity -> WStackedEntity.of(entity).getStackAmount())
+                .collect(Collectors.toList());
+
+        if (!nearbyEntitiesAmounts.isEmpty()) {
+            Executor.sync(() -> {
+                for (Entity entity : event.getWorld().getNearbyEntities(event.getLightning().getLocation(), 2, 2, 2)) {
+                    if (entity instanceof PigZombie) {
+                        this.handleEntityTransform(entity, "LIGHTNING", nearbyEntitiesAmounts.remove(0), SpawnCause.LIGHTNING);
+                    }
+                }
+            }, 2L);
+        }
+    }
+
     /*
      *  General methods
      */
@@ -823,6 +851,46 @@ public final class EntitiesListener implements Listener {
         }
     }
 
+    private void handleEntityTransform(Entity entityBukkit, Entity transformedEntityBukkit, String reason) {
+        StackedEntity stackedEntity = WStackedEntity.of(entityBukkit);
+
+        if (stackedEntity.getStackAmount() > 1) {
+            if (this.handleEntityTransform(transformedEntityBukkit, reason, stackedEntity.getStackAmount(), stackedEntity.getSpawnCause()))
+                stackedEntity.remove();
+        }
+    }
+
+    private boolean handleEntityTransform(Entity transformedEntityBukkit, String reason, int originalStackAmount, SpawnCause defaultCause) {
+        if (!plugin.getSettings().entitiesFilteredTransforms.contains(reason))
+            return false;
+
+        StackedEntity transformedEntity = WStackedEntity.of(transformedEntityBukkit);
+        boolean multipleEntities = !transformedEntity.isCached();
+
+        SpawnCause spawnCause;
+
+        try {
+            spawnCause = SpawnCause.valueOf(reason);
+        } catch (IllegalArgumentException ex) {
+            spawnCause = defaultCause;
+        }
+
+        if (multipleEntities) {
+            for (int i = 0; i < originalStackAmount - 1; i++) {
+                plugin.getSystemManager().spawnEntityWithoutStacking(transformedEntityBukkit.getLocation(),
+                        transformedEntityBukkit.getClass(), spawnCause);
+            }
+        } else {
+            StackedEntity transformed = WStackedEntity.of(transformedEntityBukkit);
+            transformed.setStackAmount(originalStackAmount, true);
+            transformed.setSpawnCause(spawnCause);
+            transformed.updateNerfed();
+            Executor.sync(() -> transformed.runStackAsync(null), 1L);
+        }
+
+        return true;
+    }
+
     private boolean isChunkLimit(Chunk chunk) {
         int chunkLimit = plugin.getSettings().entitiesChunkLimit;
 
@@ -845,38 +913,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler
         public void onEntityTransform(org.bukkit.event.entity.EntityTransformEvent e) {
-            if (!plugin.getSettings().entitiesFilteredTransforms.contains(e.getTransformReason().name()))
-                return;
-
-            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-
-            if (stackedEntity.getStackAmount() > 1) {
-                StackedEntity transformedEntity = WStackedEntity.of(e.getTransformedEntity());
-                boolean multipleEntities = !transformedEntity.isCached();
-
-                SpawnCause spawnCause;
-
-                try {
-                    spawnCause = SpawnCause.valueOf(e.getTransformReason().name());
-                } catch (IllegalArgumentException ex) {
-                    spawnCause = stackedEntity.getSpawnCause();
-                }
-
-                if (multipleEntities) {
-                    for (int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
-                        plugin.getSystemManager().spawnEntityWithoutStacking(e.getTransformedEntity().getLocation(),
-                                e.getTransformedEntity().getClass(), spawnCause);
-                    }
-                } else {
-                    StackedEntity transformed = WStackedEntity.of(e.getTransformedEntity());
-                    transformed.setStackAmount(stackedEntity.getStackAmount(), true);
-                    transformed.setSpawnCause(spawnCause);
-                    transformed.updateNerfed();
-                    Executor.sync(() -> transformed.runStackAsync(null), 1L);
-                }
-
-                stackedEntity.remove();
-            }
+            handleEntityTransform(e.getEntity(), e.getTransformedEntity(), e.getTransformReason().name());
         }
 
     }
