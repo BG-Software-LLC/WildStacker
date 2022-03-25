@@ -425,7 +425,7 @@ public final class NMSAdapter_v1_18_R2 implements NMSAdapter {
     @Override
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        return nmsItem != null && nmsItem.f();
+        return nmsItem != null && nmsItem.g();
     }
 
     @Override
