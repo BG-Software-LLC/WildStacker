@@ -116,7 +116,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
         createCondition("ABOVE_NATURAL_STONE", (world, position) -> {
             BlockPosition.MutableBlockPosition mutableBlockPosition = position.i();
 
-            for(int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 5; ++i) {
                 mutableBlockPosition.c(EnumDirection.a);
 
                 IBlockData blockData = world.getType(mutableBlockPosition);
@@ -366,7 +366,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
                     mobsToSpawn = 0;
                 }
 
-                if(increaseStackAmount > 0) {
+                if (increaseStackAmount > 0) {
                     spawnedEntities += increaseStackAmount;
 
                     targetEntity.increaseStackAmount(increaseStackAmount, true);
@@ -386,6 +386,29 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
                 amountPerEntity = Math.min(mobsToSpawn, demoEntity.getStackLimit());
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
+
+            while (spawnedEntities < stackAmount) {
+                if (!attemptMobSpawning(world, position, entityTypes, mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner))
+                    return;
+            }
+
+            resetSpawnDelay(world, position);
+        }
+
+        @Override
+        public void a(World world, BlockPosition position, int i) {
+            world.playBlockAction(position, Blocks.bV, i, 0);
+        }
+
+        public void updateUpgrade(int upgradeId) {
+            if (demoEntity != null)
+                demoEntity.setUpgradeId(upgradeId);
+        }
+
+        private boolean attemptMobSpawning(WorldServer world, BlockPosition position, EntityTypes<?> entityTypes,
+                                           int mobsToSpawn, int amountPerEntity, int spawnCount, short particlesAmount,
+                                           WStackedSpawner stackedSpawner) {
+            boolean hasSpawnedEntity = false;
 
             for (int i = 0; i < mobsToSpawn; i++) {
                 double x = position.getX() + (world.getRandom().nextDouble() - world.getRandom().nextDouble()) * this.o + 0.5D;
@@ -413,7 +436,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
 
                 if (bukkitEntity == null) {
                     resetSpawnDelay(world, position);
-                    return;
+                    return false;
                 }
 
                 int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
@@ -421,21 +444,11 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
                 if (handleEntitySpawn(world, position, bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.k)) {
                     spawnedEntities += amountPerEntity;
                     particlesAmount++;
+                    hasSpawnedEntity = true;
                 }
             }
 
-            if (spawnedEntities >= stackAmount)
-                resetSpawnDelay(world, position);
-        }
-
-        @Override
-        public void a(World world, BlockPosition position, int i) {
-            world.playBlockAction(position, Blocks.bV, i, 0);
-        }
-
-        public void updateUpgrade(int upgradeId) {
-            if (demoEntity != null)
-                demoEntity.setUpgradeId(upgradeId);
+            return hasSpawnedEntity;
         }
 
         private boolean hasNearbyPlayers(World world, BlockPosition position) {
@@ -461,7 +474,7 @@ public final class NMSSpawners_v1_17_R1 implements NMSSpawners {
         private org.bukkit.entity.Entity generateEntity(World world, double x, double y, double z, boolean rotation) {
             NBTTagCompound entityCompound = this.f.getEntity();
             Entity entity = EntityTypes.a(entityCompound, world, _entity -> {
-                _entity.setPositionRotation(x, y, z, rotation ? world.getRandom().nextFloat() * 360.0F:  0f, 0f);
+                _entity.setPositionRotation(x, y, z, rotation ? world.getRandom().nextFloat() * 360.0F : 0f, 0f);
 
                 _entity.t = world;
                 _entity.valid = true;

@@ -396,6 +396,30 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
 
+            while (spawnedEntities < stackAmount) {
+                if (!attemptMobSpawning(world, position, entityTypes, mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner)) {
+                    return;
+                }
+            }
+
+            resetSpawnDelay(world, position);
+        }
+
+        @Override
+        public void a(World world, BlockPosition position, int i) {
+            world.a(position, Blocks.bV, i, 0);
+        }
+
+        public void updateUpgrade(int upgradeId) {
+            if (demoEntity != null)
+                demoEntity.setUpgradeId(upgradeId);
+        }
+
+        private boolean attemptMobSpawning(WorldServer world, BlockPosition position, EntityTypes<?> entityTypes,
+                                           int mobsToSpawn, int amountPerEntity, int spawnCount, short particlesAmount,
+                                           WStackedSpawner stackedSpawner) {
+            boolean hasSpawnedEntity = false;
+
             for (int i = 0; i < mobsToSpawn; i++) {
                 double x = getX(position) + (getRandom(world).nextDouble() - getRandom(world).nextDouble()) * this.n + 0.5D;
                 double y = getY(position) + getRandom(world).nextInt(3) - 1;
@@ -422,7 +446,7 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
 
                 if (bukkitEntity == null) {
                     resetSpawnDelay(world, position);
-                    return;
+                    return false;
                 }
 
                 int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
@@ -430,21 +454,11 @@ public final class NMSSpawners_v1_18_R2 implements NMSSpawners {
                 if (handleEntitySpawn(world, position, bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.j)) {
                     spawnedEntities += amountPerEntity;
                     particlesAmount++;
+                    hasSpawnedEntity = true;
                 }
             }
 
-            if (spawnedEntities >= stackAmount)
-                resetSpawnDelay(world, position);
-        }
-
-        @Override
-        public void a(World world, BlockPosition position, int i) {
-            world.a(position, Blocks.bV, i, 0);
-        }
-
-        public void updateUpgrade(int upgradeId) {
-            if (demoEntity != null)
-                demoEntity.setUpgradeId(upgradeId);
+            return hasSpawnedEntity;
         }
 
         private boolean hasNearbyPlayers(World world, BlockPosition position) {

@@ -301,7 +301,7 @@ public final class NMSSpawners_v1_12_R1 implements NMSSpawners {
                     mobsToSpawn = 0;
                 }
 
-                if(increaseStackAmount > 0) {
+                if (increaseStackAmount > 0) {
                     spawnedEntities += increaseStackAmount;
 
                     targetEntity.increaseStackAmount(increaseStackAmount, true);
@@ -322,56 +322,12 @@ public final class NMSSpawners_v1_12_R1 implements NMSSpawners {
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
 
-            for (int i = 0; i < mobsToSpawn; i++) {
-                double x = position.getX() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
-                double y = position.getY() + world.random.nextInt(3) - 1;
-                double z = position.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
-
-                org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
-
-                if (bukkitEntity == null) {
-                    resetSpawnDelay();
+            while (spawnedEntities < stackAmount) {
+                if (!attemptMobSpawning(mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner))
                     return;
-                }
-
-                Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
-
-                boolean hasSpace;
-
-                if (nmsEntity instanceof EntityOcelot) {
-                    World world = nmsEntity.world;
-                    hasSpace = !world.containsLiquid(nmsEntity.getBoundingBox()) &&
-                            world.getCubes(nmsEntity, nmsEntity.getBoundingBox()).isEmpty() &&
-                            world.a(nmsEntity.getBoundingBox(), nmsEntity);
-                } else {
-                    hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
-                }
-
-                if (!hasSpace) {
-                    failureReason = "Not enough space to spawn the entity.";
-                    continue;
-                }
-
-                Location location = new Location(world.getWorld(), x, y, z);
-
-                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())
-                        .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
-
-                if (failedCondition != null) {
-                    failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
-                    continue;
-                }
-
-                int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
-
-                if (handleEntitySpawn(bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
-                    spawnedEntities += amountPerEntity;
-                    particlesAmount++;
-                }
             }
 
-            if (spawnedEntities >= stackAmount)
-                resetSpawnDelay();
+            resetSpawnDelay();
         }
 
         @Override
@@ -460,6 +416,62 @@ public final class NMSSpawners_v1_12_R1 implements NMSSpawners {
         public void updateUpgrade(int upgradeId) {
             if (demoEntity != null)
                 demoEntity.setUpgradeId(upgradeId);
+        }
+
+        private boolean attemptMobSpawning(int mobsToSpawn, int amountPerEntity, int spawnCount, short particlesAmount,
+                                           WStackedSpawner stackedSpawner) {
+            boolean hasSpawnedEntities = false;
+
+            for (int i = 0; i < mobsToSpawn; i++) {
+                double x = position.getX() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
+                double y = position.getY() + world.random.nextInt(3) - 1;
+                double z = position.getZ() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
+
+                org.bukkit.entity.Entity bukkitEntity = generateEntity(x, y, z, true);
+
+                if (bukkitEntity == null) {
+                    resetSpawnDelay();
+                    return false;
+                }
+
+                Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+
+                boolean hasSpace;
+
+                if (nmsEntity instanceof EntityOcelot) {
+                    World world = nmsEntity.world;
+                    hasSpace = !world.containsLiquid(nmsEntity.getBoundingBox()) &&
+                            world.getCubes(nmsEntity, nmsEntity.getBoundingBox()).isEmpty() &&
+                            world.a(nmsEntity.getBoundingBox(), nmsEntity);
+                } else {
+                    hasSpace = !(nmsEntity instanceof EntityInsentient) || ((EntityInsentient) nmsEntity).canSpawn();
+                }
+
+                if (!hasSpace) {
+                    failureReason = "Not enough space to spawn the entity.";
+                    continue;
+                }
+
+                Location location = new Location(world.getWorld(), x, y, z);
+
+                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())
+                        .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
+
+                if (failedCondition != null) {
+                    failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
+                    continue;
+                }
+
+                int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
+
+                if (handleEntitySpawn(bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
+                    spawnedEntities += amountPerEntity;
+                    particlesAmount++;
+                    hasSpawnedEntities = true;
+                }
+            }
+
+            return hasSpawnedEntities;
         }
 
         private boolean hasNearbyPlayers() {

@@ -340,7 +340,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                     mobsToSpawn = 0;
                 }
 
-                if(increaseStackAmount > 0) {
+                if (increaseStackAmount > 0) {
                     spawnedEntities += increaseStackAmount;
 
                     targetEntity.increaseStackAmount(increaseStackAmount, true);
@@ -360,6 +360,38 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                 amountPerEntity = Math.min(mobsToSpawn, demoEntity.getStackLimit());
                 mobsToSpawn = mobsToSpawn / amountPerEntity;
             }
+
+            while (spawnedEntities < stackAmount) {
+                if (!attemptMobSpawning(entityTypes, mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner))
+                    return;
+            }
+
+            resetSpawnDelay();
+        }
+
+        @Override
+        public void a(int i) {
+            world.playBlockAction(position, Blocks.SPAWNER, i, 0);
+        }
+
+        @Override
+        public World a() {
+            return world;
+        }
+
+        @Override
+        public BlockPosition b() {
+            return position;
+        }
+
+        public void updateUpgrade(int upgradeId) {
+            if (demoEntity != null)
+                demoEntity.setUpgradeId(upgradeId);
+        }
+
+        private boolean attemptMobSpawning(EntityTypes<?> entityTypes, int mobsToSpawn, int amountPerEntity,
+                                           int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {
+            boolean hasSpawnedEntity = false;
 
             for (int i = 0; i < mobsToSpawn; i++) {
                 double x = position.getX() + (world.random.nextDouble() - world.random.nextDouble()) * spawnRange + 0.5D;
@@ -387,7 +419,7 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
 
                 if (bukkitEntity == null) {
                     resetSpawnDelay();
-                    return;
+                    return false;
                 }
 
                 int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
@@ -395,31 +427,11 @@ public final class NMSSpawners_v1_16_R3 implements NMSSpawners {
                 if (handleEntitySpawn(bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
                     spawnedEntities += amountPerEntity;
                     particlesAmount++;
+                    hasSpawnedEntity = true;
                 }
             }
 
-            if (spawnedEntities >= stackAmount)
-                resetSpawnDelay();
-        }
-
-        @Override
-        public void a(int i) {
-            world.playBlockAction(position, Blocks.SPAWNER, i, 0);
-        }
-
-        @Override
-        public World a() {
-            return world;
-        }
-
-        @Override
-        public BlockPosition b() {
-            return position;
-        }
-
-        public void updateUpgrade(int upgradeId) {
-            if (demoEntity != null)
-                demoEntity.setUpgradeId(upgradeId);
+            return hasSpawnedEntity;
         }
 
         private boolean hasNearbyPlayers() {
