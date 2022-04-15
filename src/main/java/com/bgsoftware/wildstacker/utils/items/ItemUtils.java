@@ -356,15 +356,21 @@ public final class ItemUtils {
     public static boolean isTool(Material material) {
         switch (material.name()) {
             case "IRON_SPADE":
+            case "IRON_SHOVEL":
             case "IRON_PICKAXE":
             case "IRON_AXE":
             case "WOOD_SPADE":
             case "WOOD_PICKAXE":
             case "WOOD_AXE":
+            case "WOODEN_SHOVEL":
+            case "WOODEN_PICKAXE":
+            case "WOODEN_AXE":
             case "STONE_SPADE":
+            case "STONE_SHOVEL":
             case "STONE_PICKAXE":
             case "STONE_AXE":
             case "DIAMOND_SPADE":
+            case "DIAMOND_SHOVEL":
             case "DIAMOND_PICKAXE":
             case "DIAMOND_AXE":
             case "GOLD_SPADE":
