@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.items;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -19,6 +20,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -28,26 +30,27 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
 public final class ItemUtils {
 
+    private static final ReflectMethod<EquipmentSlot> PLAYER_INTERACT_EVENT_GET_HAND = new ReflectMethod<>(
+            PlayerInteractEvent.class, "getHand");
+    private static final ReflectMethod<EquipmentSlot> PLAYER_INTERACT_ENTITY_EVENT_GET_HAND = new ReflectMethod<>(
+            PlayerInteractEntityEvent.class, "getHand");
+    private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND = new ReflectMethod<>(
+            PlayerInventory.class, "getItemInOffHand");
+    private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND = new ReflectMethod<>(
+            PlayerInventory.class, "setItemInOffHand", ItemStack.class);
+    private static final ReflectMethod<Boolean> IS_UNBREAKABLE_METHOD = new ReflectMethod<>(
+            ItemMeta.class, "isUnbreakable");
+
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int MAX_PICKUP_DELAY = 32767;
-    private static Method IS_UNBREAKABLE_METHOD = null;
     private static final Sound ITEM_PICKUP_SOUND = ServerVersion.isLessThan(ServerVersion.v1_9) ?
             Sound.ITEM_PICKUP : Sound.valueOf("ENTITY_ITEM_PICKUP");
-
-    static {
-        try {
-            //noinspection JavaReflectionMemberAccess
-            IS_UNBREAKABLE_METHOD = ItemMeta.class.getMethod("isUnbreakable");
-        } catch (Throwable ignored) {
-        }
-    }
 
     public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location) {
         Arrays.stream(itemStacks)
@@ -180,11 +183,11 @@ public final class ItemUtils {
                 itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 
         String customName = plugin.getSettings().customNames.get(typeName);
-        if(customName != null)
+        if (customName != null)
             return customName;
 
         customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
-        if(customName != null)
+        if (customName != null)
             return customName;
 
         return EntityUtils.getFormattedType(typeName);
@@ -252,40 +255,29 @@ public final class ItemUtils {
                 .forEach(player -> ((Player) player).updateInventory());
     }
 
-    @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
     public static void removeItem(ItemStack itemStack, PlayerInteractEvent event) {
-        try {
-            EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEvent.class.getMethod("getHand").invoke(event);
-            if (equipmentSlot.name().equals("OFF_HAND")) {
-                ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
-                if (offHand.isSimilar(itemStack)) {
-                    offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
-                    PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
-                            .invoke(event.getPlayer().getInventory(), offHand);
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
-        event.getPlayer().getInventory().removeItem(itemStack);
+        removeItem(itemStack, event, PLAYER_INTERACT_EVENT_GET_HAND);
     }
 
-    @SuppressWarnings({"JavaReflectionMemberAccess", "unused"})
     public static void removeItem(ItemStack itemStack, PlayerInteractEntityEvent event) {
-        try {
-            EquipmentSlot equipmentSlot = (EquipmentSlot) PlayerInteractEntityEvent.class.getMethod("getHand").invoke(event);
+        removeItem(itemStack, event, PLAYER_INTERACT_ENTITY_EVENT_GET_HAND);
+    }
+
+    private static void removeItem(ItemStack itemStack, PlayerEvent event, ReflectMethod<EquipmentSlot> getHandMethod) {
+        PlayerInventory playerInventory = event.getPlayer().getInventory();
+
+        if (getHandMethod.isValid()) {
+            EquipmentSlot equipmentSlot = getHandMethod.invoke(event);
             if (equipmentSlot.name().equals("OFF_HAND")) {
-                ItemStack offHand = (ItemStack) PlayerInventory.class.getMethod("getItemInOffHand").invoke(event.getPlayer().getInventory());
+                ItemStack offHand = PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND.invoke(playerInventory);
                 if (offHand.isSimilar(itemStack)) {
                     offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
-                    PlayerInventory.class.getMethod("setItemInOffHand", ItemStack.class)
-                            .invoke(event.getPlayer().getInventory(), offHand);
+                    PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND.invoke(playerInventory, offHand);
                 }
             }
-        } catch (Exception ignored) {
         }
 
-        event.getPlayer().getInventory().removeItem(itemStack);
+        playerInventory.removeItem(itemStack);
     }
 
     public static int countItem(Inventory inventory, ItemStack itemStack) {
@@ -407,17 +399,8 @@ public final class ItemUtils {
     }
 
     public static boolean isUnbreakable(ItemStack itemStack) {
-        if (!itemStack.hasItemMeta() || IS_UNBREAKABLE_METHOD == null)
-            return false;
-
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        try {
-            return (boolean) IS_UNBREAKABLE_METHOD.invoke(itemMeta);
-        } catch (Throwable ignored) {
-        }
-
-        return false;
+        return IS_UNBREAKABLE_METHOD.isValid() && itemStack.hasItemMeta() &&
+                IS_UNBREAKABLE_METHOD.invoke(itemStack.getItemMeta());
     }
 
     public static boolean isStackable(Entity entity) {
@@ -433,7 +416,7 @@ public final class ItemUtils {
         return clonedArray;
     }
 
-    public static void playPickupSound(Location location){
+    public static void playPickupSound(Location location) {
         Random random = new Random();
         float pitch = ((random.nextFloat() - random.nextFloat()) * 0.7F + 1.0F) * 2.0F;
         location.getWorld().playSound(location, ITEM_PICKUP_SOUND, 0.2F, pitch);

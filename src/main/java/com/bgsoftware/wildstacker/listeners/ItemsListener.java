@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.listeners;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -46,6 +47,8 @@ import java.util.Map;
 
 @SuppressWarnings("unused")
 public final class ItemsListener implements Listener {
+
+    private static final ReflectMethod<Void> ENTITY_EQUIPMENT_SET_ITEM_IN_MAIN_HAND = new ReflectMethod<>(EntityEquipment.class, "setItemInMainHand", ItemStack.class);
 
     private final WildStackerPlugin plugin;
 
@@ -256,10 +259,9 @@ public final class ItemsListener implements Listener {
     }
 
     private void setItemInHand(LivingEntity entity, ItemStack itemStack) {
-        try {
-            //noinspection JavaReflectionMemberAccess
-            EntityEquipment.class.getMethod("setItemInMainHand", ItemStack.class).invoke(entity.getEquipment(), itemStack);
-        } catch (Exception ex) {
+        if (ENTITY_EQUIPMENT_SET_ITEM_IN_MAIN_HAND.isValid()) {
+            ENTITY_EQUIPMENT_SET_ITEM_IN_MAIN_HAND.invoke(entity.getEquipment(), itemStack);
+        } else {
             entity.getEquipment().setItemInHand(itemStack);
         }
     }

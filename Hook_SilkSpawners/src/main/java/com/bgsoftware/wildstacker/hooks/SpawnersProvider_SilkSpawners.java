@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
@@ -16,12 +17,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("SameParameterValue")
 public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
+
+    private static final ReflectMethod<Object> GET_SPAWNER_ENTITY_ID = new ReflectMethod<>(
+            SilkUtil.class, "getSpawnerEntityID", Block.class);
+    private static final ReflectMethod<Object> GET_STORED_SPAWNER_ITEM_ENTITY_ID = new ReflectMethod<>(
+            SilkUtil.class, "getStoredSpawnerItemEntityID", ItemStack.class);
+    private static final ReflectMethod<String> GET_CREATURE_NAME_SHORT = new ReflectMethod<>(
+            SilkUtil.class, "getCreatureName", short.class);
+    private static final ReflectMethod<ItemStack> NEW_SPAWNER_ITEM = new ReflectMethod<>(
+            SilkUtil.class, "newSpawnerItem", short.class, String.class, int.class, boolean.class);
 
     private final SilkSpawners ss;
     private final SilkUtil silkUtil;
@@ -111,44 +120,22 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     }
 
     private Object getSpawnerEntityID(CreatureSpawner spawner) {
-        Object entityId;
-        try {
-            entityId = SilkUtil.class.getMethod("getSpawnerEntityID", Block.class).invoke(silkUtil, spawner.getBlock());
-        } catch (Exception ex) {
-            throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
-        }
+        Object entityId = GET_SPAWNER_ENTITY_ID.invoke(silkUtil, spawner.getBlock());
         return entityId == null || entityId.equals(0) ? silkUtil.getDefaultEntityID() : entityId;
     }
 
     private Object getStoredSpawnerItemEntityID(ItemStack itemStack) {
-        Object entityId;
-        try {
-            entityId = SilkUtil.class.getMethod("getStoredSpawnerItemEntityID", ItemStack.class).invoke(silkUtil, itemStack);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
-        }
+        Object entityId = GET_STORED_SPAWNER_ITEM_ENTITY_ID.invoke(silkUtil, itemStack);
         return entityId == null || entityId.equals(0) ? silkUtil.getDefaultEntityID() : entityId;
     }
 
     private String getCreatureName(Object entityId) {
-        Class objectClass = entityId instanceof String ? String.class : short.class;
-        try {
-            Method method = SilkUtil.class.getMethod("getCreatureName", objectClass);
-            return (String) method.invoke(silkUtil, entityId);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return GET_CREATURE_NAME_SHORT.isValid() ? GET_CREATURE_NAME_SHORT.invoke(entityId) : silkUtil.getCreatureName((String) entityId);
     }
 
     private ItemStack newSpawnerItem(Object entityId, String customName, int amount, boolean forceLore) {
-        Class objectClass = entityId instanceof String ? String.class : short.class;
-        try {
-            return (ItemStack) SilkUtil.class.getMethod("newSpawnerItem", objectClass, String.class, int.class, boolean.class)
-                    .invoke(silkUtil, entityId, customName, amount, forceLore);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Couldn't process the getCreatureName of SilkSpawners.");
-        }
+        return NEW_SPAWNER_ITEM.isValid() ? NEW_SPAWNER_ITEM.invoke(silkUtil, entityId, customName, amount, forceLore) :
+                silkUtil.newSpawnerItem((String) entityId, customName, amount, forceLore);
     }
 
 }

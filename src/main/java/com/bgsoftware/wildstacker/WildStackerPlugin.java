@@ -38,9 +38,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -96,10 +94,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         try {
             Bukkit.getScheduler().cancelAllTasks();
         } catch (Throwable ex) {
-            try {
-                BukkitScheduler.class.getMethod("cancelTasks", Plugin.class).invoke(Bukkit.getScheduler(), this);
-            } catch (Exception ignored) {
-            }
+            Bukkit.getScheduler().cancelTasks(this);
         }
 
         log("Shutting down stacking service...");
@@ -168,10 +163,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getServer().getPluginManager().registerEvents(new ToolsListener(this), this);
         getServer().getPluginManager().registerEvents(new WorldsListener(this), this);
 
-        try{
+        try {
             Class.forName("com.destroystokyo.paper.event.server.ServerTickEndEvent");
             getServer().getPluginManager().registerEvents(new ServerTickListener(), this);
-        }catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         EventsListener.register(this);
 
