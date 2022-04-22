@@ -777,16 +777,16 @@ public final class EntitiesListener implements Listener {
         if (!stackedEntity.isCached())
             return;
 
-        if (stackedEntity.hasFlag(EntityFlag.BYPASS_STACKING)) {
-            stackedEntity.removeFlag(EntityFlag.BYPASS_STACKING);
-            return;
-        }
-
         //Chunk Limit
         Executor.sync(() -> {
             if (isChunkLimit(entity.getLocation().getChunk()))
                 stackedEntity.remove();
         }, 5L);
+
+        if (stackedEntity.hasFlag(EntityFlag.BYPASS_STACKING)) {
+            stackedEntity.removeFlag(EntityFlag.BYPASS_STACKING);
+            return;
+        }
 
         //EpicSpawners has it's own event
         if (stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
