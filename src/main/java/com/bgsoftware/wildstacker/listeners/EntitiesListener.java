@@ -469,7 +469,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        int inHandItemsAmount = ItemUtils.countItem(e.getPlayer().getInventory(), inHand);
+        int inHandItemsAmount = inHand.getAmount();
 
         if (stackedEntity.getStackAmount() > 1) {
             int itemsAmountToRemove;
@@ -524,7 +524,16 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                ItemUtils.removeItem(e.getPlayer().getInventory(), inHand, itemsAmountToRemove);
+                ItemStack newItem;
+
+                if (itemsAmountToRemove >= inHandItemsAmount) {
+                    newItem = new ItemStack(Material.AIR);
+                } else {
+                    newItem = inHand.clone();
+                    inHand.setAmount(inHandItemsAmount - itemsAmountToRemove);
+                }
+
+                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
             }
         }
     }
