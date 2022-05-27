@@ -24,6 +24,7 @@ public final class SuperiorSkyblockHook {
             plugin.getServer().getPluginManager().registerEvents(new Listener() {
                 @EventHandler
                 public void onPluginInit(PluginInitializeEvent e) {
+                    WildStackerPlugin.log("&aRegistering custom IslandFlag: ENTITIES_STACKING");
                     IslandFlag.register("ENTITIES_STACKING");
                     ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
                 }
