@@ -278,10 +278,8 @@ public final class BarrelsListener implements Listener {
     @EventHandler
     public void onEntityInteract(PlayerInteractAtEntityEvent e) {
         if (e.getRightClicked() instanceof ArmorStand) {
-            for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels()) {
-                if (e.getRightClicked().getLocation().getBlock().getLocation().equals(stackedBarrel.getLocation()))
-                    e.setCancelled(true);
-            }
+            if(plugin.getSystemManager().isStackedBarrel(e.getRightClicked().getLocation().getBlock().getLocation()))
+                e.setCancelled(true);
         }
     }
 
