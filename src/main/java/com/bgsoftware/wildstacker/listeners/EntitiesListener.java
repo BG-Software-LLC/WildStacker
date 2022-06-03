@@ -530,7 +530,7 @@ public final class EntitiesListener implements Listener {
                     newItem = new ItemStack(Material.AIR);
                 } else {
                     newItem = inHand.clone();
-                    inHand.setAmount(inHandItemsAmount - itemsAmountToRemove);
+                    newItem.setAmount(inHandItemsAmount - itemsAmountToRemove);
                 }
 
                 ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
