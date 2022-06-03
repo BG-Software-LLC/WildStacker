@@ -285,7 +285,8 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (!plugin.getSettings().barrelsToggleCommand || !e.getPlayer().hasPermission("wildstacker.toggle"))
+        if (!plugin.getSettings().barrelsStackingEnabled || !plugin.getSettings().barrelsToggleCommand ||
+                !e.getPlayer().hasPermission("wildstacker.toggle"))
             return;
 
         String commandSyntax = "/" + plugin.getSettings().barrelsToggleCommandSyntax;
@@ -307,6 +308,9 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPistonExtend(BlockPistonExtendEvent e) {
+        if(!plugin.getSettings().barrelsStackingEnabled)
+            return;
+
         for (Block block : e.getBlocks()) {
             if (plugin.getSystemManager().isStackedBarrel(block)) {
                 e.setCancelled(true);
@@ -317,6 +321,9 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPistonRetract(BlockPistonRetractEvent e) {
+        if(!plugin.getSettings().barrelsStackingEnabled)
+            return;
+
         for (Block block : e.getBlocks()) {
             if (plugin.getSystemManager().isStackedBarrel(block)) {
                 e.setCancelled(true);
@@ -355,6 +362,9 @@ public final class BarrelsListener implements Listener {
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onCauldronFill(CauldronLevelChangeEvent e) {
+            if(!plugin.getSettings().barrelsStackingEnabled)
+                return;
+
             if (plugin.getSystemManager().isStackedBarrel(e.getBlock())) {
                 e.setCancelled(true);
                 e.setNewLevel(0);
