@@ -73,6 +73,7 @@ import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R3.World;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -160,7 +161,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("§x(?>§[0-9a-f]){6}");
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile(ChatColor.COLOR_CHAR + "x(?>" + ChatColor.COLOR_CHAR + "[0-9a-f]){6}", Pattern.CASE_INSENSITIVE);
 
     /*
      *   Entity methods
@@ -268,7 +269,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     public int getEntityExp(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        if(!(entityLiving instanceof EntityInsentient))
+        if (!(entityLiving instanceof EntityInsentient))
             return 0;
 
         EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
@@ -317,7 +318,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        if(!(entityLiving instanceof EntityInsentient))
+        if (!(entityLiving instanceof EntityInsentient))
             return;
 
         EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
@@ -755,7 +756,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     @Override
     public void playSpawnEffect(LivingEntity livingEntity) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        if(entityLiving instanceof EntityInsentient)
+        if (entityLiving instanceof EntityInsentient)
             ((EntityInsentient) entityLiving).doSpawnEffect();
     }
 
@@ -817,7 +818,7 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
     public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        if(!(entityLiving instanceof EntityInsentient))
+        if (!(entityLiving instanceof EntityInsentient))
             return false;
 
         EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
