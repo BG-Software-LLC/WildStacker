@@ -11,6 +11,7 @@ import org.bukkit.entity.Zombie;
 
 public enum EntityTypes {
 
+    ALLAY,
     AXOLOTL,
     BAT,
     BEE,
@@ -30,6 +31,7 @@ public enum EntityTypes {
     ENDERMITE,
     EVOKER,
     FOX,
+    FROG,
     GHAST,
     GIANT,
     GLOW_SQUID,
@@ -68,6 +70,7 @@ public enum EntityTypes {
     SQUID,
     STRAY,
     STRIDER,
+    TADPOLE,
     TRADER_LLAMA,
     TROPICAL_FISH,
     TURTLE,
@@ -76,6 +79,7 @@ public enum EntityTypes {
     VILLAGER,
     VINDICATOR,
     WANDERING_TRADER,
+    WARDEN,
     WITCH,
     WITHER,
     WITHER_SKELETON,
