@@ -56,7 +56,7 @@ public final class NMSHolograms_v1_19_R1 implements NMSHolograms {
 
         @Override
         public void setHologramName(String name) {
-            super.a(CraftChatMessage.fromString(name)[0]);
+            super.b(CraftChatMessage.fromStringOrNull(name));
         }
 
         @Override
