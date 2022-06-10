@@ -549,10 +549,15 @@ public final class NMSSpawners_v1_8_R3 implements NMSSpawners {
         private boolean addEntity(Entity entity) {
             entity.valid = false;
 
-            if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
-                if (entity.passenger != null)
-                    addEntity(entity.passenger);
-                return true;
+            try {
+                if (world.addEntity(entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+                    if (entity.passenger != null)
+                        addEntity(entity.passenger);
+                    return true;
+                }
+            } catch (Exception ignored){
+                // For no reason, sometimes entities with the same UUIDs already exist.
+                // Can be ignored.
             }
 
             return false;
