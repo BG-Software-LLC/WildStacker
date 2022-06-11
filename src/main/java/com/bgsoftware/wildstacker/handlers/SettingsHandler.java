@@ -82,10 +82,10 @@ public final class SettingsHandler {
 
     //Entities settings
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
-            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreeding,
-            entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill, eggLayMultiply, scuteMultiply,
-            entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
-            multiplyDrops, multiplyExp, spreadDamage, entitiesFillVehicles;
+            stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreedingEnabled,
+            smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
+            eggLayMultiply, scuteMultiply, entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities,
+            superiorSkyblockHook, multiplyDrops, multiplyExp, spreadDamage, entitiesFillVehicles;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -261,7 +261,8 @@ public final class SettingsHandler {
         keepLowestHealth = Fast2EnumsArray.fromList(cfg.getStringList("entities.keep-lowest-health"),
                 EntityType.class, SpawnCause.class);
         stackAfterBreed = cfg.getBoolean("entities.stack-after-breed", true);
-        smartBreeding = cfg.getBoolean("entities.smart-breeding", false);
+        smartBreedingEnabled = cfg.getBoolean("entities.smart-breeding.enabled", false);
+        smartBreedingConsumeEntireInventory = cfg.getBoolean("entities.smart-breeding.consume-entire-inventory", false);
         entitiesHideNames = cfg.getBoolean("entities.hide-names", false);
         entitiesNamesToggleEnabled = cfg.getBoolean("entities.names-toggle.enabled", false);
         entitiesNamesToggleCommand = cfg.getString("entities.names-toggle.command", "stacker names entity");
@@ -712,20 +713,8 @@ public final class SettingsHandler {
         if (cfg.contains("items.pickup-sound.enabled")) {
             cfg.set("items.pickup-sound", cfg.getBoolean("items.pickup-sound.enabled"));
         }
-    }
-
-    private static boolean canHaveSpawnerOverride() {
-        String version = System.getProperty("java.version");
-
-        if (!version.contains("."))
-            return true;
-
-        try {
-            int javaVersionNum = Integer.parseInt(version.split("\\.")[0]);
-            return javaVersionNum < 12;
-        } catch (NumberFormatException error) {
-            error.printStackTrace();
-            return true;
+        if (cfg.isBoolean("entities.smart-breeding")) {
+            cfg.set("entities.smart-breeding.enabled", cfg.getBoolean("entities.smart-breeding"));
         }
     }
 

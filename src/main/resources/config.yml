@@ -375,7 +375,10 @@ entities:
   # When smart-breed is enabled, players will be consumed with two items in order to breed a stack.
   # No breeding animation will be played, and a new baby stack will be spawned with the correct amount.
   # This can prevent massive splits of the stack for breeding, and can help with performance.
-  smart-breeding: false
+  smart-breeding:
+    enabled: false
+    # When enabled, items for breeding will be consumed from the entire inventory instead of only hand.
+    consume-entire-inventory: false
 
   # When enabled, entities' names will be shown only if player looks exactly towards them.
   hide-names: false
