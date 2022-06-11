@@ -377,7 +377,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static NBTTagCompound getOrCreateTag(ItemStack itemStack) {
-        return itemStack.u();
+        return itemStack.v();
     }
 
     public static void setTag(ItemStack itemStack, NBTTagCompound nbtTagCompound) {
