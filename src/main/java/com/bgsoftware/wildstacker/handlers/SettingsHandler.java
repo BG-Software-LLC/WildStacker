@@ -17,7 +17,6 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.upgrades.WSpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsArray;
 import com.bgsoftware.wildstacker.utils.data.structures.Fast2EnumsMap;
@@ -402,6 +401,9 @@ public final class SettingsHandler {
         spawnerUpgradesMultiplyStackAmount = cfg.getBoolean("spawners.spawner-upgrades.multiply-stack-amount", true);
         plugin.getUpgradesManager().removeAllUpgrades();
         for (String ladder : cfg.getConfigurationSection("spawners.spawner-upgrades.ladders").getKeys(false)) {
+            SpawnerUpgrade lastKnownUpgrade = null;
+            int nextUpgradeId = -1;
+
             ConfigurationSection ladderSection = cfg.getConfigurationSection("spawners.spawner-upgrades.ladders." + ladder);
             List<String> allowedEntities = ladderSection.getStringList("entities");
 
@@ -411,18 +413,22 @@ public final class SettingsHandler {
                     try {
                         SpawnerUpgrade spawnerUpgrade;
 
-                        if (upgradeName.equalsIgnoreCase("default")) {
-                            spawnerUpgrade = plugin.getUpgradesManager().createDefault(allowedEntities);
+                        if (lastKnownUpgrade == null) {
+                            spawnerUpgrade = plugin.getUpgradesManager().createDefault(upgradeName, upgrade.getInt("id", 0), allowedEntities);
                         } else {
                             spawnerUpgrade = plugin.getUpgradesManager().createUpgrade(upgradeName, upgrade.getInt("id", 0));
-                            spawnerUpgrade.setDisplayName(upgrade.getString("display", ""));
-                            spawnerUpgrade.setCost(upgrade.getDouble("cost", 0D));
                             spawnerUpgrade.setAllowedEntities(allowedEntities);
                         }
 
+                        spawnerUpgrade.setDisplayName(upgrade.getString("display", ""));
+                        spawnerUpgrade.setCost(upgrade.getDouble("cost", 0D));
+
+                        if (lastKnownUpgrade != null && nextUpgradeId == upgrade.getInt("id", 0))
+                            lastKnownUpgrade.setNextUpgrade(spawnerUpgrade);
+
                         String nextUpgrade = upgrade.getString("next-upgrade");
                         if (nextUpgrade != null)
-                            ((WSpawnerUpgrade) spawnerUpgrade).setNextUpgrade(ladderSection.getInt(nextUpgrade + ".id", 0));
+                            nextUpgradeId = ladderSection.getInt(nextUpgrade + ".id", 0);
 
                         if (upgrade.isConfigurationSection("icon")) {
                             spawnerUpgrade.setIcon(FileUtils.getItemStack("spawner-upgrades.yml",
@@ -435,6 +441,8 @@ public final class SettingsHandler {
                         spawnerUpgrade.setMaxNearbyEntities(upgrade.getInt("max-nearby-entities", 6));
                         spawnerUpgrade.setRequiredPlayerRange(upgrade.getInt("required-player-range", 16));
                         spawnerUpgrade.setSpawnRange(upgrade.getInt("spawn-range", 4));
+
+                        lastKnownUpgrade = spawnerUpgrade;
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -701,7 +709,7 @@ public final class SettingsHandler {
             cfg.set("entities.fast-kill", !cfg.getBoolean("entities.next-stack-knockback"));
             cfg.set("entities.next-stack-knockback", null);
         }
-        if(cfg.contains("items.pickup-sound.enabled")){
+        if (cfg.contains("items.pickup-sound.enabled")) {
             cfg.set("items.pickup-sound", cfg.getBoolean("items.pickup-sound.enabled"));
         }
     }
@@ -709,7 +717,7 @@ public final class SettingsHandler {
     private static boolean canHaveSpawnerOverride() {
         String version = System.getProperty("java.version");
 
-        if(!version.contains("."))
+        if (!version.contains("."))
             return true;
 
         try {
