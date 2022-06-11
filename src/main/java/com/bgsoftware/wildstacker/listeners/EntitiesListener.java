@@ -469,15 +469,16 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        int inHandItemsAmount = inHand.getAmount();
+        int inventoryItemsAmount = plugin.getSettings().smartBreedingConsumeEntireInventory ?
+                ItemUtils.countItem(e.getPlayer().getInventory(), inHand) : inHand.getAmount();
 
         if (stackedEntity.getStackAmount() > 1) {
             int itemsAmountToRemove;
 
-            if (plugin.getSettings().smartBreeding) {
+            if (plugin.getSettings().smartBreedingEnabled) {
                 int breedableAmount = e.getPlayer().getGameMode() == GameMode.CREATIVE ?
                         stackedEntity.getStackAmount() :
-                        Math.min(stackedEntity.getStackAmount(), inHandItemsAmount);
+                        Math.min(stackedEntity.getStackAmount(), inventoryItemsAmount);
 
                 if (breedableAmount % 2 != 0)
                     breedableAmount--;
@@ -524,16 +525,21 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                int inHandItemsAmount = inHand.getAmount();
+
                 ItemStack newItem;
 
                 if (itemsAmountToRemove >= inHandItemsAmount) {
                     newItem = new ItemStack(Material.AIR);
+                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
+                    if (itemsAmountToRemove - inHandItemsAmount > 0)
+                        ItemUtils.removeItem(e.getPlayer().getInventory(), inHand, itemsAmountToRemove - inHandItemsAmount);
                 } else {
                     newItem = inHand.clone();
                     newItem.setAmount(inHandItemsAmount - itemsAmountToRemove);
+                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
                 }
 
-                ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
             }
         }
     }
@@ -961,7 +967,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onTurtleEggLay(EntityChangeBlockEvent e) {
-            if (plugin.getSettings().smartBreeding && e.getEntity() instanceof org.bukkit.entity.Turtle &&
+            if (plugin.getSettings().smartBreedingEnabled && e.getEntity() instanceof org.bukkit.entity.Turtle &&
                     e.getTo().name().equals("TURTLE_EGG")) {
                 StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
                 int breedableAmount = !stackedEntity.hasFlag(EntityFlag.BREEDABLE_AMOUNT) ? 0 :
