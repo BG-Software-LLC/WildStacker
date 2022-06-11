@@ -23,8 +23,22 @@ public interface UpgradesManager {
      *
      * @param allowedEntities A list of entities that will have this upgrade.
      *                        If the list is empty, then all the entities will receive this upgrade.
+     * @deprecated See {@link #createDefault(String, int, List)}
      */
+    @Deprecated
     SpawnerUpgrade createDefault(List<String> allowedEntities);
+
+    /**
+     * Create a new default upgrade.
+     * This upgrade will be given to spawners by default.
+     * If this upgrade doesn't have a next upgrade, then spawners won't be able to be upgraded.
+     *
+     * @param name            The name of the upgrade.
+     * @param id              The id of the upgrade
+     * @param allowedEntities A list of entities that will have this upgrade.
+     *                        If the list is empty, then all the entities will receive this upgrade.
+     */
+    SpawnerUpgrade createDefault(String name, int id, List<String> allowedEntities);
 
     /**
      * Get an upgrade by its name.

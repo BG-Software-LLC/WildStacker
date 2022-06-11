@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.upgrades;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
@@ -13,7 +12,6 @@ import java.util.List;
 
 public final class WSpawnerUpgrade implements SpawnerUpgrade {
 
-    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final ItemStack DEFAULT_ICON = new ItemBuilder(Material.GOLD_INGOT)
             .withName("%name% &7%cost%")
             .withLore(
@@ -28,7 +26,7 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
     private final int id;
 
     private ItemStack icon = DEFAULT_ICON.clone();
-    private int nextId = 0;
+    private SpawnerUpgrade nextUpgrade = null;
     private int minSpawnDelay = 200;
     private int maxSpawnDelay = 800;
     private int spawnCount = 4;
@@ -65,16 +63,12 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
 
     @Override
     public SpawnerUpgrade getNextUpgrade() {
-        return nextId <= 0 ? null : plugin.getUpgradesManager().getUpgrade(nextId);
+        return nextUpgrade;
     }
 
     @Override
     public void setNextUpgrade(SpawnerUpgrade nextUpgrade) {
-        setNextUpgrade(nextUpgrade == null ? 0 : nextUpgrade.getId());
-    }
-
-    public void setNextUpgrade(int nextId) {
-        this.nextId = Math.max(0, nextId);
+        this.nextUpgrade = nextUpgrade;
     }
 
     @Override

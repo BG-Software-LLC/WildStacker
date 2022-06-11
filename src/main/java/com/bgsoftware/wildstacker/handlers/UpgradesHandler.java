@@ -18,8 +18,8 @@ public final class UpgradesHandler implements UpgradesManager {
     private final Map<String, SpawnerUpgrade> spawnerUpgrades = Maps.newConcurrentMap();
     private final Map<Integer, SpawnerUpgrade> spawnerUpgradesById = Maps.newConcurrentMap();
 
-    private final Set<SpawnerUpgrade> defaultUpgrades = Sets.newConcurrentHashSet();
-    private SpawnerUpgrade GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", 0);
+    private final Set<SpawnerUpgrade> rootUpgrades = Sets.newConcurrentHashSet();
+    private SpawnerUpgrade GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", -1);
 
     @Override
     public SpawnerUpgrade createUpgrade(String name, int upgradeId) {
@@ -46,13 +46,18 @@ public final class UpgradesHandler implements UpgradesManager {
 
     @Override
     public SpawnerUpgrade createDefault(List<String> allowedEntities) {
-        SpawnerUpgrade spawnerUpgrade = new WSpawnerUpgrade("Default", 0);
+        return this.createDefault("Default", -1, allowedEntities);
+    }
+
+    @Override
+    public SpawnerUpgrade createDefault(String name, int id, List<String> allowedEntities) {
+        SpawnerUpgrade spawnerUpgrade = new WSpawnerUpgrade(name, id);
 
         if (allowedEntities.isEmpty()) {
             GLOBAL_UPGRADE = spawnerUpgrade;
         } else {
             spawnerUpgrade.setAllowedEntities(allowedEntities);
-            defaultUpgrades.add(spawnerUpgrade);
+            rootUpgrades.add(spawnerUpgrade);
         }
 
         return spawnerUpgrade;
@@ -70,7 +75,7 @@ public final class UpgradesHandler implements UpgradesManager {
 
     @Override
     public SpawnerUpgrade getDefaultUpgrade(EntityType entityType) {
-        return entityType == null ? GLOBAL_UPGRADE : defaultUpgrades.stream().filter(_spawnerUpgrade ->
+        return entityType == null ? GLOBAL_UPGRADE : rootUpgrades.stream().filter(_spawnerUpgrade ->
                 _spawnerUpgrade.isEntityAllowed(entityType)).findFirst().orElse(GLOBAL_UPGRADE);
     }
 
@@ -89,8 +94,8 @@ public final class UpgradesHandler implements UpgradesManager {
     public void removeAllUpgrades() {
         spawnerUpgrades.clear();
         spawnerUpgradesById.clear();
-        defaultUpgrades.clear();
-        GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", 0);
+        rootUpgrades.clear();
+        GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", -1);
     }
 
 }
