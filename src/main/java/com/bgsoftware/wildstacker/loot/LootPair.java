@@ -131,6 +131,9 @@ public class LootPair {
         List<String> commands = new ArrayList<>();
 
         for (LootCommand lootCommand : lootCommands) {
+            if (!lootCommand.getRequiredPermission().isEmpty() && !player.hasPermission(lootCommand.getRequiredPermission()))
+                continue;
+
             int amountOfCommands = (int) (lootCommand.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
 
             if (amountOfCommands == 0) {
