@@ -27,6 +27,7 @@ import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
+import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -39,6 +40,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import javax.annotation.Nullable;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -54,6 +57,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private NMSAdapter nmsAdapter;
     private NMSHolograms nmsHolograms;
     private NMSSpawners nmsSpawners;
+    @Nullable
+    private NMSEntities nmsEntities;
 
     private boolean shouldEnable = true;
 
@@ -205,6 +210,9 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
         }
+        try {
+            nmsEntities = (NMSEntities) Class.forName("com.bgsoftware.wildstacker.nms.NMSEntities_" + bukkitVersion).newInstance();
+        } catch (Exception ignored) {}
     }
 
     public NMSAdapter getNMSAdapter() {
@@ -217,6 +225,11 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public NMSSpawners getNMSSpawners() {
         return nmsSpawners;
+    }
+
+    @Nullable
+    public NMSEntities getNMSEntities() {
+        return nmsEntities;
     }
 
     public LootHandler getLootHandler() {

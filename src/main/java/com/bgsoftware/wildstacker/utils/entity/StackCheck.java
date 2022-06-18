@@ -26,6 +26,8 @@ public enum StackCheck {
     CREEPER_CHARGED(EntityTypes.CREEPER),
     ENDERMAN_CARRIED_BLOCK(EntityTypes.ENDERMAN),
     EXACT_AGE(),
+    FROG_TOUNGE_TARGET(EntityTypes.FROG),
+    FROG_TYPE(EntityTypes.FROG),
     GLOW_SQUID_DARK_TICKS(EntityTypes.GLOW_SQUID),
     GOAT_SCREAMING(EntityTypes.GOAT),
     GUARDIAN_ELDER(EntityTypes.ELDER_GUARDIAN),

@@ -15,7 +15,8 @@ public enum ServerVersion {
     v1_15(115),
     v1_16(116),
     v1_17(117),
-    v1_18(118);
+    v1_18(118),
+    v1_19(119);
 
     private static final ServerVersion currentVersion;
     private static final String bukkitVersion;

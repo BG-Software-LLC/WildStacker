@@ -255,6 +255,8 @@ entities:
     CREEPER_CHARGED: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false
+    FROG_TOUNGE_TARGET: false
+    FROG_TYPE: true
     GLOW_SQUID_DARK_TICKS: false
     GOAT_SCREAMING: false
     GUARDIAN_ELDER: true

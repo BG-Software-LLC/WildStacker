@@ -188,14 +188,16 @@ public final class EntityUtils {
 
     @SuppressWarnings("all")
     public static StackCheckResult areSimilar(LivingEntity en1, LivingEntity en2) {
-        EntityTypes entityType = EntityTypes.fromEntity(en1);
-
-        if (en1.getType() != en2.getType())
+        if (en1.getType() != en2.getType()) {
             return StackCheckResult.NOT_SIMILAR;
+        }
 
         StackCheckResult customSimilarityResult = plugin.getProviders().areSimilar(en1, en2);
-        if (customSimilarityResult != StackCheckResult.SUCCESS)
+        if (customSimilarityResult != StackCheckResult.SUCCESS) {
             return customSimilarityResult;
+        }
+
+        EntityTypes entityType = EntityTypes.fromEntity(en1);
 
         if (StackCheck.AGE.isEnabled() && en1 instanceof Ageable) {
             if ((((Ageable) en1).getAge() >= 0) != (((Ageable) en2).getAge() >= 0))
@@ -444,7 +446,8 @@ public final class EntityUtils {
                 return StackCheckResult.ZOMBIE_PIGMAN_ANGRY;
         }
 
-        return StackCheckResult.SUCCESS;
+        return plugin.getNMSEntities() == null ? StackCheckResult.SUCCESS :
+                plugin.getNMSEntities().areSimilar(entityType, en1, en2);
     }
 
     public static boolean canBeBred(Animals animal) {
