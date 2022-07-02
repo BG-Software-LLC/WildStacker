@@ -100,9 +100,6 @@ public final class ProvidersHandler {
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
         }, 0L);
 
-        if (plugin.getSettings().superiorSkyblockHook)
-            registerHook("SuperiorSkyblockHook");
-
         Executor.sync(() -> {
             if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
                     Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().stream().noneMatch(a -> a.contains("Ome_R"))) {

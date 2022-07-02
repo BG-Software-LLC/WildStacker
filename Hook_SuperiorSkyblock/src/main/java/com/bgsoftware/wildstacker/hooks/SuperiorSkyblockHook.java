@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
-import com.bgsoftware.superiorskyblock.api.events.PluginInitializeEvent;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.island.IslandFlag;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -13,33 +12,28 @@ import org.bukkit.event.Listener;
 public final class SuperiorSkyblockHook {
 
     private static IslandFlag ENTITIES_STACKING;
-    private static boolean firstTime = true;
     private static boolean registered = false;
 
     public static void register(WildStackerPlugin plugin) {
         if (!plugin.getSettings().superiorSkyblockHook)
             return;
 
-        if (firstTime) {
-            plugin.getServer().getPluginManager().registerEvents(new Listener() {
-                @EventHandler
-                public void onPluginInit(PluginInitializeEvent e) {
-                    WildStackerPlugin.log("&aRegistering custom IslandFlag: ENTITIES_STACKING");
-                    IslandFlag.register("ENTITIES_STACKING");
-                    ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
-                }
-            }, plugin);
-            firstTime = false;
-            return;
-        }
-
         if (registered)
             return;
 
-        if (ENTITIES_STACKING == null) {
-            WildStackerPlugin.log("&cCouldn't register a custom island-flag into SuperiorSkyblock - open an issue on github.");
-            return;
+        try {
+            ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
+        } catch (NullPointerException error) {
+            IslandFlag.register("ENTITIES_STACKING");
+            try {
+                ENTITIES_STACKING = IslandFlag.getByName("ENTITIES_STACKING");
+            } catch (NullPointerException error2) {
+                WildStackerPlugin.log("&cCouldn't register a custom island-flag into SuperiorSkyblock - open an issue on github.");
+                return;
+            }
         }
+
+        assert ENTITIES_STACKING != null;
 
         SuperiorSkyblockAPI.getSuperiorSkyblock().getMenus().updateSettings(ENTITIES_STACKING);
         plugin.getServer().getPluginManager().registerEvents(new EntityListener(), plugin);
