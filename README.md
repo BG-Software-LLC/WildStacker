@@ -53,7 +53,7 @@ The plugin is packed with a rich API for interacting with entities, items and mo
     <dependency>
         <groupId>com.bgsoftware</groupId>
         <artifactId>WildStackerAPI</artifactId>
-        <version>latest</version>
+        <version>LATEST</version>
     </dependency>
 </dependencies>
 ```
