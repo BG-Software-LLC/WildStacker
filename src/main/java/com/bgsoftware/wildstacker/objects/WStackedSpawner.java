@@ -308,22 +308,24 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public boolean isSimilar(StackedObject stackedObject) {
-        if(!(stackedObject instanceof StackedSpawner))
+        if (!(stackedObject instanceof StackedSpawner))
             return false;
 
         StackedSpawner otherSpawner = (StackedSpawner) stackedObject;
 
         EntityType otherSpawnerType = otherSpawner.getSpawnedType();
 
-        if(getSpawnedType() != otherSpawnerType)
+        // Spawners that are similar must spawn the same entity.
+        if (getSpawnedType() != otherSpawnerType)
             return false;
 
         int otherUpgradeId = ((WStackedSpawner) otherSpawner).getUpgradeId();
 
-        if(spawnerUpgradeId == otherUpgradeId)
+        // Spawners that are similar must have the same upgrade, or be in the default upgrade.
+        if (spawnerUpgradeId == otherUpgradeId)
             return true;
 
-        return isDefaultUpgrade(spawnerUpgradeId, getSpawnedType()) == isDefaultUpgrade(otherUpgradeId, otherSpawnerType);
+        return isDefaultUpgrade(spawnerUpgradeId, getSpawnedType()) && isDefaultUpgrade(otherUpgradeId, otherSpawnerType);
     }
 
     /*
