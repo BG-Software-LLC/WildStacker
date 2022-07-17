@@ -121,6 +121,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -864,7 +865,13 @@ public final class NMSAdapter_v1_16_R3 implements NMSAdapter {
 
     @Override
     public void giveExp(Player player, int amount) {
-        player.giveExp(amount, true);
+
+        if (amount > 0) {
+            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
+            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
+            if (playerExpChangeEvent.getAmount() > 0)
+                player.giveExp(playerExpChangeEvent.getAmount());
+        }
     }
 
     @Override
