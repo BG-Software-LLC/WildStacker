@@ -32,6 +32,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -196,6 +197,12 @@ public final class DeathSimulation {
 
                 if (finalExp > 0) {
                     if (GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
+
+                        /* Listen the potential experience edits, like boosts from other plugins */
+                        PlayerExpChangeEvent expChangeEvent = new PlayerExpChangeEvent(livingEntity.getKiller(), finalExp);
+                        Bukkit.getPluginManager().callEvent(expChangeEvent);
+                        finalExp = expChangeEvent.getAmount();
+
                         EntityUtils.giveExp(livingEntity.getKiller(), finalExp);
                         if (plugin.getSettings().entitiesExpPickupSound != null)
                             livingEntity.getKiller().playSound(livingEntity.getLocation(),
