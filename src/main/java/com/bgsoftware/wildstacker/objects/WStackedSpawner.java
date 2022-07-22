@@ -163,7 +163,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public boolean isCached() {
-        return plugin.getSettings().spawnersStackingEnabled && (!isDefaultUpgrade(spawnerUpgradeId, getSpawnedType()) || super.isCached());
+        return plugin.getSettings().spawnersStackingEnabled && (!isDefaultUpgrade() || super.isCached());
     }
 
     @Override
@@ -202,8 +202,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         int amount = getStackAmount();
 
-        if ((amount < 1 || (amount == 1 && !plugin.getSettings().spawnersUnstackedCustomName)) &&
-                isDefaultUpgrade(spawnerUpgradeId, getSpawnedType())) {
+        if ((amount < 1 || (amount == 1 && !plugin.getSettings().spawnersUnstackedCustomName)) && isDefaultUpgrade()) {
             removeHologram();
             return;
         }
@@ -325,7 +324,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         if (spawnerUpgradeId == otherUpgradeId)
             return true;
 
-        return isDefaultUpgrade(spawnerUpgradeId, getSpawnedType()) && isDefaultUpgrade(otherUpgradeId, otherSpawnerType);
+        return isDefaultUpgrade() && otherSpawner.isDefaultUpgrade();
     }
 
     /*
@@ -388,8 +387,13 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
-        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId(), player, true);
+        setUpgradeId(spawnerUpgrade == null ? -1 : spawnerUpgrade.getId(), player, true);
         updateName();
+    }
+
+    @Override
+    public boolean isDefaultUpgrade() {
+        return spawnerUpgradeId == -1 || spawnerUpgradeId == plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType()).getId();
     }
 
     public int getUpgradeId() {
@@ -397,12 +401,12 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     }
 
     public void setUpgradeId(int spawnerUpgradeId, @Nullable Player who, boolean fireEvent) {
-        if (!isDefaultUpgrade(spawnerUpgradeId, getSpawnedType()) && !isCached())
+        if (!isDefaultUpgrade() && !isCached())
             plugin.getDataHandler().addStackedSpawner(this);
 
         this.spawnerUpgradeId = spawnerUpgradeId;
 
-        if (spawnerUpgradeId == 0 && !isCached())
+        if (isDefaultUpgrade() && !isCached())
             plugin.getDataHandler().removeStackedSpawner(this);
 
         SpawnerUpgrade spawnerUpgrade = getUpgrade();
@@ -414,10 +418,6 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);
-    }
-
-    private static boolean isDefaultUpgrade(int spawnerUpgradeId, EntityType spawnerType) {
-        return spawnerUpgradeId == -1 || spawnerUpgradeId == plugin.getUpgradesManager().getDefaultUpgrade(spawnerType).getId();
     }
 
     public LivingEntity getRawLinkedEntity() {

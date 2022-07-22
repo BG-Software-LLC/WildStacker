@@ -57,7 +57,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private List<ItemStack> drops = null;
     private int dropsMultiplier = 1;
     private SpawnCause spawnCause;
-    private int spawnerUpgradeId = 0;
+    private int spawnerUpgradeId = -1;
     private Predicate<LivingEntity> stackFlag = null;
     private EntityType cachedType;
 
@@ -165,7 +165,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
         try {
             String customName = EntityUtils.getEntityName(this);
-            boolean nameVisible = (getStackAmount() > 1 || spawnerUpgradeId != 0) && !plugin.getSettings().entitiesHideNames;
+            boolean nameVisible = (getStackAmount() > 1 || !isDefaultUpgrade()) && !plugin.getSettings().entitiesHideNames;
 
             Executor.sync(() -> {
                 setCustomName(customName);
@@ -222,7 +222,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (StackCheck.NAME_TAG.isEnabled() && targetEntity.hasNameTag())
             return StackCheckResult.TARGET_NAME_TAG;
 
-        if (StackCheck.UPGRADE.isEnabled() && spawnerUpgradeId != ((WStackedEntity) targetEntity).getUpgradeId())
+        if (StackCheck.UPGRADE.isEnabled() && spawnerUpgradeId != ((WStackedEntity) targetEntity).getUpgradeId() &&
+                (!isDefaultUpgrade() || !targetEntity.isDefaultUpgrade()))
             return StackCheckResult.UPGRADE;
 
         if (StackCheck.NERFED.isEnabled() && isNerfed() != targetEntity.isNerfed())
@@ -756,8 +757,13 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player) {
-        setUpgradeId(spawnerUpgrade == null ? 0 : spawnerUpgrade.getId());
+        setUpgradeId(spawnerUpgrade == null ? -1 : spawnerUpgrade.getId());
         updateName();
+    }
+
+    @Override
+    public boolean isDefaultUpgrade() {
+        return spawnerUpgradeId == -1 || spawnerUpgradeId == plugin.getUpgradesManager().getDefaultUpgrade(getType()).getId();
     }
 
     /*

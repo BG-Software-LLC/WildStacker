@@ -166,7 +166,7 @@ public final class EntityUtils {
         if (plugin.getSettings().entitiesCustomName.isEmpty())
             throw new NullPointerException();
 
-        return stackAmount <= 1 && stackedEntity.getUpgrade().isDefault() ? "" :
+        return stackAmount <= 1 && stackedEntity.isDefaultUpgrade() ? "" :
                 plugin.getSettings().entitiesNameBuilder.build(stackedEntity);
     }
 

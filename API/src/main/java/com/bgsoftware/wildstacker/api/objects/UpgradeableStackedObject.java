@@ -26,8 +26,13 @@ public interface UpgradeableStackedObject {
      * Can be null to remove the upgrades from this object.
      *
      * @param spawnerUpgrade The upgrade to set.
-     * @param player The player that upgraded the object.
+     * @param player         The player that upgraded the object.
      */
     void setUpgrade(SpawnerUpgrade spawnerUpgrade, @Nullable Player player);
+
+    /**
+     * Check whether this object has a the default upgrade.
+     */
+    boolean isDefaultUpgrade();
 
 }
