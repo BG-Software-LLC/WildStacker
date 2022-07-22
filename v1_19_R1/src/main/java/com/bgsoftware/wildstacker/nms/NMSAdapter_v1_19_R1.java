@@ -85,7 +85,6 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AxisAlignedBB;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -157,7 +156,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import static com.bgsoftware.wildstacker.nms.NMSMappings_v1_19_R1.*;
 
@@ -179,7 +177,6 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "fL");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile(ChatColor.COLOR_CHAR + "x(?>" + ChatColor.COLOR_CHAR + "[0-9a-f]){6}", Pattern.CASE_INSENSITIVE);
 
     /*
      *   Entity methods
@@ -301,11 +298,17 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
             return 0;
 
         int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
-        int exp = entityInsentient.getExpReward();
 
-        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
+        for (int i = 0; i < 5; ++i) {
+            try {
+                int exp = entityInsentient.getExpReward();
+                ENTITY_EXP.set(entityInsentient, defaultEntityExp);
+                return exp;
+            } catch (Exception ignored) {
+            }
+        }
 
-        return exp;
+        return 0;
     }
 
     @Override
