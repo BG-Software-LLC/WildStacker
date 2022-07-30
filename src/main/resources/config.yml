@@ -669,6 +669,8 @@ spawners:
   # Settings related to the manage menu of spawners.
   # If all the sub menus are disabled, the manage menu will not be opened.
   manage-menu:
+    # Whether sneaking is required in order to open the menu or not.
+    sneaking-open-menu: true
     # Should the amounts menu be enabled?
     amounts-menu: true
     # Should the upgrades menu be enabled?

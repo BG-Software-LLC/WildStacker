@@ -570,13 +570,10 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        if (e.getPlayer().isSneaking() && plugin.getSettings().manageMenuEnabled) {
+        if (plugin.getSettings().manageMenuEnabled && (!plugin.getSettings().sneakingOpenMenu || e.getPlayer().isSneaking())) {
             SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
             e.setCancelled(true);
-        } else {
-            if (!plugin.getSettings().floatingSpawnerNames)
-                return;
-
+        } else if (plugin.getSettings().floatingSpawnerNames) {
             int spawnerAmount = stackedSpawner.getStackAmount();
 
             if (spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().spawnersUnstackedCustomName))

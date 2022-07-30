@@ -106,8 +106,8 @@ public final class SettingsHandler {
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
             getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled,
-            amountsMenuEnabled, upgradeMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled, spawnerUpgradesMultiplyStackAmount,
-            listenPaperPreSpawnEvent, spawnersUnstackedCustomName;
+            sneakingOpenMenu, amountsMenuEnabled, upgradeMenuEnabled, manageMenuEnabled, spawnersOverrideEnabled,
+            spawnerUpgradesMultiplyStackAmount, listenPaperPreSpawnEvent, spawnersUnstackedCustomName;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
     public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
@@ -396,6 +396,7 @@ public final class SettingsHandler {
                 }
             }
         }
+        sneakingOpenMenu = cfg.getBoolean("spawners.manage-menu.sneaking-open-menu");
         amountsMenuEnabled = cfg.getBoolean("spawners.manage-menu.amounts-menu");
         upgradeMenuEnabled = cfg.getBoolean("spawners.manage-menu.upgrade-menu");
         manageMenuEnabled = amountsMenuEnabled || upgradeMenuEnabled;
