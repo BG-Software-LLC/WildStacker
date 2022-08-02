@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms.mapping;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.google.common.reflect.ClassPath;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
 import java.util.logging.Logger;
 
 public class TestRemaps {
@@ -24,7 +26,19 @@ public class TestRemaps {
 
     }
 
-    public static void testRemapsForClass(File mappingsFile, Class<?>... classes) throws
+    @SuppressWarnings("UnstableApiUsage")
+    public static void testRemapsForClassesInPackage(File mappingsFile, ClassLoader classLoader, String packageName) throws
+            IllegalAccessException, NullPointerException, IOException, RemapFailure {
+        Class<?>[] classes = ClassPath.from(classLoader)
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> clazz.getPackageName().startsWith(packageName))
+                .map(ClassPath.ClassInfo::load)
+                .toArray((IntFunction<Class<?>[]>) Class[]::new);
+        testRemapsForClasses(mappingsFile, classes);
+    }
+
+    public static void testRemapsForClasses(File mappingsFile, Class<?>... classes) throws
             IllegalAccessException, NullPointerException, IOException, RemapFailure {
         for (Class<?> clazz : classes) {
             logger.info("Starting remaps test for " + clazz.getName());
