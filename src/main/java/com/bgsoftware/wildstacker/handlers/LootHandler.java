@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.handlers;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.loot.LootTableSheep;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.entity.Ageable;
@@ -138,7 +139,11 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/iron_golem.json");
         if (containsEntity("LLAMA"))
             FileUtils.saveResource("loottables/llama.json");
-        FileUtils.saveResource("loottables/magma_cube.json");
+        if(ServerVersion.isAtLeast(ServerVersion.v1_19)) {
+            FileUtils.saveResource("loottables/magma_cube1_19.json", "loottables/magma_cube.json");
+        } else {
+            FileUtils.saveResource("loottables/magma_cube.json");
+        }
         FileUtils.saveResource("loottables/mooshroom.json");
         FileUtils.saveResource("loottables/mooshroom_baby.json");
         FileUtils.saveResource("loottables/mule.json");

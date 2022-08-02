@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,6 +29,10 @@ public final class FileUtils {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void saveResource(String resourcePath) {
+        saveResource(resourcePath, null);
+    }
+
+    public static void saveResource(String resourcePath, @Nullable String newName) {
         try {
             File file = new File(plugin.getDataFolder(), resourcePath);
             String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
@@ -42,6 +47,12 @@ public final class FileUtils {
                     plugin.saveResource(resourcePath, true);
                 }
             }
+
+            if (newName != null) {
+                File newFile = new File(plugin.getDataFolder(), newName);
+                file.renameTo(newFile);
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
