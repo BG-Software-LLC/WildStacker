@@ -8,6 +8,13 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.nms.mapping.Remap;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.core.BlockPosition;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.nbt.NBTTagCompound;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.server.level.MobSpawnerData;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity.Entity;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.World;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.block.entity.TileEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -15,16 +22,15 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
-import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldServer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
@@ -32,11 +38,10 @@ import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.EnumSkyBlock;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.MobSpawnerAbstract;
-import net.minecraft.world.level.World;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityMobSpawner;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.entity.LevelCallback;
@@ -56,16 +61,60 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
-import static com.bgsoftware.wildstacker.nms.NMSMappings_v1_19_R1.*;
-
 @SuppressWarnings("unused")
 public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
 
+    @Remap(classPath = "net.minecraft.world.level.block.entity.SpawnerBlockEntity", name = "spawner", type = Remap.Type.FIELD)
     private static final ReflectField<MobSpawnerAbstract> MOB_SPAWNER_ABSTRACT = new ReflectField<MobSpawnerAbstract>(TileEntityMobSpawner.class,
             MobSpawnerAbstract.class, "a").removeFinal();
-    private static final ReflectField<LevelCallback<Entity>> WORLD_LEVEL_CALLBACK = new ReflectField<>(PersistentEntitySectionManager.class,
-            LevelCallback.class, "c");
+    @Remap(classPath = "net.minecraft.world.level.entity.PersistentEntitySectionManager", name = "callbacks", type = Remap.Type.FIELD)
+    private static final ReflectField<LevelCallback<net.minecraft.world.entity.Entity>> WORLD_LEVEL_CALLBACK =
+            new ReflectField<>(PersistentEntitySectionManager.class, LevelCallback.class, "c");
 
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "FROZEN_OCEAN", type = Remap.Type.FIELD, remappedName = "V")
+    private static final ResourceKey<BiomeBase> FROZEN_OCEAN_BIOME = Biomes.V;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "SWAMP", type = Remap.Type.FIELD, remappedName = "g")
+    private static final ResourceKey<BiomeBase> SWAMP_BIOME = Biomes.g;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "DEEP_FROZEN_OCEAN", type = Remap.Type.FIELD, remappedName = "W")
+    private static final ResourceKey<BiomeBase> DEEP_FROZEN_OCEAN_BIOME = Biomes.W;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "LUSH_CAVES", type = Remap.Type.FIELD, remappedName = "Z")
+    private static final ResourceKey<BiomeBase> LUSH_CAVES_BIOME = Biomes.Z;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "OCEAN", type = Remap.Type.FIELD, remappedName = "R")
+    private static final ResourceKey<BiomeBase> OCEAN_BIOME = Biomes.R;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "DEEP_OCEAN", type = Remap.Type.FIELD, remappedName = "S")
+    private static final ResourceKey<BiomeBase> DEEP_OCEAN_BIOME = Biomes.S;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "RIVER", type = Remap.Type.FIELD, remappedName = "J")
+    private static final ResourceKey<BiomeBase> RIVER_BIOME = Biomes.J;
+    @Remap(classPath = "net.minecraft.world.level.biome.Biomes", name = "FROZEN_RIVER", type = Remap.Type.FIELD, remappedName = "K")
+    private static final ResourceKey<BiomeBase> FROZEN_RIVER_BIOME = Biomes.K;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "GRASS_BLOCK", type = Remap.Type.FIELD, remappedName = "i")
+    private static final Block GRASS_BLOCK_BLOCK = Blocks.i;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "ICE", type = Remap.Type.FIELD, remappedName = "cX")
+    private static final Block ICE_BLOCK = Blocks.cX;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "WATER", type = Remap.Type.FIELD, remappedName = "C")
+    private static final Block WATER_BLOCK = Blocks.C;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "NETHER_WART_BLOCK", type = Remap.Type.FIELD, remappedName = "jw")
+    private static final Block NETHER_WART_BLOCK_BLOCK = Blocks.jw;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "MYCELIUM", type = Remap.Type.FIELD, remappedName = "es")
+    private static final Block MYCELIUM_BLOCK = Blocks.es;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "SAND", type = Remap.Type.FIELD, remappedName = "E")
+    private static final Block SAND_BLOCK = Blocks.E;
+    @Remap(classPath = "net.minecraft.world.level.block.Blocks", name = "SPAWNER", type = Remap.Type.FIELD, remappedName = "ce")
+    private static final Block SPAWNER_BLOCK = Blocks.ce;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "AXOLOTLS_SPAWNABLE_ON", type = Remap.Type.FIELD, remappedName = "bE")
+    private static final TagKey<Block> AXOLOTLS_SPAWNABLE_ON_TAG = TagsBlock.bE;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "FOXES_SPAWNABLE_ON", type = Remap.Type.FIELD, remappedName = "bK")
+    private static final TagKey<Block> FOXES_SPAWNABLE_ON_TAG = TagsBlock.bK;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "GOATS_SPAWNABLE_ON", type = Remap.Type.FIELD, remappedName = "bF")
+    private static final TagKey<Block> GOATS_SPAWNABLE_ON_TAG = TagsBlock.bF;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "RABBITS_SPAWNABLE_ON", type = Remap.Type.FIELD, remappedName = "bJ")
+    private static final TagKey<Block> RABBITS_SPAWNABLE_ON_TAG = TagsBlock.bJ;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "LEAVES", type = Remap.Type.FIELD, remappedName = "K")
+    private static final TagKey<Block> LEAVES_TAG = TagsBlock.K;
+    @Remap(classPath = "net.minecraft.tags.BlockTags", name = "LOGS", type = Remap.Type.FIELD, remappedName = "s")
+    private static final TagKey<Block> LOGS_TAG = TagsBlock.s;
+    @Remap(classPath = "net.minecraft.world.entity.MobSpawnType", name = "SPAWNER", type = Remap.Type.FIELD, remappedName = "c")
+    private static final EnumMobSpawn SPAWNER_MOB_SPAWN = EnumMobSpawn.c;
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -73,7 +122,7 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
             @Override
             public boolean test(Location location) {
-                return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
+                return predicate.test(new World(((CraftWorld) location.getWorld()).getHandle()),
                         new BlockPosition(location.getX(), location.getY(), location.getZ()));
             }
         });
@@ -82,13 +131,14 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
 
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
-        World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
+        World world = new World(((CraftWorld) stackedSpawner.getWorld()).getHandle());
         Location location = stackedSpawner.getLocation();
 
-        TileEntity tileEntity = getBlockEntity(world, new BlockPosition(location.getX(), location.getY(), location.getZ()));
-        if (tileEntity instanceof TileEntityMobSpawner tileEntityMobSpawner &&
-                !(getSpawner(tileEntityMobSpawner) instanceof StackedMobSpawner)) {
-            new StackedMobSpawner(tileEntityMobSpawner, stackedSpawner);
+        BlockPosition blockPosition = new BlockPosition(location.getX(), location.getY(), location.getZ());
+        TileEntity tileEntity = world.getBlockEntity(blockPosition.getHandle());
+        if (tileEntity.getHandle() instanceof TileEntityMobSpawner &&
+                !(tileEntity.getSpawner().getHandle() instanceof StackedMobSpawner)) {
+            new StackedMobSpawner(tileEntity, stackedSpawner);
             return true;
         }
 
@@ -96,13 +146,13 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
     }
 
     private static IBlockData getBlockBelow(World world, BlockPosition position) {
-        return getBlockState(world, position.c());
+        return world.getBlockStateNoMappings(position.below());
     }
 
     @Override
     public void registerSpawnConditions() {
         createCondition("ANIMAL_LIGHT",
-                (world, position) -> getRawBrightness(world, position, 0) > 8,
+                (world, position) -> world.getRawBrightness(position.getHandle(), 0) > 8,
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.GOAT, EntityType.HORSE,
                 EntityType.LLAMA, EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG,
                 EntityType.RABBIT, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.TURTLE, EntityType.WOLF,
@@ -110,84 +160,88 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         );
 
         createCondition("ANIMAL_LIGHT_AND_COLD", (world, position) -> {
-            Holder<BiomeBase> biomeBaseHolder = world.w(position);
-            boolean coldBiome = biomeBaseHolder.a(Biomes.V) || biomeBaseHolder.a(Biomes.W);
+            Holder<BiomeBase> biomeBaseHolder = world.getBiome(position.getHandle());
+            boolean coldBiome = biomeBaseHolder.a(FROZEN_OCEAN_BIOME) || biomeBaseHolder.a(DEEP_FROZEN_OCEAN_BIOME);
             IBlockData blockData = getBlockBelow(world, position);
-            return getRawBrightness(world, position, 0) > 8 && (coldBiome ? blockData.a(Blocks.i) : blockData.a(Blocks.cX));
+            return world.getRawBrightness(position.getHandle(), 0) > 8 &&
+                    (coldBiome ? blockData.a(GRASS_BLOCK_BLOCK) : blockData.a(ICE_BLOCK));
         }, EntityType.POLAR_BEAR);
 
         createCondition("ON_AXOLOTL_SPAWNABLE",
-                (world, position) -> is(TagsBlock.bE, getBlock(getBlockState(world, position.c()))),
+                (world, position) -> world.getBlockState(position.below()).is(AXOLOTLS_SPAWNABLE_ON_TAG),
                 EntityType.AXOLOTL
         );
 
         createCondition("ON_FOX_SPAWNABLE",
-                (world, position) -> is(TagsBlock.bK, getBlock(getBlockState(world, position.c()))),
+                (world, position) -> world.getBlockState(position.below()).is(FOXES_SPAWNABLE_ON_TAG),
                 EntityType.FOX
         );
 
         createCondition("ON_GOAT_SPAWNABLE",
-                (world, position) -> is(TagsBlock.bF, getBlock(getBlockState(world, position.c()))),
+                (world, position) -> world.getBlockState(position.below()).is(GOATS_SPAWNABLE_ON_TAG),
                 EntityType.GOAT
         );
 
         createCondition("ON_RABBITS_SPAWNABLE",
-                (world, position) -> is(TagsBlock.bJ, getBlock(getBlockState(world, position.c()))),
+                (world, position) -> world.getBlockState(position.below()).is(RABBITS_SPAWNABLE_ON_TAG),
                 EntityType.RABBIT
         );
 
         createCondition("BELOW_SEA_LEVEL",
-                (world, position) -> getY(position) < getSeaLevel(world),
+                (world, position) -> position.getY() < world.getSeaLevel(),
                 EntityType.DOLPHIN
         );
 
         createCondition("DARK_BLOCK_LIGHT",
-                (world, position) -> getBrightness(world, EnumSkyBlock.b, position) <= 8,
+                (world, position) -> world.getBrightness(EnumSkyBlock.b, position.getHandle()) <= 8,
                 EntityType.PILLAGER
         );
 
         createCondition("IN_LAVA_AND_AIR_ABOVE", (world, position) -> {
-            BlockPosition.MutableBlockPosition mutableBlockPosition = position.i();
+            BlockPosition mutableBlockPosition = position.mutable();
 
             do {
-                mutableBlockPosition.c(EnumDirection.b);
-            } while (getFluidState(world, mutableBlockPosition).a(TagsFluid.b));
+                mutableBlockPosition.move(EnumDirection.b);
+            } while (world.getFluidState(mutableBlockPosition.getHandle()).a(TagsFluid.b));
 
-            return getBlockState(world, mutableBlockPosition).h(); //isAir
+            return world.getBlockState(mutableBlockPosition.getHandle()).isAir();
         }, EntityType.STRIDER);
 
         createCondition("IN_SEA_SURFACE",
-                (world, position) -> getY(position) < getSeaLevel(world) + 4,
+                (world, position) -> position.getY() < world.getSeaLevel() + 4,
                 EntityType.TURTLE
         );
 
         createCondition("IN_SLIME_CHUNK_OR_SWAMP", (world, position) -> {
-            Holder<BiomeBase> biomeBaseHolder = world.w(position);
+            Holder<BiomeBase> biomeBaseHolder = world.getBiome(position.getHandle());
 
-            if (biomeBaseHolder.a(Biomes.g))
+            if (biomeBaseHolder.a(SWAMP_BIOME))
                 return true;
 
-            ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position);
+            ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position.getHandle());
             boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.e, chunkcoordintpair.f, ((GeneratorAccessSeed) world).B(),
-                    world.getMinecraftWorld().spigotConfig.slimeSeed).a(10) == 0;
-            return isSlimeChunk && getY(position) < 40;
+                    world.getHandle().spigotConfig.slimeSeed).a(10) == 0;
+            return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);
 
         createCondition("IN_FISH_WATER",
-                (world, position) -> getFluidState(world, position.c()).a(TagsFluid.b) && getBlockState(world, position.b()).a(Blocks.A) &&
-                        position.v() >= getSeaLevel(world) - 13 && position.v() <= getSeaLevel(world),
+                (world, position) -> world.getFluidState(position.below()).a(TagsFluid.b) &&
+                        world.getBlockState(position.above()).getHandle().a(WATER_BLOCK) &&
+                        position.getY() >= world.getSeaLevel() - 13 && position.getY() <= world.getSeaLevel(),
                 EntityType.COD, EntityType.PUFFERFISH, EntityType.SALMON, EntityType.DOLPHIN
         );
 
         createCondition("IN_FISH_WATER_OR_LUSH_CAVES",
-                (world, position) -> getFluidState(world, position.c()).a(TagsFluid.b) &&
-                        (world.w(position).a(Biomes.Z) ||
-                                (getBlockState(world, position.b()).a(Blocks.A) && position.v() >= getSeaLevel(world) - 13 && position.v() <= getSeaLevel(world))),
+                (world, position) -> world.getFluidState(position.below()).a(TagsFluid.b) &&
+                        (world.getBiome(position.getHandle()).a(LUSH_CAVES_BIOME) ||
+                                (world.getBlockState(position.above()).getHandle().a(WATER_BLOCK) &&
+                                position.getY() >= world.getSeaLevel() - 13 && position.getY() <= world.getSeaLevel())),
                 EntityType.TROPICAL_FISH
         );
 
         createCondition("COMPLETE_DARKNESS",
-                (world, position) -> (world.Y() ? world.c(position, 10) : getMaxLocalRawBrightness(world, position)) == 0,
+                (world, position) -> (world.isRaining() ? world.getMaxLocalRawBrightness(position.getHandle(), 10) :
+                        world.getMaxLocalRawBrightness(position.getHandle())) == 0,
                 EntityType.AXOLOTL, EntityType.DROWNED, EntityType.CAVE_SPIDER, EntityType.CREEPER,
                 EntityType.ENDERMAN, EntityType.GIANT, EntityType.HUSK, EntityType.SKELETON, EntityType.SPIDER,
                 EntityType.STRAY, EntityType.WITCH, EntityType.WITHER, EntityType.WITHER_SKELETON, EntityType.ZOMBIE,
@@ -196,32 +250,32 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         );
 
         createCondition("NOT_IN_OCEAN", (world, position) -> {
-            Holder<BiomeBase> biomeBaseHolder = world.w(position);
-            return !biomeBaseHolder.a(Biomes.R) && !biomeBaseHolder.a(Biomes.S);
+            Holder<BiomeBase> biomeBaseHolder = world.getBiome(position.getHandle());
+            return !biomeBaseHolder.a(OCEAN_BIOME) && !biomeBaseHolder.a(DEEP_OCEAN_BIOME);
         }, EntityType.DOLPHIN);
 
         createCondition("IN_RIVER", (world, position) -> {
-            Holder<BiomeBase> biomeBaseHolder = world.w(position);
-            return biomeBaseHolder.a(Biomes.J) || biomeBaseHolder.a(Biomes.K);
+            Holder<BiomeBase> biomeBaseHolder = world.getBiome(position.getHandle());
+            return biomeBaseHolder.a(RIVER_BIOME) || biomeBaseHolder.a(FROZEN_RIVER_BIOME);
         }, EntityType.DOLPHIN);
 
         createCondition("NOT_IN_OCEAN_DEEP",
-                (world, position) -> getY(position) > 45,
+                (world, position) -> position.getY() > 45,
                 EntityType.DOLPHIN
         );
 
         createCondition("IN_OCEAN_DEEP",
-                (world, position) -> getBlockState(world, position).a(Blocks.A) && getY(position) <= 30,
+                (world, position) -> world.getBlockState(position.getHandle()).getHandle().a(WATER_BLOCK) && position.getY() <= 30,
                 EntityType.GLOW_SQUID
         );
 
         createCondition("NOT_ON_NETHER_WART_BLOCK",
-                (world, position) -> !getBlockBelow(world, position).a(Blocks.jw),
+                (world, position) -> !getBlockBelow(world, position).a(NETHER_WART_BLOCK_BLOCK),
                 EntityType.ZOMBIFIED_PIGLIN
         );
 
         createCondition("NOT_PEACEFUL",
-                (world, position) -> getDifficulty(world) != EnumDifficulty.a,
+                (world, position) -> world.getDifficulty() != EnumDifficulty.a,
                 EntityType.DROWNED, EntityType.GUARDIAN, EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
                 EntityType.ENDERMAN, EntityType.ENDERMITE, EntityType.GHAST, EntityType.GIANT, EntityType.HUSK,
                 EntityType.MAGMA_CUBE, EntityType.PILLAGER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME,
@@ -231,31 +285,31 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         );
 
         createCondition("ON_GRASS",
-                (world, position) -> getBlockBelow(world, position).a(Blocks.i),
+                (world, position) -> getBlockBelow(world, position).a(GRASS_BLOCK_BLOCK),
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.GOAT, EntityType.HORSE,
                 EntityType.LLAMA, EntityType.MULE, EntityType.PIG, EntityType.SHEEP, EntityType.SKELETON_HORSE,
                 EntityType.WOLF, EntityType.ZOMBIE_HORSE, EntityType.CAT, EntityType.PANDA, EntityType.TRADER_LLAMA
         );
 
         createCondition("ON_MYCELIUM",
-                (world, position) -> getBlockBelow(world, position).a(Blocks.es),
+                (world, position) -> getBlockBelow(world, position).a(MYCELIUM_BLOCK),
                 EntityType.MUSHROOM_COW
         );
 
         createCondition("ON_NETHER_WART_BLOCK",
-                (world, position) -> getBlockBelow(world, position).a(Blocks.jw),
+                (world, position) -> getBlockBelow(world, position).a(NETHER_WART_BLOCK_BLOCK),
                 EntityType.HOGLIN, EntityType.PIGLIN
         );
 
         createCondition("ON_SAND",
-                (world, position) -> getBlockBelow(world, position).a(Blocks.E),
+                (world, position) -> getBlockBelow(world, position).a(SAND_BLOCK),
                 EntityType.TURTLE
         );
 
         createCondition("ON_TREE_OR_AIR", (world, position) -> {
             IBlockData blockData = getBlockBelow(world, position);
-            return blockData.a(TagsBlock.K) || blockData.a(Blocks.i) ||
-                    blockData.a(TagsBlock.s) || blockData.a(Blocks.a);
+            return blockData.a(LEAVES_TAG) || blockData.a(GRASS_BLOCK_BLOCK) ||
+                    blockData.a(LOGS_TAG) || blockData.a(Blocks.a);
         }, EntityType.PARROT);
     }
 
@@ -267,11 +321,11 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         private int spawnedEntities = 0;
         private WStackedEntity demoEntity = null;
 
-        StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner) {
+        StackedMobSpawner(TileEntity tileEntity, StackedSpawner stackedSpawner) {
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
-            MobSpawnerAbstract originalSpawner = getSpawner(tileEntityMobSpawner);
-            MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
+            MobSpawnerAbstract originalSpawner = tileEntity.getSpawner().getHandle();
+            MOB_SPAWNER_ABSTRACT.set(tileEntity.getHandle(), this);
 
             this.e = originalSpawner.e;
             this.h = originalSpawner.h;
@@ -281,20 +335,23 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
             this.m = originalSpawner.m;
             this.n = originalSpawner.n;
 
-            updateDemoEntity((WorldServer) getWorld(tileEntityMobSpawner), getBlockPos(tileEntityMobSpawner));
+            updateDemoEntity(tileEntity.getWorld(), tileEntity.getBlockPos());
             updateUpgrade(((WStackedSpawner) stackedSpawner).getUpgradeId());
         }
 
         @Override
-        public void a(WorldServer world, BlockPosition position) {
+        public void a(WorldServer nmsWorld, net.minecraft.core.BlockPosition nmsPosition) {
             WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
             if (stackedSpawner == null) {
-                super.a(world, position);
+                super.a(nmsWorld, nmsPosition);
                 return;
             }
 
-            if (!hasNearbyPlayers(world, position)) {
+            World world = new World(nmsWorld);
+            BlockPosition position = new BlockPosition(nmsPosition);
+
+            if (!world.hasNearbyAlivePlayer(position.getX() + 0.5D, position.getY() + 0.5D, position.getZ() + 0.5D, this.m)) {
                 failureReason = "There are no nearby players.";
                 return;
             }
@@ -307,7 +364,8 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                 return;
             }
 
-            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(getEntityToSpawn(this.e));
+            MobSpawnerData mobSpawnerData = new MobSpawnerData(this.e);
+            Optional<EntityTypes<?>> entityTypesOptional = EntityTypes.a(mobSpawnerData.getEntityToSpawnNoMapping());
 
             if (!entityTypesOptional.isPresent()) {
                 resetSpawnDelay(world, position);
@@ -318,33 +376,32 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
             EntityTypes<?> entityTypes = entityTypesOptional.get();
 
             if (demoEntity == null) {
-                super.a(world, position);
+                super.a(nmsWorld, nmsPosition);
                 failureReason = "";
                 return;
             }
 
-            Entity demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
+            Entity demoNMSEntity = new Entity(((CraftEntity) demoEntity.getLivingEntity()).getHandle());
 
-            if (NMSMappings_v1_19_R1.getType(demoNMSEntity) != entityTypes) {
+            if (demoNMSEntity.getType() != entityTypes) {
                 updateDemoEntity(world, position);
 
                 if (demoEntity == null) {
-                    super.a(world, position);
+                    super.a(nmsWorld, nmsPosition);
                     failureReason = "";
                     return;
                 }
 
                 updateUpgrade(stackedSpawner.getUpgradeId());
 
-                demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
+                demoNMSEntity = new Entity(((CraftEntity) demoEntity.getLivingEntity()).getHandle());
             }
 
             int stackAmount = stackedSpawner.getStackAmount();
 
-            List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), new AxisAlignedBB(
-                    getX(position), getY(position), getZ(position),
-                    getX(position) + 1, getY(position) + 1, getZ(position) + 1
-            ).g(this.n));
+            List<? extends net.minecraft.world.entity.Entity> nearbyEntities = world.getEntitiesOfClass(
+                    demoNMSEntity.getHandle().getClass(), new AxisAlignedBB(position.getX(), position.getY(), position.getZ(),
+                    position.getX() + 1, position.getY() + 1, position.getZ() + 1).g(this.n));
 
             StackedEntity targetEntity = getTargetEntity(stackedSpawner, demoEntity, nearbyEntities);
 
@@ -385,7 +442,7 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                     if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
                         stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
-                    NMSMappings_v1_19_R1.levelEvent(world, 2004, position, 0);
+                    world.levelEvent(2004, position.getHandle(), 0);
                     particlesAmount++;
                 }
             } else {
@@ -407,8 +464,8 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         }
 
         @Override
-        public void a(World world, BlockPosition position, int i) {
-            world.a(position, Blocks.bV, i, 0);
+        public void a(net.minecraft.world.level.World world, net.minecraft.core.BlockPosition position, int i) {
+            world.a(position, SPAWNER_BLOCK, i, 0);
         }
 
         public void updateUpgrade(int upgradeId) {
@@ -416,23 +473,21 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                 demoEntity.setUpgradeId(upgradeId);
         }
 
-        private boolean attemptMobSpawning(WorldServer world, BlockPosition position, EntityTypes<?> entityTypes,
+        private boolean attemptMobSpawning(World world, BlockPosition position, EntityTypes<?> entityTypes,
                                            int mobsToSpawn, int amountPerEntity, int spawnCount, short particlesAmount,
                                            WStackedSpawner stackedSpawner) {
             boolean hasSpawnedEntity = false;
 
             for (int i = 0; i < mobsToSpawn; i++) {
-                RandomSource randomSource = getRandom(world);
+                RandomSource randomSource = world.getRandom();
 
-                double x = getX(position) + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
-                double y = getY(position) + randomSource.a(3) - 1;
-                double z = getZ(position) + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
+                double x = position.getX() + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
+                double y = position.getY() + randomSource.a(3) - 1;
+                double z = position.getZ() + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
 
-                Location location = new Location(world.getWorld(), x, y, z);
+                Location location = new Location(world.getHandle().getWorld(), x, y, z);
 
-                boolean hasSpace = world.b(entityTypes.a(x, y, z));
-
-                if (!hasSpace) {
+                if (!world.noCollision(entityTypes.a(x, y, z))) {
                     failureReason = "Not enough space to spawn the entity.";
                     continue;
                 }
@@ -445,7 +500,7 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                     continue;
                 }
 
-                org.bukkit.entity.Entity bukkitEntity = generateEntity(world, x, y, z, true);
+                Entity bukkitEntity = generateEntity(world, x, y, z, true);
 
                 if (bukkitEntity == null) {
                     resetSpawnDelay(world, position);
@@ -464,44 +519,42 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
             return hasSpawnedEntity;
         }
 
-        private boolean hasNearbyPlayers(World world, BlockPosition position) {
-            return world.a(getX(position) + 0.5D, getY(position) + 0.5D, getZ(position) + 0.5D, this.m);
-        }
-
         private void resetSpawnDelay(World world, BlockPosition position) {
             if (this.i <= this.h) {
                 this.c = this.h;
             } else {
-                this.c = this.h + getRandom(world).a(this.i - this.h);
+                this.c = this.h + world.getRandom().a(this.i - this.h);
             }
 
             // Set mob spawn data
-            this.d.b(getRandom(world)).ifPresent(weightedEntry -> this.a(world, position, weightedEntry.b()));
+            this.d.b(world.getRandom()).ifPresent(weightedEntry ->
+                    this.a(world.getHandle(), position.getHandle(), weightedEntry.b()));
 
             spawnedEntities = 0;
             failureReason = "";
 
-            a(world, position, 1);
+            a(world.getHandle(), position.getHandle(), 1);
         }
 
-        private org.bukkit.entity.Entity generateEntity(World world, double x, double y, double z, boolean rotation) {
-            NBTTagCompound entityCompound = getEntityToSpawn(this.e);
-            Entity entity = EntityTypes.a(entityCompound, world, _entity -> {
-                moveTo(_entity, x, y, z, rotation ? getRandom(world).i() * 360.0F : 0f, 0f);
-
-                _entity.s = world;
+        private Entity generateEntity(World world, double x, double y, double z, boolean rotation) {
+            MobSpawnerData mobSpawnerData = new MobSpawnerData(this.e);
+            NBTTagCompound entityCompound = mobSpawnerData.getEntityToSpawn();
+            net.minecraft.world.entity.Entity entity = EntityTypes.a(entityCompound.getHandle(), world.getHandle(), _entity -> {
+                Entity mappedEntity = new Entity(_entity);
+                mappedEntity.moveTo(x, y, z, rotation ? world.getRandom().i() * 360.0F : 0f, 0f);
+                mappedEntity.setWorld(world.getHandle());
                 _entity.valid = true;
-
                 return _entity;
             });
-            return entity == null ? null : entity.getBukkitEntity();
+            return entity == null ? null : new Entity(entity);
         }
 
-        private boolean handleEntitySpawn(WorldServer world, BlockPosition position,
-                                          org.bukkit.entity.Entity bukkitEntity, WStackedSpawner stackedSpawner,
+        private boolean handleEntitySpawn(World world, BlockPosition position,
+                                         Entity entity, WStackedSpawner stackedSpawner,
                                           int amountPerEntity, boolean spawnParticles) {
-            Entity entity = ((CraftEntity) bukkitEntity).getHandle();
             StackedEntity stackedEntity = null;
+
+            org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
 
             EntityStorage.setMetadata(bukkitEntity, EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
 
@@ -511,25 +564,28 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                 stackedEntity.setStackAmount(amountPerEntity, true);
             }
 
-            if (entity instanceof EntityInsentient entityInsentient) {
-                if (getEntityToSpawn(this.e).e() == 1 && NMSMappings_v1_19_R1.contains(getEntityToSpawn(this.e), "id", 8)) {
-                    finalizeSpawn(entityInsentient, world, getCurrentDifficultyAt(world, blockPosition(entity)),
-                            EnumMobSpawn.c, null, null);
+            if (entity.getHandle() instanceof EntityInsentient entityInsentient) {
+                MobSpawnerData mobSpawnerData = new MobSpawnerData(this.e);
+                NBTTagCompound entityToSpawn = mobSpawnerData.getEntityToSpawn();
+
+                if (entityToSpawn.size() == 1 && entityToSpawn.contains("id", 8)) {
+                    entity.finalizeSpawn((WorldServer) world.getHandle(), world.getCurrentDifficultyAt(entity.blockPosition()),
+                            SPAWNER_MOB_SPAWN, null, null);
                 }
 
-                if (getWorld(entityInsentient).spigotConfig.nerfSpawnerMobs) {
+                if (entity.getWorld().getHandle().spigotConfig.nerfSpawnerMobs) {
                     entityInsentient.aware = false;
                 }
             }
 
-            if (CraftEventFactory.callSpawnerSpawnEvent(entity, position).isCancelled()) {
-                Entity vehicle = getVehicle(entity);
+            if (CraftEventFactory.callSpawnerSpawnEvent(entity.getHandle(), position.getHandle()).isCancelled()) {
+                Entity vehicle = entity.getVehicle();
                 if (vehicle != null) {
-                    discard(vehicle);
+                    vehicle.discard();
                 }
 
-                for (Entity passenger : getIndirectPassengers(entity))
-                    discard(passenger);
+                for (net.minecraft.world.entity.Entity passenger : entity.getIndirectPassengers())
+                    new Entity(passenger).discard();
 
                 if (stackedEntity != null)
                     plugin.getSystemManager().removeStackObject(stackedEntity);
@@ -541,10 +597,10 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
                 }
 
                 if (spawnParticles)
-                    NMSMappings_v1_19_R1.levelEvent(world, 2004, position, 0);
+                    world.levelEvent(2004, position.getHandle(), 0);
 
-                if (entity instanceof EntityInsentient entityInsentient) {
-                    spawnAnim(entityInsentient);
+                if (entity.getHandle() instanceof EntityInsentient) {
+                    entity.spawnAnim();
                 }
 
                 return true;
@@ -554,10 +610,10 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         }
 
         private boolean addEntity(World world, Entity entity) {
-            entity.valid = false;
+            entity.getHandle().valid = false;
 
-            if (NMSMappings_v1_19_R1.addFreshEntity(world, entity, CreatureSpawnEvent.SpawnReason.SPAWNER)) {
-                getPassengers(entity).forEach(passenger -> addEntity(world, passenger));
+            if (world.addFreshEntity(entity.getHandle(), CreatureSpawnEvent.SpawnReason.SPAWNER)) {
+                entity.getPassengers().forEach(passenger -> addEntity(world, new Entity(passenger)));
                 return true;
             }
 
@@ -565,35 +621,36 @@ public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
         }
 
         private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                              List<? extends Entity> nearbyEntities) {
+                                              List<? extends net.minecraft.world.entity.Entity> nearbyEntities) {
             LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
             if (linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
                 return WStackedEntity.of(linkedEntity);
 
             Optional<CraftEntity> closestEntity = GeneralUtils.getClosestBukkit(stackedSpawner.getLocation(),
-                    nearbyEntities.stream().map(Entity::getBukkitEntity).filter(entity ->
+                    nearbyEntities.stream().map(net.minecraft.world.entity.Entity::getBukkitEntity).filter(entity ->
                             EntityUtils.isStackable(entity) &&
                                     demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
 
             return closestEntity.map(WStackedEntity::of).orElse(null);
         }
 
-        private void updateDemoEntity(WorldServer world, BlockPosition position) {
-            org.bukkit.entity.Entity demoEntityBukkit = generateEntity(world, getX(position), getY(position),
-                    getZ(position), false);
+        private void updateDemoEntity(World world, BlockPosition position) {
+            Entity demoEntity = generateEntity(world, position.getX(), position.getY(), position.getZ(), false);
 
-            if (demoEntityBukkit != null)
-                WORLD_LEVEL_CALLBACK.get(world.P).a(((CraftEntity) demoEntityBukkit).getHandle());
+            if (demoEntity == null)
+                return;
 
-            if (!EntityUtils.isStackable(demoEntityBukkit)) {
+            WORLD_LEVEL_CALLBACK.get(world.getEntityManager()).a(demoEntity.getHandle());
+
+            if (!EntityUtils.isStackable(demoEntity.getBukkitEntity())) {
                 demoEntity = null;
                 return;
             }
 
-            demoEntity = (WStackedEntity) WStackedEntity.of(demoEntityBukkit);
-            demoEntity.setSpawnCause(SpawnCause.SPAWNER);
-            demoEntity.setDemoEntity();
+            this.demoEntity = (WStackedEntity) WStackedEntity.of(demoEntity.getBukkitEntity());
+            this.demoEntity.setSpawnCause(SpawnCause.SPAWNER);
+            this.demoEntity.setDemoEntity();
         }
 
     }
