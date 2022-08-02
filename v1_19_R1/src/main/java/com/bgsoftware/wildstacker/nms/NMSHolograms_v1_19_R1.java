@@ -80,7 +80,7 @@ public final class NMSHolograms_v1_19_R1 implements NMSHolograms {
         }
 
         @Override
-        public AxisAlignedBB cA() {
+        public AxisAlignedBB cz() {
             return EMPTY_BOUND;
         }
 

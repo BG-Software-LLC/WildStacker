@@ -164,17 +164,17 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, Modifier.PROTECTED, 1);
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "bd");
-    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, boolean.class, "dN");
+    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, boolean.class, "dM");
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "x_");
-    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "eD");
-    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "eE");
+    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "eC");
+    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "eD");
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
     private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(EntityChicken.class, Integer.class, "cd");
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, boolean.class, "fZ");
-    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fY");
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, boolean.class, "fY");
+    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fX");
 
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "v", boolean.class);
-    private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "fL");
+    private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "fK");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -429,7 +429,7 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
     @Override
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
-        return nmsItem != null && nmsItem.g();
+        return nmsItem != null && nmsItem.h();
     }
 
     @Override
@@ -818,8 +818,8 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
         setCount(itemStack, 1);
         net.minecraft.world.item.Item item = getItem(itemStack);
 
-        if (is(TagsItem.N, item)) {
-            eraseMemory(behaviorController, MemoryModuleType.Y);
+        if (is(TagsItem.Q, item)) {
+            eraseMemory(behaviorController, MemoryModuleType.ac);
             if (!isEmpty(NMSMappings_v1_19_R1.getOffhandItem(entityPiglin))) {
                 entityPiglin.b(entityPiglin.b(EnumHand.b));
             }
@@ -831,8 +831,8 @@ public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
                 setPersistenceRequired(entityPiglin);
             }
 
-            behaviorController.a(MemoryModuleType.X, true, 120L);
-        } else if ((item == Items.nJ || item == Items.nK) && !hasMemoryValue(behaviorController, MemoryModuleType.ap)) {
+            behaviorController.a(MemoryModuleType.ab, true, 120L);
+        } else if ((item == Items.ot || item == Items.ou) && !hasMemoryValue(behaviorController, MemoryModuleType.at)) {
             behaviorController.a(MemoryModuleType.at, true, 200L);
         } else {
             handleEquipmentPickup((LivingEntity) bukkitPiglin, bukkitItem);

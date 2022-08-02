@@ -121,15 +121,15 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static double getX(Entity entity) {
-        return entity.dg();
+        return entity.df();
     }
 
     public static double getY(Entity entity) {
-        return entity.di();
+        return entity.dh();
     }
 
     public static double getZ(Entity entity) {
-        return entity.dm();
+        return entity.dl();
     }
 
     public static EntityTypes<?> getType(Entity entity) {
@@ -137,7 +137,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static AxisAlignedBB getBoundingBox(Entity entity) {
-        return entity.cA();
+        return entity.cy();
     }
 
     public static int getId(Entity entity) {
@@ -169,19 +169,19 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static BlockPosition blockPosition(Entity entity) {
-        return entity.db();
+        return entity.da();
     }
 
     public static Entity getVehicle(Entity entity) {
-        return entity.cR();
+        return entity.cQ();
     }
 
     public static Iterable<Entity> getIndirectPassengers(Entity entity) {
-        return entity.cJ();
+        return entity.cM();
     }
 
     public static List<Entity> getPassengers(Entity entity) {
-        return entity.cJ();
+        return entity.cI();
     }
 
     public static boolean isBaby(EntityAgeable entityAgeable) {
@@ -193,11 +193,11 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static void resetLove(EntityAnimal entityAnimal) {
-        entityAnimal.fR();
+        entityAnimal.fQ();
     }
 
     public static boolean isInLove(EntityAnimal entityAnimal) {
-        return entityAnimal.fQ();
+        return entityAnimal.fP();
     }
 
     public static boolean isFood(EntityAnimal entityAnimal, ItemStack itemStack) {
@@ -213,7 +213,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static boolean isNoAI(EntityInsentient entityInsentient) {
-        return entityInsentient.fs();
+        return entityInsentient.fA();
     }
 
     public static void setNoAI(EntityInsentient entityInsentient, boolean isNoAI) {
@@ -229,7 +229,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static void setPersistenceRequired(EntityInsentient entityInsentient) {
-        entityInsentient.fh();
+        entityInsentient.fp();
     }
 
     public static GroupDataEntity finalizeSpawn(EntityInsentient entityInsentient, WorldAccess worldAccess,
@@ -239,7 +239,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static ItemStack getItem(EntityItem entityItem) {
-        return entityItem.h();
+        return entityItem.i();
     }
 
     public static void setHealth(EntityLiving entityLiving, float health) {
@@ -255,7 +255,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static ItemStack getOffhandItem(EntityLiving entityLiving) {
-        return entityLiving.eB();
+        return entityLiving.eA();
     }
 
     public static void setItemSlot(EntityLiving entityLiving, EnumItemSlot itemSlot, ItemStack itemStack) {
@@ -271,7 +271,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static float getMaxHealth(EntityLiving entityLiving) {
-        return entityLiving.eu();
+        return entityLiving.et();
     }
 
     public static void readAdditionalSaveData(EntityLiving entityLiving, NBTTagCompound nbtTagCompound) {
@@ -279,7 +279,7 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static BehaviorController<EntityPiglin> getBrain(EntityPiglin entityPiglin) {
-        return entityPiglin.dz();
+        return entityPiglin.dy();
     }
 
     public static boolean isSaddled(EntityStrider entityStrider) {
@@ -291,15 +291,15 @@ public final class NMSMappings_v1_19_R1 {
     }
 
     public static VillagerData getVillagerData(EntityVillager entityVillager) {
-        return entityVillager.fV();
+        return entityVillager.fU();
     }
 
     public static Reputation getGossips(EntityVillager entityVillager) {
-        return entityVillager.gg();
+        return entityVillager.gf();
     }
 
     public static MerchantRecipeList getOffers(EntityVillagerAbstract entityVillager) {
-        return entityVillager.fN();
+        return entityVillager.fM();
     }
 
     public static int getExperience(EntityVillager entityVillager) {
