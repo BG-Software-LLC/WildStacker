@@ -371,6 +371,10 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         return 0;
     }
 
+    @Remap(classPath = "net.minecraft.world.level.GameRules",
+            name = "getBoolean",
+            type = Remap.Type.METHOD,
+            remappedName = "b")
     @Override
     public boolean canDropExp(LivingEntity livingEntity) {
         Entity entityLiving = new Entity(((CraftLivingEntity) livingEntity).getHandle());
@@ -418,6 +422,10 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         }
     }
 
+    @Remap(classPath = "net.minecraft.world.entity.LivingEntity",
+            name = "lastHurtByPlayer",
+            type = Remap.Type.FIELD,
+            remappedName = "bc")
     @Override
     public void setKiller(LivingEntity livingEntity, Player killer) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
@@ -432,7 +440,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         EntityTypes<?> entityTypes = entity.getType();
         return EntityPositionTypes.a(entityTypes, (WorldServer) world.getHandle(), SPAWNER_MOB_SPAWN,
                 new BlockPosition(location.getX(), location.getY(), location.getZ()).getHandle(),
-                world.getRandom());
+                world.getRandom().getHandle());
     }
 
     @Override
@@ -1138,9 +1146,13 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
      *   Other methods
      */
 
+    @Remap(classPath = "net.minecraft.network.chat.Component",
+            name = "nullToEmpty",
+            type = Remap.Type.METHOD,
+            remappedName = "a")
     @Override
     public Object getChatMessage(String message) {
-        return IChatBaseComponent.b(message);
+        return IChatBaseComponent.a(message);
     }
 
     /*

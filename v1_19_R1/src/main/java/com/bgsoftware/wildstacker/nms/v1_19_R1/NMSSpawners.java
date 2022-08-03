@@ -12,7 +12,9 @@ import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.core.BlockPosition;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.nbt.NBTTagCompound;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.server.level.MobSpawnerData;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.util.RandomSource;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity.Entity;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.ChunkCoordIntPair;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.World;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.block.entity.TileEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -29,12 +31,10 @@ import net.minecraft.server.level.WorldServer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.tags.TagsFluid;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.entity.EntityInsentient;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EnumMobSpawn;
-import net.minecraft.world.level.ChunkCoordIntPair;
 import net.minecraft.world.level.EnumSkyBlock;
 import net.minecraft.world.level.GeneratorAccessSeed;
 import net.minecraft.world.level.MobSpawnerAbstract;
@@ -219,7 +219,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                 return true;
 
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position.getHandle());
-            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.e, chunkcoordintpair.f, ((GeneratorAccessSeed) world).B(),
+            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.getX(), chunkcoordintpair.getZ(), ((GeneratorAccessSeed) world).B(),
                     world.getHandle().spigotConfig.slimeSeed).a(10) == 0;
             return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);
@@ -321,6 +321,14 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         private int spawnedEntities = 0;
         private WStackedEntity demoEntity = null;
 
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "spawnDelay", type = Remap.Type.FIELD, remappedName = "c")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "nextSpawnData", type = Remap.Type.FIELD, remappedName = "e")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "minSpawnDelay", type = Remap.Type.FIELD, remappedName = "h")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "maxSpawnDelay", type = Remap.Type.FIELD, remappedName = "i")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "spawnCount", type = Remap.Type.FIELD, remappedName = "j")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "maxNearbyEntities", type = Remap.Type.FIELD, remappedName = "l")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "requiredPlayerRange", type = Remap.Type.FIELD, remappedName = "m")
+        @Remap(classPath = "net.minecraft.world.level.BaseSpawner", name = "spawnRange", type = Remap.Type.FIELD, remappedName = "n")
         StackedMobSpawner(TileEntity tileEntity, StackedSpawner stackedSpawner) {
             this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
@@ -481,9 +489,9 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             for (int i = 0; i < mobsToSpawn; i++) {
                 RandomSource randomSource = world.getRandom();
 
-                double x = position.getX() + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
-                double y = position.getY() + randomSource.a(3) - 1;
-                double z = position.getZ() + (randomSource.j() - randomSource.j()) * this.n + 0.5D;
+                double x = position.getX() + (randomSource.nextDouble() - randomSource.nextDouble()) * this.n + 0.5D;
+                double y = position.getY() + randomSource.nextInt(3) - 1;
+                double z = position.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * this.n + 0.5D;
 
                 Location location = new Location(world.getHandle().getWorld(), x, y, z);
 
@@ -523,11 +531,11 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             if (this.i <= this.h) {
                 this.c = this.h;
             } else {
-                this.c = this.h + world.getRandom().a(this.i - this.h);
+                this.c = this.h + world.getRandom().nextInt(this.i - this.h);
             }
 
             // Set mob spawn data
-            this.d.b(world.getRandom()).ifPresent(weightedEntry ->
+            this.d.b(world.getRandom().getHandle()).ifPresent(weightedEntry ->
                     this.a(world.getHandle(), position.getHandle(), weightedEntry.b()));
 
             spawnedEntities = 0;
@@ -541,7 +549,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             NBTTagCompound entityCompound = mobSpawnerData.getEntityToSpawn();
             net.minecraft.world.entity.Entity entity = EntityTypes.a(entityCompound.getHandle(), world.getHandle(), _entity -> {
                 Entity mappedEntity = new Entity(_entity);
-                mappedEntity.moveTo(x, y, z, rotation ? world.getRandom().i() * 360.0F : 0f, 0f);
+                mappedEntity.moveTo(x, y, z, rotation ? world.getRandom().nextFloat() * 360.0F : 0f, 0f);
                 mappedEntity.setWorld(world.getHandle());
                 _entity.valid = true;
                 return _entity;
@@ -644,7 +652,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             WORLD_LEVEL_CALLBACK.get(world.getEntityManager()).a(demoEntity.getHandle());
 
             if (!EntityUtils.isStackable(demoEntity.getBukkitEntity())) {
-                demoEntity = null;
+                this.demoEntity = null;
                 return;
             }
 

@@ -41,6 +41,14 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
 
         private CraftEntity bukkitEntity;
 
+        @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setInvisible", type = Remap.Type.METHOD, remappedName = "j")
+        @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setSmall", type = Remap.Type.METHOD, remappedName = "a")
+        @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setShowArms", type = Remap.Type.METHOD, remappedName = "r")
+        @Remap(classPath = "net.minecraft.world.entity.Entity", name = "setNoGravity", type = Remap.Type.METHOD, remappedName = "e")
+        @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setNoBasePlate", type = Remap.Type.METHOD, remappedName = "s")
+        @Remap(classPath = "net.minecraft.world.entity.decoration.ArmorStand", name = "setMarker", type = Remap.Type.METHOD, remappedName = "t")
+        @Remap(classPath = "net.minecraft.world.entity.Entity", name = "setCustomNameVisible", type = Remap.Type.METHOD, remappedName = "n")
+        @Remap(classPath = "net.minecraft.world.entity.Entity", name = "setBoundingBox", type = Remap.Type.METHOD, remappedName = "a")
         EntityHologram(World world, double x, double y, double z) {
             super(world.getHandle(), x, y, z);
             j(true); // Invisible
@@ -54,6 +62,10 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
             super.a(EMPTY_BOUND);
         }
 
+        @Remap(classPath = "net.minecraft.world.entity.Entity",
+                name = "setCustomName",
+                type = Remap.Type.METHOD,
+                remappedName = "b")
         @Override
         public void setHologramName(String name) {
             super.b(CraftChatMessage.fromStringOrNull(name));

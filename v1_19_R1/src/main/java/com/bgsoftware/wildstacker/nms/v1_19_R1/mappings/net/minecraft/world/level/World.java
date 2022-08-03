@@ -3,12 +3,12 @@ package com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.lev
 import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.MappedObject;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.server.level.ChunkProviderServer;
+import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.util.RandomSource;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.block.entity.TileEntity;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.WorldServer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyDamageScaler;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.entity.Entity;
@@ -119,7 +119,7 @@ public class World extends MappedObject<net.minecraft.world.level.World> {
             type = Remap.Type.METHOD,
             remappedName = "r_")
     public RandomSource getRandom() {
-        return handle.r_();
+        return new RandomSource(handle.r_());
     }
 
     @Remap(classPath = "net.minecraft.world.level.Level",
