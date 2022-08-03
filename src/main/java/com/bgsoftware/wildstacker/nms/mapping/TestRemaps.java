@@ -48,24 +48,36 @@ public class TestRemaps {
             try {
                 for (Field field : clazz.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) {
-                        Remap remap = field.getAnnotation(Remap.class);
-                        if (remap != null) {
+                        Remap[] remaps = field.getAnnotationsByType(Remap.class);
+                        if (remaps.length > 0) {
                             logger.info("Testing field " + field.getName());
-                            testRemap(remappedMap, remap, getRemappedName(field));
+                            for (Remap remap : remaps) {
+                                try {
+                                    testRemap(remappedMap, remap, getRemappedName(field));
+                                } catch (Throwable error) {
+                                    error.printStackTrace();
+                                }
+                            }
                         }
                     }
                 }
 
                 for (Method method : clazz.getDeclaredMethods()) {
-                    Remap remap = method.getAnnotation(Remap.class);
-                    if (remap != null) {
+                    Remap[] remaps = method.getAnnotationsByType(Remap.class);
+                    if (remaps.length > 0) {
                         logger.info("Testing method " + method.getName());
-                        testRemap(remappedMap, remap, null);
+                        for (Remap remap : remaps) {
+                            try {
+                                testRemap(remappedMap, remap, null);
+                            } catch (Throwable error) {
+                                error.printStackTrace();
+                            }
+                        }
                     }
                 }
-            } catch (Exception error) {
+            } catch (Throwable error) {
                 logger.info("Failed remaps test for " + clazz.getName() + ":");
-                throw error;
+                error.printStackTrace();
             }
 
             logger.info("Finished remaps tests for " + clazz.getName());
