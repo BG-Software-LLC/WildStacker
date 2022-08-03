@@ -46,7 +46,6 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Set;
 
 public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
 
@@ -184,14 +183,6 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             remappedName = "ah")
     public void discard() {
         handle.ah();
-    }
-
-    @Remap(classPath = "net.minecraft.world.entity.Entity",
-            name = "getTags",
-            type = Remap.Type.METHOD,
-            remappedName = "af")
-    public Set<String> getTags() {
-        return handle.af();
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
