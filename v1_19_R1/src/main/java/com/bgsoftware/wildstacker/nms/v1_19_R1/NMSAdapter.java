@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms;
+package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
@@ -164,7 +164,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @SuppressWarnings("ConstantConditions")
-public final class NMSAdapter_v1_19_R1 implements NMSAdapter {
+public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapter {
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, Modifier.PROTECTED, 1);
     private static final ReflectField<net.minecraft.world.entity.Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(net.minecraft.world.entity.Entity.class, net.minecraft.world.entity.Entity.RemovalReason.class, Modifier.PRIVATE, 1);

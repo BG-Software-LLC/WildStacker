@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms;
+package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
@@ -8,7 +8,7 @@ import org.bukkit.entity.LivingEntity;
 
 import java.util.Objects;
 
-public final class NMSEntities_v1_19_R1 implements NMSEntities {
+public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEntities {
 
     @Override
     public StackCheckResult areSimilar(EntityTypes entityType, LivingEntity en1, LivingEntity en2) {

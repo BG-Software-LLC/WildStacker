@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms;
+package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
 import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.World;
@@ -24,7 +24,7 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftChatMessage;
 
 @SuppressWarnings("unused")
-public final class NMSHolograms_v1_19_R1 implements NMSHolograms {
+public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHolograms {
 
     @Override
     public Hologram createHologram(Location location) {

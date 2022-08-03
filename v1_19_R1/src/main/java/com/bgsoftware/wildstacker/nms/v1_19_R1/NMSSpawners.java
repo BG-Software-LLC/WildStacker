@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms;
+package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -62,7 +62,7 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 
 @SuppressWarnings("unused")
-public final class NMSSpawners_v1_19_R1 implements NMSSpawners {
+public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpawners {
 
     @Remap(classPath = "net.minecraft.world.level.block.entity.SpawnerBlockEntity", name = "spawner", type = Remap.Type.FIELD)
     private static final ReflectField<MobSpawnerAbstract> MOB_SPAWNER_ABSTRACT = new ReflectField<MobSpawnerAbstract>(TileEntityMobSpawner.class,
