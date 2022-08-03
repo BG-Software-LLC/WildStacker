@@ -203,16 +203,17 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private void loadNMSAdapter() {
         String bukkitVersion = ServerVersion.getBukkitVersion();
         try {
-            nmsAdapter = (NMSAdapter) Class.forName("com.bgsoftware.wildstacker.nms.NMSAdapter_" + bukkitVersion).newInstance();
-            nmsHolograms = (NMSHolograms) Class.forName("com.bgsoftware.wildstacker.nms.NMSHolograms_" + bukkitVersion).newInstance();
-            nmsSpawners = (NMSSpawners) Class.forName("com.bgsoftware.wildstacker.nms.NMSSpawners_" + bukkitVersion).newInstance();
+            nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", bukkitVersion)).newInstance();
+            nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", bukkitVersion)).newInstance();
+            nmsSpawners = (NMSSpawners) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSSpawners", bukkitVersion)).newInstance();
         } catch (Exception ex) {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
         }
         try {
-            nmsEntities = (NMSEntities) Class.forName("com.bgsoftware.wildstacker.nms.NMSEntities_" + bukkitVersion).newInstance();
-        } catch (Exception ignored) {}
+            nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", bukkitVersion)).newInstance();
+        } catch (Exception ignored) {
+        }
     }
 
     public NMSAdapter getNMSAdapter() {
