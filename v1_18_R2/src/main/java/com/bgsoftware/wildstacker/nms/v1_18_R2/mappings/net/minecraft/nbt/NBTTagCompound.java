@@ -146,4 +146,12 @@ public class NBTTagCompound extends MappedObject<net.minecraft.nbt.NBTTagCompoun
         return handle.e();
     }
 
+    @Remap(classPath = "net.minecraft.nbt.CompoundTag",
+            name = "get",
+            type = Remap.Type.METHOD,
+            remappedName = "c")
+    public NBTBase get(String key) {
+        return handle.c(key);
+    }
+
 }

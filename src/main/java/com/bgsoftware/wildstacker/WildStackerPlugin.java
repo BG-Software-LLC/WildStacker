@@ -30,6 +30,7 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
+import com.bgsoftware.wildstacker.nms.mapping.TestRemaps;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
@@ -41,7 +42,7 @@ import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nullable;
+import java.io.File;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -57,7 +58,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private NMSAdapter nmsAdapter;
     private NMSHolograms nmsHolograms;
     private NMSSpawners nmsSpawners;
-    @Nullable
     private NMSEntities nmsEntities;
 
     private boolean shouldEnable = true;
@@ -206,14 +206,19 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", bukkitVersion)).newInstance();
             nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", bukkitVersion)).newInstance();
             nmsSpawners = (NMSSpawners) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSSpawners", bukkitVersion)).newInstance();
+            nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", bukkitVersion)).newInstance();
         } catch (Exception ex) {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
             shouldEnable = false;
         }
+
         try {
-            nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", bukkitVersion)).newInstance();
-        } catch (Exception ignored) {
+            TestRemaps.testRemapsForClassesInPackage(new File(plugin.getDataFolder(), "mappings"),
+                    plugin.getClassLoader(), "com.bgsoftware.wildstacker.nms." + bukkitVersion);
+        } catch (Exception error) {
+            error.printStackTrace();
         }
+
     }
 
     public NMSAdapter getNMSAdapter() {
@@ -228,7 +233,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return nmsSpawners;
     }
 
-    @Nullable
     public NMSEntities getNMSEntities() {
         return nmsEntities;
     }

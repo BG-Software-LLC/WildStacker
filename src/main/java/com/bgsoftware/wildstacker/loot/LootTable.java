@@ -2,11 +2,9 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
-import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -16,7 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private final List<LootPair> lootPairs = new ArrayList<>();
+    private final List<LootPair> lootPairs = new LinkedList<>();
     private final int min, max, minExp, maxExp;
     private final boolean dropEquipment, alwaysDropsExp;
 
@@ -43,28 +43,22 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getFireTicks() > 0;
     }
 
-    static String getEntityKiller(StackedEntity stackedEntity) {
+    @Nullable
+    static Entity getEntityKiller(StackedEntity stackedEntity) {
         EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
-        String returnType = "UNKNOWN";
 
         if (damageEvent instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
             Entity damager = entityDamageByEntityEvent.getDamager();
             if (damager instanceof Projectile) {
                 Projectile projectile = (Projectile) damager;
-                if (projectile.getShooter() instanceof Entity)
-                    returnType = ((Entity) projectile.getShooter()).getType().name();
-                else
-                    returnType = projectile.getType().name();
+                return projectile.getShooter() instanceof Entity ? (Entity) projectile.getShooter() : projectile;
             } else {
-                if (damager instanceof Creeper && ((Creeper) damager).isPowered())
-                    returnType = "CHARGED_CREEPER";
-                else
-                    returnType = damager.getType().name();
+                return damager;
             }
         }
 
-        return returnType;
+        return null;
     }
 
     static boolean isKilledByPlayer(StackedEntity stackedEntity) {
@@ -75,9 +69,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         return stackedEntity.getLivingEntity().getKiller();
     }
 
-    static String getDeathCause(StackedEntity stackedEntity) {
-        EntityDamageEvent lastCause = stackedEntity.getLivingEntity().getLastDamageCause();
-        return lastCause == null ? "" : lastCause.getCause().name();
+    @Nullable
+    static EntityDamageEvent.DamageCause getDeathCause(Entity entity) {
+        EntityDamageEvent lastCause = entity.getLastDamageCause();
+        return lastCause == null ? null : lastCause.getCause();
     }
 
     public static LootTable fromJson(JSONObject jsonObject, String lootTableName) {
@@ -107,11 +102,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new ArrayList<>();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                (lootPair.getKiller().isEmpty() || lootPair.getKiller().contains(getEntityKiller(stackedEntity))) &&
-                        (lootPair.getRequiredPermission().isEmpty() || !isKilledByPlayer(stackedEntity) || getKiller(stackedEntity).hasPermission(lootPair.getRequiredPermission())) &&
-                        (lootPair.getRequiredUpgrade().isEmpty() || stackedEntity.getUpgrade().getName().equalsIgnoreCase(lootPair.getRequiredUpgrade())) &&
-                        GeneralUtils.containsOrEmpty(lootPair.getSpawnCauseFilter(), stackedEntity.getSpawnCause().name()) &&
-                        GeneralUtils.containsOrEmpty(lootPair.getDeathCauseFilter(), getDeathCause(stackedEntity))
+                lootPair.checkKiller(getEntityKiller(stackedEntity)) && lootPair.checkEntity(stackedEntity.getLivingEntity())
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :

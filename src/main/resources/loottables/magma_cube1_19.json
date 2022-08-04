@@ -26,7 +26,10 @@
     },
     {
       "killer": [
-        "FROG"
+        {
+          "type": "FROG",
+          "variant": ""
+        }
       ],
       "chance": 100,
       "items": [

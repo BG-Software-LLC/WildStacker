@@ -1,37 +1,18 @@
-package com.bgsoftware.wildstacker.nms.v1_19_R1;
+package com.bgsoftware.wildstacker.nms.v1_18_R1;
 
-import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.nms.mapping.Remap;
-import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.nbt.NBTTagCompound;
-import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity.Entity;
-import com.bgsoftware.wildstacker.utils.entity.StackCheck;
-import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.nms.v1_18_R1.mappings.net.minecraft.nbt.NBTTagCompound;
+import com.bgsoftware.wildstacker.nms.v1_18_R1.mappings.net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTNumber;
 import net.minecraft.nbt.NBTTagString;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
-import org.bukkit.entity.Frog;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Map;
 import java.util.Objects;
 
 public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEntities {
-
-    @Override
-    public StackCheckResult areSimilar(EntityTypes entityType, LivingEntity en1, LivingEntity en2) {
-        if (StackCheck.FROG_TOUNGE_TARGET.isEnabled() && StackCheck.FROG_TOUNGE_TARGET.isTypeAllowed(entityType)) {
-            if (!Objects.equals(((Frog) en1).getTongueTarget(), ((Frog) en2).getTongueTarget()))
-                return StackCheckResult.FROG_TOUNGE_TARGET;
-        }
-
-        if (StackCheck.FROG_TYPE.isEnabled() && StackCheck.FROG_TYPE.isTypeAllowed(entityType)) {
-            if (((Frog) en1).getVariant() != ((Frog) en2).getVariant())
-                return StackCheckResult.FROG_TYPE;
-        }
-
-        return StackCheckResult.SUCCESS;
-    }
 
     @Remap(classPath = "net.minecraft.nbt.NumericTag", name = "getAsNumber", type = Remap.Type.METHOD, remappedName = "k")
     @Remap(classPath = "net.minecraft.nbt.Tag", name = "getAsString", type = Remap.Type.METHOD, remappedName = "e_")

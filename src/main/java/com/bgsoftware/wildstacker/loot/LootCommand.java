@@ -7,12 +7,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootCommand {
 
-    private final List<String> commands = new ArrayList<>();
+    private final List<String> commands = new LinkedList<>();
     private final double chance;
     private final int min, max;
     private final String requiredPermission;

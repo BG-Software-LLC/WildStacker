@@ -446,8 +446,7 @@ public final class EntityUtils {
                 return StackCheckResult.ZOMBIE_PIGMAN_ANGRY;
         }
 
-        return plugin.getNMSEntities() == null ? StackCheckResult.SUCCESS :
-                plugin.getNMSEntities().areSimilar(entityType, en1, en2);
+        return plugin.getNMSEntities().areSimilar(entityType, en1, en2);
     }
 
     public static boolean canBeBred(Animals animal) {
