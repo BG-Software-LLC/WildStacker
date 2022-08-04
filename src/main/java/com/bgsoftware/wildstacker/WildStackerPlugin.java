@@ -203,7 +203,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", bukkitVersion)).newInstance();
 
             if(!nmsAdapter.isMappingsSupported()) {
-                log("WildStacker does not support your version mappings are not supported... Please contact @Ome_R");
+                log("WildStacker does not support your version mappings... Please contact @Ome_R");
                 shouldEnable = false;
                 return;
             }
