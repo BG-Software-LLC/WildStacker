@@ -26,14 +26,37 @@
     },
     {
       "killer": [
-        {
-          "type": "FROG",
-          "variant": ""
-        }
+        "FROG"
       ],
       "chance": 100,
       "items": [
         {
+          "killer": [
+            {
+              "type": "FROG",
+              "variant": "minecraft:warm"
+            }
+          ],
+          "type": "PEARLESCENT_FROGLIGHT",
+          "chance": 100
+        },
+        {
+          "killer": [
+            {
+              "type": "FROG",
+              "variant": "minecraft:cold"
+            }
+          ],
+          "type": "VERDANT_FROGLIGHT",
+          "chance": 100
+        },
+        {
+          "killer": [
+            {
+              "type": "FROG",
+              "variant": "minecraft:temperate"
+            }
+          ],
           "type": "OCHRE_FROGLIGHT",
           "chance": 100
         }
