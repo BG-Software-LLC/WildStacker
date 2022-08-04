@@ -34,7 +34,7 @@ public final class FileUtils {
 
     public static void saveResource(String resourcePath, @Nullable String newName) {
         try {
-            File file = new File(plugin.getDataFolder(), resourcePath);
+            File file = new File(plugin.getDataFolder(), newName == null ? resourcePath : newName);
             String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
 
             if (!file.exists()) {
@@ -45,14 +45,12 @@ public final class FileUtils {
                     legacyFile.renameTo(file);
                 } else {
                     plugin.saveResource(resourcePath, true);
+                    if (newName != null) {
+                        File resourceFile = new File(plugin.getDataFolder(), resourcePath);
+                        resourceFile.renameTo(file);
+                    }
                 }
             }
-
-            if (newName != null) {
-                File newFile = new File(plugin.getDataFolder(), newName);
-                file.renameTo(newFile);
-            }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
