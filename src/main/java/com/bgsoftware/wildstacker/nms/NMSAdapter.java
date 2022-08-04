@@ -37,6 +37,8 @@ import java.util.function.Predicate;
 
 public interface NMSAdapter {
 
+    boolean isMappingsSupported();
+
     /*
      *   Entity methods
      */

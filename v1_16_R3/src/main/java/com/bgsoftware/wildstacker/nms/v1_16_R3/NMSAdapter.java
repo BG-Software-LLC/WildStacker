@@ -173,6 +173,11 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
             UPGRADE = new NamespacedKey(plugin, "upgrade");
 
     @Override
+    public boolean isMappingsSupported() {
+        return true;
+    }
+
+    @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
         CraftWorld world = (CraftWorld) location.getWorld();
 

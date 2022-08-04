@@ -184,6 +184,13 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
             NAME_TAG = new NamespacedKey(plugin, "nameTag"),
             UPGRADE = new NamespacedKey(plugin, "upgrade");
 
+    private static final String BUILT_AGAINST_MAPPING = "acd6e6c27e5a0a9440afba70a96c27c9";
+
+    @Override
+    public boolean isMappingsSupported() {
+        return ((CraftMagicNumbers) CraftMagicNumbers.INSTANCE).getMappingsVersion().equals(BUILT_AGAINST_MAPPING);
+    }
+
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
         CraftWorld world = (CraftWorld) location.getWorld();

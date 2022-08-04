@@ -120,6 +120,11 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
      *   Entity methods
      */
 
+    @Override
+    public boolean isMappingsSupported() {
+        return true;
+    }
+
     private static void saveData(Scoreboard scoreboard, UUID entity, String key, int value) {
         ScoreboardObjective objective = scoreboard.getObjective(key);
         if (objective == null)
