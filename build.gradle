@@ -53,6 +53,7 @@ dependencies {
 
     implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
+    implementation 'com.bgsoftware.common.mappings:MappingsChecker:1.0.0'
 
     // Spigot jars
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
@@ -69,7 +70,7 @@ jar {
 }
 
 processResources {
-    outputs.upToDateWhen {false}
+    outputs.upToDateWhen { false }
     String versionNumber = System.getenv("BUILD_NUMBER") == null ? version : version + "." + System.getenv("BUILD_NUMBER")
     eachFile { details ->
         if (details.name.contentEquals('plugin.yml')) {
@@ -83,10 +84,9 @@ processResources {
 shadowJar {
     dependsOn(jar)
 
-    if(System.getenv("BUILD_NUMBER") == null){
+    if (System.getenv("BUILD_NUMBER") == null) {
         archiveName = rootProject.name + "-" + version + ".jar"
-    }
-    else{
+    } else {
         archiveName = rootProject.name + "-" + version + "-b" + System.getenv("BUILD_NUMBER") + ".jar"
     }
 

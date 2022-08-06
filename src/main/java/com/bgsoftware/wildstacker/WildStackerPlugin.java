@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker;
 
+import com.bgsoftware.common.mappings.MappingsChecker;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
@@ -30,6 +31,7 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
+import com.bgsoftware.wildstacker.nms.mapping.TestRemaps;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
@@ -40,6 +42,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -82,7 +86,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         new Metrics(this);
 
-        loadNMSAdapter();
+        shouldEnable = loadNMSAdapter();
         loadAPI();
 
         if (!shouldEnable)
@@ -197,15 +201,17 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
     }
 
-    private void loadNMSAdapter() {
+    private boolean loadNMSAdapter() {
         String bukkitVersion = ServerVersion.getBukkitVersion();
         try {
             nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", bukkitVersion)).newInstance();
 
-            if(!nmsAdapter.isMappingsSupported()) {
+            String mappingVersionHash = nmsAdapter.getMappingsHash();
+
+            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, bukkitVersion)) {
                 log("WildStacker does not support your version mappings... Please contact @Ome_R");
-                shouldEnable = false;
-                return;
+                log("Your mappings version: " + mappingVersionHash);
+                return false;
             }
 
             nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", bukkitVersion)).newInstance();
@@ -213,8 +219,20 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", bukkitVersion)).newInstance();
         } catch (Exception ex) {
             log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
-            shouldEnable = false;
+            return false;
         }
+
+        File mappingsFile = new File("mappings");
+        if (mappingsFile.exists()) {
+            try {
+                TestRemaps.testRemapsForClassesInPackage(mappingsFile,
+                        plugin.getClassLoader(), "com.bgsoftware.wildstacker.nms." + bukkitVersion);
+            } catch (Exception error) {
+                error.printStackTrace();
+            }
+        }
+
+        return true;
     }
 
     public NMSAdapter getNMSAdapter() {

@@ -126,8 +126,8 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
      */
 
     @Override
-    public boolean isMappingsSupported() {
-        return true;
+    public String getMappingsHash() {
+        return null;
     }
 
     @Override
@@ -637,7 +637,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
-        if(!(entityLiving instanceof EntityInsentient))
+        if (!(entityLiving instanceof EntityInsentient))
             return false;
 
         EntityInsentient entityInsentient = (EntityInsentient) entityLiving;

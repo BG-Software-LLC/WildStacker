@@ -31,13 +31,15 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public interface NMSAdapter {
 
-    boolean isMappingsSupported();
+    @Nullable
+    String getMappingsHash();
 
     /*
      *   Entity methods
