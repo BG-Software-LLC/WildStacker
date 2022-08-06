@@ -239,7 +239,15 @@ public final class ItemsListener implements Listener {
         if (!ItemUtils.isStackable(e.getItem()))
             return;
 
+        // We don't want removed items to be picked up.
+        if (EntityStorage.hasMetadata(e.getItem(), EntityFlag.REMOVED_ENTITY)) {
+            e.getItem().remove(); // Remove it again, synchronized.
+            e.setCancelled(true);
+            return;
+        }
+
         StackedItem stackedItem = WStackedItem.of(e.getItem());
+
         if (stackedItem.getStackAmount() > 1) {
             e.setCancelled(true);
             stackedItem.giveItemStack(e.getInventory());
