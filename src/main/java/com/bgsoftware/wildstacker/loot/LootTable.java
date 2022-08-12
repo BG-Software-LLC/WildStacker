@@ -139,7 +139,12 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
                     exp += Random.nextInt(maxExp - minExp + 1) + minExp;
             }
         } else {
-            exp = stackAmount * plugin.getNMSAdapter().getEntityExp(stackedEntity.getLivingEntity());
+            exp = plugin.getNMSAdapter().getEntityExp(stackedEntity.getLivingEntity());
+
+            if (exp < 0)
+                return exp;
+
+            exp *= stackAmount;
         }
 
         return exp;

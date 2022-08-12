@@ -18,7 +18,9 @@ public interface LootTable {
     List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount);
 
     /**
-     * Get the vanilla exp of a the entity using a stack size.
+     * Get the vanilla exp of the entity using a stack size.
+     * In 1.19 or later, this method must be called synchronized if there's no custom exp set
+     * in the entity's loot table. Therefore, in case of async call, -1 will be returned.
      *
      * @param stackedEntity The stacked entity object
      * @param stackAmount   the stack size

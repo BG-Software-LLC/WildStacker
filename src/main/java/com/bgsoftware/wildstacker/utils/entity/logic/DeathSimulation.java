@@ -109,7 +109,7 @@ public final class DeathSimulation {
         if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
             livingEntity.setFireTicks(160);
 
-        if(entityKiller != null)
+        if (entityKiller != null)
             giveStatisticsToKiller(entityKiller, unstackAmount, stackedEntity);
 
         // Handle sweeping edge enchantment
@@ -135,7 +135,7 @@ public final class DeathSimulation {
 
             int lootBonusLevel = killerTool == null ? 0 : killerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
             List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
-            int droppedExp = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
+            int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
             Executor.sync(() -> {
                 plugin.getNMSAdapter().setEntityDead(livingEntity, true);
@@ -158,6 +158,8 @@ public final class DeathSimulation {
                 int finalExp;
 
                 if (!noDeathEvent.contains(livingEntity.getUniqueId())) {
+                    int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
+                            stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
                     EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
                     Bukkit.getPluginManager().callEvent(entityDeathEvent);
                     finalDrops = entityDeathEvent.getDrops();

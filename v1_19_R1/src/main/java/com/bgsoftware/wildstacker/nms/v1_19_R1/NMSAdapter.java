@@ -357,23 +357,19 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
     @Override
     public int getEntityExp(LivingEntity livingEntity) {
+        if (!Bukkit.isPrimaryThread())
+            return -1;
+
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
 
         if (!(entityLiving instanceof EntityInsentient entityInsentient))
             return 0;
 
         int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
+        int exp = entityInsentient.getExpReward();
+        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
 
-        for (int i = 0; i < 5; ++i) {
-            try {
-                int exp = entityInsentient.getExpReward();
-                ENTITY_EXP.set(entityInsentient, defaultEntityExp);
-                return exp;
-            } catch (Exception ignored) {
-            }
-        }
-
-        return 0;
+        return exp;
     }
 
     @Remap(classPath = "net.minecraft.world.level.GameRules",
