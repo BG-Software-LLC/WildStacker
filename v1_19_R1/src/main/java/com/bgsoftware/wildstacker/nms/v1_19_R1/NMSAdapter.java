@@ -75,6 +75,8 @@ import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.monster.EntityZombieVillager;
 import net.minecraft.world.entity.monster.piglin.EntityPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAI;
+import net.minecraft.world.entity.npc.EntityVillager;
+import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.entity.projectile.EntityArrow;
 import net.minecraft.world.entity.projectile.EntityFireballFireball;
@@ -171,24 +173,24 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
     @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "lastHurtByPlayerTime", type = Remap.Type.FIELD)
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "bd");
-    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "shouldDropExperience", type = Remap.Type.METHOD)
-    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, boolean.class, "dM");
+    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "shouldDropExperience", type = Remap.Type.METHOD, remappedName = "dM")
+    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE;
     @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "getDeathSound", type = Remap.Type.METHOD)
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "x_");
-    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "getSoundVolume", type = Remap.Type.METHOD)
-    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "eC");
-    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "getVoicePitch", type = Remap.Type.METHOD)
-    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "eD");
+    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "getSoundVolume", type = Remap.Type.METHOD, remappedName = "eC")
+    private static final ReflectMethod<Float> GET_SOUND_VOLUME;
+    @Remap(classPath = "net.minecraft.world.entity.LivingEntity", name = "getVoicePitch", type = Remap.Type.METHOD, remappedName = "eD")
+    private static final ReflectMethod<Float> GET_SOUND_PITCH;
     @Remap(classPath = "net.minecraft.world.entity.animal.Chicken", name = "eggTime", type = Remap.Type.FIELD)
     private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(EntityChicken.class, Integer.class, "cd");
-    @Remap(classPath = "net.minecraft.world.entity.raid.Raider", name = "hasActiveRaid", type = Remap.Type.METHOD)
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, boolean.class, "fY");
-    @Remap(classPath = "net.minecraft.world.entity.raid.Raider", name = "getCurrentRaid", type = Remap.Type.METHOD)
-    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, Raid.class, "fX");
+    @Remap(classPath = "net.minecraft.world.entity.raid.Raider", name = "hasActiveRaid", type = Remap.Type.METHOD, remappedName = "fY")
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID;
+    @Remap(classPath = "net.minecraft.world.entity.raid.Raider", name = "getCurrentRaid", type = Remap.Type.METHOD, remappedName = "fX")
+    private static final ReflectMethod<Raid> RAIDER_RAID;
     @Remap(classPath = "net.minecraft.world.entity.animal.Turtle", name = "setHasEgg", type = Remap.Type.METHOD)
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "v", boolean.class);
-    @Remap(classPath = "net.minecraft.world.entity.animal.Turtle", name = "getHomePos", type = Remap.Type.METHOD)
-    private static final ReflectMethod<net.minecraft.core.BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "fK");
+    @Remap(classPath = "net.minecraft.world.entity.animal.Turtle", name = "getHomePos", type = Remap.Type.METHOD, remappedName = "fK")
+    private static final ReflectMethod<net.minecraft.core.BlockPosition> TURTLE_HOME_POS;
 
     @Remap(classPath = "net.minecraft.world.entity.EntityType", name = "ZOMBIE_VILLAGER", type = Remap.Type.FIELD, remappedName = "bl")
     private static final EntityTypes<EntityZombieVillager> ENTITY_ZOMBIE_VILLAGER_TYPE = EntityTypes.bl;
@@ -232,6 +234,18 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     private static final EnumMobSpawn SPAWNER_MOB_SPAWN = EnumMobSpawn.c;
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    static {
+        ReflectMethod<?> method119 = new ReflectMethod<>(EntityVillager.class, VillagerData.class, "fV");
+        boolean is119Mappings = method119.isValid();
+
+        IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, boolean.class, is119Mappings ? "dN" : "dM");
+        GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "eD" : "eC");
+        GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "eE" : "eD");
+        RAIDER_CAN_RAID = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fZ" : "fY");
+        RAIDER_RAID = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fY" : "fX");
+        TURTLE_HOME_POS = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fL" : "fK");
+    }
 
     /*
      *   Entity methods

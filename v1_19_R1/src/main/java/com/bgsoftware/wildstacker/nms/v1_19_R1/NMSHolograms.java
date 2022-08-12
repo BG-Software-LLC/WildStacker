@@ -78,7 +78,7 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
 
         @Remap(classPath = "net.minecraft.world.entity.Entity",
                 name = "onGround",
-                type = Remap.Type.METHOD,
+                type = Remap.Type.FIELD,
                 remappedName = "y")
         @Override
         public void inactiveTick() {
@@ -89,25 +89,6 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
                 this.y = false;
             }
         }
-
-        @Remap(classPath = "net.minecraft.world.entity.Entity",
-                name = "repositionEntityAfterLoad",
-                type = Remap.Type.METHOD,
-                remappedName = "bm")
-        @Override
-        public boolean bm() {
-            return false;
-        }
-
-        @Remap(classPath = "net.minecraft.world.entity.Entity",
-                name = "getBoundingBoxForCulling",
-                type = Remap.Type.METHOD,
-                remappedName = "cz")
-        @Override
-        public AxisAlignedBB cz() {
-            return EMPTY_BOUND;
-        }
-
 
         @Override
         public void setItemSlot(EnumItemSlot enumitemslot, ItemStack itemstack, boolean silence) {

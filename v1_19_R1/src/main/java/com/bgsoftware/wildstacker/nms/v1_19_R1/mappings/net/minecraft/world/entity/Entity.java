@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.MappedObject;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity.ai.BehaviorController;
@@ -48,6 +49,77 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
+
+    private static final ReflectMethod<ItemStack> ENTITY_ITEM_GET_ITEM;
+    private static final ReflectMethod<Double> ENTITY_GET_X;
+    private static final ReflectMethod<Double> ENTITY_GET_Y;
+    private static final ReflectMethod<Double> ENTITY_GET_Z;
+    private static final ReflectMethod<Void> ENTITY_INSENTIENT_SET_PERSISTENCE_REQUIRED;
+    private static final ReflectMethod<net.minecraft.world.phys.AxisAlignedBB> ENTITY_GET_BOUNDING_BOX;
+    private static final ReflectMethod<MerchantRecipeList> ENTITY_VILLAGER_ABSTRACT_GET_OFFERS;
+    private static final ReflectMethod<net.minecraft.world.entity.Entity> ENTITY_GET_VEHICLE;
+    private static final ReflectMethod<List<net.minecraft.world.entity.Entity>> ENTITY_GET_PASSENGERS;
+    private static final ReflectMethod<Float> ENTITY_LIVING_GET_MAX_HEALTH;
+    private static final ReflectMethod<BlockPosition> ENTITY_BLOCK_POSITION;
+    private static final ReflectMethod<VillagerData> ENTITY_VILLAGER_GET_VILLAGER_DATA;
+    private static final ReflectMethod<Boolean> ENTITY_INSENTIENT_IS_NO_AI;
+    private static final ReflectMethod<Void> ENTITY_ANIMAL_RESET_LOVE;
+    private static final ReflectMethod<Reputation> ENTITY_VILLAGER_GET_GOSSIPS;
+    private static final ReflectMethod<Boolean> ENTITY_ANIMAL_IS_IN_LOVE;
+    private static final ReflectMethod<net.minecraft.world.entity.ai.BehaviorController<EntityPiglin>> ENTITY_PIGLIN_GET_BRAIN;
+    private static final ReflectMethod<ItemStack> ENTITY_LIVING_GET_OFFHAND_ITEM;
+    private static final ReflectMethod<Boolean> ENTITY_GET_CUSTOM_NAME_VISIBLE;
+    private static final ReflectMethod<Iterable<net.minecraft.world.entity.Entity>> ENTITY_GET_INDIRECT_PASSENGERS;
+
+    static {
+        ReflectMethod<?> method119 = new ReflectMethod<>(EntityVillager.class, VillagerData.class, "fV");
+        boolean is119Mappings = method119.isValid();
+
+        if (is119Mappings) {
+            ENTITY_ITEM_GET_ITEM = new ReflectMethod<>(EntityItem.class, "h");
+            ENTITY_GET_X = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "dg");
+            ENTITY_GET_Y = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "di");
+            ENTITY_GET_Z = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "dm");
+            ENTITY_INSENTIENT_SET_PERSISTENCE_REQUIRED = new ReflectMethod<>(EntityInsentient.class, "fq");
+            ENTITY_GET_BOUNDING_BOX = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "cz");
+            ENTITY_VILLAGER_ABSTRACT_GET_OFFERS = new ReflectMethod<>(EntityVillagerAbstract.class, "fN");
+            ENTITY_GET_VEHICLE = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "cR");
+            ENTITY_GET_PASSENGERS = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "cJ");
+            ENTITY_LIVING_GET_MAX_HEALTH = new ReflectMethod<>(EntityLiving.class, "eu");
+            ENTITY_BLOCK_POSITION = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "db");
+            ENTITY_VILLAGER_GET_VILLAGER_DATA = new ReflectMethod<>(EntityVillager.class, "fV");
+            ENTITY_INSENTIENT_IS_NO_AI = new ReflectMethod<>(EntityInsentient.class, "fB");
+            ENTITY_ANIMAL_RESET_LOVE = new ReflectMethod<>(EntityAnimal.class, "fR");
+            ENTITY_VILLAGER_GET_GOSSIPS = new ReflectMethod<>(EntityVillager.class, "gg");
+            ENTITY_ANIMAL_IS_IN_LOVE = new ReflectMethod<>(EntityAnimal.class, "fQ");
+            ENTITY_PIGLIN_GET_BRAIN = new ReflectMethod<>(EntityPiglin.class, "dz");
+            ENTITY_LIVING_GET_OFFHAND_ITEM = new ReflectMethod<>(EntityLiving.class, "eB");
+            ENTITY_GET_CUSTOM_NAME_VISIBLE = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "cu");
+            ENTITY_GET_INDIRECT_PASSENGERS = new ReflectMethod<>(net.minecraft.world.entity.Entity.class, "cN");
+        } else {
+            ENTITY_ITEM_GET_ITEM = null;
+            ENTITY_GET_X = null;
+            ENTITY_GET_Y = null;
+            ENTITY_GET_Z = null;
+            ENTITY_INSENTIENT_SET_PERSISTENCE_REQUIRED = null;
+            ENTITY_GET_BOUNDING_BOX = null;
+            ENTITY_VILLAGER_ABSTRACT_GET_OFFERS = null;
+            ENTITY_GET_VEHICLE = null;
+            ENTITY_GET_PASSENGERS = null;
+            ENTITY_LIVING_GET_MAX_HEALTH = null;
+            ENTITY_BLOCK_POSITION = null;
+            ENTITY_VILLAGER_GET_VILLAGER_DATA = null;
+            ENTITY_INSENTIENT_IS_NO_AI = null;
+            ENTITY_ANIMAL_RESET_LOVE = null;
+            ENTITY_VILLAGER_GET_GOSSIPS = null;
+            ENTITY_ANIMAL_IS_IN_LOVE = null;
+            ENTITY_PIGLIN_GET_BRAIN = null;
+            ENTITY_LIVING_GET_OFFHAND_ITEM = null;
+            ENTITY_GET_CUSTOM_NAME_VISIBLE = null;
+            ENTITY_GET_INDIRECT_PASSENGERS = null;
+        }
+
+    }
 
     public static Entity ofNullable(net.minecraft.world.entity.Entity handle) {
         return handle == null ? null : new Entity(handle);
@@ -102,7 +174,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "ct")
     public boolean getCustomNameVisible() {
-        return handle.ct();
+        return ENTITY_GET_CUSTOM_NAME_VISIBLE == null ? handle.ct() : ENTITY_GET_CUSTOM_NAME_VISIBLE.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -118,7 +190,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "df")
     public double getX() {
-        return handle.df();
+        return ENTITY_GET_X == null ? handle.df() : ENTITY_GET_X.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -126,7 +198,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "dh")
     public double getY() {
-        return handle.dh();
+        return ENTITY_GET_Y == null ? handle.dh() : ENTITY_GET_Y.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -134,7 +206,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "dl")
     public double getZ() {
-        return handle.dl();
+        return ENTITY_GET_Z == null ? handle.dl() : ENTITY_GET_Z.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -150,7 +222,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "cy")
     public AxisAlignedBB getBoundingBox() {
-        return new AxisAlignedBB(handle.cy());
+        return new AxisAlignedBB(ENTITY_GET_BOUNDING_BOX == null ? handle.cy() : ENTITY_GET_BOUNDING_BOX.invoke(handle));
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -198,7 +270,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "da")
     public BlockPosition blockPosition() {
-        return handle.da();
+        return ENTITY_BLOCK_POSITION == null ? handle.da() : ENTITY_BLOCK_POSITION.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -206,7 +278,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "cQ")
     public Entity getVehicle() {
-        return ofNullable(handle.cQ());
+        return ofNullable(ENTITY_GET_VEHICLE == null ? handle.cQ() : ENTITY_GET_VEHICLE.invoke(handle));
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -214,7 +286,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "cM")
     public Iterable<net.minecraft.world.entity.Entity> getIndirectPassengers() {
-        return handle.cM();
+        return ENTITY_GET_INDIRECT_PASSENGERS == null ? handle.cM() : ENTITY_GET_INDIRECT_PASSENGERS.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -222,7 +294,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "cI")
     public List<net.minecraft.world.entity.Entity> getPassengers() {
-        return handle.cI();
+        return ENTITY_GET_PASSENGERS == null ? handle.cI() : ENTITY_GET_PASSENGERS.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -266,7 +338,11 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fQ")
     public void resetLove() {
-        ((EntityAnimal) handle).fQ();
+        if (ENTITY_ANIMAL_RESET_LOVE == null) {
+            ((EntityAnimal) handle).fQ();
+        } else {
+            ENTITY_ANIMAL_RESET_LOVE.invoke(handle);
+        }
     }
 
     @Remap(classPath = "net.minecraft.world.entity.animal.Animal",
@@ -274,7 +350,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fP")
     public boolean isInLove() {
-        return ((EntityAnimal) handle).fP();
+        return ENTITY_ANIMAL_IS_IN_LOVE == null ? ((EntityAnimal) handle).fP() :
+                ENTITY_ANIMAL_IS_IN_LOVE.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.animal.Animal",
@@ -298,7 +375,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fA")
     public boolean isNoAI() {
-        return ((EntityInsentient) handle).fA();
+        return ENTITY_INSENTIENT_IS_NO_AI == null ? ((EntityInsentient) handle).fA() :
+                ENTITY_INSENTIENT_IS_NO_AI.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Mob",
@@ -330,7 +408,11 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fp")
     public void setPersistenceRequired() {
-        ((EntityInsentient) handle).fp();
+        if (ENTITY_INSENTIENT_SET_PERSISTENCE_REQUIRED == null) {
+            ((EntityInsentient) handle).fp();
+        } else {
+            ENTITY_INSENTIENT_SET_PERSISTENCE_REQUIRED.invoke(handle);
+        }
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Mob",
@@ -356,7 +438,7 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "i")
     public ItemStack getItem() {
-        return ((EntityItem) handle).i();
+        return ENTITY_ITEM_GET_ITEM == null ? ((EntityItem) handle).i() : ENTITY_ITEM_GET_ITEM.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.item.ItemEntity",
@@ -404,7 +486,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "eA")
     public ItemStack getOffhandItem() {
-        return ((EntityLiving) handle).eA();
+        return ENTITY_LIVING_GET_OFFHAND_ITEM == null ? ((EntityLiving) handle).eA() :
+                ENTITY_LIVING_GET_OFFHAND_ITEM.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.Entity",
@@ -452,7 +535,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "et")
     public float getMaxHealth() {
-        return ((EntityLiving) handle).et();
+        return ENTITY_LIVING_GET_MAX_HEALTH == null ? ((EntityLiving) handle).et() :
+                ENTITY_LIVING_GET_MAX_HEALTH.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.LivingEntity",
@@ -484,7 +568,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "dy")
     public BehaviorController<EntityPiglin> getBrain() {
-        return new BehaviorController(((EntityPiglin) handle).dy());
+        return new BehaviorController<>(ENTITY_PIGLIN_GET_BRAIN == null ? ((EntityPiglin) handle).dy() :
+                ENTITY_PIGLIN_GET_BRAIN.invoke(handle));
     }
 
     @Remap(classPath = "net.minecraft.world.entity.monster.Strider",
@@ -508,7 +593,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fU")
     public VillagerData getVillagerData() {
-        return ((EntityVillager) handle).fU();
+        return ENTITY_VILLAGER_GET_VILLAGER_DATA == null ? ((EntityVillager) handle).fU() :
+                ENTITY_VILLAGER_GET_VILLAGER_DATA.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.npc.Villager",
@@ -516,7 +602,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "gf")
     public Reputation getGossips() {
-        return ((EntityVillager) handle).gf();
+        return ENTITY_VILLAGER_GET_GOSSIPS == null ? ((EntityVillager) handle).gf() :
+                ENTITY_VILLAGER_GET_GOSSIPS.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.npc.AbstractVillager",
@@ -524,7 +611,8 @@ public class Entity extends MappedObject<net.minecraft.world.entity.Entity> {
             type = Remap.Type.METHOD,
             remappedName = "fM")
     public MerchantRecipeList getOffers() {
-        return ((EntityVillagerAbstract) handle).fM();
+        return ENTITY_VILLAGER_ABSTRACT_GET_OFFERS == null ? ((EntityVillagerAbstract) handle).fM() :
+                ENTITY_VILLAGER_ABSTRACT_GET_OFFERS.invoke(handle);
     }
 
     @Remap(classPath = "net.minecraft.world.entity.monster.Zombie",
