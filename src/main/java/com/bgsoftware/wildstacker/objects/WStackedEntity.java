@@ -526,7 +526,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public int getExp(int stackAmount, int defaultExp) {
-        return plugin.getLootHandler().getLootTable(object).getExp(this, stackAmount);
+        int exp = plugin.getLootHandler().getLootTable(object).getExp(this, stackAmount);
+        return exp == 0 ? defaultExp : exp;
     }
 
     @Override
