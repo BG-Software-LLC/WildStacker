@@ -171,11 +171,11 @@ public class LootPair {
             return false;
 
         for (Predicate<Entity> filter : filters) {
-            if (!filter.test(entity))
-                return false;
+            if (filter.test(entity))
+                return true;
         }
 
-        return true;
+        return false;
     }
 
     public double getChance() {

@@ -177,11 +177,11 @@ public class LootItem {
             return false;
 
         for (Predicate<Entity> filter : filters) {
-            if (!filter.test(entity))
-                return false;
+            if (filter.test(entity))
+                return true;
         }
 
-        return true;
+        return false;
     }
 
     public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel) {
