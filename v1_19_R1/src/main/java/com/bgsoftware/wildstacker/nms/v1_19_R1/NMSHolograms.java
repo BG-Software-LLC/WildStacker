@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.level.World;
 import com.bgsoftware.wildstacker.utils.holograms.Hologram;
 import net.minecraft.nbt.NBTTagCompound;

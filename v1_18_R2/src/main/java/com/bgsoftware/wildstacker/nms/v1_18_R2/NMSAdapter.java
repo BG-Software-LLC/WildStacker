@@ -2,12 +2,12 @@ package com.bgsoftware.wildstacker.nms.v1_18_R2;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.core.BlockPosition;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.nbt.NBTTagCompound;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.resources.MinecraftKey;

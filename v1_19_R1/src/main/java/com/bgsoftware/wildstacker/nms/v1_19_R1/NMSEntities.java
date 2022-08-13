@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.nms.v1_19_R1;
 
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.nbt.NBTTagCompound;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.world.entity.Entity;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;

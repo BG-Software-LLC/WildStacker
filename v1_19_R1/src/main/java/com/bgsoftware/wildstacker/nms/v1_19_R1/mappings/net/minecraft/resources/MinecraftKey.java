@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.net.minecraft.resources;
 
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.nms.v1_19_R1.mappings.MappedObject;
 
 public class MinecraftKey extends MappedObject<net.minecraft.resources.MinecraftKey> {

@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_18_R1.mappings.net.minecraft.nbt;
 
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.nms.v1_18_R1.mappings.MappedObject;
 import net.minecraft.nbt.NBTBase;
 

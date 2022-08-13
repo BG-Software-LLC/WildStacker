@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.world.level;
 
-import com.bgsoftware.wildstacker.nms.mapping.Remap;
+import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.MappedObject;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.server.level.ChunkProviderServer;
 import com.bgsoftware.wildstacker.nms.v1_18_R2.mappings.net.minecraft.world.level.block.entity.TileEntity;

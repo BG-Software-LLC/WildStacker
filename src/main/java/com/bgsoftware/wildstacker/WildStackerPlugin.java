@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker;
 
 import com.bgsoftware.common.mappings.MappingsChecker;
+import com.bgsoftware.common.remaps.TestRemaps;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
@@ -31,7 +32,6 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
-import com.bgsoftware.wildstacker.nms.mapping.TestRemaps;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
