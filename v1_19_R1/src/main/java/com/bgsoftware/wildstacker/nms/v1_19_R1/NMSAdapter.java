@@ -242,9 +242,9 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, boolean.class, is119Mappings ? "dN" : "dM");
         GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "eD" : "eC");
         GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "eE" : "eD");
-        RAIDER_CAN_RAID = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fZ" : "fY");
-        RAIDER_RAID = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fY" : "fX");
-        TURTLE_HOME_POS = new ReflectMethod<>(EntityLiving.class, is119Mappings ? "fL" : "fK");
+        RAIDER_CAN_RAID = new ReflectMethod<>(EntityRaider.class, is119Mappings ? "fZ" : "fY");
+        RAIDER_RAID = new ReflectMethod<>(EntityRaider.class, is119Mappings ? "fY" : "fX");
+        TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, is119Mappings ? "fL" : "fK");
     }
 
     /*
