@@ -218,7 +218,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                 return true;
 
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position.getHandle());
-            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.getX(), chunkcoordintpair.getZ(), ((GeneratorAccessSeed) world).D(),
+            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.getX(), chunkcoordintpair.getZ(), ((GeneratorAccessSeed) world.getHandle()).D(),
                     world.getHandle().spigotConfig.slimeSeed).nextInt(10) == 0;
             return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);

@@ -219,7 +219,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                 return true;
 
             ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(position.getHandle());
-            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.getX(), chunkcoordintpair.getZ(), ((GeneratorAccessSeed) world).B(),
+            boolean isSlimeChunk = SeededRandom.a(chunkcoordintpair.getX(), chunkcoordintpair.getZ(), ((GeneratorAccessSeed) world.getHandle()).B(),
                     world.getHandle().spigotConfig.slimeSeed).a(10) == 0;
             return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);
@@ -235,7 +235,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                 (world, position) -> world.getFluidState(position.below()).a(TagsFluid.b) &&
                         (world.getBiome(position.getHandle()).a(LUSH_CAVES_BIOME) ||
                                 (world.getBlockState(position.above()).getHandle().a(WATER_BLOCK) &&
-                                position.getY() >= world.getSeaLevel() - 13 && position.getY() <= world.getSeaLevel())),
+                                        position.getY() >= world.getSeaLevel() - 13 && position.getY() <= world.getSeaLevel())),
                 EntityType.TROPICAL_FISH
         );
 
@@ -409,7 +409,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
 
             List<? extends net.minecraft.world.entity.Entity> nearbyEntities = world.getEntitiesOfClass(
                     demoNMSEntity.getHandle().getClass(), new AxisAlignedBB(position.getX(), position.getY(), position.getZ(),
-                    position.getX() + 1, position.getY() + 1, position.getZ() + 1).g(this.n));
+                            position.getX() + 1, position.getY() + 1, position.getZ() + 1).g(this.n));
 
             StackedEntity targetEntity = getTargetEntity(stackedSpawner, demoEntity, nearbyEntities);
 
@@ -486,6 +486,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                                            WStackedSpawner stackedSpawner) {
             boolean hasSpawnedEntity = false;
 
+            outerLoop:
             for (int i = 0; i < mobsToSpawn; i++) {
                 RandomSource randomSource = world.getRandom();
 
@@ -500,12 +501,11 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                     continue;
                 }
 
-                SpawnCondition failedCondition = plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())
-                        .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
-
-                if (failedCondition != null) {
-                    failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
-                    continue;
+                for (SpawnCondition spawnCondition : plugin.getSystemManager().getSpawnConditions(demoEntity.getLivingEntity().getType())) {
+                    if (!spawnCondition.test(location)) {
+                        failureReason = "Cannot spawn entities due to " + spawnCondition.getName() + " restriction.";
+                        continue outerLoop;
+                    }
                 }
 
                 Entity bukkitEntity = generateEntity(world, x, y, z, true);
@@ -558,7 +558,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         }
 
         private boolean handleEntitySpawn(World world, BlockPosition position,
-                                         Entity entity, WStackedSpawner stackedSpawner,
+                                          Entity entity, WStackedSpawner stackedSpawner,
                                           int amountPerEntity, boolean spawnParticles) {
             StackedEntity stackedEntity = null;
 
