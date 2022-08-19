@@ -148,6 +148,9 @@ public final class DeathSimulation {
                 plugin.getProviders().notifyEntityDeathListeners(stackedEntity,
                         IEntityDeathListener.Type.BEFORE_DEATH_EVENT);
 
+                // We fire the entity_die game event
+                plugin.getNMSAdapter().sendEntityDieEvent(livingEntity);
+
                 // I set the health to 0, so it will be 0 in the EntityDeathEvent
                 // Some plugins, such as MyPet, check for that value
                 double originalHealth = livingEntity.getHealth();

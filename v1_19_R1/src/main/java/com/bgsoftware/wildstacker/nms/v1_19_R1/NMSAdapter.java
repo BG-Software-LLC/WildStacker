@@ -226,6 +226,8 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     private static final TagKey<net.minecraft.world.item.Item> PIGLIN_LOVED_TAG = TagsItem.Q;
     @Remap(classPath = "net.minecraft.world.level.gameevent.GameEvent", name = "EQUIP", type = Remap.Type.FIELD, remappedName = "v")
     private static final GameEvent EQUIP_GAME_EVENT = GameEvent.v;
+    @Remap(classPath = "net.minecraft.world.level.gameevent.GameEvent", name = "ENTITY_DIE", type = Remap.Type.FIELD, remappedName = "q")
+    private static final GameEvent ENTITY_DIE_GAME_EVENT = GameEvent.q;
     @Remap(classPath = "net.minecraft.world.item.enchantment.Enchantments", name = "MENDING", type = Remap.Type.FIELD, remappedName = "L")
     private static final net.minecraft.world.item.enchantment.Enchantment MENDING_ENCHANTMENT = Enchantments.L;
     @Remap(classPath = "net.minecraft.world.level.GameRules", name = "RULE_DOMOBLOOT", type = Remap.Type.FIELD, remappedName = "f")
@@ -654,6 +656,12 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         }
 
         return true;
+    }
+
+    @Override
+    public void sendEntityDieEvent(LivingEntity livingEntity) {
+        Entity entityLiving = new Entity(((CraftLivingEntity) livingEntity).getHandle());
+        entityLiving.gameEvent(ENTITY_DIE_GAME_EVENT);
     }
 
     @Override

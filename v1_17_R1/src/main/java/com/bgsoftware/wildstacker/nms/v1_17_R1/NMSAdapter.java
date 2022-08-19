@@ -587,6 +587,12 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     }
 
     @Override
+    public void sendEntityDieEvent(LivingEntity livingEntity) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        entityLiving.a(GameEvent.s);
+    }
+
+    @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         org.bukkit.World bukkitWorld = creatureSpawner.getWorld();
         World world = ((CraftWorld) bukkitWorld).getHandle();

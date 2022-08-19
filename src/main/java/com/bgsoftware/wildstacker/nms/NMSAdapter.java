@@ -158,6 +158,10 @@ public interface NMSAdapter {
         return false;
     }
 
+    default void sendEntityDieEvent(LivingEntity livingEntity) {
+        // Does not exist in 1.16 or below.
+    }
+
     /*
      *   Spawner methods
      */
