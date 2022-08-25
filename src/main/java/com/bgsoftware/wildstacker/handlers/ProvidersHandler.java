@@ -293,7 +293,7 @@ public final class ProvidersHandler {
     }
 
     private void loadDataSerializers() {
-        if (Bukkit.getPluginManager().isPluginEnabled("NBTInjector")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("NBTAPI")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
         }
     }
