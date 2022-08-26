@@ -458,6 +458,13 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
+        if (!plugin.getSettings().itemsStackingEnabled) {
+            ItemStack item = itemStack.clone();
+            item.setAmount(amount);
+            return plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
+            });
+        }
+
         int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE);
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
 
