@@ -46,6 +46,7 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -123,6 +124,12 @@ public final class EntitiesListener implements Listener {
     /*
      *  Event handlers
      */
+
+    @EventHandler
+    public void g(CreatureSpawnEvent event) {
+        if (event.getEntity() instanceof Skeleton)
+            event.getEntity().getEquipment().setHelmet(new ItemStack(Material.DIAMOND_HELMET));
+    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e) {

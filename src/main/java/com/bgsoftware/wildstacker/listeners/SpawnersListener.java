@@ -466,55 +466,57 @@ public final class SpawnersListener implements Listener {
     }
 
     private void spawnEntities(StackedSpawner stackedSpawner, StackedEntity stackedEntity, int amountToSpawn, int limit) {
-        Executor.async(() -> {
-            Location location = stackedSpawner.getLocation();
-            Entity entity = stackedEntity.getLivingEntity();
+        Location location = stackedSpawner.getLocation();
+        Entity entity = stackedEntity.getLivingEntity();
 
-            Set<Location> locationsToSpawn = new HashSet<>();
-            ThreadLocalRandom random = ThreadLocalRandom.current();
-            int entitiesToSpawn = (amountToSpawn / limit) + (amountToSpawn % limit != 0 ? 1 : 0);
+        Set<Location> locationsToSpawn = new HashSet<>();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int entitiesToSpawn = (amountToSpawn / limit) + (amountToSpawn % limit != 0 ? 1 : 0);
 
-            stackedEntity.setStackAmount(limit, true);
+        stackedEntity.setStackAmount(limit, true);
 
-            if (entitiesToSpawn > 1) {
-                for (int i = 0; i < entitiesToSpawn - 1; i++) {
-                    Location locationToSpawn = null;
-                    int tries = 0;
+        if (entitiesToSpawn <= 1)
+            return;
 
-                    while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(entity, locationToSpawn)) && ++tries <= 5) {
-                        locationToSpawn = new Location(location.getWorld(),
-                                location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
-                                location.getBlockY(),
-                                location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
-                        );
-                    }
+        for (int i = 0; i < entitiesToSpawn - 1; i++) {
+            Location locationToSpawn = null;
+            int tries = 0;
 
-                    locationsToSpawn.add(locationToSpawn);
+            while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(entity, locationToSpawn)) && ++tries <= 5) {
+                locationToSpawn = new Location(location.getWorld(),
+                        location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
+                        location.getBlockY(),
+                        location.getBlockZ() + ((random.nextDouble() - random.nextDouble()) * 4.5D)
+                );
+            }
+
+            locationsToSpawn.add(locationToSpawn);
+        }
+
+        int leftEntities = amountToSpawn - limit;
+
+        try {
+            listenToSpawnEvent = false;
+
+            for (Location toSpawn : locationsToSpawn) {
+                if (leftEntities <= 0)
+                    break;
+
+                StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
+                plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
+
+                if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {
+                    targetEntity.remove();
+                } else {
+                    targetEntity.updateNerfed();
+                    targetEntity.setStackAmount(Math.min(leftEntities, limit), true);
                 }
 
-                Executor.sync(() -> {
-                    int leftEntities = amountToSpawn - limit;
-                    listenToSpawnEvent = false;
-                    for (Location toSpawn : locationsToSpawn) {
-                        if (leftEntities <= 0)
-                            break;
-
-                        StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
-                        plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
-
-                        if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {
-                            targetEntity.remove();
-                        } else {
-                            targetEntity.updateNerfed();
-                            targetEntity.setStackAmount(Math.min(leftEntities, limit), true);
-                        }
-
-                        leftEntities -= limit;
-                    }
-                    listenToSpawnEvent = true;
-                });
+                leftEntities -= limit;
             }
-        });
+        } finally {
+            listenToSpawnEvent = true;
+        }
     }
 
     //Same as SilkSpawnersSpawnerChangeEvent, but will only work if SilkSpawners is disabled
