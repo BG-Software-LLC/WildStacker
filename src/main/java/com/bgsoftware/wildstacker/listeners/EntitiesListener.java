@@ -135,11 +135,6 @@ public final class EntitiesListener implements Listener {
      *  Event handlers
      */
 
-    @EventHandler
-    public void g(EntityBreedEvent e){
-        Bukkit.broadcastMessage(e.getFather() + " + " + e.getMother());
-    }
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e) {
         if (EntityStorage.hasMetadata(e.getEntity(), EntityFlag.CORPSE) &&
