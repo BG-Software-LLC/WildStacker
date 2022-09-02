@@ -53,6 +53,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockShearEntityEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -100,6 +101,8 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
     private final WildStackerPlugin plugin;
 
+    private boolean callEntityBreedEvent;
+
     private boolean duplicateCow = false;
 
     public EntitiesListener(WildStackerPlugin plugin) {
@@ -118,11 +121,24 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
         } catch (Exception ignored) {
         }
+
+        try {
+            Class.forName("org.bukkit.event.entity.EntityBreedEvent");
+            callEntityBreedEvent = true;
+        } catch (Throwable error) {
+            callEntityBreedEvent = false;
+        }
+
     }
 
     /*
      *  Event handlers
      */
+
+    @EventHandler
+    public void g(EntityBreedEvent e){
+        Bukkit.broadcastMessage(e.getFather() + " + " + e.getMother());
+    }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathMonitor(EntityDeathEvent e) {
@@ -495,22 +511,42 @@ public final class EntitiesListener implements Listener {
                     // Spawning the baby after 2.5 seconds
                     int babiesAmount = itemsAmountToRemove / 2;
 
+                    LivingEntity childEntity;
+
                     if (EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE) {
                         // Turtles should lay an egg instead of spawning a baby.
                         plugin.getNMSAdapter().setTurtleEgg(stackedEntity.getLivingEntity());
                         stackedEntity.setFlag(EntityFlag.BREEDABLE_AMOUNT, babiesAmount);
+                        childEntity = null;
                     } else {
                         StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount, SpawnCause.BREEDING);
-                        ((Animals) duplicated.getLivingEntity()).setBaby();
-                        plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), false);
+                        childEntity = duplicated.getLivingEntity();
+                        ((Animals) childEntity).setBaby();
                     }
 
                     // Making sure the entities are not in a love-mode anymore.
                     plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
+
                     // Resetting the breeding of the entity to 5 minutes
                     ((Animals) e.getRightClicked()).setAge(6000);
+
                     // Calculate exp to drop
                     int expToDrop = Random.nextInt(1, 7, babiesAmount);
+
+                    if (callEntityBreedEvent && childEntity != null) {
+                        /* father and mother is the same entity in this case */
+                        EntityBreedEvent entityBreedEvent = new EntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
+                                (LivingEntity) e.getRightClicked(), e.getPlayer(), inHand, expToDrop);
+                        Bukkit.getPluginManager().callEvent(entityBreedEvent);
+
+                        if (entityBreedEvent.isCancelled()) {
+                            childEntity.remove();
+                            return;
+                        }
+
+                        plugin.getNMSAdapter().setInLove((Animals) childEntity, e.getPlayer(), false);
+                    }
+
                     EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
                 }, 50L);
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
