@@ -388,9 +388,16 @@ public final class SystemHandler implements SystemManager {
                 }
             } else if (stackedObject instanceof StackedBarrel) {
                 StackedBarrel stackedBarrel = (StackedBarrel) stackedObject;
-                if (GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(stackedBarrel.getBlock())) {
-                    removeStackObject(stackedObject);
-                    stackedBarrel.removeDisplayBlock();
+                Block block = stackedBarrel.getBlock();
+                if (GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(block)) {
+                    // In some versions, cauldron material can be WATER_CAULDRON.
+                    // Instead of removing the barrel, we just want to set it to CAULDRON.
+                    if (block.getType().name().equals("WATER_CAULDRON")) {
+                        Executor.sync(() -> block.setType(Material.CAULDRON));
+                    } else {
+                        removeStackObject(stackedObject);
+                        stackedBarrel.removeDisplayBlock();
+                    }
                 }
             }
         }
