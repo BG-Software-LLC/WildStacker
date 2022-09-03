@@ -162,6 +162,9 @@ public interface NMSAdapter {
         // Does not exist in 1.16 or below.
     }
 
+    boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father,
+                                         @Nullable LivingEntity breeder, @Nullable ItemStack bredWith, int experience);
+
     /*
      *   Spawner methods
      */

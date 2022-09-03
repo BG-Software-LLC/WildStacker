@@ -53,7 +53,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockShearEntityEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -101,8 +100,6 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
     private final WildStackerPlugin plugin;
 
-    private boolean callEntityBreedEvent;
-
     private boolean duplicateCow = false;
 
     public EntitiesListener(WildStackerPlugin plugin) {
@@ -121,14 +118,6 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
         } catch (Exception ignored) {
         }
-
-        try {
-            Class.forName("org.bukkit.event.entity.EntityBreedEvent");
-            callEntityBreedEvent = true;
-        } catch (Throwable error) {
-            callEntityBreedEvent = false;
-        }
-
     }
 
     /*
@@ -528,13 +517,10 @@ public final class EntitiesListener implements Listener {
                     // Calculate exp to drop
                     int expToDrop = Random.nextInt(1, 7, babiesAmount);
 
-                    if (callEntityBreedEvent && childEntity != null) {
+                    if (childEntity != null) {
                         /* father and mother is the same entity in this case */
-                        EntityBreedEvent entityBreedEvent = new EntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
-                                (LivingEntity) e.getRightClicked(), e.getPlayer(), inHand, expToDrop);
-                        Bukkit.getPluginManager().callEvent(entityBreedEvent);
-
-                        if (entityBreedEvent.isCancelled()) {
+                        if (!plugin.getNMSAdapter().callEntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
+                                (LivingEntity) e.getRightClicked(), e.getPlayer(), inHand, expToDrop)) {
                             childEntity.remove();
                             return;
                         }

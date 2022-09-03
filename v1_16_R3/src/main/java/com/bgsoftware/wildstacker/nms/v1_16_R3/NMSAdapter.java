@@ -118,6 +118,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -127,6 +128,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -553,6 +555,14 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         }
 
         return true;
+    }
+
+    @Override
+    public boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father, @Nullable LivingEntity breeder,
+                                        @Nullable org.bukkit.inventory.ItemStack bredWith, int experience) {
+        EntityBreedEvent entityBreedEvent = new EntityBreedEvent(child, mother, father, breeder, bredWith, experience);
+        Bukkit.getPluginManager().callEvent(entityBreedEvent);
+        return !entityBreedEvent.isCancelled();
     }
 
     @Override

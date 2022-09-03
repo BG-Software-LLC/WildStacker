@@ -82,6 +82,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -328,6 +329,13 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         return nmsItem != null && nmsItem.e();
+    }
+
+    @Override
+    public boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father, @Nullable LivingEntity breeder,
+                                        @Nullable org.bukkit.inventory.ItemStack bredWith, int experience) {
+        // Does not exist
+        return true;
     }
 
     @Override

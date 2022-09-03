@@ -79,6 +79,7 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -347,6 +348,13 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     public void setCustomNameVisible(org.bukkit.entity.Entity entity, boolean visibleName) {
         if (entity instanceof LivingEntity)
             ((LivingEntity) entity).setCustomNameVisible(visibleName);
+    }
+
+    @Override
+    public boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father, @Nullable LivingEntity breeder,
+                                        @Nullable org.bukkit.inventory.ItemStack bredWith, int experience) {
+        // Does not exist
+        return true;
     }
 
     @Override
