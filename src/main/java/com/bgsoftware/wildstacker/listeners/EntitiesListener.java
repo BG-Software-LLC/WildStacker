@@ -751,10 +751,12 @@ public final class EntitiesListener implements Listener {
         EntityStorage.setMetadata(entity, EntityFlag.SPAWN_CAUSE, spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(entity);
 
-        mushroomTracker.getTrackedData().ifPresent(mushroomCount -> {
-            stackedEntity.setStackAmount(mushroomCount, true);
-            mushroomTracker.resetTracker();
-        });
+        if (stackedEntity.getType() == EntityType.COW) {
+            mushroomTracker.getTrackedData().ifPresent(mushroomCount -> {
+                stackedEntity.setStackAmount(mushroomCount, true);
+                mushroomTracker.decreaseTrackCount();
+            });
+        }
 
         if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
             this.slimeSplitTracker.getTrackedData().ifPresent(originalStackAmount -> {
