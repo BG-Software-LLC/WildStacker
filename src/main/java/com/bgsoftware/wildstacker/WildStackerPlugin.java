@@ -208,7 +208,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
             String mappingVersionHash = nmsAdapter.getMappingsHash();
 
-            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, bukkitVersion)) {
+            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, bukkitVersion, error -> {
+                log("&cFailed to retrieve allowed mappings for your server, skipping...");
+                return true;
+            })) {
                 log("WildStacker does not support your version mappings... Please contact @Ome_R");
                 log("Your mappings version: " + mappingVersionHash);
                 return false;
