@@ -33,7 +33,6 @@ allprojects {
 
     dependencies {
         compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
-        compileOnly "com.bgsoftware.common.remaps:RemapsChecker:1.0.0"
     }
 
     task checkDebug() {
@@ -64,8 +63,6 @@ dependencies {
 
     implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
-    implementation 'com.bgsoftware.common.mappings:MappingsChecker:1.0.1'
-    implementation 'com.bgsoftware.common.remaps:RemapsChecker:1.0.0'
 
     // Spigot jars
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"

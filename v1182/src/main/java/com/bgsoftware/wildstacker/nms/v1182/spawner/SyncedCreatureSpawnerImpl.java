@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.nms.v1182.spawner;
 
-import com.bgsoftware.common.remaps.Remap;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
@@ -81,10 +80,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().spawnDelay = spawnDelay;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "minSpawnDelay",
-            type = Remap.Type.FIELD,
-            remappedName = "h")
     @Override
     public int getMinSpawnDelay() {
         return getSpawner().minSpawnDelay;
@@ -95,10 +90,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().minSpawnDelay = minSpawnDelay;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "maxSpawnDelay",
-            type = Remap.Type.FIELD,
-            remappedName = "i")
     @Override
     public int getMaxSpawnDelay() {
         return getSpawner().maxSpawnDelay;
@@ -109,10 +100,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().maxSpawnDelay = maxSpawnDelay;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "spawnCount",
-            type = Remap.Type.FIELD,
-            remappedName = "j")
     @Override
     public int getSpawnCount() {
         return getSpawner().spawnCount;
@@ -123,10 +110,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().spawnCount = spawnCount;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "maxNearbyEntities",
-            type = Remap.Type.FIELD,
-            remappedName = "l")
     @Override
     public int getMaxNearbyEntities() {
         return getSpawner().maxNearbyEntities;
@@ -137,10 +120,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().maxNearbyEntities = maxNearbyEntities;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "requiredPlayerRange",
-            type = Remap.Type.FIELD,
-            remappedName = "m")
     @Override
     public int getRequiredPlayerRange() {
         return getSpawner().requiredPlayerRange;
@@ -151,10 +130,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().requiredPlayerRange = requiredPlayerRange;
     }
 
-    @Remap(classPath = "net.minecraft.world.level.BaseSpawner",
-            name = "spawnRange",
-            type = Remap.Type.FIELD,
-            remappedName = "n")
     @Override
     public int getSpawnRange() {
         return getSpawner().spawnRange;
