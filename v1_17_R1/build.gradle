@@ -8,6 +8,8 @@ java {
 
 dependencies {
     compileOnly "org.spigotmc:v1_17_R1-Paper:latest"
+    compileOnly project(":NMS-Spigot")
+    compileOnly project(":NMS-Paper")
     compileOnly project(":API")
     compileOnly parent
 }

@@ -38,9 +38,6 @@ import java.util.function.Predicate;
 
 public interface NMSAdapter {
 
-    @Nullable
-    String getMappingsHash();
-
     /*
      *   Entity methods
      */

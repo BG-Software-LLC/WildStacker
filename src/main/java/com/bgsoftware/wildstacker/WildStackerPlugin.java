@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker;
 
-import com.bgsoftware.common.mappings.MappingsChecker;
-import com.bgsoftware.common.remaps.TestRemaps;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
@@ -35,15 +34,18 @@ import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
+import org.bukkit.UnsafeValues;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
@@ -202,38 +204,48 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     }
 
     private boolean loadNMSAdapter() {
-        String bukkitVersion = ServerVersion.getBukkitVersion();
-        try {
-            nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", bukkitVersion)).newInstance();
+        String version = null;
 
-            String mappingVersionHash = nmsAdapter.getMappingsHash();
+        if (ServerVersion.isLessThan(ServerVersion.v1_18)) {
+            version = getServer().getClass().getPackage().getName().split("\\.")[3];
+        } else {
+            ReflectMethod<Integer> getDataVersion = new ReflectMethod<>(UnsafeValues.class, "getDataVersion");
+            int dataVersion = getDataVersion.invoke(Bukkit.getUnsafe());
 
-            if (mappingVersionHash != null && !MappingsChecker.checkMappings(mappingVersionHash, bukkitVersion, error -> {
-                log("&cFailed to retrieve allowed mappings for your server, skipping...");
-                return true;
-            })) {
-                log("WildStacker does not support your version mappings... Please contact @Ome_R");
-                log("Your mappings version: " + mappingVersionHash);
-                return false;
+            List<Pair<Integer, String>> versions = Arrays.asList(
+                    new Pair<>(2865, "v1181"),
+                    new Pair<>(2975, "v1182"),
+                    new Pair<>(3105, "v119"),
+                    new Pair<>(3117, "v1191"),
+                    new Pair<>(3120, "v1192")
+            );
+
+            for (Pair<Integer, String> versionData : versions) {
+                if (dataVersion <= versionData.getKey()) {
+                    version = versionData.getValue();
+                    break;
+                }
             }
 
-            nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", bukkitVersion)).newInstance();
-            nmsSpawners = (NMSSpawners) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSSpawners", bukkitVersion)).newInstance();
-            nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", bukkitVersion)).newInstance();
-        } catch (Exception ex) {
-            log("WildStacker doesn't support " + bukkitVersion + " - shutting down...");
-            return false;
+            if (version == null) {
+                log("Data version: " + dataVersion);
+            }
         }
 
-        File mappingsFile = new File("mappings");
-        if (mappingsFile.exists()) {
+        if (version != null) {
             try {
-                TestRemaps.testRemapsForClassesInPackage(mappingsFile,
-                        plugin.getClassLoader(), "com.bgsoftware.wildstacker.nms." + bukkitVersion);
+                nmsAdapter = (NMSAdapter) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSAdapter", version)).newInstance();
+                nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", version)).newInstance();
+                nmsSpawners = (NMSSpawners) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSSpawners", version)).newInstance();
+                nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", version)).newInstance();
+                return true;
             } catch (Exception error) {
                 error.printStackTrace();
             }
         }
+
+        log("&cThe plugin doesn't support your minecraft version.");
+        log("&cPlease try a different version.");
 
         return true;
     }

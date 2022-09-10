@@ -5,15 +5,14 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.nms.v1_8_R3.serializers.DefaultDataSerializer;
 import com.bgsoftware.wildstacker.nms.v1_8_R3.serializers.EntityDataContainerSerializer;
+import com.bgsoftware.wildstacker.nms.v1_8_R3.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_8_R3.AchievementList;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -37,14 +36,12 @@ import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.ItemArmor;
 import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.Items;
-import net.minecraft.server.v1_8_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagList;
 import net.minecraft.server.v1_8_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_8_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Achievement;
@@ -54,7 +51,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -68,8 +64,6 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
-import org.bukkit.entity.CreatureType;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -113,11 +107,6 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     /*
      *   Entity methods
      */
-
-    @Override
-    public String getMappingsHash() {
-        return null;
-    }
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -743,140 +732,6 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     @Override
     public void loadItem(StackedItem stackedItem) {
         dataSerializer.loadItem(stackedItem);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static class SyncedCreatureSpawnerImpl extends CraftBlockState implements SyncedCreatureSpawner {
-
-        private final World world;
-        private final BlockPosition blockPosition;
-
-        SyncedCreatureSpawnerImpl(Block block) {
-            super(block);
-            world = ((CraftWorld) block.getWorld()).getHandle();
-            blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
-        }
-
-        @Override
-        public CreatureType getCreatureType() {
-            return CreatureType.fromEntityType(getSpawnedType());
-        }
-
-        @Override
-        public void setCreatureType(CreatureType creatureType) {
-            setSpawnedType(creatureType.toEntityType());
-        }
-
-        @Override
-        public String getCreatureTypeId() {
-            return getCreatureTypeName();
-        }
-
-        @Override
-        public void setCreatureTypeId(String s) {
-            setCreatureTypeByName(s);
-        }
-
-        @Override
-        public int getDelay() {
-            return getSpawner().getSpawner().spawnDelay;
-        }
-
-        @Override
-        public void setDelay(int i) {
-            getSpawner().getSpawner().spawnDelay = i;
-        }
-
-        @Override
-        public void setCreatureTypeByName(String s) {
-            EntityType entityType = EntityType.fromName(s);
-            if (entityType != null && entityType != EntityType.UNKNOWN)
-                setSpawnedType(entityType);
-        }
-
-        @Override
-        public String getCreatureTypeName() {
-            return getSpawner().getSpawner().getMobName();
-        }
-
-        @Override
-        public EntityType getSpawnedType() {
-            try {
-                return EntityType.fromName(getSpawner().getSpawner().getMobName());
-            } catch (Exception ex) {
-                return EntityType.PIG;
-            }
-        }
-
-        @Override
-        public void setSpawnedType(EntityType entityType) {
-            if (entityType != null && entityType.getName() != null) {
-                getSpawner().getSpawner().setMobName(entityType.getName());
-            } else {
-                throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
-            }
-        }
-
-        @Override
-        public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            if (mobSpawnerAbstract instanceof NMSSpawners.StackedMobSpawner) {
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).spawnCount = spawnerUpgrade.getSpawnCount();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).spawnRange = spawnerUpgrade.getSpawnRange();
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
-            } else {
-                NBTTagCompound nbtTagCompound = new NBTTagCompound();
-                mobSpawnerAbstract.b(nbtTagCompound);
-
-                nbtTagCompound.setShort("MinSpawnDelay", (short) spawnerUpgrade.getMinSpawnDelay());
-                nbtTagCompound.setShort("MaxSpawnDelay", (short) spawnerUpgrade.getMaxSpawnDelay());
-                nbtTagCompound.setShort("SpawnCount", (short) spawnerUpgrade.getSpawnCount());
-                nbtTagCompound.setShort("MaxNearbyEntities", (short) spawnerUpgrade.getMaxNearbyEntities());
-                nbtTagCompound.setShort("RequiredPlayerRange", (short) spawnerUpgrade.getRequiredPlayerRange());
-                nbtTagCompound.setShort("SpawnRange", (short) spawnerUpgrade.getSpawnRange());
-
-                mobSpawnerAbstract.a(nbtTagCompound);
-            }
-        }
-
-        @Override
-        public SpawnerCachedData readData() {
-            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            if (mobSpawnerAbstract instanceof NMSSpawners.StackedMobSpawner) {
-                NMSSpawners.StackedMobSpawner stackedMobSpawner = (NMSSpawners.StackedMobSpawner) mobSpawnerAbstract;
-                return new SpawnerCachedData(
-                        stackedMobSpawner.minSpawnDelay,
-                        stackedMobSpawner.maxSpawnDelay,
-                        stackedMobSpawner.spawnCount,
-                        stackedMobSpawner.maxNearbyEntities,
-                        stackedMobSpawner.requiredPlayerRange,
-                        stackedMobSpawner.spawnRange,
-                        stackedMobSpawner.spawnDelay / 20,
-                        stackedMobSpawner.failureReason
-                );
-            } else {
-                NBTTagCompound nbtTagCompound = new NBTTagCompound();
-                mobSpawnerAbstract.b(nbtTagCompound);
-                return new SpawnerCachedData(
-                        nbtTagCompound.getShort("MinSpawnDelay"),
-                        nbtTagCompound.getShort("MaxSpawnDelay"),
-                        nbtTagCompound.getShort("SpawnCount"),
-                        nbtTagCompound.getShort("MaxNearbyEntities"),
-                        nbtTagCompound.getShort("RequiredPlayerRange"),
-                        nbtTagCompound.getShort("SpawnRange"),
-                        nbtTagCompound.getShort("Delay") / 20
-                );
-            }
-        }
-
-        TileEntityMobSpawner getSpawner() {
-            return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
-        }
-
     }
 
 }

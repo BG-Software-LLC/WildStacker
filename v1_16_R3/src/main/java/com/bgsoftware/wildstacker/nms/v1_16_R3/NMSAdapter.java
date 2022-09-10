@@ -6,15 +6,14 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.nms.algorithms.PaperGlowEnchantment;
+import com.bgsoftware.wildstacker.nms.algorithms.SpigotGlowEnchantment;
+import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import io.papermc.paper.enchantments.EnchantmentRarity;
-import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.BlockRotatable;
 import net.minecraft.server.v1_16_R3.ChatComponentText;
@@ -53,10 +52,8 @@ import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
 import net.minecraft.server.v1_16_R3.Items;
 import net.minecraft.server.v1_16_R3.MemoryModuleType;
-import net.minecraft.server.v1_16_R3.MinecraftKey;
 import net.minecraft.server.v1_16_R3.MobEffect;
 import net.minecraft.server.v1_16_R3.MobEffects;
-import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_16_R3.NBTReadLimiter;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
@@ -69,7 +66,6 @@ import net.minecraft.server.v1_16_R3.SoundEffect;
 import net.minecraft.server.v1_16_R3.SoundEffects;
 import net.minecraft.server.v1_16_R3.StatisticList;
 import net.minecraft.server.v1_16_R3.TagsItem;
-import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_16_R3.World;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Bukkit;
@@ -85,7 +81,6 @@ import org.bukkit.block.data.type.TurtleEgg;
 import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftParticle;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftChicken;
@@ -101,12 +96,9 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_16_R3.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
-import org.bukkit.entity.EntityCategory;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -123,10 +115,8 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -141,7 +131,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -173,11 +162,6 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
             SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
             NAME_TAG = new NamespacedKey(plugin, "nameTag"),
             UPGRADE = new NamespacedKey(plugin, "upgrade");
-
-    @Override
-    public String getMappingsHash() {
-        return null;
-    }
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -605,73 +589,12 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     }
 
     @Override
-    @SuppressWarnings("all")
     public Enchantment getGlowEnchant() {
-        return new Enchantment(NamespacedKey.minecraft("glowing_enchant")) {
-            @Override
-            public String getName() {
-                return "WildStackerGlow";
-            }
-
-            @Override
-            public int getMaxLevel() {
-                return 1;
-            }
-
-            @Override
-            public int getStartLevel() {
-                return 0;
-            }
-
-            @Override
-            public EnchantmentTarget getItemTarget() {
-                return null;
-            }
-
-            @Override
-            public boolean isTreasure() {
-                return false;
-            }
-
-            @Override
-            public boolean isCursed() {
-                return false;
-            }
-
-            @Override
-            public boolean conflictsWith(Enchantment enchantment) {
-                return false;
-            }
-
-            @Override
-            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
-                return true;
-            }
-
-            public @NotNull Component displayName(int i) {
-                return null;
-            }
-
-            public boolean isTradeable() {
-                return false;
-            }
-
-            public boolean isDiscoverable() {
-                return false;
-            }
-
-            public @NotNull EnchantmentRarity getRarity() {
-                return null;
-            }
-
-            public float getDamageIncrease(int i, @NotNull EntityCategory entityCategory) {
-                return 0;
-            }
-
-            public @NotNull Set<EquipmentSlot> getActiveSlots() {
-                return null;
-            }
-        };
+        try {
+            return new PaperGlowEnchantment("wildstacker_glowing_enchant");
+        } catch (Throwable error) {
+            return new SpigotGlowEnchantment("wildstacker_glowing_enchant");
+        }
     }
 
     /*
@@ -1126,182 +1049,6 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
                 }
             }
         }
-    }
-
-    @SuppressWarnings({"deprecation", "NullableProblems"})
-    private static class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityMobSpawner> implements SyncedCreatureSpawner {
-
-        private final World world;
-        private final BlockPosition blockPosition;
-        private final Location blockLocation;
-
-        SyncedCreatureSpawnerImpl(Block block) {
-            super(block, TileEntityMobSpawner.class);
-            world = ((CraftWorld) block.getWorld()).getHandle();
-            blockPosition = new BlockPosition(block.getX(), block.getY(), block.getZ());
-            blockLocation = block.getLocation();
-        }
-
-        @Override
-        public EntityType getSpawnedType() {
-            try {
-                MinecraftKey key = getSpawner().getSpawner().getMobName();
-                EntityType entityType = key == null ? EntityType.PIG : EntityType.fromName(key.getKey());
-                return entityType == null ? EntityType.PIG : entityType;
-            } catch (Exception ex) {
-                return EntityType.PIG;
-            }
-        }
-
-        @Override
-        public void setSpawnedType(EntityType entityType) {
-            if (entityType != null && entityType.getName() != null) {
-                getSpawner().getSpawner().setMobName(EntityTypes.a(entityType.getName()).orElse(EntityTypes.PIG));
-            } else {
-                throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
-            }
-        }
-
-        @Override
-        public void setCreatureTypeByName(String s) {
-            EntityType entityType = EntityType.fromName(s);
-            if (entityType != null && entityType != EntityType.UNKNOWN)
-                setSpawnedType(entityType);
-        }
-
-        @Override
-        public String getCreatureTypeName() {
-            MinecraftKey key = getSpawner().getSpawner().getMobName();
-            return key == null ? "PIG" : key.getKey();
-        }
-
-        @Override
-        public int getDelay() {
-            return getSpawner().getSpawner().spawnDelay;
-        }
-
-        @Override
-        public void setDelay(int i) {
-            getSpawner().getSpawner().spawnDelay = i;
-        }
-
-        @Override
-        public int getMinSpawnDelay() {
-            return getSpawner().getSpawner().minSpawnDelay;
-        }
-
-        @Override
-        public void setMinSpawnDelay(int i) {
-            getSpawner().getSpawner().minSpawnDelay = i;
-        }
-
-        @Override
-        public int getMaxSpawnDelay() {
-            return getSpawner().getSpawner().maxSpawnDelay;
-        }
-
-        @Override
-        public void setMaxSpawnDelay(int i) {
-            getSpawner().getSpawner().maxSpawnDelay = i;
-        }
-
-        @Override
-        public int getSpawnCount() {
-            return getSpawner().getSpawner().spawnCount;
-        }
-
-        @Override
-        public void setSpawnCount(int i) {
-            getSpawner().getSpawner().spawnCount = i;
-        }
-
-        @Override
-        public int getMaxNearbyEntities() {
-            return getSpawner().getSpawner().maxNearbyEntities;
-        }
-
-        @Override
-        public void setMaxNearbyEntities(int i) {
-            getSpawner().getSpawner().maxNearbyEntities = i;
-        }
-
-        @Override
-        public int getRequiredPlayerRange() {
-            return getSpawner().getSpawner().requiredPlayerRange;
-        }
-
-        @Override
-        public void setRequiredPlayerRange(int i) {
-            getSpawner().getSpawner().requiredPlayerRange = i;
-        }
-
-        @Override
-        public int getSpawnRange() {
-            return getSpawner().getSpawner().spawnRange;
-        }
-
-        @Override
-        public void setSpawnRange(int i) {
-            getSpawner().getSpawner().spawnRange = i;
-        }
-
-        public boolean isActivated() {
-            try {
-                return getSpawner().getSpawner().isActivated();
-            } catch (Throwable ex) {
-                return false;
-            }
-        }
-
-        public void resetTimer() {
-            try {
-                getSpawner().getSpawner().resetTimer();
-            } catch (Throwable ignored) {
-            }
-        }
-
-        public void setSpawnedItem(org.bukkit.inventory.@NotNull ItemStack itemStack) {
-
-        }
-
-        @Override
-        public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            mobSpawnerAbstract.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-            mobSpawnerAbstract.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-            mobSpawnerAbstract.spawnCount = spawnerUpgrade.getSpawnCount();
-            mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-            mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-            mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
-            if (mobSpawnerAbstract instanceof NMSSpawners.StackedMobSpawner)
-                ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
-        }
-
-        @Override
-        public SpawnerCachedData readData() {
-            MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-            return new SpawnerCachedData(
-                    mobSpawnerAbstract.minSpawnDelay,
-                    mobSpawnerAbstract.maxSpawnDelay,
-                    mobSpawnerAbstract.spawnCount,
-                    mobSpawnerAbstract.maxNearbyEntities,
-                    mobSpawnerAbstract.requiredPlayerRange,
-                    mobSpawnerAbstract.spawnRange,
-                    mobSpawnerAbstract.spawnDelay / 20,
-                    mobSpawnerAbstract instanceof NMSSpawners.StackedMobSpawner ?
-                            ((NMSSpawners.StackedMobSpawner) mobSpawnerAbstract).failureReason : ""
-            );
-        }
-
-        @Override
-        public boolean update(boolean force, boolean applyPhysics) {
-            return blockLocation.getBlock().getState().update(force, applyPhysics);
-        }
-
-        TileEntityMobSpawner getSpawner() {
-            return (TileEntityMobSpawner) world.getTileEntity(blockPosition);
-        }
-
     }
 
 }

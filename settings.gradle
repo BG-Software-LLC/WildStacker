@@ -1,4 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url "https://repo.papermc.io/repository/maven-public/" }
+    }
+}
+
 rootProject.name = 'WildStacker'
+
 include 'API'
 include 'Hook_Boss34'
 include 'Hook_Boss39'
@@ -47,12 +55,15 @@ include 'Hook_Vault'
 include 'Hook_WildTools'
 include 'Hook_WorldGuard7'
 include 'Hook_WorldGuard6'
+include 'NMS-Spigot'
+include 'NMS-Paper'
 include 'v1_7_R4'
 include 'v1_8_R3'
 include 'v1_12_R1'
 include 'v1_16_R3'
 include 'v1_17_R1'
-include 'v1_18_R1'
-include 'v1_18_R2'
-include 'v1_19_R1'
-
+include 'v1181'
+include 'v1182'
+include 'v119'
+include 'v1191'
+include 'v1192'
