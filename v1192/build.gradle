@@ -31,6 +31,6 @@ tasks {
     }
 }
 
-if (project.hasProperty('nms.compile_v1_18') && !Boolean.valueOf(project.findProperty("nms.compile_v1_18").toString())) {
+if (project.hasProperty('nms.compile_v1_19') && !Boolean.valueOf(project.findProperty("nms.compile_v1_19").toString())) {
     project.tasks.all { task -> task.enabled = false }
 }
