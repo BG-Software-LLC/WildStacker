@@ -1,20 +1,20 @@
-package com.bgsoftware.wildstacker.nms.v1_17_R1;
+package com.bgsoftware.wildstacker.nms.v117;
 
 import com.bgsoftware.wildstacker.utils.holograms.Hologram;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.sounds.SoundEffect;
-import net.minecraft.world.EnumHand;
-import net.minecraft.world.EnumInteractionResult;
+import com.google.common.base.Preconditions;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EnumItemSlot;
-import net.minecraft.world.entity.decoration.EntityArmorStand;
-import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.World;
-import net.minecraft.world.phys.AxisAlignedBB;
-import net.minecraft.world.phys.Vec3D;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_17_R1.CraftServer;
@@ -23,47 +23,47 @@ import org.bukkit.craftbukkit.v1_17_R1.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_17_R1.util.CraftChatMessage;
 
-import javax.annotation.Nullable;
-
 @SuppressWarnings("unused")
 public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHolograms {
 
     @Override
     public Hologram createHologram(Location location) {
-        assert location.getWorld() != null;
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        EntityHologram entityHologram = new EntityHologram(world, location.getX(), location.getY(), location.getZ());
-        world.addEntity(entityHologram);
+        Preconditions.checkNotNull(location.getWorld(), "cannot spawn holograms in null world.");
+        ServerLevel serverLevel = ((CraftWorld) location.getWorld()).getHandle();
+        EntityHologram entityHologram = new EntityHologram(serverLevel, location.getX(), location.getY(), location.getZ());
+        serverLevel.addFreshEntity(entityHologram);
         return entityHologram;
     }
 
-    private static final class EntityHologram extends EntityArmorStand implements Hologram {
+    private static final class EntityHologram extends ArmorStand implements Hologram {
 
-        private static final AxisAlignedBB EMPTY_BOUND = new AxisAlignedBB(0D, 0D, 0D, 0D, 0D, 0D);
+        private static final AABB EMPTY_BOUND = new AABB(0D, 0D, 0D, 0D, 0D, 0D);
 
         private CraftEntity bukkitEntity;
 
-        EntityHologram(World world, double x, double y, double z) {
-            super(world, x, y, z);
+        EntityHologram(ServerLevel serverLevel, double x, double y, double z) {
+            super(serverLevel, x, y, z);
+
             setInvisible(true);
             setSmall(true);
-            setArms(false);
+            setShowArms(false);
             setNoGravity(true);
-            setBasePlate(true);
+            setNoBasePlate(true);
             setMarker(true);
+            forceSetBoundingBox(EMPTY_BOUND);
+
             super.collides = false;
             super.setCustomNameVisible(true);
-            super.a(EMPTY_BOUND);
         }
 
         @Override
         public void setHologramName(String name) {
-            super.setCustomName(CraftChatMessage.fromString(name)[0]);
+            super.setCustomName(CraftChatMessage.fromStringOrNull(name));
         }
 
         @Override
         public void removeHologram() {
-            super.a(Entity.RemovalReason.b);
+            super.remove(RemovalReason.DISCARDED);
         }
 
         @Override
@@ -71,40 +71,40 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
             // Disable normal ticking for this entity.
 
             // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
-            if (this.z) {
-                this.z = false;
+            if (this.onGround) {
+                this.onGround = false;
             }
         }
 
         @Override
-        public boolean isCollidable() {
+        public boolean repositionEntityAfterLoad() {
             return false;
         }
 
         @Override
-        public AxisAlignedBB cs() {
+        public AABB getBoundingBoxForCulling() {
             return EMPTY_BOUND;
         }
 
         @Override
-        public void setSlot(EnumItemSlot enumitemslot, ItemStack itemstack) {
+        public void setSlot(EquipmentSlot equipmentSlot, ItemStack itemStack, boolean silence) {
             // Prevent stand being equipped
         }
 
         @Override
-        public void saveData(NBTTagCompound nbttagcompound) {
+        public void addAdditionalSaveData(CompoundTag compoundTag) {
             // Do not save NBT.
         }
 
         @Override
-        public void loadData(NBTTagCompound nbttagcompound) {
+        public void readAdditionalSaveData(CompoundTag compoundTag) {
             // Do not load NBT.
         }
 
         @Override
-        public EnumInteractionResult a(EntityHuman human, Vec3D vec3d, EnumHand enumhand) {
+        public InteractionResult interactAt(Player player, Vec3 hitPos, InteractionHand hand) {
             // Prevent stand being equipped
-            return EnumInteractionResult.d;
+            return InteractionResult.PASS;
         }
 
         @Override
@@ -112,13 +112,13 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
             // Disable normal ticking for this entity.
 
             // Workaround to force EntityTrackerEntry to send a teleport packet immediately after spawning this entity.
-            if (this.z) {
-                this.z = false;
+            if (this.onGround) {
+                this.onGround = false;
             }
         }
 
-        public void forceSetBoundingBox(AxisAlignedBB boundingBox) {
-            super.a(boundingBox);
+        public void forceSetBoundingBox(AABB boundingBox) {
+            super.setBoundingBox(boundingBox);
         }
 
         @Override
@@ -130,34 +130,34 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
         }
 
         @Override
-        public void a(Entity.RemovalReason entity_removalreason) {
+        public void remove(RemovalReason removalReason) {
             // Prevent being killed.
         }
 
         @Override
-        public void playSound(SoundEffect soundeffect, float f, float f1) {
+        public void playSound(SoundEvent soundEvent, float volume, float pitch) {
             // Remove sounds.
         }
 
         @Override
-        public boolean d(NBTTagCompound nbttagcompound) {
+        public boolean saveAsPassenger(CompoundTag compoundTag) {
             // Do not save NBT.
             return false;
         }
 
         @Override
-        public NBTTagCompound save(NBTTagCompound nbttagcompound) {
+        public CompoundTag saveWithoutId(CompoundTag compoundTag) {
             // Do not save NBT.
-            return nbttagcompound;
+            return compoundTag;
         }
 
         @Override
-        public void load(NBTTagCompound nbttagcompound) {
+        public void load(CompoundTag compoundTag) {
             // Do not load NBT.
         }
 
         @Override
-        public boolean isInvulnerable(DamageSource source) {
+        public boolean isInvulnerableTo(DamageSource source) {
             /*
              * The field Entity.invulnerable is private.
              * It's only used while saving NBTTags, but since the entity would be killed
@@ -167,7 +167,7 @@ public final class NMSHolograms implements com.bgsoftware.wildstacker.nms.NMSHol
         }
 
         @Override
-        public void setCustomName(@Nullable IChatBaseComponent ichatbasecomponent) {
+        public void setCustomName(Component component) {
             // Locks the custom name.
         }
 

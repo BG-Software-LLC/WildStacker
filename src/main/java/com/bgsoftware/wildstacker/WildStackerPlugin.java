@@ -206,13 +206,15 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private boolean loadNMSAdapter() {
         String version = null;
 
-        if (ServerVersion.isLessThan(ServerVersion.v1_18)) {
+        if (ServerVersion.isLessThan(ServerVersion.v1_17)) {
             version = getServer().getClass().getPackage().getName().split("\\.")[3];
         } else {
             ReflectMethod<Integer> getDataVersion = new ReflectMethod<>(UnsafeValues.class, "getDataVersion");
             int dataVersion = getDataVersion.invoke(Bukkit.getUnsafe());
 
             List<Pair<Integer, String>> versions = Arrays.asList(
+                    new Pair<>(2729, null),
+                    new Pair<>(2730, "v117"),
                     new Pair<>(2865, "v1181"),
                     new Pair<>(2975, "v1182"),
                     new Pair<>(3105, "v119"),

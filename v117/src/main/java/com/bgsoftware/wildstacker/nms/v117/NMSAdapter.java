@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1181;
+package com.bgsoftware.wildstacker.nms.v117;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
@@ -8,7 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.nms.algorithms.PaperGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.algorithms.SpigotGlowEnchantment;
-import com.bgsoftware.wildstacker.nms.v1181.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.nms.v117.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
@@ -83,24 +83,24 @@ import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
-import org.bukkit.craftbukkit.v1_18_R1.CraftParticle;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftAnimals;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftChicken;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPiglin;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftRaider;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftStrider;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftTurtle;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_18_R1.event.CraftEventFactory;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_18_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_17_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftAnimals;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftChicken;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPiglin;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftRaider;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftStrider;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftTurtle;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_17_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Enderman;
@@ -145,16 +145,16 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(
             Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
 
-    private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "be");
-    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "dH");
-    private static final ReflectMethod<SoundEvent> GET_SOUND_DEATH = new ReflectMethod<>(LivingEntity.class, "x_");
-    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "eu");
-    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(LivingEntity.class, "ev");
-    private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(Chicken.class, Integer.class, "cc");
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(Raider.class, boolean.class, "fN");
-    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(Raider.class, Raid.class, "fM");
-    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "v", boolean.class);
-    private static final ReflectMethod<BlockPos> TURTLE_HOME_POS = new ReflectMethod<>(Turtle.class, "fz");
+    private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "bd");
+    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "isDropExperience");
+    private static final ReflectMethod<SoundEvent> GET_SOUND_DEATH = new ReflectMethod<>(LivingEntity.class, "getSoundDeath");
+    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "getSoundVolume");
+    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(LivingEntity.class, "ep");
+    private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(Chicken.class, Integer.class, "bY");
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(Raider.class, boolean.class, "fK");
+    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(Raider.class, Raid.class, "fJ");
+    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "setHasEgg", boolean.class);
+    private static final ReflectMethod<BlockPos> TURTLE_HOME_POS = new ReflectMethod<>(Turtle.class, "getHomePos");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -176,7 +176,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
         assert world != null;
 
-        net.minecraft.world.entity.Entity nmsEntity = world.createEntity(location, type);
+        Entity nmsEntity = world.createEntity(location, type);
         org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
 
         if (beforeSpawnConsumer != null) {
@@ -202,7 +202,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
         assert world != null;
 
-        net.minecraft.world.entity.Entity nmsEntity = world.createEntity(location, type);
+        Entity nmsEntity = world.createEntity(location, type);
         org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
 
         world.addEntity(nmsEntity, spawnCause.toSpawnReason());
@@ -241,7 +241,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         if (entityTransformEvent.isCancelled())
             return null;
 
-        serverLevel.addFreshEntity(zombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
+        serverLevel.addEntity(zombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
         BlockPos blockPos = new BlockPos(villager.getX(), villager.getY(), villager.getZ());
         serverLevel.levelEvent(null, 1026, blockPos, 0);
 
@@ -304,7 +304,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         boolean isDropExperience = IS_DROP_EXPERIENCE.invoke(livingEntity);
 
         return lastDamageByPlayerTime > 0 && isDropExperience &&
-                livingEntity.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
+                livingEntity.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
     }
 
     @Override
@@ -505,7 +505,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
             return;
 
         float sweepDamage = 1.0F + EnchantmentHelper.getSweepingDamageRatio(serverPlayer) * (float) damage;
-        List<LivingEntity> nearbyEntities = livingEntity.getLevel().getEntitiesOfClass(LivingEntity.class,
+        List<LivingEntity> nearbyEntities = livingEntity.level.getEntitiesOfClass(LivingEntity.class,
                 livingEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D));
 
         for (LivingEntity nearby : nearbyEntities) {
@@ -568,7 +568,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
             livingEntity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1), EntityPotionEffectEvent.Cause.TOTEM);
             livingEntity.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1), EntityPotionEffectEvent.Cause.TOTEM);
             livingEntity.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0), EntityPotionEffectEvent.Cause.TOTEM);
-            livingEntity.getLevel().broadcastEntityEvent(livingEntity, (byte) 35);
+            livingEntity.level.broadcastEntityEvent(livingEntity, (byte) 35);
         }
 
         return true;
@@ -594,7 +594,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        org.bukkit.World bukkitWorld = creatureSpawner.getWorld();
+        World bukkitWorld = creatureSpawner.getWorld();
         ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
         SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
@@ -705,7 +705,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         ItemEntity itemEntity = (ItemEntity) ((CraftItem) item).getHandle();
 
-        ServerChunkCache serverChunkCache = (ServerChunkCache) livingEntity.getLevel().getChunkSource();
+        ServerChunkCache serverChunkCache = (ServerChunkCache) livingEntity.level.getChunkSource();
 
         ClientboundTakeItemEntityPacket takeItemEntityPacket = new ClientboundTakeItemEntityPacket(
                 itemEntity.getId(), livingEntity.getId(), item.getItemStack().getAmount());
