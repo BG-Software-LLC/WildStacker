@@ -18,12 +18,10 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Chunk;
 import org.bukkit.block.Hopper;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -33,7 +31,6 @@ import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -100,16 +97,6 @@ public final class ItemsListener implements Listener {
                     stackedItem.remove();
             });
         });
-    }
-
-    @EventHandler
-    public void g(PlayerInteractEvent e) {
-        if (e.getItem() != null && e.getItem().getType().name().equals("GUNPOWDER")) {
-            for (Entity entity : e.getPlayer().getNearbyEntities(5, 5, 5)) {
-                if (entity instanceof Zombie)
-                    ((Zombie) entity).setCanPickupItems(true);
-            }
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
