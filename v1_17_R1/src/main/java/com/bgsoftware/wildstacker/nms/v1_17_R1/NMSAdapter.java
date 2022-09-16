@@ -846,7 +846,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         if (!mendingItem.isEmpty() && mendingItem.getItem().usesDurability()) {
             EntityExperienceOrb orb = EntityTypes.A.a(entityPlayer.getWorld());
             orb.aq = amount;
-            orb.spawnReason = ExperienceOrb.SpawnReason.CUSTOM;
+            orb.spawnReason = ExperienceOrb.SpawnReason.ENTITY_DEATH;
             orb.setPositionRaw(entityPlayer.locX(), entityPlayer.locY(), entityPlayer.locZ());
             int repairAmount = Math.min(amount * 2, mendingItem.getDamage());
             PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(entityPlayer, orb, mendingItem, repairAmount);
