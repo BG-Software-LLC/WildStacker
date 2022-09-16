@@ -807,7 +807,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
                 piglin.spawnAtLocation(piglin.getItemInHand(InteractionHand.OFF_HAND));
 
             piglin.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
-            piglin.broadcastBreakEvent(EquipmentSlot.OFFHAND);
+            piglin.setGuaranteedDrop(EquipmentSlot.OFFHAND);
 
             if (item != PiglinAi.BARTERING_ITEM)
                 piglin.setPersistenceRequired();
@@ -852,7 +852,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         }
 
         mob.setItemSlot(equipmentSlotForItem, itemStack);
-        mob.broadcastBreakEvent(equipmentSlotForItem);
+        mob.setGuaranteedDrop(equipmentSlotForItem);
 
         SoundEvent equipSound = itemStack.getEquipSound();
         if (!itemStack.isEmpty() && equipSound != null) {
