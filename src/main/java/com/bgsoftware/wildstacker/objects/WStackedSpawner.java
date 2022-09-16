@@ -40,6 +40,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     private LivingEntity linkedEntity = null;
     private int spawnerUpgradeId = -1;
     private EntityType cachedEntity;
+    private boolean isSpawnerOverridenTick;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner) {
         this(creatureSpawner, 1);
@@ -377,7 +378,14 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
-        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType()) : currentUpgrade;
+
+        if (currentUpgrade == null) {
+            SpawnerUpgrade defaultUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType());
+            spawnerUpgradeId = defaultUpgrade.getId();
+            return defaultUpgrade;
+        }
+
+        return currentUpgrade;
     }
 
     @Override
@@ -398,6 +406,14 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     public int getUpgradeId() {
         return spawnerUpgradeId;
+    }
+
+    public boolean isSpawnerOverridenTick() {
+        return isSpawnerOverridenTick;
+    }
+
+    public void setSpawnerOverridenTick(boolean spawnerOverridenTick) {
+        isSpawnerOverridenTick = spawnerOverridenTick;
     }
 
     public void setUpgradeId(int spawnerUpgradeId, @Nullable Player who, boolean fireEvent) {

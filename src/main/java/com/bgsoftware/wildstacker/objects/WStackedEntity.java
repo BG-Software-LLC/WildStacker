@@ -748,7 +748,14 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public SpawnerUpgrade getUpgrade() {
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
-        return currentUpgrade == null ? plugin.getUpgradesManager().getDefaultUpgrade(object.getType()) : currentUpgrade;
+
+        if (currentUpgrade == null) {
+            SpawnerUpgrade defaultUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(getType());
+            spawnerUpgradeId = defaultUpgrade.getId();
+            return defaultUpgrade;
+        }
+
+        return currentUpgrade;
     }
 
     @Override

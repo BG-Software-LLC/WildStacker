@@ -121,8 +121,8 @@ public final class ItemUtils {
     }
 
     public static int getSpawnerUpgrade(ItemStack itemStack) {
-        int spawnerUpgrade = plugin.getNMSAdapter().getTag(itemStack, "spawners-upgrade", Integer.class, 0);
-        return Math.max(0, spawnerUpgrade);
+        int spawnerUpgrade = plugin.getNMSAdapter().getTag(itemStack, "spawners-upgrade", Integer.class, -1);
+        return Math.max(-1, spawnerUpgrade);
     }
 
     public static ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {

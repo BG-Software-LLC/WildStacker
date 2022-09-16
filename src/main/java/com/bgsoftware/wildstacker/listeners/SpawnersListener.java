@@ -428,7 +428,12 @@ public final class SpawnersListener implements Listener {
         if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.remove(e.getSpawner().getLocation()))
             return;
 
-        StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner());
+        WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawner());
+
+        // If the event was called from the spawner override spawner, we can safely ignore this section.
+        // All the checks here were already been performed by the overridden spawner.
+        if (stackedSpawner.isSpawnerOverridenTick())
+            return;
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
             // We make sure the spawner is still overridden by WildStacker
@@ -442,7 +447,7 @@ public final class SpawnersListener implements Listener {
 
         stackedEntity.updateNerfed();
 
-        ((WStackedEntity) stackedEntity).setUpgradeId(((WStackedSpawner) stackedSpawner).getUpgradeId());
+        ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
 
         int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
@@ -729,10 +734,16 @@ public final class SpawnersListener implements Listener {
 
         @EventHandler
         public void onPreSpawnSpawner(PreSpawnerSpawnEvent e) {
-            if (!plugin.getSettings().listenPaperPreSpawnEvent)
+            if (!plugin.getSettings().entitiesStackingEnabled || !plugin.getSettings().listenPaperPreSpawnEvent)
                 return;
 
-            StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawnerLocation().getBlock());
+            WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawnerLocation().getBlock());
+
+            // If the event was called from the spawner override spawner, we can safely ignore this section.
+            // All the checks here were already been performed by the overridden spawner.
+            if (stackedSpawner.isSpawnerOverridenTick())
+                return;
+
             SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 

@@ -42,6 +42,7 @@ import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
@@ -162,7 +163,8 @@ public class StackedBaseSpawner extends BaseSpawner {
             return;
         }
 
-        boolean spawnStacked = EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
+        boolean spawnStacked = plugin.getSettings().entitiesStackingEnabled &&
+                EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
         failureReason = "";
 
         int spawnCount = !spawnStacked || !this.demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
@@ -206,14 +208,19 @@ public class StackedBaseSpawner extends BaseSpawner {
             mobsToSpawn = mobsToSpawn / amountPerEntity;
         }
 
-        while (spawnedEntities < stackAmount) {
-            if (!attemptMobSpawning(serverLevel, blockPos, entityToSpawn, entityToSpawnType,
-                    mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner)) {
-                return;
+        MobSpawnResult spawnResult = MobSpawnResult.SUCCESS;
+        try {
+            stackedSpawner.setSpawnerOverridenTick(true);
+            while (spawnResult == MobSpawnResult.SUCCESS && spawnedEntities < stackAmount) {
+                spawnResult = attemptMobSpawning(serverLevel, blockPos, entityToSpawn, entityToSpawnType,
+                        mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner);
             }
+        } finally {
+            stackedSpawner.setSpawnerOverridenTick(false);
         }
 
-        resetSpawnDelay(serverLevel, blockPos);
+        if (spawnResult == MobSpawnResult.SUCCESS || spawnResult == MobSpawnResult.ABORT_AND_RESET_DELAY)
+            resetSpawnDelay(serverLevel, blockPos);
     }
 
     @Override
@@ -226,9 +233,9 @@ public class StackedBaseSpawner extends BaseSpawner {
             demoEntity.setUpgradeId(upgradeId);
     }
 
-    private boolean attemptMobSpawning(ServerLevel serverLevel, BlockPos blockPos, CompoundTag entityToSpawn,
-                                       EntityType<?> entityToSpawnType, int mobsToSpawn, int amountPerEntity,
-                                       int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {
+    private MobSpawnResult attemptMobSpawning(ServerLevel serverLevel, BlockPos blockPos, CompoundTag entityToSpawn,
+                                              EntityType<?> entityToSpawnType, int mobsToSpawn, int amountPerEntity,
+                                              int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {
         boolean hasSpawnedEntity = false;
 
         for (int i = 0; i < mobsToSpawn; i++) {
@@ -279,7 +286,7 @@ public class StackedBaseSpawner extends BaseSpawner {
                             type, MCUtil.toLocation(serverLevel, blockPos));
                     if (!event.callEvent()) {
                         if (event.shouldAbortSpawn())
-                            break;
+                            return MobSpawnResult.ABORT_AND_RESET_DELAY;
 
                         continue;
                     }
@@ -289,10 +296,8 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             Entity bukkitEntity = generateEntity(serverLevel, x, y, z, true);
 
-            if (bukkitEntity == null) {
-                resetSpawnDelay(serverLevel, blockPos);
-                return false;
-            }
+            if (bukkitEntity == null)
+                return MobSpawnResult.ABORT_AND_RESET_DELAY;
 
             int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
 
@@ -303,7 +308,7 @@ public class StackedBaseSpawner extends BaseSpawner {
             }
         }
 
-        return hasSpawnedEntity;
+        return hasSpawnedEntity ? MobSpawnResult.SUCCESS : MobSpawnResult.ABORT;
     }
 
     private void resetSpawnDelay(ServerLevel serverLevel, BlockPos blockPos) {
@@ -342,7 +347,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         EntityStorage.setMetadata(bukkitEntity, EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
 
-        if (amountPerEntity > 1 || stackedSpawner.getUpgradeId() != 0) {
+        if (amountPerEntity > 1 || !stackedSpawner.isDefaultUpgrade()) {
             stackedEntity = WStackedEntity.of(bukkitEntity);
             ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
             stackedEntity.setStackAmount(amountPerEntity, true);
@@ -410,8 +415,12 @@ public class StackedBaseSpawner extends BaseSpawner {
         return false;
     }
 
+    @Nullable
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
                                           List<? extends Entity> nearbyEntities) {
+        if (!plugin.getSettings().entitiesStackingEnabled)
+            return null;
+
         LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
         if (linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
@@ -441,6 +450,16 @@ public class StackedBaseSpawner extends BaseSpawner {
         this.demoEntity = (WStackedEntity) WStackedEntity.of(demoEntity.getBukkitEntity());
         this.demoEntity.setSpawnCause(SpawnCause.SPAWNER);
         this.demoEntity.setDemoEntity();
+    }
+
+    enum MobSpawnResult {
+
+        SUCCESS,
+
+        ABORT,
+
+        ABORT_AND_RESET_DELAY
+
     }
 
 }

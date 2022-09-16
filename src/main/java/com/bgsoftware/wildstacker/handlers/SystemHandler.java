@@ -170,7 +170,7 @@ public final class SystemHandler implements SystemManager {
         }
 
         boolean shouldBeCached = stackedEntity.isCached() || stackedEntity.getStackAmount() > 1 ||
-                ((WStackedEntity) stackedEntity).getUpgradeId() != 0;
+                !stackedEntity.isDefaultUpgrade();
 
         //A new entity was created. Let's see if we need to add him
         if (shouldBeCached)
@@ -822,7 +822,7 @@ public final class SystemHandler implements SystemManager {
 
         for (StackedSpawner stackedSpawner : getStackedSpawners(chunk)) {
             dataHandler.removeStackedSpawner(stackedSpawner);
-            if (stackedSpawner.getStackAmount() > 1 || ((WStackedSpawner) stackedSpawner).getUpgradeId() != 0) {
+            if (stackedSpawner.getStackAmount() > 1 || !stackedSpawner.isDefaultUpgrade()) {
                 dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
                         .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
             }
