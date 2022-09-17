@@ -28,6 +28,7 @@ import net.minecraft.server.v1_16_R3.Entity;
 import net.minecraft.server.v1_16_R3.EntityAnimal;
 import net.minecraft.server.v1_16_R3.EntityArmorStand;
 import net.minecraft.server.v1_16_R3.EntityArrow;
+import net.minecraft.server.v1_16_R3.EntityExperienceOrb;
 import net.minecraft.server.v1_16_R3.EntityFireballFireball;
 import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.EntityInsentient;
@@ -85,6 +86,7 @@ import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftExperienceOrb;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
@@ -99,6 +101,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -190,17 +193,16 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     }
 
     @Override
-    public <T extends org.bukkit.entity.Entity> T spawnEntity(Location location, Class<T> type, SpawnCause spawnCause) {
-        CraftWorld world = (CraftWorld) location.getWorld();
-
-        assert world != null;
-
-        Entity nmsEntity = world.createEntity(location, type);
-        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
-
-        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
-
-        return type.cast(bukkitEntity);
+    public ExperienceOrb spawnExpOrb(Location location, SpawnCause spawnCause, int value) {
+        return createEntity(location, ExperienceOrb.class, spawnCause, bukkitOrb -> {
+            EntityExperienceOrb orb = ((CraftExperienceOrb) bukkitOrb).getHandle();
+            orb.value = value;
+            try {
+                // Paper only
+                orb.spawnReason = ExperienceOrb.SpawnReason.ENTITY_DEATH;
+            } catch (Throwable ignored) {
+            }
+        }, null);
     }
 
     @Override

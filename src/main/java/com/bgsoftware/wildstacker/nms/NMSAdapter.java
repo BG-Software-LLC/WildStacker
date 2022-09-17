@@ -18,6 +18,7 @@ import org.bukkit.entity.Animals;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -45,7 +46,7 @@ public interface NMSAdapter {
     <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause,
                                       Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer);
 
-    <T extends Entity> T spawnEntity(Location location, Class<T> type, SpawnCause spawnCause);
+    ExperienceOrb spawnExpOrb(Location location, SpawnCause spawnCause, int value);
 
     Zombie spawnZombieVillager(Villager villager);
 

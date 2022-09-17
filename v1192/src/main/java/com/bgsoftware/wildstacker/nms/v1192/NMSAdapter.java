@@ -90,6 +90,7 @@ import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftAnimals;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftChicken;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftExperienceOrb;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPiglin;
@@ -197,17 +198,16 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     }
 
     @Override
-    public <T extends org.bukkit.entity.Entity> T spawnEntity(Location location, Class<T> type, SpawnCause spawnCause) {
-        CraftWorld world = (CraftWorld) location.getWorld();
-
-        assert world != null;
-
-        Entity nmsEntity = world.createEntity(location, type);
-        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
-
-        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
-
-        return type.cast(bukkitEntity);
+    public org.bukkit.entity.ExperienceOrb spawnExpOrb(Location location, SpawnCause spawnCause, int value) {
+        return createEntity(location, org.bukkit.entity.ExperienceOrb.class, spawnCause, bukkitOrb -> {
+            ExperienceOrb orb = ((CraftExperienceOrb) bukkitOrb).getHandle();
+            orb.value = value;
+            try {
+                // Paper only
+                orb.spawnReason = org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH;
+            } catch (Throwable ignored) {
+            }
+        }, null);
     }
 
     @Override
@@ -271,7 +271,7 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
     @Override
     public int getEntityExp(org.bukkit.entity.LivingEntity bukkitLivingEntity) {
-        if(!Bukkit.isPrimaryThread())
+        if (!Bukkit.isPrimaryThread())
             return -1;
 
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
