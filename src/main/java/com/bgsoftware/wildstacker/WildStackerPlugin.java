@@ -249,7 +249,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         log("&cThe plugin doesn't support your minecraft version.");
         log("&cPlease try a different version.");
 
-        return true;
+        return false;
     }
 
     public NMSAdapter getNMSAdapter() {
