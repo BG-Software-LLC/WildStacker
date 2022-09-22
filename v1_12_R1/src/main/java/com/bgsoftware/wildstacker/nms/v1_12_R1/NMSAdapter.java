@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.SyncedCreatureSpawnerImpl
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.BlockRotatable;
@@ -137,7 +138,8 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
         world.addEntity(nmsEntity, spawnCause.toSpawnReason());
 
-        WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
+        if (EntityUtils.isStackable(bukkitEntity))
+            WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
         if (afterSpawnConsumer != null) {
             //noinspection unchecked
