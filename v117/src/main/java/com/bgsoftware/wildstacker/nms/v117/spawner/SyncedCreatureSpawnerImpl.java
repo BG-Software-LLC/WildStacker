@@ -190,7 +190,7 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
                 baseSpawner.requiredPlayerRange,
                 baseSpawner.spawnRange,
                 baseSpawner.spawnDelay / 20,
-                ""
+                baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
         );
     }
 
