@@ -246,7 +246,8 @@ public class StackedBaseSpawner extends BaseSpawner {
             Location location = new Location(serverLevel.getWorld(), x, y, z);
 
             if (!serverLevel.noCollision(entityToSpawnType.getAABB(x, y, z))) {
-                failureReason = "Not enough space to spawn the entity.";
+                if(failureReason.isEmpty())
+                    failureReason = "Not enough space to spawn the entity.";
                 continue;
             }
 

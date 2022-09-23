@@ -333,7 +333,8 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             }
 
             if (!hasSpace) {
-                failureReason = "Not enough space to spawn the entity.";
+                if(failureReason.isEmpty())
+                    failureReason = "Not enough space to spawn the entity.";
                 continue;
             }
 
