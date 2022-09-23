@@ -355,12 +355,6 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (entity instanceof Mob mob) {
             CompoundTag entityToSpawn = this.nextSpawnData.getEntityToSpawn();
 
-            if (!this.nextSpawnData.getCustomSpawnRules().isPresent() &&
-                    !mob.checkSpawnRules(serverLevel, MobSpawnType.SPAWNER) ||
-                    !mob.checkSpawnObstruction(serverLevel)) {
-                return false;
-            }
-
             if (entityToSpawn.size() == 1 && entityToSpawn.contains("id", 8)) {
                 mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()),
                         MobSpawnType.SPAWNER, null, null);
