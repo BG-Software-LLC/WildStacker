@@ -744,6 +744,13 @@ public final class SpawnersListener implements Listener {
             if (stackedSpawner.isSpawnerOverridenTick())
                 return;
 
+            if (plugin.getSettings().spawnersOverrideEnabled) {
+                // We make sure the spawner is still overridden by WildStacker
+                // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
+                if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
+                    return;
+            }
+
             SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
