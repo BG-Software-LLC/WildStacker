@@ -33,8 +33,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
-import net.minecraft.world.level.entity.LevelCallback;
-import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
@@ -51,8 +49,6 @@ public class StackedBaseSpawner extends BaseSpawner {
 
     private static final ReflectField<BaseSpawner> BASE_SPAWNER = new ReflectField<BaseSpawner>(SpawnerBlockEntity.class,
             SpawnerBlockEntity.class, "a").removeFinal();
-    private static final ReflectField<LevelCallback<Entity>> WORLD_LEVEL_CALLBACK =
-            new ReflectField<>(PersistentEntitySectionManager.class, LevelCallback.class, "c");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -250,7 +246,7 @@ public class StackedBaseSpawner extends BaseSpawner {
             Location location = new Location(serverLevel.getWorld(), x, y, z);
 
             if (!serverLevel.noCollision(entityToSpawnType.getAABB(x, y, z))) {
-                if(failureReason.isEmpty())
+                if (failureReason.isEmpty())
                     failureReason = "Not enough space to spawn the entity.";
                 continue;
             }
@@ -435,7 +431,8 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (demoEntity == null)
             return;
 
-        WORLD_LEVEL_CALLBACK.get(serverLevel.entityManager).onTrackingEnd(demoEntity);
+        demoEntity.remove(Entity.RemovalReason.DISCARDED);
+        demoEntity.unsetRemoved();
 
         if (!EntityUtils.isStackable(demoEntity.getBukkitEntity())) {
             this.demoEntity = null;
