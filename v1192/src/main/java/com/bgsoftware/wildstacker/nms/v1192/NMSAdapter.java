@@ -100,7 +100,6 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftRaider;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftStrider;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftTurtle;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.enchantments.Enchantment;
@@ -883,7 +882,11 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
             experienceOrb.setPosRaw(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ());
             int repairAmount = Math.min(amount * 2, mendingItem.getDamageValue());
-            PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(serverPlayer, experienceOrb, mendingItem, repairAmount);
+            PlayerItemMendEvent event = new PlayerItemMendEvent(serverPlayer.getBukkitEntity(),
+                    CraftItemStack.asBukkitCopy(mendingItem),
+                    (org.bukkit.entity.ExperienceOrb) experienceOrb.getBukkitEntity(),
+                    repairAmount);
+            Bukkit.getPluginManager().callEvent(event);
             repairAmount = event.getRepairAmount();
 
             experienceOrb.discard();
