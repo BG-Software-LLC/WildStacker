@@ -465,14 +465,10 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
-        if (!plugin.getSettings().itemsStackingEnabled) {
-            ItemStack item = itemStack.clone();
-            item.setAmount(amount);
-            return plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
-            });
-        }
+        int limit = ItemUtils.canBeStacked(itemStack, location.getWorld()) ?
+                plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE) :
+                itemStack.getMaxStackSize();
 
-        int limit = plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE);
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
 
         int amountOfItems = amount / limit;
@@ -484,8 +480,10 @@ public final class SystemHandler implements SystemManager {
         for (int i = 0; i < amountOfItems; i++) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
-            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM,
-                    stackedItem -> stackedItem.setStackAmount(itemLimit, stackedItem.isCached()));
+            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
+                if (plugin.getSettings().itemsStackingEnabled)
+                    stackedItem.setStackAmount(itemLimit, stackedItem.isCached());
+            });
         }
 
         int leftOvers = amount % limit;
@@ -493,8 +491,10 @@ public final class SystemHandler implements SystemManager {
         if (leftOvers > 0) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
-            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM,
-                    stackedItem -> stackedItem.setStackAmount(leftOvers, stackedItem.isCached()));
+            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
+                if (plugin.getSettings().itemsStackingEnabled)
+                    stackedItem.setStackAmount(leftOvers, stackedItem.isCached());
+            });
         }
 
         return lastDroppedItem;

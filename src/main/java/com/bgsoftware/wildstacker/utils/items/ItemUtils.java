@@ -422,7 +422,7 @@ public final class ItemUtils {
         location.getWorld().playSound(location, ITEM_PICKUP_SOUND, 0.2F, pitch);
     }
 
-    private static boolean canBeStacked(ItemStack itemStack, World world) {
+    public static boolean canBeStacked(ItemStack itemStack, World world) {
         Material itemType = itemStack.getType();
         return !plugin.getSettings().blacklistedItems.contains(itemType) &&
                 (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&
