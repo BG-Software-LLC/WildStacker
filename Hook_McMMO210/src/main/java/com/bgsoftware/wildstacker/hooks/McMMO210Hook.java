@@ -33,6 +33,8 @@ import java.util.UUID;
 public final class McMMO210Hook {
 
     private static final String CUSTOM_NAME_KEY = "mcMMO: Custom Name";
+    private static final String CUSTOM_NAME_NEW_KEY = "mcmmo_custom_name";
+    private static final String OLD_NAME_KEY = "mcmmo_old_name";
     private static final String CUSTOM_NAME_VISIBLE_KEY = "mcMMO: Name Visibility";
 
     private static final String RUPTURE_TASK_KEY = "mcMMO: RuptureTask";
@@ -72,10 +74,23 @@ public final class McMMO210Hook {
         if (!(entity instanceof LivingEntity))
             return;
 
+        String name = plugin.getNMSAdapter().getCustomName(entity);
+
         if (entity.hasMetadata(CUSTOM_NAME_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_KEY, mcMMO);
-            entity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().getCustomName(entity)));
+            entity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, name));
         }
+
+        if (entity.hasMetadata(CUSTOM_NAME_NEW_KEY)) {
+            entity.removeMetadata(CUSTOM_NAME_NEW_KEY, mcMMO);
+            entity.setMetadata(CUSTOM_NAME_NEW_KEY, new FixedMetadataValue(mcMMO, name));
+        }
+
+        if (entity.hasMetadata(OLD_NAME_KEY)) {
+            entity.removeMetadata(OLD_NAME_KEY, mcMMO);
+            entity.setMetadata(OLD_NAME_KEY, new FixedMetadataValue(mcMMO, name));
+        }
+
         if (entity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_VISIBLE_KEY, mcMMO);
             entity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().isCustomNameVisible(entity)));
