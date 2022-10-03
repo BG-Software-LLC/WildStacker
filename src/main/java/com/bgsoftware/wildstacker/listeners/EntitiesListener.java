@@ -5,7 +5,8 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.listeners.events.EntityPickupItemEvent;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
@@ -70,8 +71,10 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,6 +121,8 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
         } catch (Exception ignored) {
         }
+
+        EventsListener.addEntityPickupListener(this::onEntityPickup, EventPriority.HIGHEST);
     }
 
     /*
@@ -138,11 +143,8 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onEntityPickup(EntityPickupItemEvent e) {
-        if (EntityStorage.hasMetadata(e.getEntity(), EntityFlag.CORPSE)) {
-            e.setCancelled(true);
-        }
+    private boolean onEntityPickup(StackedItem stackedItem, LivingEntity livingEntity, @Nullable Inventory inventory) {
+        return EntityStorage.hasMetadata(livingEntity, EntityFlag.CORPSE);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

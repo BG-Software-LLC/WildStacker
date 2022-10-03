@@ -1,25 +1,40 @@
 package com.bgsoftware.wildstacker.listeners.events;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.pair.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Turtle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
-@SuppressWarnings("unused")
+import javax.annotation.Nullable;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
+
 public final class EventsListener {
 
     private static WildStackerPlugin plugin;
+
+    @Nullable
+    private static IEggLayListener eggLayListener;
+    @Nullable
+    private static IScuteDropListener scuteDropListener;
+    private static final List<Pair<IEntityPickupListener, EventPriority>> entityPickupListeners = new LinkedList<>();
 
     public static void register(WildStackerPlugin plugin) {
         EventsListener.plugin = plugin;
@@ -44,30 +59,47 @@ public final class EventsListener {
         }
 
         plugin.getServer().getPluginManager().registerEvents(new EggLay(), plugin);
+
         if (ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new ScuteDrop(), plugin);
+    }
+
+    public static void registerEggLayListener(IEggLayListener eggLayListener) {
+        EventsListener.eggLayListener = eggLayListener;
+    }
+
+    public static void registerScuteDropListener(IScuteDropListener scuteDropListener) {
+        EventsListener.scuteDropListener = scuteDropListener;
+    }
+
+    public static void addEntityPickupListener(IEntityPickupListener entityPickupListener, EventPriority eventPriority) {
+        entityPickupListeners.add(new Pair<>(entityPickupListener, eventPriority));
+        entityPickupListeners.sort(Comparator.comparingInt(o -> o.getValue().getSlot()));
+    }
+
+    private static boolean notifyEntityPickupListeners(StackedItem stackedItem, LivingEntity livingEntity) {
+        Inventory inventory = livingEntity instanceof InventoryHolder ? ((InventoryHolder) livingEntity).getInventory() : null;
+        for (Pair<IEntityPickupListener, EventPriority> pair : entityPickupListeners) {
+            if (pair.getKey().apply(stackedItem, livingEntity, inventory))
+                return true;
+        }
+
+        return false;
     }
 
     private static class PlayerAttemptPickup implements Listener {
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.player.PlayerAttemptPickupItemEvent e) {
-            if (!ItemUtils.isStackable(e.getItem()))
+            if (entityPickupListeners.isEmpty() || !ItemUtils.isStackable(e.getItem()))
                 return;
 
             org.bukkit.event.entity.EntityPickupItemEvent bukkitEntityPickupItemEvent =
                     new org.bukkit.event.entity.EntityPickupItemEvent(e.getPlayer(), e.getItem(), e.getRemaining());
             Bukkit.getPluginManager().callEvent(bukkitEntityPickupItemEvent);
 
-            if (bukkitEntityPickupItemEvent.isCancelled()) {
-                e.setCancelled(true);
-                e.setFlyAtPlayer(false);
-                return;
-            }
-
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
-            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
-            if (entityPickupItemEvent.isCancelled()) {
+            if (bukkitEntityPickupItemEvent.isCancelled() ||
+                    notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getPlayer())) {
                 e.setCancelled(true);
                 e.setFlyAtPlayer(false);
             }
@@ -84,15 +116,10 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.entity.EntityPickupItemEvent e) {
-            if (!listenToPlayersPickup && e.getEntity() instanceof Player)
+            if (entityPickupListeners.isEmpty() || (!listenToPlayersPickup && e.getEntity() instanceof Player))
                 return;
 
-            if (!ItemUtils.isStackable(e.getItem()))
-                return;
-
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getEntity(), WStackedItem.of(e.getItem()));
-            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
-            if (entityPickupItemEvent.isCancelled())
+            if (ItemUtils.isStackable(e.getItem()) && notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getEntity()))
                 e.setCancelled(true);
         }
 
@@ -102,12 +129,10 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         public void onEntityPickupEvent(org.bukkit.event.player.PlayerPickupItemEvent e) {
-            if (!ItemUtils.isStackable(e.getItem()))
+            if (entityPickupListeners.isEmpty() || !ItemUtils.isStackable(e.getItem()))
                 return;
 
-            EntityPickupItemEvent entityPickupItemEvent = new EntityPickupItemEvent(e.getPlayer(), WStackedItem.of(e.getItem()));
-            Bukkit.getPluginManager().callEvent(entityPickupItemEvent);
-            if (entityPickupItemEvent.isCancelled())
+            if (notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getPlayer()))
                 e.setCancelled(true);
         }
 
@@ -117,36 +142,39 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
         public void onEggLay(ItemSpawnEvent e) {
-            if (e.getEntity().getItemStack().getType() != Material.EGG)
+            if (eggLayListener == null || e.getEntity().getItemStack().getType() != Material.EGG)
                 return;
 
             Item egg = e.getEntity();
 
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2, entity ->
-                            entity instanceof Chicken && plugin.getNMSEntities().getEggLayTime((Chicken) entity) <= 0)
-                    .findFirst().ifPresent(chicken -> {
-                        EggLayEvent eggLayEvent = new EggLayEvent(egg, (Chicken) chicken);
-                        Bukkit.getPluginManager().callEvent(eggLayEvent);
-                    });
+                    entity instanceof Chicken && plugin.getNMSEntities().getEggLayTime((Chicken) entity) <= 0
+            ).findFirst().ifPresent(chicken -> eggLayListener.apply((Chicken) chicken, egg));
         }
 
     }
 
     private static class ScuteDrop implements Listener {
 
+        @Nullable
+        private static final Material SCUTE = ((Supplier<Material>) () -> {
+            try {
+                return Material.valueOf("SCUTE");
+            } catch (IllegalArgumentException error) {
+                return null;
+            }
+        }).get();
+
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
         public void onScuteDrop(ItemSpawnEvent e) {
-            if (!e.getEntity().getItemStack().getType().name().equals("SCUTE"))
+            if (scuteDropListener == null || e.getEntity().getItemStack().getType() != SCUTE)
                 return;
 
             Item scute = e.getEntity();
 
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 2,
                             entity -> entity instanceof org.bukkit.entity.Turtle)
-                    .findFirst().ifPresent(turtle -> {
-                        ScuteDropEvent scuteDropEvent = new ScuteDropEvent(scute, (Turtle) turtle);
-                        Bukkit.getPluginManager().callEvent(scuteDropEvent);
-                    });
+                    .findFirst().ifPresent(turtle -> scuteDropListener.apply(turtle, scute));
         }
 
     }
