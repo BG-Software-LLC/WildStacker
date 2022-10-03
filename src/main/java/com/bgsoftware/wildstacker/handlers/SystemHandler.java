@@ -480,7 +480,7 @@ public final class SystemHandler implements SystemManager {
         for (int i = 0; i < amountOfItems; i++) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
-            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
+            lastDroppedItem = plugin.getNMSEntities().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
                 if (plugin.getSettings().itemsStackingEnabled)
                     stackedItem.setStackAmount(itemLimit, stackedItem.isCached());
             });
@@ -491,7 +491,7 @@ public final class SystemHandler implements SystemManager {
         if (leftOvers > 0) {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
-            lastDroppedItem = plugin.getNMSAdapter().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
+            lastDroppedItem = plugin.getNMSEntities().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
                 if (plugin.getSettings().itemsStackingEnabled)
                     stackedItem.setStackAmount(leftOvers, stackedItem.isCached());
             });
@@ -517,7 +517,7 @@ public final class SystemHandler implements SystemManager {
 
         if (livingEntity != null) {
             Executor.sync(() -> {
-                plugin.getNMSAdapter().playDeathSound(livingEntity);
+                plugin.getNMSEntities().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
             }, 2L);
         }
@@ -780,11 +780,11 @@ public final class SystemHandler implements SystemManager {
             loadBarrels(chunk);
 
         for (Entity entity : chunk.getEntities()) {
-            String customName = plugin.getNMSAdapter().getCustomName(entity);
+            String customName = plugin.getNMSEntities().getCustomName(entity);
 
             // Checking for too long names
             if (customName != null && customName.length() > 256)
-                plugin.getNMSAdapter().setCustomName(entity, customName.substring(0, 256));
+                plugin.getNMSEntities().setCustomName(entity, customName.substring(0, 256));
 
             // Remove display blocks of invalid barrels
             if (atLeast18 && entity instanceof ArmorStand && customName != null &&
@@ -837,7 +837,7 @@ public final class SystemHandler implements SystemManager {
     }
 
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
-        return plugin.getNMSAdapter().createEntity(location, type, spawnCause, entity -> {
+        return plugin.getNMSEntities().createEntity(location, type, spawnCause, entity -> {
             EntityStorage.setMetadata(entity, EntityFlag.BYPASS_STACKING, true);
             if (beforeSpawnConsumer != null)
                 beforeSpawnConsumer.accept(entity);

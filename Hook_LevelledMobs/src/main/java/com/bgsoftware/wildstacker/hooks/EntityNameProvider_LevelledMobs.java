@@ -26,7 +26,7 @@ public final class EntityNameProvider_LevelledMobs implements EntityNameProvider
     @Override
     public String getCustomName(StackedEntity stackedEntity) {
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
-        return isLevelledMob(livingEntity) ? plugin.getNMSAdapter().getCustomName(livingEntity) : null;
+        return isLevelledMob(livingEntity) ? plugin.getNMSEntities().getCustomName(livingEntity) : null;
     }
 
     private boolean isLevelledMob(LivingEntity livingEntity) {

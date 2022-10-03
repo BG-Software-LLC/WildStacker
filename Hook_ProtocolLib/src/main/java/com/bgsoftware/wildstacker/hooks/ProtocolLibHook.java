@@ -82,7 +82,7 @@ public final class ProtocolLibHook {
 
             //Refresh item names
             EntitiesGetter.getNearbyEntities(event.getPlayer().getLocation(), 48, entity ->
-                            EntityUtils.isStackable(entity) && plugin.getNMSAdapter().isCustomNameVisible(entity))
+                            EntityUtils.isStackable(entity) && plugin.getNMSEntities().isCustomNameVisible(entity))
                     .forEach(entity -> updateName(event.getPlayer(), entity));
         }
 
@@ -107,7 +107,7 @@ public final class ProtocolLibHook {
 
             //Refresh item names
             EntitiesGetter.getNearbyEntities(event.getPlayer().getLocation(), 48, entity ->
-                            entity instanceof Item && plugin.getNMSAdapter().isCustomNameVisible(entity))
+                            entity instanceof Item && plugin.getNMSEntities().isCustomNameVisible(entity))
                     .forEach(entity -> updateName(event.getPlayer(), entity));
         }
 
@@ -121,9 +121,9 @@ public final class ProtocolLibHook {
             WrappedDataWatcher.Serializer visibleSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
 
             watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer),
-                    getCustomName(plugin.getNMSAdapter().getCustomName(entity)));
+                    getCustomName(plugin.getNMSEntities().getCustomName(entity)));
             watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer),
-                    plugin.getNMSAdapter().isCustomNameVisible(entity));
+                    plugin.getNMSEntities().isCustomNameVisible(entity));
 
             packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
 

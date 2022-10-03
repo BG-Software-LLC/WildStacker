@@ -4,7 +4,9 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.StackedMobSpawner;
+import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_12_R1.BiomeBase;
 import net.minecraft.server.v1_12_R1.Biomes;
 import net.minecraft.server.v1_12_R1.Block;
@@ -20,6 +22,7 @@ import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_12_R1.World;
 import org.bukkit.Location;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.entity.EntityType;
 
@@ -140,6 +143,11 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             return block instanceof BlockLeaves || block == Blocks.GRASS ||
                     block instanceof BlockLogAbstract || block == Blocks.AIR;
         }, EntityType.PARROT);
+    }
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
 
 }

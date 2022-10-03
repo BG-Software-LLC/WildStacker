@@ -245,7 +245,7 @@ public final class ItemUtils {
 
     public static ItemStack getFromBlock(Block block) {
         ItemStack itemStack = ServerVersion.isLegacy() ? block.getState().getData().toItemStack(1) : new ItemStack(block.getType());
-        if (plugin.getNMSAdapter().isRotatable(block))
+        if (plugin.getNMSWorld().isRotatable(block))
             itemStack.setDurability((short) 0);
         return itemStack;
     }
@@ -404,7 +404,7 @@ public final class ItemUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return entity.isValid() && !entity.isDead() && plugin.getNMSAdapter().isDroppedItem(entity);
+        return entity.isValid() && !entity.isDead() && plugin.getNMSEntities().isDroppedItem(entity);
     }
 
     public static ItemStack[] cloneItems(ItemStack[] original) {

@@ -4,8 +4,10 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.StackedMobSpawner;
+import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.world.BlockPosition;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_7_R4.BiomeBase;
 import net.minecraft.server.v1_7_R4.Block;
 import net.minecraft.server.v1_7_R4.Blocks;
@@ -16,6 +18,7 @@ import net.minecraft.server.v1_7_R4.TileEntity;
 import net.minecraft.server.v1_7_R4.TileEntityMobSpawner;
 import net.minecraft.server.v1_7_R4.World;
 import org.bukkit.Location;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.entity.EntityType;
 
@@ -111,6 +114,11 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
                 (world, position) -> world.getType(position.x, position.y - 1, position.z) == Blocks.MYCEL,
                 EntityType.MUSHROOM_COW
         );
+    }
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
     }
 
 }

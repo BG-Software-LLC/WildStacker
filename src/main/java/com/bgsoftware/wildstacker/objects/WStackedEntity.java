@@ -237,8 +237,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return StackCheckResult.BREED_STATUS;
 
         if (StackCheck.IS_IN_LOVE.isEnabled() && object instanceof Animals && (
-                plugin.getNMSAdapter().isInLove((Animals) object) ||
-                        plugin.getNMSAdapter().isInLove((Animals) targetEntity.getLivingEntity())))
+                plugin.getNMSEntities().isInLove((Animals) object) ||
+                        plugin.getNMSEntities().isInLove((Animals) targetEntity.getLivingEntity())))
             return StackCheckResult.IN_LOVE_STATUS;
 
         if (!plugin.getSettings().entitiesDisabledRegions.isEmpty()) {
@@ -318,8 +318,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 setFlag(EntityFlag.CORPSE, true);
                 if (EntityTypes.fromEntity(object).isSlime())
                     setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
-                plugin.getNMSAdapter().setHealthDirectly(object, 0);
-                plugin.getNMSAdapter().playDeathSound(object);
+                plugin.getNMSEntities().setHealthDirectly(object, 0);
+                plugin.getNMSEntities().playDeathSound(object);
             }, 2L);
         }
 
@@ -375,22 +375,22 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public String getCustomName() {
-        return plugin.getNMSAdapter().getCustomName(object);
+        return plugin.getNMSEntities().getCustomName(object);
     }
 
     @Override
     public void setCustomName(String customName) {
-        plugin.getNMSAdapter().setCustomName(object, customName);
+        plugin.getNMSEntities().setCustomName(object, customName);
     }
 
     @Override
     public boolean isCustomNameVisible() {
-        return plugin.getNMSAdapter().isCustomNameVisible(object);
+        return plugin.getNMSEntities().isCustomNameVisible(object);
     }
 
     @Override
     public void setCustomNameVisible(boolean visible) {
-        plugin.getNMSAdapter().setCustomNameVisible(object, visible);
+        plugin.getNMSEntities().setCustomNameVisible(object, visible);
     }
 
     @Override
@@ -551,7 +551,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setNerfed(boolean nerfed) {
-        plugin.getNMSAdapter().setNerfedEntity(object, nerfed);
+        plugin.getNMSEntities().setNerfedEntity(object, nerfed);
     }
 
     @Override

@@ -10,7 +10,7 @@ public interface SyncedCreatureSpawner extends CreatureSpawner {
 
     static SyncedCreatureSpawner of(CreatureSpawner creatureSpawner) {
         return creatureSpawner instanceof SyncedCreatureSpawner ? (SyncedCreatureSpawner) creatureSpawner :
-                plugin.getNMSAdapter().createSyncedSpawner(creatureSpawner);
+                plugin.getNMSSpawners().createSyncedSpawner(creatureSpawner);
     }
 
     void updateSpawner(SpawnerUpgrade spawnerUpgrade);

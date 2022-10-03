@@ -31,6 +31,7 @@ import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
+import com.bgsoftware.wildstacker.nms.NMSWorld;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
@@ -62,6 +63,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private NMSHolograms nmsHolograms;
     private NMSSpawners nmsSpawners;
     private NMSEntities nmsEntities;
+    private NMSWorld nmsWorld;
 
     private boolean shouldEnable = true;
 
@@ -240,6 +242,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                 nmsHolograms = (NMSHolograms) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSHolograms", version)).newInstance();
                 nmsSpawners = (NMSSpawners) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSSpawners", version)).newInstance();
                 nmsEntities = (NMSEntities) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSEntities", version)).newInstance();
+                nmsWorld = (NMSWorld) Class.forName(String.format("com.bgsoftware.wildstacker.nms.%s.NMSWorld", version)).newInstance();
                 return true;
             } catch (Exception error) {
                 error.printStackTrace();
@@ -266,6 +269,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public NMSEntities getNMSEntities() {
         return nmsEntities;
+    }
+
+    public NMSWorld getNMSWorld() {
+        return nmsWorld;
     }
 
     public LootHandler getLootHandler() {

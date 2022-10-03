@@ -65,7 +65,7 @@ public final class DeathSimulation {
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
         if (lastDamageCause != EntityDamageEvent.DamageCause.VOID &&
-                plugin.getNMSAdapter().handleTotemOfUndying(livingEntity)) {
+                plugin.getNMSEntities().handleTotemOfUndying(livingEntity)) {
             return new Result(true, -1);
         }
 
@@ -116,7 +116,7 @@ public final class DeathSimulation {
         if (!sweepingEdgeHandled && result.cancelEvent && killerTool != null && killer != null) {
             try {
                 sweepingEdgeHandled = true;
-                plugin.getNMSAdapter().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
+                plugin.getNMSEntities().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
             } finally {
                 sweepingEdgeHandled = false;
             }
@@ -138,7 +138,7 @@ public final class DeathSimulation {
             int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
             Executor.sync(() -> {
-                plugin.getNMSAdapter().setEntityDead(livingEntity, true);
+                plugin.getNMSEntities().setEntityDead(livingEntity, true);
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 // Setting the stack amount of the entity to the unstack amount.
@@ -149,12 +149,12 @@ public final class DeathSimulation {
                         IEntityDeathListener.Type.BEFORE_DEATH_EVENT);
 
                 // We fire the entity_die game event
-                plugin.getNMSAdapter().sendEntityDieEvent(livingEntity);
+                plugin.getNMSEntities().sendEntityDieEvent(livingEntity);
 
                 // I set the health to 0, so it will be 0 in the EntityDeathEvent
                 // Some plugins, such as MyPet, check for that value
                 double originalHealth = livingEntity.getHealth();
-                plugin.getNMSAdapter().setHealthDirectly(livingEntity, 0);
+                plugin.getNMSEntities().setHealthDirectly(livingEntity, 0);
 
                 boolean spawnDuplicate = false;
                 List<ItemStack> finalDrops;
@@ -177,8 +177,8 @@ public final class DeathSimulation {
                 }
 
                 // Restore all values.
-                plugin.getNMSAdapter().setEntityDead(livingEntity, false);
-                plugin.getNMSAdapter().setHealthDirectly(livingEntity, originalHealth);
+                plugin.getNMSEntities().setEntityDead(livingEntity, false);
+                plugin.getNMSEntities().setHealthDirectly(livingEntity, originalHealth);
                 stackedEntity.setStackAmount(realStackAmount, false);
 
                 // If setting this to ender dragons, the death animation doesn't happen for an unknown reason.
@@ -291,7 +291,7 @@ public final class DeathSimulation {
                 return false;
         }
 
-        Zombie zombieVillager = plugin.getNMSAdapter().spawnZombieVillager((Villager) livingEntity);
+        Zombie zombieVillager = plugin.getNMSEntities().spawnZombieVillager((Villager) livingEntity);
 
         if (zombieVillager == null)
             return false;
@@ -323,7 +323,7 @@ public final class DeathSimulation {
             }
         }
 
-        plugin.getNMSAdapter().awardKillScore(stackedEntity.getLivingEntity(), entityKiller);
+        plugin.getNMSEntities().awardKillScore(stackedEntity.getLivingEntity(), entityKiller);
     }
 
     private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {
@@ -364,7 +364,7 @@ public final class DeathSimulation {
             ));
         }
 
-        plugin.getNMSAdapter().attemptJoinRaid(killer, raider);
+        plugin.getNMSWorld().attemptJoinRaid(killer, raider);
     }
 
     private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager) {
@@ -385,7 +385,7 @@ public final class DeathSimulation {
     public static final class Result {
 
         private boolean cancelEvent;
-        private double eventDamage;
+        private final double eventDamage;
 
         public Result(boolean cancelEvent, double eventDamage) {
             this.cancelEvent = cancelEvent;

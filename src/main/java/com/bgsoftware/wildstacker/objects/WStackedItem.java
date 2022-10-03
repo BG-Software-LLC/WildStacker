@@ -278,22 +278,22 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public String getCustomName() {
-        return plugin.getNMSAdapter().getCustomName(object);
+        return plugin.getNMSEntities().getCustomName(object);
     }
 
     @Override
     public void setCustomName(String customName) {
-        plugin.getNMSAdapter().setCustomName(object, customName);
+        plugin.getNMSEntities().setCustomName(object, customName);
     }
 
     @Override
     public boolean isCustomNameVisible() {
-        return plugin.getNMSAdapter().isCustomNameVisible(object);
+        return plugin.getNMSEntities().isCustomNameVisible(object);
     }
 
     @Override
     public void setCustomNameVisible(boolean visible) {
-        plugin.getNMSAdapter().setCustomNameVisible(object, visible);
+        plugin.getNMSEntities().setCustomNameVisible(object, visible);
     }
 
     @Override

@@ -84,8 +84,8 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             blockDisplay.setSmall(true);
             blockDisplay.setGravity(false);
             blockDisplay.setHelmet(barrelItem);
-            plugin.getNMSAdapter().setCustomName(blockDisplay, "BlockDisplay");
-            plugin.getNMSAdapter().setCustomNameVisible(blockDisplay, false);
+            plugin.getNMSEntities().setCustomName(blockDisplay, "BlockDisplay");
+            plugin.getNMSEntities().setCustomNameVisible(blockDisplay, false);
         }
     }
 

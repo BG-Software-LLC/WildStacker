@@ -2,6 +2,7 @@ group 'v1_12_R1'
 
 dependencies {
     compileOnly "org.spigotmc:v1_12_R1:latest"
+    compileOnly project(":NMS-Spigot")
     compileOnly project(":API")
     compileOnly parent
 }

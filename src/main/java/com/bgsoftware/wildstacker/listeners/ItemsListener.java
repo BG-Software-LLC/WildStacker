@@ -66,7 +66,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e) {
-        if (!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSAdapter().isDroppedItem(e.getEntity()))
+        if (!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSEntities().isDroppedItem(e.getEntity()))
             return;
 
         StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
@@ -149,7 +149,7 @@ public final class ItemsListener implements Listener {
 
             int stackAmount = stackedItem.getStackAmount();
 
-            if (plugin.getNMSAdapter().handlePiglinPickup(e.getEntity(), item)) {
+            if (plugin.getNMSEntities().handlePiglinPickup(e.getEntity(), item)) {
                 if (stackAmount <= 1) {
                     stackedItem.remove();
                 } else {
@@ -181,9 +181,9 @@ public final class ItemsListener implements Listener {
                         }
                     });
                 } else {
-                    plugin.getNMSAdapter().awardPickupScore((Player) ((PlayerInventory) e.getInventory()).getHolder(), item);
+                    plugin.getNMSEntities().awardPickupScore((Player) ((PlayerInventory) e.getInventory()).getHolder(), item);
                 }
-            } else if (plugin.getNMSAdapter().handleEquipmentPickup(e.getEntity(), item)) {
+            } else if (plugin.getNMSEntities().handleEquipmentPickup(e.getEntity(), item)) {
                 if (stackAmount <= 1) {
                     stackedItem.remove();
                 } else {
@@ -210,7 +210,7 @@ public final class ItemsListener implements Listener {
                 if (plugin.getSettings().itemsSoundEnabled)
                     ItemUtils.playPickupSound(e.getEntity().getLocation());
                 //Pick up animation
-                plugin.getNMSAdapter().playPickupAnimation(e.getEntity(), item);
+                plugin.getNMSEntities().playPickupAnimation(e.getEntity(), item);
             }
 
             if (stackedItem.getStackAmount() <= 0) {

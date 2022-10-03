@@ -62,11 +62,11 @@ public final class CoreProtectHook {
             switch (action) {
                 case BLOCK_BREAK:
                     coreProtectAPI.logRemoval(offlinePlayer.getName(), location, type,
-                            (org.bukkit.block.data.BlockData) plugin.getNMSAdapter().getBlockData(type, data));
+                            (org.bukkit.block.data.BlockData) plugin.getNMSWorld().getBlockData(type, data));
                     break;
                 case BLOCK_PLACE:
                     coreProtectAPI.logPlacement(offlinePlayer.getName(), location, type,
-                            (org.bukkit.block.data.BlockData) plugin.getNMSAdapter().getBlockData(type, data));
+                            (org.bukkit.block.data.BlockData) plugin.getNMSWorld().getBlockData(type, data));
                     break;
             }
         } else if (!warningDisplayed) {

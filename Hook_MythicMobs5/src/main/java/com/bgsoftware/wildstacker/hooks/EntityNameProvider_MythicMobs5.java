@@ -32,7 +32,7 @@ public final class EntityNameProvider_MythicMobs5 implements EntityNameProvider 
         } catch (Throwable ignored) {
         }
 
-        return plugin.getNMSAdapter().getCustomName(livingEntity);
+        return plugin.getNMSEntities().getCustomName(livingEntity);
     }
 
 }

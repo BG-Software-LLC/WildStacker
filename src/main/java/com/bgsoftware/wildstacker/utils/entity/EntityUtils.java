@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -112,9 +113,9 @@ public final class EntityUtils {
     }
 
     public static void setKiller(LivingEntity livingEntity, Player killer) {
-        plugin.getNMSAdapter().setKiller(livingEntity, killer);
+        plugin.getNMSEntities().setKiller(livingEntity, killer);
         if (killer != null)
-            plugin.getNMSAdapter().updateLastDamageTime(livingEntity);
+            plugin.getNMSEntities().updateLastDamageTime(livingEntity);
     }
 
     public static void removeParrotIfShoulder(Parrot parrot) {
@@ -136,7 +137,7 @@ public final class EntityUtils {
     }
 
     public static void giveExp(Player player, int amount) {
-        plugin.getNMSAdapter().giveExp(player, amount);
+        plugin.getNMSEntities().giveExp(player, amount);
     }
 
     public static void spawnExp(Location location, int amount) {
@@ -149,7 +150,7 @@ public final class EntityUtils {
             experienceOrb = (ExperienceOrb) closestOrb.get();
             experienceOrb.setExperience(experienceOrb.getExperience() + amount);
         } else {
-            plugin.getNMSAdapter().spawnExpOrb(location, SpawnCause.DEFAULT, amount);
+            plugin.getNMSEntities().spawnExpOrb(location, SpawnCause.DEFAULT, amount);
         }
     }
 
@@ -239,7 +240,7 @@ public final class EntityUtils {
         }
 
         if (StackCheck.ENDERMAN_CARRIED_BLOCK.isEnabled() && StackCheck.ENDERMAN_CARRIED_BLOCK.isTypeAllowed(entityType)) {
-            if (!plugin.getNMSAdapter().getEndermanCarried((Enderman) en1).equals(plugin.getNMSAdapter().getEndermanCarried((Enderman) en2)))
+            if (!plugin.getNMSEntities().getEndermanCarried((Enderman) en1).equals(plugin.getNMSEntities().getEndermanCarried((Enderman) en2)))
                 return StackCheckResult.ENDERMAN_CARRIED_BLOCK;
         }
 
@@ -336,7 +337,7 @@ public final class EntityUtils {
         }
 
         if (StackCheck.MOOSHROOM_TYPE.isEnabled() && StackCheck.MOOSHROOM_TYPE.isTypeAllowed(entityType)) {
-            if (plugin.getNMSAdapter().getMooshroomType((MushroomCow) en1) != plugin.getNMSAdapter().getMooshroomType((MushroomCow) en2))
+            if (plugin.getNMSEntities().getMooshroomType((MushroomCow) en1) != plugin.getNMSEntities().getMooshroomType((MushroomCow) en2))
                 return StackCheckResult.MOOSHROOM_TYPE;
         }
 
@@ -449,26 +450,27 @@ public final class EntityUtils {
     }
 
     public static boolean canBeBred(Animals animal) {
-        return animal.getAge() == 0 && !plugin.getNMSAdapter().isInLove(animal);
+        return animal.getAge() == 0 && !plugin.getNMSEntities().isInLove(animal);
     }
 
     public static List<ItemStack> getEquipment(LivingEntity livingEntity, int lootBonusLevel) {
         List<ItemStack> drops = new ArrayList<>();
 
-        EntityEquipment entityEquipment = livingEntity.getEquipment();
+        EntityEquipment bukkitEntityEquipment = livingEntity.getEquipment();
+        INMSEntityEquipment entityEquipment = plugin.getNMSAdapter().createEntityEquipmentWrapper(bukkitEntityEquipment);
 
-        addDropArmor(drops, livingEntity, entityEquipment.getItemInHand(), lootBonusLevel,
-                plugin.getNMSAdapter().getItemInMainHandDropChance(entityEquipment));
+        addDropArmor(drops, livingEntity, entityEquipment.getItemInMainHand(), lootBonusLevel,
+                entityEquipment.getItemInMainHandDropChance());
 
         if (ServerVersion.isAtLeast(ServerVersion.v1_9)) {
-            addDropArmor(drops, livingEntity, plugin.getNMSAdapter().getItemInOffHand(entityEquipment), lootBonusLevel,
-                    plugin.getNMSAdapter().getItemInOffHandDropChance(entityEquipment));
+            addDropArmor(drops, livingEntity, entityEquipment.getItemInOffHand(), lootBonusLevel,
+                    entityEquipment.getItemInOffHandDropChance());
         }
 
-        addDropArmor(drops, livingEntity, entityEquipment.getHelmet(), lootBonusLevel, entityEquipment.getHelmetDropChance());
-        addDropArmor(drops, livingEntity, entityEquipment.getChestplate(), lootBonusLevel, entityEquipment.getChestplateDropChance());
-        addDropArmor(drops, livingEntity, entityEquipment.getLeggings(), lootBonusLevel, entityEquipment.getLeggingsDropChance());
-        addDropArmor(drops, livingEntity, entityEquipment.getBoots(), lootBonusLevel, entityEquipment.getBootsDropChance());
+        addDropArmor(drops, livingEntity, bukkitEntityEquipment.getHelmet(), lootBonusLevel, bukkitEntityEquipment.getHelmetDropChance());
+        addDropArmor(drops, livingEntity, bukkitEntityEquipment.getChestplate(), lootBonusLevel, bukkitEntityEquipment.getChestplateDropChance());
+        addDropArmor(drops, livingEntity, bukkitEntityEquipment.getLeggings(), lootBonusLevel, bukkitEntityEquipment.getLeggingsDropChance());
+        addDropArmor(drops, livingEntity, bukkitEntityEquipment.getBoots(), lootBonusLevel, bukkitEntityEquipment.getBootsDropChance());
 
         switch (EntityTypes.fromEntity(livingEntity)) {
             case PIG:
@@ -476,7 +478,7 @@ public final class EntityUtils {
                     drops.add(new ItemStack(Material.SADDLE));
                 break;
             case STRIDER:
-                if (plugin.getNMSAdapter().doesStriderHaveSaddle((org.bukkit.entity.Strider) livingEntity))
+                if (plugin.getNMSEntities().doesStriderHaveSaddle(livingEntity))
                     drops.add(new ItemStack(Material.SADDLE));
                 break;
             case HORSE:
@@ -522,32 +524,33 @@ public final class EntityUtils {
         }
 
         boolean clearEquipment = plugin.getSettings().entitiesClearEquipment;
-        EntityEquipment entityEquipment = livingEntity.getEquipment();
+        EntityEquipment bukkitEntityEquipment = livingEntity.getEquipment();
+        INMSEntityEquipment entityEquipment = plugin.getNMSAdapter().createEntityEquipmentWrapper(bukkitEntityEquipment);
 
-        if (clearEquipment || plugin.getNMSAdapter().getItemInMainHandDropChance(entityEquipment) >= 2.0F)
-            plugin.getNMSAdapter().setItemInMainHand(entityEquipment, new ItemStack(Material.AIR));
+        if (clearEquipment || entityEquipment.getItemInMainHandDropChance() >= 2.0F)
+            entityEquipment.setItemInMainHand(new ItemStack(Material.AIR));
 
-        if (ServerVersion.isAtLeast(ServerVersion.v1_9) && (clearEquipment || plugin.getNMSAdapter().getItemInOffHandDropChance(entityEquipment) >= 2.0F))
-            plugin.getNMSAdapter().setItemInOffHand(entityEquipment, new ItemStack(Material.AIR));
+        if (ServerVersion.isAtLeast(ServerVersion.v1_9) && (clearEquipment || entityEquipment.getItemInOffHandDropChance() >= 2.0F))
+            entityEquipment.setItemInOffHand(new ItemStack(Material.AIR));
 
-        if (clearEquipment || entityEquipment.getHelmetDropChance() >= 2.0F)
-            entityEquipment.setHelmet(new ItemStack(Material.AIR));
+        if (clearEquipment || bukkitEntityEquipment.getHelmetDropChance() >= 2.0F)
+            bukkitEntityEquipment.setHelmet(new ItemStack(Material.AIR));
 
-        if (clearEquipment || entityEquipment.getChestplateDropChance() >= 2.0F)
-            entityEquipment.setChestplate(new ItemStack(Material.AIR));
+        if (clearEquipment || bukkitEntityEquipment.getChestplateDropChance() >= 2.0F)
+            bukkitEntityEquipment.setChestplate(new ItemStack(Material.AIR));
 
-        if (clearEquipment || entityEquipment.getLeggingsDropChance() >= 2.0F)
-            entityEquipment.setLeggings(new ItemStack(Material.AIR));
+        if (clearEquipment || bukkitEntityEquipment.getLeggingsDropChance() >= 2.0F)
+            bukkitEntityEquipment.setLeggings(new ItemStack(Material.AIR));
 
-        if (clearEquipment || entityEquipment.getBootsDropChance() >= 2.0F)
-            entityEquipment.setBoots(new ItemStack(Material.AIR));
+        if (clearEquipment || bukkitEntityEquipment.getBootsDropChance() >= 2.0F)
+            bukkitEntityEquipment.setBoots(new ItemStack(Material.AIR));
 
         switch (EntityTypes.fromEntity(livingEntity)) {
             case PIG:
                 ((Pig) livingEntity).setSaddle(false);
                 break;
             case STRIDER:
-                plugin.getNMSAdapter().removeStriderSaddle((org.bukkit.entity.Strider) livingEntity);
+                plugin.getNMSEntities().removeStriderSaddle(livingEntity);
                 break;
             case HORSE:
             case DONKEY:

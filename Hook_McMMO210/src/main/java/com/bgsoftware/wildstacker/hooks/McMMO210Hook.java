@@ -74,7 +74,7 @@ public final class McMMO210Hook {
         if (!(entity instanceof LivingEntity))
             return;
 
-        String name = plugin.getNMSAdapter().getCustomName(entity);
+        String name = plugin.getNMSEntities().getCustomName(entity);
 
         if (entity.hasMetadata(CUSTOM_NAME_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_KEY, mcMMO);
@@ -93,7 +93,7 @@ public final class McMMO210Hook {
 
         if (entity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_VISIBLE_KEY, mcMMO);
-            entity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().isCustomNameVisible(entity)));
+            entity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSEntities().isCustomNameVisible(entity)));
         }
     }
 

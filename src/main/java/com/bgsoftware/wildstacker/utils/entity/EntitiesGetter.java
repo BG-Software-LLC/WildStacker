@@ -25,7 +25,7 @@ public final class EntitiesGetter {
             .build(new CacheLoader<ChunkPosition, Collection<Entity>>() {
                 @Override
                 public Collection<Entity> load(@NotNull ChunkPosition chunkPosition) {
-                    return plugin.getNMSAdapter().getEntitiesAtChunk(chunkPosition);
+                    return plugin.getNMSWorld().getEntitiesAtChunk(chunkPosition);
                 }
             });
 
@@ -35,7 +35,7 @@ public final class EntitiesGetter {
     }
 
     public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter) {
-        Collection<Entity> entities = plugin.getNMSAdapter().getNearbyEntities(location, range, filter);
+        Collection<Entity> entities = plugin.getNMSWorld().getNearbyEntities(location, range, filter);
 
         if (entities != null) {
             return entities.stream();

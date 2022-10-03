@@ -462,7 +462,7 @@ public final class EntitiesListener implements Listener {
 
         ItemStack inHand = e.getPlayer().getItemInHand();
 
-        if (!plugin.getNMSAdapter().isAnimalFood((Animals) e.getRightClicked(), inHand))
+        if (!plugin.getNMSEntities().isAnimalFood((Animals) e.getRightClicked(), inHand))
             return;
 
         if (!EntityUtils.canBeBred((Animals) e.getRightClicked()))
@@ -487,7 +487,7 @@ public final class EntitiesListener implements Listener {
                     return;
 
                 // Setting the entity to be in love-mode.
-                plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), true);
+                plugin.getNMSEntities().setInLove((Animals) e.getRightClicked(), e.getPlayer(), true);
 
                 itemsAmountToRemove = breedableAmount;
 
@@ -499,7 +499,7 @@ public final class EntitiesListener implements Listener {
 
                     if (EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE) {
                         // Turtles should lay an egg instead of spawning a baby.
-                        plugin.getNMSAdapter().setTurtleEgg(stackedEntity.getLivingEntity());
+                        plugin.getNMSEntities().setTurtleEgg(stackedEntity.getLivingEntity());
                         stackedEntity.setFlag(EntityFlag.BREEDABLE_AMOUNT, babiesAmount);
                         childEntity = null;
                     } else {
@@ -509,7 +509,7 @@ public final class EntitiesListener implements Listener {
                     }
 
                     // Making sure the entities are not in a love-mode anymore.
-                    plugin.getNMSAdapter().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
+                    plugin.getNMSEntities().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
 
                     // Resetting the breeding of the entity to 5 minutes
                     ((Animals) e.getRightClicked()).setAge(6000);
@@ -519,13 +519,13 @@ public final class EntitiesListener implements Listener {
 
                     if (childEntity != null) {
                         /* father and mother is the same entity in this case */
-                        if (!plugin.getNMSAdapter().callEntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
+                        if (!plugin.getNMSEntities().callEntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
                                 (LivingEntity) e.getRightClicked(), e.getPlayer(), inHand, expToDrop)) {
                             childEntity.remove();
                             return;
                         }
 
-                        plugin.getNMSAdapter().setInLove((Animals) childEntity, e.getPlayer(), false);
+                        plugin.getNMSEntities().setInLove((Animals) childEntity, e.getPlayer(), false);
                     }
 
                     EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
@@ -533,7 +533,7 @@ public final class EntitiesListener implements Listener {
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
                 stackedEntity.decreaseStackAmount(1, true);
                 StackedEntity duplicated = stackedEntity.spawnDuplicate(1, SpawnCause.BREEDING);
-                plugin.getNMSAdapter().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
+                plugin.getNMSEntities().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
                 itemsAmountToRemove = 1;
             } else {
                 return;
@@ -565,7 +565,7 @@ public final class EntitiesListener implements Listener {
     public void onEntityBreed(CreatureSpawnEvent e) {
         if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed) {
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) &&
-                            (!(entity instanceof Animals) || !plugin.getNMSAdapter().isInLove((Animals) entity)))
+                            (!(entity instanceof Animals) || !plugin.getNMSEntities().isInLove((Animals) entity)))
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
         }
     }
@@ -631,7 +631,7 @@ public final class EntitiesListener implements Listener {
         e.setCancelled(true);
 
         if (!plugin.getSettings().entitiesFillVehicles &&
-                plugin.getNMSAdapter().getPassengersCount(e.getVehicle()) >= 1 && stackedEntity.getStackAmount() > 1)
+                plugin.getNMSEntities().getPassengersCount(e.getVehicle()) >= 1 && stackedEntity.getStackAmount() > 1)
             return;
 
         stackedEntity.decreaseStackAmount(1, true);
@@ -639,7 +639,7 @@ public final class EntitiesListener implements Listener {
 
         try {
             stackedEntity.setFlag(EntityFlag.ADD_TO_VEHICLE, true);
-            plugin.getNMSAdapter().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());
+            plugin.getNMSEntities().enterVehicle(e.getVehicle(), duplicated.getLivingEntity());
         } finally {
             stackedEntity.removeFlag(EntityFlag.ADD_TO_VEHICLE);
         }
@@ -780,7 +780,7 @@ public final class EntitiesListener implements Listener {
                 }
             }
         } else if (spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE) {
-            Location homeLocation = plugin.getNMSAdapter().getTurtleHome(entity);
+            Location homeLocation = plugin.getNMSEntities().getTurtleHome(entity);
             Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
             if (cachedEggs != null && cachedEggs > 1) {
                 int newBabiesAmount = Random.nextInt(1, 4, cachedEggs);
@@ -994,7 +994,7 @@ public final class EntitiesListener implements Listener {
                         stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
                 stackedEntity.removeFlag(EntityFlag.BREEDABLE_AMOUNT);
                 if (breedableAmount > 1) {
-                    Executor.sync(() -> plugin.getNMSAdapter().setTurtleEggsAmount(e.getBlock(), 1), 1L);
+                    Executor.sync(() -> plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
                     turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
                 }
             }

@@ -1,426 +1,46 @@
 package com.bgsoftware.wildstacker.nms.v1_12_R1;
 
-import com.bgsoftware.common.reflection.ReflectField;
-import com.bgsoftware.common.reflection.ReflectMethod;
-import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.EntitiesListener;
-import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
+import com.bgsoftware.wildstacker.nms.entity.NMSEntityEquipmentImpl;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedItem;
-import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import net.minecraft.server.v1_12_R1.BlockPosition;
-import net.minecraft.server.v1_12_R1.BlockRotatable;
-import net.minecraft.server.v1_12_R1.Chunk;
-import net.minecraft.server.v1_12_R1.CriterionTriggers;
-import net.minecraft.server.v1_12_R1.DamageSource;
-import net.minecraft.server.v1_12_R1.EnchantmentManager;
-import net.minecraft.server.v1_12_R1.Enchantments;
-import net.minecraft.server.v1_12_R1.Entity;
-import net.minecraft.server.v1_12_R1.EntityAnimal;
-import net.minecraft.server.v1_12_R1.EntityArmorStand;
-import net.minecraft.server.v1_12_R1.EntityArrow;
-import net.minecraft.server.v1_12_R1.EntityExperienceOrb;
-import net.minecraft.server.v1_12_R1.EntityFireball;
-import net.minecraft.server.v1_12_R1.EntityHuman;
-import net.minecraft.server.v1_12_R1.EntityInsentient;
 import net.minecraft.server.v1_12_R1.EntityItem;
 import net.minecraft.server.v1_12_R1.EntityLiving;
-import net.minecraft.server.v1_12_R1.EntityPlayer;
-import net.minecraft.server.v1_12_R1.EntityTracker;
-import net.minecraft.server.v1_12_R1.EntityTypes;
-import net.minecraft.server.v1_12_R1.EntityVillager;
-import net.minecraft.server.v1_12_R1.EntityZombieVillager;
-import net.minecraft.server.v1_12_R1.EnumHand;
-import net.minecraft.server.v1_12_R1.EnumItemSlot;
-import net.minecraft.server.v1_12_R1.EnumParticle;
-import net.minecraft.server.v1_12_R1.IBlockData;
-import net.minecraft.server.v1_12_R1.IWorldAccess;
 import net.minecraft.server.v1_12_R1.ItemStack;
-import net.minecraft.server.v1_12_R1.ItemSword;
-import net.minecraft.server.v1_12_R1.Items;
-import net.minecraft.server.v1_12_R1.MobEffect;
-import net.minecraft.server.v1_12_R1.MobEffects;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagList;
-import net.minecraft.server.v1_12_R1.PacketPlayOutCollect;
-import net.minecraft.server.v1_12_R1.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_12_R1.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_12_R1.SoundCategory;
-import net.minecraft.server.v1_12_R1.SoundEffect;
-import net.minecraft.server.v1_12_R1.StatisticList;
-import net.minecraft.server.v1_12_R1.World;
-import net.minecraft.server.v1_12_R1.WorldServer;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftAnimals;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftChicken;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftExperienceOrb;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftVehicle;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityBreedEvent;
-import org.bukkit.event.entity.EntityResurrectEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.EntityEquipment;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused", "ConstantConditions"})
 public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapter {
 
-    private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "b_");
-    private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
-    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(Entity.class, boolean.class, "fromMobSpawner");
-    private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(Chunk.class, Collection[].class, "entitySlices");
-    private static final ReflectMethod<Boolean> ALWAYS_GIVES_EXP = new ReflectMethod<>(EntityLiving.class, "alwaysGivesExp");
-    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "isDropExperience");
-    private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "cf");
-    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "cq");
-    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "cr");
-    private static final ReflectField<Boolean> ENTITY_FORCE_DROPS = new ReflectField<>(EntityLiving.class, Boolean.class, "forceDrops");
-
-    /*
-     *   Entity methods
-     */
-
     @Override
-    public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
-        CraftWorld world = (CraftWorld) location.getWorld();
-
-        Entity nmsEntity = world.createEntity(location, type);
-        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
-
-        if (beforeSpawnConsumer != null) {
-            //noinspection unchecked
-            beforeSpawnConsumer.accept((T) bukkitEntity);
-        }
-
-        world.addEntity(nmsEntity, spawnCause.toSpawnReason());
-
-        if (EntityUtils.isStackable(bukkitEntity))
-            WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
-
-        if (afterSpawnConsumer != null) {
-            //noinspection unchecked
-            afterSpawnConsumer.accept((T) bukkitEntity);
-        }
-
-        return type.cast(bukkitEntity);
-    }
-
-    @Override
-    public ExperienceOrb spawnExpOrb(Location location, SpawnCause spawnCause, int value) {
-        return createEntity(location, ExperienceOrb.class, spawnCause, bukkitOrb -> {
-            EntityExperienceOrb orb = ((CraftExperienceOrb) bukkitOrb).getHandle();
-            orb.value = value;
-        }, null);
-    }
-
-    @Override
-    public Zombie spawnZombieVillager(Villager villager) {
-        EntityVillager entityVillager = ((CraftVillager) villager).getHandle();
-        EntityZombieVillager entityZombieVillager = new EntityZombieVillager(entityVillager.world);
-
-        entityZombieVillager.u(entityVillager);
-        entityZombieVillager.setProfession(entityVillager.getProfession());
-        entityZombieVillager.setBaby(entityVillager.isBaby());
-        entityZombieVillager.setNoAI(entityVillager.isNoAI());
-
-        if (entityVillager.hasCustomName()) {
-            entityZombieVillager.setCustomName(entityVillager.getCustomName());
-            entityZombieVillager.setCustomNameVisible(entityVillager.getCustomNameVisible());
-        }
-
-        entityVillager.world.addEntity(entityZombieVillager, CreatureSpawnEvent.SpawnReason.INFECTION);
-        entityVillager.world.a(null, 1026, new BlockPosition(entityVillager), 0);
-
-        return (Zombie) entityZombieVillager.getBukkitEntity();
-    }
-
-    @Override
-    public void setInLove(Animals entity, Player breeder, boolean inLove) {
-        EntityAnimal nmsEntity = ((CraftAnimals) entity).getHandle();
-        EntityPlayer entityPlayer = ((CraftPlayer) breeder).getHandle();
-        if (inLove)
-            nmsEntity.f(entityPlayer);
-        else
-            nmsEntity.resetLove();
-    }
-
-    @Override
-    public boolean isInLove(Animals entity) {
-        return ((EntityAnimal) ((CraftEntity) entity).getHandle()).isInLove();
-    }
-
-    @Override
-    public boolean isAnimalFood(Animals animal, org.bukkit.inventory.ItemStack itemStack) {
-        EntityAnimal nmsEntity = ((CraftAnimals) animal).getHandle();
-        return itemStack != null && nmsEntity.e(CraftItemStack.asNMSCopy(itemStack));
-    }
-
-    @Override
-    public int getEntityExp(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-
-        if (!(entityLiving instanceof EntityInsentient))
-            return 0;
-
-        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
-
-        int defaultEntityExp = ENTITY_EXP.get(entityInsentient);
-        int exp = entityInsentient.getExpReward();
-
-        ENTITY_EXP.set(entityInsentient, defaultEntityExp);
-
-        return exp;
-    }
-
-    @Override
-    public boolean canDropExp(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        int lastDamageByPlayerTime = LAST_DAMAGE_BY_PLAYER_TIME.get(entityLiving);
-        boolean alwaysGivesExp = ALWAYS_GIVES_EXP.invoke(entityLiving);
-        boolean isDropExperience = IS_DROP_EXPERIENCE.invoke(entityLiving);
-        return (lastDamageByPlayerTime > 0 || alwaysGivesExp) && isDropExperience &&
-                entityLiving.world.getGameRules().getBoolean("doMobLoot");
-    }
-
-    @Override
-    public void updateLastDamageTime(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        LAST_DAMAGE_BY_PLAYER_TIME.set(entityLiving, 100);
-    }
-
-    @Override
-    public void setHealthDirectly(LivingEntity livingEntity, double health) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.setHealth((float) health);
-    }
-
-    @Override
-    public void setEntityDead(LivingEntity livingEntity, boolean dead) {
-        ((CraftLivingEntity) livingEntity).getHandle().dead = dead;
-    }
-
-    @Override
-    public int getEggLayTime(Chicken chicken) {
-        return ((CraftChicken) chicken).getHandle().bD;
-    }
-
-    @Override
-    public void setNerfedEntity(LivingEntity livingEntity, boolean nerfed) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.fromMobSpawner = nerfed;
-    }
-
-    @Override
-    public void setKiller(LivingEntity livingEntity, Player killer) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        entityLiving.killer = killer == null ? null : ((CraftPlayer) killer).getHandle();
-    }
-
-    @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
-        World world = ((CraftWorld) location.getWorld()).getHandle();
-        Entity entity = EntityTypes.a(((CraftEntity) bukkitEntity).getHandle().getClass(), world);
-
-        if (entity == null) {
-            WildStackerPlugin.log("Failed to get entity type from " + bukkitEntity.getType());
-            return true;
-        }
-
-        entity.setPosition(location.getX(), location.getY(), location.getZ());
-        return !(entity instanceof EntityInsentient) || (((EntityInsentient) entity).P() && ((EntityInsentient) entity).canSpawn());
-    }
-
-    @Override
-    public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
-        World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
-
-        Chunk chunk = world.getChunkIfLoaded(chunkPosition.getX(), chunkPosition.getZ());
-
-        if (chunk == null)
-            return new ArrayList<>();
-
-        return Arrays.stream(chunk.entitySlices)
-                .flatMap(Collection::stream)
-                .map(Entity::getBukkitEntity)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public float getItemInMainHandDropChance(EntityEquipment entityEquipment) {
-        return entityEquipment.getItemInMainHandDropChance();
-    }
-
-    @Override
-    public float getItemInOffHandDropChance(EntityEquipment entityEquipment) {
-        return entityEquipment.getItemInOffHandDropChance();
-    }
-
-    @Override
-    public void setItemInMainHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
-        entityEquipment.setItemInMainHand(itemStack);
-    }
-
-    @Override
-    public void setItemInOffHand(EntityEquipment entityEquipment, org.bukkit.inventory.ItemStack itemStack) {
-        entityEquipment.setItemInOffHand(itemStack);
-    }
-
-    @Override
-    public org.bukkit.inventory.ItemStack getItemInOffHand(EntityEquipment entityEquipment) {
-        return entityEquipment.getItemInOffHand();
+    public INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment) {
+        return new NMSEntityEquipmentImpl(bukkitEntityEquipment);
     }
 
     @Override
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         return nmsItem != null && nmsItem.f();
-    }
-
-    @Override
-    public void handleSweepingEdge(Player attacker, org.bukkit.inventory.ItemStack usedItem, LivingEntity target, double damage) {
-        EntityLiving targetLiving = ((CraftLivingEntity) target).getHandle();
-        EntityHuman entityHuman = ((CraftPlayer) attacker).getHandle();
-
-        // Making sure the player used a sword.
-        if (usedItem.getType() == Material.AIR || !(CraftItemStack.asNMSCopy(usedItem).getItem() instanceof ItemSword))
-            return;
-
-        float sweepDamage = 1.0F + EnchantmentManager.a(entityHuman) * (float) damage;
-        List<EntityLiving> nearbyEntities = targetLiving.world.a(EntityLiving.class, targetLiving.getBoundingBox().grow(1.0D, 0.25D, 1.0D));
-
-        for (EntityLiving nearby : nearbyEntities) {
-            if (nearby != targetLiving && nearby != entityHuman && !entityHuman.r(nearby) && (!(nearby instanceof EntityArmorStand) || !((EntityArmorStand) nearby).isMarker()) && entityHuman.h(nearby) < 9.0D) {
-                nearby.damageEntity(DamageSource.playerAttack(entityHuman).sweep(), sweepDamage);
-            }
-        }
-    }
-
-    @Override
-    public boolean handleTotemOfUndying(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-
-        ItemStack totemOfUndying = ItemStack.a;
-
-        for (EnumHand enumHand : EnumHand.values()) {
-            ItemStack handItem = entityLiving.b(enumHand);
-            if (handItem.getItem() == Items.cY) {
-                totemOfUndying = handItem;
-                break;
-            }
-        }
-
-        EntityResurrectEvent event = new EntityResurrectEvent(livingEntity);
-        event.setCancelled(totemOfUndying.isEmpty());
-        Bukkit.getPluginManager().callEvent(event);
-
-        if (event.isCancelled())
-            return false;
-
-        if (!totemOfUndying.isEmpty()) {
-            totemOfUndying.subtract(1);
-
-            if (entityLiving instanceof EntityPlayer) {
-                ((EntityPlayer) entityLiving).b(StatisticList.b(Items.cY));
-                CriterionTriggers.A.a((EntityPlayer) entityLiving, totemOfUndying);
-            }
-
-            entityLiving.setHealth(1.0F);
-            entityLiving.removeAllEffects();
-            entityLiving.addEffect(new MobEffect(MobEffects.REGENERATION, 900, 1));
-            entityLiving.addEffect(new MobEffect(MobEffects.ABSORBTION, 100, 1));
-            entityLiving.addEffect(new MobEffect(MobEffects.FIRE_RESISTANCE, 800, 0));
-            entityLiving.world.broadcastEntityEffect(entityLiving, (byte) 35);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father, @Nullable LivingEntity breeder,
-                                        @Nullable org.bukkit.inventory.ItemStack bredWith, int experience) {
-        EntityBreedEvent entityBreedEvent = new EntityBreedEvent(child, mother, father, breeder, bredWith, experience);
-        Bukkit.getPluginManager().callEvent(entityBreedEvent);
-        return !entityBreedEvent.isCancelled();
-    }
-
-    /*
-     *   Spawner methods
-     */
-
-    @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
-    }
-
-    @Override
-    public boolean isRotatable(Block block) {
-        World world = ((CraftWorld) block.getWorld()).getHandle();
-        return world.getType(new BlockPosition(block.getX(), block.getY(), block.getZ())).getBlock() instanceof BlockRotatable;
-    }
-
-    /*
-     *   Item methods
-     */
-
-    @Override
-    public StackedItem createItem(Location location, org.bukkit.inventory.ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer) {
-        CraftWorld craftWorld = (CraftWorld) location.getWorld();
-
-        EntityItem entityItem = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
-
-        entityItem.pickupDelay = 10;
-
-        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
-
-        itemConsumer.accept(stackedItem);
-
-        craftWorld.addEntity(entityItem, spawnCause.toSpawnReason());
-
-        return stackedItem;
     }
 
     @Override
@@ -494,214 +114,6 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
-
-    @Override
-    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
-                               org.bukkit.entity.Entity damagerEntity) {
-        Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
-        Entity damager = ((CraftEntity) damagerEntity).getHandle();
-
-        DamageSource damageSource = null;
-
-        if (damager instanceof EntityHuman) {
-            damageSource = DamageSource.playerAttack((EntityHuman) damager);
-        } else if (damager instanceof EntityArrow) {
-            EntityArrow entityArrow = (EntityArrow) damager;
-            damageSource = DamageSource.arrow(entityArrow, entityArrow.shooter);
-        } else if (damager instanceof EntityFireball) {
-            EntityFireball entityFireball = (EntityFireball) damager;
-            damageSource = DamageSource.fireball(entityFireball, entityFireball.shooter);
-        }
-
-        if (damageSource == null) {
-            if (damager instanceof EntityLiving) {
-                damageSource = DamageSource.mobAttack((EntityLiving) damager);
-            } else {
-                return;
-            }
-        }
-
-        damager.a(damaged, 0, damageSource);
-    }
-
-    /*
-     *   World methods
-     */
-
-    @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
-        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
-        //Makes sure the entity is still there.
-        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
-        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
-    }
-
-    @Override
-    public void playDeathSound(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-
-        SoundEffect deathSound = GET_SOUND_DEATH.invoke(entityLiving);
-        float soundVolume = GET_SOUND_VOLUME.invoke(entityLiving);
-        float soundPitch = GET_SOUND_PITCH.invoke(entityLiving);
-
-        if (deathSound != null)
-            entityLiving.a(deathSound, soundVolume, soundPitch);
-    }
-
-    @Override
-    public void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra) {
-        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
-        world.sendParticles(null, EnumParticle.valueOf(particle), true, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
-                count, offsetX, offsetY, offsetZ, extra);
-    }
-
-    @Override
-    public void playSpawnEffect(LivingEntity livingEntity) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        if (entityLiving instanceof EntityInsentient)
-            ((EntityInsentient) entityLiving).doSpawnEffect();
-    }
-
-    @Override
-    public void startEntityListen(org.bukkit.World world) {
-        ((CraftWorld) world).getHandle().addIWorldAccess(new IWorldAccess() {
-            @Override
-            public void a(World world, BlockPosition blockPosition, IBlockData iBlockData, IBlockData iBlockData1, int i) {
-
-            }
-
-            @Override
-            public void a(BlockPosition blockPosition) {
-
-            }
-
-            @Override
-            public void a(int i, int i1, int i2, int i3, int i4, int i5) {
-
-            }
-
-            @Override
-            public void a(@Nullable EntityHuman entityHuman, SoundEffect soundEffect, SoundCategory soundCategory, double v, double v1, double v2, float v3, float v4) {
-
-            }
-
-            @Override
-            public void a(SoundEffect soundEffect, BlockPosition blockPosition) {
-
-            }
-
-            @Override
-            public void a(int i, boolean b, double v, double v1, double v2, double v3, double v4, double v5, int... ints) {
-
-            }
-
-            @Override
-            public void a(int i, boolean b, boolean b1, double v, double v1, double v2, double v3, double v4, double v5, int... ints) {
-
-            }
-
-            @Override
-            public void a(Entity entity) {
-
-            }
-
-            @Override
-            public void b(Entity entity) {
-                EntitiesListener.IMP.handleEntityRemove(entity.getBukkitEntity());
-            }
-
-            @Override
-            public void a(int i, BlockPosition blockPosition, int i1) {
-
-            }
-
-            @Override
-            public void a(EntityHuman entityHuman, int i, BlockPosition blockPosition, int i1) {
-
-            }
-
-            @Override
-            public void b(int i, BlockPosition blockPosition, int i1) {
-
-            }
-        });
-    }
-
-    @Override
-    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-
-        if (!(entityLiving instanceof EntityInsentient))
-            return false;
-
-        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
-        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
-        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
-        itemStack.setCount(1);
-
-        EnumItemSlot equipmentSlotForItem = EntityInsentient.d(itemStack);
-
-        if (equipmentSlotForItem.a() != EnumItemSlot.Function.ARMOR) {
-            return false;
-        }
-
-        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
-
-        double equipmentDropChance = entityInsentient.dropChanceArmor[equipmentSlotForItem.b()];
-
-        Random random = new Random();
-        if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            ENTITY_FORCE_DROPS.set(entityInsentient, true);
-            entityInsentient.a(equipmentItem, 0F);
-            ENTITY_FORCE_DROPS.set(entityInsentient, false);
-        }
-
-        entityInsentient.setSlot(equipmentSlotForItem, itemStack);
-        entityInsentient.dropChanceArmor[equipmentSlotForItem.b()] = 2.0F;
-
-        entityInsentient.persistent = true;
-        entityInsentient.receive(entityItem, itemStack.getCount());
-
-        return true;
-    }
-
-    @Override
-    public void giveExp(Player player, int amount) {
-        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-
-        ItemStack mendingItem = EnchantmentManager.b(Enchantments.C, entityPlayer);
-
-        if (!mendingItem.isEmpty() && mendingItem.getItem().usesDurability()) {
-            int repairAmount = Math.min(amount * 2, mendingItem.getData());
-            amount -= repairAmount / 2;
-            mendingItem.setData(mendingItem.getData() - repairAmount);
-        }
-
-        if (amount > 0) {
-            PlayerExpChangeEvent playerExpChangeEvent = new PlayerExpChangeEvent(player, amount);
-            Bukkit.getPluginManager().callEvent(playerExpChangeEvent);
-            if (playerExpChangeEvent.getAmount() > 0)
-                player.giveExp(playerExpChangeEvent.getAmount());
-        }
-    }
-
-    @Override
-    public void enterVehicle(Vehicle vehicle, org.bukkit.entity.Entity entity) {
-        vehicle.addPassenger(entity);
-    }
-
-    @Override
-    public int getPassengersCount(Vehicle vehicle) {
-        return (int) ((CraftVehicle) vehicle).getHandle().passengers.stream()
-                .filter(entity -> !(entity instanceof EntityPlayer)).count();
-    }
-
-    /*
-     *   Tag methods
-     */
 
     @Override
     public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {
@@ -822,18 +234,15 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
     }
 
-    /*
-     *   Other methods
-     */
+    @Override
+    public Object getChatMessage(String message) {
+        return message;
+    }
 
     @Override
     public void runAtEndOfTick(Runnable code) {
         ((CraftServer) Bukkit.getServer()).getServer().a(code::run);
     }
-
-    /*
-     *   Data methods
-     */
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {

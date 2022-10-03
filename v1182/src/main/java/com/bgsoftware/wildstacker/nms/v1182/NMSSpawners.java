@@ -4,7 +4,9 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1182.spawner.StackedBaseSpawner;
+import com.bgsoftware.wildstacker.nms.v1182.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -23,6 +25,8 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
 import org.bukkit.entity.EntityType;
 
@@ -43,6 +47,10 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
     }
 
+    private static BlockState getBlockBelow(ServerLevel serverLevel, BlockPos blockPos) {
+        return serverLevel.getBlockState(blockPos.below());
+    }
+
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
         ServerLevel serverLevel = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
@@ -57,10 +65,6 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         }
 
         return false;
-    }
-
-    private static BlockState getBlockBelow(ServerLevel serverLevel, BlockPos blockPos) {
-        return serverLevel.getBlockState(blockPos.below());
     }
 
     @Override
@@ -225,6 +229,15 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             return blockState.is(BlockTags.LEAVES) || blockState.is(Blocks.GRASS_BLOCK) ||
                     blockState.is(BlockTags.LOGS) || blockState.is(Blocks.AIR);
         }, EntityType.PARROT);
+    }
+
+    @Override
+    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
+        World bukkitWorld = creatureSpawner.getWorld();
+        ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
+        BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
+        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
+        return new SyncedCreatureSpawnerImpl(bukkitWorld, spawnerBlockEntity);
     }
 
 }

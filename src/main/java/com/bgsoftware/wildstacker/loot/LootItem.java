@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -118,7 +119,7 @@ public class LootItem {
         ItemStack itemStack = new ItemStack(type, 1, data);
 
         if (jsonObject.containsKey("skull"))
-            itemStack = plugin.getNMSAdapter().getPlayerSkull((String) jsonObject.get("skull"));
+            itemStack = plugin.getNMSAdapter().getPlayerSkull(Materials.PLAYER_HEAD.toBukkitItem(), (String) jsonObject.get("skull"));
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 

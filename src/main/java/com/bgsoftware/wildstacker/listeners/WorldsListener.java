@@ -15,12 +15,12 @@ public final class WorldsListener implements Listener {
     public WorldsListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
         for (World world : Bukkit.getWorlds())
-            plugin.getNMSAdapter().startEntityListen(world);
+            plugin.getNMSWorld().startEntityListen(world);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldInit(WorldInitEvent e) {
-        plugin.getNMSAdapter().startEntityListen(e.getWorld());
+        plugin.getNMSWorld().startEntityListen(e.getWorld());
     }
 
 }

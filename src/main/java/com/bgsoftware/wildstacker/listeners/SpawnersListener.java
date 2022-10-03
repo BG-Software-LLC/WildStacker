@@ -487,7 +487,7 @@ public final class SpawnersListener implements Listener {
             Location locationToSpawn = null;
             int tries = 0;
 
-            while ((locationToSpawn == null || !plugin.getNMSAdapter().canSpawnOn(entity, locationToSpawn)) && ++tries <= 5) {
+            while ((locationToSpawn == null || !plugin.getNMSWorld().canSpawnOn(entity, locationToSpawn)) && ++tries <= 5) {
                 locationToSpawn = new Location(location.getWorld(),
                         location.getBlockX() + ((random.nextDouble() - random.nextDouble()) * 4.5D),
                         location.getBlockY(),
@@ -508,7 +508,7 @@ public final class SpawnersListener implements Listener {
                     break;
 
                 StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
-                plugin.getNMSAdapter().playSpawnEffect(targetEntity.getLivingEntity());
+                plugin.getNMSEntities().playSpawnEffect(targetEntity.getLivingEntity());
 
                 if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {
                     targetEntity.remove();
@@ -539,7 +539,7 @@ public final class SpawnersListener implements Listener {
             if (EntitiesListener.IMP.handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e)) {
                 try {
                     EntityType entityType = EntityType.valueOf(ItemUtils.getEntityType(e.getItem()).name());
-                    plugin.getNMSAdapter().createEntity(e.getClickedBlock().getRelative(e.getBlockFace())
+                    plugin.getNMSEntities().createEntity(e.getClickedBlock().getRelative(e.getBlockFace())
                             .getLocation().add(0.5, 0, 0.5), entityType.getEntityClass(), SpawnCause.SPAWNER_EGG, null, null);
 
                     if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {

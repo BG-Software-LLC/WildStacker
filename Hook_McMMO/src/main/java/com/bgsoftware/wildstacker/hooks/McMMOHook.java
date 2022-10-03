@@ -71,11 +71,11 @@ public final class McMMOHook {
 
         if (entity.hasMetadata(CUSTOM_NAME_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_KEY, mcMMO);
-            entity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().getCustomName(entity)));
+            entity.setMetadata(CUSTOM_NAME_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSEntities().getCustomName(entity)));
         }
         if (entity.hasMetadata(CUSTOM_NAME_VISIBLE_KEY)) {
             entity.removeMetadata(CUSTOM_NAME_VISIBLE_KEY, mcMMO);
-            entity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSAdapter().isCustomNameVisible(entity)));
+            entity.setMetadata(CUSTOM_NAME_VISIBLE_KEY, new FixedMetadataValue(mcMMO, plugin.getNMSEntities().isCustomNameVisible(entity)));
         }
     }
 
