@@ -6,6 +6,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -23,11 +24,11 @@ import net.minecraft.server.v1_16_R3.EntityArmorStand;
 import net.minecraft.server.v1_16_R3.EntityArrow;
 import net.minecraft.server.v1_16_R3.EntityExperienceOrb;
 import net.minecraft.server.v1_16_R3.EntityFireballFireball;
+import net.minecraft.server.v1_16_R3.EntityFox;
 import net.minecraft.server.v1_16_R3.EntityHuman;
 import net.minecraft.server.v1_16_R3.EntityInsentient;
 import net.minecraft.server.v1_16_R3.EntityItem;
 import net.minecraft.server.v1_16_R3.EntityLiving;
-import net.minecraft.server.v1_16_R3.EntityPiglin;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import net.minecraft.server.v1_16_R3.EntityThrownTrident;
 import net.minecraft.server.v1_16_R3.EntityTurtle;
@@ -35,14 +36,11 @@ import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EntityVillager;
 import net.minecraft.server.v1_16_R3.EntityZombieVillager;
 import net.minecraft.server.v1_16_R3.EnumHand;
-import net.minecraft.server.v1_16_R3.EnumItemSlot;
 import net.minecraft.server.v1_16_R3.GameRules;
 import net.minecraft.server.v1_16_R3.IChatBaseComponent;
-import net.minecraft.server.v1_16_R3.ItemArmor;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.ItemSword;
 import net.minecraft.server.v1_16_R3.Items;
-import net.minecraft.server.v1_16_R3.MemoryModuleType;
 import net.minecraft.server.v1_16_R3.MobEffect;
 import net.minecraft.server.v1_16_R3.MobEffects;
 import net.minecraft.server.v1_16_R3.NBTBase;
@@ -52,14 +50,10 @@ import net.minecraft.server.v1_16_R3.NBTTagString;
 import net.minecraft.server.v1_16_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_16_R3.PiglinAI;
 import net.minecraft.server.v1_16_R3.SoundEffect;
-import net.minecraft.server.v1_16_R3.SoundEffects;
 import net.minecraft.server.v1_16_R3.StatisticList;
-import net.minecraft.server.v1_16_R3.TagsItem;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
@@ -71,7 +65,6 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftExperienceOrb;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPiglin;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftStrider;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftTurtle;
@@ -85,7 +78,6 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Piglin;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Strider;
 import org.bukkit.entity.Turtle;
@@ -103,9 +95,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEntities {
 
@@ -119,7 +109,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     private static final ReflectMethod<BlockPosition> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "setHasEgg", boolean.class);
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
     private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(net.minecraft.server.v1_16_R3.Entity.class, boolean.class, "fromMobSpawner");
-    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile(ChatColor.COLOR_CHAR + "x(?>" + ChatColor.COLOR_CHAR + "[0-9a-f]){6}", Pattern.CASE_INSENSITIVE);
+    private static final ReflectMethod<Void> INSENTIENT_PICK_UP_ITEM = new ReflectMethod<>(EntityInsentient.class, "b", EntityItem.class);
 
 
     @Override
@@ -515,93 +505,72 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item bukkitItem) {
-        if (!(bukkitPiglin instanceof Piglin))
-            return false;
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+        EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
-        EntityPiglin entityPiglin = ((CraftPiglin) bukkitPiglin).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
+        if (!isPlayerPickup && !(entityLiving instanceof EntityInsentient))
+            return;
 
-        entityPiglin.a(entityItem);
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        if (remaining > 0)
+            entityItem.getItemStack().add(remaining);
 
-        entityPiglin.getBehaviorController().removeMemory(MemoryModuleType.WALK_TARGET);
-        entityPiglin.getNavigation().o();
+        int stackAmount = stackedItem.getStackAmount();
+        int maxStackSize = entityItem.getItemStack().getMaxStackSize();
 
-        entityPiglin.receive(entityItem, 1);
-
-        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
-        itemStack.setCount(1);
-        net.minecraft.server.v1_16_R3.Item item = itemStack.getItem();
-        if (item.a(TagsItem.PIGLIN_LOVED)) {
-            entityPiglin.getBehaviorController().removeMemory(MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM);
-            if (!entityPiglin.getItemInOffHand().isEmpty()) {
-                entityPiglin.a(entityPiglin.b(EnumHand.OFF_HAND));
-            }
-
-            entityPiglin.setSlot(EnumItemSlot.OFFHAND, itemStack);
-            entityPiglin.d(EnumItemSlot.OFFHAND);
-
-            if (item != PiglinAI.a) {
-                entityPiglin.persistent = true;
-            }
-
-            entityPiglin.getBehaviorController().a(MemoryModuleType.ADMIRING_ITEM, true, 120L);
-        } else if ((item == Items.PORKCHOP || item == Items.COOKED_PORKCHOP) && !
-                entityPiglin.getBehaviorController().hasMemory(MemoryModuleType.ATE_RECENTLY)) {
-            entityPiglin.getBehaviorController().a(MemoryModuleType.ATE_RECENTLY, true, 200L);
+        EntityItem pickupItem;
+        if (stackAmount <= maxStackSize) {
+            // If the stack size is not larger than vanilla, we can safely pickup the original item.
+            pickupItem = entityItem;
         } else {
-            handleEquipmentPickup((LivingEntity) bukkitPiglin, bukkitItem);
-        }
+            // In case the stack size is larger than vanilla's max stack size, we want to simulate pickup
+            // of a max stack size item instead. In case it's a player picking up the item, we want the item to have
+            // the real count.
+            ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
-        return true;
-    }
-
-    @Override
-    public boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-
-        if (!(entityLiving instanceof EntityInsentient))
-            return false;
-
-        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
-        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
-        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
-        itemStack.setCount(1);
-
-        EnumItemSlot equipmentSlotForItem = EntityInsentient.j(itemStack);
-
-        if (equipmentSlotForItem.a() != EnumItemSlot.Function.ARMOR) {
-            return false;
-        }
-
-        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
-
-        double equipmentDropChance = entityInsentient.dropChanceArmor[equipmentSlotForItem.b()];
-
-        Random random = new Random();
-        if (!equipmentItem.isEmpty() && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            entityInsentient.forceDrops = true;
-            entityInsentient.a(equipmentItem);
-            entityInsentient.forceDrops = false;
-        }
-
-        entityInsentient.setSlot(equipmentSlotForItem, itemStack);
-        entityInsentient.d(equipmentSlotForItem);
-
-        if (!itemStack.isEmpty()) {
-            SoundEffect equipSoundEffect = SoundEffects.ITEM_ARMOR_EQUIP_GENERIC;
-            net.minecraft.server.v1_16_R3.Item item = itemStack.getItem();
-
-            if (item instanceof ItemArmor) {
-                equipSoundEffect = ((ItemArmor) item).ab_().b();
-            } else if (item == Items.ELYTRA) {
-                equipSoundEffect = SoundEffects.ITEM_ARMOR_EQUIP_ELYTRA;
+            if (isPlayerPickup || entityLiving instanceof EntityFox) {
+                itemStack.setCount(stackAmount);
+            } else {
+                itemStack.setCount(maxStackSize);
             }
 
-            entityInsentient.playSound(equipSoundEffect, 1.0F, 1.0F);
+            pickupItem = new EntityItem(entityItem.world, entityItem.locX(), entityItem.locY(), entityItem.locZ(), itemStack);
         }
 
-        return true;
+        int originalItemCount = pickupItem.getItemStack().getCount();
+        int originalPickupDelay = entityItem.pickupDelay;
+        boolean isDifferentPickupItem = pickupItem != entityItem;
+        boolean actualItemDupe = originalItemCount != stackAmount;
+
+        try {
+            if (isDifferentPickupItem) entityItem.o(); // setNeverPickUp
+            EntitiesListener.IMP.secondPickupEventCall = true;
+            EntitiesListener.IMP.secondPickupEvent = null;
+            if (isPlayerPickup) {
+                pickupItem.pickup((EntityHuman) entityLiving);
+            } else {
+                INSENTIENT_PICK_UP_ITEM.invoke(entityLiving, pickupItem);
+            }
+        } finally {
+            if (isDifferentPickupItem) entityItem.pickupDelay = originalPickupDelay;
+            EntitiesListener.IMP.secondPickupEventCall = false;
+            EntitiesListener.IMP.secondPickupEvent = null;
+        }
+
+        int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItemStack().getCount() : 0);
+
+        if (pickupCount > 0) {
+            stackedItem.decreaseStackAmount(pickupCount, true);
+            entityItem.defaultPickupDelay();
+        }
+
+        if (!actualItemDupe && isDifferentPickupItem) {
+            entityLiving.a(entityItem); // onItemPickup
+            entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+            if (!pickupItem.isAlive())
+                entityItem.die();
+        }
     }
 
     @Override

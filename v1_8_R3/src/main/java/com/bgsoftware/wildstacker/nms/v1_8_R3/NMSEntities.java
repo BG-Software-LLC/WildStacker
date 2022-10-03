@@ -6,6 +6,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -24,7 +25,7 @@ import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.EntityTracker;
 import net.minecraft.server.v1_8_R3.EntityVillager;
 import net.minecraft.server.v1_8_R3.EntityZombie;
-import net.minecraft.server.v1_8_R3.ItemArmor;
+import net.minecraft.server.v1_8_R3.ItemStack;
 import net.minecraft.server.v1_8_R3.Items;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagByte;
@@ -57,7 +58,6 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.MushroomCow;
@@ -68,14 +68,12 @@ import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.projectiles.ProjectileSource;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEntities {
@@ -87,6 +85,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     private static final ReflectMethod<String> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "bp");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "bB");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "bC");
+    private static final ReflectMethod<Void> INSENTIENT_PICK_UP_ITEM = new ReflectMethod<>(EntityInsentient.class, "a", EntityItem.class);
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -412,47 +411,75 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, Item item) {
-        return false;
-    }
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+        EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
-    @Override
-    public boolean handleEquipmentPickup(LivingEntity livingEntity, org.bukkit.entity.Item bukkitItem) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        if (!isPlayerPickup && !(entityLiving instanceof EntityInsentient))
+            return;
 
-        if (!(entityLiving instanceof EntityInsentient))
-            return false;
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        if (remaining > 0)
+            entityItem.getItemStack().count += remaining;
 
-        EntityInsentient entityInsentient = (EntityInsentient) entityLiving;
-        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
-        net.minecraft.server.v1_8_R3.ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
-        itemStack.count = 1;
+        int stackAmount = stackedItem.getStackAmount();
+        int maxStackSize = entityItem.getItemStack().getMaxStackSize();
 
-        if (!(itemStack.getItem() instanceof ItemArmor))
-            return false;
+        EntityItem pickupItem;
+        if (stackAmount <= maxStackSize) {
+            // If the stack size is not larger than vanilla, we can safely pickup the original item.
+            pickupItem = entityItem;
+        } else {
+            // In case the stack size is larger than vanilla's max stack size, we want to simulate pickup
+            // of a max stack size item instead. In case it's a player picking up the item, we want the item to have
+            // the real count.
+            ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
-        int equipmentSlotForItem = EntityInsentient.c(itemStack);
+            if (isPlayerPickup) {
+                itemStack.count = stackAmount;
+            } else {
+                itemStack.count = maxStackSize;
+            }
 
-        net.minecraft.server.v1_8_R3.ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
-
-        double equipmentDropChance = entityInsentient.dropChances[equipmentSlotForItem];
-
-        Random random = new Random();
-        if (equipmentItem != null && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            entityInsentient.a(equipmentItem, 0F);
+            pickupItem = new EntityItem(entityItem.world, entityItem.locX, entityItem.locY, entityItem.locZ, itemStack);
         }
 
-        entityInsentient.setEquipment(equipmentSlotForItem, itemStack);
-        entityInsentient.dropChances[equipmentSlotForItem] = 2.0F;
+        int originalItemCount = pickupItem.getItemStack().count;
+        int originalPickupDelay = entityItem.pickupDelay;
+        boolean isDifferentPickupItem = pickupItem != entityItem;
+        boolean actualItemDupe = originalItemCount != stackAmount;
 
-        entityInsentient.persistent = true;
-        entityInsentient.receive(entityItem, itemStack.count);
+        try {
+            if (isDifferentPickupItem) entityItem.r(); // setNeverPickUp
+            EntitiesListener.IMP.secondPickupEventCall = true;
+            EntitiesListener.IMP.secondPickupEvent = null;
+            if (isPlayerPickup) {
+                pickupItem.d((EntityHuman) entityLiving); // playerTouch
+            } else {
+                INSENTIENT_PICK_UP_ITEM.invoke(entityLiving, pickupItem);
+            }
+        } finally {
+            if (isDifferentPickupItem) entityItem.pickupDelay = originalPickupDelay;
+            EntitiesListener.IMP.secondPickupEventCall = false;
+            EntitiesListener.IMP.secondPickupEvent = null;
+        }
 
-        return true;
+        int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItemStack().count : 0);
+
+        if (pickupCount > 0) {
+            stackedItem.decreaseStackAmount(pickupCount, true);
+            entityItem.p(); // setDefaultPickUpDelay
+        }
+
+        if (!actualItemDupe && isDifferentPickupItem) {
+            entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+            if (!pickupItem.isAlive())
+                entityItem.die();
+        }
     }
 
     @Override
-    public void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage) {
+    public void handleSweepingEdge(Player attacker, org.bukkit.inventory.ItemStack usedItem, LivingEntity target, double damage) {
         // Do nothing.
     }
 

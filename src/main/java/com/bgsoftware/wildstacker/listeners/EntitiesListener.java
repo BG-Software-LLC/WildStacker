@@ -71,7 +71,6 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
@@ -104,6 +103,10 @@ public final class EntitiesListener implements Listener {
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
+
+    public boolean secondPickupEventCall = false;
+    @Nullable
+    public Cancellable secondPickupEvent = null;
 
     public EntitiesListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -143,7 +146,7 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    private boolean onEntityPickup(StackedItem stackedItem, LivingEntity livingEntity, @Nullable Inventory inventory) {
+    private boolean onEntityPickup(Cancellable event, StackedItem stackedItem, LivingEntity livingEntity, int remaining) {
         return EntityStorage.hasMetadata(livingEntity, EntityFlag.CORPSE);
     }
 

@@ -18,10 +18,9 @@ import org.bukkit.Chunk;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,12 +31,9 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -127,7 +123,12 @@ public final class ItemsListener implements Listener {
             WStackedItem.of(e.getEntity()).remove();
     }
 
-    private boolean onEntityPickup(StackedItem stackedItem, LivingEntity livingEntity, @Nullable Inventory inventory) {
+    private boolean onEntityPickup(Cancellable event, StackedItem stackedItem, LivingEntity livingEntity, int remaining) {
+        if (EntitiesListener.IMP.secondPickupEventCall) {
+            EntitiesListener.IMP.secondPickupEvent = event;
+            return false;
+        }
+
         Item item = stackedItem.getItem();
 
         if (EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)) {
@@ -136,90 +137,15 @@ public final class ItemsListener implements Listener {
             return true;
         }
 
-        boolean cancelled = false;
-
-        //Should run only if the item is 1 (stacked item)
+        // Should run only if items stacking is enabled, or the item's stack size is larger than the max stack size.
+        // Another case is if buckets stacking is enabled and the item is a bucket.
         if (plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
                 (plugin.getSettings().bucketsStackerEnabled && stackedItem.getItemStack().getType().name().contains("BUCKET")))) {
-            cancelled = true;
-
-            //Causes too many issues
-            if (livingEntity.getType().name().equals("DOLPHIN"))
-                return cancelled;
-
-            int stackAmount = stackedItem.getStackAmount();
-
-            if (plugin.getNMSEntities().handlePiglinPickup(livingEntity, item)) {
-                if (stackAmount <= 1) {
-                    stackedItem.remove();
-                } else {
-                    stackedItem.decreaseStackAmount(1, true);
-                }
-            } else if (inventory != null) {
-                ItemStack rawAddedItem = item.getItemStack();
-
-                // The item is already added by the NMS code in case of villagers.
-                // Therefore, we need to remove it.
-                if (livingEntity.getType() == EntityType.VILLAGER)
-                    inventory.removeItem(rawAddedItem);
-
-                // In some versions of Paper, when the event is cancelled, items are restored to their original state.
-                // Therefore, we take a snapshot of the original contents so we can add items again if it occurs.
-                ItemStack[] originalContentsSnapshot = inventory.getContents();
-
-                stackedItem.giveItemStack(inventory);
-
-                if (!(inventory instanceof PlayerInventory)) {
-                    ItemStack[] adjustedContentsSnapshot = ItemUtils.cloneItems(inventory.getContents());
-
-                    // Checks for reverting of items.
-                    Executor.runAtEndOfTick(() -> {
-                        ItemStack[] currentContentsSnapshot = inventory.getContents();
-                        if (Arrays.equals(currentContentsSnapshot, originalContentsSnapshot)) {
-                            // Inventory was restored, we should load it again with all the new items.
-                            inventory.setContents(adjustedContentsSnapshot);
-                        }
-                    });
-                } else {
-                    plugin.getNMSEntities().awardPickupScore((Player) ((PlayerInventory) inventory).getHolder(), item);
-                }
-            } else if (plugin.getNMSEntities().handleEquipmentPickup(livingEntity, item)) {
-                if (stackAmount <= 1) {
-                    stackedItem.remove();
-                } else {
-                    stackedItem.decreaseStackAmount(1, true);
-                }
-            } else {
-                ItemStack itemStack = stackedItem.getItemStack();
-                int maxStackSize = plugin.getSettings().itemsFixStackEnabled || itemStack.getType().name().contains("SHULKER_BOX") ? itemStack.getMaxStackSize() : 64;
-
-                if (itemStack.getAmount() > maxStackSize)
-                    itemStack.setAmount(maxStackSize);
-
-                if (itemStack.getAmount() == stackedItem.getStackAmount()) {
-                    stackedItem.remove();
-                } else {
-                    stackedItem.decreaseStackAmount(itemStack.getAmount(), true);
-                }
-
-                setItemInHand(livingEntity, itemStack);
-                livingEntity.getEquipment().setItemInHandDropChance(2.0f);
-            }
-
-            if (stackAmount != stackedItem.getStackAmount()) {
-                if (plugin.getSettings().itemsSoundEnabled)
-                    ItemUtils.playPickupSound(livingEntity.getLocation());
-                //Pick up animation
-                plugin.getNMSEntities().playPickupAnimation(livingEntity, item);
-            }
-
-            if (stackedItem.getStackAmount() <= 0) {
-                item.setPickupDelay(5);
-                EntityStorage.setMetadata(item, EntityFlag.RECENTLY_PICKED_UP, true);
-            }
+            plugin.getNMSEntities().handleItemPickup(livingEntity, stackedItem, remaining);
+            return true;
         }
 
-        return cancelled;
+        return false;
     }
 
     //This method will be fired even if stacking-drops is disabled.

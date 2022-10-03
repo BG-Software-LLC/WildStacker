@@ -6,6 +6,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.entity.EntityHelper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
@@ -27,6 +28,7 @@ import net.minecraft.server.v1_7_R4.EntityZombie;
 import net.minecraft.server.v1_7_R4.Item;
 import net.minecraft.server.v1_7_R4.ItemArmor;
 import net.minecraft.server.v1_7_R4.ItemStack;
+import net.minecraft.server.v1_7_R4.ItemSword;
 import net.minecraft.server.v1_7_R4.Items;
 import net.minecraft.server.v1_7_R4.NBTBase;
 import net.minecraft.server.v1_7_R4.NBTTagByte;
@@ -87,6 +89,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     private static final ReflectMethod<String> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "aU");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "bf");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "bg");
+    private static final ReflectField<Random> ENTITY_RANDOM = new ReflectField<>(Entity.class, Random.class, "random");
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -416,43 +419,125 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public boolean handlePiglinPickup(org.bukkit.entity.Entity bukkitPiglin, org.bukkit.entity.Item item) {
-        return false;
-    }
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+        EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
-    @Override
-    public boolean handleEquipmentPickup(LivingEntity livingEntity, org.bukkit.entity.Item bukkitItem) {
-        EntityLiving a = ((CraftLivingEntity) livingEntity).getHandle();
+        if (!isPlayerPickup && !(entityLiving instanceof EntityInsentient))
+            return;
 
-        if (!(a instanceof EntityInsentient))
-            return false;
+        EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
+        if (remaining > 0)
+            entityItem.getItemStack().count += remaining;
 
-        EntityInsentient entityInsentient = (EntityInsentient) a;
-        EntityItem entityItem = (EntityItem) ((CraftItem) bukkitItem).getHandle();
-        ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
-        itemStack.count = 1;
+        int stackAmount = stackedItem.getStackAmount();
+        int maxStackSize = entityItem.getItemStack().getMaxStackSize();
 
-        if (!(itemStack.getItem() instanceof ItemArmor))
-            return false;
+        EntityItem pickupItem;
+        if (stackAmount <= maxStackSize) {
+            // If the stack size is not larger than vanilla, we can safely pickup the original item.
+            pickupItem = entityItem;
+        } else {
+            // In case the stack size is larger than vanilla's max stack size, we want to simulate pickup
+            // of a max stack size item instead. In case it's a player picking up the item, we want the item to have
+            // the real count.
+            ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
-        int equipmentSlotForItem = EntityInsentient.b(itemStack);
+            if (isPlayerPickup) {
+                itemStack.count = stackAmount;
+            } else {
+                itemStack.count = maxStackSize;
+            }
 
-        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlotForItem);
-
-        double equipmentDropChance = entityInsentient.dropChances[equipmentSlotForItem];
-
-        Random random = new Random();
-        if (equipmentItem != null && Math.max(random.nextFloat() - 0.1F, 0.0F) < equipmentDropChance) {
-            entityInsentient.a(equipmentItem, 0F);
+            pickupItem = new EntityItem(entityItem.world, entityItem.locX, entityItem.locY, entityItem.locZ, itemStack);
         }
 
-        entityInsentient.setEquipment(equipmentSlotForItem, itemStack);
-        entityInsentient.dropChances[equipmentSlotForItem] = 2.0F;
+        int originalItemCount = pickupItem.getItemStack().count;
+        int originalPickupDelay = entityItem.pickupDelay;
+        boolean isDifferentPickupItem = pickupItem != entityItem;
+        boolean actualItemDupe = originalItemCount != stackAmount;
 
-        entityInsentient.persistent = true;
-        entityInsentient.receive(entityItem, itemStack.count);
+        try {
+            if (isDifferentPickupItem) entityItem.pickupDelay = 32767; // setNeverPickUp
+            EntitiesListener.IMP.secondPickupEventCall = true;
+            EntitiesListener.IMP.secondPickupEvent = null;
+            if (isPlayerPickup) {
+                pickupItem.b_((EntityHuman) entityLiving); // playerTouch
+            } else {
+                simulatePickUpItem((EntityInsentient) entityLiving, pickupItem);
+            }
+        } finally {
+            if (isDifferentPickupItem) entityItem.pickupDelay = originalPickupDelay;
+            EntitiesListener.IMP.secondPickupEventCall = false;
+            EntitiesListener.IMP.secondPickupEvent = null;
+        }
 
-        return true;
+        int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItemStack().count : 0);
+
+        if (pickupCount > 0) {
+            stackedItem.decreaseStackAmount(pickupCount, true);
+            entityItem.pickupDelay = 10; // setDefaultPickUpDelay
+        }
+
+        if (!actualItemDupe && isDifferentPickupItem) {
+            entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+            if (!pickupItem.isAlive())
+                entityItem.die();
+        }
+    }
+
+    private static void simulatePickUpItem(EntityInsentient entityInsentient, EntityItem entityItem) {
+        boolean flag = true;
+
+        ItemStack itemStack = entityItem.getItemStack();
+        int equipmentSlot = EntityInsentient.b(itemStack); // getEquipmentSlotForItem
+        ItemStack equipmentItem = entityInsentient.getEquipment(equipmentSlot);
+
+        if (equipmentItem != null) {
+            if (equipmentSlot == 0) {
+                if (itemStack.getItem() instanceof ItemSword && equipmentItem.getItem() instanceof ItemSword) {
+                    ItemSword itemSword = (ItemSword) itemStack.getItem();
+                    ItemSword equipmentItemSword = (ItemSword) equipmentItem.getItem();
+                    if (itemSword.i() != equipmentItemSword.i()) {
+                        flag = itemSword.i() > equipmentItemSword.i();
+                    } else {
+                        flag = itemStack.getData() > equipmentItem.getData() || itemStack.hasTag() && !equipmentItem.hasTag();
+                    }
+                } else {
+                    flag = false;
+                }
+            } else if (itemStack.getItem() instanceof ItemArmor && equipmentItem.getItem() instanceof ItemArmor) {
+                ItemArmor itemArmor = (ItemArmor) itemStack.getItem();
+                ItemArmor equipmentItemArmor = (ItemArmor) equipmentItem.getItem();
+                if (itemArmor.c != equipmentItemArmor.c) {
+                    flag = itemArmor.c > equipmentItemArmor.c;
+                } else {
+                    flag = itemStack.getData() > equipmentItem.getData() || itemStack.hasTag() && !equipmentItem.hasTag();
+                }
+            } else {
+                flag = false;
+            }
+        }
+
+        if (flag) {
+            if (equipmentItem != null && ENTITY_RANDOM.get(entityInsentient).nextFloat() - 0.1F <
+                    entityInsentient.dropChances[equipmentSlot]) {
+                entityInsentient.a(equipmentItem, 0.0F);
+            }
+
+            if (itemStack.getItem() == Items.DIAMOND && entityItem.j() != null) {
+                EntityHuman entityhuman = entityInsentient.world.a(entityItem.j());
+                if (entityhuman != null) {
+                    entityhuman.a(AchievementList.x);
+                }
+            }
+
+            entityInsentient.setEquipment(equipmentSlot, itemStack);
+            entityInsentient.dropChances[equipmentSlot] = 2.0F;
+            entityInsentient.persistent = true;
+            entityInsentient.receive(entityItem, 1);
+            entityItem.die();
+        }
     }
 
     @Override

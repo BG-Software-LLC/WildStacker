@@ -13,12 +13,11 @@ import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -77,10 +76,10 @@ public final class EventsListener {
         entityPickupListeners.sort(Comparator.comparingInt(o -> o.getValue().getSlot()));
     }
 
-    private static boolean notifyEntityPickupListeners(StackedItem stackedItem, LivingEntity livingEntity) {
-        Inventory inventory = livingEntity instanceof InventoryHolder ? ((InventoryHolder) livingEntity).getInventory() : null;
+    private static boolean notifyEntityPickupListeners(Cancellable event, StackedItem stackedItem,
+                                                       LivingEntity livingEntity, int remaining) {
         for (Pair<IEntityPickupListener, EventPriority> pair : entityPickupListeners) {
-            if (pair.getKey().apply(stackedItem, livingEntity, inventory))
+            if (pair.getKey().apply(event, stackedItem, livingEntity, remaining))
                 return true;
         }
 
@@ -89,9 +88,10 @@ public final class EventsListener {
 
     private static class PlayerAttemptPickup implements Listener {
 
-        @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-        public void onEntityPickupEvent(org.bukkit.event.player.PlayerAttemptPickupItemEvent e) {
-            if (entityPickupListeners.isEmpty() || !ItemUtils.isStackable(e.getItem()))
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        public void onPlayerAttemptPickupItem(org.bukkit.event.player.PlayerAttemptPickupItemEvent e) {
+            if (entityPickupListeners.isEmpty() || e.getRemaining() >= e.getItem().getItemStack().getAmount()
+                    || !ItemUtils.isStackable(e.getItem()))
                 return;
 
             org.bukkit.event.entity.EntityPickupItemEvent bukkitEntityPickupItemEvent =
@@ -99,11 +99,12 @@ public final class EventsListener {
             Bukkit.getPluginManager().callEvent(bukkitEntityPickupItemEvent);
 
             if (bukkitEntityPickupItemEvent.isCancelled() ||
-                    notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getPlayer())) {
+                    notifyEntityPickupListeners(e, WStackedItem.of(e.getItem()), e.getPlayer(), 0)) {
                 e.setCancelled(true);
                 e.setFlyAtPlayer(false);
             }
         }
+
     }
 
     private static class EntityPickup implements Listener {
@@ -114,12 +115,13 @@ public final class EventsListener {
             this.listenToPlayersPickup = listenToPlayersPickup;
         }
 
-        @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-        public void onEntityPickupEvent(org.bukkit.event.entity.EntityPickupItemEvent e) {
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        public void onEntityPickupItem(org.bukkit.event.entity.EntityPickupItemEvent e) {
             if (entityPickupListeners.isEmpty() || (!listenToPlayersPickup && e.getEntity() instanceof Player))
                 return;
 
-            if (ItemUtils.isStackable(e.getItem()) && notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getEntity()))
+            if (ItemUtils.isStackable(e.getItem()) && notifyEntityPickupListeners(e, WStackedItem.of(e.getItem()),
+                    e.getEntity(), e.getRemaining()))
                 e.setCancelled(true);
         }
 
@@ -127,12 +129,12 @@ public final class EventsListener {
 
     private static class PlayerPickup implements Listener {
 
-        @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-        public void onEntityPickupEvent(org.bukkit.event.player.PlayerPickupItemEvent e) {
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        public void onPlayerPickupItem(org.bukkit.event.player.PlayerPickupItemEvent e) {
             if (entityPickupListeners.isEmpty() || !ItemUtils.isStackable(e.getItem()))
                 return;
 
-            if (notifyEntityPickupListeners(WStackedItem.of(e.getItem()), e.getPlayer()))
+            if (notifyEntityPickupListeners(e, WStackedItem.of(e.getItem()), e.getPlayer(), e.getRemaining()))
                 e.setCancelled(true);
         }
 

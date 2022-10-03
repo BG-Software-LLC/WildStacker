@@ -91,9 +91,7 @@ public interface NMSEntities {
 
     void playSpawnEffect(LivingEntity livingEntity);
 
-    boolean handlePiglinPickup(Entity bukkitPiglin, Item item);
-
-    boolean handleEquipmentPickup(LivingEntity livingEntity, Item bukkitItem);
+    void handleItemPickup(LivingEntity livingEntity, StackedItem stackedItem, int remaining);
 
     void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage);
 
