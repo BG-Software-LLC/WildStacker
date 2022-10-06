@@ -18,6 +18,7 @@ import org.bukkit.Chunk;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
@@ -66,7 +67,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e) {
-        if (!plugin.getSettings().itemsStackingEnabled || !plugin.getNMSEntities().isDroppedItem(e.getEntity()))
+        if (!plugin.getSettings().itemsStackingEnabled || e.getEntity().getType() != EntityType.DROPPED_ITEM)
             return;
 
         StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());

@@ -404,7 +404,7 @@ public final class ItemUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return entity.isValid() && !entity.isDead() && plugin.getNMSEntities().isDroppedItem(entity);
+        return entity.isValid() && !entity.isDead() && entity.getType() == EntityType.DROPPED_ITEM;
     }
 
     public static ItemStack[] cloneItems(ItemStack[] original) {

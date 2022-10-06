@@ -79,8 +79,6 @@ public interface NMSEntities {
 
     boolean checkEntityAttributes(LivingEntity livingEntity, Map<String, Object> attributes);
 
-    boolean isDroppedItem(Entity entity);
-
     void awardKillScore(Entity bukkitDamaged, Entity damagerEntity);
 
     void awardPickupScore(Player player, Item pickItem);

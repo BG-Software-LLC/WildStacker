@@ -337,11 +337,6 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public boolean isDroppedItem(org.bukkit.entity.Entity entity) {
-        return ((CraftEntity) entity).getHandle() instanceof EntityItem;
-    }
-
-    @Override
     public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity damagerEntity) {
         if (damagerEntity instanceof Player && bukkitDamaged instanceof Monster) {

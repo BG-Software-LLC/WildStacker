@@ -468,11 +468,6 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public boolean isDroppedItem(org.bukkit.entity.Entity entity) {
-        return ((CraftEntity) entity).getHandle() instanceof ItemEntity;
-    }
-
-    @Override
     public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity damagerEntity) {
         Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
@@ -482,10 +477,10 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
         if (damager instanceof Player player) {
             damageSource = DamageSource.playerAttack(player);
-        } else if (damager instanceof AbstractArrow abstractArrow) {
-            damageSource = DamageSource.arrow(abstractArrow, abstractArrow.getOwner());
         } else if (damager instanceof ThrownTrident thrownTrident) {
             damageSource = DamageSource.trident(damager, thrownTrident.getOwner());
+        } else if (damager instanceof AbstractArrow abstractArrow) {
+            damageSource = DamageSource.arrow(abstractArrow, abstractArrow.getOwner());
         } else if (damager instanceof Fireball fireball) {
             damageSource = DamageSource.fireball(fireball, fireball.getOwner());
         } else if (damager instanceof LivingEntity livingEntity) {
