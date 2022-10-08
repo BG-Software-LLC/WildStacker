@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms.v1_8_R3;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
@@ -77,6 +78,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEntities {
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "b_");
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
@@ -419,6 +422,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
         int stackAmount = stackedItem.getStackAmount();
         int maxStackSize = entityItem.getItemStack().getMaxStackSize();
+        boolean retryPickup = false;
 
         EntityItem pickupItem;
         if (stackAmount <= maxStackSize) {
@@ -431,7 +435,12 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
             ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
             if (isPlayerPickup) {
-                itemStack.count = stackAmount;
+                if (plugin.getSettings().itemsFixStackEnabled) {
+                    itemStack.count = maxStackSize;
+                    retryPickup = true;
+                } else {
+                    itemStack.count = stackAmount;
+                }
             } else {
                 itemStack.count = maxStackSize;
             }
@@ -460,10 +469,13 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         }
 
         int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItemStack().count : 0);
-
         if (pickupCount > 0) {
             stackedItem.decreaseStackAmount(pickupCount, true);
-            entityItem.p(); // setDefaultPickUpDelay
+            if (retryPickup) {
+                handleItemPickup(bukkitLivingEntity, stackedItem, 0);
+            } else {
+                entityItem.p(); // setDefaultPickUpDelay
+            }
         }
 
         if (!actualItemDupe && isDifferentPickupItem) {
