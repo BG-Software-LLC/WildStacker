@@ -219,7 +219,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         BlockPos blockPos = new BlockPos(villager.getX(), villager.getY(), villager.getZ());
         serverLevel.levelEvent(null, 1026, blockPos, 0);
 
-        return (Zombie) villager.getBukkitEntity();
+        return (Zombie) zombieVillager.getBukkitEntity();
     }
 
     @Override
