@@ -282,6 +282,7 @@ public final class EntitiesListener implements Listener {
         // We later change the cancel status.
         if (fireSecondEvent) {
             this.monitorEntityDamageEventResult = deathSimulationResult;
+            damageEvent.setCancelled(true);
         } else {
             handleEntityDamageMonitor(damageEvent);
         }
