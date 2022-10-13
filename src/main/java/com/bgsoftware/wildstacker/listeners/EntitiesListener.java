@@ -208,7 +208,7 @@ public final class EntitiesListener implements Listener {
         handleEntityDamage(e, true);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false /* Not ignoring cancel status as the event should be cancelled. */)
     public void onEntityDamageMonitor(EntityDamageEvent e) {
         if (this.monitorEntityDamageEventResult != null)
             handleEntityDamageMonitor(e);
@@ -288,8 +288,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private void handleEntityDamageMonitor(EntityDamageEvent damageEvent) {
-        if (this.monitorEntityDamageEventResult.isCancelEvent())
-            damageEvent.setCancelled(true);
+        damageEvent.setCancelled(this.monitorEntityDamageEventResult.isCancelEvent());
 
         if (this.monitorEntityDamageEventResult.getEventDamage() >= 0)
             damageEvent.setDamage(this.monitorEntityDamageEventResult.getEventDamage());
