@@ -274,14 +274,13 @@ public final class EntitiesListener implements Listener {
             }
         }
 
-        DeathSimulation.Result deathSimulationResult = DeathSimulation.simulateDeath(stackedEntity,
+        this.monitorEntityDamageEventResult = DeathSimulation.simulateDeath(stackedEntity,
                 damageEvent.getCause(), damagerTool, damager, entityDamager, creativeMode, damageEvent.getDamage(),
                 damageEvent.getFinalDamage(), noDeathEvent);
 
         // We want to fake the status of the damage event if another event was already been called.
         // We later change the cancel status.
         if (fireSecondEvent) {
-            this.monitorEntityDamageEventResult = deathSimulationResult;
             damageEvent.setCancelled(true);
         } else {
             handleEntityDamageMonitor(damageEvent);
