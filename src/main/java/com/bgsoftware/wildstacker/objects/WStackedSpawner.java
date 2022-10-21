@@ -41,6 +41,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     private int spawnerUpgradeId = -1;
     private EntityType cachedEntity;
     private boolean isSpawnerOverridenTick;
+    private boolean debug = false;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner) {
         this(creatureSpawner, 1);
@@ -414,6 +415,14 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     public void setSpawnerOverridenTick(boolean spawnerOverridenTick) {
         isSpawnerOverridenTick = spawnerOverridenTick;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 
     public void setUpgradeId(int spawnerUpgradeId, @Nullable Player who, boolean fireEvent) {

@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.command;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.command.commands.CommandDebug;
 import com.bgsoftware.wildstacker.command.commands.CommandGive;
 import com.bgsoftware.wildstacker.command.commands.CommandInfo;
 import com.bgsoftware.wildstacker.command.commands.CommandInspect;
@@ -26,6 +27,7 @@ public final class CommandsHandler implements CommandExecutor, TabCompleter {
 
     public CommandsHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
+        subCommands.add(new CommandDebug());
         subCommands.add(new CommandGive());
         subCommands.add(new CommandInfo());
         subCommands.add(new CommandInspect());

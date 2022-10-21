@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -102,6 +103,8 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         if (!serverLevel.hasNearbyAlivePlayer(blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, this.requiredPlayerRange)) {
             failureReason = "There are no nearby players.";
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "No nearby players in range (" + this.requiredPlayerRange + ")");
             return;
         }
 
@@ -114,6 +117,8 @@ public class StackedBaseSpawner extends BaseSpawner {
         }
 
         if (this.demoEntity == null) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null");
             super.serverTick(serverLevel, blockPos);
             failureReason = "";
             return;
@@ -123,6 +128,8 @@ public class StackedBaseSpawner extends BaseSpawner {
         Optional<EntityType<?>> entityTypesOptional = EntityType.by(entityToSpawn);
 
         if (!entityTypesOptional.isPresent()) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "No valid entity to spawn");
             resetSpawnDelay(serverLevel, blockPos);
             failureReason = "";
             return;
@@ -136,6 +143,8 @@ public class StackedBaseSpawner extends BaseSpawner {
             updateDemoEntity(serverLevel, blockPos);
 
             if (this.demoEntity == null) {
+                if (stackedSpawner.isDebug())
+                    Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null after trying to update it");
                 super.serverTick(serverLevel, blockPos);
                 failureReason = "";
                 return;
@@ -148,13 +157,21 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         int stackAmount = stackedSpawner.getStackAmount();
 
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "serverTick", "stackAmount=" + stackAmount);
+
         List<? extends Entity> nearbyEntities = serverLevel.getEntitiesOfClass(
                 demoEntity.getClass(), new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(),
                         blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1).inflate(this.spawnRange));
 
         StackedEntity targetEntity = getTargetEntity(stackedSpawner, this.demoEntity, nearbyEntities);
 
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "serverTick", "targetEntity=" + targetEntity);
+
         if (targetEntity == null && nearbyEntities.size() >= this.maxNearbyEntities) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "There are too many nearby entities (" + nearbyEntities.size() + ">" + this.maxNearbyEntities + ")");
             failureReason = "There are too many nearby entities.";
             return;
         }
@@ -163,8 +180,14 @@ public class StackedBaseSpawner extends BaseSpawner {
                 EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
         failureReason = "";
 
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "serverTick", "spawnStacked=" + spawnStacked);
+
         int spawnCount = !spawnStacked || !this.demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
                 Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
+
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "serverTick", "spawnCount=" + spawnCount);
 
         int amountPerEntity = 1;
         int mobsToSpawn;
@@ -173,6 +196,9 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         // Try stacking into the target entity first
         if (targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, this.demoEntity)) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "Stacking into the target entity");
+
             int targetEntityStackLimit = targetEntity.getStackLimit();
             int currentStackAmount = targetEntity.getStackAmount();
             int increaseStackAmount = Math.min(spawnCount, targetEntityStackLimit - currentStackAmount);
@@ -182,6 +208,9 @@ public class StackedBaseSpawner extends BaseSpawner {
             } else {
                 mobsToSpawn = 0;
             }
+
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "increaseStackAmount=" + increaseStackAmount);
 
             if (increaseStackAmount > 0) {
                 spawnedEntities += increaseStackAmount;
@@ -196,13 +225,20 @@ public class StackedBaseSpawner extends BaseSpawner {
                 particlesAmount++;
             }
         } else {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "Stacking naturally");
             mobsToSpawn = spawnCount;
         }
 
         if (mobsToSpawn > 0 && this.demoEntity.isCached() && spawnStacked) {
             amountPerEntity = Math.min(mobsToSpawn, this.demoEntity.getStackLimit());
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "serverTick", "amountPerEntity=" + amountPerEntity);
             mobsToSpawn = mobsToSpawn / amountPerEntity;
         }
+
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "serverTick", "mobsToSpawn=" + mobsToSpawn);
 
         MobSpawnResult spawnResult = MobSpawnResult.SUCCESS;
         try {
@@ -210,6 +246,10 @@ public class StackedBaseSpawner extends BaseSpawner {
             while (spawnResult == MobSpawnResult.SUCCESS && spawnedEntities < stackAmount) {
                 spawnResult = attemptMobSpawning(serverLevel, blockPos, entityToSpawn, entityToSpawnType,
                         mobsToSpawn, amountPerEntity, spawnCount, particlesAmount, stackedSpawner);
+                if (stackedSpawner.isDebug()) {
+                    Debug.debug("StackedBaseSpawner", "serverTick", "spawnResult=" + spawnResult);
+                    Debug.debug("StackedBaseSpawner", "serverTick", "spawnedEntities=" + spawnedEntities);
+                }
             }
         } finally {
             stackedSpawner.setSpawnerOverridenTick(false);
@@ -232,6 +272,9 @@ public class StackedBaseSpawner extends BaseSpawner {
     private MobSpawnResult attemptMobSpawning(ServerLevel serverLevel, BlockPos blockPos, CompoundTag entityToSpawn,
                                               EntityType<?> entityToSpawnType, int mobsToSpawn, int amountPerEntity,
                                               int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Attempting to spawn mob");
+
         boolean hasSpawnedEntity = false;
 
         for (int i = 0; i < mobsToSpawn; i++) {
@@ -245,7 +288,12 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             Location location = new Location(serverLevel.getWorld(), x, y, z);
 
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "location=" + location);
+
             if (!serverLevel.noCollision(entityToSpawnType.getAABB(x, y, z))) {
+                if (stackedSpawner.isDebug())
+                    Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Not enough space to spawn the entity.");
                 if (failureReason.isEmpty())
                     failureReason = "Not enough space to spawn the entity.";
                 continue;
@@ -253,6 +301,8 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             if (this.nextSpawnData.getCustomSpawnRules().isPresent()) {
                 if (!entityToSpawnType.getCategory().isFriendly() && serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
+                    if (stackedSpawner.isDebug())
+                        Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Cannot spawn as PEACEFUL");
                     failureReason = "Cannot spawn entities due to PEACEFUL_WORLD restriction.";
                     continue;
                 }
@@ -260,6 +310,8 @@ public class StackedBaseSpawner extends BaseSpawner {
                 SpawnData.CustomSpawnRules customSpawnRules = this.nextSpawnData.getCustomSpawnRules().get();
                 if (!customSpawnRules.blockLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.BLOCK, blockPos)) ||
                         !customSpawnRules.skyLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.SKY, blockPos))) {
+                    if (stackedSpawner.isDebug())
+                        Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Cannot spawn due to a custom spawn rule");
                     failureReason = "Cannot spawn entities due to CustomSpawnRules restriction.";
                     continue;
                 }
@@ -268,6 +320,8 @@ public class StackedBaseSpawner extends BaseSpawner {
                         .stream().filter(spawnCondition -> !spawnCondition.test(location)).findFirst().orElse(null);
 
                 if (failedCondition != null) {
+                    if (stackedSpawner.isDebug())
+                        Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Cannot spawn due to " + failedCondition.getName());
                     failureReason = "Cannot spawn entities due to " + failedCondition.getName() + " restriction.";
                     continue;
                 }
@@ -282,6 +336,8 @@ public class StackedBaseSpawner extends BaseSpawner {
                     PreSpawnerSpawnEvent event = new PreSpawnerSpawnEvent(MCUtil.toLocation(serverLevel, x, y, z),
                             type, MCUtil.toLocation(serverLevel, blockPos));
                     if (!event.callEvent()) {
+                        if (stackedSpawner.isDebug())
+                            Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "PreSpawnerSpawnEvent was cancelled");
                         if (event.shouldAbortSpawn())
                             return MobSpawnResult.ABORT_AND_RESET_DELAY;
 
@@ -293,10 +349,16 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             Entity bukkitEntity = generateEntity(serverLevel, x, y, z, true);
 
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "bukkitEntity=" + bukkitEntity);
+
             if (bukkitEntity == null)
                 return MobSpawnResult.ABORT_AND_RESET_DELAY;
 
             int amountToSpawn = spawnedEntities + amountPerEntity > spawnCount ? spawnCount - spawnedEntities : amountPerEntity;
+
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "amountToSpawn=" + amountToSpawn);
 
             if (handleEntitySpawn(serverLevel, blockPos, bukkitEntity, stackedSpawner, amountToSpawn, particlesAmount <= this.spawnCount)) {
                 spawnedEntities += amountPerEntity;
@@ -338,6 +400,10 @@ public class StackedBaseSpawner extends BaseSpawner {
     private boolean handleEntitySpawn(ServerLevel serverLevel, BlockPos blockPos,
                                       Entity entity, WStackedSpawner stackedSpawner,
                                       int amountPerEntity, boolean spawnParticles) {
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "Trying to spawn entity" +
+                    " (amountPerEntity=" + amountPerEntity + " spawnParticles=" + spawnParticles + ")");
+
         StackedEntity stackedEntity = null;
 
         org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
@@ -345,8 +411,12 @@ public class StackedBaseSpawner extends BaseSpawner {
         EntityStorage.setMetadata(bukkitEntity, EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
 
         if (amountPerEntity > 1 || !stackedSpawner.isDefaultUpgrade()) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "Setting upgrade id for the entity to " + stackedSpawner.getUpgradeId());
             stackedEntity = WStackedEntity.of(bukkitEntity);
             ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "Setting stack amount for the entity to " + amountPerEntity);
             stackedEntity.setStackAmount(amountPerEntity, true);
         }
 
@@ -371,6 +441,9 @@ public class StackedBaseSpawner extends BaseSpawner {
         }
 
         if (CraftEventFactory.callSpawnerSpawnEvent(entity, blockPos).isCancelled()) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "SpawnerStackEvent was cancelled");
+
             Entity vehicle = entity.getVehicle();
             if (vehicle != null)
                 vehicle.discard();
@@ -378,6 +451,9 @@ public class StackedBaseSpawner extends BaseSpawner {
             for (Entity passenger : entity.getIndirectPassengers())
                 passenger.discard();
         } else if (addEntity(serverLevel, entity)) {
+            if (stackedSpawner.isDebug())
+                Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "Successfully added entity to the world");
+
             if (spawnParticles)
                 serverLevel.levelEvent(2004, blockPos, 0);
 
@@ -386,6 +462,9 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             return true;
         }
+
+        if (stackedSpawner.isDebug())
+            Debug.debug("StackedBaseSpawner", "handleEntitySpawn", "Failed to add the entity to the world");
 
         if (stackedEntity != null)
             plugin.getSystemManager().removeStackObject(stackedEntity);
