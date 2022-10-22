@@ -179,7 +179,7 @@ public final class ItemsListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(turtle);
         ItemStack scuteItem = scute.getItemStack();
-        scuteItem.setAmount(stackedEntity.getStackAmount());
+        scuteItem.setAmount(scuteItem.getAmount() * stackedEntity.getStackAmount());
         scute.setItemStack(scuteItem);
     }
 

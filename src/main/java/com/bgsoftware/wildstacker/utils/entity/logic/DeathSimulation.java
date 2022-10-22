@@ -179,7 +179,6 @@ public final class DeathSimulation {
                 // Restore all values.
                 plugin.getNMSEntities().setEntityDead(livingEntity, false);
                 plugin.getNMSEntities().setHealthDirectly(livingEntity, originalHealth);
-                stackedEntity.setStackAmount(realStackAmount, false);
 
                 // If setting this to ender dragons, the death animation doesn't happen for an unknown reason.
                 // Cannot revert to original death event neither. This fixes death animations for all versions.
@@ -215,6 +214,9 @@ public final class DeathSimulation {
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
                 stackedEntity.removeFlag(EntityFlag.ATTACKED_ENTITY);
+
+                // Restore stacked entity amount
+                stackedEntity.setStackAmount(realStackAmount, false);
 
                 if (!stackedEntity.hasFlag(EntityFlag.REMOVED_ENTITY) && (livingEntity.getHealth() <= 0 ||
                         (spawnDuplicate && stackedEntity.getStackAmount() > 1))) {
