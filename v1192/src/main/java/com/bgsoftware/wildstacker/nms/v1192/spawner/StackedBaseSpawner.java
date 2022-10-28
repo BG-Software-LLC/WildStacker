@@ -20,7 +20,6 @@ import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.server.MCUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -61,10 +60,22 @@ public class StackedBaseSpawner extends BaseSpawner {
     private WStackedEntity demoEntity = null;
 
     public StackedBaseSpawner(SpawnerBlockEntity spawnerBlockEntity, StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "Creating new spawner");
+
         this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
         BaseSpawner originalSpawner = spawnerBlockEntity.getSpawner();
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "originalSpawner=" + originalSpawner);
+
         BASE_SPAWNER.set(spawnerBlockEntity, this);
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "After set: " + spawnerBlockEntity.getSpawner());
 
         this.nextSpawnData = originalSpawner.nextSpawnData;
         this.minSpawnDelay = originalSpawner.minSpawnDelay;
@@ -333,8 +344,8 @@ public class StackedBaseSpawner extends BaseSpawner {
                 org.bukkit.entity.EntityType type = org.bukkit.entity.EntityType.fromName(key);
 
                 if (type != null) {
-                    PreSpawnerSpawnEvent event = new PreSpawnerSpawnEvent(MCUtil.toLocation(serverLevel, x, y, z),
-                            type, MCUtil.toLocation(serverLevel, blockPos));
+                    PreSpawnerSpawnEvent event = new PreSpawnerSpawnEvent(new Location(serverLevel.getWorld(), x, y, z),
+                            type, new Location(serverLevel.getWorld(), blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                     if (!event.callEvent()) {
                         if (stackedSpawner.isDebug())
                             Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "PreSpawnerSpawnEvent was cancelled");

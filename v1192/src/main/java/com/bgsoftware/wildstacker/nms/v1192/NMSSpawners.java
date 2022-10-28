@@ -5,6 +5,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1192.spawner.StackedBaseSpawner;
 import com.bgsoftware.wildstacker.nms.v1192.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
@@ -53,13 +55,24 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
 
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("NMSSpawners", "updateStackedSpawner", "Trying to update spawner");
+
         ServerLevel serverLevel = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
         BlockPos blockPos = new BlockPos(location.getX(), location.getY(), location.getZ());
 
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
+
+        if (isDebug && blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
+            Debug.debug("NMSSpawners", "updateStackedSpawner", "baseSpawner=" + spawnerBlockEntity.getSpawner());
+
         if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity &&
                 !(spawnerBlockEntity.getSpawner() instanceof StackedBaseSpawner)) {
+            if (isDebug)
+                Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting baseSpawner to new one.");
             new StackedBaseSpawner(spawnerBlockEntity, stackedSpawner);
             return true;
         }

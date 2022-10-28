@@ -64,10 +64,22 @@ public class StackedBaseSpawner extends BaseSpawner {
     private WStackedEntity demoEntity = null;
 
     public StackedBaseSpawner(SpawnerBlockEntity spawnerBlockEntity, StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "Creating new spawner");
+
         this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
         BaseSpawner originalSpawner = spawnerBlockEntity.getSpawner();
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "originalSpawner=" + originalSpawner);
+
         BASE_SPAWNER.set(spawnerBlockEntity, this);
+
+        if (isDebug)
+            Debug.debug("StackedBaseSpawner", "init", "After set: " + spawnerBlockEntity.getSpawner());
 
         this.nextSpawnData = originalSpawner.nextSpawnData;
         this.minSpawnDelay = originalSpawner.minSpawnDelay;

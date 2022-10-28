@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -430,17 +431,28 @@ public final class SpawnersListener implements Listener {
 
         WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawner());
 
+        if(stackedSpawner.isDebug())
+            Debug.debug("SpawnersListener", "onSpawnerSpawn", "Detected a new mob that is spawning.");
+
         // If the event was called from the spawner override spawner, we can safely ignore this section.
         // All the checks here were already been performed by the overridden spawner.
-        if (stackedSpawner.isSpawnerOverridenTick())
+        if (stackedSpawner.isSpawnerOverridenTick()) {
+            if(stackedSpawner.isDebug())
+                Debug.debug("SpawnersListener", "onSpawnerSpawn", "isSpawnerOverridenTick=true");
             return;
+        }
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
+            if(stackedSpawner.isDebug())
+                Debug.debug("SpawnersListener", "onSpawnerSpawn", "spawnersOverrideEnabled=true");
             // We make sure the spawner is still overridden by WildStacker
             // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
             if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
                 return;
         }
+
+        if(stackedSpawner.isDebug())
+            Debug.debug("SpawnersListener", "onSpawnerSpawn", "Running original flow");
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -451,14 +463,22 @@ public final class SpawnersListener implements Listener {
 
         int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
+        if(stackedSpawner.isDebug())
+            Debug.debug("SpawnersListener", "onSpawnerSpawn", "minimumEntityRequirement=" + minimumEntityRequirement);
+
         boolean multipleEntities = !stackedEntity.isCached() ||
                 minimumEntityRequirement > stackedSpawner.getStackAmount() ||
                 !EventsCaller.callSpawnerStackedEntitySpawnEvent(e.getSpawner());
+
+        if(stackedSpawner.isDebug())
+            Debug.debug("SpawnersListener", "onSpawnerSpawn", "multipleEntities=" + multipleEntities);
 
         if (multipleEntities || stackedSpawner.getStackAmount() > stackedEntity.getStackLimit()) {
             if (stackedSpawner.getStackAmount() > 1)
                 spawnEntities(stackedSpawner, stackedEntity, stackedSpawner.getStackAmount(), multipleEntities ? 1 : stackedEntity.getStackLimit());
         } else {
+            if(stackedSpawner.isDebug())
+                Debug.debug("SpawnersListener", "onSpawnerSpawn", "Changing amount to " + stackedEntity.getUniqueId());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
             stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
         }
@@ -471,6 +491,11 @@ public final class SpawnersListener implements Listener {
     }
 
     private void spawnEntities(StackedSpawner stackedSpawner, StackedEntity stackedEntity, int amountToSpawn, int limit) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if(isDebug)
+            Debug.debug("SpawnersListener", "spawnEntities", "amountToSpawn=" + amountToSpawn + " limit=" + limit);
+
         Location location = stackedSpawner.getLocation();
         Entity entity = stackedEntity.getLivingEntity();
 

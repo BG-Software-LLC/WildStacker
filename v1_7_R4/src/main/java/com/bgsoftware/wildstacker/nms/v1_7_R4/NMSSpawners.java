@@ -6,6 +6,8 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.StackedMobSpawner;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.world.BlockPosition;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_7_R4.BiomeBase;
@@ -42,11 +44,22 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
 
     @Override
     public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("NMSSpawners", "updateStackedSpawner", "Trying to update spawner");
+
         World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
         Location location = stackedSpawner.getLocation();
 
         TileEntity tileEntity = world.getTileEntity(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+        if (isDebug && tileEntity instanceof TileEntityMobSpawner)
+            Debug.debug("NMSSpawners", "updateStackedSpawner", "mobSpawner=" + ((TileEntityMobSpawner) tileEntity).getSpawner());
+
         if (tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner)) {
+            if (isDebug)
+                Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting mobSpawner to new one.");
             new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
             return true;
         }

@@ -66,12 +66,24 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     private WStackedEntity demoEntity = null;
 
     public StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "Creating new spawner");
+
         this.world = tileEntityMobSpawner.getWorld();
         this.position = new BlockPosition(tileEntityMobSpawner.x, tileEntityMobSpawner.y, tileEntityMobSpawner.z);
         this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
         MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "originalSpawner=" + originalSpawner);
+
         MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "After set: " + tileEntityMobSpawner.getSpawner());
 
         NBTTagCompound tagCompound = new NBTTagCompound();
         originalSpawner.b(tagCompound);

@@ -55,12 +55,24 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     private WStackedEntity demoEntity = null;
 
     public StackedMobSpawner(TileEntityMobSpawner tileEntityMobSpawner, StackedSpawner stackedSpawner) {
+        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "Creating new spawner");
+
         this.world = (WorldServer) tileEntityMobSpawner.getWorld();
         this.position = tileEntityMobSpawner.getPosition();
         this.stackedSpawner = new WeakReference<>((WStackedSpawner) stackedSpawner);
 
         MobSpawnerAbstract originalSpawner = tileEntityMobSpawner.getSpawner();
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "originalSpawner=" + originalSpawner);
+
         MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
+
+        if (isDebug)
+            Debug.debug("StackedMobSpawner", "init", "After set: " + tileEntityMobSpawner.getSpawner());
 
         this.spawnData = originalSpawner.spawnData;
         this.minSpawnDelay = originalSpawner.minSpawnDelay;
