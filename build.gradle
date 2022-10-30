@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'WildStacker'
-version = "2022.5"
+version = "2022.6"
 
 allprojects {
     apply plugin: 'java'
