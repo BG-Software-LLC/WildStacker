@@ -92,10 +92,15 @@ public final class SpawnersListener implements Listener {
     }
 
     public static boolean handleSpawnerBreak(WildStackerPlugin plugin, StackedSpawner stackedSpawner, int breakAmount, Player player, boolean breakMenu) {
-        Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge
-                .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
+        double amountToCharge;
 
-        double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
+        if (player.hasPermission("wildstacker.charge.bypass")) {
+            amountToCharge = 0;
+        } else {
+            Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge
+                    .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
+            amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
+        }
 
         if (amountToCharge > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(player) < amountToCharge) {
             Locale.SPAWNER_BREAK_NOT_ENOUGH_MONEY.send(player, amountToCharge);
@@ -197,10 +202,15 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge
-                    .getOrDefault(spawnerType, new Pair<>(0.0, false));
+            double amountToCharge;
 
-            double amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
+            if (e.getPlayer().hasPermission("wildstacker.charge.bypass")) {
+                amountToCharge = 0;
+            } else {
+                Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge
+                        .getOrDefault(spawnerType, new Pair<>(0.0, false));
+                amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
+            }
 
             if (amountToCharge > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(e.getPlayer()) < amountToCharge) {
                 Locale.SPAWNER_PLACE_NOT_ENOUGH_MONEY.send(e.getPlayer(), amountToCharge);
@@ -431,19 +441,19 @@ public final class SpawnersListener implements Listener {
 
         WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawner());
 
-        if(stackedSpawner.isDebug())
+        if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "Detected a new mob that is spawning.");
 
         // If the event was called from the spawner override spawner, we can safely ignore this section.
         // All the checks here were already been performed by the overridden spawner.
         if (stackedSpawner.isSpawnerOverridenTick()) {
-            if(stackedSpawner.isDebug())
+            if (stackedSpawner.isDebug())
                 Debug.debug("SpawnersListener", "onSpawnerSpawn", "isSpawnerOverridenTick=true");
             return;
         }
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
-            if(stackedSpawner.isDebug())
+            if (stackedSpawner.isDebug())
                 Debug.debug("SpawnersListener", "onSpawnerSpawn", "spawnersOverrideEnabled=true");
             // We make sure the spawner is still overridden by WildStacker
             // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
@@ -451,7 +461,7 @@ public final class SpawnersListener implements Listener {
                 return;
         }
 
-        if(stackedSpawner.isDebug())
+        if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "Running original flow");
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.SPAWNER);
@@ -463,21 +473,21 @@ public final class SpawnersListener implements Listener {
 
         int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
 
-        if(stackedSpawner.isDebug())
+        if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "minimumEntityRequirement=" + minimumEntityRequirement);
 
         boolean multipleEntities = !stackedEntity.isCached() ||
                 minimumEntityRequirement > stackedSpawner.getStackAmount() ||
                 !EventsCaller.callSpawnerStackedEntitySpawnEvent(e.getSpawner());
 
-        if(stackedSpawner.isDebug())
+        if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "multipleEntities=" + multipleEntities);
 
         if (multipleEntities || stackedSpawner.getStackAmount() > stackedEntity.getStackLimit()) {
             if (stackedSpawner.getStackAmount() > 1)
                 spawnEntities(stackedSpawner, stackedEntity, stackedSpawner.getStackAmount(), multipleEntities ? 1 : stackedEntity.getStackLimit());
         } else {
-            if(stackedSpawner.isDebug())
+            if (stackedSpawner.isDebug())
                 Debug.debug("SpawnersListener", "onSpawnerSpawn", "Changing amount to " + stackedEntity.getUniqueId());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
             stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
@@ -493,7 +503,7 @@ public final class SpawnersListener implements Listener {
     private void spawnEntities(StackedSpawner stackedSpawner, StackedEntity stackedEntity, int amountToSpawn, int limit) {
         boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
 
-        if(isDebug)
+        if (isDebug)
             Debug.debug("SpawnersListener", "spawnEntities", "amountToSpawn=" + amountToSpawn + " limit=" + limit);
 
         Location location = stackedSpawner.getLocation();

@@ -28,6 +28,7 @@ permissions:
       wildstacker.nextplace: true
       wildstacker.stats: true
       wildstacker.toggle: true
+      wildstacker.charge.bypass: true
   wildstacker.give:
     description: Gives access to give spawner and eggs to players.
   wildstacker.info:
@@ -54,3 +55,5 @@ permissions:
   wildstacker.toggle:
     default: true
     description: Gives access to use the toggle command if enabled.
+  wildstacker.charge.bypass:
+    description: Bypass charging for placing and breaking spawners
