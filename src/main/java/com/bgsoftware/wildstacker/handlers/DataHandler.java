@@ -19,7 +19,6 @@ import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -43,7 +42,7 @@ public final class DataHandler {
     public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
     public final Map<Location, StackedBarrel> CACHED_BARRELS = new ConcurrentHashMap<>();
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
-    public final Set<StackedObject> OBJECTS_TO_SAVE = Sets.newConcurrentHashSet();
+    public final Set<StackedObject> OBJECTS_TO_SAVE = Collections.newSetFromMap(new ConcurrentHashMap<>());
     //References for all the data from database
     public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
     public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();

@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -20,18 +23,11 @@ public final class EntitiesGetter {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static final LoadingCache<ChunkPosition, Collection<Entity>> entitiesCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.SECONDS)
-            .build(new CacheLoader<ChunkPosition, Collection<Entity>>() {
-                @Override
-                public Collection<Entity> load(@NotNull ChunkPosition chunkPosition) {
-                    return plugin.getNMSWorld().getEntitiesAtChunk(chunkPosition);
-                }
-            });
+    private static final EntitiesCache entitiesCache = initializeCache();
 
     public static void handleEntitySpawn(Entity entity) {
         ChunkPosition chunkPosition = new ChunkPosition(entity.getLocation());
-        entitiesCache.getUnchecked(chunkPosition).add(entity);
+        entitiesCache.get(chunkPosition).add(entity);
     }
 
     public static Stream<Entity> getNearbyEntities(Location location, int range, Predicate<Entity> filter) {
@@ -56,7 +52,7 @@ public final class EntitiesGetter {
 
         for (int x = minChunkX; x <= maxChunkX; x++) {
             for (int z = minChunkZ; z <= maxChunkZ; z++) {
-                entities.addAll(entitiesCache.getUnchecked(new ChunkPosition(worldName, x, z)));
+                entities.addAll(entitiesCache.get(new ChunkPosition(worldName, x, z)));
             }
         }
 
@@ -71,6 +67,41 @@ public final class EntitiesGetter {
     private static boolean isInRange(Location location, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         int x = location.getBlockX(), y = location.getBlockY(), z = location.getBlockZ();
         return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
+    }
+
+    private static EntitiesCache initializeCache() {
+        if (ServerVersion.isAtLeast(ServerVersion.v1_8)) {
+            return new EntitiesCache() {
+                private final LoadingCache<ChunkPosition, Collection<Entity>> entitiesCache = CacheBuilder.newBuilder()
+                        .expireAfterWrite(5, TimeUnit.SECONDS)
+                        .build(new CacheLoader<ChunkPosition, Collection<Entity>>() {
+                            @Override
+                            public Collection<Entity> load(@NotNull ChunkPosition chunkPosition) {
+                                return plugin.getNMSWorld().getEntitiesAtChunk(chunkPosition);
+                            }
+                        });
+
+                @Override
+                public Collection<Entity> get(ChunkPosition chunkPosition) {
+                    return entitiesCache.getUnchecked(chunkPosition);
+                }
+            };
+        } else {
+            return new EntitiesCache() {
+                private final Map<ChunkPosition, Collection<Entity>> entitiesCache = new HashMap<>();
+
+                @Override
+                public Collection<Entity> get(ChunkPosition chunkPosition) {
+                    return entitiesCache.computeIfAbsent(chunkPosition, unused -> new ArrayList<>());
+                }
+            };
+        }
+    }
+
+    private interface EntitiesCache {
+
+        Collection<Entity> get(ChunkPosition chunkPosition);
+
     }
 
 }

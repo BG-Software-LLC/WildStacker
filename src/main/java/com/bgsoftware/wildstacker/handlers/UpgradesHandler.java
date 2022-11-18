@@ -4,7 +4,6 @@ import com.bgsoftware.wildstacker.api.handlers.UpgradesManager;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.upgrades.WSpawnerUpgrade;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
@@ -12,13 +11,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class UpgradesHandler implements UpgradesManager {
 
     private final Map<String, SpawnerUpgrade> spawnerUpgrades = Maps.newConcurrentMap();
     private final Map<Integer, SpawnerUpgrade> spawnerUpgradesById = Maps.newConcurrentMap();
 
-    private final Set<SpawnerUpgrade> rootUpgrades = Sets.newConcurrentHashSet();
+    private final Set<SpawnerUpgrade> rootUpgrades = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private SpawnerUpgrade GLOBAL_UPGRADE = new WSpawnerUpgrade("Default", -1);
 
     @Override
