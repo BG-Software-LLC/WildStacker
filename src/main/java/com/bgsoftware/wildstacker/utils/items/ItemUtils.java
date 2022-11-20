@@ -399,8 +399,9 @@ public final class ItemUtils {
     }
 
     public static boolean isUnbreakable(ItemStack itemStack) {
-        return IS_UNBREAKABLE_METHOD.isValid() && itemStack.hasItemMeta() &&
-                IS_UNBREAKABLE_METHOD.invoke(itemStack.getItemMeta());
+        return itemStack.hasItemMeta() && IS_UNBREAKABLE_METHOD.isValid() ?
+                IS_UNBREAKABLE_METHOD.invoke(itemStack.getItemMeta()) :
+                itemStack.getItemMeta().spigot().isUnbreakable();
     }
 
     public static boolean isStackable(Entity entity) {
