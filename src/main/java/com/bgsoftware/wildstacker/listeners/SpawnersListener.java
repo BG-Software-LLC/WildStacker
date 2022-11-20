@@ -59,6 +59,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public final class SpawnersListener implements Listener {
@@ -803,18 +806,29 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            if (!targetEntityOptional.isPresent()) {
-                int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
+            int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
+            AtomicInteger nearbyEntitiesCount = new AtomicInteger(0);
 
+            List<StackedEntity> nearbyStackableEntities = mergeRadius <= 0 ? Collections.emptyList() :
+                    EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
+                                    entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
+                            .map(WStackedEntity::of)
+                            .filter(stackedEntity -> {
+                                if (stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
+                                        stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
+                                    nearbyEntitiesCount.set(nearbyEntitiesCount.get() + stackedEntity.getStackAmount());
+                                    return true;
+                                }
+
+                                return false;
+                            }).collect(Collectors.toList());
+
+            if (!targetEntityOptional.isPresent()) {
                 if (mergeRadius <= 0)
                     return;
 
-                targetEntityOptional = EntitiesGetter.getNearbyEntities(e.getSpawnLocation(),
-                                mergeRadius, entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
-                        .map(WStackedEntity::of)
-                        .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
-                                stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS)
-                        .findFirst();
+                if (!nearbyStackableEntities.isEmpty())
+                    targetEntityOptional = Optional.of(nearbyStackableEntities.get(0));
             }
 
             if (!targetEntityOptional.isPresent()) {
@@ -823,7 +837,28 @@ public final class SpawnersListener implements Listener {
             }
 
             StackedEntity stackedEntity = targetEntityOptional.get();
-            stackedEntity.increaseStackAmount(spawnMobsCount, true);
+
+            int finalSpawnMobsCount;
+
+            int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 0);
+            if (nearbyEntitiesCount.get() + spawnMobsCount >= minimumEntityRequirement) {
+                nearbyStackableEntities.forEach(nearbyEntity -> {
+                    if (nearbyEntity != stackedEntity) {
+                        nearbyEntity.remove();
+                        nearbyEntity.spawnStackParticle(true);
+                    }
+                });
+
+                stackedEntity.increaseStackAmount(spawnMobsCount, true);
+                finalSpawnMobsCount = nearbyEntitiesCount.get() + spawnMobsCount - stackedEntity.getStackAmount();
+            } else if (minimumEntityRequirement <= 0) {
+                finalSpawnMobsCount = spawnMobsCount;
+            } else {
+                return;
+            }
+
+            stackedEntity.increaseStackAmount(finalSpawnMobsCount, true);
+
             stackedEntity.spawnStackParticle(true);
 
             e.setCancelled(true);
