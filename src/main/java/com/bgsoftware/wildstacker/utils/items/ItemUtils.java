@@ -30,6 +30,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
@@ -398,8 +399,8 @@ public final class ItemUtils {
         return origin;
     }
 
-    public static boolean isUnbreakable(ItemStack itemStack) {
-        return itemStack.hasItemMeta() && IS_UNBREAKABLE_METHOD.isValid() ?
+    public static boolean isUnbreakable(@Nullable ItemStack itemStack) {
+        return itemStack != null && itemStack.hasItemMeta() && IS_UNBREAKABLE_METHOD.isValid() ?
                 IS_UNBREAKABLE_METHOD.invoke(itemStack.getItemMeta()) :
                 itemStack.getItemMeta().spigot().isUnbreakable();
     }
