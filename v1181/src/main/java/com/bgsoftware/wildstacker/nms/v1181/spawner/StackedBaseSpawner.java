@@ -44,8 +44,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StackedBaseSpawner extends BaseSpawner {
 
@@ -179,7 +181,21 @@ public class StackedBaseSpawner extends BaseSpawner {
                 demoEntity.getClass(), new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(),
                         blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1).inflate(this.spawnRange));
 
-        StackedEntity targetEntity = getTargetEntity(stackedSpawner, this.demoEntity, nearbyEntities);
+        AtomicInteger nearbyAndStackableCount = new AtomicInteger(0);
+        List<StackedEntity> nearbyAndStackableEntities = new LinkedList<>();
+
+        nearbyEntities.forEach(entity -> {
+            CraftEntity craftEntity = entity.getBukkitEntity();
+            if (EntityUtils.isStackable(craftEntity)) {
+                StackedEntity stackedEntity = WStackedEntity.of(craftEntity);
+                if (this.demoEntity.runStackCheck(stackedEntity) == StackCheckResult.SUCCESS) {
+                    nearbyAndStackableCount.set(nearbyAndStackableCount.get() + stackedEntity.getStackAmount());
+                    nearbyAndStackableEntities.add(stackedEntity);
+                }
+            }
+        });
+
+        StackedEntity targetEntity = getTargetEntity(stackedSpawner, this.demoEntity, nearbyAndStackableEntities);
 
         if (stackedSpawner.isDebug())
             Debug.debug("StackedBaseSpawner", "serverTick", "targetEntity=" + targetEntity);
@@ -191,7 +207,13 @@ public class StackedBaseSpawner extends BaseSpawner {
             return;
         }
 
-        boolean spawnStacked = plugin.getSettings().entitiesStackingEnabled &&
+        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this.demoEntity, 1);
+
+        int stackedEntityCount = Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
+
+        boolean canStackToTarget = nearbyAndStackableCount.get() + stackedEntityCount >= minimumEntityRequirement;
+
+        boolean spawnStacked = plugin.getSettings().entitiesStackingEnabled && canStackToTarget &&
                 EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
         failureReason = "";
 
@@ -199,7 +221,7 @@ public class StackedBaseSpawner extends BaseSpawner {
             Debug.debug("StackedBaseSpawner", "serverTick", "spawnStacked=" + spawnStacked);
 
         int spawnCount = !spawnStacked || !this.demoEntity.isCached() ? Random.nextInt(1, this.spawnCount, stackAmount) :
-                Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
+                stackedEntityCount;
 
         if (stackedSpawner.isDebug())
             Debug.debug("StackedBaseSpawner", "serverTick", "spawnCount=" + spawnCount);
@@ -210,7 +232,7 @@ public class StackedBaseSpawner extends BaseSpawner {
         short particlesAmount = 0;
 
         // Try stacking into the target entity first
-        if (targetEntity != null && EventsCaller.callEntityStackEvent(targetEntity, this.demoEntity)) {
+        if (targetEntity != null && canStackToTarget && EventsCaller.callEntityStackEvent(targetEntity, this.demoEntity)) {
             if (stackedSpawner.isDebug())
                 Debug.debug("StackedBaseSpawner", "serverTick", "Stacking into the target entity");
 
@@ -229,6 +251,17 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             if (increaseStackAmount > 0) {
                 spawnedEntities += increaseStackAmount;
+
+                if (minimumEntityRequirement > 1) {
+                    // We want to stack all nearby entities into target as well.
+                    increaseStackAmount += nearbyAndStackableCount.get() - targetEntity.getStackAmount();
+                    nearbyAndStackableEntities.forEach(nearbyEntity -> {
+                        if (nearbyEntity != targetEntity) {
+                            nearbyEntity.remove();
+                            nearbyEntity.spawnStackParticle(true);
+                        }
+                    });
+                }
 
                 targetEntity.increaseStackAmount(increaseStackAmount, true);
                 this.demoEntity.spawnStackParticle(true);
@@ -502,7 +535,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
     @Nullable
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                          List<? extends Entity> nearbyEntities) {
+                                          List<StackedEntity> nearbyEntities) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return null;
 
@@ -511,12 +544,7 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (linkedEntity != null && linkedEntity.getType() == demoEntity.getType())
             return WStackedEntity.of(linkedEntity);
 
-        Optional<CraftEntity> closestEntity = GeneralUtils.getClosestBukkit(stackedSpawner.getLocation(),
-                nearbyEntities.stream().map(Entity::getBukkitEntity).filter(entity ->
-                        EntityUtils.isStackable(entity) &&
-                                demoEntity.runStackCheck(WStackedEntity.of(entity)) == StackCheckResult.SUCCESS));
-
-        return closestEntity.map(WStackedEntity::of).orElse(null);
+        return GeneralUtils.getClosest(stackedSpawner.getLocation(), nearbyEntities.stream()).orElse(null);
     }
 
     private void updateDemoEntity(ServerLevel serverLevel, BlockPos blockPos) {
