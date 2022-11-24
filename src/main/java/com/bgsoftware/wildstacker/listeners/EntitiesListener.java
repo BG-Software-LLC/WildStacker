@@ -868,8 +868,10 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.updateNerfed();
         };
 
+        boolean stackWithDelay = Optional.ofNullable((Boolean) EntityStorage.removeMetadata(entity, EntityFlag.DELAY_STACK)).orElse(false);
+
         //Need to add a delay so eggs will get removed from inventory
-        if (spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
+        if (stackWithDelay || spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
                 entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
                 entity.getType() == EntityType.SNOWMAN || EntityTypes.fromEntity(entity).isSlime() ||
                 plugin.getProviders().handleEntityStackingWithDelay())

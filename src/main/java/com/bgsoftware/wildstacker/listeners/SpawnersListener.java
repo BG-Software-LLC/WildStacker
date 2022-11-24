@@ -35,6 +35,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -439,6 +440,11 @@ public final class SpawnersListener implements Listener {
         if (!listenToSpawnEvent || !(e.getEntity() instanceof LivingEntity))
             return;
 
+        if (e.getSpawner() == null) {
+            EntityStorage.setMetadata(e.getEntity(), EntityFlag.DELAY_STACK, true);
+            return;
+        }
+
         if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.remove(e.getSpawner().getLocation()))
             return;
 
@@ -775,7 +781,12 @@ public final class SpawnersListener implements Listener {
             if (!plugin.getSettings().entitiesStackingEnabled || !plugin.getSettings().listenPaperPreSpawnEvent)
                 return;
 
-            WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawnerLocation().getBlock());
+            BlockState spawnerBlockState = e.getSpawnerLocation().getBlock().getState();
+
+            if (!(spawnerBlockState instanceof CreatureSpawner))
+                return;
+
+            WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of((CreatureSpawner) spawnerBlockState);
 
             // If the event was called from the spawner override spawner, we can safely ignore this section.
             // All the checks here were already been performed by the overridden spawner.
