@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
@@ -79,13 +80,15 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
         removeDisplayBlock();
 
         if (location.getBlock().getType() == Material.CAULDRON) {
-            blockDisplay = location.getWorld().spawn(location.add(0.5, 0, 0.5), ArmorStand.class);
-            blockDisplay.setVisible(false);
-            blockDisplay.setSmall(true);
-            blockDisplay.setGravity(false);
-            blockDisplay.setHelmet(barrelItem);
-            plugin.getNMSEntities().setCustomName(blockDisplay, "BlockDisplay");
-            plugin.getNMSEntities().setCustomNameVisible(blockDisplay, false);
+            blockDisplay = plugin.getNMSEntities().createEntity(location.add(0.5, 0, 0.5), ArmorStand.class,
+                    SpawnCause.CUSTOM, createdEntity -> {
+                        createdEntity.setVisible(false);
+                        createdEntity.setSmall(true);
+                        createdEntity.setGravity(false);
+                        createdEntity.setHelmet(barrelItem);
+                        plugin.getNMSEntities().setCustomName(createdEntity, "BlockDisplay");
+                        plugin.getNMSEntities().setCustomNameVisible(createdEntity, false);
+                    }, null);
         }
     }
 
