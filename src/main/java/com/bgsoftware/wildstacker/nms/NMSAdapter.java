@@ -14,6 +14,8 @@ public interface NMSAdapter {
 
     boolean shouldArmorBeDamaged(ItemStack itemStack);
 
+    boolean isUnbreakable(ItemStack itemStack);
+
     Enchantment getGlowEnchant();
 
     ItemStack getPlayerSkull(ItemStack bukkitItem, String texture);

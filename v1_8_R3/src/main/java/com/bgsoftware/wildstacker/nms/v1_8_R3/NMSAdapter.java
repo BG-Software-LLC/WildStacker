@@ -23,6 +23,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +52,12 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {
         ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
         return nmsItem != null && nmsItem.e();
+    }
+
+    @Override
+    public boolean isUnbreakable(org.bukkit.inventory.ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        return itemMeta != null && itemMeta.spigot().isUnbreakable();
     }
 
     @Override

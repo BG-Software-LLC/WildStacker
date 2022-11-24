@@ -27,10 +27,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
@@ -45,8 +43,6 @@ public final class ItemUtils {
             PlayerInventory.class, "getItemInOffHand");
     private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND = new ReflectMethod<>(
             PlayerInventory.class, "setItemInOffHand", ItemStack.class);
-    private static final ReflectMethod<Boolean> IS_UNBREAKABLE_METHOD = new ReflectMethod<>(
-            ItemMeta.class, "isUnbreakable");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int MAX_PICKUP_DELAY = 32767;
@@ -397,12 +393,6 @@ public final class ItemUtils {
             return location;
 
         return origin;
-    }
-
-    public static boolean isUnbreakable(@Nullable ItemStack itemStack) {
-        return itemStack != null && itemStack.hasItemMeta() && IS_UNBREAKABLE_METHOD.isValid() ?
-                IS_UNBREAKABLE_METHOD.invoke(itemStack.getItemMeta()) :
-                itemStack.getItemMeta().spigot().isUnbreakable();
     }
 
     public static boolean isStackable(Entity entity) {
