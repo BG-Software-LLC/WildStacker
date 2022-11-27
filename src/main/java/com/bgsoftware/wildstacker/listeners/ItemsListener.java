@@ -130,6 +130,9 @@ public final class ItemsListener implements Listener {
             return false;
         }
 
+        if (((WStackedItem) stackedItem).isRemoved())
+            return false;
+
         Item item = stackedItem.getItem();
 
         if (EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)) {
