@@ -60,6 +60,11 @@ public final class BarrelsListener implements Listener {
         if (!isBarrelBlock(e.getBlock()) || !plugin.getProviders().canCreateBarrel(e.getItemInHand()))
             return;
 
+        // In some cases, the item in hand may be different than the placed block.
+        // For example, when waxing copper blocks: https://github.com/BG-Software-LLC/WildStacker/issues/685
+        if(e.getItemInHand() != null && e.getItemInHand().getType() != e.getBlock().getType())
+            return;
+
         if (ItemUtils.isOffHand(e)) {
             e.setCancelled(true);
             return;
@@ -278,7 +283,7 @@ public final class BarrelsListener implements Listener {
     @EventHandler
     public void onEntityInteract(PlayerInteractAtEntityEvent e) {
         if (e.getRightClicked() instanceof ArmorStand) {
-            if(plugin.getSystemManager().isStackedBarrel(e.getRightClicked().getLocation().getBlock().getLocation()))
+            if (plugin.getSystemManager().isStackedBarrel(e.getRightClicked().getLocation().getBlock().getLocation()))
                 e.setCancelled(true);
         }
     }
@@ -308,7 +313,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPistonExtend(BlockPistonExtendEvent e) {
-        if(!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().barrelsStackingEnabled)
             return;
 
         for (Block block : e.getBlocks()) {
@@ -321,7 +326,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPistonRetract(BlockPistonRetractEvent e) {
-        if(!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().barrelsStackingEnabled)
             return;
 
         for (Block block : e.getBlocks()) {
@@ -362,7 +367,7 @@ public final class BarrelsListener implements Listener {
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onCauldronFill(CauldronLevelChangeEvent e) {
-            if(!plugin.getSettings().barrelsStackingEnabled)
+            if (!plugin.getSettings().barrelsStackingEnabled)
                 return;
 
             if (plugin.getSystemManager().isStackedBarrel(e.getBlock())) {
