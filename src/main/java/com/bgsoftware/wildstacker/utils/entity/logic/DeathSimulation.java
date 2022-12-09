@@ -123,7 +123,7 @@ public final class DeathSimulation {
         }
 
         //Decrease durability when next-stack-knockback is false
-        if (result.cancelEvent && killerTool != null && !creativeMode && plugin.getNMSAdapter().isUnbreakable(killerTool))
+        if (result.cancelEvent && killerTool != null && !creativeMode && !plugin.getNMSAdapter().isUnbreakable(killerTool))
             reduceKillerToolDurability(killerTool, killer);
 
         EntityDamageEvent clonedEvent = createDamageEvent(livingEntity, lastDamageCause, originalDamage, entityKiller);
