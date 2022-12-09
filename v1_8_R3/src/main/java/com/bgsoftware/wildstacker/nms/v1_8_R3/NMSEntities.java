@@ -59,6 +59,7 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.MushroomCow;
@@ -530,6 +531,11 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     @Override
     public void setCustomNameVisible(org.bukkit.entity.Entity entity, boolean visible) {
         entity.setCustomNameVisible(visible);
+    }
+
+    @Override
+    public boolean isDroppedItem(Item item) {
+        return ((CraftItem) item).getHandle() instanceof EntityItem;
     }
 
 }

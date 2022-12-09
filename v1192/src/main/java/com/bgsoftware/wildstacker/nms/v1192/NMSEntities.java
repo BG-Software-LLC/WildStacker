@@ -733,4 +733,9 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         entity.setCustomNameVisible(visible);
     }
 
+    @Override
+    public boolean isDroppedItem(Item item) {
+        return ((CraftItem) item).getHandle() instanceof ItemEntity;
+    }
+
 }

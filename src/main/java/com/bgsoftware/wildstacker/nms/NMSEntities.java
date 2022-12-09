@@ -107,4 +107,6 @@ public interface NMSEntities {
 
     void setCustomNameVisible(Entity entity, boolean visible);
 
+    boolean isDroppedItem(Item item);
+
 }

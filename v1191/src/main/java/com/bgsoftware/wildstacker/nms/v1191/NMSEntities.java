@@ -78,6 +78,7 @@ import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Frog;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Zombie;
@@ -730,6 +731,11 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     @Override
     public void setCustomNameVisible(org.bukkit.entity.Entity entity, boolean visible) {
         entity.setCustomNameVisible(visible);
+    }
+
+    @Override
+    public boolean isDroppedItem(Item item) {
+        return ((CraftItem) item).getHandle() instanceof ItemEntity;
     }
 
 }

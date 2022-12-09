@@ -584,4 +584,9 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
             ((LivingEntity) entity).setCustomNameVisible(visible);
     }
 
+    @Override
+    public boolean isDroppedItem(org.bukkit.entity.Item item) {
+        return ((CraftItem) item).getHandle() instanceof EntityItem;
+    }
+
 }
