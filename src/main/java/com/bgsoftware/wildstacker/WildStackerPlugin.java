@@ -221,7 +221,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                     new Pair<>(2975, "v1182"),
                     new Pair<>(3105, "v119"),
                     new Pair<>(3117, "v1191"),
-                    new Pair<>(3120, "v1192")
+                    new Pair<>(3120, "v1192"),
+                    new Pair<>(3218, "v1193")
             );
 
             for (Pair<Integer, String> versionData : versions) {

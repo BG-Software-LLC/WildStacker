@@ -86,6 +86,10 @@ public final class LootHandler {
             FileUtils.saveResource("loottables/bee_baby.json");
         }
         FileUtils.saveResource("loottables/blaze.json");
+        if(containsEntity("CAMEL")) {
+            FileUtils.saveResource("loottables/camel.json");
+            FileUtils.saveResource("loottables/camel_baby.json");
+        }
         if (containsEntity("CAT")) {
             FileUtils.saveResource("loottables/cat.json");
             FileUtils.saveResource("loottables/cat_baby.json");

@@ -872,9 +872,9 @@ public final class EntitiesListener implements Listener {
 
         //Need to add a delay so eggs will get removed from inventory
         if (stackWithDelay || spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
-                entity.getType() == EntityType.WITHER || entity.getType() == EntityType.IRON_GOLEM ||
-                entity.getType() == EntityType.SNOWMAN || EntityTypes.fromEntity(entity).isSlime() ||
-                plugin.getProviders().handleEntityStackingWithDelay())
+                spawnCause == SpawnCause.COMMAND || entity.getType() == EntityType.WITHER ||
+                entity.getType() == EntityType.IRON_GOLEM || entity.getType() == EntityType.SNOWMAN ||
+                EntityTypes.fromEntity(entity).isSlime() || plugin.getProviders().handleEntityStackingWithDelay())
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
