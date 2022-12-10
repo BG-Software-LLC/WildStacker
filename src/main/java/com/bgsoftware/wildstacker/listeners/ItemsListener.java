@@ -131,7 +131,7 @@ public final class ItemsListener implements Listener {
         }
 
         if (((WStackedItem) stackedItem).isRemoved())
-            return false;
+            return true;
 
         Item item = stackedItem.getItem();
 
