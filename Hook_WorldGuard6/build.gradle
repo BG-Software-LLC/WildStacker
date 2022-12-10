@@ -1,7 +1,7 @@
 group 'Hook_WorldGuard6'
 
 dependencies {
-    compileOnly 'com.sk89q:WorldGuard-6:latest'
+    compileOnly 'com.sk89q:WorldGuard:6.2.1'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent

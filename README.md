@@ -16,26 +16,6 @@ You can compile the project using gradlew.<br>
 Run `gradlew build` in console to build the project.<br>
 You can find already compiled jars on our [Jenkins](https://hub.bg-software.com/) hub!<br>
 
-When compiling you will receive errors about missing dependencies.<br>
-These dependencies are premium plugins that cannot be published on a public repository.<br>
-You can do either of the followings in order to solve it:
-- Add manually all the jar files of the premium plugins.
-- Purchase access to our private repository.
-- Disabling compiling of the modules of these dependencies in the `gradle.properties` file.
-
-<br>
-
-##### Private Jars:
-- Boss (latest & v3.9.7) by kangarko [[link]](https://www.mc-market.org/resources/21619/)
-- Citizens by fullwall [[link]](https://www.spigotmc.org/resources/13811/)
-- CustomBosses by AMinecraftDev
-- EpicBosses by Songoda [[link]](https://www.spigotmc.org/resources/34159/)
-- EpicSpawners (v5 & v6) by Songoda [[link]](https://songoda.com/marketplace/product/13)
-- FabledSkyblock by Songoda [[link]](https://songoda.com/marketplace/product/17)
-- mcMMO (v1 & v2) by nossr50 [[link]](https://www.spigotmc.org/resources/64348/)
-- PlotSquared (legacy, v4 & v5) by IntellectualSites [[link]](https://www.spigotmc.org/resources/77506/)
-- ShopGUIPlus (v1.18 & v1.20) by brcdev [[link]](https://www.spigotmc.org/resources/6515/)
-
 ## API
 
 The plugin is packed with a rich API for interacting with entities, items and more. When hooking into the plugin, it's highly recommended to only use the API and not the compiled plugin, as the API methods are not only commented, but also will not get removed or changed unless they are marked as deprecated. This means that by using the API, you won't have to do any additional changes to your code between updates.

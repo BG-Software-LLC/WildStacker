@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import io.lumine.xikage.mythicmobs.MythicMobs;
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob;
 import org.bukkit.entity.LivingEntity;
-import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public final class EntityNameProvider_MythicMobs4 implements EntityNameProvider {
@@ -17,10 +16,9 @@ public final class EntityNameProvider_MythicMobs4 implements EntityNameProvider 
         this.plugin = plugin;
     }
 
-    @Nullable
     @Override
     public String getCustomName(StackedEntity stackedEntity) {
-        if(stackedEntity.getSpawnCause() != SpawnCause.MYTHIC_MOBS)
+        if (stackedEntity.getSpawnCause() != SpawnCause.MYTHIC_MOBS)
             return null;
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();

@@ -1,7 +1,7 @@
 group 'Hook_Boss39'
 
 dependencies {
-    compileOnly 'org.mineacademy:Boss-3.9.7:latest'
+    compileOnly 'org.mineacademy:Boss:3.9.7'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent

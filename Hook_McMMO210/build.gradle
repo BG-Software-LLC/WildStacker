@@ -7,7 +7,7 @@ java {
 }
 
 dependencies {
-    compileOnly 'com.nossr50:mcMMO-2:2.1.210'
+    compileOnly 'com.gmail.nossr50:mcMMO:2.1.210'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent

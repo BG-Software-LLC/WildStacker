@@ -1,8 +1,8 @@
 group 'Hook_MassiveFactions'
 
 dependencies {
-    compileOnly 'com.massivecraft:Factions:latest'
-    compileOnly 'com.massivecraft:MassiveCore:latest'
+    compileOnly 'com.massivecraft:Factions:2.13.6'
+    compileOnly 'com.massivecraft:MassiveCore:2.13.6'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent

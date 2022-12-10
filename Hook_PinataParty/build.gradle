@@ -1,7 +1,7 @@
 group 'Hook_PinataParty'
 
 dependencies {
-    compileOnly 'me.hexedhero:PinataParty:latest'
+    compileOnly 'me.hexedhero:PinataParty:2.16.1'
     compileOnly "org.spigotmc:v1_16_R3:latest"
     compileOnly project(":API")
     compileOnly parent

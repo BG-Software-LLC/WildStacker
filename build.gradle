@@ -15,20 +15,7 @@ allprojects {
         maven { url 'https://repo.bg-software.com/repository/nms/' }
         maven { url 'https://repo.bg-software.com/repository/api/' }
         maven { url 'https://repo.bg-software.com/repository/common/' }
-        maven { url 'https://repo.bg-software.com/repository/public-libs/' }
-
-        String mavenUsername = System.getenv('mavenUsername') == null ? project.mavenUsername : System.getenv('mavenUsername');
-        String mavenPassword = System.getenv('mavenPassword') == null ? project.mavenUsername : System.getenv('mavenPassword');
-
-        if (mavenUsername != null && mavenPassword != null) {
-            maven {
-                url 'https://repo.bg-software.com/repository/private-libs/'
-                credentials {
-                    username mavenUsername
-                    password mavenPassword
-                }
-            }
-        }
+        maven { url 'https://repo.bg-software.com/repository/dependencies/' }
     }
 
     dependencies {

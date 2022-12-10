@@ -7,7 +7,7 @@ java {
 }
 
 dependencies {
-    compileOnly 'com.github.intellectualsites:PlotSquared-6:latest'
+    compileOnly 'com.github.intellectualsites:PlotSquared:6.0.5'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly parent
