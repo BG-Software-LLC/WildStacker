@@ -46,7 +46,6 @@ import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -257,24 +256,8 @@ public final class EntitiesListener implements Listener {
         if (damageEvent.isCancelled())
             return new DeathSimulation.Result(true, 0);
 
-        /*
-         *  Getting the damager of the event.
-         */
-
-        Entity entityDamager = null;
-        Player damager = null;
-
-        if (damageEvent instanceof EntityDamageByEntityEvent) {
-            entityDamager = ((EntityDamageByEntityEvent) damageEvent).getDamager();
-            if (entityDamager instanceof Player) {
-                damager = (Player) entityDamager;
-            } else if (entityDamager instanceof Projectile) {
-                Projectile projectile = (Projectile) entityDamager;
-                if (projectile.getShooter() instanceof Player)
-                    damager = (Player) projectile.getShooter();
-            }
-        }
-
+        Entity entityDamager = EntityUtils.getDamagerFromEvent(damageEvent, true);
+        Player damager = entityDamager instanceof Player ? (Player) entityDamager : null;
         ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
         boolean creativeMode = damager != null && damager.getGameMode() == GameMode.CREATIVE;
 

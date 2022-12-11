@@ -7,8 +7,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
@@ -45,20 +43,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Nullable
     static Entity getEntityKiller(StackedEntity stackedEntity) {
-        EntityDamageEvent damageEvent = stackedEntity.getLivingEntity().getLastDamageCause();
-
-        if (damageEvent instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) damageEvent;
-            Entity damager = entityDamageByEntityEvent.getDamager();
-            if (damager instanceof Projectile) {
-                Projectile projectile = (Projectile) damager;
-                return projectile.getShooter() instanceof Entity ? (Entity) projectile.getShooter() : projectile;
-            } else {
-                return damager;
-            }
-        }
-
-        return null;
+        return EntityUtils.getDamagerFromEvent(stackedEntity.getLivingEntity().getLastDamageCause(), false);
     }
 
     static boolean isKilledByPlayer(StackedEntity stackedEntity) {

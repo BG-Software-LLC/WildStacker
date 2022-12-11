@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Ageable;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Bat;
@@ -38,24 +39,30 @@ import org.bukkit.entity.Phantom;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.PufferFish;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.TropicalFish;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieVillager;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.projectiles.ProjectileSource;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -582,6 +589,30 @@ public final class EntityUtils {
             }
         }
 
+    }
+
+    @Nullable
+    public static Entity getDamagerFromEvent(@Nullable EntityDamageEvent event, boolean checkUnusualSources) {
+        if (!(event instanceof EntityDamageByEntityEvent))
+            return null;
+
+        Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+
+        if (damager instanceof Projectile) {
+            ProjectileSource shooter = ((Projectile) damager).getShooter();
+            if (shooter instanceof Entity)
+                damager = (Entity) shooter;
+        } else if (checkUnusualSources) {
+            if (damager instanceof Tameable) {
+                AnimalTamer animalTamer = ((Tameable) damager).getOwner();
+                if (animalTamer instanceof Entity)
+                    damager = (Entity) animalTamer;
+            } else if (damager instanceof TNTPrimed) {
+                damager = ((TNTPrimed) damager).getSource();
+            }
+        }
+
+        return damager;
     }
 
     private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance) {
