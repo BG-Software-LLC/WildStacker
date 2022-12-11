@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.entity.EntityDamageEventTracker;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.FutureEntityTracker;
@@ -103,8 +104,7 @@ public final class EntitiesListener implements Listener {
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
-    private boolean secondEntityDamageEvent = false;
-    private DeathSimulation.Result monitorEntityDamageEventResult = null;
+    private DeathSimulation.Result damageResult = null;
 
     public boolean secondPickupEventCall = false;
     @Nullable
@@ -170,7 +170,7 @@ public final class EntitiesListener implements Listener {
 
         //Calling the onEntityLastDamage function with default parameters.
         handleEntityDamage(createDamageEvent(e.getEntity(), EntityDamageEvent.DamageCause.CUSTOM,
-                e.getEntity().getHealth(), null), false);
+                e.getEntity().getHealth(), null), true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -205,28 +205,57 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void handleEntityDamage(EntityDamageEvent e) {
-        handleEntityDamage(e, true);
+        handleEntityDamage(e, false);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false /* Not ignoring cancel status as the event should be cancelled. */)
     public void onEntityDamageMonitor(EntityDamageEvent e) {
-        if (this.monitorEntityDamageEventResult != null)
-            handleEntityDamageMonitor(e);
+        if (this.damageResult != null)
+            restoreDamageResult(e);
     }
 
-    private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fireSecondEvent) {
+    private void handleEntityDamage(EntityDamageEvent originalEvent, boolean fromDeathEvent) {
         // Making sure the entity is stackable
-        if (secondEntityDamageEvent || !plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity()))
+        if (EntityDamageEventTracker.isTracker(originalEvent) || !plugin.getSettings().entitiesStackingEnabled ||
+                !EntityUtils.isStackable(originalEvent.getEntity()))
             return;
 
-        LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
+        LivingEntity livingEntity = (LivingEntity) originalEvent.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
         // If the entity is already considered as "dead", then we don't deal any damage and return.
         if (stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY)) {
-            damageEvent.setDamage(0);
+            originalEvent.setDamage(0);
             return;
         }
+
+        // We call a fake event and cancel the original one, if needed.
+
+        EntityDamageEvent damageEvent;
+
+        if (fromDeathEvent) {
+            damageEvent = originalEvent;
+        } else {
+            originalEvent.setCancelled(true);
+            // Call our track event.
+            damageEvent = EntityDamageEventTracker.createEvent(originalEvent);
+            Bukkit.getPluginManager().callEvent(damageEvent);
+        }
+
+        this.damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
+
+        // We want to restore the original values of the event.
+        // If we were called from the death event, we restore it now.
+        // Otherwise, the values will be restored in #onEntityDamageMonitor
+        // Reminder: The original event in that case is cancelled, therefore no other plugins should touch it.
+        if (fromDeathEvent) {
+            restoreDamageResult(originalEvent);
+        }
+    }
+
+    private DeathSimulation.Result handleEntityDamageInternal(EntityDamageEvent damageEvent, StackedEntity stackedEntity) {
+        if (damageEvent.isCancelled())
+            return new DeathSimulation.Result(true, 0);
 
         /*
          *  Getting the damager of the event.
@@ -249,48 +278,35 @@ public final class EntitiesListener implements Listener {
         ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
         boolean creativeMode = damager != null && damager.getGameMode() == GameMode.CREATIVE;
 
-        boolean oneShot = !stackedEntity.hasFlag(EntityFlag.AVOID_ONE_SHOT) && damager != null &&
-                plugin.getSettings().entitiesOneShotEnabled &&
-                GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
-                plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
+        boolean shouldSimulateDeath;
 
-        //Checks that it's the last hit of the entity
-        if (stackedEntity.getHealth() - damageEvent.getFinalDamage() > 0 && !oneShot)
-            return;
-
-        if (fireSecondEvent) {
-            try {
-                secondEntityDamageEvent = true;
-                Bukkit.getPluginManager().callEvent(damageEvent);
-            } finally {
-                secondEntityDamageEvent = false;
-            }
-            if (damageEvent.isCancelled()) {
-                // The damage event was cancelled by another plugin, we don't want to continue.
-                return;
-            }
+        if (stackedEntity.getHealth() - damageEvent.getFinalDamage() <= 0) {
+            shouldSimulateDeath = true;
+        } else {
+            // In case the entity has enough health to deal with the damage, we check for one shot.
+            shouldSimulateDeath = !stackedEntity.hasFlag(EntityFlag.AVOID_ONE_SHOT) && damager != null &&
+                    plugin.getSettings().entitiesOneShotEnabled &&
+                    GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
+                    plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
         }
 
-        this.monitorEntityDamageEventResult = DeathSimulation.simulateDeath(stackedEntity,
+        if (!shouldSimulateDeath) {
+            // The entity will not be killed, therefore the damage result should be identical to the event's results.
+            return new DeathSimulation.Result(damageEvent.isCancelled(), damageEvent.getFinalDamage());
+        }
+
+        return DeathSimulation.simulateDeath(stackedEntity,
                 damageEvent.getCause(), damagerTool, damager, entityDamager, creativeMode, damageEvent.getDamage(),
                 damageEvent.getFinalDamage(), noDeathEvent);
-
-        // We want to fake the status of the damage event if another event was already been called.
-        // We later change the cancel status.
-        if (fireSecondEvent) {
-            damageEvent.setCancelled(true);
-        } else {
-            handleEntityDamageMonitor(damageEvent);
-        }
     }
 
-    private void handleEntityDamageMonitor(EntityDamageEvent damageEvent) {
-        damageEvent.setCancelled(this.monitorEntityDamageEventResult.isCancelEvent());
+    private void restoreDamageResult(EntityDamageEvent damageEvent) {
+        damageEvent.setCancelled(this.damageResult.isCancelEvent());
 
-        if (this.monitorEntityDamageEventResult.getEventDamage() >= 0)
-            damageEvent.setDamage(this.monitorEntityDamageEventResult.getEventDamage());
+        if (this.damageResult.getEventDamage() >= 0)
+            damageEvent.setDamage(this.damageResult.getEventDamage());
 
-        this.monitorEntityDamageEventResult = null;
+        this.damageResult = null;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
