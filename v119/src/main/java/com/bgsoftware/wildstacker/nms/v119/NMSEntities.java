@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
+import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -24,6 +25,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -108,6 +111,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
             Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
 
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "bd");
+    private static final ReflectField<Boolean> ENTITY_LIVING_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "be");
     private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "dM");
     private static final ReflectMethod<SoundEvent> GET_SOUND_DEATH = new ReflectMethod<>(LivingEntity.class, "x_");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "eC");
@@ -116,6 +120,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "v", boolean.class);
     private static final ReflectMethod<BlockPos> TURTLE_HOME_POS = new ReflectMethod<>(Turtle.class, "fK");
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "b", ItemEntity.class);
+    private static final ReflectMethod<SynchedEntityData.DataItem<?>> ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "b", EntityDataAccessor.class);
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type,
@@ -290,15 +295,18 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public void setHealthDirectly(org.bukkit.entity.LivingEntity bukkitLivingEntity, double health) {
+    public void setHealthDirectly(org.bukkit.entity.LivingEntity bukkitLivingEntity, double health, boolean preventUpdate) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        SynchedEntityData entityData = livingEntity.getEntityData();
         livingEntity.setHealth((float) health);
-    }
-
-    @Override
-    public void setEntityDead(org.bukkit.entity.LivingEntity bukkitLivingEntity, boolean dead) {
-        LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
-        ENTITY_REMOVE_REASON.set(livingEntity, dead ? Entity.RemovalReason.DISCARDED : null);
+        if (preventUpdate) {
+            SynchedEntityData.DataItem<?> dataItem = ENTITY_DATA_GET_ITEM.invoke(entityData, LivingEntity.DATA_HEALTH_ID);
+            if (dataItem != null)
+                dataItem.setDirty(false);
+        } else {
+            // We make sure health is marked dirty
+            entityData.markDirty(LivingEntity.DATA_HEALTH_ID);
+        }
     }
 
     @Override
@@ -735,6 +743,27 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     @Override
     public boolean isDroppedItem(Item item) {
         return ((CraftItem) item).getHandle() instanceof ItemEntity;
+    }
+
+    @Override
+    public IEntityWrapper wrapEntity(org.bukkit.entity.LivingEntity bukkitLivingEntity) {
+        return new IEntityWrapper() {
+            @Override
+            public void setHealth(float health, boolean preventUpdate) {
+                NMSEntities.this.setHealthDirectly(bukkitLivingEntity, health, preventUpdate);
+            }
+
+            @Override
+            public void setRemoved(boolean removed) {
+                LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+                ENTITY_REMOVE_REASON.set(livingEntity, removed ? Entity.RemovalReason.DISCARDED : null);
+            }
+
+            @Override
+            public void setDead(boolean dead) {
+                ENTITY_LIVING_DEAD.set(((CraftLivingEntity) bukkitLivingEntity).getHandle(), dead);
+            }
+        };
     }
 
 }

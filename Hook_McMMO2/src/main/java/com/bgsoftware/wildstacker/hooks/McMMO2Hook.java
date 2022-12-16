@@ -3,26 +3,11 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
-import com.gmail.nossr50.config.experience.ExperienceConfig;
-import com.gmail.nossr50.datatypes.experience.XPGainReason;
-import com.gmail.nossr50.datatypes.experience.XPGainSource;
 import com.gmail.nossr50.datatypes.meta.RuptureTaskMeta;
-import com.gmail.nossr50.datatypes.player.McMMOPlayer;
-import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import com.gmail.nossr50.util.ItemUtils;
 import com.gmail.nossr50.util.compat.CompatibilityManager;
 import com.gmail.nossr50.util.compat.layers.persistentdata.MobMetaFlagType;
-import com.gmail.nossr50.util.player.UserManager;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
@@ -30,7 +15,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@SuppressWarnings("unused")
 public final class McMMO2Hook {
 
     private static final String CUSTOM_NAME_KEY = "mcMMO: Custom Name";
@@ -47,7 +31,6 @@ public final class McMMO2Hook {
         McMMO2Hook.plugin = plugin;
         mcMMO = com.gmail.nossr50.mcMMO.p;
         plugin.getProviders().registerEntityDeathListener(McMMO2Hook::handleDeath);
-        plugin.getProviders().registerEntityCombatListener(McMMO2Hook::handleCombat);
         plugin.getProviders().registerNameChangeListener(McMMO2Hook::updateCachedName);
     }
 
@@ -83,69 +66,6 @@ public final class McMMO2Hook {
         }
     }
 
-    private static void handleCombat(LivingEntity target, Player attacker, Entity entityAttacker, double finalDamage) {
-        ItemStack heldItem = attacker.getItemInHand();
-
-        McMMOPlayer mcMMOPlayer = UserManager.getPlayer(attacker);
-
-        if (mcMMOPlayer == null)
-            return;
-
-        PrimarySkillType primarySkillType;
-
-        if (entityAttacker instanceof Wolf) {
-            primarySkillType = PrimarySkillType.TAMING;
-        } else if (entityAttacker instanceof Arrow) {
-            primarySkillType = PrimarySkillType.ARCHERY;
-        } else if (ItemUtils.isSword(heldItem)) {
-            primarySkillType = PrimarySkillType.SWORDS;
-        } else if (ItemUtils.isAxe(heldItem)) {
-            primarySkillType = PrimarySkillType.AXES;
-        } else if (ItemUtils.isUnarmed(heldItem)) {
-            primarySkillType = PrimarySkillType.UNARMED;
-        } else {
-            return;
-        }
-
-        //noinspection deprecation
-        if (!primarySkillType.shouldProcess(target) || !primarySkillType.getPermissions(attacker))
-            return;
-
-        EntityType type = target.getType();
-
-        double baseXp = 0;
-
-        if (target instanceof Animals) {
-            baseXp = getAnimalsXP(type);
-        } else if (target instanceof Monster) {
-            baseXp = ExperienceConfig.getInstance().getCombatXP(type);
-        } else if (type == EntityType.IRON_GOLEM) {
-            if (!((IronGolem) target).isPlayerCreated()) {
-                baseXp = ExperienceConfig.getInstance().getCombatXP(type);
-            }
-        } else {
-            baseXp = ExperienceConfig.getInstance().getCombatXP(type);
-        }
-
-        if (isSpawnEggEntity(target)) {
-            baseXp *= ExperienceConfig.getInstance().getEggXpMultiplier();
-        } else if (isSpawnerEntity(target)) {
-            baseXp *= ExperienceConfig.getInstance().getSpawnedMobXpMultiplier();
-        } else if (isNetherPortal(target)) {
-            baseXp *= ExperienceConfig.getInstance().getNetherPortalXpMultiplier();
-        } else if (isAnimalBred(target)) {
-            baseXp *= ExperienceConfig.getInstance().getBredMobXpMultiplier();
-        } else if (isTamedAnimal(target)) {
-            baseXp *= ExperienceConfig.getInstance().getTamedMobXpMultiplier();
-        }
-
-        baseXp *= 10;
-
-        if (baseXp > 0)
-            mcMMOPlayer.beginXpGain(primarySkillType, (float) ((int) (finalDamage * baseXp)),
-                    XPGainReason.PVE, XPGainSource.SELF);
-    }
-
     private static void updateSpawnedEntity(LivingEntity livingEntity) {
         CompatibilityManager compatibilityManager = com.gmail.nossr50.mcMMO.getCompatibilityManager();
         if (compatibilityManager != null)
@@ -162,30 +82,6 @@ public final class McMMO2Hook {
 
     private static boolean isSpawnerEntity(LivingEntity livingEntity) {
         return hasTag(livingEntity, MobMetaFlagType.MOB_SPAWNER_MOB);
-    }
-
-    private static boolean isSpawnEggEntity(LivingEntity livingEntity) {
-        return hasTag(livingEntity, MobMetaFlagType.EGG_MOB);
-    }
-
-    private static boolean isNetherPortal(LivingEntity livingEntity) {
-        return hasTag(livingEntity, MobMetaFlagType.NETHER_PORTAL_MOB);
-    }
-
-    private static boolean isAnimalBred(LivingEntity livingEntity) {
-        return hasTag(livingEntity, MobMetaFlagType.PLAYER_BRED_MOB);
-    }
-
-    private static boolean isTamedAnimal(LivingEntity livingEntity) {
-        return hasTag(livingEntity, MobMetaFlagType.PLAYER_TAMED_MOB);
-    }
-
-    private static double getAnimalsXP(EntityType type) {
-        try {
-            return ExperienceConfig.getInstance().getAnimalsXP(type);
-        } catch (Throwable ex) {
-            return ExperienceConfig.getInstance().getAnimalsXP();
-        }
     }
 
     private static boolean hasTag(LivingEntity livingEntity, MobMetaFlagType mobMetaFlagType) {

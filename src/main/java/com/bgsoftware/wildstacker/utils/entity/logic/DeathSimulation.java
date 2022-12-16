@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
+import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -85,12 +86,6 @@ public final class DeathSimulation {
         if (handleFastKill(livingEntity, killer))
             result.cancelEvent = true;
 
-        if (killer != null) {
-            plugin.getProviders().notifyEntityCombatListeners(livingEntity, killer, entityKiller, finalDamage);
-        }
-
-        livingEntity.setHealth(livingEntity.getMaxHealth() - damageToNextStack);
-
         //Villager was killed by a zombie - should be turned into a zombie villager.
         if (checkForZombieVillager(stackedEntity, entityKiller))
             return result;
@@ -138,7 +133,9 @@ public final class DeathSimulation {
             int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
             Executor.sync(() -> {
-                plugin.getNMSEntities().setEntityDead(livingEntity, true);
+                IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
+                nmsEntity.setRemoved(true);
+
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
                 // Setting the stack amount of the entity to the unstack amount.
@@ -151,12 +148,6 @@ public final class DeathSimulation {
                 // We fire the entity_die game event
                 plugin.getNMSEntities().sendEntityDieEvent(livingEntity);
 
-                // I set the health to 0, so it will be 0 in the EntityDeathEvent
-                // Some plugins, such as MyPet, check for that value
-                double originalHealth = livingEntity.getHealth();
-                plugin.getNMSEntities().setHealthDirectly(livingEntity, 0);
-
-                boolean spawnDuplicate = false;
                 List<ItemStack> finalDrops;
                 int finalExp;
 
@@ -168,7 +159,6 @@ public final class DeathSimulation {
                     finalDrops = entityDeathEvent.getDrops();
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
-                    spawnDuplicate = true;
                     noDeathEvent.remove(livingEntity.getUniqueId());
                     finalDrops = drops;
                     Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
@@ -176,9 +166,17 @@ public final class DeathSimulation {
                     stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                 }
 
-                // Restore all values.
-                plugin.getNMSEntities().setEntityDead(livingEntity, false);
-                plugin.getNMSEntities().setHealthDirectly(livingEntity, originalHealth);
+                // Restore all values
+                nmsEntity.setRemoved(false);
+                nmsEntity.setDead(false);
+
+                // Restore health.
+                if (realStackAmount > 0) {
+                    nmsEntity.setHealth((float) (livingEntity.getMaxHealth() - damageToNextStack), false);
+                } else {
+                    // We want to set the health to 0 but update it.
+                    nmsEntity.setHealth(0f, false);
+                }
 
                 // If setting this to ender dragons, the death animation doesn't happen for an unknown reason.
                 // Cannot revert to original death event neither. This fixes death animations for all versions.
@@ -217,12 +215,6 @@ public final class DeathSimulation {
 
                 // Restore stacked entity amount
                 stackedEntity.setStackAmount(realStackAmount, false);
-
-                if (!stackedEntity.hasFlag(EntityFlag.REMOVED_ENTITY) && (livingEntity.getHealth() <= 0 ||
-                        (spawnDuplicate && stackedEntity.getStackAmount() > 1))) {
-                    stackedEntity.spawnDuplicate(stackedEntity.getStackAmount());
-                    Executor.sync(stackedEntity::remove, 1L);
-                }
             });
         });
 

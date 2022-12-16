@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.EntitiesListener;
+import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -15,6 +16,8 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.CriterionTriggers;
 import net.minecraft.server.v1_12_R1.DamageSource;
+import net.minecraft.server.v1_12_R1.DataWatcher;
+import net.minecraft.server.v1_12_R1.DataWatcherObject;
 import net.minecraft.server.v1_12_R1.EnchantmentManager;
 import net.minecraft.server.v1_12_R1.Enchantments;
 import net.minecraft.server.v1_12_R1.Entity;
@@ -95,12 +98,14 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "b_");
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
+    private static final ReflectField<Boolean> ENTITY_LIVING_DEAD = new ReflectField<>(EntityLiving.class, boolean.class, "aU");
     private static final ReflectMethod<Boolean> ALWAYS_GIVES_EXP = new ReflectMethod<>(EntityLiving.class, "alwaysGivesExp");
     private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "isDropExperience");
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "cf");
     private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(EntityLiving.class, "cq");
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "cr");
     private static final ReflectMethod<Void> INSENTIENT_PICK_UP_ITEM = new ReflectMethod<>(EntityInsentient.class, "a", EntityItem.class);
+    private static final ReflectMethod<DataWatcher.Item<?>> DATA_WATCHER_GET_ITEM = new ReflectMethod<>(DataWatcher.class, "c", DataWatcherObject.class);
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
@@ -228,14 +233,18 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public void setHealthDirectly(LivingEntity livingEntity, double health) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+    public void setHealthDirectly(LivingEntity bukkitLivingEntity, double health, boolean preventUpdate) {
+        EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        DataWatcher dataWatcher = entityLiving.getDataWatcher();
         entityLiving.setHealth((float) health);
-    }
-
-    @Override
-    public void setEntityDead(LivingEntity livingEntity, boolean dead) {
-        ((CraftLivingEntity) livingEntity).getHandle().dead = dead;
+        if (preventUpdate) {
+            DataWatcher.Item<?> item = DATA_WATCHER_GET_ITEM.invoke(dataWatcher, EntityLiving.HEALTH);
+            if (item != null)
+                item.a(false);
+        } else {
+            // We make sure health is marked dirty
+            dataWatcher.markDirty(EntityLiving.HEALTH);
+        }
     }
 
     @Override
@@ -594,6 +603,26 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     @Override
     public boolean isDroppedItem(Item item) {
         return ((CraftItem) item).getHandle() instanceof EntityItem;
+    }
+
+    @Override
+    public IEntityWrapper wrapEntity(LivingEntity livingEntity) {
+        return new IEntityWrapper() {
+            @Override
+            public void setHealth(float health, boolean preventUpdate) {
+                NMSEntities.this.setHealthDirectly(livingEntity, health, preventUpdate);
+            }
+
+            @Override
+            public void setRemoved(boolean removed) {
+                ((CraftLivingEntity) livingEntity).getHandle().dead = removed;
+            }
+
+            @Override
+            public void setDead(boolean dead) {
+                ENTITY_LIVING_DEAD.set(((CraftLivingEntity) livingEntity).getHandle(), dead);
+            }
+        };
     }
 
 }

@@ -16,7 +16,6 @@ import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
-import com.bgsoftware.wildstacker.hooks.listeners.IEntityCombatListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDuplicateListener;
 import com.bgsoftware.wildstacker.hooks.listeners.INameChangeListener;
@@ -65,7 +64,6 @@ public final class ProvidersHandler {
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
     private final List<IEntityDeathListener> entityDeathListeners = new ArrayList<>();
-    private final List<IEntityCombatListener> entityCombatListeners = new ArrayList<>();
     private final List<INameChangeListener> nameChangeListeners = new ArrayList<>();
     private final List<IEntityDuplicateListener> entityDuplicateListeners = new ArrayList<>();
 
@@ -513,16 +511,6 @@ public final class ProvidersHandler {
 
     public void notifyEntityDeathListeners(StackedEntity stackedEntity, IEntityDeathListener.Type type) {
         this.entityDeathListeners.forEach(entityDeathListener -> entityDeathListener.handleDeath(stackedEntity, type));
-    }
-
-    public void registerEntityCombatListener(IEntityCombatListener entityCombatListener) {
-        this.entityCombatListeners.add(entityCombatListener);
-    }
-
-    public void notifyEntityCombatListeners(LivingEntity livingEntity, Player killer,
-                                            Entity entityDamager, double finalDamage) {
-        this.entityCombatListeners.forEach(entityCombatListener -> entityCombatListener.handleCombat(livingEntity,
-                killer, entityDamager, finalDamage));
     }
 
     public void registerNameChangeListener(INameChangeListener nameChangeListener) {

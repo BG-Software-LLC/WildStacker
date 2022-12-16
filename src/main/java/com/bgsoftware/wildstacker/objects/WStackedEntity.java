@@ -318,7 +318,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 setFlag(EntityFlag.CORPSE, true);
                 if (EntityTypes.fromEntity(object).isSlime())
                     setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
-                plugin.getNMSEntities().setHealthDirectly(object, 0);
+                plugin.getNMSEntities().setHealthDirectly(object, 0, false);
                 plugin.getNMSEntities().playDeathSound(object);
             }, 2L);
         }

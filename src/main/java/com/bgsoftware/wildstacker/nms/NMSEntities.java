@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.Location;
 import org.bukkit.entity.Animals;
@@ -46,9 +47,7 @@ public interface NMSEntities {
 
     void updateLastDamageTime(LivingEntity livingEntity);
 
-    void setHealthDirectly(LivingEntity livingEntity, double health);
-
-    void setEntityDead(LivingEntity livingEntity, boolean dead);
+    void setHealthDirectly(LivingEntity livingEntity, double health, boolean preventUpdate);
 
     int getEggLayTime(Chicken chicken);
 
@@ -108,5 +107,7 @@ public interface NMSEntities {
     void setCustomNameVisible(Entity entity, boolean visible);
 
     boolean isDroppedItem(Item item);
+
+    IEntityWrapper wrapEntity(LivingEntity livingEntity);
 
 }

@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
+import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
@@ -278,9 +279,23 @@ public final class EntitiesListener implements Listener {
             return new DeathSimulation.Result(damageEvent.isCancelled(), damageEvent.getFinalDamage());
         }
 
-        return DeathSimulation.simulateDeath(stackedEntity,
+        IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(stackedEntity.getLivingEntity());
+
+        nmsEntity.setHealth(0f, true);
+
+        DeathSimulation.Result result = DeathSimulation.simulateDeath(stackedEntity,
                 damageEvent.getCause(), damagerTool, damager, entityDamager, creativeMode, damageEvent.getDamage(),
                 damageEvent.getFinalDamage(), noDeathEvent);
+
+        if (!result.isCancelEvent()) {
+            // Because we set the health of the entity to 0, when the event finishes, the code flow will call
+            // Entity#die which will make the entity go to the death pos and unhurtable.
+            // To avoid this, we make it dead now, which will be later removed.
+            nmsEntity.setDead(true);
+        }
+
+
+        return result;
     }
 
     private void restoreDamageResult(EntityDamageEvent damageEvent) {
