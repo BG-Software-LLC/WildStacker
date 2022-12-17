@@ -339,32 +339,44 @@ public final class SettingsHandler {
         spawnersBreakCharge = new FastEnumMap<>(EntityType.class);
         for (String key : cfg.getConfigurationSection("spawners.break-charge").getKeys(false)) {
             ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.break-charge." + key);
-            EntityType entityType;
-
-            try {
-                entityType = EntityType.valueOf(key.toUpperCase());
-            } catch (Exception ex) {
-                continue;
-            }
 
             double amount = mobSection.getDouble("price", 0.0);
-            if (amount > 0) {
+            if (amount <= 0)
+                continue;
+
+            if (key.equalsIgnoreCase("ALL")) {
+                spawnersBreakCharge.putGlobal(new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+            } else {
+                EntityType entityType;
+
+                try {
+                    entityType = EntityType.valueOf(key.toUpperCase());
+                } catch (Exception ex) {
+                    continue;
+                }
+
                 spawnersBreakCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
         spawnersPlaceCharge = new FastEnumMap<>(EntityType.class);
         for (String key : cfg.getConfigurationSection("spawners.place-charge").getKeys(false)) {
             ConfigurationSection mobSection = cfg.getConfigurationSection("spawners.place-charge." + key);
-            EntityType entityType;
-
-            try {
-                entityType = EntityType.valueOf(key.toUpperCase());
-            } catch (Exception ex) {
-                continue;
-            }
 
             double amount = mobSection.getDouble("price", 0.0);
-            if (amount > 0) {
+            if (amount <= 0)
+                continue;
+
+            if (key.equalsIgnoreCase("ALL")) {
+                spawnersPlaceCharge.putGlobal(new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+            } else {
+                EntityType entityType;
+
+                try {
+                    entityType = EntityType.valueOf(key.toUpperCase());
+                } catch (Exception ex) {
+                    continue;
+                }
+
                 spawnersPlaceCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }

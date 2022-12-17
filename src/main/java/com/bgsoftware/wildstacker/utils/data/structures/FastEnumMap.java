@@ -37,6 +37,12 @@ public final class FastEnumMap<E extends Enum<E>, V> {
         return fastEnumIntMap;
     }
 
+    public V putGlobal(V value) {
+        V oldGlobal = this.globalValue;
+        this.globalValue = value;
+        return oldGlobal;
+    }
+
     public V put(E e, V value) {
         V originalValue = arr[e.ordinal()];
         arr[e.ordinal()] = value;
