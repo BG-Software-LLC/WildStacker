@@ -13,7 +13,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
-import com.bgsoftware.wildstacker.utils.entity.EntityDamageEventTracker;
+import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.FutureEntityTracker;
@@ -105,6 +105,7 @@ public final class EntitiesListener implements Listener {
 
     private boolean duplicateCow = false;
     private DeathSimulation.Result damageResult = null;
+    private EntityDamageData entityDamageData;
 
     public boolean secondPickupEventCall = false;
     @Nullable
@@ -214,42 +215,50 @@ public final class EntitiesListener implements Listener {
             restoreDamageResult(e);
     }
 
-    private void handleEntityDamage(EntityDamageEvent originalEvent, boolean fromDeathEvent) {
+    private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
         // Making sure the entity is stackable
-        if (EntityDamageEventTracker.isTracker(originalEvent) || !plugin.getSettings().entitiesStackingEnabled ||
-                !EntityUtils.isStackable(originalEvent.getEntity()))
+        if (entityDamageData != null || !plugin.getSettings().entitiesStackingEnabled ||
+                !EntityUtils.isStackable(damageEvent.getEntity()))
             return;
 
-        LivingEntity livingEntity = (LivingEntity) originalEvent.getEntity();
+        LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
         // If the entity is already considered as "dead", then we don't deal any damage and return.
         if (stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY)) {
-            originalEvent.setDamage(0);
+            damageEvent.setDamage(0);
             return;
         }
 
         // We call a fake event and cancel the original one, if needed.
 
-        EntityDamageEvent damageEvent;
-
-        if (fromDeathEvent) {
-            damageEvent = originalEvent;
-        } else {
-            originalEvent.setCancelled(true);
-            // Call our track event.
-            damageEvent = EntityDamageEventTracker.createEvent(originalEvent);
-            Bukkit.getPluginManager().callEvent(damageEvent);
+        if (!fromDeathEvent) {
+            damageEvent.setCancelled(true);
+            this.entityDamageData = new EntityDamageData(damageEvent);
+            try {
+                // Call the event again.
+                Bukkit.getPluginManager().callEvent(damageEvent);
+            } catch (Throwable error) {
+                this.entityDamageData = null;
+                throw error;
+            }
         }
 
-        this.damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
+        try {
+            this.damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
 
-        // We want to restore the original values of the event.
-        // If we were called from the death event, we restore it now.
-        // Otherwise, the values will be restored in #onEntityDamageMonitor
-        // Reminder: The original event in that case is cancelled, therefore no other plugins should touch it.
-        if (fromDeathEvent) {
-            restoreDamageResult(originalEvent);
+            // We want to restore the original values of the event.
+            // If we were called from the death event, we restore it now.
+            // Otherwise, the values will be restored in #onEntityDamageMonitor
+            // Reminder: The original event in that case is cancelled, therefore no other plugins should touch it.
+            if (fromDeathEvent) {
+                restoreDamageResult(damageEvent);
+            }
+        } finally {
+            if (this.entityDamageData != null) {
+                this.entityDamageData.restoreEvent(damageEvent);
+                this.entityDamageData = null;
+            }
         }
     }
 
