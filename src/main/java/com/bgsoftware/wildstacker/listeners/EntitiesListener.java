@@ -799,7 +799,7 @@ public final class EntitiesListener implements Listener {
         } else if (entity instanceof Item) {
             plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
         }
-        EntityStorage.clearMetadata(entity);
+        Executor.sync(() -> EntityStorage.clearMetadata(entity), 100L);
     }
 
     private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
