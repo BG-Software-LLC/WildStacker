@@ -22,6 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -433,13 +434,20 @@ public class StackedBaseSpawner extends BaseSpawner {
     }
 
     private Entity generateEntity(ServerLevel serverLevel, double x, double y, double z, boolean rotation) {
-        CompoundTag entityCompound = this.nextSpawnData.getEntityToSpawn();
+        CompoundTag entityCompound = getOrCreateNextSpawnData(serverLevel.getRandom()).getEntityToSpawn();
         return EntityType.loadEntityRecursive(entityCompound, serverLevel, entity -> {
             entity.moveTo(x, y, z, rotation ? serverLevel.getRandom().nextFloat() * 360.0F : 0f, 0f);
             entity.level = serverLevel;
             entity.valid = true;
             return entity;
         });
+    }
+
+    private SpawnData getOrCreateNextSpawnData(RandomSource random) {
+        if (this.nextSpawnData == null)
+            this.nextSpawnData = this.spawnPotentials.getRandom(random).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new);
+
+        return this.nextSpawnData;
     }
 
     private boolean handleEntitySpawn(ServerLevel serverLevel, BlockPos blockPos,
