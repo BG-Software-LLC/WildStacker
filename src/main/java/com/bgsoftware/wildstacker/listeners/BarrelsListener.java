@@ -65,11 +65,6 @@ public final class BarrelsListener implements Listener {
         if(e.getItemInHand() != null && e.getItemInHand().getType() != e.getBlock().getType())
             return;
 
-        if (ItemUtils.isOffHand(e)) {
-            e.setCancelled(true);
-            return;
-        }
-
         try {
             ItemStack inHand = e.getItemInHand().clone();
             int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
