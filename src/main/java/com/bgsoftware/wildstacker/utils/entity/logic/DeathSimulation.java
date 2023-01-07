@@ -15,10 +15,6 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,7 +26,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -40,7 +35,6 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -50,8 +44,6 @@ public final class DeathSimulation {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
-    private static final Map<EntityDamageEvent.DamageModifier, ? extends Function<? super Double, Double>> DAMAGE_MODIFIERS_FUNCTIONS =
-            Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private static boolean sweepingEdgeHandled = false;
 
     private DeathSimulation() {
@@ -121,11 +113,9 @@ public final class DeathSimulation {
         if (result.cancelEvent && killerTool != null && !creativeMode && !plugin.getNMSAdapter().isUnbreakable(killerTool))
             reduceKillerToolDurability(killerTool, killer);
 
-        EntityDamageEvent clonedEvent = createDamageEvent(livingEntity, lastDamageCause, originalDamage, entityKiller);
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
 
         Executor.async(() -> {
-            livingEntity.setLastDamageCause(clonedEvent);
             livingEntity.setFireTicks(fireTicks);
 
             int lootBonusLevel = killerTool == null ? 0 : killerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
@@ -359,15 +349,6 @@ public final class DeathSimulation {
         }
 
         plugin.getNMSWorld().attemptJoinRaid(killer, raider);
-    }
-
-    private static EntityDamageEvent createDamageEvent(Entity entity, EntityDamageEvent.DamageCause damageCause, double damage, Entity damager) {
-        Map<EntityDamageEvent.DamageModifier, Double> damageModifiers = Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, damage));
-        if (damager == null) {
-            return new EntityDamageEvent(entity, damageCause, damageModifiers, DAMAGE_MODIFIERS_FUNCTIONS);
-        } else {
-            return new EntityDamageByEntityEvent(damager, entity, damageCause, damageModifiers, DAMAGE_MODIFIERS_FUNCTIONS);
-        }
     }
 
     private static List<ItemStack> subtract(List<ItemStack> list1, List<ItemStack> list2) {

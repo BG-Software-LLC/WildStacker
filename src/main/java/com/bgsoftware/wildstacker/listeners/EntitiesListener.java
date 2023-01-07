@@ -244,6 +244,9 @@ public final class EntitiesListener implements Listener {
             }
         }
 
+        if (!damageEvent.isCancelled())
+            damageEvent.getEntity().setLastDamageCause(damageEvent);
+
         try {
             this.damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
 
