@@ -762,7 +762,9 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
             @Override
             public void setDead(boolean dead) {
-                ENTITY_LIVING_DEAD.set(((CraftLivingEntity) bukkitLivingEntity).getHandle(), dead);
+                LivingEntity entity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+                ENTITY_LIVING_DEAD.set(entity, dead);
+                entity.deathTime = 0;
             }
         };
     }

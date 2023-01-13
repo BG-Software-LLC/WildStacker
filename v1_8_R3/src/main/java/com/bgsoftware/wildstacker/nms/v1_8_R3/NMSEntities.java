@@ -546,20 +546,22 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public IEntityWrapper wrapEntity(LivingEntity livingEntity) {
+    public IEntityWrapper wrapEntity(LivingEntity bukkitLivingEntity) {
         return new IEntityWrapper() {
             @Override
             public void setHealth(float health, boolean preventUpdate) {
-                NMSEntities.this.setHealthDirectly(livingEntity, health, preventUpdate);
+                NMSEntities.this.setHealthDirectly(bukkitLivingEntity, health, preventUpdate);
             }
 
             @Override
             public void setRemoved(boolean removed) {
-                ((CraftLivingEntity) livingEntity).getHandle().dead = removed;
+                ((CraftLivingEntity) bukkitLivingEntity).getHandle().dead = removed;
             }
 
             @Override
             public void setDead(boolean dead) {
+                EntityLiving entity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+                entity.deathTicks = 0;
             }
         };
     }

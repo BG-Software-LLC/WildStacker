@@ -87,7 +87,6 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "b");
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
-    private static final ReflectField<Boolean> ENTITY_LIVING_DEAD = new ReflectField<>(EntityLiving.class, boolean.class, "aU");
     private static final ReflectMethod<Boolean> ALWAYS_GIVES_EXP = new ReflectMethod<>(EntityLiving.class, "alwaysGivesExp");
     private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "aG");
     private static final ReflectMethod<String> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "aU");
@@ -599,21 +598,22 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public IEntityWrapper wrapEntity(LivingEntity livingEntity) {
+    public IEntityWrapper wrapEntity(LivingEntity bukkitLivingEntity) {
         return new IEntityWrapper() {
             @Override
             public void setHealth(float health, boolean preventUpdate) {
-                NMSEntities.this.setHealthDirectly(livingEntity, health, preventUpdate);
+                NMSEntities.this.setHealthDirectly(bukkitLivingEntity, health, preventUpdate);
             }
 
             @Override
             public void setRemoved(boolean removed) {
-                ((CraftLivingEntity) livingEntity).getHandle().dead = removed;
+                ((CraftLivingEntity) bukkitLivingEntity).getHandle().dead = removed;
             }
 
             @Override
             public void setDead(boolean dead) {
-                ENTITY_LIVING_DEAD.set(((CraftLivingEntity) livingEntity).getHandle(), dead);
+                EntityLiving entity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+                entity.deathTicks = 0;
             }
         };
     }
