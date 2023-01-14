@@ -132,10 +132,15 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         if (this.demoEntity == null) {
             if (stackedSpawner.isDebug())
-                Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null");
-            super.serverTick(serverLevel, blockPos);
-            failureReason = "";
-            return;
+                Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null, trying to update it.");
+            updateDemoEntity(serverLevel, blockPos);
+            if (this.demoEntity == null) {
+                if (stackedSpawner.isDebug())
+                    Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null again, aborting.");
+                super.serverTick(serverLevel, blockPos);
+                failureReason = "";
+                return;
+            }
         }
 
         CompoundTag entityToSpawn = this.nextSpawnData.getEntityToSpawn();

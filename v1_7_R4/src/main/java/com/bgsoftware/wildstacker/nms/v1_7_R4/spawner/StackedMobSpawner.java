@@ -138,11 +138,17 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             return;
         }
 
-        if (demoEntity == null) {
+        if (this.demoEntity == null) {
             if (stackedSpawner.isDebug())
-                Debug.debug("StackedMobSpawner", "g", "Demo entity is null");
-            super.g();
-            return;
+                Debug.debug("StackedMobSpawner", "g", "Demo entity is null, trying to update it.");
+            updateDemoEntity();
+            if (this.demoEntity == null) {
+                if (stackedSpawner.isDebug())
+                    Debug.debug("StackedMobSpawner", "g", "Demo entity is null again, aborting.");
+                super.g();
+                failureReason = "";
+                return;
+            }
         }
 
         Entity demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
