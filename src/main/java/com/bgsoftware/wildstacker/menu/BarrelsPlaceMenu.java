@@ -60,7 +60,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
         switch (e.getAction()) {
             case HOTBAR_SWAP:
-                barrelItem = e.getWhoClicked().getInventory().getItem(e.getHotbarButton());
+                barrelItem = e.getHotbarButton() < 0 ? null : e.getWhoClicked().getInventory().getItem(e.getHotbarButton());
                 break;
             case PLACE_ALL:
             case PLACE_SOME:
