@@ -10,10 +10,10 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-@SuppressWarnings("unused")
+import static com.bgsoftware.wildstacker.handlers.SystemHandler.CHUNK_FULL_STAGE;
+
 public final class ChunksListener implements Listener {
 
-    public static boolean loadedData = false;
     private final WildStackerPlugin plugin;
 
     public ChunksListener(WildStackerPlugin plugin) {
@@ -22,31 +22,25 @@ public final class ChunksListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent e) {
-        if (loadedData)
-            plugin.getSystemManager().handleChunkUnload(e.getChunk());
+        plugin.getSystemManager().handleChunkUnload(e.getChunk(), CHUNK_FULL_STAGE);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChunkLoad(ChunkLoadEvent e) {
-        if (loadedData)
-            plugin.getSystemManager().handleChunkLoad(e.getChunk());
+        plugin.getSystemManager().handleChunkLoad(e.getChunk(), CHUNK_FULL_STAGE);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onWorldUnload(WorldUnloadEvent e){
-        if (loadedData){
-            for(Chunk chunk : e.getWorld().getLoadedChunks()){
-                plugin.getSystemManager().handleChunkUnload(chunk);
-            }
+    public void onWorldUnload(WorldUnloadEvent e) {
+        for (Chunk chunk : e.getWorld().getLoadedChunks()) {
+            plugin.getSystemManager().handleChunkUnload(chunk, CHUNK_FULL_STAGE);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onWorldLoad(WorldLoadEvent e){
-        if (loadedData){
-            for(Chunk chunk : e.getWorld().getLoadedChunks()){
-                plugin.getSystemManager().handleChunkLoad(chunk);
-            }
+    public void onWorldLoad(WorldLoadEvent e) {
+        for (Chunk chunk : e.getWorld().getLoadedChunks()) {
+            plugin.getSystemManager().handleChunkLoad(chunk, CHUNK_FULL_STAGE);
         }
     }
 

@@ -73,6 +73,10 @@ import java.util.stream.Collectors;
 
 public final class SystemHandler implements SystemManager {
 
+    public static final int ENTITIES_STAGE = (1 << 0);
+    public static final int CHUNK_STAGE = (1 << 1);
+    public static final int CHUNK_FULL_STAGE = ENTITIES_STAGE | CHUNK_STAGE;
+
     private final WildStackerPlugin plugin;
     private final DataHandler dataHandler;
 
@@ -81,6 +85,7 @@ public final class SystemHandler implements SystemManager {
 
     private final FastEnumMap<EntityType, Set<SpawnCondition>> spawnConditions = new FastEnumMap<>(EntityType.class);
     private final Map<String, SpawnCondition> spawnConditionsIds = new HashMap<>();
+    private boolean loadedData = false;
 
     private IDataSerializer dataSerializer;
 
@@ -771,69 +776,98 @@ public final class SystemHandler implements SystemManager {
         }
     }
 
-    public void handleChunkLoad(Chunk chunk) {
-        loadSpawners(chunk);
+    public void handleChunkLoad(Chunk chunk, int unloadStage) {
+        this.handleChunkLoad(chunk, unloadStage, Arrays.asList(chunk.getEntities()));
+    }
+
+    public void handleChunkLoad(Chunk chunk, int loadStage, List<Entity> loadedEntities) {
+        if (!this.loadedData)
+            return;
+
+        boolean isChunkLoad = (loadStage & CHUNK_STAGE) != 0;
+        boolean isEntitiesLoad = (loadStage & ENTITIES_STAGE) != 0;
 
         boolean atLeast18 = ServerVersion.isAtLeast(ServerVersion.v1_8);
 
-        if (atLeast18)
-            loadBarrels(chunk);
+        if (isChunkLoad) {
+            loadSpawners(chunk);
+            if (atLeast18)
+                loadBarrels(chunk);
+        }
 
-        for (Entity entity : chunk.getEntities()) {
-            String customName = plugin.getNMSEntities().getCustomName(entity);
+        if (isEntitiesLoad) {
+            for (Entity entity : loadedEntities) {
+                String customName = plugin.getNMSEntities().getCustomName(entity);
 
-            // Checking for too long names
-            if (customName != null && customName.length() > 256)
-                plugin.getNMSEntities().setCustomName(entity, customName.substring(0, 256));
+                // Checking for too long names
+                if (customName != null && customName.length() > 256)
+                    plugin.getNMSEntities().setCustomName(entity, customName.substring(0, 256));
 
-            // Remove display blocks of invalid barrels
-            if (atLeast18 && entity instanceof ArmorStand && customName != null &&
-                    customName.equals("BlockDisplay") && !isStackedBarrel(entity.getLocation().getBlock())) {
-                Block block = entity.getLocation().getBlock();
-                if (block.getType() == Material.CAULDRON)
-                    block.setType(Material.AIR);
-                entity.remove();
-            }
+                // Remove display blocks of invalid barrels
+                if (atLeast18 && entity instanceof ArmorStand && customName != null &&
+                        customName.equals("BlockDisplay") && !isStackedBarrel(entity.getLocation().getBlock())) {
+                    Block block = entity.getLocation().getBlock();
+                    if (block.getType() == Material.CAULDRON)
+                        block.setType(Material.AIR);
+                    entity.remove();
+                }
 
-            if (EntityUtils.isStackable(entity)) {
-                StackedEntity stackedEntity = WStackedEntity.of(entity);
-                stackedEntity.updateNerfed();
-                stackedEntity.updateName();
+                if (EntityUtils.isStackable(entity)) {
+                    StackedEntity stackedEntity = WStackedEntity.of(entity);
+                    stackedEntity.updateNerfed();
+                    stackedEntity.updateName();
+                }
             }
         }
     }
 
-    public void handleChunkUnload(Chunk chunk) {
-        Entity[] entities = chunk.getEntities();
+    public void handleChunkUnload(Chunk chunk, int unloadStage) {
+        this.handleChunkUnload(chunk, unloadStage, Arrays.asList(chunk.getEntities()));
+    }
 
-        for (Entity entity : entities) {
-            if (EntityUtils.isStackable(entity)) {
-                StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
-                if (stackedEntity != null) {
-                    dataSerializer.saveEntity(stackedEntity);
-                    stackedEntity.clearFlags();
+    public void handleChunkUnload(Chunk chunk, int unloadStage, List<Entity> unloadedEntities) {
+        if (!this.loadedData)
+            return;
+
+        boolean isChunkLoad = (unloadStage & CHUNK_STAGE) != 0;
+        boolean isEntitiesLoad = (unloadStage & ENTITIES_STAGE) != 0;
+
+        if (isEntitiesLoad) {
+            for (Entity entity : unloadedEntities) {
+                if (EntityUtils.isStackable(entity)) {
+                    StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
+                    if (stackedEntity != null) {
+                        dataSerializer.saveEntity(stackedEntity);
+                        stackedEntity.clearFlags();
+                    }
+                } else if (entity instanceof Item) {
+                    StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
+                    if (stackedItem != null)
+                        dataSerializer.saveItem(stackedItem);
                 }
-            } else if (entity instanceof Item) {
-                StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
-                if (stackedItem != null)
-                    dataSerializer.saveItem(stackedItem);
             }
         }
 
-        for (StackedSpawner stackedSpawner : getStackedSpawners(chunk)) {
-            dataHandler.removeStackedSpawner(stackedSpawner);
-            if (stackedSpawner.getStackAmount() > 1 || !stackedSpawner.isDefaultUpgrade()) {
-                dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
-                        .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
+        if (isChunkLoad) {
+            for (StackedSpawner stackedSpawner : getStackedSpawners(chunk)) {
+                dataHandler.removeStackedSpawner(stackedSpawner);
+                if (stackedSpawner.getStackAmount() > 1 || !stackedSpawner.isDefaultUpgrade()) {
+                    dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
+                            .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
+                }
+            }
+
+            for (StackedBarrel stackedBarrel : getStackedBarrels(chunk)) {
+                dataHandler.removeStackedBarrel(stackedBarrel);
+                dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Maps.newConcurrentMap())
+                        .put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
+                stackedBarrel.removeDisplayBlock();
             }
         }
+    }
 
-        for (StackedBarrel stackedBarrel : getStackedBarrels(chunk)) {
-            dataHandler.removeStackedBarrel(stackedBarrel);
-            dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Maps.newConcurrentMap())
-                    .put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
-            stackedBarrel.removeDisplayBlock();
-        }
+    public void setDataLoaded() {
+        this.loadedData = true;
     }
 
     public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {

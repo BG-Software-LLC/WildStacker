@@ -405,6 +405,9 @@ public final class ProvidersHandler {
             registerHook("FabledSkyblockHook");
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             registerHook("SuperiorSkyblockHook");
+
+        if(doesClassExist("org.bukkit.event.world.EntitiesLoadEvent"))
+            registerHook("PaperChunksHook");
     }
 
     public SpawnersProvider getSpawnersProvider() {

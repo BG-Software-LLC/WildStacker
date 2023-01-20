@@ -116,7 +116,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
             for (World world : Bukkit.getWorlds()) {
                 for (Chunk chunk : world.getLoadedChunks())
-                    systemManager.handleChunkUnload(chunk);
+                    systemManager.handleChunkUnload(chunk, SystemHandler.CHUNK_FULL_STAGE);
             }
 
             //We need to save the entire database
