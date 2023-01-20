@@ -78,6 +78,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,11 +102,11 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<Integer> slimeSplitTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
+    private final Map<EntityDamageEvent, DeathSimulation.Result> damageResults = new IdentityHashMap<>();
+    private final Map<EntityDamageEvent, EntityDamageData> entityDamagesData = new IdentityHashMap<>();
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
-    private DeathSimulation.Result damageResult = null;
-    private EntityDamageData entityDamageData;
 
     public boolean secondPickupEventCall = false;
     @Nullable
@@ -211,14 +212,17 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false /* Not ignoring cancel status as the event should be cancelled. */)
     public void onEntityDamageMonitor(EntityDamageEvent e) {
-        if (this.damageResult != null)
-            restoreDamageResult(e);
+        Optional.ofNullable(this.damageResults.remove(e)).ifPresent(result -> restoreDamageResult(result, e));
     }
 
     private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
         // Making sure the entity is stackable
-        if (entityDamageData != null || !plugin.getSettings().entitiesStackingEnabled ||
-                !EntityUtils.isStackable(damageEvent.getEntity()))
+        if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity()))
+            return;
+
+        EntityDamageData entityDamageData = this.entityDamagesData.get(damageEvent);
+
+        if (entityDamageData != null)
             return;
 
         LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
@@ -234,12 +238,13 @@ public final class EntitiesListener implements Listener {
 
         if (!fromDeathEvent) {
             damageEvent.setCancelled(true);
-            this.entityDamageData = new EntityDamageData(damageEvent);
+            entityDamageData = new EntityDamageData(damageEvent);
+            this.entityDamagesData.put(damageEvent, entityDamageData);
             try {
                 // Call the event again.
                 Bukkit.getPluginManager().callEvent(damageEvent);
             } catch (Throwable error) {
-                this.entityDamageData = null;
+                this.entityDamagesData.remove(damageEvent);
                 throw error;
             }
         }
@@ -248,19 +253,21 @@ public final class EntitiesListener implements Listener {
             damageEvent.getEntity().setLastDamageCause(damageEvent);
 
         try {
-            this.damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
+            DeathSimulation.Result damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
 
             // We want to restore the original values of the event.
             // If we were called from the death event, we restore it now.
             // Otherwise, the values will be restored in #onEntityDamageMonitor
             // Reminder: The original event in that case is cancelled, therefore no other plugins should touch it.
             if (fromDeathEvent) {
-                restoreDamageResult(damageEvent);
+                restoreDamageResult(damageResult, damageEvent);
+            } else {
+                this.damageResults.put(damageEvent, damageResult);
             }
         } finally {
-            if (this.entityDamageData != null) {
-                this.entityDamageData.restoreEvent(damageEvent);
-                this.entityDamageData = null;
+            if (entityDamageData != null) {
+                entityDamageData.restoreEvent(damageEvent);
+                this.entityDamagesData.remove(damageEvent);
             }
         }
     }
@@ -310,13 +317,11 @@ public final class EntitiesListener implements Listener {
         return result;
     }
 
-    private void restoreDamageResult(EntityDamageEvent damageEvent) {
-        damageEvent.setCancelled(this.damageResult.isCancelEvent());
+    private void restoreDamageResult(DeathSimulation.Result damageResult, EntityDamageEvent damageEvent) {
+        damageEvent.setCancelled(damageResult.isCancelEvent());
 
-        if (this.damageResult.getEventDamage() >= 0)
-            damageEvent.setDamage(this.damageResult.getEventDamage());
-
-        this.damageResult = null;
+        if (damageResult.getEventDamage() >= 0)
+            damageEvent.setDamage(damageResult.getEventDamage());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
