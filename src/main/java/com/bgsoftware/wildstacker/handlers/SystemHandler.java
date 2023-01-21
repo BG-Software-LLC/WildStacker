@@ -825,6 +825,14 @@ public final class SystemHandler implements SystemManager {
         this.handleChunkUnload(chunk, unloadStage, Arrays.asList(chunk.getEntities()));
     }
 
+    public void saveEntity(StackedEntity stackedEntity) {
+        dataSerializer.saveEntity(stackedEntity);
+    }
+
+    public void saveItem(StackedItem stackedItem) {
+        dataSerializer.saveItem(stackedItem);
+    }
+
     public void handleChunkUnload(Chunk chunk, int unloadStage, List<Entity> unloadedEntities) {
         if (!this.loadedData)
             return;
