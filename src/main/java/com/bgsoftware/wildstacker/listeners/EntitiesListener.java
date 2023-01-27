@@ -130,6 +130,11 @@ public final class EntitiesListener implements Listener {
         }
 
         EventsListener.addEntityPickupListener(this::onEntityPickup, EventPriority.HIGHEST);
+
+        // We register the event in a delay so it will be the last listener to be called.
+        // We want to restore the event after all the other ones will be called on the wanted data.
+        Executor.sync(() -> plugin.getServer().getPluginManager().registerEvents(
+                new EntityDamageRestoreListener(), plugin), 10L);
     }
 
     /*
@@ -208,11 +213,6 @@ public final class EntitiesListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void handleEntityDamage(EntityDamageEvent e) {
         handleEntityDamage(e, false);
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false /* Not ignoring cancel status as the event should be cancelled. */)
-    public void onEntityDamageMonitor(EntityDamageEvent e) {
-        Optional.ofNullable(this.damageResults.remove(e)).ifPresent(result -> restoreDamageResult(result, e));
     }
 
     private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
@@ -1086,6 +1086,15 @@ public final class EntitiesListener implements Listener {
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onBlockShearEntity(BlockShearEntityEvent e) {
             handleEntityShear(e, e.getEntity());
+        }
+
+    }
+
+    private class EntityDamageRestoreListener implements Listener {
+
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false /* Not ignoring cancel status as the event should be cancelled. */)
+        public void onEntityDamageRestore(EntityDamageEvent e) {
+            Optional.ofNullable(damageResults.remove(e)).ifPresent(result -> restoreDamageResult(result, e));
         }
 
     }
