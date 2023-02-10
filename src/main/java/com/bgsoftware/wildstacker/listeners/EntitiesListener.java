@@ -918,6 +918,7 @@ public final class EntitiesListener implements Listener {
     private void handleEntityCacheClear(LivingEntity livingEntity) {
         // Removing the entity from cache.
         plugin.getDataHandler().CACHED_ENTITIES.remove(livingEntity.getUniqueId());
+        EntityStorage.clearMetadata(livingEntity);
     }
 
     private void handleEntityShear(Cancellable cancellable, Entity entity) {
