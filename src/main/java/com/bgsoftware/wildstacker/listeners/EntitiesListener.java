@@ -171,6 +171,9 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
+        Bukkit.broadcastMessage("Custom EntityDeathEvent: " + e.getEntity());
+        new Exception().printStackTrace();
+
         noDeathEvent.add(stackedEntity.getUniqueId());
         stackedEntity.setDrops(e.getDrops()); // Fixing issues with plugins changing the drops in this event.
         stackedEntity.setFlag(EntityFlag.EXP_TO_DROP, e.getDroppedExp());
@@ -208,6 +211,12 @@ public final class EntitiesListener implements Listener {
         if (!plugin.getSettings().nerfedEntitiesTeleport && EntityUtils.isStackable(e.getEntity()) &&
                 WStackedEntity.of(e.getEntity()).isNerfed())
             e.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void g(EntityDamageEvent e) {
+        Bukkit.broadcastMessage(e.getEntity() + ": " + e.getFinalDamage());
+        new Exception().printStackTrace();
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -320,8 +329,14 @@ public final class EntitiesListener implements Listener {
     private void restoreDamageResult(DeathSimulation.Result damageResult, EntityDamageEvent damageEvent) {
         damageEvent.setCancelled(damageResult.isCancelEvent());
 
-        if (damageResult.getEventDamage() >= 0)
+        if (ServerVersion.isEquals(ServerVersion.v1_8)) {
+            // In 1.8, EntityLiving#die does not check for dead flag, causing the entity to actually die.
+            // Therefore, we set the health to 0.1 and later restore it.
+            plugin.getNMSEntities().setHealthDirectly((LivingEntity) damageEvent.getEntity(), 0.01f, true);
+            damageEvent.setDamage(0);
+        } else if (damageResult.getEventDamage() >= 0) {
             damageEvent.setDamage(damageResult.getEventDamage());
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
