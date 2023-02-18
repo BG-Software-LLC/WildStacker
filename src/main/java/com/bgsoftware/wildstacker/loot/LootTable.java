@@ -115,6 +115,26 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     }
 
     @Override
+    public List<ItemStack> getDrops(int lootBonusLevel, int stackAmount) {
+        List<ItemStack> drops = new ArrayList<>();
+
+        int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
+                Random.nextInt(min, max, stackAmount);
+
+        for (LootPair lootPair : lootPairs) {
+            int amountOfPairs = (int) (lootPair.getChance() * amountOfDifferentPairs / 100);
+
+            if (amountOfPairs == 0) {
+                amountOfPairs = Random.nextChance(lootPair.getChance(), amountOfDifferentPairs);
+            }
+
+            drops.addAll(lootPair.getItems(amountOfPairs, lootBonusLevel));
+        }
+
+        return drops;
+    }
+
+    @Override
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
         int exp = 0;
 

@@ -136,6 +136,25 @@ public class LootPair {
         return items;
     }
 
+    public List<ItemStack> getItems(int amountOfPairs, int lootBonusLevel) {
+        List<ItemStack> items = new ArrayList<>();
+
+        for (LootItem lootItem : lootItems) {
+            int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
+
+            if (amountOfItems == 0) {
+                amountOfItems = Random.nextChance(lootItem.getChance(lootBonusLevel, lootingChance), amountOfPairs);
+            }
+
+            ItemStack itemStack = lootItem.getItemStack(amountOfItems, lootBonusLevel);
+
+            if (itemStack != null)
+                items.add(itemStack);
+        }
+
+        return items;
+    }
+
     public void executeCommands(Player player, int amountOfPairs, int lootBonusLevel) {
         List<String> commands = new ArrayList<>();
 

@@ -204,6 +204,25 @@ public class LootItem {
         return itemStack;
     }
 
+    public ItemStack getItemStack(int amountOfItems, int lootBonusLevel) {
+        ItemStack itemStack = this.itemStack.clone();
+
+        int lootingBonus = 0;
+
+        if (looting && lootBonusLevel > 0) {
+            lootingBonus = Random.nextInt(lootBonusLevel + 1);
+        }
+
+        int itemAmount = Random.nextInt(min + lootingBonus, max + lootingBonus, amountOfItems);
+
+        if (itemAmount <= 0)
+            return null;
+
+        itemStack.setAmount(itemAmount);
+
+        return itemStack;
+    }
+
     @Override
     public String toString() {
         return "LootItem{item=" + itemStack + ",burnable=" + burnableItem + "}";
