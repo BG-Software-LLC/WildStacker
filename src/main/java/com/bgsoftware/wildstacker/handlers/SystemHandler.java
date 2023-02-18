@@ -612,6 +612,11 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
+    public LootTable getLootTable(String entityTypeName, boolean isBaby) {
+        return plugin.getLootHandler().getLootTable(entityTypeName, isBaby);
+    }
+
+    @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData) {
         return getStackedSnapshot(chunk);
     }

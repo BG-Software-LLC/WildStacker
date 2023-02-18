@@ -300,6 +300,15 @@ public interface SystemManager {
     LootTable getLootTable(LivingEntity livingEntity);
 
     /**
+     * Get a loot-table from an entity type name.
+     *
+     * @param entityTypeName the entity type name
+     * @param isBaby should baby table be used
+     * @return loot-table
+     */
+    LootTable getLootTable(String entityTypeName, boolean isBaby);
+
+    /**
      * Get a stacked snapshot of a chunk.
      *
      * @param chunk    The chunk

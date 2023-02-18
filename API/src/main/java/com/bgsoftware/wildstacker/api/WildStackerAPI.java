@@ -115,12 +115,22 @@ public final class WildStackerAPI {
     }
 
     /**
-     * Returns the loot loot of an entity.
+     * Returns the loot of an entity.
      *
      * @param livingEntity An entity to check
      */
     public static LootTable getLootTable(LivingEntity livingEntity) {
         return instance.getSystemManager().getLootTable(livingEntity);
+    }
+
+    /**
+     * Returns the loot from an entity type name.
+     *
+     * @param entityTypeName An entity type name to use
+     * @param isBaby Should baby table be used
+     */
+    public static LootTable getLootTable(String entityTypeName, boolean isBaby) {
+        return instance.getSystemManager().getLootTable(entityTypeName, isBaby);
     }
 
     /**

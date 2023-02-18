@@ -256,4 +256,11 @@ public final class LootHandler {
         return lootTables.getOrDefault(entityTypeName, lootTables.get("EMPTY"));
     }
 
+    public LootTable getLootTable(String entityTypeName, boolean isBaby) {
+        if (isBaby)
+            entityTypeName += "_BABY";
+
+        return lootTables.getOrDefault(entityTypeName, lootTables.get("EMPTY"));
+    }
+
 }
