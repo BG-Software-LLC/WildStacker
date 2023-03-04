@@ -171,9 +171,6 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        Bukkit.broadcastMessage("Custom EntityDeathEvent: " + e.getEntity());
-        new Exception().printStackTrace();
-
         noDeathEvent.add(stackedEntity.getUniqueId());
         stackedEntity.setDrops(e.getDrops()); // Fixing issues with plugins changing the drops in this event.
         stackedEntity.setFlag(EntityFlag.EXP_TO_DROP, e.getDroppedExp());
@@ -211,12 +208,6 @@ public final class EntitiesListener implements Listener {
         if (!plugin.getSettings().nerfedEntitiesTeleport && EntityUtils.isStackable(e.getEntity()) &&
                 WStackedEntity.of(e.getEntity()).isNerfed())
             e.setCancelled(true);
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void g(EntityDamageEvent e) {
-        Bukkit.broadcastMessage(e.getEntity() + ": " + e.getFinalDamage());
-        new Exception().printStackTrace();
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
