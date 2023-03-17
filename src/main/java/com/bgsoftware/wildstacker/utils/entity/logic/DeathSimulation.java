@@ -124,9 +124,9 @@ public final class DeathSimulation {
 
             Executor.sync(() -> {
                 IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
-                nmsEntity.setRemoved(true);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
+                nmsEntity.setHealth(0f, true);
 
                 // Setting the stack amount of the entity to the unstack amount.
                 int realStackAmount = stackedEntity.getStackAmount();
@@ -155,6 +155,7 @@ public final class DeathSimulation {
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
                     stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                 }
+
 
                 // Restore all values
                 nmsEntity.setRemoved(false);
