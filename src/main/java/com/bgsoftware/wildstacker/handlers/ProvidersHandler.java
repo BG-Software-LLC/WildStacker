@@ -406,7 +406,7 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             registerHook("SuperiorSkyblockHook");
 
-        if(doesClassExist("org.bukkit.event.world.EntitiesLoadEvent"))
+        if (doesClassExist("org.bukkit.event.world.EntitiesLoadEvent"))
             registerHook("PaperChunksHook");
     }
 
@@ -489,8 +489,9 @@ public final class ProvidersHandler {
 
     public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Block block,
                                             IStackedBlockListener.Action action) {
-        // noinspection deprecation
-        notifyStackedBlockListeners(offlinePlayer, block.getLocation(), block.getType(), block.getData(), action);
+        if (!this.stackedBlocksListeners.isEmpty())
+            // noinspection deprecation
+            notifyStackedBlockListeners(offlinePlayer, block.getLocation(), block.getType(), block.getData(), action);
     }
 
     public void notifyStackedBlockListeners(OfflinePlayer offlinePlayer, Location location, Material type, byte data,
