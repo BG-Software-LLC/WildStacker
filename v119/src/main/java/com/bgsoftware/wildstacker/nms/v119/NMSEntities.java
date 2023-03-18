@@ -95,6 +95,7 @@ import org.bukkit.event.player.PlayerItemMendEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -517,6 +518,13 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     @Override
     public void awardPickupScore(org.bukkit.entity.Player player, org.bukkit.entity.Item pickItem) {
         // Do nothing.
+    }
+
+    @Override
+    public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target) {
+        ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+        LivingEntity targetEntity = ((CraftLivingEntity) target).getHandle();
+        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(targetEntity));
     }
 
     @Override

@@ -76,13 +76,10 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -97,7 +94,6 @@ public final class EntitiesListener implements Listener {
 
     public static EntitiesListener IMP;
 
-    private final Set<UUID> noDeathEvent = new HashSet<>();
     private final FutureEntityTracker<Integer> slimeSplitTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
@@ -170,7 +166,6 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        noDeathEvent.add(stackedEntity.getUniqueId());
         stackedEntity.setDrops(e.getDrops()); // Fixing issues with plugins changing the drops in this event.
         stackedEntity.setFlag(EntityFlag.EXP_TO_DROP, e.getDroppedExp());
 
@@ -252,7 +247,7 @@ public final class EntitiesListener implements Listener {
             damageEvent.getEntity().setLastDamageCause(damageEvent);
 
         try {
-            EntityDamageData damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
+            EntityDamageData damageResult = handleEntityDamageInternal(damageEvent, stackedEntity, fromDeathEvent);
 
             // We want to restore the original values of the event.
             // If we were called from the death event, we restore it now.
@@ -271,7 +266,7 @@ public final class EntitiesListener implements Listener {
         }
     }
 
-    private EntityDamageData handleEntityDamageInternal(EntityDamageEvent damageEvent, StackedEntity stackedEntity) {
+    private EntityDamageData handleEntityDamageInternal(EntityDamageEvent damageEvent, StackedEntity stackedEntity, boolean fromDeathEvent) {
         if (damageEvent.isCancelled())
             return new EntityDamageData(true, 0);
 
@@ -297,9 +292,8 @@ public final class EntitiesListener implements Listener {
             return new EntityDamageData(damageEvent);
         }
 
-        return DeathSimulation.simulateDeath(stackedEntity,
-                damageEvent.getCause(), damagerTool, damager, entityDamager, creativeMode, damageEvent.getDamage(),
-                damageEvent.getFinalDamage(), noDeathEvent);
+        return DeathSimulation.simulateDeath(stackedEntity, damageEvent, damagerTool, damager, entityDamager,
+                creativeMode, fromDeathEvent);
     }
 
     private void restoreDamageResult(EntityDamageData damageResult, EntityDamageEvent damageEvent) {

@@ -82,6 +82,8 @@ public interface NMSEntities {
 
     void awardPickupScore(Player player, Item pickItem);
 
+    void awardCrossbowShot(Player player, LivingEntity target);
+
     void playPickupAnimation(LivingEntity livingEntity, Item item);
 
     void playDeathSound(LivingEntity entity);

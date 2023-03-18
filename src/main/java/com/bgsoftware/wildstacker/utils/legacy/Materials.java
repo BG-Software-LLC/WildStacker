@@ -6,6 +6,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
+
 public enum Materials {
 
     SPAWNER("MOB_SPAWNER"),
@@ -38,6 +40,7 @@ public enum Materials {
     Materials(String bukkitType) {
         this(bukkitType, 0);
     }
+
     Materials(String bukkitType, int bukkitData) {
         this.bukkitType = bukkitType;
         this.bukkitData = (short) bukkitData;
@@ -85,6 +88,15 @@ public enum Materials {
 
     public ItemStack toBukkitItem(int amount) {
         return bukkitData == 0 ? new ItemStack(toBukkitType(), amount) : new ItemStack(toBukkitType(), amount, bukkitData);
+    }
+
+    @Nullable
+    public static Material getMaterialOrNull(String name) {
+        try {
+            return Material.valueOf(name);
+        } catch (Exception error) {
+            return null;
+        }
     }
 
 }

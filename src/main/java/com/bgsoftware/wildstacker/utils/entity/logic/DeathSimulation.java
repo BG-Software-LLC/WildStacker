@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -21,12 +22,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -34,11 +37,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class DeathSimulation {
@@ -46,20 +48,22 @@ public final class DeathSimulation {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
+    @Nullable
+    private static final Material CROSSBOW_TYPE = Materials.getMaterialOrNull("CROSSBOW");
     private static boolean sweepingEdgeHandled = false;
 
     private DeathSimulation() {
     }
 
-    public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent.DamageCause lastDamageCause,
-                                                 ItemStack killerTool, Player killer, Entity entityKiller, boolean creativeMode,
-                                                 double originalDamage, double finalDamage, Set<UUID> noDeathEvent) {
+    public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent damageEvent,
+                                                 ItemStack killerTool, Player killer, Entity entityKiller,
+                                                 boolean creativeMode, boolean fromDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
             return new EntityDamageData(false, Collections.emptyMap());
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
-        if (lastDamageCause != EntityDamageEvent.DamageCause.VOID &&
+        if (damageEvent.getCause() != EntityDamageEvent.DamageCause.VOID &&
                 plugin.getNMSEntities().handleTotemOfUndying(livingEntity)) {
             return new EntityDamageData(true, Collections.emptyMap());
         }
@@ -68,7 +72,7 @@ public final class DeathSimulation {
             return new EntityDamageData(true, Collections.emptyMap());
 
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
-                stackedEntity.isInstantKill(lastDamageCause), finalDamage, killerTool);
+                stackedEntity.isInstantKill(damageEvent.getCause()), damageEvent.getFinalDamage(), killerTool);
 
         int entitiesToKill = spreadDamageResult.getKey();
         double damageToNextStack = spreadDamageResult.getValue();
@@ -105,7 +109,8 @@ public final class DeathSimulation {
         if (!sweepingEdgeHandled && result.isCancelled() && killerTool != null && killer != null) {
             try {
                 sweepingEdgeHandled = true;
-                plugin.getNMSEntities().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
+                plugin.getNMSEntities().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(),
+                        damageEvent.getDamage());
             } finally {
                 sweepingEdgeHandled = false;
             }
@@ -143,7 +148,7 @@ public final class DeathSimulation {
                 List<ItemStack> finalDrops;
                 int finalExp;
 
-                if (!noDeathEvent.contains(livingEntity.getUniqueId())) {
+                if (!fromDeathEvent) {
                     int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
                             stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
                     EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
@@ -151,7 +156,6 @@ public final class DeathSimulation {
                     finalDrops = entityDeathEvent.getDrops();
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
-                    noDeathEvent.remove(livingEntity.getUniqueId());
                     finalDrops = drops;
                     Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
@@ -201,6 +205,10 @@ public final class DeathSimulation {
                 }
 
                 attemptJoinRaid(killer, livingEntity);
+
+                if (killer != null && killerTool != null && killerTool.getType() == CROSSBOW_TYPE &&
+                        ((EntityDamageByEntityEvent) damageEvent).getDamager() instanceof Arrow)
+                    plugin.getNMSEntities().awardCrossbowShot(killer, livingEntity);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
