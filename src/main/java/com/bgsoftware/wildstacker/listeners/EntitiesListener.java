@@ -101,7 +101,7 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<Integer> slimeSplitTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
-    private final Map<EntityDamageEvent, DeathSimulation.Result> damageResults = new IdentityHashMap<>();
+    private final Map<EntityDamageEvent, EntityDamageData> damageResults = new IdentityHashMap<>();
     private final Map<EntityDamageEvent, EntityDamageData> entityDamagesData = new IdentityHashMap<>();
     private final WildStackerPlugin plugin;
 
@@ -252,7 +252,7 @@ public final class EntitiesListener implements Listener {
             damageEvent.getEntity().setLastDamageCause(damageEvent);
 
         try {
-            DeathSimulation.Result damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
+            EntityDamageData damageResult = handleEntityDamageInternal(damageEvent, stackedEntity);
 
             // We want to restore the original values of the event.
             // If we were called from the death event, we restore it now.
@@ -265,15 +265,15 @@ public final class EntitiesListener implements Listener {
             }
         } finally {
             if (entityDamageData != null) {
-                entityDamageData.restoreEvent(damageEvent);
+                entityDamageData.applyToEvent(damageEvent);
                 this.entityDamagesData.remove(damageEvent);
             }
         }
     }
 
-    private DeathSimulation.Result handleEntityDamageInternal(EntityDamageEvent damageEvent, StackedEntity stackedEntity) {
+    private EntityDamageData handleEntityDamageInternal(EntityDamageEvent damageEvent, StackedEntity stackedEntity) {
         if (damageEvent.isCancelled())
-            return new DeathSimulation.Result(true, 0);
+            return new EntityDamageData(true, 0);
 
         Entity entityDamager = EntityUtils.getDamagerFromEvent(damageEvent, true);
         Player damager = entityDamager instanceof Player ? (Player) entityDamager : null;
@@ -294,7 +294,7 @@ public final class EntitiesListener implements Listener {
 
         if (!shouldSimulateDeath) {
             // The entity will not be killed, therefore the damage result should be identical to the event's results.
-            return new DeathSimulation.Result(damageEvent.isCancelled(), damageEvent.getFinalDamage());
+            return new EntityDamageData(damageEvent);
         }
 
         return DeathSimulation.simulateDeath(stackedEntity,
@@ -302,16 +302,16 @@ public final class EntitiesListener implements Listener {
                 damageEvent.getFinalDamage(), noDeathEvent);
     }
 
-    private void restoreDamageResult(DeathSimulation.Result damageResult, EntityDamageEvent damageEvent) {
-        damageEvent.setCancelled(damageResult.isCancelEvent());
+    private void restoreDamageResult(EntityDamageData damageResult, EntityDamageEvent damageEvent) {
+        damageEvent.setCancelled(damageResult.isCancelled());
 
         if (ServerVersion.isEquals(ServerVersion.v1_8)) {
             // In 1.8, EntityLiving#die does not check for dead flag, causing the entity to actually die.
             // Therefore, we set the health to 0.1 and later restore it.
             plugin.getNMSEntities().setHealthDirectly((LivingEntity) damageEvent.getEntity(), 0.01f, true);
             damageEvent.setDamage(0);
-        } else if (damageResult.getEventDamage() >= 0) {
-            damageEvent.setDamage(damageResult.getEventDamage());
+        } else {
+            damageResult.applyToEvent(damageEvent);
         }
     }
 

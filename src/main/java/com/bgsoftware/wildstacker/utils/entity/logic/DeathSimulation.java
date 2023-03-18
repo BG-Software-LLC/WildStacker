@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -34,6 +35,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -49,21 +51,21 @@ public final class DeathSimulation {
     private DeathSimulation() {
     }
 
-    public static Result simulateDeath(StackedEntity stackedEntity, EntityDamageEvent.DamageCause lastDamageCause,
-                                       ItemStack killerTool, Player killer, Entity entityKiller, boolean creativeMode,
-                                       double originalDamage, double finalDamage, Set<UUID> noDeathEvent) {
+    public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent.DamageCause lastDamageCause,
+                                                 ItemStack killerTool, Player killer, Entity entityKiller, boolean creativeMode,
+                                                 double originalDamage, double finalDamage, Set<UUID> noDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
-            return new Result(false, -1);
+            return new EntityDamageData(false, Collections.emptyMap());
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
         if (lastDamageCause != EntityDamageEvent.DamageCause.VOID &&
                 plugin.getNMSEntities().handleTotemOfUndying(livingEntity)) {
-            return new Result(true, -1);
+            return new EntityDamageData(true, Collections.emptyMap());
         }
 
         if (stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
-            return new Result(true, -1);
+            return new EntityDamageData(true, Collections.emptyMap());
 
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
                 stackedEntity.isInstantKill(lastDamageCause), finalDamage, killerTool);
@@ -73,10 +75,10 @@ public final class DeathSimulation {
 
         int fireTicks = livingEntity.getFireTicks();
 
-        Result result = new Result(false, 0);
+        EntityDamageData result = new EntityDamageData(false, 0);
 
         if (handleFastKill(livingEntity, killer))
-            result.cancelEvent = true;
+            result.setCancelled(true);
 
         //Villager was killed by a zombie - should be turned into a zombie villager.
         if (checkForZombieVillager(stackedEntity, entityKiller))
@@ -100,7 +102,7 @@ public final class DeathSimulation {
             giveStatisticsToKiller(entityKiller, unstackAmount, stackedEntity);
 
         // Handle sweeping edge enchantment
-        if (!sweepingEdgeHandled && result.cancelEvent && killerTool != null && killer != null) {
+        if (!sweepingEdgeHandled && result.isCancelled() && killerTool != null && killer != null) {
             try {
                 sweepingEdgeHandled = true;
                 plugin.getNMSEntities().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(), originalDamage);
@@ -110,7 +112,7 @@ public final class DeathSimulation {
         }
 
         //Decrease durability when next-stack-knockback is false
-        if (result.cancelEvent && killerTool != null && !creativeMode && !plugin.getNMSAdapter().isUnbreakable(killerTool))
+        if (result.isCancelled() && killerTool != null && !creativeMode && !plugin.getNMSAdapter().isUnbreakable(killerTool))
             reduceKillerToolDurability(killerTool, killer);
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
@@ -356,26 +358,6 @@ public final class DeathSimulation {
         List<ItemStack> toReturn = new ArrayList<>(list2);
         toReturn.removeAll(list1);
         return toReturn;
-    }
-
-    public static final class Result {
-
-        private boolean cancelEvent;
-        private final double eventDamage;
-
-        public Result(boolean cancelEvent, double eventDamage) {
-            this.cancelEvent = cancelEvent;
-            this.eventDamage = eventDamage;
-        }
-
-        public boolean isCancelEvent() {
-            return cancelEvent;
-        }
-
-        public double getEventDamage() {
-            return eventDamage;
-        }
-
     }
 
 }
