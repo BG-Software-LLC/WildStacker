@@ -1,0 +1,13 @@
+group 'Hooks:PlotSquaredLegacy'
+
+dependencies {
+    compileOnly 'com.github.intellectualsites:PlotSquared:18.09.09-eab918b-2040'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_plotsquaredlegacy') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_plotsquaredlegacy").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

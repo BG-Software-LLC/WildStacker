@@ -1,0 +1,13 @@
+group 'Hooks:Citizens'
+
+dependencies {
+    compileOnly 'net.citizensnpcs:Citizens:2.0.27'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_citizens') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_citizens").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

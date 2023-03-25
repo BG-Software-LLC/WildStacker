@@ -1,0 +1,19 @@
+group 'Hooks:McMMO210'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
+
+dependencies {
+    compileOnly 'com.gmail.nossr50:mcMMO:2.1.210'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_mcmmo210') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_mcmmo210").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

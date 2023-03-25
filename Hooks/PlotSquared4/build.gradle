@@ -1,0 +1,14 @@
+group 'Hooks:PlotSquared4'
+
+dependencies {
+    compileOnly 'com.github.intellectualsites:PlotSquared:4.390'
+    compileOnly 'com.sk89q:WorldEdit:7.0.0-beta-05'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_plotsquared4') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_plotsquared4").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

@@ -1,0 +1,13 @@
+group 'Hooks:FabledSkyblock'
+
+dependencies {
+    compileOnly 'com.songoda:FabledSkyblock:2.3.23'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_fabledskyblock') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_fabledskyblock").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

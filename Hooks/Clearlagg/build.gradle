@@ -1,0 +1,13 @@
+group 'Hooks:Clearlagg'
+
+dependencies {
+    compileOnly 'me.minebuilders:Clearlag:2.9.7'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_clearlagg') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_clearlagg").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

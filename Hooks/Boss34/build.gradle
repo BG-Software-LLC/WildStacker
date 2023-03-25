@@ -1,0 +1,13 @@
+group 'Hooks:Boss34'
+
+dependencies {
+    compileOnly 'org.mineacademy:Boss:3.4.13'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_boss34') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_boss34").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

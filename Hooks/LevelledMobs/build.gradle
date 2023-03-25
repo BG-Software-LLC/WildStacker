@@ -1,0 +1,12 @@
+group 'Hooks:LevelledMobs'
+
+dependencies {
+    compileOnly "org.spigotmc:v1_16_R3:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_levelledmobs') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_levelledmobs").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

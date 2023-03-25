@@ -1,0 +1,13 @@
+group 'Hooks:ShopGUIPlus18'
+
+dependencies {
+    compileOnly 'net.brcdev:ShopGUIPlus:1.18.3'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_shopguiplus18') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_shopguiplus18").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

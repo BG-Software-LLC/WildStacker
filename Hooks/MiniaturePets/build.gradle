@@ -1,0 +1,13 @@
+group 'Hooks:MiniaturePets'
+
+dependencies {
+    compileOnly 'com.kirelcodes:MiniaturePets:2.6.0'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_miniaturepets') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_miniaturepets").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}
