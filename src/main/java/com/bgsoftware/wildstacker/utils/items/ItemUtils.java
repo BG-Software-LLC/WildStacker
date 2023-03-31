@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -31,7 +30,6 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Random;
 
 public final class ItemUtils {
 
@@ -46,8 +44,6 @@ public final class ItemUtils {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int MAX_PICKUP_DELAY = 32767;
-    private static final Sound ITEM_PICKUP_SOUND = ServerVersion.isLessThan(ServerVersion.v1_9) ?
-            Sound.ITEM_PICKUP : Sound.valueOf("ENTITY_ITEM_PICKUP");
 
     public static void addItems(ItemStack[] itemStacks, Inventory inventory, Location location) {
         Arrays.stream(itemStacks)
@@ -397,21 +393,6 @@ public final class ItemUtils {
 
     public static boolean isStackable(Entity entity) {
         return entity.isValid() && !entity.isDead() && entity.getType() == EntityType.DROPPED_ITEM;
-    }
-
-    public static ItemStack[] cloneItems(ItemStack[] original) {
-        ItemStack[] clonedArray = new ItemStack[original.length];
-        for (int i = 0; i < clonedArray.length; ++i) {
-            if (clonedArray[i] != null)
-                clonedArray[i] = clonedArray[i].clone();
-        }
-        return clonedArray;
-    }
-
-    public static void playPickupSound(Location location) {
-        Random random = new Random();
-        float pitch = ((random.nextFloat() - random.nextFloat()) * 0.7F + 1.0F) * 2.0F;
-        location.getWorld().playSound(location, ITEM_PICKUP_SOUND, 0.2F, pitch);
     }
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
