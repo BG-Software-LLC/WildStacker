@@ -77,6 +77,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +99,7 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
     private final Map<EntityDamageEvent, EntityDamageData> damageResults = new IdentityHashMap<>();
-    private final Map<EntityDamageEvent, EntityDamageData> entityDamagesData = new IdentityHashMap<>();
+    private final List<EntityDamageEvent> entityDamageEventCalls = new LinkedList<>();
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
@@ -214,9 +215,7 @@ public final class EntitiesListener implements Listener {
         if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity()))
             return;
 
-        EntityDamageData entityDamageData = this.entityDamagesData.get(damageEvent);
-
-        if (entityDamageData != null)
+        if (this.entityDamageEventCalls.contains(damageEvent))
             return;
 
         LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
@@ -230,16 +229,17 @@ public final class EntitiesListener implements Listener {
 
         // We call a fake event and cancel the original one, if needed.
 
+        EntityDamageData entityDamageData = null;
+
         if (!fromDeathEvent) {
             damageEvent.setCancelled(true);
             entityDamageData = new EntityDamageData(damageEvent);
-            this.entityDamagesData.put(damageEvent, entityDamageData);
             try {
+                this.entityDamageEventCalls.add(damageEvent);
                 // Call the event again.
                 Bukkit.getPluginManager().callEvent(damageEvent);
-            } catch (Throwable error) {
-                this.entityDamagesData.remove(damageEvent);
-                throw error;
+            } finally {
+                this.entityDamageEventCalls.remove(damageEvent);
             }
         }
 
@@ -259,10 +259,8 @@ public final class EntitiesListener implements Listener {
                 this.damageResults.put(damageEvent, damageResult);
             }
         } finally {
-            if (entityDamageData != null) {
+            if (entityDamageData != null)
                 entityDamageData.applyToEvent(damageEvent);
-                this.entityDamagesData.remove(damageEvent);
-            }
         }
     }
 
@@ -293,13 +291,13 @@ public final class EntitiesListener implements Listener {
         }
 
         return DeathSimulation.simulateDeath(stackedEntity, damageEvent, damagerTool, damager, entityDamager,
-                creativeMode, fromDeathEvent);
+                creativeMode, fromDeathEvent).setShouldEntityDie();
     }
 
     private void restoreDamageResult(EntityDamageData damageResult, EntityDamageEvent damageEvent) {
         damageEvent.setCancelled(damageResult.isCancelled());
 
-        if (ServerVersion.isEquals(ServerVersion.v1_8)) {
+        if (ServerVersion.isEquals(ServerVersion.v1_8) && damageResult.isShouldEntityDie()) {
             // In 1.8, EntityLiving#die does not check for dead flag, causing the entity to actually die.
             // Therefore, we set the health to 0.1 and later restore it.
             plugin.getNMSEntities().setHealthDirectly((LivingEntity) damageEvent.getEntity(), 0.01f, true);

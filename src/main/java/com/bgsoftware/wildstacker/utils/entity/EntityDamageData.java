@@ -16,6 +16,7 @@ public class EntityDamageData {
 
     private final Map<EntityDamageEvent.DamageModifier, Double> modifiers;
     private boolean cancelled;
+    private boolean shouldEntityDie = false;
 
     public EntityDamageData(EntityDamageEvent event) {
         // We copy all the modifiable fields of the event.
@@ -46,6 +47,15 @@ public class EntityDamageData {
 
     public Map<EntityDamageEvent.DamageModifier, Double> getModifiers() {
         return modifiers;
+    }
+
+    public EntityDamageData setShouldEntityDie() {
+        this.shouldEntityDie = true;
+        return this;
+    }
+
+    public boolean isShouldEntityDie() {
+        return shouldEntityDie;
     }
 
     public void applyToEvent(EntityDamageEvent event) {
