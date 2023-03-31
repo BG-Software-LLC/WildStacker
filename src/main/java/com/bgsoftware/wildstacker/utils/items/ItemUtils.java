@@ -392,7 +392,8 @@ public final class ItemUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return entity.isValid() && !entity.isDead() && entity.getType() == EntityType.DROPPED_ITEM;
+        return entity.isValid() && !entity.isDead() && entity instanceof Item &&
+                plugin.getNMSEntities().isDroppedItem((Item) entity);
     }
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
