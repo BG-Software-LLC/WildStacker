@@ -16,11 +16,7 @@ public class StackerScheduler<T extends WStackedObject<?>> {
     private static final AtomicInteger schedulerIdGenerator = new AtomicInteger(0);
 
     private final int schedulerId = schedulerIdGenerator.getAndIncrement();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
-        StackerThread stackerThread = new StackerThread(task, schedulerId);
-        stackerThread.setName("StackerScheduler Thread #" + schedulerId);
-        return stackerThread;
-    });
+    private ExecutorService executor;
 
     private final List<WeakReference<T>> stackingObjects = new LinkedList<>();
     private final Lock schedulerLock = new ReentrantLock();
@@ -48,7 +44,7 @@ public class StackerScheduler<T extends WStackedObject<?>> {
         if (isStackerThread()) {
             runTaskLocked(task);
         } else {
-            this.executor.submit(() -> runTaskLocked(task));
+            getExecutor().submit(() -> runTaskLocked(task));
         }
     }
 
@@ -91,10 +87,16 @@ public class StackerScheduler<T extends WStackedObject<?>> {
 
         try {
             this.schedulerLock.lock();
-            List<Runnable> leftOverTasks = this.executor.shutdownNow();
-            leftOverTasks.forEach(scheduler::schedule);
+
+            if (this.executor != null) {
+                List<Runnable> leftOverTasks = this.executor.shutdownNow();
+                leftOverTasks.forEach(scheduler::schedule);
+                this.executor = null;
+            }
+
+            this.stopped = true;
+
             scheduler.addRefCount();
-            stop();
         } finally {
             this.schedulerLock.unlock();
         }
@@ -103,7 +105,10 @@ public class StackerScheduler<T extends WStackedObject<?>> {
     public void stop() {
         if (!this.stopped) {
             this.stopped = true;
-            this.executor.shutdownNow();
+            if (this.executor != null) {
+                this.executor.shutdownNow();
+                this.executor = null;
+            }
         }
     }
 
@@ -114,6 +119,18 @@ public class StackerScheduler<T extends WStackedObject<?>> {
     private void ensureActive(String message) {
         if (this.stopped)
             throw new IllegalStateException(message);
+    }
+
+    private ExecutorService getExecutor() {
+        if (this.executor == null) {
+            this.executor = Executors.newSingleThreadExecutor(task -> {
+                StackerThread stackerThread = new StackerThread(task, schedulerId);
+                stackerThread.setName("StackerScheduler Thread #" + schedulerId);
+                return stackerThread;
+            });
+        }
+
+        return this.executor;
     }
 
     private static class StackerThread extends Thread {
