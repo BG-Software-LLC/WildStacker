@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.stacker.barrels.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;

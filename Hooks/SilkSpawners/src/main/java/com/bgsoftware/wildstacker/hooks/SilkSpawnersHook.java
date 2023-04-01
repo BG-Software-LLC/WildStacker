@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerBreakEvent;

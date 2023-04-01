@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import me.minebuilders.clearlag.events.EntityRemoveEvent;
 import org.bukkit.event.EventHandler;

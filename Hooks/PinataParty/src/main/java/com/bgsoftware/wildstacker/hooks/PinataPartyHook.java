@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import me.hexedhero.pp.api.PinataSpawnEvent;
 import org.bukkit.entity.Llama;

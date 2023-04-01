@@ -4,7 +4,7 @@ import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerUnstackEvent;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.google.common.collect.ImmutableMap;
 import net.novucs.ftop.FactionsTopPlugin;

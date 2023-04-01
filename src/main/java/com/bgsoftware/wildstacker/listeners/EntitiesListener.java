@@ -7,7 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;

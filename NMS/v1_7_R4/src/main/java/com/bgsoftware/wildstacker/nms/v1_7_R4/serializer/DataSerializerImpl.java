@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import net.minecraft.server.v1_7_R4.EntityItem;
 import net.minecraft.server.v1_7_R4.EntityLiving;
 import net.minecraft.server.v1_7_R4.IScoreboardCriteria;

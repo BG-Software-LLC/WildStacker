@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.nms.algorithms.PaperGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.algorithms.SpigotGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
 import com.bgsoftware.wildstacker.nms.entity.NMSEntityEquipmentImpl;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import net.minecraft.server.v1_16_R3.ChatMessage;
 import net.minecraft.server.v1_16_R3.EntityItem;
 import net.minecraft.server.v1_16_R3.EntityLiving;

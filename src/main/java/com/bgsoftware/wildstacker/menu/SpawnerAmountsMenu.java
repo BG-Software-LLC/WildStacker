@@ -4,7 +4,7 @@ import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.listeners.SpawnersListener;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;

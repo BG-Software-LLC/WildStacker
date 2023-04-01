@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.command.commands;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.google.common.collect.Sets;
 import org.bukkit.ChatColor;

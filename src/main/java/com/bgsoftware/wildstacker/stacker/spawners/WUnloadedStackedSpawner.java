@@ -1,9 +1,10 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.spawners;
 
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.stacker.WUnloadedStackedObject;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import org.bukkit.Location;
 

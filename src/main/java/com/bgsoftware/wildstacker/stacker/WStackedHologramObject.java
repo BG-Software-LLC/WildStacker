@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker;
 
 import com.bgsoftware.wildstacker.utils.holograms.Hologram;
 

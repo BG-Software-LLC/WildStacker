@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.tasks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;

@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
-import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.stacker.barrels.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;

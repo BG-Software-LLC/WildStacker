@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.barrels;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
@@ -8,13 +8,13 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.stacker.WStackedHologramObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -289,7 +289,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!StackService.canStackFromThread())
+        if (!Bukkit.isPrimaryThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)

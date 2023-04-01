@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.Keyle.MyPet.api.entity.MyPetBukkitEntity;

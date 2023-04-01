@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedObject;

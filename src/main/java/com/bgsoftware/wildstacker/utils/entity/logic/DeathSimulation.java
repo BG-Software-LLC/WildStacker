@@ -7,7 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;

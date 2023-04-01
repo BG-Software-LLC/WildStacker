@@ -5,7 +5,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
 import com.bgsoftware.wildstacker.nms.entity.NMSEntityEquipmentImpl;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import net.minecraft.server.v1_12_R1.EntityItem;
 import net.minecraft.server.v1_12_R1.EntityLiving;
 import net.minecraft.server.v1_12_R1.ItemStack;

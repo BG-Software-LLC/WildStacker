@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;

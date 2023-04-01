@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import net.aminecraftdev.custombosses.events.BossSpawnEvent;
 import org.bukkit.event.EventHandler;

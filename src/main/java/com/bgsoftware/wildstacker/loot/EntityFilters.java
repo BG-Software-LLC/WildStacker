@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;

@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import me.jet315.minions.events.SlayerSlayEvent;
 import org.bukkit.event.EventHandler;

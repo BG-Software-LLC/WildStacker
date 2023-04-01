@@ -18,13 +18,15 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
-import com.bgsoftware.wildstacker.objects.WStackedBarrel;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
-import com.bgsoftware.wildstacker.objects.WStackedItem;
-import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
-import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.WStackedSnapshot;
+import com.bgsoftware.wildstacker.stacker.barrels.WStackedBarrel;
+import com.bgsoftware.wildstacker.stacker.barrels.WUnloadedStackedBarrel;
+import com.bgsoftware.wildstacker.stacker.entities.WStackedEntity;
+import com.bgsoftware.wildstacker.stacker.items.WStackedItem;
+import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
+import com.bgsoftware.wildstacker.stacker.scheduler.StackerSchedulerManager;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WUnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
@@ -76,6 +78,9 @@ public final class SystemHandler implements SystemManager {
     public static final int ENTITIES_STAGE = (1 << 0);
     public static final int CHUNK_STAGE = (1 << 1);
     public static final int CHUNK_FULL_STAGE = ENTITIES_STAGE | CHUNK_STAGE;
+
+    private final StackerSchedulerManager<WStackedEntity> entitiesSchedulerManager = new StackerSchedulerManager<>();
+//    private final StackerSchedulerManager<WStackedItem> itemsSchedulerManager = new StackerSchedulerManager<>();
 
     private final WildStackerPlugin plugin;
     private final DataHandler dataHandler;
@@ -136,9 +141,12 @@ public final class SystemHandler implements SystemManager {
         if (!EntityUtils.isStackable(livingEntity))
             throw new IllegalArgumentException("Cannot convert " + livingEntity.getType() + " into a stacked entity.");
 
-
-        //Entity wasn't found, creating a new object
-        stackedEntity = new WStackedEntity(livingEntity);
+        // Entity wasn't found, creating a new object.
+        StackerScheduler<WStackedEntity> entityStackerScheduler = this.entitiesSchedulerManager.getSchedulerForChunk(livingEntity.getLocation());
+        if (entityStackerScheduler == null)
+            throw new IllegalStateException("Tried to get a stacked entity but no scheduler was found for its chunk: " +
+                    livingEntity.getWorld().getName() + ", " + (livingEntity.getLocation().getBlockX() >> 4) + ", " + (livingEntity.getLocation().getBlockZ() >> 4));
+        stackedEntity = new WStackedEntity(entityStackerScheduler, livingEntity);
 
         Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
         if (entityData != null) {
@@ -198,7 +206,10 @@ public final class SystemHandler implements SystemManager {
             return stackedItem;
 
         //Item wasn't found, creating a new object.
-        stackedItem = new WStackedItem(item);
+//        StackerScheduler<WStackedItem> itemStackerScheduler = this.itemsSchedulerManager.getSchedulerForChunk(item.getLocation());
+//        if (itemStackerScheduler == null)
+//            throw new IllegalStateException("Tried to get a stacked item but no scheduler was found for its chunk.");
+        stackedItem = new WStackedItem(new StackerScheduler<>(), item);
 
         //Checks if the item still exists after a few ticks
         Executor.sync(() -> {
@@ -789,6 +800,11 @@ public final class SystemHandler implements SystemManager {
 
         boolean atLeast18 = ServerVersion.isAtLeast(ServerVersion.v1_8);
 
+        if(isChunkLoad && isEntitiesLoad) {
+            this.entitiesSchedulerManager.onChunkLoad(chunk);
+//            this.itemsSchedulerManager.onChunkLoad(chunk);
+        }
+
         if (isChunkLoad) {
             loadSpawners(chunk);
             if (atLeast18)
@@ -816,6 +832,9 @@ public final class SystemHandler implements SystemManager {
                     StackedEntity stackedEntity = WStackedEntity.of(entity);
                     stackedEntity.updateNerfed();
                     stackedEntity.updateName();
+                } else if (ItemUtils.isStackable(entity)) {
+                    // This will trigger adding the entity to the scheduler.
+                    StackedItem stackedItem = WStackedItem.of(entity);
                 }
             }
         }
@@ -839,6 +858,11 @@ public final class SystemHandler implements SystemManager {
 
         boolean isChunkLoad = (unloadStage & CHUNK_STAGE) != 0;
         boolean isEntitiesLoad = (unloadStage & ENTITIES_STAGE) != 0;
+
+        if(isChunkLoad && isEntitiesLoad) {
+            this.entitiesSchedulerManager.onChunkUnload(chunk);
+//            this.itemsSchedulerManager.onChunkUnload(chunk);
+        }
 
         if (isEntitiesLoad) {
             for (Entity entity : unloadedEntities) {
@@ -892,6 +916,14 @@ public final class SystemHandler implements SystemManager {
 
     public void setDataSerializer(IDataSerializer dataSerializer) {
         this.dataSerializer = dataSerializer;
+    }
+
+    /*
+     * Schedulers methods
+     */
+    public void stopSchedulers() {
+        this.entitiesSchedulerManager.stopSchedulers();
+//        this.itemsSchedulerManager.stopSchedulers();
     }
 
     private static boolean hasImportantFlags(StackedEntity stackedEntity) {

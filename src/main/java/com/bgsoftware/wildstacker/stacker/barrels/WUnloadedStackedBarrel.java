@@ -1,8 +1,9 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.barrels;
 
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.stacker.WUnloadedStackedObject;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.entities;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
@@ -11,8 +11,10 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.loot.LootTable;
+import com.bgsoftware.wildstacker.stacker.WAsyncStackedObject;
+import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.MergeBox;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
@@ -24,7 +26,6 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -40,8 +41,11 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,19 +54,21 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> implements StackedEntity {
+public final class WStackedEntity extends WAsyncStackedObject<LivingEntity, WStackedEntity> implements StackedEntity {
 
     private final UUID cachedUUID;
     private final int cachedEntityId;
+    private EntityType cachedType;
+
     private List<ItemStack> drops = null;
     private int dropsMultiplier = 1;
     private SpawnCause spawnCause;
     private int spawnerUpgradeId = -1;
     private Predicate<LivingEntity> stackFlag = null;
-    private EntityType cachedType;
 
-    public WStackedEntity(LivingEntity livingEntity) {
-        super(livingEntity, 1);
+    public WStackedEntity(StackerScheduler<WStackedEntity> scheduler, LivingEntity livingEntity) {
+        super(scheduler, livingEntity, 1);
+        scheduler.addStackedObject(this);
         this.cachedUUID = livingEntity.getUniqueId();
         this.cachedEntityId = livingEntity.getEntityId();
         this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
@@ -261,7 +267,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!StackService.canStackFromThread())
+        if (!scheduler.isStackerThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
@@ -611,33 +617,39 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
-        // Should be called sync due to collecting nearby entities
-        if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> runStackAsync(result));
-            return;
-        }
+        scheduler.schedule(() -> {
+            Iterator<WeakReference<WStackedEntity>> nearbyStackedEntityReferences = scheduler.getStackingObjects().iterator();
+            MergeBox mergeBox = new MergeBox(getLocation(), getMergeRadius());
+            List<WStackedEntity> potentialStackableEntities = new LinkedList<>();
 
-        int range = getMergeRadius();
-        Location entityLocation = getLivingEntity().getLocation();
+            while (nearbyStackedEntityReferences.hasNext()) {
+                WStackedEntity nearbyEntity = nearbyStackedEntityReferences.next().get();
 
-        if (range <= 0 || getStackLimit() <= 1) {
-            if (result != null)
-                result.accept(Optional.empty());
-            return;
-        }
+                if (nearbyEntity == null) {
+                    nearbyStackedEntityReferences.remove();
+                    continue;
+                }
 
-        List<StackedEntity> nearbyEntities = EntitiesGetter.getNearbyEntities(entityLocation, range, EntityUtils::isStackable)
-                .map(WStackedEntity::of).filter(stackedEntity -> runStackCheck(stackedEntity) == StackCheckResult.SUCCESS)
-                .collect(Collectors.toList());
+                Location nearbyLocation = nearbyEntity.getLocation();
 
-        if (!nearbyEntities.isEmpty()) {
+                if (mergeBox.isInside(nearbyLocation) && runStackCheck(nearbyEntity) == StackCheckResult.SUCCESS) {
+                    potentialStackableEntities.add(nearbyEntity);
+                }
+            }
+
+            if (potentialStackableEntities.isEmpty()) {
+                if (result != null)
+                    result.accept(Optional.empty());
+                return;
+            }
+
             int minimumStackSize = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this, 1);
-            StackedEntity targetEntity = nearbyEntities.get(0);
+            WStackedEntity targetEntity = potentialStackableEntities.get(0);
 
             if (minimumStackSize > 2) {
                 int totalStackSize = getStackAmount();
 
-                for (StackedEntity stackedEntity : nearbyEntities)
+                for (StackedEntity stackedEntity : potentialStackableEntities)
                     totalStackSize += stackedEntity.getStackAmount();
 
                 if (totalStackSize < minimumStackSize) {
@@ -647,7 +659,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                     return;
                 }
 
-                nearbyEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
+                potentialStackableEntities.forEach(nearbyEntity -> nearbyEntity.runStackAsync(targetEntity, null));
             }
 
             runStackAsync(targetEntity, stackResult -> {
@@ -660,10 +672,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                         result.accept(Optional.of(targetEntity.getLivingEntity()));
                 }
             });
-        } else {
-            if (result != null)
-                result.accept(Optional.empty());
-        }
+        });
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.spawners;
 
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
@@ -8,13 +8,13 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
+import com.bgsoftware.wildstacker.stacker.WStackedHologramObject;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -274,7 +274,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!StackService.canStackFromThread())
+        if (!Bukkit.isPrimaryThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)

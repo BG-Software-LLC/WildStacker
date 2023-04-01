@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.StackedMobSpawner;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_7_R4.world.BlockPosition;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.stacker.spawners.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;

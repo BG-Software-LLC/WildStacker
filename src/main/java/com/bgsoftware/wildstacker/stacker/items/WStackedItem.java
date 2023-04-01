@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.objects;
+package com.bgsoftware.wildstacker.stacker.items;
 
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
@@ -6,6 +6,8 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.stacker.WAsyncStackedObject;
+import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -13,7 +15,6 @@ import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("WeakerAccess")
-public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
+public final class WStackedItem extends WAsyncStackedObject<Item, WStackedItem> implements StackedItem {
 
     private static final Pattern DISPLAY_NAME_PLACEHOLDER = Pattern.compile(Pattern.quote("{0}"));
 
@@ -41,12 +42,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     private final int cachedEntityId;
     private String mmoItemName = null;
 
-    public WStackedItem(Item item) {
-        this(item, item.getItemStack().getAmount());
+    public WStackedItem(StackerScheduler<WStackedItem> scheduler, Item item) {
+        this(scheduler, item, item.getItemStack().getAmount());
     }
 
-    public WStackedItem(Item item, int stackAmount) {
-        super(item, stackAmount);
+    public WStackedItem(StackerScheduler<WStackedItem> scheduler, Item item, int stackAmount) {
+        super(scheduler, item, stackAmount);
+        scheduler.addStackedObject(this);
         cachedUUID = item.getUniqueId();
         cachedEntityId = item.getEntityId();
     }
@@ -221,7 +223,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!StackService.canStackFromThread())
+        if (!scheduler.isStackerThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
@@ -313,7 +315,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void giveItemStack(Inventory inventory) {
-        if(isRemoved())
+        if (isRemoved())
             return;
 
         ItemStack itemStack = getItemStack();
@@ -430,7 +432,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         return String.format("StackedItem{uuid=%s,amount=%s,item=%s}", getUniqueId(), getStackAmount(), object.getItemStack());
     }
 
-    public boolean isRemoved(){
+    public boolean isRemoved() {
         return EntityStorage.hasMetadata(object, EntityFlag.REMOVED_ENTITY);
     }
 
