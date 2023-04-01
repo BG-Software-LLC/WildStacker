@@ -566,7 +566,7 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
     }
 
     @Override
-    public void enterVehicle(Vehicle vehicle, org.bukkit.entity.Entity entity) {
+    public void enterVehicle(org.bukkit.entity.Entity vehicle, org.bukkit.entity.Entity entity) {
         vehicle.setPassenger(entity);
     }
 

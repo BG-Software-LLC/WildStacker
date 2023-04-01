@@ -41,6 +41,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class DeathSimulation {
@@ -290,6 +291,9 @@ public final class DeathSimulation {
 
         if (zombieVillager == null)
             return false;
+
+        Optional.ofNullable(livingEntity.getVehicle()).ifPresent(vehicle ->
+                plugin.getNMSEntities().enterVehicle(vehicle, zombieVillager));
 
         StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
 
