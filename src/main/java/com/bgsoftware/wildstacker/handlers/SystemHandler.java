@@ -31,6 +31,7 @@ import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Holder;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.data.DataSerializer;
@@ -79,7 +80,7 @@ public final class SystemHandler implements SystemManager {
     public static final int CHUNK_STAGE = (1 << 1);
     public static final int CHUNK_FULL_STAGE = ENTITIES_STAGE | CHUNK_STAGE;
 
-    private final StackerSchedulerManager<WStackedEntity> entitiesSchedulerManager = new StackerSchedulerManager<>();
+    private final StackerSchedulerManager<WStackedEntity> entitiesSchedulerManager;
 //    private final StackerSchedulerManager<WStackedItem> itemsSchedulerManager = new StackerSchedulerManager<>();
 
     private final WildStackerPlugin plugin;
@@ -98,6 +99,7 @@ public final class SystemHandler implements SystemManager {
         this.plugin = plugin;
         this.dataHandler = plugin.getDataHandler();
         this.dataSerializer = new DataSerializer_Default(plugin);
+        this.entitiesSchedulerManager = new StackerSchedulerManager<>(plugin);
 
         //Start all required tasks
         Executor.sync(() -> {
@@ -142,7 +144,7 @@ public final class SystemHandler implements SystemManager {
             throw new IllegalArgumentException("Cannot convert " + livingEntity.getType() + " into a stacked entity.");
 
         // Entity wasn't found, creating a new object.
-        StackerScheduler<WStackedEntity> entityStackerScheduler = this.entitiesSchedulerManager.getSchedulerForChunk(livingEntity.getLocation());
+        Holder<StackerScheduler<WStackedEntity>> entityStackerScheduler = this.entitiesSchedulerManager.getSchedulerForChunk(livingEntity.getLocation());
         if (entityStackerScheduler == null)
             throw new IllegalStateException("Tried to get a stacked entity but no scheduler was found for its chunk: " +
                     livingEntity.getWorld().getName() + ", " + (livingEntity.getLocation().getBlockX() >> 4) + ", " + (livingEntity.getLocation().getBlockZ() >> 4));
@@ -209,7 +211,7 @@ public final class SystemHandler implements SystemManager {
 //        StackerScheduler<WStackedItem> itemStackerScheduler = this.itemsSchedulerManager.getSchedulerForChunk(item.getLocation());
 //        if (itemStackerScheduler == null)
 //            throw new IllegalStateException("Tried to get a stacked item but no scheduler was found for its chunk.");
-        stackedItem = new WStackedItem(new StackerScheduler<>(), item);
+        stackedItem = new WStackedItem(new Holder<>(new StackerScheduler<>()), item);
 
         //Checks if the item still exists after a few ticks
         Executor.sync(() -> {
@@ -800,7 +802,7 @@ public final class SystemHandler implements SystemManager {
 
         boolean atLeast18 = ServerVersion.isAtLeast(ServerVersion.v1_8);
 
-        if(isChunkLoad && isEntitiesLoad) {
+        if (isChunkLoad && isEntitiesLoad) {
             this.entitiesSchedulerManager.onChunkLoad(chunk);
 //            this.itemsSchedulerManager.onChunkLoad(chunk);
         }
@@ -859,7 +861,7 @@ public final class SystemHandler implements SystemManager {
         boolean isChunkLoad = (unloadStage & CHUNK_STAGE) != 0;
         boolean isEntitiesLoad = (unloadStage & ENTITIES_STAGE) != 0;
 
-        if(isChunkLoad && isEntitiesLoad) {
+        if (isChunkLoad && isEntitiesLoad) {
             this.entitiesSchedulerManager.onChunkUnload(chunk);
 //            this.itemsSchedulerManager.onChunkUnload(chunk);
         }
@@ -924,6 +926,10 @@ public final class SystemHandler implements SystemManager {
     public void stopSchedulers() {
         this.entitiesSchedulerManager.stopSchedulers();
 //        this.itemsSchedulerManager.stopSchedulers();
+    }
+
+    public StackerSchedulerManager<WStackedEntity> getEntitiesSchedulerManager() {
+        return entitiesSchedulerManager;
     }
 
     private static boolean hasImportantFlags(StackedEntity stackedEntity) {

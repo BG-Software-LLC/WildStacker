@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.stacker.WAsyncStackedObject;
 import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.Holder;
 import com.bgsoftware.wildstacker.utils.MergeBox;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -66,9 +67,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity, WSta
     private int spawnerUpgradeId = -1;
     private Predicate<LivingEntity> stackFlag = null;
 
-    public WStackedEntity(StackerScheduler<WStackedEntity> scheduler, LivingEntity livingEntity) {
+    public WStackedEntity(Holder<StackerScheduler<WStackedEntity>> scheduler, LivingEntity livingEntity) {
         super(scheduler, livingEntity, 1);
-        scheduler.addStackedObject(this);
+        scheduler.getHandle().addStackedObject(this);
         this.cachedUUID = livingEntity.getUniqueId();
         this.cachedEntityId = livingEntity.getEntityId();
         this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
@@ -267,7 +268,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity, WSta
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!scheduler.isStackerThread())
+        if (!scheduler.getHandle().isStackerThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)
@@ -617,8 +618,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity, WSta
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
-        scheduler.schedule(() -> {
-            Iterator<WeakReference<WStackedEntity>> nearbyStackedEntityReferences = scheduler.getStackingObjects().iterator();
+        scheduler.getHandle().schedule(() -> {
+            Iterator<WeakReference<WStackedEntity>> nearbyStackedEntityReferences = scheduler.getHandle().getStackingObjects().iterator();
             MergeBox mergeBox = new MergeBox(getLocation(), getMergeRadius());
             List<WStackedEntity> potentialStackableEntities = new LinkedList<>();
 

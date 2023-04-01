@@ -4,17 +4,18 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.objects.AsyncStackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
+import com.bgsoftware.wildstacker.utils.Holder;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public abstract class WAsyncStackedObject<T, R extends WStackedObject<?>> extends WStackedObject<T> implements AsyncStackedObject<T> {
+public abstract class WAsyncStackedObject<T, R extends IScheduledStackedObject> extends WStackedObject<T> implements AsyncStackedObject<T>, IScheduledStackedObject {
 
-    protected final StackerScheduler<R> scheduler;
+    protected final Holder<StackerScheduler<R>> scheduler;
 
-    protected WAsyncStackedObject(StackerScheduler<R> scheduler, T object, int stackAmount) {
+    protected WAsyncStackedObject(Holder<StackerScheduler<R>> scheduler, T object, int stackAmount) {
         super(object, stackAmount);
         this.scheduler = scheduler;
     }
@@ -23,7 +24,7 @@ public abstract class WAsyncStackedObject<T, R extends WStackedObject<?>> extend
 
     @Override
     public void runStackAsync(StackedObject stackedObject, Consumer<StackResult> stackResultCallback) {
-        scheduler.schedule(() -> {
+        scheduler.getHandle().schedule(() -> {
             StackResult stackResult = runStack(stackedObject);
             if (stackResultCallback != null)
                 stackResultCallback.accept(stackResult);
@@ -32,8 +33,8 @@ public abstract class WAsyncStackedObject<T, R extends WStackedObject<?>> extend
 
     @Override
     public void runStackAsync(Consumer<Optional<T>> result) {
-        scheduler.schedule(() -> {
-            Iterator<WeakReference<R>> stackedObjects = scheduler.getStackingObjects().iterator();
+        scheduler.getHandle().schedule(() -> {
+            Iterator<WeakReference<R>> stackedObjects = scheduler.getHandle().getStackingObjects().iterator();
 
             while (stackedObjects.hasNext()) {
                 WeakReference<R> weakStackedReference = stackedObjects.next();

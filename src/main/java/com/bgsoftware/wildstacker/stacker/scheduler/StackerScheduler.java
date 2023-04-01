@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.stacker.scheduler;
 
-import com.bgsoftware.wildstacker.stacker.WStackedObject;
+import com.bgsoftware.wildstacker.stacker.IScheduledStackedObject;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class StackerScheduler<T extends WStackedObject<?>> {
+public class StackerScheduler<T extends IScheduledStackedObject> {
 
     private static final AtomicInteger schedulerIdGenerator = new AtomicInteger(0);
 
@@ -20,11 +20,10 @@ public class StackerScheduler<T extends WStackedObject<?>> {
 
     private final List<WeakReference<T>> stackingObjects = new LinkedList<>();
     private final Lock schedulerLock = new ReentrantLock();
-    private final AtomicInteger refCount = new AtomicInteger(0);
     private boolean stopped = false;
 
     public StackerScheduler() {
-        addRefCount();
+
     }
 
     public void addStackedObject(T object) {
@@ -61,22 +60,6 @@ public class StackerScheduler<T extends WStackedObject<?>> {
         return this.stackingObjects;
     }
 
-    public boolean checkInactive() {
-        return stopped || refCount.get() <= 0;
-    }
-
-    public void addRefCount() {
-        ensureActive("Called addRefCount on an already stopped scheduler");
-        this.refCount.incrementAndGet();
-    }
-
-    public void removeRefCount() {
-        ensureActive("Called removeRefCount on an already stopped scheduler");
-        int newRefCount = this.refCount.decrementAndGet();
-        if (newRefCount <= 0)
-            stop();
-    }
-
     public boolean isStackerThread() {
         Thread current = Thread.currentThread();
         return current instanceof StackerThread && ((StackerThread) current).id == schedulerId;
@@ -94,9 +77,7 @@ public class StackerScheduler<T extends WStackedObject<?>> {
                 this.executor = null;
             }
 
-            this.stopped = true;
-
-            scheduler.addRefCount();
+            markStopped();
         } finally {
             this.schedulerLock.unlock();
         }
@@ -104,7 +85,7 @@ public class StackerScheduler<T extends WStackedObject<?>> {
 
     public void stop() {
         if (!this.stopped) {
-            this.stopped = true;
+            markStopped();
             if (this.executor != null) {
                 this.executor.shutdownNow();
                 this.executor = null;
@@ -116,6 +97,14 @@ public class StackerScheduler<T extends WStackedObject<?>> {
         return stopped;
     }
 
+    public boolean isScheduling() {
+        return !isStopped() && this.executor != null;
+    }
+
+    private void markStopped() {
+        this.stopped = true;
+    }
+
     private void ensureActive(String message) {
         if (this.stopped)
             throw new IllegalStateException(message);
@@ -124,13 +113,17 @@ public class StackerScheduler<T extends WStackedObject<?>> {
     private ExecutorService getExecutor() {
         if (this.executor == null) {
             this.executor = Executors.newSingleThreadExecutor(task -> {
-                StackerThread stackerThread = new StackerThread(task, schedulerId);
-                stackerThread.setName("StackerScheduler Thread #" + schedulerId);
+                StackerThread stackerThread = new StackerThread(task, this.schedulerId);
+                stackerThread.setName("StackerScheduler Thread #" + this.schedulerId);
                 return stackerThread;
             });
         }
 
         return this.executor;
+    }
+
+    public int getId() {
+        return this.schedulerId;
     }
 
     private static class StackerThread extends Thread {

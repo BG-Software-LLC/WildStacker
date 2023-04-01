@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.stacker.WAsyncStackedObject;
 import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
+import com.bgsoftware.wildstacker.utils.Holder;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -42,13 +43,13 @@ public final class WStackedItem extends WAsyncStackedObject<Item, WStackedItem> 
     private final int cachedEntityId;
     private String mmoItemName = null;
 
-    public WStackedItem(StackerScheduler<WStackedItem> scheduler, Item item) {
+    public WStackedItem(Holder<StackerScheduler<WStackedItem>> scheduler, Item item) {
         this(scheduler, item, item.getItemStack().getAmount());
     }
 
-    public WStackedItem(StackerScheduler<WStackedItem> scheduler, Item item, int stackAmount) {
+    public WStackedItem(Holder<StackerScheduler<WStackedItem>> scheduler, Item item, int stackAmount) {
         super(scheduler, item, stackAmount);
-        scheduler.addStackedObject(this);
+        scheduler.getHandle().addStackedObject(this);
         cachedUUID = item.getUniqueId();
         cachedEntityId = item.getEntityId();
     }
@@ -223,7 +224,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item, WStackedItem> 
 
     @Override
     public StackResult runStack(StackedObject stackedObject) {
-        if (!scheduler.isStackerThread())
+        if (!scheduler.getHandle().isStackerThread())
             return StackResult.THREAD_CATCHER;
 
         if (runStackCheck(stackedObject) != StackCheckResult.SUCCESS)

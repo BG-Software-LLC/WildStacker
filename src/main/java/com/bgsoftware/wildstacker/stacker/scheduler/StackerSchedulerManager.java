@@ -1,88 +1,112 @@
 package com.bgsoftware.wildstacker.stacker.scheduler;
 
-import com.bgsoftware.wildstacker.stacker.WStackedObject;
+import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.stacker.IScheduledStackedObject;
+import com.bgsoftware.wildstacker.utils.Holder;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitTask;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-public class StackerSchedulerManager<T extends WStackedObject<?>> {
+public class StackerSchedulerManager<T extends IScheduledStackedObject> {
 
-    private final Map<UUID, Map<Long, SchedulerEntry>> schedulers = new HashMap<>();
+    private final Map<UUID, Map<Long, Holder<StackerScheduler<T>>>> schedulers = new HashMap<>();
+    private BukkitTask cleanTask;
     private boolean stopped = false;
 
-    public StackerSchedulerManager() {
-
+    public StackerSchedulerManager(WildStackerPlugin plugin) {
+        this.cleanTask = Bukkit.getScheduler().runTaskTimer(plugin, this::checkSchedulers, 20 * 300L, 20 * 300L);
     }
 
-    @Nullable
-    public StackerScheduler<T> getSchedulerForChunk(Location location) {
+    public Holder<StackerScheduler<T>> getSchedulerForChunk(Location location) {
         ensureActive("Called getSchedulerForChunk on an already stopped scheduler manager.");
+        return getSchedulerForChunk(location, true);
+    }
 
+    private Holder<StackerScheduler<T>> getSchedulerForChunk(Location location, boolean runChunkLoadIfNotExists) {
         UUID worldUUID = location.getWorld().getUID();
 
-        Map<Long, SchedulerEntry> worldSchedulers = schedulers.get(worldUUID);
-        if (worldSchedulers == null)
-            return null;
+        Map<Long, Holder<StackerScheduler<T>>> worldSchedulers = schedulers.get(worldUUID);
 
-        SchedulerEntry schedulerEntry = worldSchedulers.get(pair(location.getBlockX() >> 4, location.getBlockZ() >> 4));
+        int chunkX = location.getBlockX() >> 4;
+        int chunkZ = location.getBlockZ() >> 4;
 
-        return schedulerEntry == null ? null : schedulerEntry.scheduler;
+        if (worldSchedulers != null) {
+            Holder<StackerScheduler<T>> schedulerHolder = worldSchedulers.get(pair(chunkX, chunkZ));
+            if (schedulerHolder != null && !schedulerHolder.getHandle().isStopped())
+                return schedulerHolder;
+        }
+
+        if (!runChunkLoadIfNotExists)
+            throw new IllegalStateException("Tried to get chunk scheduler on a chunk that does not exist: " + location.getWorld().getName() + ", " + chunkX + ", " + chunkZ);
+
+        onChunkLoadInternal(location.getWorld(), chunkX, chunkZ);
+
+        return getSchedulerForChunk(location, false);
     }
 
     public void onChunkLoad(Chunk chunk) {
         ensureActive("Called onChunkLoad on an already stopped scheduler manager.");
+        onChunkLoadInternal(chunk.getWorld(), chunk.getX(), chunk.getZ());
+    }
 
-        Map<Long, SchedulerEntry> worldSchedulers = schedulers.get(chunk.getWorld().getUID());
+    private void onChunkLoadInternal(World world, int chunkX, int chunkZ) {
+        Map<Long, Holder<StackerScheduler<T>>> worldSchedulers = schedulers.get(world.getUID());
+
+        long chunkCoords = pair(chunkX, chunkZ);
 
         if (worldSchedulers == null) {
             worldSchedulers = new HashMap<>();
-            schedulers.put(chunk.getWorld().getUID(), worldSchedulers);
-            long chunkCoords = pair(chunk.getX(), chunk.getZ());
-            worldSchedulers.put(chunkCoords, new SchedulerEntry(chunkCoords, new StackerScheduler<>()));
+            schedulers.put(world.getUID(), worldSchedulers);
+            StackerScheduler<T> scheduler = new StackerScheduler<>();
+            worldSchedulers.put(chunkCoords, new Holder<>(scheduler));
             return;
         }
 
-        long chunkCoords = pair(chunk.getX(), chunk.getZ());
-        if (worldSchedulers.get(chunkCoords) != null)
-            return;
+        Holder<StackerScheduler<T>> chunkScheduler = worldSchedulers.get(chunkCoords);
 
+        if (chunkScheduler != null) {
+            if (!chunkScheduler.getHandle().isStopped())
+                return;
+            chunkScheduler = null;
+        }
 
         // We look for nearby schedulers of the chunk.
-        SchedulerEntry chunkEntry = null;
-
-        for (int chunkX = -1; chunkX <= 1; ++chunkX) {
-            for (int chunkZ = -1; chunkZ <= 1; ++chunkZ) {
-                SchedulerEntry nearbyChunkEntry = worldSchedulers.get(pair(chunk.getX() + chunkX, chunk.getZ() + chunkZ));
-                if (nearbyChunkEntry != null && !nearbyChunkEntry.scheduler.isStopped()) {
-                    chunkEntry = nearbyChunkEntry;
+        for (int chunkXOffset = -1; chunkXOffset <= 1; ++chunkXOffset) {
+            for (int chunkZOffset = -1; chunkZOffset <= 1; ++chunkZOffset) {
+                long nearbyChunkCoords = pair(chunkX + chunkXOffset, chunkZ + chunkZOffset);
+                Holder<StackerScheduler<T>> nearbyChunkScheduler = worldSchedulers.get(nearbyChunkCoords);
+                if (nearbyChunkScheduler != null && !nearbyChunkScheduler.getHandle().isStopped()) {
+                    chunkScheduler = nearbyChunkScheduler;
                     break;
                 }
             }
         }
 
-        if (chunkEntry == null) {
-            chunkEntry = new SchedulerEntry(chunkCoords, new StackerScheduler<>());
+        if (chunkScheduler == null) {
+            chunkScheduler = new Holder<>(new StackerScheduler<>());
         }
 
         // We change all neighbors to have the same scheduler.
-        for (int chunkX = -1; chunkX <= 1; ++chunkX) {
-            for (int chunkZ = -1; chunkZ <= 1; ++chunkZ) {
-                long nearbyChunkCoords = pair(chunk.getX() + chunkX, chunk.getZ() + chunkZ);
-                SchedulerEntry nearbyChunkEntry = worldSchedulers.get(nearbyChunkCoords);
+        for (int chunkXOffset = -1; chunkXOffset <= 1; ++chunkXOffset) {
+            for (int chunkZOffset = -1; chunkZOffset <= 1; ++chunkZOffset) {
+                long nearbyChunkCoords = pair(chunkX + chunkXOffset, chunkZ + chunkZOffset);
+                Holder<StackerScheduler<T>> nearbyChunkScheduler = worldSchedulers.get(nearbyChunkCoords);
                 // We want to update the nearby chunk with the new scheduler
-                if (nearbyChunkEntry == null) {
-                    worldSchedulers.put(nearbyChunkCoords, new SchedulerEntry(nearbyChunkCoords, chunkEntry.scheduler));
-                    chunkEntry.scheduler.addRefCount();
-                } else if (nearbyChunkEntry.scheduler != chunkEntry.scheduler) {
-                    StackerScheduler<T> oldScheduler = nearbyChunkEntry.setScheduler(chunkEntry.scheduler);
+                if (nearbyChunkScheduler == null) {
+                    worldSchedulers.put(nearbyChunkCoords, chunkScheduler);
+                } else if (nearbyChunkScheduler.getHandle() != chunkScheduler.getHandle()) {
+                    StackerScheduler<T> oldScheduler = nearbyChunkScheduler.setHandle(chunkScheduler.getHandle());
                     if (!oldScheduler.isStopped()) {
-                        oldScheduler.mergeInto(chunkEntry.scheduler);
+                        oldScheduler.mergeInto(chunkScheduler.getHandle());
                     }
                 }
             }
@@ -92,27 +116,58 @@ public class StackerSchedulerManager<T extends WStackedObject<?>> {
     public void onChunkUnload(Chunk chunk) {
         ensureActive("Called onChunkUnload on an already stopped scheduler manager.");
 
-        Map<Long, SchedulerEntry> worldSchedulers = schedulers.get(chunk.getWorld().getUID());
+        Map<Long, Holder<StackerScheduler<T>>> worldSchedulers = schedulers.get(chunk.getWorld().getUID());
         if (worldSchedulers != null) {
-            SchedulerEntry schedulerEntry = worldSchedulers.remove(pair(chunk.getX(), chunk.getZ()));
-            if (schedulerEntry != null)
-                schedulerEntry.scheduler.removeRefCount();
+            long chunkCoords = pair(chunk.getX(), chunk.getZ());
+            worldSchedulers.remove(chunkCoords);
         }
     }
 
-    public void checkSchedulers() {
+    private void checkSchedulers() {
         ensureActive("Called checkSchedulers on an already stopped scheduler manager.");
 
         this.schedulers.values().forEach(worldSchedulers -> {
-            Iterator<Map.Entry<Long, SchedulerEntry>> worldSchedulersIterator = worldSchedulers.entrySet().iterator();
+            Iterator<Map.Entry<Long, Holder<StackerScheduler<T>>>> worldSchedulersIterator = worldSchedulers.entrySet().iterator();
             while (worldSchedulersIterator.hasNext()) {
-                Map.Entry<Long, SchedulerEntry> entry = worldSchedulersIterator.next();
-                SchedulerEntry schedulerEntry = entry.getValue();
-                if (schedulerEntry.scheduler.checkInactive()) {
+                Map.Entry<Long, Holder<StackerScheduler<T>>> entry = worldSchedulersIterator.next();
+                Holder<StackerScheduler<T>> scheduler = entry.getValue();
+                if (scheduler.getHandle().isStopped()) {
                     worldSchedulersIterator.remove();
                 }
             }
         });
+    }
+
+    public int getScheduledSchedulers() {
+        Set<StackerScheduler<T>> schedulers = new LinkedHashSet<>();
+
+        this.schedulers.values().forEach(worldSchedulers -> worldSchedulers.values().forEach(schedulerHolder -> {
+            schedulers.add(schedulerHolder.getHandle());
+        }));
+
+        int count = 0;
+        for (StackerScheduler<T> scheduler : schedulers) {
+            if (scheduler.isScheduling())
+                ++count;
+        }
+
+        return count;
+    }
+
+    public int getActiveSchedulers() {
+        Set<StackerScheduler<T>> schedulers = new LinkedHashSet<>();
+
+        this.schedulers.values().forEach(worldSchedulers -> worldSchedulers.values().forEach(schedulerHolder -> {
+            schedulers.add(schedulerHolder.getHandle());
+        }));
+
+        int count = 0;
+        for (StackerScheduler<T> scheduler : schedulers) {
+            if (!scheduler.isStopped())
+                ++count;
+        }
+
+        return count;
     }
 
     public void stopSchedulers() {
@@ -120,9 +175,14 @@ public class StackerSchedulerManager<T extends WStackedObject<?>> {
             return;
 
         this.stopped = true;
-        this.schedulers.values().forEach(worldSchedulers -> worldSchedulers.values().forEach(schedulerEntry -> {
-            schedulerEntry.scheduler.stop();
-        }));
+
+        if (this.cleanTask != null) {
+            this.cleanTask.cancel();
+            this.cleanTask = null;
+        }
+
+        this.schedulers.values().forEach(worldSchedulers -> worldSchedulers.values().forEach(
+                schedulerHolder -> schedulerHolder.getHandle().stop()));
     }
 
     private void ensureActive(String message) {
@@ -132,29 +192,6 @@ public class StackerSchedulerManager<T extends WStackedObject<?>> {
 
     private static long pair(int x, int z) {
         return ((long) z << 32 | x);
-    }
-
-    private static String chunkCoords(World world, long pair) {
-        int chunkX = (int) pair;
-        int chunkZ = (int) (pair >> 32);
-        return world.getName() + ", " + chunkX + ", " + chunkZ;
-    }
-
-    private class SchedulerEntry {
-
-        private final long chunkCoords;
-        private StackerScheduler<T> scheduler;
-
-        SchedulerEntry(long chunkCoords, StackerScheduler<T> scheduler) {
-            this.chunkCoords = chunkCoords;
-            this.scheduler = scheduler;
-        }
-
-        public StackerScheduler<T> setScheduler(StackerScheduler<T> newScheduler) {
-            StackerScheduler<T> oldScheduler = this.scheduler;
-            this.scheduler = newScheduler;
-            return oldScheduler;
-        }
     }
 
 }

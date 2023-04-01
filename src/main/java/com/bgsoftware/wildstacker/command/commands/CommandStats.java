@@ -57,8 +57,12 @@ public final class CommandStats implements ICommand {
         for (Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
             barrelsUnloadedAmount += map.size();
 
+        int activeEntitySchedulers = plugin.getSystemManager().getEntitiesSchedulerManager().getActiveSchedulers();
+        int scheduledEntitySchedulers = plugin.getSystemManager().getEntitiesSchedulerManager().getScheduledSchedulers();
+
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + unloadedEntitiesAmount + ")" +
+                "\n&e - Entity Schedulers: (Active: " + activeEntitySchedulers + ", Scheduled: " + scheduledEntitySchedulers + ")" +
                 "\n&e - Stacked Items: (Loaded: " + itemsAmount + ", Unloaded: " + unloadedItemsAmount + ")" +
                 "\n&e - Stacked Spawners: (Loaded: " + spawnersAmount + ", Unloaded: " + spawnersUnloadedAmount + ")" +
                 "\n&e - Stacked Barrels: (Loaded: " + barrelsAmount + ", Unloaded: " + barrelsUnloadedAmount + ")";
