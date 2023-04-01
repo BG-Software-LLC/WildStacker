@@ -107,7 +107,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         log("Shutting down stacking service...");
-
         systemManager.stopSchedulers();
 
         if (shouldEnable) {
@@ -127,6 +126,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             //We need to close the connection
             dataHandler.clearDatabase();
         }
+
+        systemManager.stopSchedulers();
 
         log("Stopping executor...");
 

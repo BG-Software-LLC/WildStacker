@@ -170,6 +170,10 @@ public class StackerSchedulerManager<T extends IScheduledStackedObject> {
         return count;
     }
 
+    public boolean isStopped() {
+        return this.stopped;
+    }
+
     public void stopSchedulers() {
         if (stopped)
             return;

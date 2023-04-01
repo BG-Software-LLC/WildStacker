@@ -800,7 +800,7 @@ public final class SystemHandler implements SystemManager {
 
         if (isChunkLoad && isEntitiesLoad) {
             this.entitiesSchedulerManager.onChunkLoad(chunk);
-//            this.itemsSchedulerManager.onChunkLoad(chunk);
+            this.itemsSchedulerManager.onChunkLoad(chunk);
         }
 
         if (isChunkLoad) {
@@ -858,8 +858,10 @@ public final class SystemHandler implements SystemManager {
         boolean isEntitiesLoad = (unloadStage & ENTITIES_STAGE) != 0;
 
         if (isChunkLoad && isEntitiesLoad) {
-            this.entitiesSchedulerManager.onChunkUnload(chunk);
-//            this.itemsSchedulerManager.onChunkUnload(chunk);
+            if (!this.entitiesSchedulerManager.isStopped())
+                this.entitiesSchedulerManager.onChunkUnload(chunk);
+            if (!this.itemsSchedulerManager.isStopped())
+                this.itemsSchedulerManager.onChunkUnload(chunk);
         }
 
         if (isEntitiesLoad) {
