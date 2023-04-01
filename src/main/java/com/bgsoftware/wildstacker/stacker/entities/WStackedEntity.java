@@ -618,9 +618,17 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity, WSta
 
     @Override
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
+        int mergeRadius = getMergeRadius();
+
+        if (mergeRadius <= 0 || getStackLimit() <= 1) {
+            if (result != null)
+                result.accept(Optional.empty());
+            return;
+        }
+
         scheduler.getHandle().schedule(() -> {
             Iterator<WeakReference<WStackedEntity>> nearbyStackedEntityReferences = scheduler.getHandle().getStackingObjects().iterator();
-            MergeBox mergeBox = new MergeBox(getLocation(), getMergeRadius());
+            MergeBox mergeBox = new MergeBox(getLocation(), mergeRadius);
             List<WStackedEntity> potentialStackableEntities = new LinkedList<>();
 
             while (nearbyStackedEntityReferences.hasNext()) {

@@ -9,14 +9,13 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.stacker.WAsyncStackedObject;
 import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
 import com.bgsoftware.wildstacker.utils.Holder;
+import com.bgsoftware.wildstacker.utils.MergeBox;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -28,6 +27,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.lang.ref.WeakReference;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -378,31 +379,48 @@ public final class WStackedItem extends WAsyncStackedObject<Item, WStackedItem> 
 
     @Override
     public void runStackAsync(Consumer<Optional<Item>> result) {
-        int range = getMergeRadius();
+        int mergeRadius = getMergeRadius();
 
-        if (range <= 0 || getStackLimit() <= 1) {
+        if (mergeRadius <= 0 || getStackLimit() <= 1) {
             if (result != null)
                 result.accept(Optional.empty());
             return;
         }
 
-        // Should be called sync due to collecting nearby entities
-        if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> runStackAsync(result));
-            return;
-        }
+        scheduler.getHandle().schedule(() -> {
+            Iterator<WeakReference<WStackedItem>> nearbyStackedItemReferences = scheduler.getHandle().getStackingObjects().iterator();
+            MergeBox mergeBox = new MergeBox(getLocation(), mergeRadius);
+            WStackedItem targetItem = null;
 
-        Location itemLocation = getItem().getLocation();
-        Optional<StackedItem> itemOptional = EntitiesGetter.getNearbyEntities(itemLocation, range, ItemUtils::isStackable)
-                .map(entity -> WStackedItem.ofBypass((Item) entity))
-                .filter(stackedItem -> runStackCheck(stackedItem) == StackCheckResult.SUCCESS)
-                .findFirst();
+            while (nearbyStackedItemReferences.hasNext()) {
+                WStackedItem nearbyItem = nearbyStackedItemReferences.next().get();
 
-        if (itemOptional.isPresent()) {
-            runStackAsync(itemOptional.get(), stackResult -> {
+                if (nearbyItem == null) {
+                    nearbyStackedItemReferences.remove();
+                    continue;
+                }
+
+                Location nearbyLocation = nearbyItem.getLocation();
+
+                if (mergeBox.isInside(nearbyLocation) && runStackCheck(nearbyItem) == StackCheckResult.SUCCESS) {
+                    targetItem = nearbyItem;
+                    break;
+                }
+            }
+
+            if (targetItem == null) {
+                updateName();
+                if (result != null)
+                    result.accept(Optional.empty());
+                return;
+            }
+
+            Item item = targetItem.getItem();
+
+            runStackAsync(targetItem, stackResult -> {
                 if (stackResult == StackResult.SUCCESS) {
                     if (result != null)
-                        result.accept(itemOptional.map(StackedItem::getItem));
+                        result.accept(Optional.of(item));
                 } else {
                     updateName();
 
@@ -410,12 +428,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item, WStackedItem> 
                         result.accept(Optional.empty());
                 }
             });
-        } else {
-            updateName();
-
-            if (result != null)
-                result.accept(Optional.empty());
-        }
+        });
     }
 
     @Override

@@ -42,28 +42,31 @@ public final class CommandStats implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size(),
-                unloadedEntitiesAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size(),
-                itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size(),
-                unloadedItemsAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size(),
-                spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size(),
-                barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size();
+        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size();
+        int unloadedEntitiesAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size();
+        int itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size();
+        int unloadedItemsAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size();
+        int spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size();
+        int barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size();
 
-        int spawnersUnloadedAmount = 0, barrelsUnloadedAmount = 0;
-
+        int spawnersUnloadedAmount = 0;
         for (Map<?, ?> map : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
             spawnersUnloadedAmount += map.size();
 
+        int barrelsUnloadedAmount = 0;
         for (Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
             barrelsUnloadedAmount += map.size();
 
         int activeEntitySchedulers = plugin.getSystemManager().getEntitiesSchedulerManager().getActiveSchedulers();
         int scheduledEntitySchedulers = plugin.getSystemManager().getEntitiesSchedulerManager().getScheduledSchedulers();
+        int activeItemSchedulers = plugin.getSystemManager().getItemsSchedulerManager().getActiveSchedulers();
+        int scheduledItemSchedulers = plugin.getSystemManager().getItemsSchedulerManager().getScheduledSchedulers();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + unloadedEntitiesAmount + ")" +
                 "\n&e - Entity Schedulers: (Active: " + activeEntitySchedulers + ", Scheduled: " + scheduledEntitySchedulers + ")" +
                 "\n&e - Stacked Items: (Loaded: " + itemsAmount + ", Unloaded: " + unloadedItemsAmount + ")" +
+                "\n&e - Item Schedulers: (Active: " + activeItemSchedulers + ", Scheduled: " + scheduledItemSchedulers + ")" +
                 "\n&e - Stacked Spawners: (Loaded: " + spawnersAmount + ", Unloaded: " + spawnersUnloadedAmount + ")" +
                 "\n&e - Stacked Barrels: (Loaded: " + barrelsAmount + ", Unloaded: " + barrelsUnloadedAmount + ")";
 

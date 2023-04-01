@@ -81,7 +81,7 @@ public final class SystemHandler implements SystemManager {
     public static final int CHUNK_FULL_STAGE = ENTITIES_STAGE | CHUNK_STAGE;
 
     private final StackerSchedulerManager<WStackedEntity> entitiesSchedulerManager;
-//    private final StackerSchedulerManager<WStackedItem> itemsSchedulerManager = new StackerSchedulerManager<>();
+    private final StackerSchedulerManager<WStackedItem> itemsSchedulerManager;
 
     private final WildStackerPlugin plugin;
     private final DataHandler dataHandler;
@@ -100,6 +100,7 @@ public final class SystemHandler implements SystemManager {
         this.dataHandler = plugin.getDataHandler();
         this.dataSerializer = new DataSerializer_Default(plugin);
         this.entitiesSchedulerManager = new StackerSchedulerManager<>(plugin);
+        this.itemsSchedulerManager = new StackerSchedulerManager<>(plugin);
 
         //Start all required tasks
         Executor.sync(() -> {
@@ -145,9 +146,6 @@ public final class SystemHandler implements SystemManager {
 
         // Entity wasn't found, creating a new object.
         Holder<StackerScheduler<WStackedEntity>> entityStackerScheduler = this.entitiesSchedulerManager.getSchedulerForChunk(livingEntity.getLocation());
-        if (entityStackerScheduler == null)
-            throw new IllegalStateException("Tried to get a stacked entity but no scheduler was found for its chunk: " +
-                    livingEntity.getWorld().getName() + ", " + (livingEntity.getLocation().getBlockX() >> 4) + ", " + (livingEntity.getLocation().getBlockZ() >> 4));
         stackedEntity = new WStackedEntity(entityStackerScheduler, livingEntity);
 
         Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
@@ -208,10 +206,8 @@ public final class SystemHandler implements SystemManager {
             return stackedItem;
 
         //Item wasn't found, creating a new object.
-//        StackerScheduler<WStackedItem> itemStackerScheduler = this.itemsSchedulerManager.getSchedulerForChunk(item.getLocation());
-//        if (itemStackerScheduler == null)
-//            throw new IllegalStateException("Tried to get a stacked item but no scheduler was found for its chunk.");
-        stackedItem = new WStackedItem(new Holder<>(new StackerScheduler<>()), item);
+        Holder<StackerScheduler<WStackedItem>> itemStackerScheduler = this.itemsSchedulerManager.getSchedulerForChunk(item.getLocation());
+        stackedItem = new WStackedItem(itemStackerScheduler, item);
 
         //Checks if the item still exists after a few ticks
         Executor.sync(() -> {
@@ -930,6 +926,10 @@ public final class SystemHandler implements SystemManager {
 
     public StackerSchedulerManager<WStackedEntity> getEntitiesSchedulerManager() {
         return entitiesSchedulerManager;
+    }
+
+    public StackerSchedulerManager<WStackedItem> getItemsSchedulerManager() {
+        return itemsSchedulerManager;
     }
 
     private static boolean hasImportantFlags(StackedEntity stackedEntity) {
