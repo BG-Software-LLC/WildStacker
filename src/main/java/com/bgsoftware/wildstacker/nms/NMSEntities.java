@@ -96,7 +96,7 @@ public interface NMSEntities {
 
     void giveExp(Player player, int amount);
 
-    void enterVehicle(Vehicle vehicle, Entity entity);
+    void enterVehicle(Entity vehicle, Entity entity);
 
     int getPassengersCount(Vehicle vehicle);
 
