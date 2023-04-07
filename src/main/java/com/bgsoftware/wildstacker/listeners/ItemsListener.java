@@ -225,12 +225,8 @@ public final class ItemsListener implements Listener {
             //We are overriding the merge system
             e.setCancelled(true);
 
-            Executor.sync(() -> {
-                if (e.getEntity().isValid() && e.getTarget().isValid()) {
-                    StackedItem targetItem = WStackedItem.ofBypass(e.getTarget());
-                    stackedItem.runStackAsync(targetItem, null);
-                }
-            }, 5L);
+            StackedItem targetItem = WStackedItem.ofBypass(e.getTarget());
+            stackedItem.runStackAsync(targetItem, null);
         }
 
     }

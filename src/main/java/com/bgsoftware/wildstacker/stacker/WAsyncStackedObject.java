@@ -6,8 +6,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.stacker.scheduler.StackerScheduler;
 import com.bgsoftware.wildstacker.utils.Holder;
 
-import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -32,21 +30,7 @@ public abstract class WAsyncStackedObject<T, R extends IScheduledStackedObject> 
     }
 
     @Override
-    public void runStackAsync(Consumer<Optional<T>> result) {
-        scheduler.getHandle().schedule(() -> {
-            Iterator<WeakReference<R>> stackedObjects = scheduler.getHandle().getStackingObjects().iterator();
-
-            while (stackedObjects.hasNext()) {
-                WeakReference<R> weakStackedReference = stackedObjects.next();
-                R stackedObject = weakStackedReference.get();
-
-                if (stackedObject == null) {
-                    stackedObjects.remove();
-                    continue;
-                }
-            }
-        });
-    }
+    public abstract void runStackAsync(Consumer<Optional<T>> result);
 
     @Override
     public Optional<T> runStack() {
