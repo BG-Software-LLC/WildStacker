@@ -66,8 +66,9 @@ public class StackerSchedulerManager<T extends IScheduledStackedObject> {
         if (worldSchedulers == null) {
             worldSchedulers = new HashMap<>();
             schedulers.put(world.getUID(), worldSchedulers);
-            StackerScheduler<T> scheduler = new StackerScheduler<>();
-            worldSchedulers.put(chunkCoords, new Holder<>(scheduler));
+            Holder<StackerScheduler<T>> scheduler = new Holder<>(new StackerScheduler<>());
+            scheduler.addHolder(chunkCoords);
+            worldSchedulers.put(chunkCoords, scheduler);
             return;
         }
 
@@ -103,10 +104,15 @@ public class StackerSchedulerManager<T extends IScheduledStackedObject> {
                 // We want to update the nearby chunk with the new scheduler
                 if (nearbyChunkScheduler == null) {
                     worldSchedulers.put(nearbyChunkCoords, chunkScheduler);
-                } else if (nearbyChunkScheduler.getHandle() != chunkScheduler.getHandle()) {
-                    StackerScheduler<T> oldScheduler = nearbyChunkScheduler.setHandle(chunkScheduler.getHandle());
-                    if (!oldScheduler.isStopped()) {
-                        oldScheduler.mergeInto(chunkScheduler.getHandle());
+                    chunkScheduler.addHolder(nearbyChunkCoords);
+                } else if (nearbyChunkScheduler != chunkScheduler) {
+                    for (long holder : nearbyChunkScheduler.getHolders()) {
+                        worldSchedulers.put(holder, chunkScheduler);
+                        chunkScheduler.addHolder(holder);
+                    }
+
+                    if (!nearbyChunkScheduler.getHandle().isStopped()) {
+                        nearbyChunkScheduler.getHandle().mergeInto(chunkScheduler.getHandle());
                     }
                 }
             }
@@ -119,7 +125,9 @@ public class StackerSchedulerManager<T extends IScheduledStackedObject> {
         Map<Long, Holder<StackerScheduler<T>>> worldSchedulers = schedulers.get(chunk.getWorld().getUID());
         if (worldSchedulers != null) {
             long chunkCoords = pair(chunk.getX(), chunk.getZ());
-            worldSchedulers.remove(chunkCoords);
+            Holder<StackerScheduler<T>> oldScheduler = worldSchedulers.remove(chunkCoords);
+            if (oldScheduler != null)
+                oldScheduler.removeHolder(chunkCoords);
         }
     }
 
@@ -133,6 +141,7 @@ public class StackerSchedulerManager<T extends IScheduledStackedObject> {
                 Holder<StackerScheduler<T>> scheduler = entry.getValue();
                 if (scheduler.getHandle().isStopped()) {
                     worldSchedulersIterator.remove();
+                    scheduler.removeHolder(entry.getKey());
                 }
             }
         });
