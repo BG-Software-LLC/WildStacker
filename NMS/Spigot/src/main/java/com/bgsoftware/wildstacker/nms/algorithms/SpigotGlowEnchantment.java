@@ -12,7 +12,7 @@ public class SpigotGlowEnchantment extends Enchantment {
 
     @Override
     public String getName() {
-        return "SuperiorSkyblockGlow";
+        return "WildStackerGlow";
     }
 
     @Override
