@@ -66,6 +66,7 @@ public enum EntityTypes {
     SKELETON,
     SKELETON_HORSE,
     SLIME,
+    SNIFFER,
     SNOWMAN,
     SPIDER,
     SQUID,

@@ -192,6 +192,10 @@ public final class LootHandler {
         FileUtils.saveResource("loottables/skeleton.json");
         FileUtils.saveResource("loottables/skeleton_horse.json");
         FileUtils.saveResource("loottables/slime.json");
+        if (containsEntity("SNIFFER")) {
+            FileUtils.saveResource("loottables/sniffer.json");
+            FileUtils.saveResource("loottables/sniffer_baby.json");
+        }
         FileUtils.saveResource("loottables/snowman.json");
         FileUtils.saveResource("loottables/spider.json");
         FileUtils.saveResource("loottables/squid.json");
