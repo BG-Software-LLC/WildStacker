@@ -78,4 +78,9 @@ public class WorldEntityListener implements IWorldAccess {
         // Do nothing.
     }
 
+    /* Part of WineSpigot */
+    public void flagChunkDirty(int a, int b) {
+        // Do nothing
+    }
+
 }
