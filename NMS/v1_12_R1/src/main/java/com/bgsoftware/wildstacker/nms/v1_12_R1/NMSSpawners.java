@@ -61,7 +61,9 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         if (isDebug && tileEntity instanceof TileEntityMobSpawner)
             Debug.debug("NMSSpawners", "updateStackedSpawner", "mobSpawner=" + ((TileEntityMobSpawner) tileEntity).getSpawner());
 
-        if (tileEntity instanceof TileEntityMobSpawner && !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner)) {
+        if (tileEntity instanceof TileEntityMobSpawner && (
+                !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner) ||
+                        !((StackedMobSpawner) ((TileEntityMobSpawner) tileEntity).getSpawner()).isValid())) {
             if (isDebug)
                 Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting mobSpawner to new one.");
             new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);

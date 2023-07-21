@@ -66,7 +66,7 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
             Debug.debug("NMSSpawners", "updateStackedSpawner", "baseSpawner=" + spawnerBlockEntity.getSpawner());
 
         if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity &&
-                !(spawnerBlockEntity.getSpawner() instanceof StackedBaseSpawner)) {
+                (!(spawnerBlockEntity.getSpawner() instanceof StackedBaseSpawner baseSpawner) || !baseSpawner.isValid())) {
             if (isDebug)
                 Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting baseSpawner to new one.");
             new StackedBaseSpawner(spawnerBlockEntity, stackedSpawner);

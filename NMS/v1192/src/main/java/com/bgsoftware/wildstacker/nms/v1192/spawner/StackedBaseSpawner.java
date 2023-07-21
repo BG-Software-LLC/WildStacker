@@ -319,6 +319,10 @@ public class StackedBaseSpawner extends BaseSpawner {
             demoEntity.setUpgradeId(upgradeId);
     }
 
+    public boolean isValid() {
+        return this.stackedSpawner.get() != null;
+    }
+
     private MobSpawnResult attemptMobSpawning(ServerLevel serverLevel, BlockPos blockPos, CompoundTag entityToSpawn,
                                               EntityType<?> entityToSpawnType, int mobsToSpawn, int amountPerEntity,
                                               int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {

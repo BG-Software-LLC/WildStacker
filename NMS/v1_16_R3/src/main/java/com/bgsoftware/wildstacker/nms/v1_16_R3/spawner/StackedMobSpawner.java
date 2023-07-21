@@ -301,6 +301,10 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             demoEntity.setUpgradeId(upgradeId);
     }
 
+    public boolean isValid() {
+        return this.stackedSpawner.get() != null;
+    }
+
     private boolean attemptMobSpawning(EntityTypes<?> entityTypes, int mobsToSpawn, int amountPerEntity,
                                        int spawnCount, short particlesAmount, WStackedSpawner stackedSpawner) {
         if (stackedSpawner.isDebug())
