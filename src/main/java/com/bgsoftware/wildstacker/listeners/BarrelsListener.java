@@ -30,6 +30,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -57,16 +58,19 @@ public final class BarrelsListener implements Listener {
         if (!plugin.getSettings().barrelsStackingEnabled)
             return;
 
-        if (!isBarrelBlock(e.getBlock()) || !plugin.getProviders().canCreateBarrel(e.getItemInHand()))
-            return;
+        ItemStack inHand = e.getItemInHand();
 
         // In some cases, the item in hand may be different than the placed block.
         // For example, when waxing copper blocks: https://github.com/BG-Software-LLC/WildStacker/issues/685
-        if(e.getItemInHand() != null && e.getItemInHand().getType() != e.getBlock().getType())
+        if (inHand == null || inHand.getType() != e.getBlock().getType())
             return;
 
+        if (!isBarrelBlock(e.getBlock()) || !plugin.getProviders().canCreateBarrel(inHand))
+            return;
+
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+
         try {
-            ItemStack inHand = e.getItemInHand().clone();
             int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
 
             if (toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
@@ -128,7 +132,8 @@ public final class BarrelsListener implements Listener {
                     return;
                 }
 
-                revokeItem(e.getPlayer(), inHand);
+                if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
+                    ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
 
                 boolean attemptPlaceDelayed = ServerVersion.isLessThan(ServerVersion.v1_9);
 
@@ -145,7 +150,7 @@ public final class BarrelsListener implements Listener {
 
                         Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
 
-                        finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+                        finishBarrelPlace(e.getPlayer(), usedHand, stackedBarrel, REPLACE_AIR);
                     }
                 }, 1L);
 
@@ -156,23 +161,24 @@ public final class BarrelsListener implements Listener {
 
                 Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
             } else {
-                revokeItem(e.getPlayer(), inHand);
+                if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
+                    ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
 
                 StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
                 Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
             }
 
-            finishBarrelPlace(e.getPlayer(), inHand, stackedBarrel, REPLACE_AIR);
+            finishBarrelPlace(e.getPlayer(), usedHand, stackedBarrel, REPLACE_AIR);
         } catch (Exception ex) {
             alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId());
             throw ex;
         }
     }
 
-    private void finishBarrelPlace(Player player, ItemStack inHand, StackedBarrel stackedBarrel, boolean replaceAir) {
+    private void finishBarrelPlace(Player player, EquipmentSlot usedHand, StackedBarrel stackedBarrel, boolean replaceAir) {
         //Removing item from player's inventory
-        if (player.getGameMode() != GameMode.CREATIVE && replaceAir)
-            ItemUtils.setItemInHand(player.getInventory(), inHand, new ItemStack(Material.AIR));
+        if (replaceAir && player.getGameMode() != GameMode.CREATIVE)
+            ItemUtils.setItemInHand(player.getInventory(), usedHand, null);
 
         plugin.getProviders().notifyStackedBlockListeners(player, stackedBarrel.getLocation(),
                 stackedBarrel.getType(), (byte) stackedBarrel.getData(), IStackedBlockListener.Action.BLOCK_PLACE);
@@ -227,6 +233,12 @@ public final class BarrelsListener implements Listener {
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
 
         if (e.getItem() != null)
+            return;
+
+        ItemStack offHandItem = ItemUtils.getItemInOffhand(e.getPlayer().getInventory());
+
+        // In case we're going to place a block from the off-hand, we don't want to do anything related to clicking barrels.
+        if (offHandItem != null && offHandItem.getType() == stackedBarrel.getType())
             return;
 
         if (e.getPlayer().isSneaking() && plugin.getSettings().barrelsPlaceInventory) {
@@ -329,15 +341,6 @@ public final class BarrelsListener implements Listener {
                 e.setCancelled(true);
                 break;
             }
-        }
-    }
-
-    private void revokeItem(Player player, ItemStack itemInHand) {
-        if (player.getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = itemInHand.clone();
-            inHand.setAmount(inHand.getAmount() - 1);
-            //Using this method as remove() doesn't affect off hand
-            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
         }
     }
 

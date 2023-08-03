@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -40,18 +41,23 @@ public final class BucketsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketEmptyEvent e) {
         PlayerInventory inventory = e.getPlayer().getInventory();
-        ItemStack itemInHand = inventory.getItem(ItemUtils.getHeldItemSlot(inventory, e.getBucket()));
 
-        if (itemInHand.getAmount() > 1) {
-            Executor.sync(() -> {
-                int newHeldSlot = ItemUtils.getHeldItemSlot(inventory, Material.BUCKET);
-                if (newHeldSlot != -1) {
-                    itemInHand.setAmount(itemInHand.getAmount() - 1);
-                    inventory.setItem(newHeldSlot, itemInHand);
-                    ItemUtils.addItem(new ItemStack(Material.BUCKET), inventory, e.getPlayer().getLocation());
-                }
-            }, 1L);
-        }
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+        ItemStack itemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
+
+        if(itemInHand == null || itemInHand.getAmount() <= 1)
+            return;
+
+        Executor.sync(() -> {
+            ItemStack newItemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
+
+            if(newItemInHand == null || newItemInHand.getType() != Material.BUCKET)
+                return;
+
+            itemInHand.setAmount(itemInHand.getAmount() - 1);
+            ItemUtils.setItemInHand(inventory, usedHand, itemInHand);
+            ItemUtils.addItem(newItemInHand, inventory, e.getPlayer().getLocation());
+        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

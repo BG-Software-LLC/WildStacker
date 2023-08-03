@@ -71,6 +71,7 @@ import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.weather.LightningStrikeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
@@ -419,9 +420,8 @@ public final class EntitiesListener implements Listener {
 
         stackedEntity.remove();
 
-        inHand = inHand.clone();
-        inHand.setAmount(1);
-        ItemUtils.removeItem(inHand, e);
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+        ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
 
         ItemUtils.addItem(fishBucketItem, e.getPlayer().getInventory(), e.getRightClicked().getLocation());
     }
@@ -599,18 +599,16 @@ public final class EntitiesListener implements Listener {
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 int inHandItemsAmount = inHand.getAmount();
-
-                ItemStack newItem;
+                EquipmentSlot usedHand = ItemUtils.getHand(e);
 
                 if (itemsAmountToRemove >= inHandItemsAmount) {
-                    newItem = new ItemStack(Material.AIR);
-                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
-                    if (itemsAmountToRemove - inHandItemsAmount > 0)
-                        ItemUtils.removeItem(e.getPlayer().getInventory(), inHand, itemsAmountToRemove - inHandItemsAmount);
+                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), usedHand, null);
+                    if (itemsAmountToRemove > inHandItemsAmount)
+                        ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), inHand, itemsAmountToRemove - inHandItemsAmount);
                 } else {
-                    newItem = inHand.clone();
+                    ItemStack newItem = inHand.clone();
                     newItem.setAmount(inHandItemsAmount - itemsAmountToRemove);
-                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), inHand, newItem);
+                    ItemUtils.setItemInHand(e.getPlayer().getInventory(), usedHand, newItem);
                 }
 
             }

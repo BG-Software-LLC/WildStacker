@@ -19,7 +19,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -28,19 +29,33 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 public final class ItemUtils {
 
     private static final ReflectMethod<EquipmentSlot> PLAYER_INTERACT_EVENT_GET_HAND = new ReflectMethod<>(
             PlayerInteractEvent.class, "getHand");
+    private static final ReflectMethod<EquipmentSlot> BLOCK_PLACE_EVENT_GET_HAND = new ReflectMethod<>(
+            BlockPlaceEvent.class, "getHand");
     private static final ReflectMethod<EquipmentSlot> PLAYER_INTERACT_ENTITY_EVENT_GET_HAND = new ReflectMethod<>(
             PlayerInteractEntityEvent.class, "getHand");
+    private static final ReflectMethod<EquipmentSlot> PLAYER_BUCKET_EVENT_GET_HAND = new ReflectMethod<>(
+            PlayerBucketEvent.class, "getHand");
     private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND = new ReflectMethod<>(
             PlayerInventory.class, "getItemInOffHand");
     private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND = new ReflectMethod<>(
             PlayerInventory.class, "setItemInOffHand", ItemStack.class);
+
+    private static final EquipmentSlot OFF_HAND_EQUIPMENT_SLOT = ((Supplier<EquipmentSlot>) () -> {
+        try {
+            return EquipmentSlot.valueOf("OFF_HAND");
+        } catch (IllegalArgumentException error) {
+            return null;
+        }
+    }).get();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
     private static final int MAX_PICKUP_DELAY = 32767;
@@ -248,29 +263,45 @@ public final class ItemUtils {
                 .forEach(player -> ((Player) player).updateInventory());
     }
 
-    public static void removeItem(ItemStack itemStack, PlayerInteractEvent event) {
-        removeItem(itemStack, event, PLAYER_INTERACT_EVENT_GET_HAND);
-    }
+    public static EquipmentSlot getHand(Event event) {
+        ReflectMethod<EquipmentSlot> getHandMethod;
 
-    public static void removeItem(ItemStack itemStack, PlayerInteractEntityEvent event) {
-        removeItem(itemStack, event, PLAYER_INTERACT_ENTITY_EVENT_GET_HAND);
-    }
-
-    private static void removeItem(ItemStack itemStack, PlayerEvent event, ReflectMethod<EquipmentSlot> getHandMethod) {
-        PlayerInventory playerInventory = event.getPlayer().getInventory();
-
-        if (getHandMethod.isValid()) {
-            EquipmentSlot equipmentSlot = getHandMethod.invoke(event);
-            if (equipmentSlot.name().equals("OFF_HAND")) {
-                ItemStack offHand = PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND.invoke(playerInventory);
-                if (offHand.isSimilar(itemStack)) {
-                    offHand.setAmount(offHand.getAmount() - itemStack.getAmount());
-                    PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND.invoke(playerInventory, offHand);
-                }
-            }
+        if (event.getClass() == PlayerInteractEvent.class) {
+            getHandMethod = PLAYER_INTERACT_EVENT_GET_HAND;
+        } else if (event.getClass() == PlayerInteractEntityEvent.class) {
+            getHandMethod = PLAYER_INTERACT_ENTITY_EVENT_GET_HAND;
+        } else if (event.getClass() == BlockPlaceEvent.class) {
+            getHandMethod = BLOCK_PLACE_EVENT_GET_HAND;
+        } else if (event instanceof PlayerBucketEvent) {
+            getHandMethod = PLAYER_BUCKET_EVENT_GET_HAND;
+        } else {
+            throw new IllegalArgumentException("Cannot get used hand for event: " + event.getClass());
         }
 
-        playerInventory.removeItem(itemStack);
+        return !getHandMethod.isValid() ? EquipmentSlot.HAND : getHandMethod.invoke(event);
+    }
+
+    public static void removeItemFromHand(Player player, int amount, EquipmentSlot equipmentSlot) {
+        PlayerInventory playerInventory = player.getInventory();
+
+        if (equipmentSlot == EquipmentSlot.HAND) {
+            ItemStack mainHand = playerInventory.getItemInHand();
+            if (mainHand != null) {
+                mainHand.setAmount(mainHand.getAmount() - amount);
+                playerInventory.setItemInHand(mainHand);
+            }
+        } else if (OFF_HAND_EQUIPMENT_SLOT == equipmentSlot) {
+            ItemStack offHand = PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND.invoke(playerInventory);
+            if (offHand != null) {
+                offHand.setAmount(offHand.getAmount() - amount);
+                PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND.invoke(playerInventory, offHand);
+            }
+        }
+    }
+
+    @Nullable
+    public static ItemStack getItemInOffhand(PlayerInventory inventory) {
+        return OFF_HAND_EQUIPMENT_SLOT == null ? null : getItemFromHand(inventory, OFF_HAND_EQUIPMENT_SLOT);
     }
 
     public static int countItem(Inventory inventory, ItemStack itemStack) {
@@ -284,7 +315,7 @@ public final class ItemUtils {
         return counter;
     }
 
-    public static void removeItem(Inventory inventory, ItemStack itemStack, int amount) {
+    public static void removeItemFromHand(Inventory inventory, ItemStack itemStack, int amount) {
         int amountRemoved = 0;
 
         for (int i = 0; i < inventory.getSize() && amountRemoved < amount; i++) {
@@ -301,25 +332,23 @@ public final class ItemUtils {
         }
     }
 
-    public static int getHeldItemSlot(PlayerInventory inventory, Material material) {
-        ItemStack itemStack;
-
-        if ((itemStack = inventory.getItem(inventory.getHeldItemSlot())) != null && itemStack.getType() == material)
-            return inventory.getHeldItemSlot();
-
-        else try {
-            if ((itemStack = inventory.getItem(40)) != null && itemStack.getType() == material)
-                return 40;
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+    @Nullable
+    public static ItemStack getItemFromHand(PlayerInventory inventory, EquipmentSlot equipmentSlot) {
+        if (equipmentSlot == EquipmentSlot.HAND) {
+            return inventory.getItemInHand();
+        } else if (equipmentSlot == OFF_HAND_EQUIPMENT_SLOT && PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND.isValid()) {
+            return PLAYER_INVENTORY_GET_ITEM_IN_OFFHAND.invoke(inventory);
         }
 
-        return -1;
+        return null;
     }
 
-    public static void setItemInHand(PlayerInventory inventory, ItemStack inHand, ItemStack itemStack) {
-        int slot = getHeldItemSlot(inventory, inHand.getType());
-        if (slot != -1)
-            inventory.setItem(slot, itemStack);
+    public static void setItemInHand(PlayerInventory inventory, EquipmentSlot equipmentSlot, ItemStack itemStack) {
+        if (equipmentSlot == EquipmentSlot.HAND) {
+            inventory.setItemInHand(itemStack);
+        } else if (equipmentSlot == OFF_HAND_EQUIPMENT_SLOT && PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND.isValid()) {
+            PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND.invoke(inventory, itemStack);
+        }
     }
 
     public static boolean canPickup(Item item) {
@@ -327,11 +356,7 @@ public final class ItemUtils {
     }
 
     public static boolean isOffHand(Event event) {
-        try {
-            return event.getClass().getMethod("getHand").invoke(event).toString().equals("OFF_HAND");
-        } catch (Throwable ex) {
-            return false;
-        }
+        return OFF_HAND_EQUIPMENT_SLOT == getHand(event);
     }
 
     public static boolean isSword(Material material) {

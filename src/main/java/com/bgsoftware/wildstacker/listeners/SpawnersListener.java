@@ -57,6 +57,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -153,6 +154,7 @@ public final class SpawnersListener implements Listener {
                 return;
 
             ItemStack itemInHand = e.getItemInHand().clone();
+            EquipmentSlot usedHand = ItemUtils.getHand(e);
 
             plugin.getProviders().getSpawnersProvider().handleSpawnerPlace(stackedSpawner.getSpawner(), itemInHand);
             EntityType spawnerType = plugin.getProviders().getSpawnersProvider().getSpawnerType(itemInHand);
@@ -279,7 +281,7 @@ public final class SpawnersListener implements Listener {
 
                         stackedSpawner.updateName();
 
-                        finishSpawnerPlace(e.getPlayer(), amountToCharge, REPLACE_AIR, itemInHand, LIMIT_ITEM, spawnerType, SPAWNER_ITEM_AMOUNT);
+                        finishSpawnerPlace(e.getPlayer(), amountToCharge, REPLACE_AIR, usedHand, LIMIT_ITEM, spawnerType, SPAWNER_ITEM_AMOUNT);
                     }, 1L);
 
                     return;
@@ -289,7 +291,8 @@ public final class SpawnersListener implements Listener {
             } else {
                 e.setCancelled(true);
 
-                revokeItem(e.getPlayer(), itemInHand);
+                if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
+                    ItemUtils.removeItemFromHand(e.getPlayer(), 1, ItemUtils.getHand(e));
 
                 StackedSpawner targetSpawner = WStackedSpawner.of(spawnerOptional.get());
 
@@ -299,29 +302,21 @@ public final class SpawnersListener implements Listener {
                 spawnerItemAmount = targetSpawner.getStackAmount();
             }
 
-            finishSpawnerPlace(e.getPlayer(), amountToCharge, replaceAir, itemInHand, limitItem, spawnerType, spawnerItemAmount);
+            finishSpawnerPlace(e.getPlayer(), amountToCharge, replaceAir, usedHand, limitItem, spawnerType, spawnerItemAmount);
         } catch (Exception ex) {
             alreadySpawnersPlacedPlayers.remove(e.getPlayer().getUniqueId());
             throw ex;
         }
     }
 
-    private void revokeItem(Player player, ItemStack itemInHand) {
-        if (player.getGameMode() != GameMode.CREATIVE) {
-            ItemStack inHand = itemInHand.clone();
-            inHand.setAmount(inHand.getAmount() - 1);
-            //Using this method as remove() doesn't affect off hand
-            ItemUtils.setItemInHand(player.getInventory(), itemInHand, inHand);
-        }
-    }
-
-    private void finishSpawnerPlace(Player player, double amountToCharge, boolean replaceAir, ItemStack itemInHand, ItemStack limitItem, EntityType spawnerType, int spawnerItemAmount) {
+    private void finishSpawnerPlace(Player player, double amountToCharge, boolean replaceAir, EquipmentSlot usedHand,
+                                    ItemStack limitItem, EntityType spawnerType, int spawnerItemAmount) {
         if (amountToCharge > 0)
             plugin.getProviders().getEconomyProvider().withdrawMoney(player, amountToCharge);
 
         //Removing item from player's inventory
-        if (player.getGameMode() != GameMode.CREATIVE && replaceAir)
-            ItemUtils.setItemInHand(player.getInventory(), itemInHand, new ItemStack(Material.AIR));
+        if (replaceAir && player.getGameMode() != GameMode.CREATIVE)
+            ItemUtils.setItemInHand(player.getInventory(), usedHand, null);
 
         if (limitItem != null)
             ItemUtils.addItem(limitItem, player.getInventory(), player.getLocation());
@@ -587,9 +582,8 @@ public final class SpawnersListener implements Listener {
                             .getLocation().add(0.5, 0, 0.5), entityType.getEntityClass(), SpawnCause.SPAWNER_EGG, null, null);
 
                     if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-                        ItemStack inHand = e.getItem().clone();
-                        inHand.setAmount(1);
-                        ItemUtils.removeItem(inHand, e);
+                        EquipmentSlot usedHand = ItemUtils.getHand(e);
+                        ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
                     }
 
                 } catch (Exception ignored) {
@@ -609,7 +603,7 @@ public final class SpawnersListener implements Listener {
         Executor.sync(() -> {
             stackedSpawner.updateName();
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
-                ItemUtils.removeItem(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+                ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
 
