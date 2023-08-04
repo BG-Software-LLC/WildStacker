@@ -463,6 +463,7 @@ entities:
   - 'DROWNED'
   - 'CURED'
   - 'PIGLIN_ZOMBIFIED'
+  - 'METAMORPHOSIS'
 
   # Should entities fill vehicles entirely by stacked entities?
   # When enabled, vehicles will be able to get filled with two entities.
