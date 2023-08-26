@@ -88,7 +88,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     @Override
     public EntityType getSpawnerType(ItemStack itemStack) {
         ItemMeta itemMeta = itemStack.getItemMeta();
-        EntityType spawnType = EntityType.UNKNOWN;
+        EntityType spawnType = null;
 
         try {
             BlockStateMeta blockStateMeta = (BlockStateMeta) itemMeta;
@@ -96,7 +96,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         } catch (Throwable ignored) {
         }
 
-        if ((spawnType == EntityType.PIG || spawnType == EntityType.UNKNOWN) && itemMeta.hasDisplayName()) {
+        if ((spawnType == EntityType.PIG || spawnType == null) && itemMeta.hasDisplayName()) {
             String displayName = itemMeta.getDisplayName();
             Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
             if (matcher.matches()) {
@@ -104,13 +104,12 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
                         .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
                 try {
                     spawnType = EntityType.valueOf(matcher.group(indexes.indexOf("1") + 1).toUpperCase().replace(" ", "_"));
-                } catch (Exception ex) {
-                    spawnType = EntityType.PIG;
+                } catch (Exception ignored) {
                 }
             }
         }
 
-        return spawnType;
+        return spawnType == null ? EntityType.PIG : spawnType;
     }
 
     @Override
