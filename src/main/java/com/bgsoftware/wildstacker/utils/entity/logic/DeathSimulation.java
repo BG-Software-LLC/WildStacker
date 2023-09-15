@@ -123,6 +123,9 @@ public final class DeathSimulation {
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
 
+        // We want to cache the killer of the entity
+        stackedEntity.setFlag(EntityFlag.CACHED_KILLER, killer == null ? entityKiller : killer);
+
         Executor.async(() -> {
             livingEntity.setFireTicks(fireTicks);
 
@@ -131,6 +134,9 @@ public final class DeathSimulation {
             int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
             Executor.sync(() -> {
+                // We want to remove the cache of the killer
+                stackedEntity.removeFlag(EntityFlag.CACHED_KILLER);
+
                 IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);

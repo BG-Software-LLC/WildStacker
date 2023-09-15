@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -43,6 +44,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Nullable
     static Entity getEntityKiller(StackedEntity stackedEntity) {
+        Entity entityKillerCached = stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
+        if (entityKillerCached != null)
+            return entityKillerCached;
+
         return EntityUtils.getDamagerFromEvent(stackedEntity.getLivingEntity().getLastDamageCause(), false);
     }
 

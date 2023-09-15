@@ -1,5 +1,7 @@
 package com.bgsoftware.wildstacker.api.enums;
 
+import org.bukkit.entity.Entity;
+
 public enum EntityFlag {
 
     CORPSE(Boolean.class),
@@ -16,6 +18,7 @@ public enum EntityFlag {
     ATTACKED_ENTITY(Boolean.class),
     ADD_TO_VEHICLE(Boolean.class),
     DELAY_STACK(Boolean.class),
+    CACHED_KILLER(Entity.class),
 
     // Items related flags
     DROPPED_BY_PLAYER(Boolean.class),
