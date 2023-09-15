@@ -57,7 +57,7 @@ public final class DeathSimulation {
     }
 
     public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent damageEvent,
-                                                 ItemStack killerTool, Player killer, Entity entityKiller,
+                                                 ItemStack killerTool, @Nullable Player killer, Entity entityKiller,
                                                  boolean creativeMode, boolean fromDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
             return new EntityDamageData(false, Collections.emptyMap());
@@ -91,7 +91,7 @@ public final class DeathSimulation {
 
         int originalAmount = stackedEntity.getStackAmount();
 
-        if (stackedEntity.runUnstack(entitiesToKill, entityKiller) != UnstackResult.SUCCESS)
+        if (stackedEntity.runUnstack(entitiesToKill, killer == null ? entityKiller : killer) != UnstackResult.SUCCESS)
             return result;
 
         stackedEntity.setFlag(EntityFlag.ATTACKED_ENTITY, true);
