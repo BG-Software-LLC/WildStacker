@@ -114,11 +114,12 @@ public class LootPair {
     }
 
     public List<ItemStack> getItems(StackedEntity stackedEntity, int amountOfPairs, int lootBonusLevel) {
-        List<ItemStack> items = new ArrayList<>();
+        List<ItemStack> items = new LinkedList<>();
+
+        Entity entityKiller = LootTable.getEntityKiller(stackedEntity);
 
         for (LootItem lootItem : lootItems) {
-            if (!lootItem.checkKiller(LootTable.getEntityKiller(stackedEntity)) ||
-                    !lootItem.checkEntity(stackedEntity.getLivingEntity()))
+            if (!lootItem.checkKiller(entityKiller) || !lootItem.checkEntity(stackedEntity.getLivingEntity()))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);

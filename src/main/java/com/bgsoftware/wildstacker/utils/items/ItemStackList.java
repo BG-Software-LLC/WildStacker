@@ -3,9 +3,9 @@ package com.bgsoftware.wildstacker.utils.items;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public final class ItemStackList {
     }
 
     public List<ItemStack> toList() {
-        List<ItemStack> list = new ArrayList<>();
+        List<ItemStack> list = new LinkedList<>();
 
         ItemStack itemStack;
 

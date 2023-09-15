@@ -84,10 +84,12 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Override
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
-        List<ItemStack> drops = new ArrayList<>();
+        List<ItemStack> drops = new LinkedList<>();
+
+        Entity entityKiller = getEntityKiller(stackedEntity);
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                lootPair.checkKiller(getEntityKiller(stackedEntity)) && lootPair.checkEntity(stackedEntity.getLivingEntity())
+                lootPair.checkKiller(entityKiller) && lootPair.checkEntity(stackedEntity.getLivingEntity())
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :

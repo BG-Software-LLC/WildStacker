@@ -63,8 +63,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -461,7 +461,7 @@ public final class EntityUtils {
     }
 
     public static List<ItemStack> getEquipment(LivingEntity livingEntity, int lootBonusLevel) {
-        List<ItemStack> drops = new ArrayList<>();
+        List<ItemStack> drops = new LinkedList<>();
 
         EntityEquipment bukkitEntityEquipment = livingEntity.getEquipment();
         INMSEntityEquipment entityEquipment = plugin.getNMSAdapter().createEntityEquipmentWrapper(bukkitEntityEquipment);
