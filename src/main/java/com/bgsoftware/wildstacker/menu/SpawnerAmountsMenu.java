@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -21,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,18 +145,21 @@ public final class SpawnerAmountsMenu extends WildMenu {
         if (stackedSpawner.getStackAmount() + depositAmount > limit)
             depositAmount = limit - stackedSpawner.getStackAmount();
 
-        Map<Integer, Integer> itemsToRemove = new HashMap<>();
+        Map<Integer, Integer> itemsToRemove = new LinkedHashMap<>();
         Inventory inventory = e.getWhoClicked().getInventory();
 
         if (e.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
             int amount = 0;
 
+            EntityType spawnerEntityType = stackedSpawner.getSpawnedType();
+            int upgradeId = stackedSpawner.isDefaultUpgrade() ? -1 : ((WStackedSpawner) stackedSpawner).getUpgradeId();
+
             for (int i = 0; i < inventory.getSize(); i++) {
                 ItemStack itemStack = inventory.getItem(i);
 
                 if (itemStack == null || itemStack.getType() != Materials.SPAWNER.toBukkitType() ||
-                        plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack) != stackedSpawner.getSpawnedType() ||
-                        ItemUtils.getSpawnerUpgrade(itemStack) != ((WStackedSpawner) stackedSpawner).getUpgradeId())
+                        plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack) != spawnerEntityType ||
+                        ItemUtils.getSpawnerUpgrade(itemStack) != upgradeId)
                     continue;
 
                 int itemAmount = ItemUtils.getSpawnerItemAmount(itemStack);
