@@ -25,6 +25,7 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.GlowSquid;
 import org.bukkit.entity.Goat;
 import org.bukkit.entity.Guardian;
@@ -597,6 +598,13 @@ public final class EntityUtils {
             return null;
 
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+
+        if (damager instanceof Fireball) {
+            Entity fireballDamager = getDamagerFromEvent(damager.getLastDamageCause(), checkUnusualSources);
+            if (fireballDamager != null) {
+                return fireballDamager;
+            }
+        }
 
         if (damager instanceof Projectile) {
             ProjectileSource shooter = ((Projectile) damager).getShooter();
