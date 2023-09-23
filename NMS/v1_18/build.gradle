@@ -8,7 +8,7 @@ java {
     }
 }
 
-group 'NMS:v1182'
+group 'NMS:v1_18'
 
 dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
