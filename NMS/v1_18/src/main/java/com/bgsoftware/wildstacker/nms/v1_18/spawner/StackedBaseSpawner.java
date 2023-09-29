@@ -92,7 +92,6 @@ public class StackedBaseSpawner extends BaseSpawner {
         this.spawnRange = originalSpawner.spawnRange;
 
         updateDemoEntity((ServerLevel) spawnerBlockEntity.getLevel(), spawnerBlockEntity.getBlockPos());
-        updateUpgrade(((WStackedSpawner) stackedSpawner).getUpgradeId());
     }
 
     @Override
@@ -172,8 +171,6 @@ public class StackedBaseSpawner extends BaseSpawner {
                 return;
             }
 
-            updateUpgrade(stackedSpawner.getUpgradeId());
-
             demoEntity = ((CraftEntity) this.demoEntity.getLivingEntity()).getHandle();
         }
 
@@ -181,6 +178,9 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         if (stackedSpawner.isDebug())
             Debug.debug("StackedBaseSpawner", "serverTick", "stackAmount=" + stackAmount);
+
+        // Update the upgrade id of the demo entity
+        updateUpgrade(stackedSpawner.getUpgradeId());
 
         List<? extends Entity> nearbyEntities = serverLevel.getEntitiesOfClass(
                 demoEntity.getClass(), new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(),

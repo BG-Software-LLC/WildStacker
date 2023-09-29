@@ -142,6 +142,10 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().spawnRange = spawnRange;
     }
 
+    public SyncedCreatureSpawnerImpl copy() {
+        return new SyncedCreatureSpawnerImpl(this.world, this.getTileEntity());
+    }
+
     public boolean isActivated() {
         this.requirePlaced();
         return getSpawner().isNearPlayer(this.world.getHandle(), this.getPosition());

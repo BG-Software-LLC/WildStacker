@@ -92,7 +92,6 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         this.mobs.clear();
 
         updateDemoEntity();
-        updateUpgrade(((WStackedSpawner) stackedSpawner).getUpgradeId());
     }
 
     @Override
@@ -167,8 +166,6 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 return;
             }
 
-            updateUpgrade(stackedSpawner.getUpgradeId());
-
             demoNMSEntity = ((CraftEntity) demoEntity.getLivingEntity()).getHandle();
         }
 
@@ -176,6 +173,9 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
 
         if (stackedSpawner.isDebug())
             Debug.debug("StackedMobSpawner", "c", "stackAmount=" + stackAmount);
+
+        // Update the upgrade id of the demo entity
+        updateUpgrade(stackedSpawner.getUpgradeId());
 
         List<? extends Entity> nearbyEntities = world.a(demoNMSEntity.getClass(), new AxisAlignedBB(
                 position.getX(), position.getY(), position.getZ(),
