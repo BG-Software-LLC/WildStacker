@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker;
 
+import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
@@ -83,6 +84,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     @Override
     public void onLoad() {
         plugin = this;
+
+        DependenciesManager.inject(this);
 
         // Setting the default locale to English will fix issues related to using upper case in Turkish.
         // https://stackoverflow.com/questions/11063102/using-locales-with-javas-tolowercase-and-touppercase
