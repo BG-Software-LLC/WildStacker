@@ -59,6 +59,7 @@ public class StackedBaseSpawner extends BaseSpawner {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final WeakReference<WStackedSpawner> stackedSpawner;
+    private final BaseSpawner originalBaseSpawner;
     public String failureReason = "";
 
     private int spawnedEntities = 0;
@@ -78,6 +79,7 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (isDebug)
             Debug.debug("StackedBaseSpawner", "init", "originalSpawner=" + originalSpawner);
 
+        this.originalBaseSpawner = originalSpawner;
         BASE_SPAWNER.set(spawnerBlockEntity, this);
 
         if (isDebug)
@@ -113,6 +115,8 @@ public class StackedBaseSpawner extends BaseSpawner {
         WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
         if (stackedSpawner == null) {
+            // We want to remove this StackedBaseSpawner, so a new one will regenerate.
+            BASE_SPAWNER.set(serverLevel.getBlockEntity(blockPos), this.originalBaseSpawner);
             super.serverTick(serverLevel, blockPos);
             return;
         }

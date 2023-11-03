@@ -16,19 +16,7 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
-import net.minecraft.server.v1_16_R3.AxisAlignedBB;
-import net.minecraft.server.v1_16_R3.BlockPosition;
-import net.minecraft.server.v1_16_R3.Blocks;
-import net.minecraft.server.v1_16_R3.Entity;
-import net.minecraft.server.v1_16_R3.EntityInsentient;
-import net.minecraft.server.v1_16_R3.EntityTypes;
-import net.minecraft.server.v1_16_R3.EnumMobSpawn;
-import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import net.minecraft.server.v1_16_R3.TileEntityMobSpawner;
-import net.minecraft.server.v1_16_R3.WeightedRandom;
-import net.minecraft.server.v1_16_R3.World;
-import net.minecraft.server.v1_16_R3.WorldServer;
+import net.minecraft.server.v1_16_R3.*;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R3.event.CraftEventFactory;
@@ -51,6 +39,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     private final WorldServer world;
     private final BlockPosition position;
     private final WeakReference<WStackedSpawner> stackedSpawner;
+    private final MobSpawnerAbstract originalMobSpawnerAbstract;
     public String failureReason = "";
 
     private int spawnedEntities = 0;
@@ -71,6 +60,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         if (isDebug)
             Debug.debug("StackedMobSpawner", "init", "originalSpawner=" + originalSpawner);
 
+        this.originalMobSpawnerAbstract = originalSpawner;
         MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
 
         if (isDebug)
@@ -92,6 +82,8 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
         if (stackedSpawner == null) {
+            // We want to remove this StackedBaseSpawner, so a new one will regenerate.
+            MOB_SPAWNER_ABSTRACT.set(this.world.getTileEntity(this.position), this.originalMobSpawnerAbstract);
             super.c();
             return;
         }
