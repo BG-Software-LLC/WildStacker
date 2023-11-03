@@ -79,6 +79,8 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         a(tagCompound);
         this.mobs.clear();
 
+        this.spawnDelay = originalSpawner.spawnDelay;
+
         updateDemoEntity();
     }
 

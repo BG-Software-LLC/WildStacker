@@ -73,6 +73,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
         this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
         this.spawnRange = originalSpawner.spawnRange;
+        this.spawnDelay = originalSpawner.spawnDelay;
 
         updateDemoEntity();
     }
