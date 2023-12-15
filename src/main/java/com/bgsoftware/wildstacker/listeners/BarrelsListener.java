@@ -243,9 +243,7 @@ public final class BarrelsListener implements Listener {
 
         if (e.getPlayer().isSneaking() && plugin.getSettings().barrelsPlaceInventory) {
             BarrelsPlaceMenu.open(e.getPlayer(), stackedBarrel);
-        } else {
-            stackedBarrel.runUnstack(1, e.getPlayer());
-
+        } else if (stackedBarrel.runUnstack(1, e.getPlayer()) == UnstackResult.SUCCESS) {
             plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), stackedBarrel.getLocation(),
                     stackedBarrel.getType(), (byte) stackedBarrel.getData(), IStackedBlockListener.Action.BLOCK_BREAK);
 
@@ -280,10 +278,11 @@ public final class BarrelsListener implements Listener {
             StackedBarrel stackedBarrel = WStackedBarrel.of(block);
 
             int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
-            ItemStack barrelItem = EventsCaller.callBarrelDropEvent(stackedBarrel, null, amount);
 
-            ItemUtils.dropItem(barrelItem, block.getLocation());
-            stackedBarrel.runUnstack(amount, e.getEntity());
+            if (stackedBarrel.runUnstack(amount, e.getEntity()) == UnstackResult.SUCCESS) {
+                ItemStack barrelItem = EventsCaller.callBarrelDropEvent(stackedBarrel, null, amount);
+                ItemUtils.dropItem(barrelItem, block.getLocation());
+            }
         }
     }
 

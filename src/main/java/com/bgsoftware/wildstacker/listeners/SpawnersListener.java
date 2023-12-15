@@ -378,17 +378,18 @@ public final class SpawnersListener implements Listener {
             // Should fix issues with amount-percentage being below 100 on low stack sizes.
             breakAmount = Math.max(breakAmount, plugin.getSettings().explosionsBreakMinimum);
 
-            int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
-            // Should fix issues with amount-percentage being below 100 on low stack sizes.
-            dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
+            if (stackedSpawner.runUnstack(breakAmount, e.getEntity()) == UnstackResult.SUCCESS) {
+                int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
+                // Should fix issues with amount-percentage being below 100 on low stack sizes.
+                dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
 
-            plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
-                    e.getEntity(), sourcePlayer, dropAmount);
+                plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
+                        e.getEntity(), sourcePlayer, dropAmount);
 
-            stackedSpawner.runUnstack(breakAmount, e.getEntity());
 
-            if (stackedSpawner.getStackAmount() > 0)
-                e.blockList().remove(block);
+                if (stackedSpawner.getStackAmount() > 0)
+                    e.blockList().remove(block);
+            }
         }
     }
 
