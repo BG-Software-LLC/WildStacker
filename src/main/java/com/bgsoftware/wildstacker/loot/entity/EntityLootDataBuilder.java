@@ -26,6 +26,8 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     public EntityDamageEvent.DamageCause deathCause;
     public boolean ignoreDeathCause;
     public boolean burning;
+    public int slimeSize;
+    public boolean ignoreSlimeSize;
 
     public EntityLootDataBuilder(EntityType entityType) {
         this.stackedEntity = null;
@@ -88,6 +90,24 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     @Override
     public LootEntityAttributes.Builder setBurning(boolean burning) {
         this.burning = burning;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setSlimeSize(int slimeSize) {
+        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+            throw new UnsupportedOperationException();
+
+        this.slimeSize = slimeSize;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setIgnoreSlimeSize(boolean ignoreSlimeSize) {
+        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+            throw new UnsupportedOperationException();
+
+        this.ignoreSlimeSize = ignoreSlimeSize;
         return this;
     }
 

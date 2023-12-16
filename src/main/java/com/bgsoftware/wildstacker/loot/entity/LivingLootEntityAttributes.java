@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,6 +81,17 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
 
     private boolean isBurningFromEntity() {
         return this.stackedEntity.getLivingEntity().getFireTicks() > 0;
+    }
+
+    @Override
+    public int getSlimeSize() {
+        int customSlimeSize = super.getSlimeSize();
+        return customSlimeSize <= 0 ? getSlimeSizeFromEntity() : customSlimeSize;
+    }
+
+    private int getSlimeSizeFromEntity() {
+        Slime slime = (Slime) this.stackedEntity.getLivingEntity();
+        return slime.getSize();
     }
 
 }

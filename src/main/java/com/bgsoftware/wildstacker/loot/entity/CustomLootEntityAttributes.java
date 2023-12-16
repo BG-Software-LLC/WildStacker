@@ -23,6 +23,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     private final EntityDamageEvent.DamageCause deathCause;
     private final boolean ignoreDeathCause;
     private final boolean burning;
+    private final int slimeSize;
+    private final boolean ignoreSlimeSize;
 
     public CustomLootEntityAttributes(EntityLootDataBuilder builder) {
         this.entityType = builder.entityType;
@@ -35,6 +37,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
         this.deathCause = builder.deathCause;
         this.ignoreDeathCause = builder.ignoreDeathCause;
         this.burning = builder.burning;
+        this.slimeSize = builder.slimeSize;
+        this.ignoreSlimeSize = builder.ignoreSlimeSize;
     }
 
     @Override
@@ -89,6 +93,22 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     @Override
     public boolean isBurning() {
         return this.burning;
+    }
+
+    @Override
+    public int getSlimeSize() {
+        if (this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+            throw new UnsupportedOperationException();
+
+        return this.slimeSize;
+    }
+
+    @Override
+    public boolean isIgnoreSlimeSize() {
+        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+            throw new UnsupportedOperationException();
+
+        return this.ignoreSlimeSize;
     }
 
 }

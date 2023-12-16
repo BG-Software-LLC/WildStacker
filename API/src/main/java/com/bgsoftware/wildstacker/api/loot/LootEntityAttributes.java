@@ -86,6 +86,24 @@ public interface LootEntityAttributes {
      */
     boolean isBurning();
 
+    /*
+     * SLIME ONLY
+     */
+
+    /**
+     * Get the slime size of the entity.
+     *
+     * @throws UnsupportedOperationException If the entity is not a Slime or a Magma Cube.
+     */
+    int getSlimeSize();
+
+    /**
+     * Whether to ignore slime-size related checks when filtering out drops.
+     *
+     * @throws UnsupportedOperationException If the entity is not a Slime or a Magma Cube.
+     */
+    boolean isIgnoreSlimeSize();
+
     /**
      * Builder class to build a new {@link LootEntityAttributes} object.
      * Can be obtained by calling {@link #newBuilder(EntityType)} or {@link #newBuilder(StackedEntity)}
@@ -154,6 +172,22 @@ public interface LootEntityAttributes {
          * @param burning Whether the entity is burning.
          */
         Builder setBurning(boolean burning);
+
+        /**
+         * Set the slime-size of the entity.
+         *
+         * @param slimeSize The slime-size of the entity.
+         * @throws UnsupportedOperationException If the entity is not a Slime or a Magma Cube
+         */
+        Builder setSlimeSize(int slimeSize);
+
+        /**
+         * Set whether to ignore slime-size related checks when filtering out drops.
+         *
+         * @param ignoreSlimeSize Whether to ignore slime-size related checks.
+         * @throws UnsupportedOperationException If the entity is not a slime or a Magma Cube
+         */
+        Builder setIgnoreSlimeSize(boolean ignoreSlimeSize);
 
         /**
          * Create a new {@link LootEntityAttributes} out of this builder.

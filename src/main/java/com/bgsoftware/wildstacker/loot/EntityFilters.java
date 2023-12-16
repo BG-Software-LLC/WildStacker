@@ -105,6 +105,18 @@ public class EntityFilters {
         };
     }
 
+    public static Predicate<LootEntityAttributes> slimeSizeFilter(Number slimeSize) {
+        return entityData -> {
+            if (entityData.getEntityType() != EntityType.SLIME && entityData.getEntityType() != EntityType.MAGMA_CUBE)
+                return true;
+
+            if (entityData.isIgnoreSlimeSize())
+                return true;
+
+            return entityData.getSlimeSize() == slimeSize.longValue();
+        };
+    }
+
     public static Predicate<LootEntityAttributes> typeFilter(String entityTypeName) {
         boolean negate = entityTypeName.startsWith("!");
         EntityType entityType = EntityType.valueOf((negate ? entityTypeName.substring(1) : entityTypeName).toUpperCase(Locale.ENGLISH));

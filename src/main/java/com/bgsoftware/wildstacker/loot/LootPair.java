@@ -70,6 +70,13 @@ public class LootPair extends FilteredLoot {
         }
 
         try {
+            Object slimeSizeFilterObject = jsonObject.get("slime-size");
+            if (slimeSizeFilterObject instanceof Number)
+                entityFilters.add(EntityFilters.slimeSizeFilter((Number) slimeSizeFilterObject));
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        try {
             Object jsonKillerFilters = jsonObject.get("killer");
             if (jsonKillerFilters instanceof JSONArray) {
                 ((JSONArray) jsonKillerFilters).forEach(filterObject -> {
