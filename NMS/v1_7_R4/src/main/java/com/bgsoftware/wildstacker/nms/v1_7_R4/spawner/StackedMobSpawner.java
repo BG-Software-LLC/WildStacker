@@ -17,7 +17,20 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
-import net.minecraft.server.v1_7_R4.*;
+import net.minecraft.server.v1_7_R4.AxisAlignedBB;
+import net.minecraft.server.v1_7_R4.Blocks;
+import net.minecraft.server.v1_7_R4.Entity;
+import net.minecraft.server.v1_7_R4.EntityInsentient;
+import net.minecraft.server.v1_7_R4.EntityOcelot;
+import net.minecraft.server.v1_7_R4.EntityTypes;
+import net.minecraft.server.v1_7_R4.MobSpawnerAbstract;
+import net.minecraft.server.v1_7_R4.NBTTagCompound;
+import net.minecraft.server.v1_7_R4.NBTTagList;
+import net.minecraft.server.v1_7_R4.TileEntityMobSpawner;
+import net.minecraft.server.v1_7_R4.TileEntityMobSpawnerData;
+import net.minecraft.server.v1_7_R4.UtilColor;
+import net.minecraft.server.v1_7_R4.WeightedRandom;
+import net.minecraft.server.v1_7_R4.World;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_7_R4.event.CraftEventFactory;
@@ -28,7 +41,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class StackedMobSpawner extends MobSpawnerAbstract {
 
@@ -176,7 +189,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 position.x + 1, position.y + 1, position.z + 1
         ).grow(this.spawnRange, this.spawnRange, this.spawnRange));
 
-        AtomicInteger nearbyAndStackableCount = new AtomicInteger(0);
+        AtomicLong nearbyAndStackableCount = new AtomicLong(0);
         List<StackedEntity> nearbyAndStackableEntities = new LinkedList<>();
 
         nearbyEntities.forEach(entity -> {
@@ -583,7 +596,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     }
 
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                          List<StackedEntity> nearbyEntities, AtomicInteger nearbyAndStackableCount) {
+                                          List<StackedEntity> nearbyEntities, AtomicLong nearbyAndStackableCount) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return null;
 
