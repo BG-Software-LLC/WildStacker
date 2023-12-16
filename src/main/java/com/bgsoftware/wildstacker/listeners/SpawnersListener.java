@@ -818,7 +818,7 @@ public final class SpawnersListener implements Listener {
                             .filter(stackedEntity -> {
                                 if (stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
                                         stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
-                                    nearbyEntitiesCount.set(nearbyEntitiesCount.get() + stackedEntity.getStackAmount());
+                                    nearbyEntitiesCount.addAndGet(stackedEntity.getStackAmount());
                                     return true;
                                 }
 
@@ -843,7 +843,9 @@ public final class SpawnersListener implements Listener {
             int finalSpawnMobsCount;
 
             int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 0);
-            if (nearbyEntitiesCount.get() + spawnMobsCount >= minimumEntityRequirement) {
+            if (minimumEntityRequirement <= 0) {
+                finalSpawnMobsCount = spawnMobsCount;
+            } else if (nearbyEntitiesCount.get() + spawnMobsCount >= minimumEntityRequirement) {
                 nearbyStackableEntities.forEach(nearbyEntity -> {
                     if (nearbyEntity != stackedEntity) {
                         nearbyEntity.remove();
@@ -853,8 +855,6 @@ public final class SpawnersListener implements Listener {
 
                 stackedEntity.increaseStackAmount(spawnMobsCount, true);
                 finalSpawnMobsCount = nearbyEntitiesCount.get() + spawnMobsCount - stackedEntity.getStackAmount();
-            } else if (minimumEntityRequirement <= 0) {
-                finalSpawnMobsCount = spawnMobsCount;
             } else {
                 return;
             }
