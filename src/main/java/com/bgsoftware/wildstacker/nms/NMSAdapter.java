@@ -8,6 +8,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Field;
+
 public interface NMSAdapter {
 
     INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment);
@@ -17,6 +19,25 @@ public interface NMSAdapter {
     boolean isUnbreakable(ItemStack itemStack);
 
     Enchantment getGlowEnchant();
+
+    default Enchantment createGlowEnchantment() {
+        Enchantment glowEnchant = getGlowEnchant();
+
+        try {
+            Field field = Enchantment.class.getDeclaredField("acceptingNew");
+            field.setAccessible(true);
+            field.set(null, true);
+            field.setAccessible(false);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            Enchantment.registerEnchantment(glowEnchant);
+        } catch (Exception ignored) {
+        }
+
+        return glowEnchant;
+    }
 
     ItemStack getPlayerSkull(ItemStack bukkitItem, String texture);
 

@@ -148,7 +148,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("******** ENABLE START ********");
 
-        GlowEnchantment.registerEnchantment();
+        GlowEnchantment.registerEnchantment(this);
 
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);
@@ -225,7 +225,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
                     new Pair<>(3336, null),
                     new Pair<>(3337, "v1_19"),
                     new Pair<>(3465, "v1_20_1"),
-                    new Pair<>(3578, "v1_20_2")
+                    new Pair<>(3578, "v1_20_2"),
+                    new Pair<>(3700, "v1_20_3")
             );
 
             for (Pair<Integer, String> versionData : versions) {
