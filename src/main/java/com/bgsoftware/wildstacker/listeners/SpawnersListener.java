@@ -809,21 +809,14 @@ public final class SpawnersListener implements Listener {
             }
 
             int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
-            AtomicInteger nearbyEntitiesCount = new AtomicInteger(0);
 
             List<StackedEntity> nearbyStackableEntities = mergeRadius <= 0 ? Collections.emptyList() :
                     EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
                                     entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
                             .map(WStackedEntity::of)
-                            .filter(stackedEntity -> {
-                                if (stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
-                                        stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
-                                    nearbyEntitiesCount.addAndGet(stackedEntity.getStackAmount());
-                                    return true;
-                                }
-
-                                return false;
-                            }).collect(Collectors.toList());
+                            .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
+                                    stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS)
+                            .collect(Collectors.toList());
 
             if (!targetEntityOptional.isPresent()) {
                 if (mergeRadius <= 0)
@@ -840,26 +833,36 @@ public final class SpawnersListener implements Listener {
 
             StackedEntity stackedEntity = targetEntityOptional.get();
 
-            int finalSpawnMobsCount;
-
             int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 0);
-            if (minimumEntityRequirement <= 0) {
-                finalSpawnMobsCount = spawnMobsCount;
-            } else if (nearbyEntitiesCount.get() + spawnMobsCount >= minimumEntityRequirement) {
+            if (minimumEntityRequirement <= 1) {
+                if (stackedEntity.canGetStacked(spawnMobsCount) != StackCheckResult.SUCCESS)
+                    return;
+
+                stackedEntity.increaseStackAmount(spawnMobsCount, true);
+            } else if (stackedEntity.getStackAmount() + spawnMobsCount < minimumEntityRequirement) {
+                // We need to look for nearby entities and merge them together.
+                AtomicInteger stackedEntityNewCount = new AtomicInteger(stackedEntity.getStackAmount() + spawnMobsCount);
+                int entityStackLimit = stackedEntity.getStackLimit();
+
                 nearbyStackableEntities.forEach(nearbyEntity -> {
-                    if (nearbyEntity != stackedEntity) {
+                    int nearbyEntityStackAmount = nearbyEntity.getStackAmount();
+                    if (nearbyEntity != stackedEntity &&
+                            stackedEntityNewCount.get() + nearbyEntityStackAmount < entityStackLimit &&
+                            nearbyEntity.runStackCheck(stackedEntity) == StackCheckResult.SUCCESS) {
                         nearbyEntity.remove();
                         nearbyEntity.spawnStackParticle(true);
+                        stackedEntityNewCount.addAndGet(nearbyEntityStackAmount);
                     }
                 });
 
-                stackedEntity.increaseStackAmount(spawnMobsCount, true);
-                finalSpawnMobsCount = nearbyEntitiesCount.get() + spawnMobsCount - stackedEntity.getStackAmount();
-            } else {
-                return;
-            }
+                if (stackedEntityNewCount.get() < minimumEntityRequirement)
+                    return;
 
-            stackedEntity.increaseStackAmount(finalSpawnMobsCount, true);
+                int increaseStackAmount = stackedEntityNewCount.get() - stackedEntity.getStackAmount();
+                stackedEntity.increaseStackAmount(increaseStackAmount, true);
+            } else {
+                stackedEntity.increaseStackAmount(spawnMobsCount, true);
+            }
 
             stackedEntity.spawnStackParticle(true);
 
