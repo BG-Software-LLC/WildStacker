@@ -88,7 +88,7 @@ public class NMSWorld implements com.bgsoftware.wildstacker.nms.NMSWorld {
         if (world != null) {
             ServerLevel serverLevel = ((CraftWorld) world).getHandle();
             serverLevel.sendParticles(null,
-                    CraftParticle.toNMS(Particle.valueOf(particle)),
+                    CraftParticle.createParticleParam(Particle.valueOf(particle), null),
                     location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                     count, offsetX, offsetY, offsetZ, extra, false);
         }
