@@ -25,6 +25,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     private final boolean burning;
     private final int slimeSize;
     private final boolean ignoreSlimeSize;
+    private final boolean creeperCharged;
+    private final boolean ignoreCreeperCharged;
 
     public CustomLootEntityAttributes(EntityLootDataBuilder builder) {
         this.entityType = builder.entityType;
@@ -39,6 +41,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
         this.burning = builder.burning;
         this.slimeSize = builder.slimeSize;
         this.ignoreSlimeSize = builder.ignoreSlimeSize;
+        this.creeperCharged = builder.creeperCharged;
+        this.ignoreCreeperCharged = builder.ignoreCreeperCharged;
     }
 
     @Override
@@ -109,6 +113,22 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
             throw new UnsupportedOperationException();
 
         return this.ignoreSlimeSize;
+    }
+
+    @Override
+    public boolean isCreeperCharged() {
+        if(this.entityType != EntityType.CREEPER)
+            throw new UnsupportedOperationException();
+
+        return this.creeperCharged;
+    }
+
+    @Override
+    public boolean isIgnoreCreeperCharged() {
+        if(this.entityType != EntityType.CREEPER)
+            throw new UnsupportedOperationException();
+
+        return this.ignoreCreeperCharged;
     }
 
 }

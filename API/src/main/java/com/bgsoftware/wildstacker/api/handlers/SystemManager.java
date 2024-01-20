@@ -318,6 +318,14 @@ public interface SystemManager {
     LootEntityAttributes.Builder createLootContextBuilder(StackedEntity stackedEntity);
 
     /**
+     * Create an entity loot data builder for the given entity.
+     * Used to get drops of an entity, and modify some of the entity attributes if wanted.
+     *
+     * @return The new builder.
+     */
+    LootEntityAttributes.Builder createLootContextBuilder(LivingEntity livingEntity);
+
+    /**
      * Get a stacked snapshot of a chunk.
      *
      * @param chunk    The chunk

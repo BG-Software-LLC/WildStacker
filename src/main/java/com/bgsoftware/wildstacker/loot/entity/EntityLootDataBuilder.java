@@ -2,16 +2,16 @@ package com.bgsoftware.wildstacker.loot.entity;
 
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
 
     @Nullable
-    private final StackedEntity stackedEntity;
+    private final LivingEntity livingEntity;
     public final EntityType entityType;
     @Nullable
     public LootEntityAttributes killerEntityData;
@@ -28,15 +28,17 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     public boolean burning;
     public int slimeSize;
     public boolean ignoreSlimeSize;
+    public boolean creeperCharged;
+    public boolean ignoreCreeperCharged;
 
     public EntityLootDataBuilder(EntityType entityType) {
-        this.stackedEntity = null;
+        this.livingEntity = null;
         this.entityType = entityType;
     }
 
-    public EntityLootDataBuilder(StackedEntity stackedEntity) {
-        this.stackedEntity = stackedEntity;
-        this.entityType = stackedEntity.getType();
+    public EntityLootDataBuilder(LivingEntity livingEntity) {
+        this.livingEntity = livingEntity;
+        this.entityType = livingEntity.getType();
     }
 
     @Override
@@ -95,7 +97,7 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
 
     @Override
     public LootEntityAttributes.Builder setSlimeSize(int slimeSize) {
-        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+        if (this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
             throw new UnsupportedOperationException();
 
         this.slimeSize = slimeSize;
@@ -104,7 +106,7 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
 
     @Override
     public LootEntityAttributes.Builder setIgnoreSlimeSize(boolean ignoreSlimeSize) {
-        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+        if (this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
             throw new UnsupportedOperationException();
 
         this.ignoreSlimeSize = ignoreSlimeSize;
@@ -112,11 +114,29 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     }
 
     @Override
+    public LootEntityAttributes.Builder setCreeperCharged(boolean charged) {
+        if (this.entityType != EntityType.CREEPER)
+            throw new UnsupportedOperationException();
+
+        this.creeperCharged = charged;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setIgnoreCreeperCharged(boolean ignoreCharged) {
+        if (this.entityType != EntityType.CREEPER)
+            throw new UnsupportedOperationException();
+
+        this.ignoreCreeperCharged = ignoreCharged;
+        return this;
+    }
+
+    @Override
     public LootEntityAttributes build() {
-        if (this.stackedEntity == null) {
+        if (this.livingEntity == null) {
             return new CustomLootEntityAttributes(this);
         } else {
-            return new LivingLootEntityAttributes(this.stackedEntity, this);
+            return new LivingLootEntityAttributes(this.livingEntity, this);
         }
     }
 

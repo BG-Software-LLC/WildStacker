@@ -117,6 +117,18 @@ public class EntityFilters {
         };
     }
 
+    public static Predicate<LootEntityAttributes> creeperChargedFilter(boolean isCreeperCharged) {
+        return entityData -> {
+            if (entityData.getEntityType() != EntityType.CREEPER)
+                return true;
+
+            if (entityData.isIgnoreCreeperCharged())
+                return true;
+
+            return entityData.isCreeperCharged() == isCreeperCharged;
+        };
+    }
+
     public static Predicate<LootEntityAttributes> typeFilter(String entityTypeName) {
         boolean negate = entityTypeName.startsWith("!");
         EntityType entityType = EntityType.valueOf((negate ? entityTypeName.substring(1) : entityTypeName).toUpperCase(Locale.ENGLISH));

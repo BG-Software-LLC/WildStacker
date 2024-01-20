@@ -623,7 +623,13 @@ public final class SystemHandler implements SystemManager {
     @Override
     public LootEntityAttributes.Builder createLootContextBuilder(StackedEntity stackedEntity) {
         Preconditions.checkNotNull(stackedEntity, "stackedEntity parameter cannot be null.");
-        return new EntityLootDataBuilder(stackedEntity);
+        return new EntityLootDataBuilder(stackedEntity.getLivingEntity());
+    }
+
+    @Override
+    public LootEntityAttributes.Builder createLootContextBuilder(LivingEntity livingEntity) {
+        Preconditions.checkNotNull(livingEntity, "livingEntity parameter cannot be null.");
+        return new EntityLootDataBuilder(livingEntity);
     }
 
     @Override

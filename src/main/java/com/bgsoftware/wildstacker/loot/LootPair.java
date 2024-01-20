@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
@@ -92,11 +92,11 @@ public class LootPair extends FilteredLoot {
         }
 
         if ((Boolean) jsonObject.getOrDefault("killedByPlayer", false)) {
-            killerFilters.add(entity -> entity instanceof Player);
+            killerFilters.add(entityAttributes -> entityAttributes.getEntityType() == EntityType.PLAYER);
         }
 
         if ((Boolean) jsonObject.getOrDefault("killedByCharged", false)) {
-            killerFilters.add(entity -> entity instanceof Creeper && ((Creeper) entity).isPowered());
+            killerFilters.add(EntityFilters.creeperChargedFilter(true));
         }
 
         if (jsonObject.containsKey("items")) {

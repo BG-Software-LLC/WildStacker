@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import javax.annotation.Nullable;
@@ -30,6 +31,17 @@ public interface LootEntityAttributes {
      */
     static LootEntityAttributes.Builder newBuilder(StackedEntity stackedEntity) {
         return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(stackedEntity);
+    }
+
+    /**
+     * Create a {@link Builder} for the given entity.
+     * You can overwrite its attributes using the returned {@link Builder}
+     *
+     * @param livingEntity The entity to get the attributes from.
+     * @return The new {@link Builder}
+     */
+    static LootEntityAttributes.Builder newBuilder(LivingEntity livingEntity) {
+        return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(livingEntity);
     }
 
     /**
@@ -103,6 +115,24 @@ public interface LootEntityAttributes {
      * @throws UnsupportedOperationException If the entity is not a Slime or a Magma Cube.
      */
     boolean isIgnoreSlimeSize();
+
+    /*
+     * CREEPER ONLY
+     */
+
+    /**
+     * Get whether the creeper is powered.
+     *
+     * @throws UnsupportedOperationException If the entity is not a Creeper.
+     */
+    boolean isCreeperCharged();
+
+    /**
+     * Whether to ignore charged related checks when filtering out drops.
+     *
+     * @throws UnsupportedOperationException If the entity is not a Creeper.
+     */
+    boolean isIgnoreCreeperCharged();
 
     /**
      * Builder class to build a new {@link LootEntityAttributes} object.
@@ -188,6 +218,22 @@ public interface LootEntityAttributes {
          * @throws UnsupportedOperationException If the entity is not a slime or a Magma Cube
          */
         Builder setIgnoreSlimeSize(boolean ignoreSlimeSize);
+
+        /**
+         * Set whether the creeper is powered.
+         *
+         * @param charged Whether the creeper is charged.
+         * @throws UnsupportedOperationException If the entity is not a Creeper.
+         */
+        Builder setCreeperCharged(boolean charged);
+
+        /**
+         * Set whether to ignore charged related checks when filtering out drops.
+         *
+         * @param ignoreCharged Whether to ignore charged related checks.
+         * @throws UnsupportedOperationException If the entity is not a Creeper.
+         */
+        Builder setIgnoreCreeperCharged(boolean ignoreCharged);
 
         /**
          * Create a new {@link LootEntityAttributes} out of this builder.

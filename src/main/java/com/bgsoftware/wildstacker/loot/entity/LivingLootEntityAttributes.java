@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
@@ -17,15 +18,17 @@ import java.util.Optional;
 
 public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
 
+    private final LivingEntity livingEntity;
     private final StackedEntity stackedEntity;
 
-    public LivingLootEntityAttributes(StackedEntity stackedEntity, EntityLootDataBuilder builder) {
+    public LivingLootEntityAttributes(LivingEntity livingEntity, EntityLootDataBuilder builder) {
         super(builder);
-        this.stackedEntity = stackedEntity;
+        this.livingEntity = livingEntity;
+        this.stackedEntity = EntityUtils.isStackable(livingEntity) ? WStackedEntity.of(livingEntity) : null;
     }
 
     public LivingEntity getLivingEntity() {
-        return this.stackedEntity.getLivingEntity();
+        return this.livingEntity;
     }
 
     @Nullable
@@ -35,11 +38,13 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private LootEntityAttributes getKillerFromEntity() {
-        Entity entityKiller = this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
+        Entity entityKiller = this.stackedEntity == null ? null : this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
+
         if (entityKiller == null)
-            entityKiller = EntityUtils.getDamagerFromEvent(this.stackedEntity.getLivingEntity().getLastDamageCause(), false);
-        return !EntityUtils.isStackable(entityKiller) ? null :
-                LootEntityAttributes.newBuilder(WStackedEntity.of(entityKiller)).build();
+            entityKiller = EntityUtils.getDamagerFromEvent(this.livingEntity.getLastDamageCause(), false);
+
+        return !(entityKiller instanceof LivingEntity) ? null :
+                LootEntityAttributes.newBuilder((LivingEntity) entityKiller).build();
     }
 
     @Override
@@ -48,8 +53,9 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         return Optional.ofNullable(super.getUpgrade()).orElseGet(this::getUpgradeFromEntity);
     }
 
+    @Nullable
     private SpawnerUpgrade getUpgradeFromEntity() {
-        return this.stackedEntity.getUpgrade();
+        return this.stackedEntity == null ? null : this.stackedEntity.getUpgrade();
     }
 
     @Nullable
@@ -58,8 +64,9 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         return Optional.ofNullable(super.getSpawnCause()).orElseGet(this::getSpawnCauseFromEntity);
     }
 
+    @Nullable
     private SpawnCause getSpawnCauseFromEntity() {
-        return this.stackedEntity.getSpawnCause();
+        return this.stackedEntity == null ? null : this.stackedEntity.getSpawnCause();
     }
 
 
@@ -69,8 +76,9 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         return Optional.ofNullable(super.getDeathCause()).orElseGet(this::getDeathCauseFromEntity);
     }
 
+    @Nullable
     private EntityDamageEvent.DamageCause getDeathCauseFromEntity() {
-        EntityDamageEvent lastCause = this.stackedEntity.getLivingEntity().getLastDamageCause();
+        EntityDamageEvent lastCause = this.livingEntity.getLastDamageCause();
         return lastCause == null ? null : lastCause.getCause();
     }
 
@@ -80,7 +88,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private boolean isBurningFromEntity() {
-        return this.stackedEntity.getLivingEntity().getFireTicks() > 0;
+        return this.livingEntity.getFireTicks() > 0;
     }
 
     @Override
@@ -90,8 +98,18 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private int getSlimeSizeFromEntity() {
-        Slime slime = (Slime) this.stackedEntity.getLivingEntity();
+        Slime slime = (Slime) this.livingEntity;
         return slime.getSize();
+    }
+
+    @Override
+    public boolean isCreeperCharged() {
+        return super.isCreeperCharged() || isCreeperChargedFromEntity();
+    }
+
+    private boolean isCreeperChargedFromEntity() {
+        Creeper creeper = (Creeper) this.livingEntity;
+        return creeper.isPowered();
     }
 
 }
