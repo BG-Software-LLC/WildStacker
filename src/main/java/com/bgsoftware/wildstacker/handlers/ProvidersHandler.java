@@ -181,7 +181,7 @@ public final class ProvidersHandler {
         if (Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
             int plotSquaredVersion = Integer.parseInt(plugin.getDescription().getVersion().split("\\.")[0]);
-            if (plotSquaredVersion >= 6){
+            if (plotSquaredVersion >= 6) {
                 try {
                     Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared6");
                     claimsProvider.ifPresent(claimsProviders::add);
@@ -340,13 +340,15 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
         if (enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners")) {
-            Plugin epicSpawners = pluginManager.getPlugin("EpicSpawners");
-            if (epicSpawners.getDescription().getVersion().startsWith("5")) {
+            String version = pluginManager.getPlugin("EpicSpawners").getDescription().getVersion();
+            if (version.startsWith("5")) {
                 registerHook("EpicSpawners5Hook");
-            } else if (epicSpawners.getDescription().getVersion().startsWith("6")) {
+            } else if (version.startsWith("6")) {
                 registerHook("EpicSpawners6Hook");
-            } else if (epicSpawners.getDescription().getVersion().startsWith("7")) {
+            } else if (version.startsWith("7")) {
                 registerHook("EpicSpawners7Hook");
+            } else if (version.startsWith("8")) {
+                registerHook("EpicSpawners8Hook");
             }
         }
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
