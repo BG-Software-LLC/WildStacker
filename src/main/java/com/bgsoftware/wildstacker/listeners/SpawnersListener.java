@@ -597,10 +597,12 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
+        ItemStack inHand = e.getItem().clone();
+
         Executor.sync(() -> {
             stackedSpawner.updateName();
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
-                ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+                ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), inHand, stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
 
