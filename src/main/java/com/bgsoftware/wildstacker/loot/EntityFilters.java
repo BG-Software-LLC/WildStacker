@@ -108,7 +108,7 @@ public class EntityFilters {
     public static Predicate<LootEntityAttributes> slimeSizeFilter(Number slimeSize) {
         return entityData -> {
             if (entityData.getEntityType() != EntityType.SLIME && entityData.getEntityType() != EntityType.MAGMA_CUBE)
-                return true;
+                return false;
 
             if (entityData.isIgnoreSlimeSize())
                 return true;
@@ -120,7 +120,7 @@ public class EntityFilters {
     public static Predicate<LootEntityAttributes> creeperChargedFilter(boolean isCreeperCharged) {
         return entityData -> {
             if (entityData.getEntityType() != EntityType.CREEPER)
-                return true;
+                return false;
 
             if (entityData.isIgnoreCreeperCharged())
                 return true;
