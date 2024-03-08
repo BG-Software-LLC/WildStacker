@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.nms.v1_7_R4.spawner;
 
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import net.minecraft.server.v1_7_R4.MobSpawnerAbstract;
+import net.minecraft.server.v1_7_R4.NBTTagCompound;
 import net.minecraft.server.v1_7_R4.TileEntityMobSpawner;
 
 import java.lang.ref.WeakReference;
@@ -42,6 +43,11 @@ public class TileEntityMobSpawnerWatcher extends TileEntityMobSpawner {
         }
 
         this.mobSpawner.h();
+    }
+
+    @Override
+    public void b(NBTTagCompound nbtTagCompound) {
+        this.mobSpawner.b(nbtTagCompound);
     }
 
 }
