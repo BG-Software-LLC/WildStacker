@@ -492,7 +492,21 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         }
 
         if (!actualItemDupe && isDifferentPickupItem) {
-            entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+            if (pickupCount < originalItemCount) {
+                // Need to simulate item pickup
+                EntityItem simulatedEntityItemPickup = pickupItem != entityItem ? pickupItem :
+                        new EntityItem(entityItem.world, entityItem.locX, entityItem.locY, entityItem.locZ, entityItem.getItemStack());
+
+                EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
+
+                entityTracker.a(entityLiving, new PacketPlayOutSpawnEntity(simulatedEntityItemPickup, 2, 1));
+                entityTracker.a(entityLiving, new PacketPlayOutEntityMetadata(
+                        simulatedEntityItemPickup.getId(), simulatedEntityItemPickup.getDataWatcher(), true));
+                entityLiving.receive(simulatedEntityItemPickup, Math.min(pickupCount, maxStackSize));
+            } else {
+                entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+            }
+
             if (!pickupItem.isAlive())
                 entityItem.die();
         }

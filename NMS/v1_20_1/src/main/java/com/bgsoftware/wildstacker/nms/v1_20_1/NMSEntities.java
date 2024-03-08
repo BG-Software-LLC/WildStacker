@@ -649,7 +649,23 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
 
         if (!actualItemDupe && isDifferentPickupItem) {
             livingEntity.onItemPickup(itemEntity);
-            livingEntity.take(itemEntity, Math.min(pickupCount, maxStackSize));
+
+            if (pickupCount < originalItemCount) {
+                // Need to simulate item pickup
+                ItemEntity simulatedEntityItemPickup = pickupItem != itemEntity ? pickupItem :
+                        new ItemEntity(itemEntity.level(), itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(), itemEntity.getItem());
+
+                List<SynchedEntityData.DataValue<?>> entityData = simulatedEntityItemPickup.getEntityData().packDirty();
+
+                ServerChunkCache serverChunkCache = ((ServerLevel) simulatedEntityItemPickup.level()).getChunkSource();
+                serverChunkCache.broadcastAndSend(livingEntity, simulatedEntityItemPickup.getAddEntityPacket());
+                serverChunkCache.broadcastAndSend(livingEntity, new ClientboundSetEntityDataPacket(
+                        simulatedEntityItemPickup.getId(), entityData));
+                livingEntity.take(simulatedEntityItemPickup, Math.min(pickupCount, maxStackSize));
+            } else {
+                livingEntity.take(itemEntity, Math.min(pickupCount, maxStackSize));
+            }
+
             if (!pickupItem.isAlive())
                 itemEntity.discard();
         }
