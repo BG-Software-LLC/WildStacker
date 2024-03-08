@@ -3,10 +3,9 @@ package com.bgsoftware.wildstacker.nms.v1_16_R3;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
-import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.StackedMobSpawner;
 import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.TileEntityMobSpawnerWatcher;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_16_R3.BiomeBase;
@@ -14,6 +13,7 @@ import net.minecraft.server.v1_16_R3.Biomes;
 import net.minecraft.server.v1_16_R3.Block;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.Blocks;
+import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkCoordIntPair;
 import net.minecraft.server.v1_16_R3.EntityMonster;
 import net.minecraft.server.v1_16_R3.EnumDifficulty;
@@ -30,9 +30,12 @@ import net.minecraft.server.v1_16_R3.World;
 import net.minecraft.server.v1_16_R3.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -54,30 +57,31 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
     }
 
     @Override
-    public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
-        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+    public void updateStackedSpawners(org.bukkit.Chunk bukkitChunk) {
+        org.bukkit.World bukkitWorld = bukkitChunk.getWorld();
+        Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+        WorldServer worldServer = chunk.world;
 
-        if (isDebug)
-            Debug.debug("NMSSpawners", "updateStackedSpawner", "Trying to update spawner");
+        List<TileEntity> watchersToAdd = new LinkedList<>();
 
-        World world = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
-        Location location = stackedSpawner.getLocation();
+        for (TileEntity tileEntity : chunk.getTileEntities().values()) {
+            if (tileEntity instanceof TileEntityMobSpawner && !(tileEntity instanceof TileEntityMobSpawnerWatcher)) {
+                BlockPosition blockPosition = tileEntity.getPosition();
 
-        TileEntity tileEntity = world.getTileEntity(new BlockPosition(location.getX(), location.getY(), location.getZ()));
+                StackedSpawner stackedSpawner = WStackedSpawner.of(bukkitWorld.getBlockAt(
+                        blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()));
 
-        if (isDebug && tileEntity instanceof TileEntityMobSpawner)
-            Debug.debug("NMSSpawners", "updateStackedSpawner", "mobSpawner=" + ((TileEntityMobSpawner) tileEntity).getSpawner());
+                TileEntityMobSpawnerWatcher tileEntityMobSpawnerWatcher = new TileEntityMobSpawnerWatcher(
+                        stackedSpawner, (TileEntityMobSpawner) tileEntity);
 
-        if (tileEntity instanceof TileEntityMobSpawner && (
-                !(((TileEntityMobSpawner) tileEntity).getSpawner() instanceof StackedMobSpawner) ||
-                        !((StackedMobSpawner) ((TileEntityMobSpawner) tileEntity).getSpawner()).isValid())) {
-            if (isDebug)
-                Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting mobSpawner to new one.");
-            new StackedMobSpawner((TileEntityMobSpawner) tileEntity, stackedSpawner);
-            return true;
+                watchersToAdd.add(tileEntityMobSpawnerWatcher);
+            }
         }
 
-        return false;
+        for(TileEntity tileEntity : watchersToAdd) {
+            worldServer.removeTileEntity(tileEntity.getPosition());
+            worldServer.setTileEntity(tileEntity.getPosition(), tileEntity);
+        }
     }
 
     @Override

@@ -1,12 +1,12 @@
 package com.bgsoftware.wildstacker.nms.v1_17;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
-import com.bgsoftware.wildstacker.nms.v1_17.spawner.StackedBaseSpawner;
+import com.bgsoftware.wildstacker.nms.v1_17.spawner.SpawnerWatcherTickingBlockEntity;
 import com.bgsoftware.wildstacker.nms.v1_17.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
@@ -17,6 +17,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -24,19 +25,30 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.EntityType;
 
+import java.lang.reflect.Modifier;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
 public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpawners {
+
+    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED = new ReflectField<>(
+            Level.class, List.class, Modifier.PROTECTED | Modifier.FINAL, 1);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -52,30 +64,37 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
     }
 
     @Override
-    public boolean updateStackedSpawner(StackedSpawner stackedSpawner) {
-        boolean isDebug = ((WStackedSpawner) stackedSpawner).isDebug();
+    public void updateStackedSpawners(Chunk chunk) {
+        World bukkitWorld = chunk.getWorld();
+        LevelChunk levelChunk = ((CraftChunk) chunk).getHandle();
+        ServerLevel serverLevel = levelChunk.level;
 
-        if (isDebug)
-            Debug.debug("NMSSpawners", "updateStackedSpawner", "Trying to update spawner");
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
 
-        ServerLevel serverLevel = ((CraftWorld) stackedSpawner.getWorld()).getHandle();
-        Location location = stackedSpawner.getLocation();
-        BlockPos blockPos = new BlockPos(location.getX(), location.getY(), location.getZ());
+        List<TickingBlockEntity> watchersToAdd = new LinkedList<>();
+        List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
+        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
 
-        BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-
-        if (isDebug && blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity)
-            Debug.debug("NMSSpawners", "updateStackedSpawner", "baseSpawner=" + spawnerBlockEntity.getSpawner());
-
-        if (blockEntity instanceof SpawnerBlockEntity spawnerBlockEntity &&
-                (!(spawnerBlockEntity.getSpawner() instanceof StackedBaseSpawner baseSpawner) || !baseSpawner.isValid())) {
-            if (isDebug)
-                Debug.debug("NMSSpawners", "updateStackedSpawner", "Setting baseSpawner to new one.");
-            new StackedBaseSpawner(spawnerBlockEntity, stackedSpawner);
-            return true;
+        while (blockEntityIterator.hasNext()) {
+            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
+            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
+                continue;
+            ChunkPos chunkPos = new ChunkPos(tickingBlockEntity.getPos());
+            if (chunkPos.x == chunkX && chunkPos.z == chunkZ) {
+                BlockPos blockPos = tickingBlockEntity.getPos();
+                BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos);
+                if (blockEntity instanceof SpawnerBlockEntity) {
+                    StackedSpawner stackedSpawner = WStackedSpawner.of(bukkitWorld.getBlockAt(
+                            blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                    watchersToAdd.add(new SpawnerWatcherTickingBlockEntity(
+                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity));
+                    blockEntityIterator.remove();
+                }
+            }
         }
 
-        return false;
+        blockEntityTickers.addAll(watchersToAdd);
     }
 
     @Override

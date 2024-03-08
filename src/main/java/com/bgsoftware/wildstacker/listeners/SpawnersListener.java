@@ -453,15 +453,6 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if (plugin.getSettings().spawnersOverrideEnabled) {
-            if (stackedSpawner.isDebug())
-                Debug.debug("SpawnersListener", "onSpawnerSpawn", "spawnersOverrideEnabled=true");
-            // We make sure the spawner is still overridden by WildStacker
-            // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
-            if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
-                return;
-        }
-
         if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "Running original flow");
 
@@ -785,13 +776,6 @@ public final class SpawnersListener implements Listener {
             // All the checks here were already been performed by the overridden spawner.
             if (stackedSpawner.isSpawnerOverridenTick())
                 return;
-
-            if (plugin.getSettings().spawnersOverrideEnabled) {
-                // We make sure the spawner is still overridden by WildStacker
-                // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
-                if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
-                    return;
-            }
 
             SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
