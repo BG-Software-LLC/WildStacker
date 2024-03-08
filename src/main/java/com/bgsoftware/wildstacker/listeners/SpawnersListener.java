@@ -70,7 +70,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -827,24 +826,27 @@ public final class SpawnersListener implements Listener {
                 stackedEntity.increaseStackAmount(spawnMobsCount, true);
             } else if (stackedEntity.getStackAmount() + spawnMobsCount < minimumEntityRequirement) {
                 // We need to look for nearby entities and merge them together.
-                AtomicInteger stackedEntityNewCount = new AtomicInteger(stackedEntity.getStackAmount() + spawnMobsCount);
+                int stackedEntityNewCount = stackedEntity.getStackAmount() + spawnMobsCount;
                 int entityStackLimit = stackedEntity.getStackLimit();
 
-                nearbyStackableEntities.forEach(nearbyEntity -> {
+                for (StackedEntity nearbyEntity : nearbyStackableEntities) {
                     int nearbyEntityStackAmount = nearbyEntity.getStackAmount();
                     if (nearbyEntity != stackedEntity &&
-                            stackedEntityNewCount.get() + nearbyEntityStackAmount < entityStackLimit &&
+                            stackedEntityNewCount + nearbyEntityStackAmount <= entityStackLimit &&
                             nearbyEntity.runStackCheck(stackedEntity) == StackCheckResult.SUCCESS) {
                         nearbyEntity.remove();
                         nearbyEntity.spawnStackParticle(true);
-                        stackedEntityNewCount.addAndGet(nearbyEntityStackAmount);
-                    }
-                });
+                        stackedEntityNewCount += nearbyEntityStackAmount;
 
-                if (stackedEntityNewCount.get() < minimumEntityRequirement)
+                        if (stackedEntityNewCount >= entityStackLimit)
+                            break;
+                    }
+                }
+
+                if (stackedEntityNewCount < minimumEntityRequirement)
                     return;
 
-                int increaseStackAmount = stackedEntityNewCount.get() - stackedEntity.getStackAmount();
+                int increaseStackAmount = stackedEntityNewCount - stackedEntity.getStackAmount();
                 stackedEntity.increaseStackAmount(increaseStackAmount, true);
             } else {
                 stackedEntity.increaseStackAmount(spawnMobsCount, true);
