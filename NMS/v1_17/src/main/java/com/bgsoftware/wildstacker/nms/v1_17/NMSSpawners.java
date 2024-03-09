@@ -63,10 +63,23 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
     }
 
+    private static boolean isChunkContainsSpawners(LevelChunk levelChunk) {
+        for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
+            if (blockEntity instanceof SpawnerBlockEntity)
+                return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void updateStackedSpawners(Chunk chunk) {
         World bukkitWorld = chunk.getWorld();
         LevelChunk levelChunk = ((CraftChunk) chunk).getHandle();
+
+        if (!isChunkContainsSpawners(levelChunk))
+            return;
+
         ServerLevel serverLevel = levelChunk.level;
 
         int chunkX = chunk.getX();
@@ -95,6 +108,41 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         }
 
         blockEntityTickers.addAll(watchersToAdd);
+    }
+
+    @Override
+    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
+        Location location = stackedSpawner.getLocation();
+
+        ServerLevel serverLevel = ((CraftWorld) location.getWorld()).getHandle();
+        int blockX = location.getBlockX();
+        int blockY = location.getBlockY();
+        int blockZ = location.getBlockZ();
+
+        List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
+
+        TickingBlockEntity watcherToAdd = null;
+        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
+
+        while (blockEntityIterator.hasNext()) {
+            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
+            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
+                continue;
+
+            BlockPos blockPos = tickingBlockEntity.getPos();
+            if (blockPos.getX() == blockX && blockPos.getY() == blockY && blockPos.getZ() == blockZ) {
+                BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
+                if (blockEntity instanceof SpawnerBlockEntity) {
+                    watcherToAdd = new SpawnerWatcherTickingBlockEntity(
+                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity);
+                    blockEntityIterator.remove();
+                    break;
+                }
+            }
+        }
+
+        if (watcherToAdd != null)
+            blockEntityTickers.add(watcherToAdd);
     }
 
     @Override

@@ -47,10 +47,23 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
     }
 
+    private static boolean isChunkContainsSpawners(Chunk chunk) {
+        for (TileEntity tileEntity : (Collection<TileEntity>) chunk.tileEntities.values()) {
+            if (tileEntity instanceof TileEntityMobSpawner)
+                return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void updateStackedSpawners(org.bukkit.Chunk bukkitChunk) {
         org.bukkit.World bukkitWorld = bukkitChunk.getWorld();
         Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
+
+        if (!isChunkContainsSpawners(chunk))
+            return;
+
         WorldServer worldServer = (WorldServer) chunk.world;
 
         List<TileEntity> watchersToAdd = new LinkedList<>();
@@ -70,6 +83,36 @@ public final class NMSSpawners implements com.bgsoftware.wildstacker.nms.NMSSpaw
         for (TileEntity tileEntity : watchersToAdd) {
             worldServer.p(tileEntity.x, tileEntity.y, tileEntity.z);
             worldServer.setTileEntity(tileEntity.x, tileEntity.y, tileEntity.z, tileEntity);
+        }
+    }
+
+    @Override
+    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
+        Location location = stackedSpawner.getLocation();
+
+        WorldServer worldServer = ((CraftWorld) location.getWorld()).getHandle();
+
+        int blockX = location.getBlockX();
+        int blockY = location.getBlockY();
+        int blockZ = location.getBlockZ();
+
+        Chunk chunk = worldServer.getChunkAt(blockX >> 4, blockZ >> 4);
+
+        TileEntity watcherToAdd = null;
+
+        for (TileEntity tileEntity : (Collection<TileEntity>) chunk.tileEntities.values()) {
+            if (tileEntity instanceof TileEntityMobSpawner && !(tileEntity instanceof TileEntityMobSpawnerWatcher)) {
+                if (tileEntity.x == blockX && tileEntity.y == blockY && tileEntity.z == blockZ) {
+                    watcherToAdd = new TileEntityMobSpawnerWatcher(
+                            stackedSpawner, (TileEntityMobSpawner) tileEntity);
+                    break;
+                }
+            }
+        }
+
+        if (watcherToAdd != null) {
+            worldServer.p(watcherToAdd.x, watcherToAdd.y, watcherToAdd.z);
+            worldServer.setTileEntity(watcherToAdd.x, watcherToAdd.y, watcherToAdd.z, watcherToAdd);
         }
     }
 

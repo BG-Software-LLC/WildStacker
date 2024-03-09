@@ -1,23 +1,27 @@
 package com.bgsoftware.wildstacker.nms.v1_20_1.spawner;
 
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import org.bukkit.Location;
 
 import java.lang.ref.WeakReference;
 
 public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
     private static final String CLASS_NAME = SpawnerWatcherTickingBlockEntity.class.getSimpleName();
     private static final int CHECK_INTERVAL = 20;
 
-    private final WeakReference<StackedSpawner> stackedSpawner;
     private final SpawnerBlockEntity spawnerBlockEntity;
     private final TickingBlockEntity original;
     private final String type;
 
+    private WeakReference<StackedSpawner> stackedSpawner;
     private int currentTick = CHECK_INTERVAL;
 
     public SpawnerWatcherTickingBlockEntity(StackedSpawner stackedSpawner,
@@ -33,10 +37,6 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
     public void tick() {
         this.original.tick();
 
-        StackedSpawner stackedSpawner = this.stackedSpawner.get();
-        if (stackedSpawner == null)
-            return;
-
         if (currentTick++ < CHECK_INTERVAL)
             return;
 
@@ -44,6 +44,17 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
 
         BaseSpawner baseSpawner = this.spawnerBlockEntity.getSpawner();
         if (!(baseSpawner instanceof StackedBaseSpawner)) {
+            StackedSpawner stackedSpawner = this.stackedSpawner.get();
+
+            if (stackedSpawner == null) {
+                Location location = new Location(this.spawnerBlockEntity.getLevel().getWorld(),
+                        getPos().getX(), getPos().getY(), getPos().getZ());
+                if (!plugin.getSystemManager().isStackedSpawner(location))
+                    return;
+                stackedSpawner = plugin.getSystemManager().getStackedSpawner(location);
+                this.stackedSpawner = new WeakReference<>(stackedSpawner);
+            }
+
             StackedBaseSpawner stackedBaseSpawner = new StackedBaseSpawner(spawnerBlockEntity, stackedSpawner);
             if (this.spawnerBlockEntity.getSpawner() != stackedBaseSpawner)
                 throw new RuntimeException("Failed to update spawner");
@@ -52,8 +63,7 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
 
     @Override
     public boolean isRemoved() {
-        StackedSpawner stackedSpawner = this.stackedSpawner.get();
-        return stackedSpawner == null || this.spawnerBlockEntity.isRemoved();
+        return this.spawnerBlockEntity.isRemoved();
     }
 
     @Override
