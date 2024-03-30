@@ -266,11 +266,11 @@ public final class ItemUtils {
     public static EquipmentSlot getHand(Event event) {
         ReflectMethod<EquipmentSlot> getHandMethod;
 
-        if (event.getClass() == PlayerInteractEvent.class) {
+        if (event instanceof PlayerInteractEvent) {
             getHandMethod = PLAYER_INTERACT_EVENT_GET_HAND;
-        } else if (event.getClass() == PlayerInteractEntityEvent.class) {
+        } else if (event instanceof PlayerInteractEntityEvent) {
             getHandMethod = PLAYER_INTERACT_ENTITY_EVENT_GET_HAND;
-        } else if (event.getClass() == BlockPlaceEvent.class) {
+        } else if (event instanceof BlockPlaceEvent) {
             getHandMethod = BLOCK_PLACE_EVENT_GET_HAND;
         } else if (event instanceof PlayerBucketEvent) {
             getHandMethod = PLAYER_BUCKET_EVENT_GET_HAND;
