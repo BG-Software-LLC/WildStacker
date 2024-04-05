@@ -93,6 +93,7 @@ public final class EntitiesListener implements Listener {
             Maps.newEnumMap(ImmutableMap.of(EntityDamageEvent.DamageModifier.BASE, Functions.constant(-0.0D)));
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
     private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
+    private final static Material TURTLE_EGG = Materials.getMaterialOrNull("TURTLE_EGG");
 
     public static EntitiesListener IMP;
 
@@ -280,7 +281,8 @@ public final class EntitiesListener implements Listener {
             shouldSimulateDeath = true;
         } else {
             // In case the entity has enough health to deal with the damage, we check for one shot.
-            shouldSimulateDeath = !stackedEntity.hasFlag(EntityFlag.AVOID_ONE_SHOT) && damager != null &&
+            boolean hasAvoidOneShot = stackedEntity.getAndRemoveFlag(EntityFlag.AVOID_ONE_SHOT) != null;
+            shouldSimulateDeath = !hasAvoidOneShot && damager != null &&
                     plugin.getSettings().entitiesOneShotEnabled &&
                     GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
                     plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
@@ -866,8 +868,7 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.remove();
         }, 5L);
 
-        if (stackedEntity.hasFlag(EntityFlag.BYPASS_STACKING)) {
-            stackedEntity.removeFlag(EntityFlag.BYPASS_STACKING);
+        if (stackedEntity.getAndRemoveFlag(EntityFlag.BYPASS_STACKING) != null) {
             return;
         }
 
@@ -1048,17 +1049,20 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onTurtleEggLay(EntityChangeBlockEvent e) {
-            if (plugin.getSettings().smartBreedingEnabled && e.getEntity() instanceof org.bukkit.entity.Turtle &&
-                    e.getTo().name().equals("TURTLE_EGG")) {
-                StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-                int breedableAmount = !stackedEntity.hasFlag(EntityFlag.BREEDABLE_AMOUNT) ? 0 :
-                        stackedEntity.getFlag(EntityFlag.BREEDABLE_AMOUNT);
-                stackedEntity.removeFlag(EntityFlag.BREEDABLE_AMOUNT);
-                if (breedableAmount > 1) {
-                    Executor.sync(() -> plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
-                    turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
-                }
-            }
+            if (!plugin.getSettings().smartBreedingEnabled)
+                return;
+
+            if (!(e.getEntity() instanceof org.bukkit.entity.Turtle) || e.getTo() != TURTLE_EGG)
+                return;
+
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+            Integer breedableAmount = stackedEntity.getAndRemoveFlag(EntityFlag.BREEDABLE_AMOUNT);
+            if (breedableAmount == null || breedableAmount <= 1)
+                return;
+
+            Executor.sync(() -> plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
+            turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
         }
 
     }

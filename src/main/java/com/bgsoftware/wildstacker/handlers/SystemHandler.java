@@ -527,6 +527,7 @@ public final class SystemHandler implements SystemManager {
             Executor.sync(() -> {
                 plugin.getNMSEntities().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
+                Executor.sync(() -> EntityStorage.clearMetadata(livingEntity), 1L);
             }, 2L);
         }
     }

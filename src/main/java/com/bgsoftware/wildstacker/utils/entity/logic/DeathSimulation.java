@@ -163,9 +163,8 @@ public final class DeathSimulation {
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
                     finalDrops = drops;
-                    Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
+                    Integer expToDropFlag = stackedEntity.getAndRemoveFlag(EntityFlag.EXP_TO_DROP);
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
-                    stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                 }
 
 

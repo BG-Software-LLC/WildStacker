@@ -65,7 +65,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         super(livingEntity, 1);
         this.cachedUUID = livingEntity.getUniqueId();
         this.cachedEntityId = livingEntity.getEntityId();
-        this.spawnCause = getFlag(EntityFlag.SPAWN_CAUSE);
+        this.spawnCause = getAndRemoveFlag(EntityFlag.SPAWN_CAUSE);
         setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
     }
 
@@ -320,6 +320,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                     setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
                 plugin.getNMSEntities().setHealthDirectly(object, 0, false);
                 plugin.getNMSEntities().playDeathSound(object);
+                Executor.sync(this::clearFlags, 100L);
             }, 2L);
         }
 
@@ -597,6 +598,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void removeFlag(EntityFlag entityFlag) {
         EntityStorage.removeMetadata(cachedUUID, entityFlag);
+    }
+
+    @Override
+    public <T> T getAndRemoveFlag(EntityFlag entityFlag) {
+        return EntityStorage.removeMetadata(cachedUUID, entityFlag);
     }
 
     @Override
