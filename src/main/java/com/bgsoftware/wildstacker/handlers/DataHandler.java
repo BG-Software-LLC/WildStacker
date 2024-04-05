@@ -73,7 +73,7 @@ public final class DataHandler {
 
         SQLHelper.executeUpdate(statementStr, ex -> {
             if (!ex.getMessage().toLowerCase().contains("duplicate")) {
-                System.out.println("Statement: " + statementStr);
+                WildStackerPlugin.log("Statement: " + statementStr);
                 ex.printStackTrace();
             }
         });

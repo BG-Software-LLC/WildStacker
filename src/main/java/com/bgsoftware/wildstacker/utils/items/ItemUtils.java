@@ -110,7 +110,7 @@ public final class ItemUtils {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("Error while dropping " + itemStack + ":");
+            WildStackerPlugin.log("Error while dropping " + itemStack + ":");
             ex.printStackTrace();
         }
     }
