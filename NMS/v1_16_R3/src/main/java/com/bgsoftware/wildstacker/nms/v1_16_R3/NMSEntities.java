@@ -52,6 +52,7 @@ import net.minecraft.server.v1_16_R3.NBTNumber;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import net.minecraft.server.v1_16_R3.NBTTagString;
 import net.minecraft.server.v1_16_R3.PacketPlayOutCollect;
+import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R3.SoundEffect;
@@ -592,18 +593,26 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         if (!actualItemDupe && isDifferentPickupItem) {
             entityLiving.a(entityItem); // onItemPickup
 
+            int simulatedItemPickupCount = Math.min(pickupCount, maxStackSize);
+
             if (pickupCount < originalItemCount) {
                 // Need to simulate item pickup
-                EntityItem simulatedEntityItemPickup = pickupItem != entityItem ? pickupItem :
-                        new EntityItem(entityItem.world, entityItem.locX(), entityItem.locY(), entityItem.locZ(), entityItem.getItemStack());
+                ItemStack simulatedItem = pickupItem.getItemStack().cloneItemStack();
+                simulatedItem.setCount(simulatedItemPickupCount);
+
+                EntityItem simulatedEntityItemPickup = new EntityItem(entityItem.world,
+                        entityItem.locX(), entityItem.locY(), entityItem.locZ(), simulatedItem);
 
                 ChunkProviderServer chunkProviderServer = ((WorldServer) simulatedEntityItemPickup.world).getChunkProvider();
                 chunkProviderServer.broadcastIncludingSelf(entityLiving, simulatedEntityItemPickup.P());
                 chunkProviderServer.broadcastIncludingSelf(entityLiving, new PacketPlayOutEntityMetadata(
                         simulatedEntityItemPickup.getId(), simulatedEntityItemPickup.getDataWatcher(), true));
-                entityLiving.receive(simulatedEntityItemPickup, Math.min(pickupCount, maxStackSize));
+                chunkProviderServer.broadcastIncludingSelf(entityLiving, new PacketPlayOutCollect(
+                        simulatedEntityItemPickup.getId(), entityLiving.getId(), simulatedItemPickupCount));
+                chunkProviderServer.broadcastIncludingSelf(entityLiving, new PacketPlayOutEntityDestroy(
+                        simulatedEntityItemPickup.getId()));
             } else {
-                entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+                entityLiving.receive(entityItem, simulatedItemPickupCount);
             }
 
             if (!pickupItem.isAlive())

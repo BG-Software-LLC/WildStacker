@@ -23,6 +23,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -649,20 +650,28 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         if (!actualItemDupe && isDifferentPickupItem) {
             livingEntity.onItemPickup(itemEntity);
 
+            int simulatedItemPickupCount = Math.min(pickupCount, maxStackSize);
+
             if (pickupCount < originalItemCount) {
                 // Need to simulate item pickup
-                ItemEntity simulatedEntityItemPickup = pickupItem != itemEntity ? pickupItem :
-                        new ItemEntity(itemEntity.level, itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(), itemEntity.getItem());
+                ItemEntity simulatedEntityItemPickup = new ItemEntity(pickupItem.level,
+                        pickupItem.getX(), pickupItem.getY(), pickupItem.getZ(),
+                        pickupItem.getItem().copyWithCount(simulatedItemPickupCount));
 
                 List<SynchedEntityData.DataValue<?>> entityData = simulatedEntityItemPickup.getEntityData().packDirty();
 
                 ServerChunkCache serverChunkCache = ((ServerLevel) simulatedEntityItemPickup.level).getChunkSource();
                 serverChunkCache.broadcastAndSend(livingEntity, simulatedEntityItemPickup.getAddEntityPacket());
-                serverChunkCache.broadcastAndSend(livingEntity, new ClientboundSetEntityDataPacket(
-                        simulatedEntityItemPickup.getId(), entityData));
-                livingEntity.take(simulatedEntityItemPickup, Math.min(pickupCount, maxStackSize));
+                if (entityData != null) {
+                    serverChunkCache.broadcastAndSend(livingEntity, new ClientboundSetEntityDataPacket(
+                            simulatedEntityItemPickup.getId(), entityData));
+                }
+                serverChunkCache.broadcastAndSend(livingEntity, new ClientboundTakeItemEntityPacket(
+                        simulatedEntityItemPickup.getId(), livingEntity.getId(), simulatedItemPickupCount));
+                serverChunkCache.broadcastAndSend(livingEntity, new ClientboundRemoveEntitiesPacket(
+                        simulatedEntityItemPickup.getId()));
             } else {
-                livingEntity.take(itemEntity, Math.min(pickupCount, maxStackSize));
+                livingEntity.take(itemEntity, simulatedItemPickupCount);
             }
 
             if (!pickupItem.isAlive())

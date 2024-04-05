@@ -42,6 +42,7 @@ import net.minecraft.server.v1_7_R4.NBTTagLong;
 import net.minecraft.server.v1_7_R4.NBTTagShort;
 import net.minecraft.server.v1_7_R4.NBTTagString;
 import net.minecraft.server.v1_7_R4.PacketPlayOutCollect;
+import net.minecraft.server.v1_7_R4.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_7_R4.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_7_R4.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_7_R4.WatchableObject;
@@ -488,19 +489,25 @@ public final class NMSEntities implements com.bgsoftware.wildstacker.nms.NMSEnti
         }
 
         if (!actualItemDupe && isDifferentPickupItem) {
+            int simulatedItemPickupCount = Math.min(pickupCount, maxStackSize);
+
             if (pickupCount < originalItemCount) {
                 // Need to simulate item pickup
-                EntityItem simulatedEntityItemPickup = pickupItem != entityItem ? pickupItem :
-                        new EntityItem(entityItem.world, entityItem.locX, entityItem.locY, entityItem.locZ, entityItem.getItemStack());
+                ItemStack simulatedItem = pickupItem.getItemStack().cloneItemStack();
+                simulatedItem.count = simulatedItemPickupCount;
+
+                EntityItem simulatedEntityItemPickup = new EntityItem(entityItem.world,
+                        entityItem.locX, entityItem.locY, entityItem.locZ, simulatedItem);
 
                 EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
 
                 entityTracker.a(entityLiving, new PacketPlayOutSpawnEntity(simulatedEntityItemPickup, 2, 1));
                 entityTracker.a(entityLiving, new PacketPlayOutEntityMetadata(
                         simulatedEntityItemPickup.getId(), simulatedEntityItemPickup.getDataWatcher(), true));
-                entityLiving.receive(simulatedEntityItemPickup, Math.min(pickupCount, maxStackSize));
+                entityTracker.a(entityLiving, new PacketPlayOutCollect(simulatedEntityItemPickup.getId(), entityLiving.getId()));
+                entityTracker.a(entityLiving, new PacketPlayOutEntityDestroy(simulatedEntityItemPickup.getId()));
             } else {
-                entityLiving.receive(entityItem, Math.min(pickupCount, maxStackSize));
+                entityLiving.receive(entityItem, simulatedItemPickupCount);
             }
 
             if (!pickupItem.isAlive())
