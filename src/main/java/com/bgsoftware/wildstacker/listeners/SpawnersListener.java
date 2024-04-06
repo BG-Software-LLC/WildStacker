@@ -536,7 +536,8 @@ public final class SpawnersListener implements Listener {
                 if (leftEntities <= 0)
                     break;
 
-                StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
+                StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn,
+                        entity.getType().getEntityClass()));
                 plugin.getNMSEntities().playSpawnEffect(targetEntity.getLivingEntity());
 
                 if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {

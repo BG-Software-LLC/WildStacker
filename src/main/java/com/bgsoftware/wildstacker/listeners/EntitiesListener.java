@@ -975,7 +975,7 @@ public final class EntitiesListener implements Listener {
         if (multipleEntities) {
             for (int i = 0; i < originalStackAmount - 1; i++) {
                 plugin.getSystemManager().spawnEntityWithoutStacking(transformedEntityBukkit.getLocation(),
-                        transformedEntityBukkit.getClass(), spawnCause);
+                        transformedEntityBukkit.getType().getEntityClass(), spawnCause);
             }
         } else {
             StackedEntity transformed = WStackedEntity.of(transformedEntityBukkit);
