@@ -35,8 +35,12 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.UUID;
 
-@SuppressWarnings("ConstantConditions")
 public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapter {
+
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
+            "Items", "ChestedHorse", "DecorItem",
+    };
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -105,17 +109,14 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         source.addAdditionalSaveData(compoundTag);
 
         compoundTag.putFloat("Health", source.getMaxHealth());
-        compoundTag.remove("SaddleItem");
-        compoundTag.remove("Saddle");
-        compoundTag.remove("ArmorItem");
-        compoundTag.remove("ArmorItems");
-        compoundTag.remove("HandItems");
-        compoundTag.remove("Leash");
 
         if (targetBukkit instanceof Zombie) {
             //noinspection deprecation
             ((Zombie) targetBukkit).setBaby(compoundTag.contains("IsBaby") && compoundTag.getBoolean("IsBaby"));
         }
+
+        for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
+            compoundTag.remove(key);
 
         target.readAdditionalSaveData(compoundTag);
     }

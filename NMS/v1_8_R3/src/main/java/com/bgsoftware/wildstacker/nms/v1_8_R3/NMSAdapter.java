@@ -37,8 +37,15 @@ import java.util.UUID;
 @SuppressWarnings({"unused"})
 public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapter {
 
-    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(Entity.class, boolean.class, "fromMobSpawner");
-    private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(Chunk.class, Collection[].class, "entitySlices");
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
+            "Leashed", "Items", "ChestedHorse",
+    };
+
+    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(
+            Entity.class, boolean.class, "fromMobSpawner");
+    private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(
+            Chunk.class, Collection[].class, "entitySlices");
 
     private static final IDataSerializer dataSerializer = EntityDataContainerSerializer.isValid() ?
             new EntityDataContainerSerializer() : new DefaultDataSerializer();
@@ -132,15 +139,12 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
 
         nbtTagCompound.setFloat("HealF", source.getMaxHealth());
         nbtTagCompound.setShort("Health", (short) Math.ceil(source.getMaxHealth()));
-        nbtTagCompound.remove("SaddleItem");
-        nbtTagCompound.remove("Saddle");
-        nbtTagCompound.remove("ArmorItem");
-        nbtTagCompound.remove("Equipment");
-        nbtTagCompound.remove("DropChances");
-        nbtTagCompound.remove("Leash");
-        nbtTagCompound.remove("Leashed");
+
         if (targetBukkit instanceof Zombie)
             ((Zombie) targetBukkit).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
+
+        for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
+            nbtTagCompound.remove(key);
 
         target.a(nbtTagCompound);
     }

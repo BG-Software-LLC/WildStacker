@@ -41,6 +41,11 @@ import java.util.UUID;
 
 public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapter {
 
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
+            "Items", "ChestedHorse", "DecorItem",
+    };
+
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static final NamespacedKey
@@ -106,16 +111,14 @@ public final class NMSAdapter implements com.bgsoftware.wildstacker.nms.NMSAdapt
         source.saveData(nbtTagCompound);
 
         nbtTagCompound.setFloat("Health", source.getMaxHealth());
-        nbtTagCompound.remove("SaddleItem");
-        nbtTagCompound.remove("Saddle");
-        nbtTagCompound.remove("ArmorItem");
-        nbtTagCompound.remove("ArmorItems");
-        nbtTagCompound.remove("HandItems");
-        nbtTagCompound.remove("Leash");
+
         if (targetBukkit instanceof Zombie) {
             //noinspection deprecation
             ((Zombie) targetBukkit).setBaby(nbtTagCompound.hasKey("IsBaby") && nbtTagCompound.getBoolean("IsBaby"));
         }
+
+        for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
+            nbtTagCompound.remove(key);
 
         target.loadData(nbtTagCompound);
     }
