@@ -458,7 +458,8 @@ public final class EntityUtils {
     }
 
     public static boolean canBeBred(Animals animal) {
-        return animal.getAge() == 0 && !plugin.getNMSEntities().isInLove(animal);
+        return animal.getAge() == 0 && !plugin.getNMSEntities().isInLove(animal) &&
+                (!(animal instanceof Tameable) || ((Tameable) animal).isTamed());
     }
 
     public static List<ItemStack> getEquipment(LivingEntity livingEntity, int lootBonusLevel) {
