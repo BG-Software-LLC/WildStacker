@@ -26,7 +26,7 @@ allprojects {
     }
 
     dependencies {
-        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:latest"
+        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b2"
     }
 
     task checkDebug() {
@@ -56,7 +56,7 @@ dependencies {
     implementation project(":API")
 
     implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
-    implementation 'com.bgsoftware.common.reflection:ReflectionUtils:latest'
+    implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b2'
     implementation 'com.bgsoftware.common.dependencies:DependenciesManager:b2'
 
     // Spigot jars
