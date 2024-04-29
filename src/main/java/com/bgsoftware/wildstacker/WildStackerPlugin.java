@@ -4,6 +4,7 @@ import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.nmsloader.INMSLoader;
 import com.bgsoftware.common.nmsloader.NMSHandlersFactory;
 import com.bgsoftware.common.nmsloader.NMSLoadException;
+import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
@@ -47,6 +48,8 @@ import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
+
+    private final Updater updater = new Updater(this, "wildstacker");
 
     private static WildStackerPlugin plugin;
 
@@ -185,10 +188,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         getCommand("stacker").setExecutor(commandsHandler);
         getCommand("stacker").setTabCompleter(commandsHandler);
 
-        if (Updater.isOutdated()) {
+        if (updater.isOutdated()) {
             log("");
-            log("A new version is available (v" + Updater.getLatestVersion() + ")!");
-            log("Version's description: \"" + Updater.getVersionDescription() + "\"");
+            log("A new version is available (v" + updater.getLatestVersion() + ")!");
+            log("Version's description: \"" + updater.getVersionDescription() + "\"");
             log("");
         }
 
@@ -276,6 +279,10 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public void setSettings(SettingsHandler settingsHandler) {
         this.settingsHandler = settingsHandler;
+    }
+
+    public Updater getUpdater() {
+        return updater;
     }
 
 }
