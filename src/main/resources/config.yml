@@ -292,6 +292,7 @@ entities:
     VILLAGER_PROFESSION: true
     WOLF_ANGRY: false
     WOLF_COLLAR_COLOR: true
+    WOLF_TYPE: true
     ZOMBIE_BABY: true
     ZOMBIE_PIGMAN_ANGRY: false
 

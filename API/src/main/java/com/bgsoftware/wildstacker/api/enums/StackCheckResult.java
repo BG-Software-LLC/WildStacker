@@ -48,6 +48,7 @@ public enum StackCheckResult {
     VILLAGER_PROFESSION,
     WOLF_ANGRY,
     WOLF_COLLAR_COLOR,
+    WOLF_TYPE,
     ZOMBIE_BABY,
     ZOMBIE_PIGMAN_ANGRY,
 

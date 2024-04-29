@@ -59,6 +59,7 @@ public enum StackCheck {
     VILLAGER_PROFESSION(EntityTypes.VILLAGER, EntityTypes.ZOMBIE_VILLAGER),
     WOLF_ANGRY(EntityTypes.WOLF),
     WOLF_COLLAR_COLOR(EntityTypes.WOLF),
+    WOLF_TYPE(EntityTypes.WOLF),
     ZOMBIE_BABY(EntityTypes.ZOMBIE, EntityTypes.ZOMBIE_VILLAGER),
     ZOMBIE_PIGMAN_ANGRY(EntityTypes.ZOMBIE_PIGMAN);
 

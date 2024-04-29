@@ -11,6 +11,7 @@ import org.bukkit.entity.Zombie;
 
 public enum EntityTypes {
 
+    ARMADILLO,
     ALLAY,
     AXOLOTL,
     BAT,
