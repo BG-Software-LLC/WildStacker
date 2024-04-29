@@ -57,6 +57,10 @@ subprojects {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation fileTree(rootProject.archiveFolder.getAbsolutePath())
     implementation project(":API")
@@ -65,6 +69,8 @@ dependencies {
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b2'
     implementation 'com.bgsoftware.common.dependencies:DependenciesManager:b2'
     implementation 'com.bgsoftware.common.nmsloader:NMSLoader:b3'
+
+    implementation 'org.bstats:bstats-bukkit:3.0.0'
 
     // Spigot jars
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
@@ -94,6 +100,7 @@ processResources {
 shadowJar {
     dependsOn(jar)
 
+    relocate 'org.bstats', 'com.bgsoftware.wildstacker.libs.org.bstats'
     relocate 'com.bgsoftware.common', 'com.bgsoftware.wildstacker.libs.com.bgsoftware.common'
 
     archiveFileName = rootProject.name + "-" + rootProject.buildVersion + ".jar"

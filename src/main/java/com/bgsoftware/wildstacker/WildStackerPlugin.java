@@ -29,7 +29,6 @@ import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.WorldsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.menu.EditorMenu;
-import com.bgsoftware.wildstacker.metrics.Metrics;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
@@ -40,6 +39,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -88,7 +88,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         // https://stackoverflow.com/questions/11063102/using-locales-with-javas-tolowercase-and-touppercase
         java.util.Locale.setDefault(java.util.Locale.ENGLISH);
 
-        new Metrics(this);
+        new Metrics(this, 4105);
 
         shouldEnable = loadNMSAdapter();
         loadAPI();
