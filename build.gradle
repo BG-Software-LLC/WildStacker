@@ -94,6 +94,8 @@ processResources {
 shadowJar {
     dependsOn(jar)
 
+    relocate 'com.bgsoftware.common', 'com.bgsoftware.wildstacker.libs.com.bgsoftware.common'
+
     archiveFileName = rootProject.name + "-" + rootProject.buildVersion + ".jar"
 
     delete fileTree(rootProject.targetFolder.getAbsolutePath())
