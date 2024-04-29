@@ -32,7 +32,7 @@ allprojects {
     }
 
     dependencies {
-        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b2"
+        compileOnly "com.bgsoftware.common.reflection:ReflectionUtils:b3"
     }
 
     task checkDebug() {
@@ -65,8 +65,8 @@ dependencies {
     implementation fileTree(rootProject.archiveFolder.getAbsolutePath())
     implementation project(":API")
 
-    implementation 'com.bgsoftware.common.config:CommentedConfiguration:1.0.3'
-    implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b2'
+    implementation 'com.bgsoftware.common.config:CommentedConfiguration:b1'
+    implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b3'
     implementation 'com.bgsoftware.common.dependencies:DependenciesManager:b2'
     implementation 'com.bgsoftware.common.nmsloader:NMSLoader:b3'
 
