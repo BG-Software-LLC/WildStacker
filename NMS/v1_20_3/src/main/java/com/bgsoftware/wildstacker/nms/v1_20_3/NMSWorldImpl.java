@@ -37,8 +37,8 @@ import java.util.function.Predicate;
 
 public class NMSWorldImpl implements NMSWorld {
 
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(Raider.class, boolean.class, "gs");
-    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(Raider.class, Raid.class, "gr");
+    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(Raider.class, boolean.class, "gt");
+    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(Raider.class, Raid.class, "gs");
 
     @Override
     public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
