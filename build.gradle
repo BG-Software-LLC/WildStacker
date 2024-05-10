@@ -69,7 +69,7 @@ dependencies {
     implementation 'com.bgsoftware.common.updater:Updater:b1'
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b3'
     implementation 'com.bgsoftware.common.dependencies:DependenciesManager:b2'
-    implementation 'com.bgsoftware.common.nmsloader:NMSLoader:b3'
+    implementation 'com.bgsoftware.common.nmsloader:NMSLoader:b4'
 
     implementation 'org.bstats:bstats-bukkit:3.0.0'
 
