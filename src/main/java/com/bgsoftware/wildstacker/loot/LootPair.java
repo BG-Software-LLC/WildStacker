@@ -1,41 +1,37 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
-@SuppressWarnings({"WeakerAccess", "unchecked"})
-public class LootPair {
+public class LootPair extends FilteredLoot {
 
     private final List<LootItem> lootItems = new LinkedList<>();
     private final List<LootCommand> lootCommands = new LinkedList<>();
     private final double chance, lootingChance;
-    private final List<Predicate<Entity>> entityFilters = new LinkedList<>();
-    private final List<Predicate<Entity>> killerFilters = new LinkedList<>();
+
 
     private LootPair(List<LootItem> lootItems, List<LootCommand> lootCommands, double chance,
-                     double lootingChance, List<Predicate<Entity>> entityFilters, List<Predicate<Entity>> killerFilters) {
+                     double lootingChance, List<Predicate<LootEntityAttributes>> entityFilters,
+                     List<Predicate<LootEntityAttributes>> killerFilters) {
+        super(entityFilters, killerFilters);
         this.lootItems.addAll(lootItems);
         this.lootCommands.addAll(lootCommands);
         this.chance = chance;
         this.lootingChance = lootingChance;
-        this.entityFilters.addAll(entityFilters);
-        this.killerFilters.addAll(killerFilters);
     }
 
     public static LootPair fromJson(JSONObject jsonObject, String lootTableName) {
@@ -44,8 +40,8 @@ public class LootPair {
         List<LootItem> lootItems = new ArrayList<>();
         List<LootCommand> lootCommands = new ArrayList<>();
 
-        List<Predicate<Entity>> entityFilters = new ArrayList<>();
-        List<Predicate<Entity>> killerFilters = new ArrayList<>();
+        List<Predicate<LootEntityAttributes>> entityFilters = new ArrayList<>();
+        List<Predicate<LootEntityAttributes>> killerFilters = new ArrayList<>();
 
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
         if (!requiredPermission.isEmpty())
@@ -74,6 +70,13 @@ public class LootPair {
         }
 
         try {
+            Object slimeSizeFilterObject = jsonObject.get("slime-size");
+            if (slimeSizeFilterObject instanceof Number)
+                entityFilters.add(EntityFilters.slimeSizeFilter((Number) slimeSizeFilterObject));
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        try {
             Object jsonKillerFilters = jsonObject.get("killer");
             if (jsonKillerFilters instanceof JSONArray) {
                 ((JSONArray) jsonKillerFilters).forEach(filterObject -> {
@@ -89,11 +92,11 @@ public class LootPair {
         }
 
         if ((Boolean) jsonObject.getOrDefault("killedByPlayer", false)) {
-            killerFilters.add(entity -> entity instanceof Player);
+            killerFilters.add(entityAttributes -> entityAttributes.getEntityType() == EntityType.PLAYER);
         }
 
         if ((Boolean) jsonObject.getOrDefault("killedByCharged", false)) {
-            killerFilters.add(entity -> entity instanceof Creeper && ((Creeper) entity).isPowered());
+            killerFilters.add(EntityFilters.creeperChargedFilter(true));
         }
 
         if (jsonObject.containsKey("items")) {
@@ -113,13 +116,13 @@ public class LootPair {
         return new LootPair(lootItems, lootCommands, chance, lootingChance, entityFilters, killerFilters);
     }
 
-    public List<ItemStack> getItems(StackedEntity stackedEntity, int amountOfPairs, int lootBonusLevel) {
+    public List<ItemStack> getItems(LootEntityAttributes lootEntityAttributes, int amountOfPairs, int lootBonusLevel) {
         List<ItemStack> items = new LinkedList<>();
 
-        Entity entityKiller = LootTable.getEntityKiller(stackedEntity);
+        LootEntityAttributes killerEntityData = lootEntityAttributes.getKiller();
 
         for (LootItem lootItem : lootItems) {
-            if (!lootItem.checkKiller(entityKiller) || !lootItem.checkEntity(stackedEntity.getLivingEntity()))
+            if (!lootItem.checkKiller(killerEntityData) || !lootItem.checkEntity(lootEntityAttributes))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);
@@ -128,7 +131,7 @@ public class LootPair {
                 amountOfItems = Random.nextChance(lootItem.getChance(lootBonusLevel, lootingChance), amountOfPairs);
             }
 
-            ItemStack itemStack = lootItem.getItemStack(stackedEntity, amountOfItems, lootBonusLevel);
+            ItemStack itemStack = lootItem.getItemStack(lootEntityAttributes, amountOfItems, lootBonusLevel);
 
             if (itemStack != null)
                 items.add(itemStack);
@@ -154,29 +157,6 @@ public class LootPair {
         }
 
         Executor.sync(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
-    }
-
-    public boolean checkEntity(@Nullable Entity entity) {
-        return checkFiltersOnEntity(this.entityFilters, entity);
-    }
-
-    public boolean checkKiller(@Nullable Entity killer) {
-        return checkFiltersOnEntity(this.killerFilters, killer);
-    }
-
-    private static boolean checkFiltersOnEntity(List<Predicate<Entity>> filters, @Nullable Entity entity) {
-        if (filters.isEmpty())
-            return true;
-
-        if (entity == null)
-            return false;
-
-        for (Predicate<Entity> filter : filters) {
-            if (filter.test(entity))
-                return true;
-        }
-
-        return false;
     }
 
     public double getChance() {

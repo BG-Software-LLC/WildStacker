@@ -1,6 +1,7 @@
 {
   "pairs": [
     {
+      "slime-size": 1,
       "chance": 100,
       "items": [
         {

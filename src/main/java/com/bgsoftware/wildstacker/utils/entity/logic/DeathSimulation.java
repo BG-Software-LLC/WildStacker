@@ -48,7 +48,6 @@ public final class DeathSimulation {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private final static Enchantment SWEEPING_EDGE = Enchantment.getByName("SWEEPING_EDGE");
     @Nullable
     private static final Material CROSSBOW_TYPE = Materials.getMaterialOrNull("CROSSBOW");
     private static boolean sweepingEdgeHandled = false;
@@ -164,9 +163,8 @@ public final class DeathSimulation {
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
                     finalDrops = drops;
-                    Integer expToDropFlag = stackedEntity.getFlag(EntityFlag.EXP_TO_DROP);
+                    Integer expToDropFlag = stackedEntity.getAndRemoveFlag(EntityFlag.EXP_TO_DROP);
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
-                    stackedEntity.removeFlag(EntityFlag.EXP_TO_DROP);
                 }
 
 
@@ -236,18 +234,10 @@ public final class DeathSimulation {
         double damageToNextStack;
 
         if (plugin.getSettings().spreadDamage && !instantKill) {
-            double dealtDamage = finalDamage;
-
-            if (SWEEPING_EDGE != null && damagerTool != null) {
-                int sweepingEdgeLevel = damagerTool.getEnchantmentLevel(SWEEPING_EDGE);
-                if (sweepingEdgeLevel > 0)
-                    dealtDamage = 1 + finalDamage * ((double) sweepingEdgeLevel / (sweepingEdgeLevel + 1));
-            }
-
             double entityHealth = stackedEntity.getHealth();
             double entityMaxHealth = stackedEntity.getLivingEntity().getMaxHealth();
 
-            double leftDamage = Math.max(0, dealtDamage - entityHealth);
+            double leftDamage = Math.max(0, finalDamage - entityHealth);
 
             entitiesToKill = Math.min(stackedEntity.getStackAmount(), 1 + (int) (leftDamage / entityMaxHealth));
             damageToNextStack = leftDamage % entityMaxHealth;

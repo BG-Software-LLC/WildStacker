@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
+import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -18,6 +19,7 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
+import com.bgsoftware.wildstacker.loot.entity.EntityLootDataBuilder;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
@@ -39,6 +41,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -524,6 +527,7 @@ public final class SystemHandler implements SystemManager {
             Executor.sync(() -> {
                 plugin.getNMSEntities().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
+                Executor.sync(() -> EntityStorage.clearMetadata(livingEntity), 1L);
             }, 2L);
         }
     }
@@ -609,6 +613,24 @@ public final class SystemHandler implements SystemManager {
     @Override
     public LootTable getLootTable(LivingEntity livingEntity) {
         return plugin.getLootHandler().getLootTable(livingEntity);
+    }
+
+    @Override
+    public LootEntityAttributes.Builder createLootContextBuilder(EntityType entityType) {
+        Preconditions.checkNotNull(entityType, "entityType parameter cannot be null.");
+        return new EntityLootDataBuilder(entityType);
+    }
+
+    @Override
+    public LootEntityAttributes.Builder createLootContextBuilder(StackedEntity stackedEntity) {
+        Preconditions.checkNotNull(stackedEntity, "stackedEntity parameter cannot be null.");
+        return new EntityLootDataBuilder(stackedEntity.getLivingEntity());
+    }
+
+    @Override
+    public LootEntityAttributes.Builder createLootContextBuilder(LivingEntity livingEntity) {
+        Preconditions.checkNotNull(livingEntity, "livingEntity parameter cannot be null.");
+        return new EntityLootDataBuilder(livingEntity);
     }
 
     @Override
@@ -743,8 +765,7 @@ public final class SystemHandler implements SystemManager {
         }
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
-            Arrays.stream(chunk.getTileEntities()).filter(blockState -> blockState instanceof CreatureSpawner)
-                    .forEach(blockState -> plugin.getNMSSpawners().updateStackedSpawner(WStackedSpawner.of(blockState.getBlock())));
+            plugin.getNMSSpawners().updateStackedSpawners(chunk);
         }
     }
 

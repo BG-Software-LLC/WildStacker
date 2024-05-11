@@ -50,7 +50,7 @@ public final class SQLHelper {
 
     public static void executeUpdate(String statement) {
         executeUpdate(statement, ex -> {
-            System.out.println(statement);
+            WildStackerPlugin.log(statement);
             ex.printStackTrace();
         });
     }

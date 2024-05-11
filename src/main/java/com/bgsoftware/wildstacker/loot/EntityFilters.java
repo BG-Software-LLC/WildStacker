@@ -2,15 +2,14 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 
 import java.util.Locale;
 import java.util.Map;
@@ -20,28 +19,38 @@ public class EntityFilters {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static final JSONParser JSON_PARSER = new JSONParser();
-
     private EntityFilters() {
 
     }
 
-    public static Predicate<Entity> checkPermissionFilter(String permission) {
-        return entity -> !(entity instanceof Player) || entity.hasPermission(permission);
+    public static Predicate<LootEntityAttributes> checkPermissionFilter(String permission) {
+        return entityData -> entityData.getEntityType() != EntityType.PLAYER ||
+                !(entityData instanceof LivingLootEntityAttributes) ||
+                ((LivingLootEntityAttributes) entityData).getLivingEntity().hasPermission(permission);
     }
 
-    public static Predicate<Entity> checkUpgradeFilter(String upgrade) {
-        return entity -> upgrade.equalsIgnoreCase(WStackedEntity.of(entity).getUpgrade().getName());
+    public static Predicate<LootEntityAttributes> checkUpgradeFilter(String upgrade) {
+        return entityData -> {
+            if (entityData.isIgnoreUpgrade())
+                return true;
+            SpawnerUpgrade spawnerUpgrade = entityData.getUpgrade();
+            return spawnerUpgrade != null && spawnerUpgrade.getName().equalsIgnoreCase(upgrade);
+        };
     }
 
-    public static Predicate<Entity> spawnCauseFilter(String spawnCauseName) {
+    public static Predicate<LootEntityAttributes> spawnCauseFilter(String spawnCauseName) {
         boolean negate = spawnCauseName.startsWith("!");
         SpawnCause spawnCause = SpawnCause.valueOf((negate ? spawnCauseName.substring(1) : spawnCauseName)
                 .toUpperCase(Locale.ENGLISH));
-        return entity -> (WStackedEntity.of(entity).getSpawnCause() == spawnCause) != negate;
+        return entityData -> {
+            if (entityData.isIgnoreSpawnCause())
+                return true;
+            SpawnCause entityDataSpawnCause = entityData.getSpawnCause();
+            return entityDataSpawnCause != null && (entityDataSpawnCause == spawnCause) != negate;
+        };
     }
 
-    public static Predicate<Entity> spawnCausesFilter(JSONArray spawnCausesArray) {
+    public static Predicate<LootEntityAttributes> spawnCausesFilter(JSONArray spawnCausesArray) {
         FastEnumArray<SpawnCause> filteredSpawnCauses = new FastEnumArray<>(SpawnCause.class);
         // noinspection unchecked
         spawnCausesArray.forEach(spawnCauseName -> {
@@ -54,17 +63,28 @@ public class EntityFilters {
         if (filteredSpawnCauses.size() == 0)
             throw new IllegalArgumentException("No filters");
 
-        return entity -> filteredSpawnCauses.contains(WStackedEntity.of(entity).getSpawnCause());
+        return entityData -> {
+            if (entityData.isIgnoreSpawnCause())
+                return true;
+            SpawnCause entityDataSpawnCause = entityData.getSpawnCause();
+            return entityDataSpawnCause != null && filteredSpawnCauses.contains(entityDataSpawnCause);
+        };
     }
 
-    public static Predicate<Entity> deathCauseFilter(String deathCauseName) {
+    public static Predicate<LootEntityAttributes> deathCauseFilter(String deathCauseName) {
         boolean negate = deathCauseName.startsWith("!");
         EntityDamageEvent.DamageCause filteredDeathCause = EntityDamageEvent.DamageCause.valueOf(
                 (negate ? deathCauseName.substring(1) : deathCauseName).toUpperCase(Locale.ENGLISH));
-        return entity -> (LootTable.getDeathCause(entity) == filteredDeathCause) != negate;
+
+        return entityData -> {
+            if (entityData.isIgnoreDeathCause())
+                return true;
+            EntityDamageEvent.DamageCause deathCause = entityData.getDeathCause();
+            return deathCause != null && (deathCause == filteredDeathCause) != negate;
+        };
     }
 
-    public static Predicate<Entity> deathCausesFilter(JSONArray deathCausesArray) {
+    public static Predicate<LootEntityAttributes> deathCausesFilter(JSONArray deathCausesArray) {
         FastEnumArray<EntityDamageEvent.DamageCause> filteredDeathCauses = new FastEnumArray<>(EntityDamageEvent.DamageCause.class);
         // noinspection unchecked
         deathCausesArray.forEach(deathCauseName -> {
@@ -77,19 +97,45 @@ public class EntityFilters {
         if (filteredDeathCauses.size() == 0)
             throw new IllegalArgumentException("No filters");
 
-        return entity -> {
-            EntityDamageEvent.DamageCause deathCause = LootTable.getDeathCause(entity);
+        return entityData -> {
+            if (entityData.isIgnoreDeathCause())
+                return true;
+            EntityDamageEvent.DamageCause deathCause = entityData.getDeathCause();
             return deathCause != null && filteredDeathCauses.contains(deathCause);
         };
     }
 
-    public static Predicate<Entity> typeFilter(String entityTypeName) {
-        boolean negate = entityTypeName.startsWith("!");
-        EntityType entityType = EntityType.valueOf((negate ? entityTypeName.substring(1) : entityTypeName).toUpperCase(Locale.ENGLISH));
-        return entity -> (entity.getType() == entityType) != negate;
+    public static Predicate<LootEntityAttributes> slimeSizeFilter(Number slimeSize) {
+        return entityData -> {
+            if (entityData.getEntityType() != EntityType.SLIME && entityData.getEntityType() != EntityType.MAGMA_CUBE)
+                return false;
+
+            if (entityData.isIgnoreSlimeSize())
+                return true;
+
+            return entityData.getSlimeSize() == slimeSize.longValue();
+        };
     }
 
-    public static Predicate<Entity> advancedFilter(Map<String, Object> advancedFilter) {
+    public static Predicate<LootEntityAttributes> creeperChargedFilter(boolean isCreeperCharged) {
+        return entityData -> {
+            if (entityData.getEntityType() != EntityType.CREEPER)
+                return false;
+
+            if (entityData.isIgnoreCreeperCharged())
+                return true;
+
+            return entityData.isCreeperCharged() == isCreeperCharged;
+        };
+    }
+
+    public static Predicate<LootEntityAttributes> typeFilter(String entityTypeName) {
+        boolean negate = entityTypeName.startsWith("!");
+        EntityType entityType = EntityType.valueOf((negate ? entityTypeName.substring(1) : entityTypeName).toUpperCase(Locale.ENGLISH));
+        return entityData -> (entityData.getEntityType() == entityType) != negate;
+    }
+
+    public static Predicate<LootEntityAttributes> advancedFilter(Map<String, Object> advancedFilter) {
         Object typeName = advancedFilter.get("type");
 
         if (!(typeName instanceof String))
@@ -104,13 +150,17 @@ public class EntityFilters {
         if (!entityType.isAlive())
             return typeFilter((String) typeName);
 
-        return entity -> {
-            if (entity.getType() != entityType)
+        advancedFilter.remove("type");
+
+        return entityData -> {
+            if (!(entityData instanceof LivingLootEntityAttributes))
+                return true;
+
+            if (entityData.getEntityType() != entityType)
                 return false;
 
-            advancedFilter.remove("type");
-
-            return plugin.getNMSEntities().checkEntityAttributes((LivingEntity) entity, advancedFilter);
+            LivingEntity livingEntity = ((LivingLootEntityAttributes) entityData).getLivingEntity();
+            return plugin.getNMSEntities().checkEntityAttributes(livingEntity, advancedFilter);
         };
     }
 

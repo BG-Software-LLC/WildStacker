@@ -49,8 +49,6 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount) {
         super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
-        if (plugin.getSettings().spawnersOverrideEnabled)
-            plugin.getNMSSpawners().updateStackedSpawner(this);
         cachedEntity = creatureSpawner.getSpawnedType();
     }
 

@@ -10,9 +10,11 @@ import java.util.Map;
 public class EntityDamageData {
 
     private static final ReflectField<Map<EntityDamageEvent.DamageModifier, Double>> MODIFIERS_FIELD =
-            new ReflectField<>(EntityDamageEvent.class, Map.class, "modifiers");
+            new ReflectField<Map<EntityDamageEvent.DamageModifier, Double>>(
+                    EntityDamageEvent.class, Map.class, "modifiers").removeFinal();
     private static final ReflectField<Map<EntityDamageEvent.DamageModifier, Double>> ORIGINALS_FIELD =
-            new ReflectField<>(EntityDamageEvent.class, Map.class, "originals");
+            new ReflectField<Map<EntityDamageEvent.DamageModifier, Double>>(EntityDamageEvent.class, Map.class, "originals")
+                    .removeFinal();
 
     private final Map<EntityDamageEvent.DamageModifier, Double> modifiers;
     private boolean cancelled;

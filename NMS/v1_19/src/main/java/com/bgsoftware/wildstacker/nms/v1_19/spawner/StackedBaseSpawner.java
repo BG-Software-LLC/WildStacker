@@ -46,7 +46,7 @@ import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class StackedBaseSpawner extends BaseSpawner {
 
@@ -56,6 +56,7 @@ public class StackedBaseSpawner extends BaseSpawner {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private final WeakReference<WStackedSpawner> stackedSpawner;
+    private final BaseSpawner originalBaseSpawner;
     public String failureReason = "";
 
     private int spawnedEntities = 0;
@@ -75,6 +76,7 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (isDebug)
             Debug.debug("StackedBaseSpawner", "init", "originalSpawner=" + originalSpawner);
 
+        this.originalBaseSpawner = originalSpawner;
         BASE_SPAWNER.set(spawnerBlockEntity, this);
 
         if (isDebug)
@@ -87,6 +89,7 @@ public class StackedBaseSpawner extends BaseSpawner {
         this.maxNearbyEntities = originalSpawner.maxNearbyEntities;
         this.requiredPlayerRange = originalSpawner.requiredPlayerRange;
         this.spawnRange = originalSpawner.spawnRange;
+        this.spawnDelay = originalBaseSpawner.spawnDelay;
 
         updateDemoEntity((ServerLevel) spawnerBlockEntity.getLevel(), spawnerBlockEntity.getBlockPos());
     }
@@ -110,6 +113,8 @@ public class StackedBaseSpawner extends BaseSpawner {
         WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
         if (stackedSpawner == null) {
+            // We want to remove this StackedBaseSpawner, so a new one will regenerate.
+            BASE_SPAWNER.set(serverLevel.getBlockEntity(blockPos), this.originalBaseSpawner);
             super.serverTick(serverLevel, blockPos);
             return;
         }
@@ -183,7 +188,7 @@ public class StackedBaseSpawner extends BaseSpawner {
                 demoEntity.getClass(), new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(),
                         blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1).inflate(this.spawnRange));
 
-        AtomicInteger nearbyAndStackableCount = new AtomicInteger(0);
+        AtomicLong nearbyAndStackableCount = new AtomicLong(0);
         List<StackedEntity> nearbyAndStackableEntities = new LinkedList<>();
 
         nearbyEntities.forEach(entity -> {
@@ -549,7 +554,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
     @Nullable
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                          List<StackedEntity> nearbyEntities, AtomicInteger nearbyAndStackableCount) {
+                                          List<StackedEntity> nearbyEntities, AtomicLong nearbyAndStackableCount) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return null;
 

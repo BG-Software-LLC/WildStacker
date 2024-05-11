@@ -1,25 +1,24 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.enums.EntityFlag;
+import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"WeakerAccess", "unchecked"})
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
@@ -38,32 +37,28 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         this.alwaysDropsExp = alwaysDropsExp;
     }
 
-    static boolean isBurning(StackedEntity stackedEntity) {
-        return stackedEntity.getLivingEntity().getFireTicks() > 0;
-    }
-
-    @Nullable
-    static Entity getEntityKiller(StackedEntity stackedEntity) {
-        Entity entityKillerCached = stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
-        if (entityKillerCached != null)
-            return entityKillerCached;
-
-        return EntityUtils.getDamagerFromEvent(stackedEntity.getLivingEntity().getLastDamageCause(), false);
-    }
-
-    static boolean isKilledByPlayer(StackedEntity stackedEntity) {
-        return getKiller(stackedEntity) != null;
-    }
-
-    static Player getKiller(StackedEntity stackedEntity) {
-        return stackedEntity.getLivingEntity().getKiller();
-    }
-
-    @Nullable
-    static EntityDamageEvent.DamageCause getDeathCause(Entity entity) {
-        EntityDamageEvent lastCause = entity.getLastDamageCause();
-        return lastCause == null ? null : lastCause.getCause();
-    }
+//    @Nullable
+//    static Entity getEntityKiller(StackedEntity stackedEntity) {
+//        Entity entityKillerCached = stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
+//        if (entityKillerCached != null)
+//            return entityKillerCached;
+//
+//        return EntityUtils.getDamagerFromEvent(stackedEntity.getLivingEntity().getLastDamageCause(), false);
+//    }
+//
+//    static boolean isKilledByPlayer(StackedEntity stackedEntity) {
+//        return getKiller(stackedEntity) != null;
+//    }
+//
+//    static Player getKiller(StackedEntity stackedEntity) {
+//        return stackedEntity.getLivingEntity().getKiller();
+//    }
+//
+//    @Nullable
+//    static EntityDamageEvent.DamageCause getDeathCause(Entity entity) {
+//        EntityDamageEvent lastCause = entity.getLastDamageCause();
+//        return lastCause == null ? null : lastCause.getCause();
+//    }
 
     public static LootTable fromJson(JSONObject jsonObject, String lootTableName) {
         boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
@@ -89,12 +84,17 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
     @Override
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
+        return getDrops(LootEntityAttributes.newBuilder(stackedEntity).build(), lootBonusLevel, stackAmount);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(LootEntityAttributes lootEntityAttributes, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new LinkedList<>();
 
-        Entity entityKiller = getEntityKiller(stackedEntity);
+        LootEntityAttributes killerEntityData = lootEntityAttributes.getKiller();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                lootPair.checkKiller(entityKiller) && lootPair.checkEntity(stackedEntity.getLivingEntity())
+                lootPair.checkKiller(killerEntityData) && lootPair.checkEntity(lootEntityAttributes)
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
@@ -107,31 +107,46 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
                 amountOfPairs = Random.nextChance(lootPair.getChance(), amountOfDifferentPairs);
             }
 
-            drops.addAll(lootPair.getItems(stackedEntity, amountOfPairs, lootBonusLevel));
-            if (isKilledByPlayer(stackedEntity))
-                lootPair.executeCommands(getKiller(stackedEntity), amountOfPairs, lootBonusLevel);
+            drops.addAll(lootPair.getItems(lootEntityAttributes, amountOfPairs, lootBonusLevel));
+            if (killerEntityData instanceof LivingLootEntityAttributes && killerEntityData.getEntityType() == EntityType.PLAYER) {
+                lootPair.executeCommands((Player) ((LivingLootEntityAttributes) killerEntityData).getLivingEntity(),
+                        amountOfPairs, lootBonusLevel);
+            }
         }
 
-        if (dropEquipment) {
-            drops.addAll(EntityUtils.getEquipment(stackedEntity.getLivingEntity(), lootBonusLevel));
-        }
+        if (lootEntityAttributes instanceof LivingLootEntityAttributes) {
+            LivingEntity livingEntity = ((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity();
 
-        EntityUtils.clearEquipment(stackedEntity.getLivingEntity());
+            if (dropEquipment) {
+                drops.addAll(EntityUtils.getEquipment(livingEntity, lootBonusLevel));
+            }
+
+            EntityUtils.clearEquipment(livingEntity);
+        }
 
         return drops;
     }
 
     @Override
     public int getExp(StackedEntity stackedEntity, int stackAmount) {
+        return getExp(LootEntityAttributes.newBuilder(stackedEntity).build(), stackAmount);
+    }
+
+    @Override
+    public int getExp(LootEntityAttributes lootEntityAttributes, int stackAmount) {
         int exp = 0;
 
         if (minExp >= 0 && maxExp >= 0) {
-            if (alwaysDropsExp || plugin.getNMSEntities().canDropExp(stackedEntity.getLivingEntity())) {
-                for (int i = 0; i < stackAmount; i++)
-                    exp += Random.nextInt(maxExp - minExp + 1) + minExp;
+            if (alwaysDropsExp) {
+                LivingEntity livingEntity = lootEntityAttributes instanceof LivingLootEntityAttributes ?
+                        ((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity() : null;
+                if (livingEntity == null || plugin.getNMSEntities().canDropExp(livingEntity)) {
+                    for (int i = 0; i < stackAmount; i++)
+                        exp += Random.nextInt(maxExp - minExp + 1) + minExp;
+                }
             }
-        } else {
-            exp = plugin.getNMSEntities().getEntityExp(stackedEntity.getLivingEntity());
+        } else if (lootEntityAttributes instanceof LivingLootEntityAttributes) {
+            exp = plugin.getNMSEntities().getEntityExp(((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity());
 
             if (exp < 0)
                 return exp;

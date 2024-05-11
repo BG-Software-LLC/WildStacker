@@ -95,7 +95,7 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity>, Upgrade
     /**
      * Spawn a duplicate entity with a specific stack amount and a specific spawn cause.
      *
-     * @param amount the stack amount it will have
+     * @param amount     the stack amount it will have
      * @param spawnCause The spawn cause of the new entity.
      * @return The stacked entity object of the new entity that was spawned
      */
@@ -244,6 +244,13 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity>, Upgrade
      * @param entityFlag The flag to set.
      */
     void removeFlag(EntityFlag entityFlag);
+
+    /**
+     * Get a flag and remove it afterward if it exists.
+     *
+     * @param entityFlag The flag to get and remove.
+     */
+    <T> T getAndRemoveFlag(EntityFlag entityFlag);
 
     /**
      * Clear all flags from this entity.

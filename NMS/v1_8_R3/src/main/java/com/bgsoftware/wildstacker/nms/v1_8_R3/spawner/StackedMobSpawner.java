@@ -41,7 +41,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class StackedMobSpawner extends MobSpawnerAbstract {
 
@@ -53,6 +53,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     private final World world;
     private final BlockPosition position;
     private final WeakReference<WStackedSpawner> stackedSpawner;
+    private final MobSpawnerAbstract originalMobSpawnerAbstract;
     private final List<a> mobs = new ArrayList<>();
     public int minSpawnDelay = 200;
     public int maxSpawnDelay = 800;
@@ -81,6 +82,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         if (isDebug)
             Debug.debug("StackedMobSpawner", "init", "originalSpawner=" + originalSpawner);
 
+        this.originalMobSpawnerAbstract = originalSpawner;
         MOB_SPAWNER_ABSTRACT.set(tileEntityMobSpawner, this);
 
         if (isDebug)
@@ -90,6 +92,8 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         originalSpawner.b(tagCompound);
         a(tagCompound);
         this.mobs.clear();
+
+        this.spawnDelay = originalSpawner.spawnDelay;
 
         updateDemoEntity();
     }
@@ -119,6 +123,8 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
         WStackedSpawner stackedSpawner = this.stackedSpawner.get();
 
         if (stackedSpawner == null) {
+            // We want to remove this StackedBaseSpawner, so a new one will regenerate.
+            MOB_SPAWNER_ABSTRACT.set(this.world.getTileEntity(this.position), this.originalMobSpawnerAbstract);
             super.c();
             return;
         }
@@ -182,7 +188,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 position.getX() + 1, position.getY() + 1, position.getZ() + 1
         ).grow(this.spawnRange, this.spawnRange, this.spawnRange));
 
-        AtomicInteger nearbyAndStackableCount = new AtomicInteger(0);
+        AtomicLong nearbyAndStackableCount = new AtomicLong(0);
         List<StackedEntity> nearbyAndStackableEntities = new LinkedList<>();
 
         nearbyEntities.forEach(entity -> {
@@ -591,7 +597,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     }
 
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
-                                          List<StackedEntity> nearbyEntities, AtomicInteger nearbyAndStackableCount) {
+                                          List<StackedEntity> nearbyEntities, AtomicLong nearbyAndStackableCount) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return null;
 

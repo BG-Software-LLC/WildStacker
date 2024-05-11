@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.Locale;
-import com.bgsoftware.wildstacker.Updater;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -31,9 +30,9 @@ public final class PlayersListener implements Listener {
                     ChatColor.GRAY + "This server is using WildStacker v" + plugin.getDescription().getVersion()), 5L);
         }
 
-        if (e.getPlayer().isOp() && Updater.isOutdated()) {
+        if (e.getPlayer().isOp() && plugin.getUpdater().isOutdated()) {
             Executor.sync(() -> e.getPlayer().sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "WildStacker" +
-                    ChatColor.GRAY + " A new version is available (v" + Updater.getLatestVersion() + ")!"), 20L);
+                    ChatColor.GRAY + " A new version is available (v" + plugin.getUpdater().getLatestVersion() + ")!"), 20L);
         }
     }
 

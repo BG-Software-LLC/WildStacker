@@ -1,3 +1,11 @@
+plugins {
+    id 'maven-publish'
+}
+
+java {
+    withSourcesJar()
+}
+
 group 'API'
 
 dependencies {

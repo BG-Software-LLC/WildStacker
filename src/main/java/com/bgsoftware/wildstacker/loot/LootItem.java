@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
@@ -9,7 +9,6 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +16,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,8 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "unchecked"})
-public class LootItem {
+public class LootItem extends FilteredLoot {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -34,19 +31,17 @@ public class LootItem {
     private final double chance;
     private final int min, max;
     private final boolean looting;
-    private final List<Predicate<Entity>> entityFilters = new LinkedList<>();
-    private final List<Predicate<Entity>> killerFilters = new LinkedList<>();
 
     private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance,
-                     boolean looting, List<Predicate<Entity>> entityFilters, List<Predicate<Entity>> killerFilters) {
+                     boolean looting, List<Predicate<LootEntityAttributes>> entityFilters,
+                     List<Predicate<LootEntityAttributes>> killerFilters) {
+        super(entityFilters, killerFilters);
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
         this.min = min;
         this.max = max;
         this.chance = chance;
         this.looting = looting;
-        this.entityFilters.addAll(entityFilters);
-        this.killerFilters.addAll(killerFilters);
     }
 
     public static LootItem fromJson(JSONObject jsonObject) {
@@ -58,8 +53,8 @@ public class LootItem {
         int max = JsonUtils.getInt(jsonObject, "max", 1);
         boolean looting = (boolean) jsonObject.getOrDefault("looting", false);
 
-        List<Predicate<Entity>> entityFilters = new ArrayList<>();
-        List<Predicate<Entity>> killerFilters = new ArrayList<>();
+        List<Predicate<LootEntityAttributes>> entityFilters = new ArrayList<>();
+        List<Predicate<LootEntityAttributes>> killerFilters = new ArrayList<>();
 
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
         if (!requiredPermission.isEmpty())
@@ -99,6 +94,13 @@ public class LootItem {
                 entityFilters.add(EntityFilters.deathCauseFilter((String) deathCauseFilterObject));
             else if (deathCauseFilterObject instanceof JSONArray)
                 entityFilters.add(EntityFilters.deathCausesFilter((JSONArray) deathCauseFilterObject));
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        try {
+            Object slimeSizeFilterObject = jsonObject.get("slime-size");
+            if (slimeSizeFilterObject instanceof Number)
+                entityFilters.add(EntityFilters.slimeSizeFilter((Number) slimeSizeFilterObject));
         } catch (IllegalArgumentException ignored) {
         }
 
@@ -162,31 +164,8 @@ public class LootItem {
         return chance + (lootBonusLevel * lootMultiplier);
     }
 
-    public boolean checkEntity(@javax.annotation.Nullable Entity entity) {
-        return checkFiltersOnEntity(this.entityFilters, entity);
-    }
-
-    public boolean checkKiller(@javax.annotation.Nullable Entity killer) {
-        return checkFiltersOnEntity(this.killerFilters, killer);
-    }
-
-    private static boolean checkFiltersOnEntity(List<Predicate<Entity>> filters, @javax.annotation.Nullable Entity entity) {
-        if (filters.isEmpty())
-            return true;
-
-        if (entity == null)
-            return false;
-
-        for (Predicate<Entity> filter : filters) {
-            if (filter.test(entity))
-                return true;
-        }
-
-        return false;
-    }
-
-    public ItemStack getItemStack(StackedEntity stackedEntity, int amountOfItems, int lootBonusLevel) {
-        ItemStack itemStack = LootTable.isBurning(stackedEntity) && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
+    public ItemStack getItemStack(LootEntityAttributes lootEntityAttributes, int amountOfItems, int lootBonusLevel) {
+        ItemStack itemStack = lootEntityAttributes.isBurning() && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
 
         int lootingBonus = 0;
 

@@ -70,7 +70,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -266,6 +265,9 @@ public final class SpawnersListener implements Listener {
                     return;
                 }
 
+                if (plugin.getSettings().spawnersOverrideEnabled)
+                    plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner);
+
                 if (ServerVersion.isLessThan(ServerVersion.v1_9)) {
                     boolean REPLACE_AIR = replaceAir;
                     ItemStack LIMIT_ITEM = limitItem;
@@ -378,17 +380,18 @@ public final class SpawnersListener implements Listener {
             // Should fix issues with amount-percentage being below 100 on low stack sizes.
             breakAmount = Math.max(breakAmount, plugin.getSettings().explosionsBreakMinimum);
 
-            int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
-            // Should fix issues with amount-percentage being below 100 on low stack sizes.
-            dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
+            if (stackedSpawner.runUnstack(breakAmount, e.getEntity()) == UnstackResult.SUCCESS) {
+                int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
+                // Should fix issues with amount-percentage being below 100 on low stack sizes.
+                dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
 
-            plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
-                    e.getEntity(), sourcePlayer, dropAmount);
+                plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
+                        e.getEntity(), sourcePlayer, dropAmount);
 
-            stackedSpawner.runUnstack(breakAmount, e.getEntity());
 
-            if (stackedSpawner.getStackAmount() > 0)
-                e.blockList().remove(block);
+                if (stackedSpawner.getStackAmount() > 0)
+                    e.blockList().remove(block);
+            }
         }
     }
 
@@ -450,15 +453,6 @@ public final class SpawnersListener implements Listener {
             if (stackedSpawner.isDebug())
                 Debug.debug("SpawnersListener", "onSpawnerSpawn", "isSpawnerOverridenTick=true");
             return;
-        }
-
-        if (plugin.getSettings().spawnersOverrideEnabled) {
-            if (stackedSpawner.isDebug())
-                Debug.debug("SpawnersListener", "onSpawnerSpawn", "spawnersOverrideEnabled=true");
-            // We make sure the spawner is still overridden by WildStacker
-            // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
-            if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
-                return;
         }
 
         if (stackedSpawner.isDebug())
@@ -542,7 +536,8 @@ public final class SpawnersListener implements Listener {
                 if (leftEntities <= 0)
                     break;
 
-                StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn, entity.getClass()));
+                StackedEntity targetEntity = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(toSpawn,
+                        entity.getType().getEntityClass()));
                 plugin.getNMSEntities().playSpawnEffect(targetEntity.getLivingEntity());
 
                 if (!callSpawnerSpawnEvent(targetEntity, stackedSpawner)) {
@@ -596,10 +591,12 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
+        ItemStack inHand = e.getItem().clone();
+
         Executor.sync(() -> {
             stackedSpawner.updateName();
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
-                ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), e.getItem(), stackedSpawner.getStackAmount() - 1);
+                ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), inHand, stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
 
@@ -783,13 +780,6 @@ public final class SpawnersListener implements Listener {
             if (stackedSpawner.isSpawnerOverridenTick())
                 return;
 
-            if (plugin.getSettings().spawnersOverrideEnabled) {
-                // We make sure the spawner is still overridden by WildStacker
-                // If the spawner was updated again, it will return true, and therefore we must calculate the mobs again.
-                if (!plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner))
-                    return;
-            }
-
             SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
@@ -808,21 +798,14 @@ public final class SpawnersListener implements Listener {
             }
 
             int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
-            AtomicInteger nearbyEntitiesCount = new AtomicInteger(0);
 
             List<StackedEntity> nearbyStackableEntities = mergeRadius <= 0 ? Collections.emptyList() :
                     EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
                                     entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
                             .map(WStackedEntity::of)
-                            .filter(stackedEntity -> {
-                                if (stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
-                                        stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
-                                    nearbyEntitiesCount.set(nearbyEntitiesCount.get() + stackedEntity.getStackAmount());
-                                    return true;
-                                }
-
-                                return false;
-                            }).collect(Collectors.toList());
+                            .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
+                                    stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS)
+                            .collect(Collectors.toList());
 
             if (!targetEntityOptional.isPresent()) {
                 if (mergeRadius <= 0)
@@ -839,26 +822,39 @@ public final class SpawnersListener implements Listener {
 
             StackedEntity stackedEntity = targetEntityOptional.get();
 
-            int finalSpawnMobsCount;
-
             int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 0);
-            if (nearbyEntitiesCount.get() + spawnMobsCount >= minimumEntityRequirement) {
-                nearbyStackableEntities.forEach(nearbyEntity -> {
-                    if (nearbyEntity != stackedEntity) {
-                        nearbyEntity.remove();
-                        nearbyEntity.spawnStackParticle(true);
-                    }
-                });
+            if (minimumEntityRequirement <= 1) {
+                if (stackedEntity.canGetStacked(spawnMobsCount) != StackCheckResult.SUCCESS)
+                    return;
 
                 stackedEntity.increaseStackAmount(spawnMobsCount, true);
-                finalSpawnMobsCount = nearbyEntitiesCount.get() + spawnMobsCount - stackedEntity.getStackAmount();
-            } else if (minimumEntityRequirement <= 0) {
-                finalSpawnMobsCount = spawnMobsCount;
-            } else {
-                return;
-            }
+            } else if (stackedEntity.getStackAmount() + spawnMobsCount < minimumEntityRequirement) {
+                // We need to look for nearby entities and merge them together.
+                int stackedEntityNewCount = stackedEntity.getStackAmount() + spawnMobsCount;
+                int entityStackLimit = stackedEntity.getStackLimit();
 
-            stackedEntity.increaseStackAmount(finalSpawnMobsCount, true);
+                for (StackedEntity nearbyEntity : nearbyStackableEntities) {
+                    int nearbyEntityStackAmount = nearbyEntity.getStackAmount();
+                    if (nearbyEntity != stackedEntity &&
+                            stackedEntityNewCount + nearbyEntityStackAmount <= entityStackLimit &&
+                            nearbyEntity.runStackCheck(stackedEntity) == StackCheckResult.SUCCESS) {
+                        nearbyEntity.remove();
+                        nearbyEntity.spawnStackParticle(true);
+                        stackedEntityNewCount += nearbyEntityStackAmount;
+
+                        if (stackedEntityNewCount >= entityStackLimit)
+                            break;
+                    }
+                }
+
+                if (stackedEntityNewCount < minimumEntityRequirement)
+                    return;
+
+                int increaseStackAmount = stackedEntityNewCount - stackedEntity.getStackAmount();
+                stackedEntity.increaseStackAmount(increaseStackAmount, true);
+            } else {
+                stackedEntity.increaseStackAmount(spawnMobsCount, true);
+            }
 
             stackedEntity.spawnStackParticle(true);
 

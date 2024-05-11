@@ -180,14 +180,15 @@ public final class ProvidersHandler {
         }
         if (Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("PlotSquared");
-            if (plugin.getDescription().getVersion().startsWith("6.")) {
+            int plotSquaredVersion = Integer.parseInt(plugin.getDescription().getVersion().split("\\.")[0]);
+            if (plotSquaredVersion >= 6) {
                 try {
                     Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared6");
                     claimsProvider.ifPresent(claimsProviders::add);
                 } catch (Exception ex) {
                     WildStackerPlugin.log("&cYour version of PlotSquared is not supported. Please contact Ome_R for support.");
                 }
-            } else if (plugin.getDescription().getVersion().startsWith("5.")) {
+            } else if (plotSquaredVersion == 5) {
                 Optional<ClaimsProvider> claimsProvider = createInstance("ClaimsProvider_PlotSquared5");
                 claimsProvider.ifPresent(claimsProviders::add);
             } else if (plugin.getDescription().getMain().contains("com.github")) {
@@ -339,13 +340,15 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
         if (enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners")) {
-            Plugin epicSpawners = pluginManager.getPlugin("EpicSpawners");
-            if (epicSpawners.getDescription().getVersion().startsWith("5")) {
+            String version = pluginManager.getPlugin("EpicSpawners").getDescription().getVersion();
+            if (version.startsWith("5")) {
                 registerHook("EpicSpawners5Hook");
-            } else if (epicSpawners.getDescription().getVersion().startsWith("6")) {
+            } else if (version.startsWith("6")) {
                 registerHook("EpicSpawners6Hook");
-            } else if (epicSpawners.getDescription().getVersion().startsWith("7")) {
+            } else if (version.startsWith("7")) {
                 registerHook("EpicSpawners7Hook");
+            } else if (version.startsWith("8")) {
+                registerHook("EpicSpawners8Hook");
             }
         }
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
