@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_20_4;
 
+import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -90,6 +91,8 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -108,6 +111,9 @@ import java.util.function.Consumer;
 public final class NMSEntitiesImpl implements NMSEntities {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
+            new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(
             Mob.class, int.class, Modifier.PROTECTED, 1);
@@ -816,4 +822,14 @@ public final class NMSEntitiesImpl implements NMSEntities {
         };
     }
 
+    @Override
+    public EntityDeathEvent createDeathEvent(org.bukkit.entity.LivingEntity livingEntity,
+                                             List<org.bukkit.inventory.ItemStack> drops, int droppedExp,
+                                             EntityDamageEvent lastDamage) {
+        if (OLD_DEATH_EVENT_CONSTRUCTOR.isValid()) {
+            return OLD_DEATH_EVENT_CONSTRUCTOR.newInstance(livingEntity, drops, droppedExp);
+        } else {
+            return new EntityDeathEvent(livingEntity, lastDamage.getDamageSource(), drops, droppedExp);
+        }
+    }
 }

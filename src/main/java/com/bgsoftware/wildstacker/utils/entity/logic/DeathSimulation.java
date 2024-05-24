@@ -40,6 +40,7 @@ import org.bukkit.util.Vector;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -157,7 +158,8 @@ public final class DeathSimulation {
                 if (!fromDeathEvent) {
                     int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
                             stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
-                    EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
+                    EntityDeathEvent entityDeathEvent = plugin.getNMSEntities().createDeathEvent(
+                            livingEntity, new LinkedList<>(drops), droppedExp, damageEvent);
                     Bukkit.getPluginManager().callEvent(entityDeathEvent);
                     finalDrops = entityDeathEvent.getDrops();
                     finalExp = entityDeathEvent.getDroppedExp();
