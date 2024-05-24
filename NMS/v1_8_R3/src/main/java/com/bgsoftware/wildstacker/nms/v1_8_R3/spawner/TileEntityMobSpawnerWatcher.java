@@ -48,4 +48,9 @@ public class TileEntityMobSpawnerWatcher extends TileEntityMobSpawner {
         this.mobSpawner.b(nbtTagCompound);
     }
 
+    @Override
+    public MobSpawnerAbstract getSpawner() {
+        return this.mobSpawner.getSpawner();
+    }
+
 }

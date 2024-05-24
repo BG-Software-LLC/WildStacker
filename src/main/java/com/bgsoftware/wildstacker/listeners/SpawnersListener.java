@@ -265,9 +265,6 @@ public final class SpawnersListener implements Listener {
                     return;
                 }
 
-                if (plugin.getSettings().spawnersOverrideEnabled)
-                    plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner);
-
                 if (ServerVersion.isLessThan(ServerVersion.v1_9)) {
                     boolean REPLACE_AIR = replaceAir;
                     ItemStack LIMIT_ITEM = limitItem;
@@ -279,7 +276,8 @@ public final class SpawnersListener implements Listener {
 
                         stackedSpawner.updateName();
 
-                        finishSpawnerPlace(e.getPlayer(), amountToCharge, REPLACE_AIR, usedHand, LIMIT_ITEM, spawnerType, SPAWNER_ITEM_AMOUNT);
+                        finishSpawnerPlace(e.getPlayer(), stackedSpawner, amountToCharge,
+                                REPLACE_AIR, usedHand, LIMIT_ITEM, spawnerType, SPAWNER_ITEM_AMOUNT);
                     }, 1L);
 
                     return;
@@ -300,15 +298,20 @@ public final class SpawnersListener implements Listener {
                 spawnerItemAmount = targetSpawner.getStackAmount();
             }
 
-            finishSpawnerPlace(e.getPlayer(), amountToCharge, replaceAir, usedHand, limitItem, spawnerType, spawnerItemAmount);
+            finishSpawnerPlace(e.getPlayer(), stackedSpawner, amountToCharge, replaceAir, usedHand, limitItem,
+                    spawnerType, spawnerItemAmount);
         } catch (Exception ex) {
             alreadySpawnersPlacedPlayers.remove(e.getPlayer().getUniqueId());
             throw ex;
         }
     }
 
-    private void finishSpawnerPlace(Player player, double amountToCharge, boolean replaceAir, EquipmentSlot usedHand,
-                                    ItemStack limitItem, EntityType spawnerType, int spawnerItemAmount) {
+    private void finishSpawnerPlace(Player player, StackedSpawner stackedSpawner, double amountToCharge,
+                                    boolean replaceAir, EquipmentSlot usedHand, ItemStack limitItem,
+                                    EntityType spawnerType, int spawnerItemAmount) {
+        if (plugin.getSettings().spawnersOverrideEnabled)
+            plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner);
+
         if (amountToCharge > 0)
             plugin.getProviders().getEconomyProvider().withdrawMoney(player, amountToCharge);
 
