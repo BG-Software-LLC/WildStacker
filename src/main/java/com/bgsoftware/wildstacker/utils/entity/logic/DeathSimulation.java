@@ -140,7 +140,6 @@ public final class DeathSimulation {
                 IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
-                nmsEntity.setHealth(0f, true);
 
                 // Setting the stack amount of the entity to the unstack amount.
                 int realStackAmount = stackedEntity.getStackAmount();
@@ -160,7 +159,14 @@ public final class DeathSimulation {
                             stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
                     EntityDeathEvent entityDeathEvent = plugin.getNMSEntities().createDeathEvent(
                             livingEntity, new LinkedList<>(drops), droppedExp, damageEvent);
-                    Bukkit.getPluginManager().callEvent(entityDeathEvent);
+
+                    try {
+                        nmsEntity.setHealth(0f, true);
+                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                    } finally {
+                        nmsEntity.setHealth(1f, true);
+                    }
+
                     finalDrops = entityDeathEvent.getDrops();
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
@@ -168,7 +174,6 @@ public final class DeathSimulation {
                     Integer expToDropFlag = stackedEntity.getAndRemoveFlag(EntityFlag.EXP_TO_DROP);
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
                 }
-
 
                 // Restore all values
                 nmsEntity.setRemoved(false);
