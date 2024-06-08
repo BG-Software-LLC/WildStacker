@@ -811,6 +811,10 @@ public final class EntitiesListener implements Listener {
         EntityStorage.setMetadata(entity, EntityFlag.SPAWN_CAUSE, spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(entity);
 
+        // In case the entity with a name already, we want to treat is as he was nametagged
+        if (entity.getCustomName() != null)
+            stackedEntity.setFlag(EntityFlag.NAME_TAG, true);
+
         if (stackedEntity.getType() == EntityType.COW) {
             mushroomTracker.getTrackedData().ifPresent(mushroomCount -> {
                 stackedEntity.setStackAmount(mushroomCount, true);
