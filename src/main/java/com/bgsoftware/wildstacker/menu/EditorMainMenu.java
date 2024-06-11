@@ -1,9 +1,9 @@
 package com.bgsoftware.wildstacker.menu;
 
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -111,7 +111,7 @@ public final class EditorMainMenu extends EditorMenu {
                 EditorStewsMenu.open(player);
                 break;
             case 49:
-                Executor.async(() -> {
+                Scheduler.runTaskAsync(() -> {
                     saveConfiguration();
                     player.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker " + ChatColor.GRAY + "Saved configuration successfully.");
                 });

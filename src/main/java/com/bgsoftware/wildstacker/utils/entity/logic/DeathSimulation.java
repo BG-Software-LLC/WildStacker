@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -16,7 +17,6 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -126,14 +126,14 @@ public final class DeathSimulation {
         // We want to cache the killer of the entity
         stackedEntity.setFlag(EntityFlag.CACHED_KILLER, killer == null ? entityKiller : killer);
 
-        Executor.async(() -> {
-            livingEntity.setFireTicks(fireTicks);
+        livingEntity.setFireTicks(fireTicks);
 
+        Scheduler.runTaskAsync(() -> {
             int lootBonusLevel = killerTool == null ? 0 : killerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
             List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
             int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
-            Executor.sync(() -> {
+            Scheduler.runTask(livingEntity, () -> {
                 // We want to remove the cache of the killer
                 stackedEntity.removeFlag(EntityFlag.CACHED_KILLER);
 
@@ -266,7 +266,7 @@ public final class DeathSimulation {
             }
 
             // We make sure the entity doesn't get any knockback by setting the velocity to 0.
-            Executor.sync(() -> livingEntity.setVelocity(new Vector()), 1L);
+            Scheduler.runTask(livingEntity, () -> livingEntity.setVelocity(new Vector()), 1L);
 
             return true;
         }

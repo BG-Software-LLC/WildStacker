@@ -3,17 +3,18 @@ package com.bgsoftware.wildstacker.menu;
 import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.scheduler.ScheduledTask;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -25,14 +26,14 @@ public final class SpawnersManageMenu extends WildMenu {
     private static List<Integer> amountsMenuSlots = new ArrayList<>(), upgradeMenuSlots = new ArrayList<>();
     private static List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
     private final WeakReference<StackedSpawner> stackedSpawner;
-    private final BukkitTask bukkitTask;
+    private final ScheduledTask task;
 
     private boolean onBuild = false;
 
-    private SpawnersManageMenu(StackedSpawner stackedSpawner) {
+    private SpawnersManageMenu(@Nullable StackedSpawner stackedSpawner) {
         super("manageMenu");
         this.stackedSpawner = new WeakReference<>(stackedSpawner);
-        bukkitTask = Executor.timer(this::tick, 20L);
+        task = stackedSpawner == null ? null : Scheduler.runRepeatingTask(stackedSpawner.getLocation(), this::tick, 20L);
     }
 
     public static void open(Player player, StackedSpawner stackedSpawner) {
@@ -137,7 +138,7 @@ public final class SpawnersManageMenu extends WildMenu {
     }
 
     public void stop() {
-        bukkitTask.cancel();
+        task.cancel();
     }
 
 }

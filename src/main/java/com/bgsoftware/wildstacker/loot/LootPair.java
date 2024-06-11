@@ -2,9 +2,9 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -156,7 +156,7 @@ public class LootPair extends FilteredLoot {
             commands.addAll(lootCommand.getCommands(player, amountOfCommands));
         }
 
-        Executor.sync(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
+        Scheduler.runTask(() -> commands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)));
     }
 
     public double getChance() {

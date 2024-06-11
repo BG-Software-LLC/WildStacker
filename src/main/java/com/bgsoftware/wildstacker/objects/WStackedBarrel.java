@@ -8,12 +8,12 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -95,7 +95,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     @Override
     public void removeDisplayBlock() {
         if (ServerVersion.isAtLeast(ServerVersion.v1_17) && !Bukkit.isPrimaryThread()) {
-            Executor.sync(this::removeDisplayBlock);
+            Scheduler.runTask(getLocation(), this::removeDisplayBlock);
             return;
         }
 
@@ -185,7 +185,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     @Override
     public void remove() {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::remove);
+            Scheduler.runTask(getLocation(), this::remove);
             return;
         }
 
@@ -209,7 +209,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     @Override
     public void updateName() {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::updateName);
+            Scheduler.runTask(getLocation(), this::updateName);
             return;
         }
 

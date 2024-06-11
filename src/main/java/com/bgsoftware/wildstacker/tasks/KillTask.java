@@ -2,21 +2,21 @@ package com.bgsoftware.wildstacker.tasks;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.scheduler.ScheduledTask;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
-public final class KillTask extends BukkitRunnable {
+public final class KillTask {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static BukkitTask task = null;
+    private static ScheduledTask task = null;
     private static long timeLeft;
 
     private KillTask() {
         timeLeft = plugin.getSettings().killTaskInterval;
-        task = runTaskTimer(plugin, 20L, 20L);
+        task = Scheduler.runRepeatingTask(this::run, 20L);
     }
 
     public static void start() {
@@ -30,7 +30,6 @@ public final class KillTask extends BukkitRunnable {
         return timeLeft;
     }
 
-    @Override
     public void run() {
         if (plugin.getSettings().killTaskInterval > 0) {
             if (timeLeft == 0) {

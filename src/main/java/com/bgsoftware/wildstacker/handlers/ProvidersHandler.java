@@ -23,7 +23,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedItemListener;
 import com.bgsoftware.wildstacker.listeners.PaperListener;
 import com.bgsoftware.wildstacker.listeners.ProvidersListener;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -73,7 +73,7 @@ public final class ProvidersHandler {
     public ProvidersHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
 
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             WildStackerPlugin.log("Loading providers started...");
             long startTime = System.currentTimeMillis();
 
@@ -96,9 +96,9 @@ public final class ProvidersHandler {
                 Bukkit.getPluginManager().registerEvents(new PaperListener(), plugin);
 
             WildStackerPlugin.log("Loading providers done (Took " + (System.currentTimeMillis() - startTime) + "ms)");
-        }, 0L);
+        });
 
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock") &&
                     Bukkit.getPluginManager().getPlugin("ASkyBlock").getDescription().getAuthors().stream().noneMatch(a -> a.contains("Ome_R"))) {
                 WildStackerPlugin.log("&c#################################################################");

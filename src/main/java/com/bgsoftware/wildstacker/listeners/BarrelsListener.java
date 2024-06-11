@@ -7,10 +7,10 @@ import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -88,7 +88,7 @@ public final class BarrelsListener implements Listener {
                 return;
             }
 
-            Executor.sync(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
+            Scheduler.runTask(() -> alreadyBarrelsPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
 
             StackedBarrel stackedBarrel = WStackedBarrel.of(e.getBlockPlaced());
 
@@ -138,7 +138,7 @@ public final class BarrelsListener implements Listener {
                 boolean attemptPlaceDelayed = ServerVersion.isLessThan(ServerVersion.v1_9);
 
                 //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
-                Executor.sync(() -> {
+                Scheduler.runTask(e.getBlock().getLocation(), () -> {
                     e.getBlock().setType(Material.CAULDRON);
                     stackedBarrel.createDisplayBlock();
 

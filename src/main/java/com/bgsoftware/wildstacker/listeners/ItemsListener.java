@@ -8,13 +8,14 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Entity;
@@ -91,13 +92,23 @@ public final class ItemsListener implements Listener {
             if (optionalItem.isPresent())
                 return;
 
-            Executor.sync(() -> {
-                if (EntityStorage.hasMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER))
+            Scheduler.runTask(() -> {
+                if (EntityStorage.hasMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER)) {
                     EntityStorage.removeMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER);
-                else if (isChunkLimit(e.getLocation().getChunk()))
-                    stackedItem.remove();
+                } else {
+                    if(Scheduler.isRegionScheduler()) {
+                        Scheduler.runTask(e.getLocation(), () -> finishItemSpawnChunkLimit(stackedItem, e.getLocation()));
+                    } else {
+                        finishItemSpawnChunkLimit(stackedItem, e.getLocation());
+                    }
+                }
             });
         });
+    }
+
+    private void finishItemSpawnChunkLimit(StackedItem stackedItem, Location location) {
+        if (isChunkLimit(location.getChunk()))
+            stackedItem.remove();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -225,7 +236,8 @@ public final class ItemsListener implements Listener {
             //We are overriding the merge system
             e.setCancelled(true);
 
-            Executor.sync(() -> {
+            Scheduler.runTask(e.getEntity(), () -> {
+                // `e.getEntity` and `e.getTarget` should be in the same region
                 if (e.getEntity().isValid() && e.getTarget().isValid()) {
                     StackedItem targetItem = WStackedItem.ofBypass(e.getTarget());
                     stackedItem.runStackAsync(targetItem, null);

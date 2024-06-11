@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.loot.LootTable;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -23,7 +24,6 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -147,9 +147,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         Also, in 1.17, the remove() function must be called sync.
         Other than that, slimes must be removed sync as well.
         */
-        Executor.sync(() -> {
+        Scheduler.runTask(getLocation(), () -> {
             object.remove();
-            Executor.sync(this::clearFlags, 100L);
+            Scheduler.runTask(this::clearFlags, 100L);
         });
 
         setFlag(EntityFlag.REMOVED_ENTITY, true);
@@ -167,7 +167,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             String customName = EntityUtils.getEntityName(this);
             boolean nameVisible = (getStackAmount() > 1 || !isDefaultUpgrade()) && !plugin.getSettings().entitiesHideNames;
 
-            Executor.sync(() -> {
+            Scheduler.runTask(getLocation(), () -> {
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
                 plugin.getProviders().notifyNameChangeListeners(object);
@@ -281,7 +281,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         targetEntity.increaseStackAmount(getStackAmount(), false);
         targetEntity.setHealth(Math.max(health, 0.5D));
 
-        Executor.sync(() -> {
+        Scheduler.runTask(targetEntity.getLivingEntity(), () -> {
             if (targetEntity.getLivingEntity().isValid())
                 targetEntity.updateName();
         }, 2L);
@@ -289,7 +289,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         plugin.getSystemManager().updateLinkedEntity(object, targetEntity.getLivingEntity());
 
         if (object.getType().name().equals("PARROT"))
-            Executor.sync(() -> EntityUtils.removeParrotIfShoulder((Parrot) object));
+            Scheduler.runTask(object, () -> EntityUtils.removeParrotIfShoulder((Parrot) object));
 
         this.remove();
 
@@ -314,13 +314,13 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             if (plugin.getSettings().spawnCorpses)
                 spawnCorpse();
         } else {
-            Executor.sync(() -> {
+            Scheduler.runTask(object, () -> {
                 setFlag(EntityFlag.CORPSE, true);
                 if (EntityTypes.fromEntity(object).isSlime())
                     setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
                 plugin.getNMSEntities().setHealthDirectly(object, 0, false);
                 plugin.getNMSEntities().playDeathSound(object);
-                Executor.sync(this::clearFlags, 100L);
+                Scheduler.runTask(this::clearFlags, 100L);
             }, 2L);
         }
 
@@ -468,7 +468,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void spawnCorpse() {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::spawnCorpse);
+            Scheduler.runTask(this::spawnCorpse);
             return;
         }
 
@@ -619,7 +619,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void runStackAsync(Consumer<Optional<LivingEntity>> result) {
         // Should be called sync due to collecting nearby entities
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> runStackAsync(result));
+            Scheduler.runTask(() -> runStackAsync(result));
             return;
         }
 

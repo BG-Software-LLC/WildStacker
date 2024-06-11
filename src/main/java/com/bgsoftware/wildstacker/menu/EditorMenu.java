@@ -3,10 +3,10 @@ package com.bgsoftware.wildstacker.menu;
 import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.handlers.SettingsHandler;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -178,10 +178,10 @@ public abstract class EditorMenu extends WildMenu {
 
         Player player = (Player) e.getPlayer();
 
-        Executor.sync(() -> {
+        Scheduler.runTask(player, () -> {
             if (e.getView().getTitle().equals("" + ChatColor.GOLD + ChatColor.BOLD + "WildStacker")) {
                 if (!noResetClose.contains(player.getUniqueId())) {
-                    Executor.async(EditorMenu::reloadConfiguration);
+                    Scheduler.runTaskAsync(EditorMenu::reloadConfiguration);
                 }
             } else {
                 Inventory topInventory = e.getView().getTopInventory();

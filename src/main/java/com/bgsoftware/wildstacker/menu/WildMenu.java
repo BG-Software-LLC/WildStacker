@@ -1,10 +1,10 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -105,7 +105,7 @@ public abstract class WildMenu implements InventoryHolder {
     public void openMenu(Player player) {
         if (inventory == null) {
             if (Bukkit.isPrimaryThread()) {
-                Executor.async(() -> openMenu(player));
+                Scheduler.runTaskAsync(() -> openMenu(player));
                 return;
             }
 
@@ -117,7 +117,7 @@ public abstract class WildMenu implements InventoryHolder {
             }
         }
 
-        Executor.sync(() -> {
+        Scheduler.runTask(player, () -> {
             if (!player.isOnline())
                 return;
 

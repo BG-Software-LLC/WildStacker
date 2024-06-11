@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerBreakEvent;
 import de.dustplanet.silkspawners.events.SilkSpawnersSpawnerChangeEvent;
@@ -38,7 +38,8 @@ public final class SilkSpawnersHook {
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onSpawnerChange(SilkSpawnersSpawnerChangeEvent e) {
             if (plugin.getSettings().spawnersStackingEnabled)
-                Executor.sync(() -> WStackedSpawner.of(e.getSpawner()).updateName(), 2L);
+                Scheduler.runTask(e.getSpawner().getLocation(), () ->
+                        WStackedSpawner.of(e.getSpawner()).updateName(), 2L);
         }
 
     }

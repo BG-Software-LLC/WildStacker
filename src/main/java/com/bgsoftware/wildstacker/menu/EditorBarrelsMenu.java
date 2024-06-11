@@ -1,6 +1,6 @@
 package com.bgsoftware.wildstacker.menu;
 
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -18,7 +18,7 @@ public final class EditorBarrelsMenu extends EditorMenu {
 
     public static void open(Player player) {
         if (Bukkit.isPrimaryThread()) {
-            Executor.async(() -> open(player));
+            Scheduler.runTaskAsync(() -> open(player));
             return;
         }
 
@@ -26,7 +26,7 @@ public final class EditorBarrelsMenu extends EditorMenu {
         EditorBarrelsMenu editorBarrelsMenu = new EditorBarrelsMenu(inventory);
         lastInventories.put(player.getUniqueId(), editorBarrelsMenu.editorIdentifier);
 
-        Executor.sync(() -> player.openInventory(editorBarrelsMenu.getInventory()));
+        Scheduler.runTask(player, () -> player.openInventory(editorBarrelsMenu.getInventory()));
     }
 
 }

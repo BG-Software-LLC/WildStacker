@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.menu.WildMenu;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -123,7 +123,7 @@ public final class MenusListener implements Listener {
             }
         }
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getPlayer(), () -> {
             EditorMenu.open(e.getPlayer());
             EditorMenu.lastInventories.remove(e.getPlayer().getUniqueId());
             EditorMenu.configValues.remove(e.getPlayer().getUniqueId());

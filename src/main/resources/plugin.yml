@@ -6,6 +6,7 @@ description: Stacking drops, entities, blocks and spawners into one object!
 website: https://bg-software.com/
 api-version: 1.13
 author: Ome_R
+folia-supported: true
 
 # Custom section used by DependenciesManager, which replaces softdepend.
 class-depends:

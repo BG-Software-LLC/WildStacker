@@ -3,22 +3,24 @@ package com.bgsoftware.wildstacker.tasks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.scheduler.ScheduledTask;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Item;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
-public final class ItemsMerger extends BukkitRunnable {
+public final class ItemsMerger {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static BukkitTask task = null;
+    private static ScheduledTask task = null;
 
     private ItemsMerger() {
         if (plugin.getSettings().itemsStackingEnabled && plugin.getSettings().itemsStackInterval > 0)
-            task = runTaskTimer(plugin, plugin.getSettings().itemsStackInterval, plugin.getSettings().itemsStackInterval);
+            task = Scheduler.runRepeatingTask(this::run, plugin.getSettings().itemsStackInterval);
+        else
+            task = null;
     }
 
     public static void start() {
@@ -28,7 +30,6 @@ public final class ItemsMerger extends BukkitRunnable {
         new ItemsMerger();
     }
 
-    @Override
     public void run() {
         if (Bukkit.getOnlinePlayers().size() > 0) {
             for (World world : Bukkit.getWorlds()) {

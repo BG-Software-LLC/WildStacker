@@ -6,9 +6,9 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -528,7 +528,7 @@ public final class EntityUtils {
 
     public static void clearEquipment(LivingEntity livingEntity) {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> clearEquipment(livingEntity));
+            Scheduler.runTask(livingEntity, () -> clearEquipment(livingEntity));
             return;
         }
 

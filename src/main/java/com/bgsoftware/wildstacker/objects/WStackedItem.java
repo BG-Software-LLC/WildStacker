@@ -6,13 +6,13 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -141,10 +141,10 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         /* Items must be removed sync, otherwise they are not properly removed from chunks.
         Also, in 1.17, the remove() function must be called sync. */
-        Executor.sync(object::remove);
+        Scheduler.runTask(object, object::remove);
 
         EntityStorage.setMetadata(object, EntityFlag.REMOVED_ENTITY, true);
-        Executor.sync(() -> EntityStorage.clearMetadata(object), 100L);
+        Scheduler.runTask(() -> EntityStorage.clearMetadata(object), 100L);
     }
 
     @Override
@@ -181,7 +181,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         String CUSTOM_NAME = customName;
 
-        Executor.sync(() -> {
+        Scheduler.runTask(object, () -> {
             if (updateName) {
                 setCustomName(CUSTOM_NAME);
             }
@@ -234,7 +234,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         targetItem.increaseStackAmount(getStackAmount(), false);
 
-        Executor.sync(() -> {
+        Scheduler.runTask(targetItem.getItem(), () -> {
             if (targetItem.getItem().isValid())
                 targetItem.updateName();
         }, 2L);
@@ -313,7 +313,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void giveItemStack(Inventory inventory) {
-        if(isRemoved())
+        if (isRemoved())
             return;
 
         ItemStack itemStack = getItemStack();
@@ -385,7 +385,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         // Should be called sync due to collecting nearby entities
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> runStackAsync(result));
+            Scheduler.runTask(() -> runStackAsync(result));
             return;
         }
 
@@ -430,7 +430,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         return String.format("StackedItem{uuid=%s,amount=%s,item=%s}", getUniqueId(), getStackAmount(), object.getItemStack());
     }
 
-    public boolean isRemoved(){
+    public boolean isRemoved() {
         return EntityStorage.hasMetadata(object, EntityFlag.REMOVED_ENTITY);
     }
 

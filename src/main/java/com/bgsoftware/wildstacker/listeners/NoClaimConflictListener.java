@@ -3,8 +3,8 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.events.BarrelStackEvent;
 import com.bgsoftware.wildstacker.api.events.SpawnerStackEvent;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -32,13 +32,15 @@ public final class NoClaimConflictListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent e) {
+        Location location = e.getBlockPlaced().getLocation();
+
         if (plugin.getSettings().spawnersStackingEnabled && e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
-            placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
+            placers.put(location, e.getPlayer().getUniqueId());
         } else if (plugin.getSettings().barrelsStackingEnabled &&
                 plugin.getSystemManager().isBarrelBlock(e.getItemInHand().getType(), e.getPlayer().getWorld())) {
-            placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
+            placers.put(location, e.getPlayer().getUniqueId());
         }
-        Executor.sync(() -> placers.remove(e.getBlockPlaced().getLocation()), 2L);
+        Scheduler.runTask(() -> placers.remove(location), 2L);
     }
 
     @EventHandler

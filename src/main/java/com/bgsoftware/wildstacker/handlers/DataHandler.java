@@ -14,9 +14,9 @@ import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -53,14 +53,14 @@ public final class DataHandler {
     public DataHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
 
-        Executor.sync(() -> {
+        Scheduler.runTask(() -> {
             try {
                 //Database.start(new File(plugin.getDataFolder(), "database.db"));
                 SQLHelper.createConnection(plugin);
                 loadDatabase();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
+                Scheduler.runTask(() -> Bukkit.getPluginManager().disablePlugin(plugin));
                 return;
             }
         }, 1L);
@@ -91,11 +91,12 @@ public final class DataHandler {
     }
 
     public void removeStackedSpawner(StackedSpawner stackedSpawner) {
-        CACHED_SPAWNERS.remove(stackedSpawner.getLocation());
-        Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(stackedSpawner.getLocation()));
+        Location location = stackedSpawner.getLocation();
+        CACHED_SPAWNERS.remove(location);
+        Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(location));
         if (chunkSpawners != null)
             chunkSpawners.remove(stackedSpawner);
-        Executor.sync(() -> ((WStackedSpawner) stackedSpawner).removeHologram());
+        Scheduler.runTask(location, () -> ((WStackedSpawner) stackedSpawner).removeHologram());
     }
 
     public void addStackedBarrel(StackedBarrel stackedBarrel) {
@@ -105,12 +106,13 @@ public final class DataHandler {
     }
 
     public void removeStackedBarrel(StackedBarrel stackedBarrel) {
-        CACHED_BARRELS.remove(stackedBarrel.getLocation());
-        Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
+        Location location = stackedBarrel.getLocation();
+        CACHED_BARRELS.remove(location);
+        Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(location));
         if (chunkBarrels != null)
             chunkBarrels.remove(stackedBarrel);
         stackedBarrel.removeDisplayBlock();
-        Executor.sync(() -> ((WStackedBarrel) stackedBarrel).removeHologram());
+        Scheduler.runTask(location, () -> ((WStackedBarrel) stackedBarrel).removeHologram());
     }
 
     public List<StackedObject> getStackedObjects() {

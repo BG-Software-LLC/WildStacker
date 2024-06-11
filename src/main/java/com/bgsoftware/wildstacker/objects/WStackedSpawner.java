@@ -8,12 +8,12 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -169,7 +169,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public void remove() {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::remove);
+            Scheduler.runTask(getLocation(), this::remove);
             return;
         }
 
@@ -191,7 +191,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     @Override
     public void updateName() {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(this::updateName);
+            Scheduler.runTask(getLocation(), this::updateName);
             return;
         }
 

@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -20,7 +21,6 @@ import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
@@ -131,7 +131,7 @@ public final class EntitiesListener implements Listener {
 
         // We register the event in a delay so it will be the last listener to be called.
         // We want to restore the event after all the other ones will be called on the wanted data.
-        Executor.sync(() -> plugin.getServer().getPluginManager().registerEvents(
+        Scheduler.runTask(() -> plugin.getServer().getPluginManager().registerEvents(
                 new EntityDamageRestoreListener(), plugin), 10L);
     }
 
@@ -371,7 +371,7 @@ public final class EntitiesListener implements Listener {
         if (spawnEggData.upgradeId != 0)
             ((WStackedEntity) stackedEntity).setUpgradeId(spawnEggData.upgradeId);
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getEntity(), () -> {
             //Resetting the name, so updateName will work.
             stackedEntity.setCustomName("");
             stackedEntity.updateName();
@@ -444,7 +444,7 @@ public final class EntitiesListener implements Listener {
 
         DyeColor originalColor = e.getEntity().getColor();
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getEntity(), () -> {
             if (stackedEntity.getStackAmount() > 1) {
                 e.getEntity().setColor(originalColor);
                 stackedEntity.decreaseStackAmount(1, true);
@@ -472,7 +472,7 @@ public final class EntitiesListener implements Listener {
         if (!e.getEntity().isSheared())
             return;
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getEntity(), () -> {
             if (stackedEntity.getStackAmount() > 1) {
                 e.getEntity().setSheared(true);
                 stackedEntity.decreaseStackAmount(1, true);
@@ -496,7 +496,7 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
         if (plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
-            Executor.sync(() -> {
+            Scheduler.runTask(e.getRightClicked(), () -> {
                 if (stackedEntity.getStackAmount() > 1) {
                     stackedEntity.setCustomName("");
                     stackedEntity.decreaseStackAmount(1, true);
@@ -549,7 +549,7 @@ public final class EntitiesListener implements Listener {
 
                 itemsAmountToRemove = breedableAmount;
 
-                Executor.sync(() -> {
+                Scheduler.runTask(e.getRightClicked(), () -> {
                     // Spawning the baby after 2.5 seconds
                     int babiesAmount = itemsAmountToRemove / 2;
 
@@ -660,14 +660,14 @@ public final class EntitiesListener implements Listener {
 
         if (stackedEntity.getStackAmount() > 1) {
             for (int i = 0; i < stackedEntity.getStackAmount() - 1; i++) {
-                Executor.sync(() -> {
+                Scheduler.runTask(creature, () -> {
                     if (creature.getTarget() != null) {
                         StackedEntity duplicate = stackedEntity.spawnDuplicate(1);
                         ((Creature) duplicate.getLivingEntity()).setTarget(creature.getTarget());
                         ((WStackedEntity) duplicate).setStackFlag(entity -> ((Creature) entity).getTarget() == null);
                         stackedEntity.setStackAmount(stackedEntity.getStackAmount() - 1, true);
                     }
-                }, i * 20);
+                }, i * 20L);
             }
         }
 
@@ -735,8 +735,9 @@ public final class EntitiesListener implements Listener {
                 .collect(Collectors.toList());
 
         if (!nearbyEntitiesAmounts.isEmpty()) {
-            Executor.sync(() -> {
-                for (Entity entity : event.getWorld().getNearbyEntities(event.getLightning().getLocation(), 2, 2, 2)) {
+            Location lightningLocation = event.getLightning().getLocation();
+            Scheduler.runTask(lightningLocation, () -> {
+                for (Entity entity : event.getWorld().getNearbyEntities(lightningLocation, 2, 2, 2)) {
                     if (entity instanceof PigZombie) {
                         this.handleEntityTransform(entity, "LIGHTNING", nearbyEntitiesAmounts.remove(0), SpawnCause.LIGHTNING);
                     }
@@ -794,7 +795,7 @@ public final class EntitiesListener implements Listener {
             if (stackedItem != null)
                 plugin.getSystemManager().saveItem(stackedItem);
         }
-        Executor.sync(() -> EntityStorage.clearMetadata(entity), 100L);
+        Scheduler.runTask(() -> EntityStorage.clearMetadata(entity), 100L);
     }
 
     private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
@@ -869,7 +870,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         //Chunk Limit
-        Executor.sync(() -> {
+        Scheduler.runTask(entity, () -> {
             if (isChunkLimit(entity.getLocation().getChunk()))
                 stackedEntity.remove();
         }, 5L);
@@ -898,7 +899,7 @@ public final class EntitiesListener implements Listener {
                 spawnCause == SpawnCause.COMMAND || entity.getType() == EntityType.WITHER ||
                 entity.getType() == EntityType.IRON_GOLEM || entity.getType() == EntityType.SNOWMAN ||
                 EntityTypes.fromEntity(entity).isSlime() || plugin.getProviders().handleEntityStackingWithDelay())
-            Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
+            Scheduler.runTask(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
     }
@@ -934,7 +935,7 @@ public final class EntitiesListener implements Listener {
         } else if (entity instanceof Sheep) {
             int stackAmount = stackedEntity.getStackAmount();
             if (StackSplit.SHEEP_SHEAR.isEnabled()) {
-                Executor.sync(() -> {
+                Scheduler.runTask(entity, () -> {
                     if (stackAmount > 1) {
                         ((Sheep) entity).setSheared(false);
                         stackedEntity.setStackAmount(stackAmount - 1, true);
@@ -988,7 +989,7 @@ public final class EntitiesListener implements Listener {
             transformed.setStackAmount(originalStackAmount, true);
             transformed.setSpawnCause(spawnCause);
             transformed.updateNerfed();
-            Executor.sync(() -> transformed.runStackAsync(null), 1L);
+            Scheduler.runTask(() -> transformed.runStackAsync(null), 1L);
         }
 
         return true;
@@ -1067,7 +1068,8 @@ public final class EntitiesListener implements Listener {
             if (breedableAmount == null || breedableAmount <= 1)
                 return;
 
-            Executor.sync(() -> plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
+            Scheduler.runTask(e.getBlock().getLocation(), () ->
+                    plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
             turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
         }
 

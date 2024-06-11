@@ -12,8 +12,8 @@ import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import net.minecraft.server.v1_16_R3.BlockPosition;
 import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkProviderServer;
@@ -160,7 +160,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
         try {
             entityItem.canMobPickup = false;
-            Executor.sync(() -> entityItem.canMobPickup = true, 20L);
+            Scheduler.runTask(entityItem.getBukkitEntity(), () -> entityItem.canMobPickup = true, 20L);
         } catch (Throwable ignored) {
         }
 

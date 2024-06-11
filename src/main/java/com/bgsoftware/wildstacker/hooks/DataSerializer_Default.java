@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 
 public final class DataSerializer_Default implements IDataSerializer {
 
@@ -15,12 +15,12 @@ public final class DataSerializer_Default implements IDataSerializer {
 
     @Override
     public void saveEntity(StackedEntity stackedEntity) {
-        Executor.sync(() -> plugin.getNMSAdapter().saveEntity(stackedEntity));
+        Scheduler.runTask(stackedEntity.getLivingEntity(), () -> plugin.getNMSAdapter().saveEntity(stackedEntity));
     }
 
     @Override
     public void loadEntity(StackedEntity stackedEntity) {
-        Executor.sync(() -> plugin.getNMSAdapter().loadEntity(stackedEntity));
+        Scheduler.runTask(stackedEntity.getLivingEntity(), () -> plugin.getNMSAdapter().loadEntity(stackedEntity));
     }
 
     @Override

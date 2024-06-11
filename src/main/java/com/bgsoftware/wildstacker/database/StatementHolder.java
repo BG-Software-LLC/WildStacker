@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.utils.threads.DatabaseThread;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -82,8 +82,8 @@ public final class StatementHolder {
     }
 
     public void execute(boolean async) {
-        if (async && !Executor.isDataThread()) {
-            Executor.data(() -> execute(false));
+        if (async && !DatabaseThread.isDataThread()) {
+            DatabaseThread.data(() -> execute(false));
             return;
         }
 

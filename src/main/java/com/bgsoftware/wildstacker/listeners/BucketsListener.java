@@ -1,9 +1,8 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -34,7 +33,7 @@ public final class BucketsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketFillEvent e) {
         if (plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
-            Bukkit.getScheduler().runTask(plugin, () -> ItemUtils.stackBucket(e.getItemStack(), e.getPlayer().getInventory()));
+            Scheduler.runTask(e.getPlayer(), () -> ItemUtils.stackBucket(e.getItemStack(), e.getPlayer().getInventory()));
         }
     }
 
@@ -45,13 +44,13 @@ public final class BucketsListener implements Listener {
         EquipmentSlot usedHand = ItemUtils.getHand(e);
         ItemStack itemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
 
-        if(itemInHand == null || itemInHand.getAmount() <= 1)
+        if (itemInHand == null || itemInHand.getAmount() <= 1)
             return;
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getPlayer(), () -> {
             ItemStack newItemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
 
-            if(newItemInHand == null || newItemInHand.getType() != Material.BUCKET)
+            if (newItemInHand == null || newItemInHand.getType() != Material.BUCKET)
                 return;
 
             itemInHand.setAmount(itemInHand.getAmount() - 1);
@@ -117,7 +116,7 @@ public final class BucketsListener implements Listener {
 
                 clicked = e.getCurrentItem().clone();
 
-                Executor.sync(() -> ItemUtils.stackBucket(clicked, invToAddItem), 1L);
+                Scheduler.runTask(e.getWhoClicked(), () -> ItemUtils.stackBucket(clicked, invToAddItem), 1L);
                 return;
             default:
                 return;

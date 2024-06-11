@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.Debug;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.Random;
@@ -26,7 +27,6 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -144,7 +144,7 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        Executor.sync(() -> alreadySpawnersPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
+        Scheduler.runTask(() -> alreadySpawnersPlacedPlayers.remove(e.getPlayer().getUniqueId()), 2L);
 
         try {
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());
@@ -270,7 +270,7 @@ public final class SpawnersListener implements Listener {
                     ItemStack LIMIT_ITEM = limitItem;
                     int SPAWNER_ITEM_AMOUNT = spawnerItemAmount;
 
-                    Executor.sync(() -> {
+                    Scheduler.runTask(e.getBlockPlaced().getLocation(), () -> {
                         if (e.getBlockPlaced().getType() != Materials.SPAWNER.toBukkitType())
                             return;
 
@@ -415,7 +415,7 @@ public final class SpawnersListener implements Listener {
         if (plugin.getSettings().explosionsDropToInventory && e.getClickedBlock() != null &&
                 e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)) {
             Location location = e.getClickedBlock().getLocation();
-            Executor.sync(() -> {
+            Scheduler.runTask(location, () -> {
                 EntitiesGetter.getNearbyEntities(location, 1, entity -> entity instanceof TNTPrimed)
                         .findFirst().ifPresent(entity -> explodableSources.put(entity, e.getPlayer().getUniqueId()));
             }, 2L);
@@ -596,7 +596,7 @@ public final class SpawnersListener implements Listener {
 
         ItemStack inHand = e.getItem().clone();
 
-        Executor.sync(() -> {
+        Scheduler.runTask(stackedSpawner.getLocation(), () -> {
             stackedSpawner.updateName();
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
                 ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), inHand, stackedSpawner.getStackAmount() - 1);
@@ -631,7 +631,7 @@ public final class SpawnersListener implements Listener {
             customName = plugin.getSettings().spawnersNameBuilder.build(stackedSpawner);
             ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);
 
-            Executor.sync(((WStackedSpawner) stackedSpawner)::removeHologram, 60L);
+            Scheduler.runTask(stackedSpawner.getLocation(), ((WStackedSpawner) stackedSpawner)::removeHologram, 60L);
         }
     }
 

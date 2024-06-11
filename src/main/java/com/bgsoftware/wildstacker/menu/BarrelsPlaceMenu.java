@@ -3,11 +3,11 @@ package com.bgsoftware.wildstacker.menu;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,13 +46,13 @@ public final class BarrelsPlaceMenu extends WildMenu {
                 !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
             e.setCancelled(true);
             Locale.BARREL_NO_PERMISSION.send(e.getWhoClicked());
-            Executor.sync(() -> e.getWhoClicked().closeInventory(), 1L);
+            Scheduler.runTask(e.getWhoClicked(), () -> e.getWhoClicked().closeInventory(), 1L);
             return;
         }
 
         if (!plugin.getSystemManager().isStackedBarrel(location)) {
             e.setCancelled(true);
-            Executor.sync(() -> e.getWhoClicked().closeInventory(), 1L);
+            Scheduler.runTask(e.getWhoClicked(), () -> e.getWhoClicked().closeInventory(), 1L);
             return;
         }
 
@@ -85,7 +85,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
             e.setCancelled(true);
         }
 
-        Executor.sync(() -> {
+        Scheduler.runTask(e.getWhoClicked(), () -> {
             if (closeFlag) {
                 for (ItemStack itemStack : e.getWhoClicked().getInventory().getContents()) {
                     if (barrelItem.equals(itemStack))

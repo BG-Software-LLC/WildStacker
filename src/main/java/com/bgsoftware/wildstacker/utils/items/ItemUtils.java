@@ -3,11 +3,11 @@ package com.bgsoftware.wildstacker.utils.items;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -82,7 +82,7 @@ public final class ItemUtils {
 
     public static void dropItem(ItemStack itemStack, Location location) {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> dropItem(itemStack, location));
+            Scheduler.runTask(location, () -> dropItem(itemStack, location));
             return;
         }
 

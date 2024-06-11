@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import net.coreprotect.config.ConfigHandler;
@@ -43,7 +43,7 @@ public final class CoreProtectHook {
     public static void recordBlockChange(OfflinePlayer offlinePlayer, Location location, Material type, byte data,
                                          IStackedBlockListener.Action action) {
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> recordBlockChange(offlinePlayer, location, type, data, action));
+            Scheduler.runTask(() -> recordBlockChange(offlinePlayer, location, type, data, action));
             return;
         }
 
@@ -86,7 +86,7 @@ public final class CoreProtectHook {
             return;
 
         if (!Bukkit.isPrimaryThread()) {
-            Executor.sync(() -> recordItemPickup(offlinePlayer, item, amount));
+            Scheduler.runTask(() -> recordItemPickup(offlinePlayer, item, amount));
             return;
         }
 

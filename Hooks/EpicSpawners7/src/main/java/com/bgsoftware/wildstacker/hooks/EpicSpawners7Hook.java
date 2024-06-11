@@ -6,8 +6,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.songoda.epicspawners.api.events.SpawnerSpawnEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,7 +28,7 @@ public final class EpicSpawners7Hook {
                 StackedSpawner stackedSpawner = WStackedSpawner.of(e.getSpawner().getCreatureSpawner());
 
                 //It takes 1 tick for EpicSpawners to set the metadata for the mobs.
-                Executor.sync(() -> stackedEntity.runSpawnerStackAsync(stackedSpawner, null), 2L);
+                Scheduler.runTask(e.getEntity(), () -> stackedEntity.runSpawnerStackAsync(stackedSpawner, null), 2L);
             }
         }, plugin);
     }

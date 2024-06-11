@@ -3,25 +3,27 @@ package com.bgsoftware.wildstacker.tasks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.bgsoftware.wildstacker.scheduler.ScheduledTask;
+import com.bgsoftware.wildstacker.scheduler.Scheduler;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class StackTask extends BukkitRunnable {
+public final class StackTask {
 
-    private static WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static BukkitTask task;
+    private static ScheduledTask task;
 
     private StackTask() {
         if (plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
-            task = runTaskTimer(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
+            task = Scheduler.runRepeatingTask(this::run, plugin.getSettings().entitiesStackInterval);
+        else
+            task = null;
     }
 
     public static void start() {
@@ -31,7 +33,6 @@ public final class StackTask extends BukkitRunnable {
         new StackTask();
     }
 
-    @Override
     public void run() {
         if (Bukkit.getOnlinePlayers().size() > 0) {
             for (World world : Bukkit.getWorlds()) {
