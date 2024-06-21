@@ -145,7 +145,9 @@ public class LootItem extends FilteredLoot {
         }
 
         if ((Boolean) jsonObject.getOrDefault("glow", false)) {
-            itemMeta.addEnchant(GlowEnchantment.getGlowEnchant(), 1, true);
+            Enchantment glowEnchant = GlowEnchantment.getGlowEnchant();
+            if (glowEnchant != null)
+                itemMeta.addEnchant(glowEnchant, 1, true);
         }
 
         itemStack.setItemMeta(itemMeta);

@@ -8,6 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 
 public interface NMSAdapter {
@@ -18,22 +19,26 @@ public interface NMSAdapter {
 
     boolean isUnbreakable(ItemStack itemStack);
 
+    @Nullable
     Enchantment getGlowEnchant();
 
+    @Nullable
     default Enchantment createGlowEnchantment() {
         Enchantment glowEnchant = getGlowEnchant();
 
-        try {
-            Field field = Enchantment.class.getDeclaredField("acceptingNew");
-            field.setAccessible(true);
-            field.set(null, true);
-            field.setAccessible(false);
-        } catch (Exception ignored) {
-        }
+        if (glowEnchant != null) {
+            try {
+                Field field = Enchantment.class.getDeclaredField("acceptingNew");
+                field.setAccessible(true);
+                field.set(null, true);
+                field.setAccessible(false);
+            } catch (Exception ignored) {
+            }
 
-        try {
-            Enchantment.registerEnchantment(glowEnchant);
-        } catch (Exception ignored) {
+            try {
+                Enchantment.registerEnchantment(glowEnchant);
+            } catch (Exception ignored) {
+            }
         }
 
         return glowEnchant;
