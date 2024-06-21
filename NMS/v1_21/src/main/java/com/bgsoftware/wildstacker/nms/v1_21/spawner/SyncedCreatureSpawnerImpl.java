@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_20_1.spawner;
+package com.bgsoftware.wildstacker.nms.v1_21.spawner;
 
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
@@ -8,18 +8,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.StringUtil;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R1.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+import org.bukkit.World;
+import org.bukkit.block.spawner.SpawnRule;
+import org.bukkit.block.spawner.SpawnerEntry;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.entity.CraftEntitySnapshot;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBlockEntity> implements SyncedCreatureSpawner {
@@ -28,10 +42,18 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
     private final BlockPos blockPos;
     private final Location blockLocation;
 
-    public SyncedCreatureSpawnerImpl(org.bukkit.World bukkitWorld, SpawnerBlockEntity spawnerBlockEntity) {
+    public SyncedCreatureSpawnerImpl(World bukkitWorld, SpawnerBlockEntity spawnerBlockEntity) {
         super(bukkitWorld, spawnerBlockEntity);
         this.serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         this.blockPos = spawnerBlockEntity.getBlockPos();
+        this.blockLocation = new Location(bukkitWorld, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
+    }
+
+    public SyncedCreatureSpawnerImpl(CraftBlockEntityState<SpawnerBlockEntity> entityState, Location location) {
+        super(entityState, location);
+        World bukkitWorld = location.getWorld();
+        this.serverLevel = ((CraftWorld) bukkitWorld).getHandle();
+        this.blockPos = entityState.getPosition();
         this.blockLocation = new Location(bukkitWorld, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
     }
 
@@ -56,6 +78,67 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         } else {
             throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
         }
+    }
+
+    @Override
+    public EntitySnapshot getSpawnedEntity() {
+        SpawnData spawnData = getSpawner().nextSpawnData;
+        return spawnData == null ? null : CraftEntitySnapshot.create(spawnData.getEntityToSpawn());
+    }
+
+    @Override
+    public void setSpawnedEntity(@NotNull EntitySnapshot snapshot) {
+        BaseSpawner baseSpawner = getSpawner();
+
+        CompoundTag compoundTag = ((CraftEntitySnapshot) snapshot).getData();
+
+        baseSpawner.spawnPotentials = SimpleWeightedRandomList.empty();
+        baseSpawner.nextSpawnData = new SpawnData(compoundTag, Optional.empty(), Optional.empty());
+    }
+
+    @Override
+    public void addPotentialSpawn(@NotNull SpawnerEntry spawnerEntry) {
+        this.addPotentialSpawn(spawnerEntry.getSnapshot(), spawnerEntry.getSpawnWeight(), spawnerEntry.getSpawnRule());
+    }
+
+    @Override
+    public void addPotentialSpawn(@NotNull EntitySnapshot snapshot, int weight, @Nullable SpawnRule spawnRule) {
+        BaseSpawner baseSpawner = getSpawner();
+
+        CompoundTag compoundTag = ((CraftEntitySnapshot) snapshot).getData();
+
+        SimpleWeightedRandomList.Builder<SpawnData> builder = SimpleWeightedRandomList.builder();
+        baseSpawner.spawnPotentials.unwrap().forEach(entry -> builder.add(entry.data(), entry.getWeight().asInt()));
+        builder.add(new SpawnData(compoundTag, Optional.ofNullable(this.toMinecraftRule(spawnRule)), Optional.empty()), weight);
+        baseSpawner.spawnPotentials = builder.build();
+    }
+
+    @Override
+    public void setPotentialSpawns(@NotNull Collection<SpawnerEntry> entries) {
+        SimpleWeightedRandomList.Builder<SpawnData> builder = SimpleWeightedRandomList.builder();
+        for (SpawnerEntry spawnerEntry : entries) {
+            CompoundTag compoundTag = ((CraftEntitySnapshot) spawnerEntry.getSnapshot()).getData();
+            builder.add(new SpawnData(compoundTag,
+                            Optional.ofNullable(this.toMinecraftRule(spawnerEntry.getSpawnRule())),
+                            Optional.empty()),
+                    spawnerEntry.getSpawnWeight());
+        }
+        getSpawner().spawnPotentials = builder.build();
+    }
+
+    @Override
+    public @NotNull List<SpawnerEntry> getPotentialSpawns() {
+        List<SpawnerEntry> entries = new ArrayList<>();
+
+        for (WeightedEntry.Wrapper<SpawnData> entry : getSpawner().spawnPotentials.unwrap()) {
+            CraftEntitySnapshot snapshot = CraftEntitySnapshot.create(entry.data().getEntityToSpawn());
+
+            if (snapshot != null) {
+                SpawnRule rule = entry.data().customSpawnRules().map(this::fromMinecraftRule).orElse(null);
+                entries.add(new SpawnerEntry(snapshot, entry.getWeight().asInt(), rule));
+            }
+        }
+        return entries;
     }
 
     @Override
@@ -142,6 +225,14 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         getSpawner().spawnRange = spawnRange;
     }
 
+    public SyncedCreatureSpawnerImpl copy() {
+        return new SyncedCreatureSpawnerImpl(this.world, this.getTileEntity());
+    }
+
+    public CraftBlockEntityState<SpawnerBlockEntity> copy(Location location) {
+        return new SyncedCreatureSpawnerImpl(this, location);
+    }
+
     public boolean isActivated() {
         this.requirePlaced();
         return getSpawner().isNearPlayer(this.world.getHandle(), this.getPosition());
@@ -157,13 +248,15 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
         CompoundTag entity = new CompoundTag();
         entity.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(net.minecraft.world.entity.EntityType.ITEM).toString());
-        entity.put("Item", itemStack.save(new CompoundTag()));
+        entity.put("Item", itemStack.save(MinecraftServer.getServer().registryAccess()));
         getSpawner().setNextSpawnData(
                 this.isPlaced() ? this.world.getHandle() : null,
                 this.getPosition(),
-                new SpawnData(entity, Optional.empty())
+                new SpawnData(entity, Optional.empty(),
+                        Optional.ofNullable(this.getSpawner().nextSpawnData).flatMap(SpawnData::equipment))
         );
     }
+
 
     @Override
     public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
@@ -202,7 +295,23 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
 
     private ResourceLocation getMobName() {
         String id = getSpawner().nextSpawnData.getEntityToSpawn().getString("id");
-        return StringUtil.isNullOrEmpty(id) ? null : new ResourceLocation(id);
+        return StringUtil.isNullOrEmpty(id) ? null : ResourceLocation.withDefaultNamespace(id);
+    }
+
+    private SpawnData.CustomSpawnRules toMinecraftRule(SpawnRule rule) {
+        if (rule == null) {
+            return null;
+        }
+        return new SpawnData.CustomSpawnRules(
+                new InclusiveRange<>(rule.getMinBlockLight(), rule.getMaxBlockLight()),
+                new InclusiveRange<>(rule.getMinSkyLight(), rule.getMaxSkyLight()));
+    }
+
+    private SpawnRule fromMinecraftRule(SpawnData.CustomSpawnRules rule) {
+        InclusiveRange<Integer> blockLight = rule.blockLightLimit();
+        InclusiveRange<Integer> skyLight = rule.skyLightLimit();
+
+        return new SpawnRule(blockLight.maxInclusive(), blockLight.maxInclusive(), skyLight.minInclusive(), skyLight.maxInclusive());
     }
 
 }

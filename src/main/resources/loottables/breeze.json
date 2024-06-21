@@ -1,0 +1,29 @@
+{
+  "pairs": [
+    {
+      "killedByPlayer": true,
+      "chance": 100,
+      "items": [
+        {
+          "type": "BREEZE_ROD",
+          "chance": 100,
+          "min": 1,
+          "max": 2,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "killer": [
+        "WITHER"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "WITHER_ROSE",
+          "chance": 100
+        }
+      ]
+    }
+  ]
+}

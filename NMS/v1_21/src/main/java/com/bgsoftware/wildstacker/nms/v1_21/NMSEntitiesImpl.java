@@ -1,5 +1,6 @@
-package com.bgsoftware.wildstacker.nms.v1_20_2;
+package com.bgsoftware.wildstacker.nms.v1_21;
 
+import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -17,6 +18,7 @@ import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NumericTag;
@@ -40,10 +42,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Fox;
@@ -60,34 +62,38 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftAnimals;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftChicken;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftExperienceOrb;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftStrider;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftTurtle;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftAnimals;
+import org.bukkit.craftbukkit.entity.CraftChicken;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftExperienceOrb;
+import org.bukkit.craftbukkit.entity.CraftItem;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftStrider;
+import org.bukkit.craftbukkit.entity.CraftTurtle;
+import org.bukkit.craftbukkit.entity.CraftVillager;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -107,22 +113,25 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
+    private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
+            new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
+
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(
             Mob.class, int.class, Modifier.PROTECTED, 1);
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(
             Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
 
-    private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "aZ");
-    private static final ReflectField<Boolean> ENTITY_LIVING_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "ba");
-    private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "eb");
-    private static final ReflectMethod<SoundEvent> GET_SOUND_DEATH = new ReflectMethod<>(LivingEntity.class, "l_");
-    private static final ReflectMethod<Float> GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "eV");
-    private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(LivingEntity.class, "eW");
-    private static final ReflectField<Integer> CHICKEN_EGG_LAY_TIME = new ReflectField<>(Chicken.class, Integer.class, "bZ");
-    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "w", boolean.class);
-    private static final ReflectMethod<BlockPos> TURTLE_HOME_POS = new ReflectMethod<>(Turtle.class, "gd");
+    private static final ReflectField<Integer> LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "bd");
+    private static final ReflectField<Boolean> LIVING_ENTITY_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "be");
+    private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "ee");
+    private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "n_");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fa");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "ff");
+    private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "ci");
+    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "x", boolean.class);
+    private static final ReflectMethod<BlockPos> TURTLE_GET_HOME_POS = new ReflectMethod<>(Turtle.class, "gk");
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "b", ItemEntity.class);
-    private static final ReflectMethod<SynchedEntityData.DataItem<?>> ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "c", EntityDataAccessor.class);
+    private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "b", EntityDataAccessor.class);
 
 
     @Override
@@ -134,8 +143,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
         assert world != null;
 
-        Entity nmsEntity = world.createEntity(location, type);
-        org.bukkit.entity.Entity bukkitEntity = nmsEntity.getBukkitEntity();
+        org.bukkit.entity.Entity bukkitEntity = world.createEntity(location, type);
+        Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
         if (beforeSpawnConsumer != null) {
             //noinspection unchecked
@@ -206,7 +215,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         zombieVillager.copyPosition(villager);
         zombieVillager.setVillagerData(villager.getVillagerData());
         zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
-        zombieVillager.setTradeOffers(villager.getOffers().createTag());
+        zombieVillager.setTradeOffers(villager.getOffers());
         zombieVillager.setVillagerXp(villager.getVillagerXp());
         zombieVillager.setBaby(villager.isBaby());
         zombieVillager.setNoAi(villager.isNoAi());
@@ -263,7 +272,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             return 0;
 
         int defaultEntityExp = ENTITY_EXP.get(mob);
-        int exp = mob.getExpReward();
+        int exp = mob.getExpReward(null);
         ENTITY_EXP.set(mob, defaultEntityExp);
 
         return exp;
@@ -279,8 +288,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
             lastDamageByPlayerTime = livingEntity.lastHurtByPlayerTime;
             isDropExperience = livingEntity.shouldDropExperience();
         } catch (Throwable error) {
-            lastDamageByPlayerTime = LAST_DAMAGE_BY_PLAYER_TIME.get(livingEntity);
-            isDropExperience = IS_DROP_EXPERIENCE.invoke(livingEntity);
+            lastDamageByPlayerTime = LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME.get(livingEntity);
+            isDropExperience = LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
         }
 
         return lastDamageByPlayerTime > 0 && isDropExperience &&
@@ -293,7 +302,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         try {
             livingEntity.lastHurtByPlayerTime = 100;
         } catch (Throwable error) {
-            LAST_DAMAGE_BY_PLAYER_TIME.set(livingEntity, 100);
+            LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME.set(livingEntity, 100);
         }
     }
 
@@ -303,7 +312,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         SynchedEntityData entityData = livingEntity.getEntityData();
         livingEntity.setHealth((float) health);
         if (preventUpdate) {
-            SynchedEntityData.DataItem<?> dataItem = ENTITY_DATA_GET_ITEM.invoke(entityData, LivingEntity.DATA_HEALTH_ID);
+            SynchedEntityData.DataItem<?> dataItem = SYNCHED_ENTITY_DATA_GET_ITEM.invoke(entityData, LivingEntity.DATA_HEALTH_ID);
             if (dataItem != null)
                 dataItem.setDirty(false);
         } else {
@@ -318,7 +327,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         try {
             return chicken.eggTime;
         } catch (Throwable error) {
-            return CHICKEN_EGG_LAY_TIME.get(chicken);
+            return CHICKEN_EGG_TIME.get(chicken);
         }
     }
 
@@ -391,7 +400,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             return ((org.bukkit.entity.Turtle) bukkitTurtle).getHome();
         } catch (Throwable ex) {
             Turtle turtle = ((CraftTurtle) bukkitTurtle).getHandle();
-            BlockPos blockPos = TURTLE_HOME_POS.invoke(turtle);
+            BlockPos blockPos = TURTLE_GET_HOME_POS.invoke(turtle);
             return new Location(bukkitTurtle.getWorld(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
         }
     }
@@ -468,6 +477,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 return StackCheckResult.FROG_TYPE;
         }
 
+        if (StackCheck.WOLF_TYPE.isEnabled() && StackCheck.WOLF_TYPE.isTypeAllowed(entityType)) {
+            if (((Wolf) en1).getVariant() != ((Wolf) en2).getVariant())
+                return StackCheckResult.WOLF_TYPE;
+        }
+
         return StackCheckResult.SUCCESS;
     }
 
@@ -539,7 +553,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
         ClientboundTakeItemEntityPacket takeItemEntityPacket = new ClientboundTakeItemEntityPacket(
                 itemEntity.getId(), livingEntity.getId(), item.getItemStack().getAmount());
-        ClientboundAddEntityPacket addEntityPacket = new ClientboundAddEntityPacket(itemEntity);
+        ClientboundAddEntityPacket addEntityPacket = getAddEntityPacketForEntity(itemEntity);
 
         serverChunkCache.broadcast(itemEntity, takeItemEntityPacket);
         serverChunkCache.broadcast(itemEntity, addEntityPacket);
@@ -556,21 +570,21 @@ public final class NMSEntitiesImpl implements NMSEntities {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         SoundEvent deathSound;
         float soundVolume;
-        float soundPitch;
+        float voicePitch;
 
         try {
             deathSound = livingEntity.getDeathSound();
             soundVolume = livingEntity.getSoundVolume();
-            soundPitch = livingEntity.getVoicePitch();
+            voicePitch = livingEntity.getVoicePitch();
         } catch (Throwable error) {
-            deathSound = GET_SOUND_DEATH.invoke(livingEntity);
-            soundVolume = GET_SOUND_VOLUME.invoke(livingEntity);
-            soundPitch = GET_SOUND_PITCH.invoke(livingEntity);
+            deathSound = LIVING_ENTITY_GET_DEATH_SOUND.invoke(livingEntity);
+            soundVolume = LIVING_ENTITY_GET_SOUND_VOLUME.invoke(livingEntity);
+            voicePitch = LIVING_ENTITY_GET_VOICE_PITCH.invoke(livingEntity);
         }
 
 
         if (deathSound != null)
-            livingEntity.playSound(deathSound, soundVolume, soundPitch);
+            livingEntity.playSound(deathSound, soundVolume, voicePitch);
     }
 
     @Override
@@ -663,7 +677,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 List<SynchedEntityData.DataValue<?>> entityData = simulatedEntityItemPickup.getEntityData().packDirty();
 
                 ServerChunkCache serverChunkCache = ((ServerLevel) simulatedEntityItemPickup.level()).getChunkSource();
-                serverChunkCache.broadcastAndSend(livingEntity, simulatedEntityItemPickup.getAddEntityPacket());
+                serverChunkCache.broadcastAndSend(livingEntity, getAddEntityPacketForEntity(simulatedEntityItemPickup));
                 if (entityData != null) {
                     serverChunkCache.broadcastAndSend(livingEntity, new ClientboundSetEntityDataPacket(
                             simulatedEntityItemPickup.getId(), entityData));
@@ -676,8 +690,9 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 livingEntity.take(itemEntity, simulatedItemPickupCount);
             }
 
-            if (!pickupItem.isAlive())
+            if (!pickupItem.isAlive()) {
                 itemEntity.discard();
+            }
         }
     }
 
@@ -692,7 +707,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         if (!(itemStack.getItem() instanceof SwordItem))
             return;
 
-        float sweepDamage = 1.0F + EnchantmentHelper.getSweepingDamageRatio(serverPlayer) * (float) damage;
+        float sweepDamage = 1.0F + (float) serverPlayer.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * (float) damage;
         List<LivingEntity> nearbyEntities = livingEntity.level().getEntitiesOfClass(LivingEntity.class,
                 livingEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D));
 
@@ -709,10 +724,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
     public void giveExp(org.bukkit.entity.Player bukkitPlayer, int amount) {
         ServerPlayer serverPlayer = ((CraftPlayer) bukkitPlayer).getHandle();
 
-        Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, serverPlayer);
-        ItemStack mendingItem = entry != null ? entry.getValue() : ItemStack.EMPTY;
+        ItemStack mendingItem = EnchantmentHelper.getRandomItemWith(
+                        EnchantmentEffectComponents.REPAIR_WITH_XP, serverPlayer, ItemStack::isDamaged)
+                .map(EnchantedItemInUse::itemStack).orElse(ItemStack.EMPTY);
 
-        if (!mendingItem.isEmpty() && mendingItem.getItem().canBeDepleted()) {
+        if (!mendingItem.isEmpty() && mendingItem.getItem().components().has(DataComponents.MAX_DAMAGE)) {
             ExperienceOrb experienceOrb = EntityType.EXPERIENCE_ORB.create(serverPlayer.level());
             experienceOrb.value = amount;
 
@@ -802,10 +818,26 @@ public final class NMSEntitiesImpl implements NMSEntities {
             @Override
             public void setDead(boolean dead) {
                 LivingEntity entity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
-                ENTITY_LIVING_DEAD.set(entity, dead);
+                LIVING_ENTITY_DEAD.set(entity, dead);
                 entity.deathTime = 0;
             }
         };
+    }
+
+    @Override
+    public EntityDeathEvent createDeathEvent(org.bukkit.entity.LivingEntity livingEntity,
+                                             List<org.bukkit.inventory.ItemStack> drops, int droppedExp,
+                                             EntityDamageEvent lastDamage) {
+        if (OLD_DEATH_EVENT_CONSTRUCTOR.isValid()) {
+            return OLD_DEATH_EVENT_CONSTRUCTOR.newInstance(livingEntity, drops, droppedExp);
+        } else {
+            return new EntityDeathEvent(livingEntity, lastDamage.getDamageSource(), drops, droppedExp);
+        }
+    }
+
+    private static ClientboundAddEntityPacket getAddEntityPacketForEntity(Entity entity) {
+        BlockPos blockPos = new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ());
+        return new ClientboundAddEntityPacket(entity, 0, blockPos);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_20_2.spawner;
+package com.bgsoftware.wildstacker.nms.v1_21.spawner;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;

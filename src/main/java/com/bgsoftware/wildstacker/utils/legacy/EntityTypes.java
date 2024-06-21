@@ -17,6 +17,8 @@ public enum EntityTypes {
     BAT,
     BEE,
     BLAZE,
+    BOGGED,
+    BREEZE,
     CAMEL,
     CAT,
     CAVE_SPIDER,

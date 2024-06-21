@@ -1,12 +1,12 @@
-package com.bgsoftware.wildstacker.nms.v1_20_2;
+package com.bgsoftware.wildstacker.nms.v1_21;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
-import com.bgsoftware.wildstacker.nms.v1_20_2.spawner.SpawnerWatcherTickingBlockEntity;
-import com.bgsoftware.wildstacker.nms.v1_20_2.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.nms.v1_21.spawner.SpawnerWatcherTickingBlockEntity;
+import com.bgsoftware.wildstacker.nms.v1_21.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
@@ -28,15 +28,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.v1_20_R2.CraftChunk;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
+import org.bukkit.craftbukkit.CraftChunk;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Modifier;
@@ -89,8 +89,14 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
+        List<TickingBlockEntity> blockEntityTickers;
+        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid()) {
+            blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
+        } else {
+            blockEntityTickers = serverLevel.blockEntityTickers;
+        }
+
         List<TickingBlockEntity> watchersToAdd = new LinkedList<>();
-        List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
         Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
 
         while (blockEntityIterator.hasNext()) {
@@ -123,7 +129,12 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         int blockY = location.getBlockY();
         int blockZ = location.getBlockZ();
 
-        List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
+        List<TickingBlockEntity> blockEntityTickers;
+        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid()) {
+            blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
+        } else {
+            blockEntityTickers = serverLevel.blockEntityTickers;
+        }
 
         TickingBlockEntity watcherToAdd = null;
         Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
@@ -154,7 +165,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         createCondition("ANIMAL_LIGHT",
                 (world, position) -> world.getRawBrightness(position, 0) > 8,
                 EntityType.CHICKEN, EntityType.COW, EntityType.DONKEY, EntityType.GOAT, EntityType.HORSE,
-                EntityType.LLAMA, EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG,
+                EntityType.LLAMA, EntityType.MOOSHROOM, EntityType.MULE, EntityType.PARROT, EntityType.PIG,
                 EntityType.RABBIT, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.TURTLE, EntityType.WOLF,
                 EntityType.ZOMBIE_HORSE, EntityType.CAT, EntityType.FOX, EntityType.PANDA, EntityType.TRADER_LLAMA
         );
@@ -293,7 +304,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
 
         createCondition("ON_MYCELIUM",
                 (world, position) -> getBlockBelow(world, position).is(Blocks.MYCELIUM),
-                EntityType.MUSHROOM_COW
+                EntityType.MOOSHROOM
         );
 
         createCondition("ON_NETHER_WART_BLOCK",

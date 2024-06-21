@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_20_1.spawner;
+package com.bgsoftware.wildstacker.nms.v1_21.spawner;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -36,8 +36,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.phys.AABB;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
@@ -137,7 +137,6 @@ public class StackedBaseSpawner extends BaseSpawner {
         if (this.demoEntity == null) {
             if (stackedSpawner.isDebug())
                 Debug.debug("StackedBaseSpawner", "serverTick", "Demo entity is null, trying to update it.");
-
             updateDemoEntity(serverLevel, blockPos);
             if (this.demoEntity == null) {
                 if (stackedSpawner.isDebug())
@@ -352,7 +351,7 @@ public class StackedBaseSpawner extends BaseSpawner {
             if (stackedSpawner.isDebug())
                 Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "location=" + location);
 
-            if (!serverLevel.noCollision(entityToSpawnType.getAABB(x, y, z))) {
+            if (!serverLevel.noCollision(entityToSpawnType.getSpawnAABB(x, y, z))) {
                 if (stackedSpawner.isDebug())
                     Debug.debug("StackedBaseSpawner", "attemptMobSpawning", "Not enough space to spawn the entity.");
                 if (failureReason.isEmpty())
@@ -440,7 +439,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
         // Set mob spawn data
         this.spawnPotentials.getRandom(serverLevel.getRandom()).ifPresent(weightedEntry ->
-                this.setNextSpawnData(serverLevel, blockPos, weightedEntry.getData()));
+                this.setNextSpawnData(serverLevel, blockPos, weightedEntry.data()));
 
         spawnedEntities = 0;
         failureReason = "";
@@ -459,7 +458,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
     private SpawnData getOrCreateNextSpawnData(RandomSource random) {
         if (this.nextSpawnData == null)
-            this.nextSpawnData = this.spawnPotentials.getRandom(random).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new);
+            this.nextSpawnData = this.spawnPotentials.getRandom(random).map(WeightedEntry.Wrapper::data).orElseGet(SpawnData::new);
 
         return this.nextSpawnData;
     }
@@ -492,7 +491,7 @@ public class StackedBaseSpawner extends BaseSpawner {
 
             if (entityToSpawn.size() == 1 && entityToSpawn.contains("id", 8)) {
                 mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()),
-                        MobSpawnType.SPAWNER, null, null);
+                        MobSpawnType.SPAWNER, null);
             }
 
             if (serverLevel.spigotConfig.nerfSpawnerMobs) {

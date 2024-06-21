@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_20_2;
+package com.bgsoftware.wildstacker.nms.v1_21;
 
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.utils.holograms.Hologram;
@@ -18,11 +18,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftArmorStand;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftChatMessage;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftArmorStand;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 
 public final class NMSHologramsImpl implements NMSHolograms {
 

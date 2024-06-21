@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_20_2;
+package com.bgsoftware.wildstacker.nms.v1_21;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.nms.NMSWorld;
@@ -19,14 +19,14 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.TurtleEgg;
-import org.bukkit.craftbukkit.v1_20_R2.CraftParticle;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftRaider;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.CraftParticle;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftRaider;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,8 +37,8 @@ import java.util.function.Predicate;
 
 public class NMSWorldImpl implements NMSWorld {
 
-    private static final ReflectMethod<Boolean> RAIDER_CAN_RAID = new ReflectMethod<>(Raider.class, boolean.class, "gs");
-    private static final ReflectMethod<Raid> RAIDER_RAID = new ReflectMethod<>(Raider.class, Raid.class, "gr");
+    private static final ReflectMethod<Boolean> RAIDER_HAS_ACTIVE_RAID = new ReflectMethod<>(Raider.class, boolean.class, "gB");
+    private static final ReflectMethod<Raid> RAIDER_GET_CURRENT_RAID = new ReflectMethod<>(Raider.class, Raid.class, "gy");
 
     @Override
     public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
@@ -105,8 +105,8 @@ public class NMSWorldImpl implements NMSWorld {
             hasActiveRaid = raider.hasActiveRaid();
             raid = raider.getCurrentRaid();
         } catch (Throwable error) {
-            hasActiveRaid = RAIDER_CAN_RAID.invoke(raider);
-            raid = RAIDER_RAID.invoke(raider);
+            hasActiveRaid = RAIDER_HAS_ACTIVE_RAID.invoke(raider);
+            raid = RAIDER_GET_CURRENT_RAID.invoke(raider);
         }
 
         if (hasActiveRaid)

@@ -1,26 +1,32 @@
-package com.bgsoftware.wildstacker.nms.v1_20_1;
+package com.bgsoftware.wildstacker.nms.v1_21;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
-import com.bgsoftware.wildstacker.nms.algorithms.PaperGlowEnchantment;
-import com.bgsoftware.wildstacker.nms.algorithms.SpigotGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
-import com.bgsoftware.wildstacker.nms.entity.NMSEntityEquipmentImpl;
+import com.bgsoftware.wildstacker.nms.v1_20_3.entity.NMSEntityEquipmentImpl;
+import com.bgsoftware.wildstacker.nms.v1_21.enchantment.GlowEnchantment;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ResolvableProfile;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+import org.bukkit.Registry;
+import org.bukkit.craftbukkit.CraftRegistry;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
@@ -34,14 +40,18 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Optional;
 
 public final class NMSAdapterImpl implements NMSAdapter {
 
-    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
             "Items", "ChestedHorse", "DecorItem",
     };
+
+    private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
+            new ReflectField<>(CraftRegistry.class, Map.class, "cache");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -68,35 +78,30 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public Enchantment getGlowEnchant() {
-        try {
-            return new PaperGlowEnchantment("wildstacker_glowing_enchant");
-        } catch (Throwable error) {
-            return new SpigotGlowEnchantment("wildstacker_glowing_enchant");
-        }
+        return new GlowEnchantment();
+    }
+
+    @Override
+    public Enchantment createGlowEnchantment() {
+        Enchantment enchantment = getGlowEnchant();
+
+        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
+
+        registryCache.put(enchantment.getKey(), enchantment);
+
+        return enchantment;
     }
 
     @Override
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
 
-        CompoundTag skullOwner = compoundTag.contains("SkullOwner") ?
-                compoundTag.getCompound("SkullOwner") : new CompoundTag();
+        PropertyMap propertyMap = new PropertyMap();
+        propertyMap.put("textures", new Property("textures", texture));
 
-        skullOwner.putString("Id", new UUID(texture.hashCode(), texture.hashCode()).toString());
+        ResolvableProfile resolvableProfile = new ResolvableProfile(Optional.empty(), Optional.empty(), propertyMap);
 
-        CompoundTag properties = new CompoundTag();
-        ListTag textures = new ListTag();
-        CompoundTag signature = new CompoundTag();
-
-        signature.putString("Value", texture);
-        textures.add(signature);
-
-        properties.put("textures", textures);
-
-        skullOwner.put("Properties", properties);
-
-        compoundTag.put("SkullOwner", skullOwner);
+        itemStack.set(DataComponents.PROFILE, resolvableProfile);
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
@@ -127,10 +132,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(outputStream);
 
-        CompoundTag compoundTag = new CompoundTag();
-
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        itemStack.save(compoundTag);
+        CompoundTag compoundTag = (CompoundTag) itemStack.save(MinecraftServer.getServer().registryAccess());
 
         try {
             NbtIo.write(compoundTag, dataOutput);
@@ -146,8 +149,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
 
         try {
-            CompoundTag compoundTag = NbtIo.read(new DataInputStream(inputStream), NbtAccounter.UNLIMITED);
-            ItemStack itemStack = ItemStack.of(compoundTag);
+            CompoundTag compoundTag = NbtIo.read(new DataInputStream(inputStream));
+            ItemStack itemStack = ItemStack.parse(MinecraftServer.getServer().registryAccess(), compoundTag).orElseThrow();
             return CraftItemStack.asBukkitCopy(itemStack);
         } catch (Exception ex) {
             return null;
@@ -157,24 +160,28 @@ public final class NMSAdapterImpl implements NMSAdapter {
     @Override
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Object value) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
 
-        if (value instanceof Boolean)
-            compoundTag.putBoolean(key, (boolean) value);
-        else if (value instanceof Integer)
-            compoundTag.putInt(key, (int) value);
-        else if (value instanceof String)
-            compoundTag.putString(key, (String) value);
-        else if (value instanceof Double)
-            compoundTag.putDouble(key, (double) value);
-        else if (value instanceof Short)
-            compoundTag.putShort(key, (short) value);
-        else if (value instanceof Byte)
-            compoundTag.putByte(key, (byte) value);
-        else if (value instanceof Float)
-            compoundTag.putFloat(key, (float) value);
-        else if (value instanceof Long)
-            compoundTag.putLong(key, (long) value);
+        CustomData customData = itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        customData = customData.update(compoundTag -> {
+            if (value instanceof Boolean)
+                compoundTag.putBoolean(key, (boolean) value);
+            else if (value instanceof Integer)
+                compoundTag.putInt(key, (int) value);
+            else if (value instanceof String)
+                compoundTag.putString(key, (String) value);
+            else if (value instanceof Double)
+                compoundTag.putDouble(key, (double) value);
+            else if (value instanceof Short)
+                compoundTag.putShort(key, (short) value);
+            else if (value instanceof Byte)
+                compoundTag.putByte(key, (byte) value);
+            else if (value instanceof Float)
+                compoundTag.putFloat(key, (float) value);
+            else if (value instanceof Long)
+                compoundTag.putLong(key, (long) value);
+        });
+
+        itemStack.set(DataComponents.CUSTOM_DATA, customData);
 
         return CraftItemStack.asBukkitCopy(itemStack);
     }
@@ -186,7 +193,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (itemStack == null || itemStack.isEmpty())
             return valueType.cast(def);
 
-        CompoundTag compoundTag = itemStack.getTag();
+        CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
+        CompoundTag compoundTag = customData == null ? null : customData.getUnsafe();
 
         if (compoundTag == null || !compoundTag.contains(key))
             return valueType.cast(def);
