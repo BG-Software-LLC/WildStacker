@@ -364,18 +364,19 @@ public final class EntitiesListener implements Listener {
         if (spawnEggData.entityType != null && EntityTypes.fromEntity(e.getEntity()) != spawnEggData.entityType)
             return;
 
+        int stackAmount = spawnEggData.stackAmount;
+
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(spawnEggData.stackAmount, false);
+        stackedEntity.setStackAmount(stackAmount, false);
+        if (stackAmount > 1) {
+            // Remove the name tag from the custom name of the egg
+            e.getEntity().setCustomName(null);
+            Executor.sync(stackedEntity::updateName, 1L);
+        }
 
         if (spawnEggData.upgradeId != 0)
             ((WStackedEntity) stackedEntity).setUpgradeId(spawnEggData.upgradeId);
-
-        Executor.sync(() -> {
-            //Resetting the name, so updateName will work.
-            stackedEntity.setCustomName("");
-            stackedEntity.updateName();
-        }, 1L);
 
         spawnEggTracker.resetTracker();
     }
