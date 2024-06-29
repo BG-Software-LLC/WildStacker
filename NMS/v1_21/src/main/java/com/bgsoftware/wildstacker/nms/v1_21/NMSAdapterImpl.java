@@ -46,8 +46,8 @@ import java.util.Optional;
 public final class NMSAdapterImpl implements NMSAdapter {
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
-            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
-            "Items", "ChestedHorse", "DecorItem",
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
+            "Items", "ChestedHorse", "DecorItem", "Leash", "leash"
     };
 
     private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
