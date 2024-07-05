@@ -45,7 +45,12 @@ public enum SpawnCause {
     VILLAGE_INVASION(33),
     COMMAND(34),
     PIGLIN_ZOMBIFIED(35),
-
+    SPELL(36),
+    FROZEN(37),
+    METAMORPHOSIS(38),
+    DUPLICATION(39),
+    ENCHANTMENT(40),
+    TRIAL_SPAWNER(41),
 
     /**
      * Custom spawn causes.
