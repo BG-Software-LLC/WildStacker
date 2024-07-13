@@ -295,7 +295,7 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
 
     private ResourceLocation getMobName() {
         String id = getSpawner().nextSpawnData.getEntityToSpawn().getString("id");
-        return StringUtil.isNullOrEmpty(id) ? null : ResourceLocation.withDefaultNamespace(id);
+        return StringUtil.isNullOrEmpty(id) ? null : ResourceLocation.parse(id);
     }
 
     private SpawnData.CustomSpawnRules toMinecraftRule(SpawnRule rule) {
