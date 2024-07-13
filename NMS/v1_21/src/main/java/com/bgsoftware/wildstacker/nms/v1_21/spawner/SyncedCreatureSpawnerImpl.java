@@ -24,6 +24,7 @@ import org.bukkit.block.spawner.SpawnRule;
 import org.bukkit.block.spawner.SpawnerEntry;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.block.CraftCreatureSpawner;
 import org.bukkit.craftbukkit.entity.CraftEntitySnapshot;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntitySnapshot;
@@ -88,12 +89,11 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
 
     @Override
     public void setSpawnedEntity(@NotNull EntitySnapshot snapshot) {
-        BaseSpawner baseSpawner = getSpawner();
+        CraftCreatureSpawner.setSpawnedEntity(getSpawner(), snapshot, null, null);
+    }
 
-        CompoundTag compoundTag = ((CraftEntitySnapshot) snapshot).getData();
-
-        baseSpawner.spawnPotentials = SimpleWeightedRandomList.empty();
-        baseSpawner.nextSpawnData = new SpawnData(compoundTag, Optional.empty(), Optional.empty());
+    public void setSpawnedEntity(SpawnerEntry spawnerEntry) {
+        CraftCreatureSpawner.setSpawnedEntity(getSpawner(), spawnerEntry.getSnapshot(), spawnerEntry.getSpawnRule(), spawnerEntry.getEquipment());
     }
 
     @Override
