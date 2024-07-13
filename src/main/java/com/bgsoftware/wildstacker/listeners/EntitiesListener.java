@@ -814,7 +814,8 @@ public final class EntitiesListener implements Listener {
 
         // In case the entity with a name already, we want to treat is as he was nametagged
         if (entity.getCustomName() != null) {
-            if (stackedEntity.getStackAmount() <= 1 || !entity.getCustomName().equals(EntityUtils.getEntityName(stackedEntity)))
+            if ((stackedEntity.getStackAmount() <= 1 && stackedEntity.isDefaultUpgrade()) ||
+                    !entity.getCustomName().equals(EntityUtils.getEntityName(stackedEntity)))
                 ((WStackedEntity) stackedEntity).setNameTag();
         }
 
