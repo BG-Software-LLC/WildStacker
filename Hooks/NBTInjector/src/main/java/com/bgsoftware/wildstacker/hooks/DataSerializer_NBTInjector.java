@@ -21,6 +21,15 @@ public final class DataSerializer_NBTInjector implements IDataSerializer, Listen
 
     private static final ReflectField<Entity> ENTITY_FIELD = new ReflectField<>(EntityEvent.class, Entity.class, "entity");
 
+    public static boolean isCompatible() {
+        try {
+            Class.forName("de.tr7zw.nbtinjector.NBTInjector");
+            return true;
+        } catch (Throwable error) {
+            return false;
+        }
+    }
+
     public DataSerializer_NBTInjector(WildStackerPlugin plugin) {
         if (NBTInjector.isInjected()) {
             plugin.getSystemManager().setDataSerializer(this);
