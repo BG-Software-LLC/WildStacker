@@ -550,22 +550,11 @@ public final class EntitiesListener implements Listener {
 
                 itemsAmountToRemove = breedableAmount;
 
+                ItemStack inHandCopy = inHand.clone();
+
                 Executor.sync(() -> {
                     // Spawning the baby after 2.5 seconds
                     int babiesAmount = itemsAmountToRemove / 2;
-
-                    LivingEntity childEntity;
-
-                    if (EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE) {
-                        // Turtles should lay an egg instead of spawning a baby.
-                        plugin.getNMSEntities().setTurtleEgg(stackedEntity.getLivingEntity());
-                        stackedEntity.setFlag(EntityFlag.BREEDABLE_AMOUNT, babiesAmount);
-                        childEntity = null;
-                    } else {
-                        StackedEntity duplicated = stackedEntity.spawnDuplicate(babiesAmount, SpawnCause.BREEDING);
-                        childEntity = duplicated.getLivingEntity();
-                        ((Animals) childEntity).setBaby();
-                    }
 
                     // Making sure the entities are not in a love-mode anymore.
                     plugin.getNMSEntities().setInLove((Animals) e.getRightClicked(), e.getPlayer(), false);
@@ -576,18 +565,25 @@ public final class EntitiesListener implements Listener {
                     // Calculate exp to drop
                     int expToDrop = Random.nextInt(1, 7, babiesAmount);
 
-                    if (childEntity != null) {
-                        /* father and mother is the same entity in this case */
-                        if (!plugin.getNMSEntities().callEntityBreedEvent(childEntity, (LivingEntity) e.getRightClicked(),
-                                (LivingEntity) e.getRightClicked(), e.getPlayer(), inHand, expToDrop)) {
-                            childEntity.remove();
-                            return;
-                        }
+                    LivingEntity childEntity;
 
-                        plugin.getNMSEntities().setInLove((Animals) childEntity, e.getPlayer(), false);
+                    if (EntityTypes.fromEntity(stackedEntity.getLivingEntity()) == EntityTypes.TURTLE) {
+                        // Turtles should lay an egg instead of spawning a baby.
+                        plugin.getNMSEntities().setTurtleEgg(stackedEntity.getLivingEntity());
+                        stackedEntity.setFlag(EntityFlag.BREEDABLE_AMOUNT, babiesAmount);
+                        childEntity = null;
+                    } else {
+                        StackedEntity duplicated = ((WStackedEntity) stackedEntity).spawnDuplicate(babiesAmount, SpawnCause.BREEDING, _childEntity -> {
+                            ((Animals) _childEntity).setBaby();
+                            return plugin.getNMSEntities().callEntityBreedEvent((LivingEntity) _childEntity, (LivingEntity) e.getRightClicked(),
+                                    (LivingEntity) e.getRightClicked(), e.getPlayer(), inHandCopy, expToDrop);
+                        });
+                        childEntity = duplicated == null ? null : duplicated.getLivingEntity();
                     }
 
-                    EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
+                    if (childEntity != null) {
+                        EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
+                    }
                 }, 50L);
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
                 stackedEntity.decreaseStackAmount(1, true);

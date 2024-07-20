@@ -59,6 +59,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -518,6 +519,7 @@ public final class SystemHandler implements SystemManager {
         LivingEntity livingEntity = (LivingEntity) spawnEntityWithoutStacking(stackedEntity.getLocation(), entityClass, SpawnCause.CUSTOM, entity -> {
             // Marking the entity as a corpse before the actual spawning
             EntityStorage.setMetadata(entity, EntityFlag.CORPSE, true);
+            return true;
         }, entity -> {
             // Updating the entity values after the actual spawning
             plugin.getNMSAdapter().updateEntity(stackedEntity.getLivingEntity(), (LivingEntity) entity);
@@ -899,11 +901,12 @@ public final class SystemHandler implements SystemManager {
         this.loadedData = true;
     }
 
-    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause, Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer) {
+    @Nullable
+    public <T extends Entity> T spawnEntityWithoutStacking(Location location, Class<T> type, SpawnCause spawnCause,
+                                                           Predicate<Entity> beforeSpawnConsumer, Consumer<Entity> afterSpawnConsumer) {
         return plugin.getNMSEntities().createEntity(location, type, spawnCause, entity -> {
             EntityStorage.setMetadata(entity, EntityFlag.BYPASS_STACKING, true);
-            if (beforeSpawnConsumer != null)
-                beforeSpawnConsumer.accept(entity);
+            return beforeSpawnConsumer == null || beforeSpawnConsumer.test(entity);
         }, afterSpawnConsumer);
     }
 

@@ -26,11 +26,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface NMSEntities {
 
+    @Nullable
     <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause,
-                                      Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer);
+                                      Predicate<Entity> beforeSpawnConsumer, Consumer<Entity> afterSpawnConsumer);
 
     StackedItem createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer);
 

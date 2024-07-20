@@ -439,6 +439,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public StackedEntity spawnDuplicate(int amount, SpawnCause spawnCause) {
+        return spawnDuplicate(amount, spawnCause, null);
+    }
+
+    @Nullable
+    public StackedEntity spawnDuplicate(int amount, SpawnCause spawnCause, @Nullable Predicate<Entity> beforeSpawnConsumer) {
         if (amount <= 0)
             return null;
 
@@ -450,7 +455,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             duplicate.setStackAmount(amount, true);
         } else {
             duplicate = WStackedEntity.of(plugin.getSystemManager().spawnEntityWithoutStacking(
-                    object.getLocation(), getType().getEntityClass(), spawnCause));
+                    object.getLocation(), getType().getEntityClass(), spawnCause, beforeSpawnConsumer, null));
 
             duplicate.setStackAmount(amount, true);
 

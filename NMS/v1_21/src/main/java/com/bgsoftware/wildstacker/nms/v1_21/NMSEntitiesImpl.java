@@ -108,6 +108,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public final class NMSEntitiesImpl implements NMSEntities {
 
@@ -137,18 +138,17 @@ public final class NMSEntitiesImpl implements NMSEntities {
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type,
                                                                SpawnCause spawnCause,
-                                                               Consumer<T> beforeSpawnConsumer,
-                                                               Consumer<T> afterSpawnConsumer) {
+                                                               Predicate<org.bukkit.entity.Entity> beforeSpawnConsumer,
+                                                               Consumer<org.bukkit.entity.Entity> afterSpawnConsumer) {
         CraftWorld world = (CraftWorld) location.getWorld();
 
         assert world != null;
 
-        org.bukkit.entity.Entity bukkitEntity = world.createEntity(location, type);
+        T bukkitEntity = world.createEntity(location, type);
         Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-        if (beforeSpawnConsumer != null) {
-            //noinspection unchecked
-            beforeSpawnConsumer.accept((T) bukkitEntity);
+        if (beforeSpawnConsumer != null && !beforeSpawnConsumer.test(bukkitEntity)) {
+            return null;
         }
 
         world.addEntity(nmsEntity, spawnCause.toSpawnReason());
@@ -157,8 +157,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
         if (afterSpawnConsumer != null) {
-            //noinspection unchecked
-            afterSpawnConsumer.accept((T) bukkitEntity);
+            afterSpawnConsumer.accept(bukkitEntity);
         }
 
         return type.cast(bukkitEntity);
@@ -199,6 +198,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 orb.spawnReason = org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH;
             } catch (Throwable ignored) {
             }
+            return true;
         }, null);
     }
 
