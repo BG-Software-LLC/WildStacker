@@ -78,7 +78,8 @@ public final class DeathSimulation {
         int entitiesToKill = spreadDamageResult.getKey();
         double damageToNextStack = spreadDamageResult.getValue();
 
-        int fireTicks = livingEntity.getFireTicks();
+        int fireAspectLevel = killerTool.getEnchantmentLevel(Enchantment.FIRE_ASPECT);
+        int fireTicks = fireAspectLevel > 0 ? fireAspectLevel * 4 : livingEntity.getFireTicks();
 
         EntityDamageData result = new EntityDamageData(false, 0);
 
