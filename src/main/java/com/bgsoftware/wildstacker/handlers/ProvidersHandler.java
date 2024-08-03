@@ -379,10 +379,15 @@ public final class ProvidersHandler {
                 registerHook("McMMOHook");
             } else {
                 try {
-                    Class.forName("com.gmail.nossr50.metadata.MobMetaFlagType");
-                    registerHook("McMMO210Hook");
+                    Class.forName("com.gmail.nossr50.util.MobMetadataUtils");
+                    registerHook("McMMO220Hook");
                 } catch (ClassNotFoundException error) {
-                    registerHook("McMMO2Hook");
+                    try {
+                        Class.forName("com.gmail.nossr50.metadata.MobMetaFlagType");
+                        registerHook("McMMO210Hook");
+                    } catch (ClassNotFoundException error2) {
+                        registerHook("McMMO2Hook");
+                    }
                 }
             }
         }

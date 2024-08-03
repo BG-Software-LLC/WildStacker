@@ -40,6 +40,7 @@ import org.bukkit.util.Vector;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -77,7 +78,8 @@ public final class DeathSimulation {
         int entitiesToKill = spreadDamageResult.getKey();
         double damageToNextStack = spreadDamageResult.getValue();
 
-        int fireTicks = livingEntity.getFireTicks();
+        int fireAspectLevel = killerTool.getEnchantmentLevel(Enchantment.FIRE_ASPECT);
+        int fireTicks = fireAspectLevel > 0 ? fireAspectLevel * 4 : livingEntity.getFireTicks();
 
         EntityDamageData result = new EntityDamageData(false, 0);
 
@@ -139,7 +141,6 @@ public final class DeathSimulation {
                 IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(true);
-                nmsEntity.setHealth(0f, true);
 
                 // Setting the stack amount of the entity to the unstack amount.
                 int realStackAmount = stackedEntity.getStackAmount();
@@ -157,8 +158,16 @@ public final class DeathSimulation {
                 if (!fromDeathEvent) {
                     int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
                             stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
-                    EntityDeathEvent entityDeathEvent = new EntityDeathEvent(livingEntity, new ArrayList<>(drops), droppedExp);
-                    Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                    EntityDeathEvent entityDeathEvent = plugin.getNMSEntities().createDeathEvent(
+                            livingEntity, new LinkedList<>(drops), droppedExp, damageEvent);
+
+                    try {
+                        nmsEntity.setHealth(0f, true);
+                        Bukkit.getPluginManager().callEvent(entityDeathEvent);
+                    } finally {
+                        nmsEntity.setHealth(1f, true);
+                    }
+
                     finalDrops = entityDeathEvent.getDrops();
                     finalExp = entityDeathEvent.getDroppedExp();
                 } else {
@@ -166,7 +175,6 @@ public final class DeathSimulation {
                     Integer expToDropFlag = stackedEntity.getAndRemoveFlag(EntityFlag.EXP_TO_DROP);
                     finalExp = expToDropFlag == null ? 0 : expToDropFlag;
                 }
-
 
                 // Restore all values
                 nmsEntity.setRemoved(false);

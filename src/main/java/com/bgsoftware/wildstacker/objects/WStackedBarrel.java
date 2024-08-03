@@ -81,13 +81,15 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         if (location.getBlock().getType() == Material.CAULDRON) {
             blockDisplay = plugin.getNMSEntities().createEntity(location.add(0.5, 0, 0.5), ArmorStand.class,
-                    SpawnCause.CUSTOM, createdEntity -> {
-                        createdEntity.setVisible(false);
-                        createdEntity.setSmall(true);
-                        createdEntity.setGravity(false);
-                        createdEntity.setHelmet(barrelItem);
-                        plugin.getNMSEntities().setCustomName(createdEntity, "BlockDisplay");
-                        plugin.getNMSEntities().setCustomNameVisible(createdEntity, false);
+                    SpawnCause.CUSTOM, entity -> {
+                        ArmorStand armorStand = (ArmorStand) entity;
+                        armorStand.setVisible(false);
+                        armorStand.setSmall(true);
+                        armorStand.setGravity(false);
+                        armorStand.setHelmet(barrelItem);
+                        plugin.getNMSEntities().setCustomName(armorStand, "BlockDisplay");
+                        plugin.getNMSEntities().setCustomNameVisible(armorStand, false);
+                        return true;
                     }, null);
         }
     }

@@ -8,8 +8,6 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
-import com.bgsoftware.wildstacker.nms.v1_20_3.algorithms.PaperGlowEnchantment;
-import com.bgsoftware.wildstacker.nms.v1_20_3.algorithms.SpigotGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.v1_20_3.entity.NMSEntityEquipmentImpl;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.mojang.authlib.properties.Property;
@@ -24,7 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -47,8 +44,8 @@ import java.util.Optional;
 public final class NMSAdapterImpl implements NMSAdapter {
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
-            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
-            "Items", "ChestedHorse", "DecorItem",
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
+            "Items", "ChestedHorse", "DecorItem", "Leash", "leash"
     };
 
     private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
@@ -79,22 +76,12 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public Enchantment getGlowEnchant() {
-        try {
-            return new PaperGlowEnchantment("wildstacker_glowing_enchant");
-        } catch (Throwable error) {
-            return new SpigotGlowEnchantment("wildstacker_glowing_enchant");
-        }
+        return null;
     }
 
     @Override
     public Enchantment createGlowEnchantment() {
-        Enchantment enchantment = getGlowEnchant();
-
-        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
-
-        registryCache.put(enchantment.getKey(), enchantment);
-
-        return enchantment;
+        return null;
     }
 
     @Override

@@ -17,6 +17,8 @@ public enum EntityTypes {
     BAT,
     BEE,
     BLAZE,
+    BOGGED,
+    BREEZE,
     CAMEL,
     CAT,
     CAVE_SPIDER,
@@ -68,7 +70,7 @@ public enum EntityTypes {
     SKELETON_HORSE,
     SLIME,
     SNIFFER,
-    SNOWMAN,
+    SNOW_GOLEM,
     SPIDER,
     SQUID,
     STRAY,
@@ -105,6 +107,7 @@ public enum EntityTypes {
 
         bukkitTypeConverter[EntityType.MUSHROOM_COW.ordinal()] = EntityTypes.MOOSHROOM;
         bukkitTypeConverter[EntityType.PIG_ZOMBIE.ordinal()] = EntityTypes.ZOMBIE_PIGMAN;
+        bukkitTypeConverter[EntityType.SNOWMAN.ordinal()] = EntityTypes.SNOW_GOLEM;
     }
 
     public static EntityTypes fromName(String name) {
@@ -119,6 +122,8 @@ public enum EntityTypes {
             case "ZOMBIFIED_PIGLIN":
             case "PIG_ZOMBIE":
                 return ZOMBIE_PIGMAN;
+            case "SNOWMAN":
+                return SNOW_GOLEM;
         }
 
         throw new IllegalArgumentException("Couldn't cast " + name + " into a EntityTypes enum. Contact Ome_R!");

@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_20_4;
 
+import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
@@ -90,6 +91,8 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -104,10 +107,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public final class NMSEntitiesImpl implements NMSEntities {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
+            new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
 
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(
             Mob.class, int.class, Modifier.PROTECTED, 1);
@@ -130,18 +137,17 @@ public final class NMSEntitiesImpl implements NMSEntities {
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type,
                                                                SpawnCause spawnCause,
-                                                               Consumer<T> beforeSpawnConsumer,
-                                                               Consumer<T> afterSpawnConsumer) {
+                                                               Predicate<org.bukkit.entity.Entity> beforeSpawnConsumer,
+                                                               Consumer<org.bukkit.entity.Entity> afterSpawnConsumer) {
         CraftWorld world = (CraftWorld) location.getWorld();
 
         assert world != null;
 
-        org.bukkit.entity.Entity bukkitEntity = world.createEntity(location, type);
+        T bukkitEntity = world.createEntity(location, type);
         Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 
-        if (beforeSpawnConsumer != null) {
-            //noinspection unchecked
-            beforeSpawnConsumer.accept((T) bukkitEntity);
+        if (beforeSpawnConsumer != null && !beforeSpawnConsumer.test(bukkitEntity)) {
+            return null;
         }
 
         world.addEntity(nmsEntity, spawnCause.toSpawnReason());
@@ -150,8 +156,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             WStackedEntity.of(bukkitEntity).setSpawnCause(spawnCause);
 
         if (afterSpawnConsumer != null) {
-            //noinspection unchecked
-            afterSpawnConsumer.accept((T) bukkitEntity);
+            afterSpawnConsumer.accept(bukkitEntity);
         }
 
         return type.cast(bukkitEntity);
@@ -192,6 +197,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 orb.spawnReason = org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH;
             } catch (Throwable ignored) {
             }
+            return true;
         }, null);
     }
 
@@ -816,4 +822,14 @@ public final class NMSEntitiesImpl implements NMSEntities {
         };
     }
 
+    @Override
+    public EntityDeathEvent createDeathEvent(org.bukkit.entity.LivingEntity livingEntity,
+                                             List<org.bukkit.inventory.ItemStack> drops, int droppedExp,
+                                             EntityDamageEvent lastDamage) {
+        if (OLD_DEATH_EVENT_CONSTRUCTOR.isValid()) {
+            return OLD_DEATH_EVENT_CONSTRUCTOR.newInstance(livingEntity, drops, droppedExp);
+        } else {
+            return new EntityDeathEvent(livingEntity, lastDamage.getDamageSource(), drops, droppedExp);
+        }
+    }
 }

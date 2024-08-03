@@ -18,16 +18,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface NMSEntities {
 
+    @Nullable
     <T extends Entity> T createEntity(Location location, Class<T> type, SpawnCause spawnCause,
-                                      Consumer<T> beforeSpawnConsumer, Consumer<T> afterSpawnConsumer);
+                                      Predicate<Entity> beforeSpawnConsumer, Consumer<Entity> afterSpawnConsumer);
 
     StackedItem createItem(Location location, ItemStack itemStack, SpawnCause spawnCause, Consumer<StackedItem> itemConsumer);
 
@@ -111,5 +116,10 @@ public interface NMSEntities {
     boolean isDroppedItem(Item item);
 
     IEntityWrapper wrapEntity(LivingEntity livingEntity);
+
+    default EntityDeathEvent createDeathEvent(LivingEntity livingEntity, List<ItemStack> drops, int droppedExp,
+                                              EntityDamageEvent lastDamage) {
+        return new EntityDeathEvent(livingEntity, drops, droppedExp);
+    }
 
 }
