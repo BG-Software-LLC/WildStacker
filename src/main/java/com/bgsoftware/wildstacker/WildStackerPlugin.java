@@ -4,6 +4,7 @@ import com.bgsoftware.common.dependencies.DependenciesManager;
 import com.bgsoftware.common.nmsloader.INMSLoader;
 import com.bgsoftware.common.nmsloader.NMSHandlersFactory;
 import com.bgsoftware.common.nmsloader.NMSLoadException;
+import com.bgsoftware.common.nmsloader.config.NMSConfiguration;
 import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
@@ -210,7 +211,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private boolean loadNMSAdapter() {
         try {
-            INMSLoader nmsLoader = NMSHandlersFactory.createNMSLoader(this);
+            INMSLoader nmsLoader = NMSHandlersFactory.createNMSLoader(this, NMSConfiguration.forPlugin(this));
             this.nmsAdapter = nmsLoader.loadNMSHandler(NMSAdapter.class);
             this.nmsEntities = nmsLoader.loadNMSHandler(NMSEntities.class);
             this.nmsHolograms = nmsLoader.loadNMSHandler(NMSHolograms.class);
