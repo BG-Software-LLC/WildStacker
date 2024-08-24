@@ -487,7 +487,9 @@ public final class SpawnersListener implements Listener {
             if (stackedSpawner.isDebug())
                 Debug.debug("SpawnersListener", "onSpawnerSpawn", "Changing amount to " + stackedEntity.getUniqueId());
             stackedEntity.setStackAmount(stackedSpawner.getStackAmount(), true);
-            stackedEntity.runSpawnerStackAsync(stackedSpawner, null);
+            // It takes one tick to set the entity as valid in some versions
+            Executor.sync(() -> stackedEntity.runSpawnerStackAsync(stackedSpawner, null), 1L);
+
         }
     }
 
