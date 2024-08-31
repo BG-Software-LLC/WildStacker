@@ -24,6 +24,8 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
     private WeakReference<StackedSpawner> stackedSpawner;
     private int currentTick = CHECK_INTERVAL;
 
+    private boolean ticking = false;
+
     public SpawnerWatcherTickingBlockEntity(StackedSpawner stackedSpawner,
                                             SpawnerBlockEntity spawnerBlockEntity,
                                             TickingBlockEntity original) {
@@ -35,6 +37,20 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
 
     @Override
     public void tick() {
+        if(this.ticking) {
+            WildStackerPlugin.log("Detected a recursive call to SpawnerWatcherTickingBlockEntity#tick for block " + getPos());
+            return;
+        }
+
+        try {
+            this.ticking = true;
+            tickInternal();
+        } finally {
+            this.ticking = false;
+        }
+    }
+
+    private void tickInternal() {
         this.original.tick();
 
         if (currentTick++ < CHECK_INTERVAL)
