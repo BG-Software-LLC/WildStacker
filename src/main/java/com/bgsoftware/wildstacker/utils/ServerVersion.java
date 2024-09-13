@@ -2,6 +2,8 @@ package com.bgsoftware.wildstacker.utils;
 
 import org.bukkit.Bukkit;
 
+import java.util.Arrays;
+
 public enum ServerVersion {
 
     v1_7(17),
@@ -23,6 +25,8 @@ public enum ServerVersion {
     private static final ServerVersion currentVersion;
     private static final String bukkitVersion;
     private static final boolean legacy;
+    private static ServerVersion[] byOrder = null;
+
 
     static {
         bukkitVersion = Bukkit.getBukkitVersion().split("-")[0];
@@ -56,6 +60,19 @@ public enum ServerVersion {
 
     public static String getBukkitVersion() {
         return bukkitVersion;
+    }
+
+    public static ServerVersion[] getByOrder() {
+        if(byOrder == null) {
+            byOrder =  Arrays.copyOfRange(values(), 0, currentVersion.ordinal() + 1);
+            for (int i = 0; i < byOrder.length / 2; i++) {
+                ServerVersion temp = byOrder[i];
+                byOrder[i] = byOrder[byOrder.length - i - 1];
+                byOrder[byOrder.length - i - 1] = temp;
+            }
+        }
+
+        return byOrder;
     }
 
 }

@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,28 +28,24 @@ public final class FileUtils {
 
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+
     public static void saveResource(String resourcePath) {
         saveResource(resourcePath, null);
     }
 
     public static void saveResource(String resourcePath, @Nullable String newName) {
         try {
-            File file = new File(plugin.getDataFolder(), newName == null ? resourcePath : newName);
-            String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
+            File outputFile = new File(plugin.getDataFolder(), newName == null ? resourcePath : newName);
 
-            if (!file.exists()) {
-                String legacyName = resourcePath.replace("." + fileType, "") + "_legacy." + fileType;
-                if (ServerVersion.isLegacy() && plugin.getResource(legacyName) != null) {
-                    plugin.saveResource(legacyName, true);
-                    File legacyFile = new File(plugin.getDataFolder(), legacyName);
-                    legacyFile.renameTo(file);
-                } else {
-                    plugin.saveResource(resourcePath, true);
-                    if (newName != null) {
-                        File resourceFile = new File(plugin.getDataFolder(), resourcePath);
-                        resourceFile.renameTo(file);
-                    }
+            if (!outputFile.exists()) {
+                String realResourcePath = getVersionedResourcePath(resourcePath);
+                if (realResourcePath == null)
+                    throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found");
+
+                plugin.saveResource(realResourcePath, true);
+                if (newName != null || !realResourcePath.equals(resourcePath)) {
+                    File resourceFile = new File(plugin.getDataFolder(), realResourcePath);
+                    resourceFile.renameTo(outputFile);
                 }
             }
         } catch (Exception ex) {
@@ -57,13 +54,11 @@ public final class FileUtils {
     }
 
     public static InputStream getResource(String resourcePath) {
-        String fileType = resourcePath.endsWith(".json") ? "json" : "yml";
-
-        String legacyName = resourcePath.replace("." + fileType, "") + "_legacy." + fileType;
-        if (ServerVersion.isLegacy() && plugin.getResource(legacyName) != null) {
-            return plugin.getResource(legacyName);
-        } else {
-            return plugin.getResource(resourcePath);
+        try {
+            String realResourcePath = getVersionedResourcePath(resourcePath);
+            return realResourcePath == null ? null : plugin.getResource(realResourcePath);
+        } catch (Exception error) {
+            throw new RuntimeException(error);
         }
     }
 
@@ -173,6 +168,35 @@ public final class FileUtils {
             return null;
 
         return new SoundWrapper(sound, (float) section.getDouble("volume"), (float) section.getDouble("pitch"));
+    }
+
+    @Nullable
+    private static String getVersionedResourcePath(String path) throws IOException {
+        String[] pathSections = path.split("\\.");
+
+        String suffix = "." + pathSections[pathSections.length - 1];
+
+        String filePathNoSuffix = path.replace(suffix, "");
+
+        for (ServerVersion serverVersion : ServerVersion.getByOrder()) {
+            String resourcePath = filePathNoSuffix + serverVersion.name().substring(1) + suffix;
+            try (InputStream versionResource = plugin.getResource(resourcePath)) {
+                if (versionResource != null)
+                    return resourcePath;
+            }
+        }
+
+        if (ServerVersion.isLegacy()) {
+            String resourcePath = filePathNoSuffix + "_legacy" + suffix;
+            try (InputStream legacyResource = plugin.getResource(resourcePath)) {
+                if (legacyResource != null)
+                    return resourcePath;
+            }
+        }
+
+        try (InputStream resource = plugin.getResource(path)) {
+            return resource == null ? null : path;
+        }
     }
 
 }
