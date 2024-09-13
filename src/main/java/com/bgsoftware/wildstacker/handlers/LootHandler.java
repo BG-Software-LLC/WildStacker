@@ -15,7 +15,7 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,12 +35,17 @@ public final class LootHandler {
 
         initAllLootTables();
 
-        lootTables.put("EMPTY", new LootTable(new ArrayList<>(), -1, -1, -1, -1, true, false));
+        lootTables.put("EMPTY", new LootTable(Collections.emptyList(), -1, -1, -1, -1,
+                true, false));
+
+        JSONParser jsonParser = new JSONParser();
 
         for (File file : folderFile.listFiles()) {
             try {
-                JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
+                JSONObject jsonObject;
+                try (FileReader reader = new FileReader(file)) {
+                    jsonObject = (JSONObject) jsonParser.parse(reader);
+                }
                 String key = file.getName().replace(".json", "").toUpperCase();
 
                 if (!isValidEntityType(key.replace("_BABY", ""))) {
