@@ -463,7 +463,16 @@ public final class SettingsHandler {
                 }
             }
         }
-        listenPaperPreSpawnEvent = cfg.getBoolean("spawners.listen-paper-pre-spawn-event");
+
+        boolean listenPaperPreSpawnEvent;
+        try {
+            Class.forName("com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent");
+            listenPaperPreSpawnEvent = cfg.getBoolean("spawners.listen-paper-pre-spawn-event");
+        } catch (ClassNotFoundException error) {
+            listenPaperPreSpawnEvent = false;
+        }
+
+        this.listenPaperPreSpawnEvent = listenPaperPreSpawnEvent;
         spawnersUnstackedCustomName = cfg.getBoolean("spawners.unstacked-custom-name");
 
         barrelsStackingEnabled = ServerVersion.isAtLeast(ServerVersion.v1_8) && cfg.getBoolean("barrels.enabled", true);
