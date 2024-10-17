@@ -60,9 +60,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +77,9 @@ import java.util.stream.Collectors;
 public final class SpawnersListener implements Listener {
 
     private static final BlockFace[] blockFaces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
+
+    @Nullable
+    private static final EntityType WIND_CHARGE = getWindChargeEntityType();
 
     private final Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
     private final Set<UUID> alreadySpawnersPlacedPlayers = new HashSet<>();
@@ -356,9 +360,14 @@ public final class SpawnersListener implements Listener {
         if (!plugin.getSettings().spawnersStackingEnabled)
             return;
 
-        List<Block> blockList = new ArrayList<>(e.blockList());
+        // WindCharge does not affect spawners, ignore
+        if(e.getEntityType() == WIND_CHARGE)
+            return;
 
-        for (Block block : blockList) {
+        Iterator<Block> blockIterator = e.blockList().iterator();
+        while (blockIterator.hasNext()) {
+            Block block = blockIterator.next();
+
             //Making sure it's a spawner
             if (block.getType() != Materials.SPAWNER.toBukkitType())
                 continue;
@@ -393,7 +402,7 @@ public final class SpawnersListener implements Listener {
 
 
                 if (stackedSpawner.getStackAmount() > 0)
-                    e.blockList().remove(block);
+                    blockIterator.remove();
             }
         }
     }
@@ -867,6 +876,15 @@ public final class SpawnersListener implements Listener {
             e.setShouldAbortSpawn(true);
         }
 
+    }
+
+    @Nullable
+    private static EntityType getWindChargeEntityType() {
+        try {
+            return EntityType.valueOf("WIND_CHARGE");
+        } catch (IllegalArgumentException error) {
+            return null;
+        }
     }
 
 }
