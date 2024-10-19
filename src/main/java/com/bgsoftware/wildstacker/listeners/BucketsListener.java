@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -45,13 +46,13 @@ public final class BucketsListener implements Listener {
         EquipmentSlot usedHand = ItemUtils.getHand(e);
         ItemStack itemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
 
-        if(itemInHand == null || itemInHand.getAmount() <= 1)
+        if (itemInHand == null || itemInHand.getAmount() <= 1)
             return;
 
         Executor.sync(() -> {
             ItemStack newItemInHand = ItemUtils.getItemFromHand(inventory, usedHand);
 
-            if(newItemInHand == null || newItemInHand.getType() != Material.BUCKET)
+            if (newItemInHand == null || newItemInHand.getType() != Material.BUCKET)
                 return;
 
             itemInHand.setAmount(itemInHand.getAmount() - 1);
@@ -130,8 +131,9 @@ public final class BucketsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void g(PlayerItemConsumeEvent e) {
-        if (!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET)
+    public void onBucketConsume(PlayerItemConsumeEvent e) {
+        if (!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET ||
+                ServerVersion.isAtLeast(ServerVersion.v1_21))
             return;
 
         if (e.getItem().getAmount() > 1)
