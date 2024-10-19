@@ -364,6 +364,18 @@ public final class SpawnersListener implements Listener {
         if(e.getEntityType() == WIND_CHARGE)
             return;
 
+        UUID explodeSource = explodableSources.get(e.getEntity());
+        Player sourcePlayer = null;
+
+        if (e.getEntity() instanceof TNTPrimed) {
+            Entity igniter = ((TNTPrimed) e.getEntity()).getSource();
+            if (igniter instanceof Player) {
+                sourcePlayer = (Player) igniter;
+            }
+        } else {
+            sourcePlayer = explodeSource == null ? null : Bukkit.getPlayer(explodeSource);
+        }
+
         Iterator<Block> blockIterator = e.blockList().iterator();
         while (blockIterator.hasNext()) {
             Block block = blockIterator.next();
@@ -374,18 +386,6 @@ public final class SpawnersListener implements Listener {
 
             StackedSpawner stackedSpawner = WStackedSpawner.of(block);
             CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
-
-            UUID explodeSource = explodableSources.get(e.getEntity());
-            Player sourcePlayer = null;
-
-            if (e.getEntity() instanceof TNTPrimed) {
-                Entity igniter = ((TNTPrimed) e.getEntity()).getSource();
-                if (igniter instanceof Player) {
-                    sourcePlayer = (Player) igniter;
-                }
-            } else {
-                sourcePlayer = explodeSource == null ? null : Bukkit.getPlayer(explodeSource);
-            }
 
             int breakAmount = plugin.getSettings().explosionsBreakPercentage == -1 ? 1 :
                     (int) Math.round((plugin.getSettings().explosionsBreakPercentage / 100.0) * stackedSpawner.getStackAmount());
