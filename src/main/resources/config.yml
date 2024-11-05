@@ -280,6 +280,7 @@ entities:
     PIG_SADDLE: true
     PUFFERFISH_STATE: true
     RABBIT_TYPE: true
+    SALMON_SIZE: true
     SHEEP_COLOR: true
     SHEEP_SHEARED: true
     SKELETON_TYPE: true

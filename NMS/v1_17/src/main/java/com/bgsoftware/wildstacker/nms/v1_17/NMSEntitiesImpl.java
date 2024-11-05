@@ -513,7 +513,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target) {
+    public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target,
+                                  org.bukkit.inventory.ItemStack unused) {
         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
         LivingEntity targetEntity = ((CraftLivingEntity) target).getHandle();
         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(targetEntity));

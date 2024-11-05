@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21;
+package com.bgsoftware.wildstacker.nms.v1_21_3;
 
 import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectField;
@@ -41,6 +41,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
@@ -87,6 +88,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
@@ -124,14 +126,14 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
     private static final ReflectField<Integer> LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "bd");
     private static final ReflectField<Boolean> LIVING_ENTITY_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "be");
-    private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "ee");
-    private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "n_");
-    private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fa");
-    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "ff");
-    private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "ci");
+    private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "en");
+    private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "o_");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fg");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "fh");
+    private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "cf");
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "x", boolean.class);
-    private static final ReflectMethod<BlockPos> TURTLE_GET_HOME_POS = new ReflectMethod<>(Turtle.class, "gk");
-    private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "b", ItemEntity.class);
+    private static final ReflectMethod<BlockPos> TURTLE_GET_HOME_POS = new ReflectMethod<>(Turtle.class, "go");
+    private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "a", ServerLevel.class, ItemEntity.class);
     private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "b", EntityDataAccessor.class);
 
 
@@ -207,7 +209,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         ServerLevel serverLevel = ((CraftWorld) bukkitVillager.getWorld()).getHandle();
 
         Villager villager = ((CraftVillager) bukkitVillager).getHandle();
-        ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(serverLevel);
+        ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(serverLevel, EntitySpawnReason.CONVERSION);
 
         if (zombieVillager == null)
             return null;
@@ -272,7 +274,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             return 0;
 
         int defaultEntityExp = ENTITY_EXP.get(mob);
-        int exp = mob.getExpReward(null);
+        int exp = mob.getExpReward((ServerLevel) livingEntity.level(), null);
         ENTITY_EXP.set(mob, defaultEntityExp);
 
         return exp;
@@ -292,8 +294,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
             isDropExperience = LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
         }
 
+        ServerLevel serverLevel = (ServerLevel) livingEntity.level();
+
         return lastDamageByPlayerTime > 0 && isDropExperience &&
-                livingEntity.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
+                serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
     }
 
     @Override
@@ -477,6 +481,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 return StackCheckResult.FROG_TYPE;
         }
 
+        if (StackCheck.SALMON_SIZE.isEnabled() && StackCheck.SALMON_SIZE.isTypeAllowed(entityType)) {
+            if (((Salmon) en1).getVariant() != ((Salmon) en2).getVariant())
+                return StackCheckResult.SALMON_SIZE;
+        }
+
         if (StackCheck.WOLF_TYPE.isEnabled() && StackCheck.WOLF_TYPE.isTypeAllowed(entityType)) {
             if (((Wolf) en1).getVariant() != ((Wolf) en2).getVariant())
                 return StackCheckResult.WOLF_TYPE;
@@ -538,11 +547,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target,
-                                  org.bukkit.inventory.ItemStack unused) {
+    public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity unused,
+                                  org.bukkit.inventory.ItemStack crossBowItem) {
         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
-        LivingEntity targetEntity = ((CraftLivingEntity) target).getHandle();
-        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(targetEntity));
+        ItemStack nmsCrossBowItem = CraftItemStack.asNMSCopy(crossBowItem);
+        CriteriaTriggers.SHOT_CROSSBOW.trigger(serverPlayer, nmsCrossBowItem);
     }
 
     @Override
@@ -645,7 +654,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             if (isPlayerPickup) {
                 pickupItem.playerTouch((Player) livingEntity);
             } else {
-                MOB_PICK_UP_ITEM.invoke(livingEntity, pickupItem);
+                MOB_PICK_UP_ITEM.invoke(livingEntity, livingEntity.level(), pickupItem);
             }
         } finally {
             if (isDifferentPickupItem) itemEntity.pickupDelay = originalPickupDelay;
@@ -730,7 +739,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 .map(EnchantedItemInUse::itemStack).orElse(ItemStack.EMPTY);
 
         if (!mendingItem.isEmpty() && mendingItem.getItem().components().has(DataComponents.MAX_DAMAGE)) {
-            ExperienceOrb experienceOrb = EntityType.EXPERIENCE_ORB.create(serverPlayer.level());
+            ExperienceOrb experienceOrb = EntityType.EXPERIENCE_ORB.create(serverPlayer.level(), EntitySpawnReason.COMMAND);
             experienceOrb.value = amount;
 
             try {

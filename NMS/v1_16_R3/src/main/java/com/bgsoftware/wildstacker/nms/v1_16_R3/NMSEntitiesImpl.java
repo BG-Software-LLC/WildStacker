@@ -487,7 +487,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardCrossbowShot(Player player, LivingEntity target) {
+    public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack unused) {
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
         EntityLiving targetEntity = ((CraftLivingEntity) target).getHandle();
         CriterionTriggers.G.a(entityPlayer, Arrays.asList(targetEntity));

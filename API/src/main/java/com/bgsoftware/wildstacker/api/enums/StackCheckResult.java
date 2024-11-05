@@ -38,6 +38,7 @@ public enum StackCheckResult {
     PIG_SADDLE,
     PUFFERFISH_STATE,
     RABBIT_TYPE,
+    SALMON_SIZE,
     SHEEP_COLOR,
     SHEEP_SHEARED,
     SKELETON_TYPE,

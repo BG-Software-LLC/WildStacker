@@ -22,6 +22,8 @@ import java.util.Map;
 @SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions"})
 public final class LootHandler {
 
+    private static final boolean SUPPORT_BABY_1_22 = isSupportBaby122();
+
     private final Map<String, LootTable> lootTables = new HashMap<>();
 
     public LootHandler(WildStackerPlugin plugin) {
@@ -73,6 +75,14 @@ public final class LootHandler {
         }
     }
 
+    private static boolean isSupportBaby122() {
+        try {
+            return Ageable.class.isAssignableFrom(Class.forName("org.bukkit.entity.Dolphin"));
+        } catch (Throwable error) {
+            return false;
+        }
+    }
+
     public static void reload() {
         WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
         plugin.setLootHandler(new LootHandler(plugin));
@@ -96,6 +106,8 @@ public final class LootHandler {
         saveLootTable("cow_baby");
         saveLootTable("creeper");
         saveLootTable(EntityTypes.DOLPHIN, "dolphin");
+        if(SUPPORT_BABY_1_22)
+            saveLootTable("dolphin_baby");
         saveLootTable("donkey", "donkey_baby");
         saveLootTable(EntityTypes.DROWNED, "drowned");
         saveLootTable("elder_guardian");
@@ -108,6 +120,8 @@ public final class LootHandler {
         saveLootTable("ghast");
         saveLootTable("giant");
         saveLootTable(EntityTypes.GLOW_SQUID, "glow_squid");
+        if(SUPPORT_BABY_1_22)
+            saveLootTable("glow_squid_baby");
         saveLootTable(EntityTypes.GOAT, "goat", "goat_baby");
         saveLootTable("guardian");
         saveLootTable(EntityTypes.HOGLIN, "hoglin", "hoglin_baby");
@@ -153,6 +167,8 @@ public final class LootHandler {
         saveLootTable("snowman");
         saveLootTable("spider");
         saveLootTable("squid");
+        if(SUPPORT_BABY_1_22)
+            saveLootTable("squid_baby");
         saveLootTable(EntityTypes.STRAY, "stray");
         saveLootTable(EntityTypes.STRIDER, "strider", "strider_baby");
         saveLootTable(EntityTypes.TADPOLE, "tadpole");

@@ -49,6 +49,7 @@ public enum StackCheck {
     PIG_SADDLE(EntityTypes.PIG),
     PUFFERFISH_STATE(EntityTypes.PUFFERFISH),
     RABBIT_TYPE(EntityTypes.RABBIT),
+    SALMON_SIZE(EntityTypes.SALMON),
     SHEEP_COLOR(EntityTypes.SHEEP),
     SHEEP_SHEARED(EntityTypes.SHEEP),
     SKELETON_TYPE(EntityTypes.SKELETON, EntityTypes.WITHER_SKELETON),

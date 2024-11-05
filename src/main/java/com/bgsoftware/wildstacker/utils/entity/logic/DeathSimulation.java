@@ -221,7 +221,7 @@ public final class DeathSimulation {
 
                 if (killer != null && killerTool != null && killerTool.getType() == CROSSBOW_TYPE &&
                         ((EntityDamageByEntityEvent) damageEvent).getDamager() instanceof Arrow)
-                    plugin.getNMSEntities().awardCrossbowShot(killer, livingEntity);
+                    plugin.getNMSEntities().awardCrossbowShot(killer, livingEntity, killerTool);
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
