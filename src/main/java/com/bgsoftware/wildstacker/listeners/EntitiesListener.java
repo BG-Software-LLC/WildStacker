@@ -574,7 +574,6 @@ public final class EntitiesListener implements Listener {
                         childEntity = null;
                     } else {
                         StackedEntity duplicated = ((WStackedEntity) stackedEntity).spawnDuplicate(babiesAmount, SpawnCause.BREEDING, _childEntity -> {
-                            ((Animals) _childEntity).setBaby();
                             return plugin.getNMSEntities().callEntityBreedEvent((LivingEntity) _childEntity, (LivingEntity) e.getRightClicked(),
                                     (LivingEntity) e.getRightClicked(), e.getPlayer(), inHandCopy, expToDrop);
                         });
@@ -582,6 +581,7 @@ public final class EntitiesListener implements Listener {
                     }
 
                     if (childEntity != null) {
+                        ((Animals) childEntity).setBaby();
                         EntityUtils.spawnExp(stackedEntity.getLocation(), expToDrop);
                     }
                 }, 50L);
