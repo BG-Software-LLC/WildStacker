@@ -824,6 +824,15 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
+    public SpawnCause getEntitySpawnCause(org.bukkit.entity.LivingEntity livingEntity) {
+        try {
+            return SpawnCause.valueOf(livingEntity.getEntitySpawnReason());
+        } catch (Throwable error) {
+            return null;
+        }
+    }
+
+    @Override
     public EntityDeathEvent createDeathEvent(org.bukkit.entity.LivingEntity livingEntity,
                                              List<org.bukkit.inventory.ItemStack> drops, int droppedExp,
                                              EntityDamageEvent lastDamage) {

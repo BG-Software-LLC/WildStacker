@@ -117,6 +117,11 @@ public interface NMSEntities {
 
     IEntityWrapper wrapEntity(LivingEntity livingEntity);
 
+    @Nullable
+    default SpawnCause getEntitySpawnCause(LivingEntity livingEntity) {
+        return null;
+    }
+
     default EntityDeathEvent createDeathEvent(LivingEntity livingEntity, List<ItemStack> drops, int droppedExp,
                                               EntityDamageEvent lastDamage) {
         return new EntityDeathEvent(livingEntity, drops, droppedExp);

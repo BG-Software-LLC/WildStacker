@@ -66,6 +66,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         this.cachedUUID = livingEntity.getUniqueId();
         this.cachedEntityId = livingEntity.getEntityId();
         this.spawnCause = getAndRemoveFlag(EntityFlag.SPAWN_CAUSE);
+        if (this.spawnCause == null)
+            this.spawnCause = plugin.getNMSEntities().getEntitySpawnCause(livingEntity);
         setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
     }
 
