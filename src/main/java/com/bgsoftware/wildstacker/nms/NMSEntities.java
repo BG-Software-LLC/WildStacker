@@ -83,7 +83,7 @@ public interface NMSEntities {
 
     boolean checkEntityAttributes(LivingEntity livingEntity, Map<String, Object> attributes);
 
-    void awardKillScore(Entity bukkitDamaged, Entity damagerEntity);
+    void awardKillScore(Player damangerPlayer, Entity bukkitDamaged, Entity damagerEntity);
 
     void awardPickupScore(Player player, Item pickItem);
 

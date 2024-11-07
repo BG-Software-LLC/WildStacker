@@ -594,14 +594,17 @@ public final class EntityUtils {
     }
 
     @Nullable
-    public static Entity getDamagerFromEvent(@Nullable EntityDamageEvent event, boolean checkUnusualSources) {
+    public static Entity getDamagerFromEvent(@Nullable EntityDamageEvent event,
+                                             boolean checkUnusualSources, boolean directDamager) {
         if (!(event instanceof EntityDamageByEntityEvent))
             return null;
 
         Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
+        if (directDamager)
+            return damager;
 
         if (damager instanceof Fireball) {
-            Entity fireballDamager = getDamagerFromEvent(damager.getLastDamageCause(), checkUnusualSources);
+            Entity fireballDamager = getDamagerFromEvent(damager.getLastDamageCause(), checkUnusualSources, false);
             if (fireballDamager != null) {
                 return fireballDamager;
             }

@@ -41,7 +41,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         Entity entityKiller = this.stackedEntity == null ? null : this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
 
         if (entityKiller == null)
-            entityKiller = EntityUtils.getDamagerFromEvent(this.livingEntity.getLastDamageCause(), false);
+            entityKiller = EntityUtils.getDamagerFromEvent(this.livingEntity.getLastDamageCause(), false, true);
 
         return !(entityKiller instanceof LivingEntity) ? null :
                 LootEntityAttributes.newBuilder((LivingEntity) entityKiller).build();

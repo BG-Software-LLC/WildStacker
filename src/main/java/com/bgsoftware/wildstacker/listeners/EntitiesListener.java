@@ -270,22 +270,23 @@ public final class EntitiesListener implements Listener {
         if (damageEvent.isCancelled())
             return new EntityDamageData(true, 0);
 
-        Entity entityDamager = EntityUtils.getDamagerFromEvent(damageEvent, true);
-        Player damager = entityDamager instanceof Player ? (Player) entityDamager : null;
-        ItemStack damagerTool = damager == null ? new ItemStack(Material.AIR) : damager.getItemInHand();
-        boolean creativeMode = damager != null && damager.getGameMode() == GameMode.CREATIVE;
+        Entity directDamager = EntityUtils.getDamagerFromEvent(damageEvent, true, true);
+        Entity sourceDamager = EntityUtils.getDamagerFromEvent(damageEvent, true, false);
 
         boolean shouldSimulateDeath;
 
         if (stackedEntity.getHealth() - damageEvent.getFinalDamage() <= 0) {
             shouldSimulateDeath = true;
-        } else {
+        } else if (sourceDamager instanceof Player) {
+            ItemStack damagerTool = ((Player) sourceDamager).getItemInHand();
             // In case the entity has enough health to deal with the damage, we check for one shot.
             boolean hasAvoidOneShot = stackedEntity.getAndRemoveFlag(EntityFlag.AVOID_ONE_SHOT) != null;
-            shouldSimulateDeath = !hasAvoidOneShot && damager != null &&
+            shouldSimulateDeath = !hasAvoidOneShot &&
                     plugin.getSettings().entitiesOneShotEnabled &&
                     GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
                     plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
+        } else {
+            shouldSimulateDeath = false;
         }
 
         if (!shouldSimulateDeath) {
@@ -293,8 +294,8 @@ public final class EntitiesListener implements Listener {
             return new EntityDamageData(damageEvent);
         }
 
-        return DeathSimulation.simulateDeath(stackedEntity, damageEvent, damagerTool, damager, entityDamager,
-                creativeMode, fromDeathEvent).setShouldEntityDie();
+        return DeathSimulation.simulateDeath(stackedEntity, damageEvent,
+                directDamager, sourceDamager, fromDeathEvent).setShouldEntityDie();
     }
 
     private void restoreDamageResult(EntityDamageData damageResult, EntityDamageEvent damageEvent) {

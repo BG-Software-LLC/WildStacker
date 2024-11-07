@@ -450,10 +450,12 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
-                               org.bukkit.entity.Entity damagerEntity) {
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
+                               org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity directDamager) {
+        EntityPlayer entityPlayer = ((CraftPlayer) playerKiller).getHandle();
         Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
-        Entity damager = ((CraftEntity) damagerEntity).getHandle();
+        Entity damager = ((CraftEntity) directDamager).getHandle();
 
         DamageSource damageSource = null;
 
@@ -478,7 +480,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             }
         }
 
-        damager.a(damaged, 0, damageSource);
+        entityPlayer.a(damaged, 0, damageSource);
     }
 
     @Override

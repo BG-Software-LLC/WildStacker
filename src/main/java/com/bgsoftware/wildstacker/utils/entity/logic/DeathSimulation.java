@@ -18,6 +18,7 @@ import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -57,10 +58,12 @@ public final class DeathSimulation {
     }
 
     public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent damageEvent,
-                                                 ItemStack killerTool, @Nullable Player killer, Entity entityKiller,
-                                                 boolean creativeMode, boolean fromDeathEvent) {
+                                                 @Nullable Entity directKiller, @Nullable Entity sourceKiller,
+                                                 boolean fromDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
             return new EntityDamageData(false, Collections.emptyMap());
+
+        boolean isSourceKillerPlayer = sourceKiller instanceof Player;
 
         LivingEntity livingEntity = stackedEntity.getLivingEntity();
 
@@ -73,64 +76,82 @@ public final class DeathSimulation {
             return new EntityDamageData(true, Collections.emptyMap());
 
         Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
-                stackedEntity.isInstantKill(damageEvent.getCause()), damageEvent.getFinalDamage(), killerTool);
+                stackedEntity.isInstantKill(damageEvent.getCause()), damageEvent.getFinalDamage());
 
         int entitiesToKill = spreadDamageResult.getKey();
         double damageToNextStack = spreadDamageResult.getValue();
 
-        int fireAspectLevel = killerTool.getEnchantmentLevel(Enchantment.FIRE_ASPECT);
-        int fireTicks = fireAspectLevel > 0 ? fireAspectLevel * 4 : livingEntity.getFireTicks();
-
         EntityDamageData result = new EntityDamageData(false, 0);
 
-        if (handleFastKill(livingEntity, killer))
-            result.setCancelled(true);
-
         //Villager was killed by a zombie - should be turned into a zombie villager.
-        if (checkForZombieVillager(stackedEntity, entityKiller))
+        if (checkForZombieVillager(stackedEntity, directKiller))
             return result;
+
+        if (isSourceKillerPlayer && handleFastKill(livingEntity, (Player) sourceKiller))
+            result.setCancelled(true);
 
         int originalAmount = stackedEntity.getStackAmount();
 
-        if (stackedEntity.runUnstack(entitiesToKill, killer == null ? entityKiller : killer) != UnstackResult.SUCCESS)
+        if (stackedEntity.runUnstack(entitiesToKill, isSourceKillerPlayer ? sourceKiller : directKiller) != UnstackResult.SUCCESS)
             return result;
-
-        stackedEntity.setFlag(EntityFlag.ATTACKED_ENTITY, true);
 
         int unstackAmount = originalAmount - stackedEntity.getStackAmount();
 
-        EntityUtils.setKiller(livingEntity, killer);
+        stackedEntity.setFlag(EntityFlag.ATTACKED_ENTITY, true);
+
+        int fireTicks;
+        int lootBonusLevel;
+
+        if (!isSourceKillerPlayer) {
+            fireTicks = livingEntity.getFireTicks();
+            lootBonusLevel = 0;
+        } else {
+            ItemStack killerTool = ((Player) sourceKiller).getItemInHand();
+            boolean isKillerToolEmpty = killerTool == null || killerTool.getType() == Material.AIR;
+
+            if (isKillerToolEmpty) {
+                fireTicks = livingEntity.getFireTicks();
+                lootBonusLevel = 0;
+            } else {
+                int fireAspectLevel = killerTool.getEnchantmentLevel(Enchantment.FIRE_ASPECT);
+                fireTicks = fireAspectLevel > 0 ? fireAspectLevel * 4 : livingEntity.getFireTicks();
+
+                lootBonusLevel = killerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
+
+                // Handle sweeping edge enchantment
+                if (!sweepingEdgeHandled && result.isCancelled()) {
+                    try {
+                        sweepingEdgeHandled = true;
+                        plugin.getNMSEntities().handleSweepingEdge((Player) sourceKiller,
+                                killerTool, stackedEntity.getLivingEntity(), damageEvent.getDamage());
+                    } finally {
+                        sweepingEdgeHandled = false;
+                    }
+                }
+
+                //Decrease durability when next-stack-knockback is false
+                if (result.isCancelled() && ((Player) sourceKiller).getGameMode() != GameMode.CREATIVE &&
+                        !plugin.getNMSAdapter().isUnbreakable(killerTool))
+                    reduceKillerToolDurability(killerTool, (Player) sourceKiller);
+            }
+
+            EntityUtils.setKiller(livingEntity, (Player) sourceKiller);
+
+            giveStatisticsToKiller(directKiller, (Player) sourceKiller, unstackAmount, stackedEntity);
+        }
 
         if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
             livingEntity.setFireTicks(160);
 
-        if (entityKiller != null)
-            giveStatisticsToKiller(entityKiller, unstackAmount, stackedEntity);
-
-        // Handle sweeping edge enchantment
-        if (!sweepingEdgeHandled && result.isCancelled() && killerTool != null && killer != null) {
-            try {
-                sweepingEdgeHandled = true;
-                plugin.getNMSEntities().handleSweepingEdge(killer, killerTool, stackedEntity.getLivingEntity(),
-                        damageEvent.getDamage());
-            } finally {
-                sweepingEdgeHandled = false;
-            }
-        }
-
-        //Decrease durability when next-stack-knockback is false
-        if (result.isCancelled() && killerTool != null && !creativeMode && !plugin.getNMSAdapter().isUnbreakable(killerTool))
-            reduceKillerToolDurability(killerTool, killer);
+        // We want to cache the killer of the entity
+        if (sourceKiller != null)
+            stackedEntity.setFlag(EntityFlag.CACHED_KILLER, sourceKiller);
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
-
-        // We want to cache the killer of the entity
-        stackedEntity.setFlag(EntityFlag.CACHED_KILLER, killer == null ? entityKiller : killer);
 
         Executor.async(() -> {
             livingEntity.setFireTicks(fireTicks);
 
-            int lootBonusLevel = killerTool == null ? 0 : killerTool.getEnchantmentLevel(Enchantment.LOOT_BONUS_MOBS);
             List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
             int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
 
@@ -217,11 +238,15 @@ public final class DeathSimulation {
                     }
                 }
 
-                attemptJoinRaid(killer, livingEntity);
+                if (isSourceKillerPlayer) {
+                    attemptJoinRaid((Player) sourceKiller, livingEntity);
 
-                if (killer != null && killerTool != null && killerTool.getType() == CROSSBOW_TYPE &&
-                        ((EntityDamageByEntityEvent) damageEvent).getDamager() instanceof Arrow)
-                    plugin.getNMSEntities().awardCrossbowShot(killer, livingEntity, killerTool);
+                    ItemStack killerTool = ((Player) sourceKiller).getItemInHand();
+
+                    if (killerTool.getType() == CROSSBOW_TYPE &&
+                            ((EntityDamageByEntityEvent) damageEvent).getDamager() instanceof Arrow)
+                        plugin.getNMSEntities().awardCrossbowShot((Player) sourceKiller, livingEntity, killerTool);
+                }
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
@@ -236,8 +261,7 @@ public final class DeathSimulation {
     }
 
     private static Pair<Integer, Double> checkForSpreadDamage(StackedEntity stackedEntity,
-                                                              boolean instantKill, double finalDamage,
-                                                              ItemStack damagerTool) {
+                                                              boolean instantKill, double finalDamage) {
         int entitiesToKill;
         double damageToNextStack;
 
@@ -314,19 +338,16 @@ public final class DeathSimulation {
         return true;
     }
 
-    private static void giveStatisticsToKiller(Entity entityKiller, int unstackAmount, StackedEntity stackedEntity) {
+    private static void giveStatisticsToKiller(Entity directKiller, Player sourceKiller, int unstackAmount, StackedEntity stackedEntity) {
         EntityType victimType = stackedEntity.getType();
 
-        if (entityKiller instanceof Player) {
-            Player killer = (Player) entityKiller;
-            try {
-                StatisticsUtils.incrementStatistic(killer, Statistic.MOB_KILLS, unstackAmount);
-                StatisticsUtils.incrementStatistic(killer, Statistic.KILL_ENTITY, victimType, unstackAmount);
-            } catch (IllegalArgumentException ignored) {
-            }
+        try {
+            StatisticsUtils.incrementStatistic(sourceKiller, Statistic.MOB_KILLS, unstackAmount);
+            StatisticsUtils.incrementStatistic(sourceKiller, Statistic.KILL_ENTITY, victimType, unstackAmount);
+        } catch (IllegalArgumentException ignored) {
         }
 
-        plugin.getNMSEntities().awardKillScore(stackedEntity.getLivingEntity(), entityKiller);
+        plugin.getNMSEntities().awardKillScore(sourceKiller, stackedEntity.getLivingEntity(), directKiller);
     }
 
     private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {

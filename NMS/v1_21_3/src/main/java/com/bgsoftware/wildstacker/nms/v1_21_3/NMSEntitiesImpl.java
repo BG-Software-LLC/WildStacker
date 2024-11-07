@@ -104,7 +104,6 @@ import org.bukkit.event.player.PlayerItemMendEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -517,10 +516,12 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
-                               org.bukkit.entity.Entity damagerEntity) {
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
+                               org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity directDamager) {
+        ServerPlayer serverPlayer = ((CraftPlayer) playerKiller).getHandle();
         Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
-        Entity damager = ((CraftEntity) damagerEntity).getHandle();
+        Entity damager = ((CraftEntity) directDamager).getHandle();
 
         DamageSource damageSource;
 
@@ -538,7 +539,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             return;
         }
 
-        damager.awardKillScore(damaged, 0, damageSource);
+        serverPlayer.awardKillScore(damaged, 0, damageSource);
     }
 
     @Override

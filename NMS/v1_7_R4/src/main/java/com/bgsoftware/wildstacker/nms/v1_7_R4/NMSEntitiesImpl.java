@@ -66,18 +66,17 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.material.MaterialData;
-import org.bukkit.projectiles.ProjectileSource;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -350,15 +349,26 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(org.bukkit.entity.Entity bukkitDamaged,
-                               org.bukkit.entity.Entity damagerEntity) {
-        if (damagerEntity instanceof Player && bukkitDamaged instanceof Monster) {
-            ((Player) damagerEntity).awardAchievement(Achievement.KILL_ENEMY);
-        } else if (damagerEntity instanceof Arrow && bukkitDamaged instanceof Skeleton) {
-            ProjectileSource shooter = ((Arrow) damagerEntity).getShooter();
-            if (shooter instanceof Player && ((Player) shooter).getWorld().equals(damagerEntity.getWorld()) &&
-                    ((Player) shooter).getLocation().distanceSquared(damagerEntity.getLocation()) >= 2500)
-                ((Player) shooter).awardAchievement(Achievement.SNIPE_SKELETON);
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
+                               org.bukkit.entity.Entity bukkitDamaged,
+                               org.bukkit.entity.Entity directDamager) {
+        if (!(bukkitDamaged instanceof Monster))
+            return;
+
+        switch (bukkitDamaged.getType()) {
+            case SKELETON: {
+                if (directDamager instanceof Arrow) {
+                    if (playerKiller.getWorld().equals(directDamager.getWorld()) &&
+                            playerKiller.getLocation().distanceSquared(bukkitDamaged.getLocation()) >= 2500)
+                        playerKiller.awardAchievement(Achievement.SNIPE_SKELETON);
+                }
+                break;
+            }
+            case GHAST: {
+                if (directDamager instanceof Fireball)
+                    playerKiller.awardAchievement(Achievement.GHAST_RETURN);
+                break;
+            }
         }
     }
 
