@@ -127,7 +127,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "ee");
     private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "n_");
     private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fa");
-    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "ff");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "fb");
     private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "ci");
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "x", boolean.class);
     private static final ReflectMethod<BlockPos> TURTLE_GET_HOME_POS = new ReflectMethod<>(Turtle.class, "gk");
