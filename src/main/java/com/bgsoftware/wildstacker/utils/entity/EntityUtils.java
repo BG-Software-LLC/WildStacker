@@ -24,6 +24,7 @@ import org.bukkit.entity.Cat;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.GlowSquid;
@@ -84,6 +85,11 @@ public final class EntityUtils {
     private static final Enchantment CURSE_OF_VANISH = Arrays.stream(Enchantment.values())
             .filter(enchantment -> enchantment.getName() != null && enchantment.getName().equals("VANISHING_CURSE"))
             .findFirst().orElse(null);
+
+    @Nullable
+    private static final EntityType WIND_CHARGE = getEntityTypeSafe("WIND_CHARGE");
+    @Nullable
+    private static final EntityType BREEZE_WIND_CHARGE = getEntityTypeSafe("BREEZE_WIND_CHARGE");
 
     public static String getFormattedType(String typeName) {
         if (typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
@@ -627,6 +633,11 @@ public final class EntityUtils {
         return damager;
     }
 
+    public static boolean shouldIgnoreExplodeEvent(EntityType entityType) {
+        // WindCharge don't affect blocks
+        return entityType == WIND_CHARGE || entityType == BREEZE_WIND_CHARGE;
+    }
+
     private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (itemStack != null && itemStack.getType() != Material.AIR &&
@@ -642,6 +653,15 @@ public final class EntityUtils {
             }
 
             drops.add(toDrop);
+        }
+    }
+
+    @Nullable
+    private static EntityType getEntityTypeSafe(String entityType) {
+        try {
+            return EntityType.valueOf(entityType);
+        } catch (IllegalArgumentException error) {
+            return null;
         }
     }
 

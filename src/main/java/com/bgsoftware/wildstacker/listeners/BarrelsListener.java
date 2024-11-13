@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
+import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -33,9 +34,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -264,16 +264,16 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().barrelsStackingEnabled ||
+                EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
             return;
 
-        List<Block> blockList = new ArrayList<>(e.blockList());
+        Iterator<Block> blockListIterator = e.blockList().iterator();
+        while (blockListIterator.hasNext()) {
+            Block block = blockListIterator.next();
 
-        for (Block block : blockList) {
             if (!plugin.getSystemManager().isStackedBarrel(block))
                 continue;
-
-            e.blockList().remove(block);
 
             StackedBarrel stackedBarrel = WStackedBarrel.of(block);
 
@@ -283,6 +283,8 @@ public final class BarrelsListener implements Listener {
                 ItemStack barrelItem = EventsCaller.callBarrelDropEvent(stackedBarrel, null, amount);
                 ItemUtils.dropItem(barrelItem, block.getLocation());
             }
+
+            blockListIterator.remove();
         }
     }
 

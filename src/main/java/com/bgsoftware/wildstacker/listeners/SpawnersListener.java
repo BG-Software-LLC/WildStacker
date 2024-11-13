@@ -60,7 +60,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,9 +76,6 @@ import java.util.stream.Collectors;
 public final class SpawnersListener implements Listener {
 
     private static final BlockFace[] blockFaces = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
-
-    @Nullable
-    private static final EntityType WIND_CHARGE = getWindChargeEntityType();
 
     private final Set<UUID> inventoryTweaksToggleCommandPlayers = new HashSet<>();
     private final Set<UUID> alreadySpawnersPlacedPlayers = new HashSet<>();
@@ -357,11 +353,8 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled)
-            return;
-
-        // WindCharge does not affect spawners, ignore
-        if(e.getEntityType() == WIND_CHARGE)
+        if (!plugin.getSettings().spawnersStackingEnabled ||
+                EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
             return;
 
         UUID explodeSource = explodableSources.get(e.getEntity());
@@ -876,15 +869,6 @@ public final class SpawnersListener implements Listener {
             e.setShouldAbortSpawn(true);
         }
 
-    }
-
-    @Nullable
-    private static EntityType getWindChargeEntityType() {
-        try {
-            return EntityType.valueOf("WIND_CHARGE");
-        } catch (IllegalArgumentException error) {
-            return null;
-        }
     }
 
 }
