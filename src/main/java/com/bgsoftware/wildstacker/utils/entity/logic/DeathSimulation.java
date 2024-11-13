@@ -9,6 +9,7 @@ import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
@@ -52,6 +53,9 @@ public final class DeathSimulation {
 
     @Nullable
     private static final Material CROSSBOW_TYPE = Materials.getMaterialOrNull("CROSSBOW");
+    @Nullable
+    private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
+
     private static boolean sweepingEdgeHandled = false;
 
     private DeathSimulation() {
@@ -379,9 +383,9 @@ public final class DeathSimulation {
 
         org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) livingEntity;
 
-        if (raider.isPatrolLeader()) {
+        if (raider.isPatrolLeader() && ServerVersion.isLessThan(ServerVersion.v1_21)) {
             killer.addPotionEffect(new PotionEffect(
-                    PotionEffectType.getByName("BAD_OMEN"),
+                    BAD_OMEN,
                     120000,
                     EntityUtils.getBadOmenAmplifier(killer),
                     false

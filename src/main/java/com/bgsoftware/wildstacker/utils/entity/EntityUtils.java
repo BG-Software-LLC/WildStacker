@@ -90,6 +90,8 @@ public final class EntityUtils {
     private static final EntityType WIND_CHARGE = getEntityTypeSafe("WIND_CHARGE");
     @Nullable
     private static final EntityType BREEZE_WIND_CHARGE = getEntityTypeSafe("BREEZE_WIND_CHARGE");
+    @Nullable
+    private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
 
     public static String getFormattedType(String typeName) {
         if (typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
@@ -188,14 +190,14 @@ public final class EntityUtils {
         int amplifier = 0;
 
         for (PotionEffect potionEffect : player.getActivePotionEffects()) {
-            if (potionEffect.getType().getName().equals("BAD_OMEN")) {
+            if (potionEffect.getType() == BAD_OMEN) {
                 amplifier = potionEffect.getAmplifier() + 1;
                 break;
             }
         }
 
         if (amplifier >= 0 && amplifier <= 5)
-            player.removePotionEffect(PotionEffectType.getByName("BAD_OMEN"));
+            player.removePotionEffect(BAD_OMEN);
 
         return Math.max(0, Math.min(5, amplifier));
     }
