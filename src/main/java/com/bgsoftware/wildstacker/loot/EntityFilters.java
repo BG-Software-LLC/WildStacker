@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -126,6 +127,18 @@ public class EntityFilters {
                 return true;
 
             return entityData.isCreeperCharged() == isCreeperCharged;
+        };
+    }
+
+    public static Predicate<LootEntityAttributes> captainFilter(boolean isCaptain) {
+        return entityData -> {
+            if (!EntityTypes.isRaider(entityData.getEntityType()))
+                return false;
+
+            if (entityData.isIgnoreRaidCaptain())
+                return true;
+
+            return entityData.isRaidCaptain() == isCaptain;
         };
     }
 

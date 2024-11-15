@@ -134,6 +134,24 @@ public interface LootEntityAttributes {
      */
     boolean isIgnoreCreeperCharged();
 
+    /*
+     * PILLAGER/VINDICATOR/EVOKER ONLY
+     */
+
+    /**
+     * Get whether the entity is a raid captain.
+     *
+     * @throws UnsupportedOperationException If the entity is not a pillager, vindicator or evoker.
+     */
+    boolean isRaidCaptain();
+
+    /**
+     * Whether to ignore raid captain related checks when filtering out drops.
+     *
+     * @throws UnsupportedOperationException If the entity is not a pillager, vindicator or evoker.
+     */
+    boolean isIgnoreRaidCaptain();
+
     /**
      * Builder class to build a new {@link LootEntityAttributes} object.
      * Can be obtained by calling {@link #newBuilder(EntityType)} or {@link #newBuilder(StackedEntity)}
@@ -234,6 +252,22 @@ public interface LootEntityAttributes {
          * @throws UnsupportedOperationException If the entity is not a Creeper.
          */
         Builder setIgnoreCreeperCharged(boolean ignoreCharged);
+
+        /**
+         * Set whether the entity is raid captain.
+         *
+         * @param captain Whether the entity is raid captain.
+         * @throws UnsupportedOperationException If the entity is not a Pillager, Vindicator or Evoker.
+         */
+        Builder setRaidCaptain(boolean captain);
+
+        /**
+         * Set whether to ignore raid captain related checks when filtering out drops.
+         *
+         * @param ignoreRaidCaptain Whether to ignore raid captain related checks.
+         * @throws UnsupportedOperationException If the entity is not a Pillager, Vindicator or Evoker.
+         */
+        Builder setIgnoreRaidCaptain(boolean ignoreRaidCaptain);
 
         /**
          * Create a new {@link LootEntityAttributes} out of this builder.

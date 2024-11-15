@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
-import com.bgsoftware.wildstacker.utils.Random;
+import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -11,11 +11,14 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,23 +28,57 @@ import java.util.stream.Stream;
 
 public class LootItem extends FilteredLoot {
 
+    private static final Material OMINOUS_BOTTLE = getOminousBottle();
+
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
+    private final List<ItemModifiers.ItemModifierFunction> itemModifiers = new LinkedList<>();
     private final ItemStack itemStack, burnableItem;
     private final double chance;
-    private final int min, max;
     private final boolean looting;
 
-    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, int min, int max, double chance,
-                     boolean looting, List<Predicate<LootEntityAttributes>> entityFilters,
+    private LootItem(ItemStack itemStack, @Nullable ItemStack burnableItem, double chance, boolean looting,
+                     List<ItemModifiers.ItemModifierFunction> itemModifiers,
+                     List<Predicate<LootEntityAttributes>> entityFilters,
                      List<Predicate<LootEntityAttributes>> killerFilters) {
         super(entityFilters, killerFilters);
         this.itemStack = itemStack;
         this.burnableItem = burnableItem;
-        this.min = min;
-        this.max = max;
         this.chance = chance;
         this.looting = looting;
+        this.itemModifiers.addAll(itemModifiers);
+    }
+
+    public boolean isLooting() {
+        return looting;
+    }
+
+    public double getChance(int lootBonusLevel, double lootMultiplier) {
+        return chance + (lootBonusLevel * lootMultiplier);
+    }
+
+    public ItemStack getItemStack(LootEntityAttributes lootEntityAttributes, int amountOfItems, int lootBonusLevel) {
+        ItemStack itemStack = lootEntityAttributes.isBurning() && this.burnableItem != null ?
+                this.burnableItem.clone() : this.itemStack.clone();
+
+        if (!this.itemModifiers.isEmpty()) {
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
+            for (ItemModifiers.ItemModifierFunction function : this.itemModifiers) {
+                if (!function.apply(this, itemStack, itemMeta, amountOfItems, lootBonusLevel))
+                    return null;
+            }
+
+            if (itemMeta != null)
+                itemStack.setItemMeta(itemMeta);
+        }
+
+        return itemStack;
+    }
+
+    @Override
+    public String toString() {
+        return "LootItem{item=" + itemStack + ",burnable=" + burnableItem + "}";
     }
 
     public static LootItem fromJson(JSONObject jsonObject) {
@@ -49,12 +86,29 @@ public class LootItem extends FilteredLoot {
         ItemStack burnableItem = jsonObject.containsKey("burnable") ?
                 buildItemStack((JSONObject) jsonObject.get("burnable")) : null;
         double chance = JsonUtils.getDouble(jsonObject, "chance", 100);
-        int min = JsonUtils.getInt(jsonObject, "min", 1);
-        int max = JsonUtils.getInt(jsonObject, "max", 1);
         boolean looting = (boolean) jsonObject.getOrDefault("looting", false);
 
-        List<Predicate<LootEntityAttributes>> entityFilters = new ArrayList<>();
-        List<Predicate<LootEntityAttributes>> killerFilters = new ArrayList<>();
+        List<Predicate<LootEntityAttributes>> entityFilters = new LinkedList<>();
+        List<Predicate<LootEntityAttributes>> killerFilters = new LinkedList<>();
+        List<ItemModifiers.ItemModifierFunction> itemModifiers = new LinkedList<>();
+
+        {
+            int min = JsonUtils.getInt(jsonObject, "min", 1);
+            int max = JsonUtils.getInt(jsonObject, "max", 1);
+            itemModifiers.add(ItemModifiers.countModifier(min, max));
+        }
+
+        // Custom case for ominous bottle
+        if (itemStack.getType() == OMINOUS_BOTTLE && ServerVersion.isAtLeast(ServerVersion.v1_21) &&
+                jsonObject.containsKey("amplifier")) {
+            try {
+                JSONObject amplifier = (JSONObject) jsonObject.get("amplifier");
+                int min = JsonUtils.getInt(amplifier, "min", 0);
+                int max = JsonUtils.getInt(amplifier, "max", 4);
+                itemModifiers.add(ItemModifiers.ominousBottleModifier(min, max));
+            } catch (Exception ignored) {
+            }
+        }
 
         String requiredPermission = (String) jsonObject.getOrDefault("permission", "");
         if (!requiredPermission.isEmpty())
@@ -104,7 +158,14 @@ public class LootItem extends FilteredLoot {
         } catch (IllegalArgumentException ignored) {
         }
 
-        return new LootItem(itemStack, burnableItem, min, max, chance, looting, entityFilters, killerFilters);
+        try {
+            Object captainFilterObject = jsonObject.get("captain");
+            if (captainFilterObject instanceof Boolean)
+                entityFilters.add(EntityFilters.captainFilter((Boolean) captainFilterObject));
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        return new LootItem(itemStack, burnableItem, chance, looting, itemModifiers, entityFilters, killerFilters);
     }
 
     private static ItemStack buildItemStack(JSONObject jsonObject) {
@@ -162,32 +223,13 @@ public class LootItem extends FilteredLoot {
         return itemStack;
     }
 
-    public double getChance(int lootBonusLevel, double lootMultiplier) {
-        return chance + (lootBonusLevel * lootMultiplier);
-    }
-
-    public ItemStack getItemStack(LootEntityAttributes lootEntityAttributes, int amountOfItems, int lootBonusLevel) {
-        ItemStack itemStack = lootEntityAttributes.isBurning() && burnableItem != null ? burnableItem.clone() : this.itemStack.clone();
-
-        int lootingBonus = 0;
-
-        if (looting && lootBonusLevel > 0) {
-            lootingBonus = Random.nextInt(lootBonusLevel + 1);
-        }
-
-        int itemAmount = Random.nextInt(min + lootingBonus, max + lootingBonus, amountOfItems);
-
-        if (itemAmount <= 0)
+    @Nullable
+    private static Material getOminousBottle() {
+        try {
+            return Material.valueOf("OMINOUS_BOTTLE");
+        } catch (IllegalArgumentException error) {
             return null;
-
-        itemStack.setAmount(itemAmount);
-
-        return itemStack;
-    }
-
-    @Override
-    public String toString() {
-        return "LootItem{item=" + itemStack + ",burnable=" + burnableItem + "}";
+        }
     }
 
 }

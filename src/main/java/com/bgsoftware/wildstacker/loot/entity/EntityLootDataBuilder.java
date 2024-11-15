@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.loot.entity;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -13,6 +14,8 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     @Nullable
     private final LivingEntity livingEntity;
     public final EntityType entityType;
+    private final boolean isRaider;
+
     @Nullable
     public LootEntityAttributes killerEntityData;
     public boolean ignoreEntityKiller;
@@ -30,15 +33,21 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     public boolean ignoreSlimeSize;
     public boolean creeperCharged;
     public boolean ignoreCreeperCharged;
+    public boolean raidCaptain;
+    public boolean ignoreRaidCaptain;
 
     public EntityLootDataBuilder(EntityType entityType) {
-        this.livingEntity = null;
-        this.entityType = entityType;
+        this(entityType, null);
     }
 
     public EntityLootDataBuilder(LivingEntity livingEntity) {
+        this(livingEntity.getType(), livingEntity);
+    }
+
+    private EntityLootDataBuilder(EntityType entityType, @Nullable LivingEntity livingEntity) {
+        this.entityType = entityType;
+        this.isRaider = EntityTypes.isRaider(entityType);
         this.livingEntity = livingEntity;
-        this.entityType = livingEntity.getType();
     }
 
     @Override
@@ -128,6 +137,24 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
             throw new UnsupportedOperationException();
 
         this.ignoreCreeperCharged = ignoreCharged;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setRaidCaptain(boolean captain) {
+        if (!this.isRaider)
+            throw new UnsupportedOperationException();
+
+        this.raidCaptain = captain;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setIgnoreRaidCaptain(boolean ignoreRaidCaptain) {
+        if (!this.isRaider)
+            throw new UnsupportedOperationException();
+
+        this.ignoreRaidCaptain = ignoreRaidCaptain;
         return this;
     }
 

@@ -171,4 +171,16 @@ public enum EntityTypes {
         return ServerVersion.isAtLeast(ServerVersion.v1_14) && (this == EVOKER || this == PILLAGER || this == VINDICATOR);
     }
 
+    public static boolean isRaider(EntityType entityType) {
+        if (!ServerVersion.isAtLeast(ServerVersion.v1_14))
+            return false;
+
+        try {
+            return EntityTypes.fromName(entityType.name()).isRaider();
+        } catch (Throwable error) {
+            return false;
+        }
+
+    }
+
 }

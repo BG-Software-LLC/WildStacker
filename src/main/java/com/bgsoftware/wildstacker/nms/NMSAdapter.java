@@ -7,6 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -55,6 +56,10 @@ public interface NMSAdapter {
     ItemStack setTag(ItemStack itemStack, String key, Object value);
 
     <T> T getTag(ItemStack itemStack, String key, Class<T> valueType, Object def);
+
+    default void setOminousBottleAmplifier(ItemMeta itemMeta, int amplifier) {
+        // Not implemented
+    }
 
     Object getChatMessage(String message);
 

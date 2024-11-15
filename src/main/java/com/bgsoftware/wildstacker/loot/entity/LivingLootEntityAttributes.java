@@ -112,4 +112,13 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         return creeper.isPowered();
     }
 
+    @Override
+    public boolean isRaidCaptain() {
+        return super.isRaidCaptain() || isRaidCaptainFromEntity();
+    }
+
+    private boolean isRaidCaptainFromEntity() {
+        org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) this.livingEntity;
+        return raider.isPatrolLeader();
+    }
 }

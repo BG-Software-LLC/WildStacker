@@ -31,6 +31,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -216,6 +217,14 @@ public final class NMSAdapterImpl implements NMSAdapter {
             return valueType.cast(compoundTag.getLong(key));
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
+    }
+
+    @Override
+    public void setOminousBottleAmplifier(ItemMeta itemMeta, int amplifier) {
+        if (!(itemMeta instanceof OminousBottleMeta ominousBottleMeta))
+            return;
+
+        ominousBottleMeta.setAmplifier(amplifier);
     }
 
     @Override

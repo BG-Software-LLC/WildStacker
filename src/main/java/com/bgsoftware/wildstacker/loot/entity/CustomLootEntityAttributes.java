@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.loot.entity;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 public class CustomLootEntityAttributes implements LootEntityAttributes {
 
     private final EntityType entityType;
+    private final boolean isRaider;
+
     @Nullable
     private final LootEntityAttributes killerEntityData;
     private final boolean ignoreEntityKiller;
@@ -27,9 +30,12 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     private final boolean ignoreSlimeSize;
     private final boolean creeperCharged;
     private final boolean ignoreCreeperCharged;
+    private final boolean raidCaptain;
+    private final boolean ignoreRaidCaptain;
 
     public CustomLootEntityAttributes(EntityLootDataBuilder builder) {
         this.entityType = builder.entityType;
+        this.isRaider = EntityTypes.isRaider(this.entityType);
         this.killerEntityData = builder.killerEntityData;
         this.ignoreEntityKiller = builder.ignoreEntityKiller;
         this.upgrade = builder.upgrade;
@@ -43,6 +49,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
         this.ignoreSlimeSize = builder.ignoreSlimeSize;
         this.creeperCharged = builder.creeperCharged;
         this.ignoreCreeperCharged = builder.ignoreCreeperCharged;
+        this.raidCaptain = builder.raidCaptain;
+        this.ignoreRaidCaptain = builder.ignoreRaidCaptain;
     }
 
     @Override
@@ -109,7 +117,7 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
 
     @Override
     public boolean isIgnoreSlimeSize() {
-        if(this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
+        if (this.entityType != EntityType.SLIME && this.entityType != EntityType.MAGMA_CUBE)
             throw new UnsupportedOperationException();
 
         return this.ignoreSlimeSize;
@@ -117,7 +125,7 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
 
     @Override
     public boolean isCreeperCharged() {
-        if(this.entityType != EntityType.CREEPER)
+        if (this.entityType != EntityType.CREEPER)
             throw new UnsupportedOperationException();
 
         return this.creeperCharged;
@@ -125,10 +133,25 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
 
     @Override
     public boolean isIgnoreCreeperCharged() {
-        if(this.entityType != EntityType.CREEPER)
+        if (this.entityType != EntityType.CREEPER)
             throw new UnsupportedOperationException();
 
         return this.ignoreCreeperCharged;
     }
 
+    @Override
+    public boolean isRaidCaptain() {
+        if (!this.isRaider)
+            throw new UnsupportedOperationException();
+
+        return this.raidCaptain;
+    }
+
+    @Override
+    public boolean isIgnoreRaidCaptain() {
+        if (!this.isRaider)
+            throw new UnsupportedOperationException();
+
+        return this.ignoreRaidCaptain;
+    }
 }
