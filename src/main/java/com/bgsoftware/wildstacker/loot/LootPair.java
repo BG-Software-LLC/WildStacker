@@ -77,6 +77,13 @@ public class LootPair extends FilteredLoot {
         }
 
         try {
+            Object captainFilterObject = jsonObject.get("captain");
+            if (captainFilterObject instanceof Boolean)
+                entityFilters.add(EntityFilters.captainFilter((Boolean) captainFilterObject));
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        try {
             Object jsonKillerFilters = jsonObject.get("killer");
             if (jsonKillerFilters instanceof JSONArray) {
                 ((JSONArray) jsonKillerFilters).forEach(filterObject -> {
