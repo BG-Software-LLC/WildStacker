@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -12,12 +13,13 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.sql.Ref;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,12 @@ import java.util.stream.Stream;
 
 public class LootItem extends FilteredLoot {
 
-    private static final Material OMINOUS_BOTTLE = getOminousBottle();
+    @Nullable
+    private static final Material OMINOUS_BOTTLE = getMaterialSafe("OMINOUS_BOTTLE");
+    @Nullable
+    private static final Material TIPPED_ARROW = getMaterialSafe("TIPPED_ARROW");
+    private static final ReflectMethod<Void> POTION_META_SET_BASE_TYPE = new ReflectMethod<>(
+            PotionMeta.class, "setBasePotionType", PotionType.class);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -95,7 +102,8 @@ public class LootItem extends FilteredLoot {
         {
             int min = JsonUtils.getInt(jsonObject, "min", 1);
             int max = JsonUtils.getInt(jsonObject, "max", 1);
-            itemModifiers.add(ItemModifiers.countModifier(min, max));
+            int limit = JsonUtils.getInt(jsonObject, "limit", -1);
+            itemModifiers.add(ItemModifiers.countModifier(min, max, limit));
         }
 
         // Custom case for ominous bottle
@@ -211,6 +219,16 @@ public class LootItem extends FilteredLoot {
                 itemMeta.addEnchant(glowEnchant, 1, true);
         }
 
+        if (itemStack.getType() == TIPPED_ARROW && jsonObject.containsKey("arrow-effect") &&
+                POTION_META_SET_BASE_TYPE.isValid()) {
+            try {
+                PotionMeta potionMeta = (PotionMeta) itemMeta;
+                POTION_META_SET_BASE_TYPE.invoke(potionMeta, PotionType.valueOf((String) jsonObject.get("arrow-effect")));
+            } catch (Exception ignored) {
+
+            }
+        }
+
         itemStack.setItemMeta(itemMeta);
 
         if (jsonObject.containsKey("nbt-data")) {
@@ -224,9 +242,9 @@ public class LootItem extends FilteredLoot {
     }
 
     @Nullable
-    private static Material getOminousBottle() {
+    private static Material getMaterialSafe(String name) {
         try {
-            return Material.valueOf("OMINOUS_BOTTLE");
+            return Material.valueOf(name);
         } catch (IllegalArgumentException error) {
             return null;
         }

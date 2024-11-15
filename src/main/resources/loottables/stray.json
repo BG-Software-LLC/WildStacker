@@ -13,6 +13,23 @@
       ]
     },
     {
+      "killer": [
+        "PLAYER"
+      ],
+      "chance": 100,
+      "items": [
+        {
+          "type": "TIPPED_ARROW",
+          "chance": 100,
+          "min": 0,
+          "max": 1,
+          "limit": 1,
+          "looting": true,
+          "arrow-effect": "SLOWNESS"
+        }
+      ]
+    },
+    {
       "chance": 100,
       "items": [
         {

@@ -10,10 +10,10 @@ public class ItemModifiers {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    public static ItemModifierFunction countModifier(int min, int max) {
+    public static ItemModifierFunction countModifier(int min, int max, int limit) {
         if (min >= max) {
             return (lootItem, itemStack, itemMeta, amountOfItems, lootBonusLevel) -> {
-                itemStack.setAmount(min);
+                itemStack.setAmount(limit < 0 || min < limit ? min : limit);
                 return true;
             };
         }
@@ -30,7 +30,7 @@ public class ItemModifiers {
             if (itemAmount <= 0)
                 return false;
 
-            itemStack.setAmount(itemAmount);
+            itemStack.setAmount(limit < 0 || itemAmount < limit ? itemAmount : limit);
 
             return true;
         };
