@@ -44,11 +44,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 public final class NMSSpawnersImpl implements NMSSpawners {
 
     private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED = new ReflectField<>(
             Level.class, List.class, Modifier.PROTECTED | Modifier.FINAL, 1);
+    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC = new ReflectField<>(
+            Level.class, List.class, Modifier.PUBLIC | Modifier.FINAL, 1);
+    private static final boolean isSparklyPaper = ((Supplier<Boolean>) () -> {
+        try {
+            Class.forName("net.sparklypower.sparklypaper.BlockEntityTickersList");
+            return true;
+        } catch (ClassNotFoundException error) {
+            return false;
+        }
+    }).get();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -89,12 +100,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
-        List<TickingBlockEntity> blockEntityTickers;
-        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid()) {
-            blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
-        } else {
-            blockEntityTickers = serverLevel.blockEntityTickers;
-        }
+        List<TickingBlockEntity> blockEntityTickers = getBlockEntityTickers(serverLevel);
 
         List<TickingBlockEntity> watchersToAdd = new LinkedList<>();
         Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
@@ -129,12 +135,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         int blockY = location.getBlockY();
         int blockZ = location.getBlockZ();
 
-        List<TickingBlockEntity> blockEntityTickers;
-        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid()) {
-            blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(serverLevel);
-        } else {
-            blockEntityTickers = serverLevel.blockEntityTickers;
-        }
+        List<TickingBlockEntity> blockEntityTickers = getBlockEntityTickers(serverLevel);
 
         TickingBlockEntity watcherToAdd = null;
         Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
@@ -331,6 +332,14 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
         SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
         return new SyncedCreatureSpawnerImpl(bukkitWorld, spawnerBlockEntity);
+    }
+
+    private static List<TickingBlockEntity> getBlockEntityTickers(Level level) {
+        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid())
+            return LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(level);
+        if (isSparklyPaper && LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC.isValid())
+            return LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC.get(level);
+        return level.blockEntityTickers;
     }
 
 }

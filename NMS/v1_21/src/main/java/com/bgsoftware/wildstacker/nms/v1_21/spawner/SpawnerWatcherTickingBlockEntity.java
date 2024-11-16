@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_21.spawner;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import net.minecraft.core.BlockPos;
@@ -11,6 +12,9 @@ import org.bukkit.Location;
 import java.lang.ref.WeakReference;
 
 public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
+
+    private static final ReflectMethod<Long> GET_CHUNK_COORD_KEY = new ReflectMethod<>(
+            TickingBlockEntity.class, "getChunkCoordinateKey");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -74,6 +78,10 @@ public class SpawnerWatcherTickingBlockEntity implements TickingBlockEntity {
     @Override
     public String getType() {
         return this.type;
+    }
+
+    public long getChunkCoordinateKey() {
+        return GET_CHUNK_COORD_KEY.invoke(this.original);
     }
 
 }
