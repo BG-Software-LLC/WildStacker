@@ -43,6 +43,9 @@ public final class LootHandler {
         JSONParser jsonParser = new JSONParser();
 
         for (File file : folderFile.listFiles()) {
+            if (file.getName().equals(".DS_Store"))
+                continue;
+
             try {
                 JSONObject jsonObject;
                 try (FileReader reader = new FileReader(file)) {
@@ -106,7 +109,7 @@ public final class LootHandler {
         saveLootTable("cow_baby");
         saveLootTable("creeper");
         saveLootTable(EntityTypes.DOLPHIN, "dolphin");
-        if(SUPPORT_BABY_1_22)
+        if (SUPPORT_BABY_1_22)
             saveLootTable("dolphin_baby");
         saveLootTable("donkey", "donkey_baby");
         saveLootTable(EntityTypes.DROWNED, "drowned");
@@ -120,7 +123,7 @@ public final class LootHandler {
         saveLootTable("ghast");
         saveLootTable("giant");
         saveLootTable(EntityTypes.GLOW_SQUID, "glow_squid");
-        if(SUPPORT_BABY_1_22)
+        if (SUPPORT_BABY_1_22)
             saveLootTable("glow_squid_baby");
         saveLootTable(EntityTypes.GOAT, "goat", "goat_baby");
         saveLootTable("guardian");
@@ -167,7 +170,7 @@ public final class LootHandler {
         saveLootTable("snowman");
         saveLootTable("spider");
         saveLootTable("squid");
-        if(SUPPORT_BABY_1_22)
+        if (SUPPORT_BABY_1_22)
             saveLootTable("squid_baby");
         saveLootTable(EntityTypes.STRAY, "stray");
         saveLootTable(EntityTypes.STRIDER, "strider", "strider_baby");
