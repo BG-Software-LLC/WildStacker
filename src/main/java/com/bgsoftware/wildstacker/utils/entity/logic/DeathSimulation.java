@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.entity.logic;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
@@ -12,6 +13,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.events.BiHandlerList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -31,10 +33,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -49,6 +53,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class DeathSimulation {
 
+    private static final ReflectField<HandlerList> EVENT_DAMAGE_HANDLER_LIST = new ReflectField<HandlerList>(
+            EntityDamageEvent.class, HandlerList.class, "handlers").removeFinal();
+
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     @Nullable
@@ -59,6 +66,22 @@ public final class DeathSimulation {
     private static boolean sweepingEdgeHandled = false;
 
     private DeathSimulation() {
+    }
+
+    public static void injectEntityDamageHandlerList() {
+        // Changes HandlerList of EntityDamageEvent to only include WildStacker's listener.
+        HandlerList original = EntityDamageEvent.getHandlerList();
+        BiHandlerList newHandlerList = new BiHandlerList(original);
+
+        for (RegisteredListener registeredListener : original.getRegisteredListeners()) {
+            if (registeredListener.getPlugin() == plugin) {
+                newHandlerList.register(registeredListener);
+                original.unregister(registeredListener);
+            }
+        }
+
+        newHandlerList.freeze();
+        EVENT_DAMAGE_HANDLER_LIST.set(null, newHandlerList);
     }
 
     public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent damageEvent,

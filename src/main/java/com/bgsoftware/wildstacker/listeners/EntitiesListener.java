@@ -17,6 +17,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.FutureEntityTracker;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
+import com.bgsoftware.wildstacker.utils.events.BiHandlerList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -78,7 +79,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,7 +101,6 @@ public final class EntitiesListener implements Listener {
     private final FutureEntityTracker<Integer> mushroomTracker = new FutureEntityTracker<>();
     private final FutureEntityTracker<SpawnEggTrackedData> spawnEggTracker = new FutureEntityTracker<>();
     private final Map<EntityDamageEvent, EntityDamageData> damageResults = new IdentityHashMap<>();
-    private final List<EntityDamageEvent> entityDamageEventCalls = new LinkedList<>();
     private final WildStackerPlugin plugin;
 
     private boolean duplicateCow = false;
@@ -217,9 +216,6 @@ public final class EntitiesListener implements Listener {
         if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity()))
             return;
 
-        if (this.entityDamageEventCalls.contains(damageEvent))
-            return;
-
         LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
@@ -236,12 +232,13 @@ public final class EntitiesListener implements Listener {
         if (!fromDeathEvent) {
             damageEvent.setCancelled(true);
             entityDamageData = new EntityDamageData(damageEvent);
+            BiHandlerList entityDamageHandlerList = (BiHandlerList) EntityDamageEvent.getHandlerList();
             try {
-                this.entityDamageEventCalls.add(damageEvent);
+                entityDamageHandlerList.setMode(BiHandlerList.Mode.ORIGINAL);
                 // Call the event again.
                 Bukkit.getPluginManager().callEvent(damageEvent);
             } finally {
-                this.entityDamageEventCalls.remove(damageEvent);
+                entityDamageHandlerList.setMode(BiHandlerList.Mode.NEW);
             }
         }
 
