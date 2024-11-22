@@ -1,7 +1,7 @@
 group 'Hooks:CrazyEnchantments'
 
 dependencies {
-    compileOnly 'me.badbones69:CrazyEnchantments:1.7.9.3.8'
+    compileOnly 'me.badbones69:CrazyEnchantments:1.8.1.1'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly rootProject

@@ -65,7 +65,8 @@ public enum SpawnCause {
     ECHO_PET(108),
     ELITE_BOSSES(109),
     MORE_BOSSES(110),
-    MINIATURE_PETS(111);
+    MINIATURE_PETS(111),
+    CRAZY_ENCHANTMENTS(112);
 
     private final int id;
 
