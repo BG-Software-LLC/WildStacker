@@ -211,10 +211,24 @@ public final class EntitiesListener implements Listener {
         handleEntityDamage(e, false);
     }
 
+    private static void recallDamageEvent(EntityDamageEvent damageEvent) {
+        BiHandlerList entityDamageHandlerList = (BiHandlerList) EntityDamageEvent.getHandlerList();
+        try {
+            entityDamageHandlerList.setMode(BiHandlerList.Mode.ORIGINAL);
+            // Call the event again.
+            Bukkit.getPluginManager().callEvent(damageEvent);
+        } finally {
+            entityDamageHandlerList.setMode(BiHandlerList.Mode.NEW);
+        }
+    }
+
     private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
         // Making sure the entity is stackable
-        if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity()))
+        if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity())) {
+            // If not, we still want to re-call the damage event
+            recallDamageEvent(damageEvent);
             return;
+        }
 
         LivingEntity livingEntity = (LivingEntity) damageEvent.getEntity();
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
@@ -232,14 +246,7 @@ public final class EntitiesListener implements Listener {
         if (!fromDeathEvent) {
             damageEvent.setCancelled(true);
             entityDamageData = new EntityDamageData(damageEvent);
-            BiHandlerList entityDamageHandlerList = (BiHandlerList) EntityDamageEvent.getHandlerList();
-            try {
-                entityDamageHandlerList.setMode(BiHandlerList.Mode.ORIGINAL);
-                // Call the event again.
-                Bukkit.getPluginManager().callEvent(damageEvent);
-            } finally {
-                entityDamageHandlerList.setMode(BiHandlerList.Mode.NEW);
-            }
+            recallDamageEvent(damageEvent);
         }
 
         if (!damageEvent.isCancelled())
