@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -22,35 +23,50 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import java.lang.reflect.InvocationTargetException;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
 public final class ProtocolLibHook {
 
+    public static final WrappedDataWatcher.Serializer NAME_SERIALIZER = ServerVersion.isLegacy() ?
+            WrappedDataWatcher.Registry.get(String.class) :
+            WrappedDataWatcher.Registry.getChatComponentSerializer(true);
+    public static final WrappedDataWatcher.Serializer VISIBLE_SERIALIZER =
+            WrappedDataWatcher.Registry.get(Boolean.class);
+
     private static WildStackerPlugin plugin;
     private static boolean registered = false;
+    private static IPacketHandler packetHandler;
 
     public static void register(WildStackerPlugin plugin) {
         if (registered)
             return;
 
         ProtocolLibHook.plugin = plugin;
+
+        packetHandler = createPacketHandler();
+
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketListener());
         plugin.getServer().getPluginManager().registerEvents(new CommandsListener(), plugin);
 
         registered = true;
     }
 
-    private static Object getCustomName(String customName) {
-        return ServerVersion.isLegacy() ? customName : customName.isEmpty() ? Optional.empty() :
-                Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
-    }
+    private static IPacketHandler createPacketHandler() {
+        if (ServerVersion.isAtLeast(ServerVersion.v1_19)) {
+            try {
+                Class.forName("com.comphenix.protocol.wrappers.WrappedDataValue");
+                return (IPacketHandler) Class.forName("com.bgsoftware.wildstacker.hooks.ProtocolLib_119PacketHandler")
+                        .newInstance();
+            } catch (ClassNotFoundException ignored) {
+            } catch (Throwable error) {
+                throw new RuntimeException(error);
+            }
+        }
 
-    private static WrappedDataWatcher.Serializer getNameSerializer() {
-        return ServerVersion.isLegacy() ? WrappedDataWatcher.Registry.get(String.class) :
-                WrappedDataWatcher.Registry.getChatComponentSerializer(true);
+        return new PacketHandler118();
     }
 
     private static final class CommandsListener implements Listener {
@@ -114,22 +130,12 @@ public final class ProtocolLibHook {
         private static void updateName(Player player, Entity entity) {
             PacketContainer packetContainer = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
             packetContainer.getIntegers().write(0, entity.getEntityId());
-            WrappedDataWatcher watcher = new WrappedDataWatcher();
-            watcher.setEntity(entity);
 
-            WrappedDataWatcher.Serializer nameSerializer = getNameSerializer();
-            WrappedDataWatcher.Serializer visibleSerializer = WrappedDataWatcher.Registry.get(Boolean.class);
-
-            watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, nameSerializer),
-                    getCustomName(plugin.getNMSEntities().getCustomName(entity)));
-            watcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, visibleSerializer),
-                    plugin.getNMSEntities().isCustomNameVisible(entity));
-
-            packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
+            packetHandler.handlePacketCustomNameUpdate(packetContainer, entity);
 
             try {
                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetContainer);
-            } catch (InvocationTargetException e) {
+            } catch (Throwable e) {
                 WildStackerPlugin.log("There was an error while sending the name toggle packet to " + player.getName() + ":");
                 e.printStackTrace();
             }
@@ -137,7 +143,7 @@ public final class ProtocolLibHook {
 
     }
 
-    private static final class PacketListener extends PacketAdapter {
+    private static class PacketListener extends PacketAdapter {
 
         PacketListener() {
             super(ProtocolLibHook.plugin, ListenerPriority.NORMAL, PacketType.Play.Server.ENTITY_METADATA);
@@ -145,27 +151,73 @@ public final class ProtocolLibHook {
 
         @Override
         public void onPacketSending(PacketEvent event) {
-            if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) {
-                PacketContainer packetContainer = event.getPacket();
-                try {
-                    StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
-                    if (entityModifier.size() > 0) {
-                        if ((ProtocolLibHook.plugin.getSystemManager().hasItemNamesToggledOff(event.getPlayer()) &&
-                                entityModifier.read(0) instanceof Item) ||
-                                (ProtocolLibHook.plugin.getSystemManager().hasEntityNamesToggledOff(event.getPlayer()) &&
-                                        entityModifier.read(0) instanceof LivingEntity)) {
-                            StructureModifier<List<WrappedWatchableObject>> structureModifier = packetContainer.getWatchableCollectionModifier();
-                            if (structureModifier.size() > 0) {
-                                WrappedDataWatcher watcher = new WrappedDataWatcher(structureModifier.read(0));
-                                watcher.setObject(2, new WrappedWatchableObject(2, getCustomName("")));
-                                watcher.setObject(3, new WrappedWatchableObject(3, false));
-                                packetContainer.getWatchableCollectionModifier().write(0, watcher.getWatchableObjects());
-                            }
-                        }
-                    }
-                } catch (Throwable ignored) {
-                }
+            if (event.getPacketType() != PacketType.Play.Server.ENTITY_METADATA)
+                return;
+
+            try {
+                onPacketSendingInternal(event);
+            } catch (Throwable error) {
+                error.printStackTrace();
             }
+        }
+
+        private void onPacketSendingInternal(PacketEvent event) {
+            PacketContainer packetContainer = event.getPacket();
+            StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
+
+            if (entityModifier.size() <= 0)
+                return;
+
+            Entity entity = entityModifier.read(0);
+
+            SystemManager systemManager = ProtocolLibHook.plugin.getSystemManager();
+
+            if ((entity instanceof Item && systemManager.hasItemNamesToggledOff(event.getPlayer())) ||
+                    (entity instanceof LivingEntity && systemManager.hasEntityNamesToggledOff(event.getPlayer()))) {
+                packetHandler.handlePacketCustomNameUpdate(packetContainer, null);
+            }
+        }
+
+    }
+
+    public interface IPacketHandler {
+
+        void handlePacketCustomNameUpdate(PacketContainer packetContainer, @Nullable Entity entity);
+
+    }
+
+    private static final class PacketHandler118 implements IPacketHandler {
+
+        private static final boolean isLegacy = ServerVersion.isLegacy();
+        private static final Object EMPTY_CUSTOM_NAME = isLegacy ? "" : Optional.empty();
+
+        @Override
+        public void handlePacketCustomNameUpdate(PacketContainer packetContainer, @Nullable Entity entity) {
+            StructureModifier<List<WrappedWatchableObject>> structureModifier =
+                    packetContainer.getWatchableCollectionModifier();
+
+            WrappedDataWatcher watcher;
+            if (entity == null) {
+                watcher = new WrappedDataWatcher();
+
+                watcher.setObject(2, NAME_SERIALIZER, EMPTY_CUSTOM_NAME);
+                watcher.setObject(3, VISIBLE_SERIALIZER, (Object) false);
+            } else {
+                watcher = new WrappedDataWatcher(entity);
+
+                Object customName = parseCustomName(plugin.getNMSEntities().getCustomName(entity, true));
+                watcher.setObject(2, NAME_SERIALIZER, customName);
+
+                boolean nameVisible = plugin.getNMSEntities().isCustomNameVisible(entity);
+                watcher.setObject(3, VISIBLE_SERIALIZER, (Object) nameVisible);
+            }
+
+            structureModifier.write(0, watcher.getWatchableObjects());
+        }
+
+        private Object parseCustomName(String customName) {
+            return isLegacy ? customName : customName == null || customName.isEmpty() ? Optional.empty() :
+                    Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
         }
 
     }

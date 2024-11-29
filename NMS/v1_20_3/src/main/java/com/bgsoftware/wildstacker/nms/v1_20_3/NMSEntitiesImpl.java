@@ -15,6 +15,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -762,7 +763,21 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public String getCustomName(org.bukkit.entity.Entity bukkitEntity) {
+    public String getCustomName(org.bukkit.entity.Entity entity) {
+        return getCustomName(entity, false);
+    }
+
+    @Override
+    public String getCustomName(org.bukkit.entity.Entity bukkitEntity, boolean withColors) {
+        if (withColors) {
+            try {
+                net.kyori.adventure.text.Component component = bukkitEntity.customName();
+                return component == null ? "" : LegacyComponentSerializer.legacySection().serialize(component);
+            } catch (Throwable ignored) {
+                return bukkitEntity.getCustomName();
+            }
+        }
+
         Entity entity = ((CraftEntity) bukkitEntity).getHandle();
         // Much more optimized way than Bukkit's method.
         Component component = entity.getCustomName();
