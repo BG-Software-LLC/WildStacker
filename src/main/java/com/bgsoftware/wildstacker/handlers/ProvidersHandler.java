@@ -218,6 +218,12 @@ public final class ProvidersHandler {
             Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_Citizens");
             entityTypeProvider.ifPresent(entityTypeProviders::add);
         }
+
+        if (Bukkit.getPluginManager().isPluginEnabled("IslandNPC") &&
+                Bukkit.getPluginManager().getPlugin("IslandNPC").getDescription().getAuthors().contains("WaterArchery")) {
+            Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_IslandNPC");
+            entityTypeProvider.ifPresent(entityTypeProviders::add);
+        }
     }
 
     private void loadRegionsProviders() {
