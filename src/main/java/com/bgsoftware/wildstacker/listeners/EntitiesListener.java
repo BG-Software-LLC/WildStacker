@@ -206,7 +206,7 @@ public final class EntitiesListener implements Listener {
             e.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void handleEntityDamage(EntityDamageEvent e) {
         handleEntityDamage(e, false);
     }
@@ -223,8 +223,9 @@ public final class EntitiesListener implements Listener {
     }
 
     private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
-        // Making sure the entity is stackable
-        if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(damageEvent.getEntity())) {
+        // Making sure the entity is stackable and that we can proceed with handling entity damage
+        if (damageEvent.isCancelled() || !plugin.getSettings().entitiesStackingEnabled ||
+                !EntityUtils.isStackable(damageEvent.getEntity())) {
             // If not, we still want to re-call the damage event
             recallDamageEvent(damageEvent);
             return;
