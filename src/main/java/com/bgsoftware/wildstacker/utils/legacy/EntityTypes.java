@@ -22,6 +22,7 @@ public enum EntityTypes {
     CAMEL,
     CAT,
     CAVE_SPIDER,
+    CREAKING,
     CHICKEN,
     COD,
     COW,
