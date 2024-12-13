@@ -895,13 +895,19 @@ public final class EntitiesListener implements Listener {
                 stackedEntity.updateNerfed();
         };
 
-        boolean stackWithDelay = Optional.ofNullable((Boolean) EntityStorage.removeMetadata(entity, EntityFlag.DELAY_STACK)).orElse(false);
+        boolean stackWithDelay = Optional.ofNullable((Boolean)
+                        EntityStorage.removeMetadata(entity, EntityFlag.DELAY_STACK))
+                .orElse(false);
+
+        EntityTypes entityType = EntityTypes.fromEntity(entity);
 
         //Need to add a delay so eggs will get removed from inventory
-        if (stackWithDelay || spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
-                spawnCause == SpawnCause.COMMAND || entity.getType() == EntityType.WITHER ||
-                entity.getType() == EntityType.IRON_GOLEM || entity.getType() == EntityType.SNOWMAN ||
-                EntityTypes.fromEntity(entity).isSlime() || plugin.getProviders().handleEntityStackingWithDelay())
+        if (stackWithDelay || plugin.getProviders().handleEntityStackingWithDelay() ||
+                spawnCause == SpawnCause.SPAWNER_EGG || spawnCause == SpawnCause.CUSTOM ||
+                spawnCause == SpawnCause.COMMAND || spawnCause == SpawnCause.EGG ||
+                entityType == EntityTypes.WITHER || entityType == EntityTypes.IRON_GOLEM ||
+                entityType == EntityTypes.SNOW_GOLEM || entityType.isSlime() ||
+                !entity.isValid())
             Executor.sync(() -> stackedEntity.runStackAsync(entityConsumer), 1L);
         else
             stackedEntity.runStackAsync(entityConsumer);
