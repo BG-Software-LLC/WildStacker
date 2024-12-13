@@ -1,0 +1,19 @@
+group 'Hooks:CrazyEnchantments2'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+dependencies {
+    compileOnly 'me.badbones69:CrazyEnchantments:2.5.1'
+    compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
+    compileOnly project(":API")
+    compileOnly rootProject
+}
+
+if (project.hasProperty('hook.compile_crazyenchantments') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_crazyenchantments").toString())) {
+    project.tasks.all { task -> task.enabled = false }
+}

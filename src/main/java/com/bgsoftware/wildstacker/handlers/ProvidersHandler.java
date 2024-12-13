@@ -357,8 +357,14 @@ public final class ProvidersHandler {
                 registerHook("EpicSpawners8Hook");
             }
         }
-        if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments"))
-            registerHook("CrazyEnchantmentsHook");
+        if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments")) {
+            Plugin crazyEnchantments = pluginManager.getPlugin("CrazyEnchantments");
+            if(crazyEnchantments.getDescription().getVersion().startsWith("2")) {
+                registerHook("CrazyEnchantments2Hook");
+            } else {
+                registerHook("CrazyEnchantmentsHook");
+            }
+        }
         if (enable && isPlugin(toCheck, "Boss") && pluginManager.isPluginEnabled("Boss")) {
             Plugin boss = pluginManager.getPlugin("Boss");
             if (boss.getDescription().getVersion().startsWith("3.4")) {
