@@ -352,12 +352,20 @@ public final class DeathSimulation {
 
         StackedEntity stackedZombie = WStackedEntity.of(zombieVillager);
 
+        stackedEntity.setSpawnCorpse(false);
         if (StackSplit.VILLAGER_INFECTION.isEnabled()) {
-            stackedEntity.runUnstack(1, entityDamager);
+            if (stackedEntity.runUnstack(1, entityDamager) == UnstackResult.SUCCESS) {
+                IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
+                nmsEntity.setHealth((float) livingEntity.getMaxHealth(), false);
+                stackedEntity.updateName();
+            }
         } else {
             stackedZombie.setStackAmount(stackedEntity.getStackAmount(), true);
             stackedEntity.remove();
         }
+
+        if (!stackedEntity.hasNameTag())
+            stackedZombie.removeFlag(EntityFlag.NAME_TAG);
 
         stackedZombie.updateName();
         stackedZombie.runStackAsync(null);

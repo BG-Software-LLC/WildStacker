@@ -60,6 +60,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     private int spawnerUpgradeId = -1;
     private Predicate<LivingEntity> stackFlag = null;
     private EntityType cachedType;
+    private boolean spawnCorpse = true;
 
     public WStackedEntity(LivingEntity livingEntity) {
         super(livingEntity, 1);
@@ -313,18 +314,26 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         int newStackAmount = decreaseStackAmount(eventResult.getValue(), true);
 
         if (newStackAmount >= 1) {
-            if (plugin.getSettings().spawnCorpses)
+            if (spawnCorpse && plugin.getSettings().spawnCorpses)
                 spawnCorpse();
         } else {
-            Executor.sync(() -> {
-                setFlag(EntityFlag.CORPSE, true);
-                if (EntityTypes.fromEntity(object).isSlime())
-                    setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
-                plugin.getNMSEntities().setHealthDirectly(object, 0, false);
-                plugin.getNMSEntities().playDeathSound(object);
-                Executor.sync(this::clearFlags, 100L);
-            }, 2L);
+            if (!spawnCorpse) {
+                remove();
+            } else {
+                setFlag(EntityFlag.REMOVED_ENTITY, true);
+                Executor.sync(() -> {
+                    setFlag(EntityFlag.CORPSE, true);
+                    if (EntityTypes.fromEntity(object).isSlime())
+                        setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
+                    plugin.getNMSEntities().setHealthDirectly(object, 0, false);
+                    plugin.getNMSEntities().playDeathSound(object);
+                    Executor.sync(this::clearFlags, 100L);
+                }, 2L);
+            }
         }
+
+        // Reset spawn-corpse state
+        spawnCorpse = true;
 
         return UnstackResult.SUCCESS;
     }
@@ -474,6 +483,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void spawnCorpse() {
+        if (!spawnCorpse)
+            return;
+
         if (!Bukkit.isPrimaryThread()) {
             Executor.sync(this::spawnCorpse);
             return;
@@ -615,6 +627,11 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     @Override
     public void clearFlags() {
         EntityStorage.clearMetadata(cachedUUID);
+    }
+
+    @Override
+    public void setSpawnCorpse(boolean spawnCorpse) {
+        this.spawnCorpse = spawnCorpse;
     }
 
     @Override

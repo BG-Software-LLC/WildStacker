@@ -257,4 +257,11 @@ public interface StackedEntity extends AsyncStackedObject<LivingEntity>, Upgrade
      */
     void clearFlags();
 
+    /**
+     * Set whether this entity should spawn a corpse upon death.
+     *
+     * @param spawnCorpse Whether a corpse should be spawned.
+     */
+    void setSpawnCorpse(boolean spawnCorpse);
+
 }

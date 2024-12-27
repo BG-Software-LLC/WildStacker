@@ -235,7 +235,7 @@ public final class EntitiesListener implements Listener {
         StackedEntity stackedEntity = WStackedEntity.of(livingEntity);
 
         // If the entity is already considered as "dead", then we don't deal any damage and return.
-        if (stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY)) {
+        if (stackedEntity.hasFlag(EntityFlag.DEAD_ENTITY) || stackedEntity.hasFlag(EntityFlag.REMOVED_ENTITY)) {
             damageEvent.setDamage(0);
             return;
         }
