@@ -69,7 +69,7 @@ public class NMSWorldImpl implements NMSWorld {
 
     @Override
     public void startEntityListen(org.bukkit.World world) {
-        ((CraftWorld) world).getHandle().addIWorldAccess(WorldEntityListener.getInstance());
+        ((CraftWorld) world).getHandle().addIWorldAccess(WorldEntityListener.LISTENER);
     }
 
     @Override
