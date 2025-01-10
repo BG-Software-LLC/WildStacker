@@ -30,11 +30,15 @@ import java.util.Optional;
 @SuppressWarnings("unused")
 public final class ProtocolLibHook {
 
+    @Nullable
     public static final WrappedDataWatcher.Serializer NAME_SERIALIZER = ServerVersion.isLegacy() ?
-            WrappedDataWatcher.Registry.get(String.class) :
+            getSerializer(String.class) :
             WrappedDataWatcher.Registry.getChatComponentSerializer(true);
-    public static final WrappedDataWatcher.Serializer VISIBLE_SERIALIZER =
-            WrappedDataWatcher.Registry.get(Boolean.class);
+    @Nullable
+    public static final WrappedDataWatcher.Serializer VISIBLE_SERIALIZER = getSerializer(Boolean.class);
+
+    private static final Object VISIBLE_NAME_VALUE_TRUE = ServerVersion.isEquals(ServerVersion.v1_8) ? (byte) 1 : true;
+    private static final Object VISIBLE_NAME_VALUE_FALSE = ServerVersion.isEquals(ServerVersion.v1_8) ? (byte) 0 : false;
 
     private static WildStackerPlugin plugin;
     private static boolean registered = false;
@@ -67,6 +71,10 @@ public final class ProtocolLibHook {
         }
 
         return new PacketHandler118();
+    }
+
+    private static WrappedDataWatcher.Serializer getSerializer(Class<?> serializerClass) {
+        return ServerVersion.isEquals(ServerVersion.v1_8) ? null : WrappedDataWatcher.Registry.get(serializerClass);
     }
 
     private static final class CommandsListener implements Listener {
@@ -186,6 +194,17 @@ public final class ProtocolLibHook {
 
     }
 
+    private static void setWatcherObject(WrappedDataWatcher watcher,
+                                         int index,
+                                         @Nullable WrappedDataWatcher.Serializer serializer,
+                                         Object value) {
+        if (serializer == null) {
+            watcher.setObject(index, value);
+        } else {
+            watcher.setObject(index, serializer, value);
+        }
+    }
+
     private static final class PacketHandler118 implements IPacketHandler {
 
         private static final boolean isLegacy = ServerVersion.isLegacy();
@@ -200,16 +219,17 @@ public final class ProtocolLibHook {
             if (entity == null) {
                 watcher = new WrappedDataWatcher();
 
-                watcher.setObject(2, NAME_SERIALIZER, EMPTY_CUSTOM_NAME);
-                watcher.setObject(3, VISIBLE_SERIALIZER, (Object) false);
+                setWatcherObject(watcher, 2, NAME_SERIALIZER, EMPTY_CUSTOM_NAME);
+                setWatcherObject(watcher, 3, VISIBLE_SERIALIZER, VISIBLE_NAME_VALUE_FALSE);
             } else {
                 watcher = new WrappedDataWatcher(entity);
 
                 Object customName = parseCustomName(plugin.getNMSEntities().getCustomName(entity, true));
-                watcher.setObject(2, NAME_SERIALIZER, customName);
+                setWatcherObject(watcher, 2, NAME_SERIALIZER, customName);
 
                 boolean nameVisible = plugin.getNMSEntities().isCustomNameVisible(entity);
-                watcher.setObject(3, VISIBLE_SERIALIZER, (Object) nameVisible);
+                setWatcherObject(watcher, 3, VISIBLE_SERIALIZER,
+                        nameVisible ? VISIBLE_NAME_VALUE_TRUE : VISIBLE_NAME_VALUE_FALSE);
             }
 
             structureModifier.write(0, watcher.getWatchableObjects());
