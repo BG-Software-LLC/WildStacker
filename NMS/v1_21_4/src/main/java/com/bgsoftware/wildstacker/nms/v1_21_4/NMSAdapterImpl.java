@@ -86,7 +86,15 @@ public final class NMSAdapterImpl implements NMSAdapter {
     public Enchantment createGlowEnchantment() {
         Enchantment enchantment = getGlowEnchant();
 
-        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
+        Registry<Enchantment> registry = Registry.ENCHANTMENT;
+        try {
+            if (registry instanceof io.papermc.paper.registry.legacy.DelayedRegistry) {
+                registry = ((io.papermc.paper.registry.legacy.DelayedRegistry) registry).delegate();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(registry);
 
         registryCache.put(enchantment.getKey(), enchantment);
 
