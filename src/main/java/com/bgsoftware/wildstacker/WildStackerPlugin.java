@@ -88,6 +88,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         plugin = this;
 
         DependenciesManager.inject(this);
+        DeathSimulation.injectEntityDamageHandlerList();
 
         // Setting the default locale to English will fix issues related to using upper case in Turkish.
         // https://stackoverflow.com/questions/11063102/using-locales-with-javas-tolowercase-and-touppercase
@@ -198,8 +199,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         log("******** ENABLE DONE ********");
-
-        Bukkit.getScheduler().runTaskLater(plugin, DeathSimulation::injectEntityDamageHandlerList, 20L);
     }
 
     private void loadAPI() {

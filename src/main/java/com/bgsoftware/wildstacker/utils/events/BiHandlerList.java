@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.events;
 
 import com.bgsoftware.common.reflection.ReflectField;
+import com.bgsoftware.wildstacker.WildStackerPlugin;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -11,16 +12,25 @@ import java.util.Collection;
 
 public class BiHandlerList extends HandlerList {
 
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
     private static final ReflectField<ArrayList<HandlerList>> ALL_HANDLERS = new ReflectField<>(
             HandlerList.class, ArrayList.class, "allLists");
 
     private final HandlerList original;
     private Mode mode = Mode.NEW;
-    private boolean freeze = false;
 
     public BiHandlerList(HandlerList original) {
         this.original = original;
         removeHandlerList(original);
+
+        // Copy listeners of WildStacker to this HandlerList
+        for (RegisteredListener registeredListener : original.getRegisteredListeners()) {
+            if (registeredListener.getPlugin() == plugin) {
+                super.register(registeredListener);
+                original.unregister(registeredListener);
+            }
+        }
     }
 
     private static void removeHandlerList(HandlerList handlerList) {
@@ -32,25 +42,19 @@ public class BiHandlerList extends HandlerList {
         this.mode = mode;
     }
 
-    public void freeze() {
-        this.freeze = true;
-    }
-
     @Override
     public synchronized void register(RegisteredListener listener) {
-        if (this.freeze || this.mode == Mode.ORIGINAL) {
-            original.register(listener);
-        } else {
+        if (listener.getPlugin() == plugin || this.mode == Mode.NEW) {
             super.register(listener);
+        } else {
+            original.register(listener);
         }
     }
 
     @Override
     public void registerAll(Collection<RegisteredListener> listeners) {
-        if (this.freeze || this.mode == Mode.ORIGINAL) {
-            original.registerAll(listeners);
-        } else {
-            super.registerAll(listeners);
+        for (RegisteredListener listener : listeners) {
+            register(listener);
         }
     }
 

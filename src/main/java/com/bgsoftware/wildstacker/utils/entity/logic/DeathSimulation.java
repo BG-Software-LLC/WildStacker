@@ -38,7 +38,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -72,15 +71,6 @@ public final class DeathSimulation {
         // Changes HandlerList of EntityDamageEvent to only include WildStacker's listener.
         HandlerList original = EntityDamageEvent.getHandlerList();
         BiHandlerList newHandlerList = new BiHandlerList(original);
-
-        for (RegisteredListener registeredListener : original.getRegisteredListeners()) {
-            if (registeredListener.getPlugin() == plugin) {
-                newHandlerList.register(registeredListener);
-                original.unregister(registeredListener);
-            }
-        }
-
-        newHandlerList.freeze();
         EVENT_DAMAGE_HANDLER_LIST.set(null, newHandlerList);
     }
 
