@@ -79,12 +79,16 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
     @Override
     public Enchantment getGlowEnchant() {
-        return new GlowEnchantment();
+        return GlowEnchantment.createEnchantment();
     }
 
     @Override
     public Enchantment createGlowEnchantment() {
-        Enchantment enchantment = getGlowEnchant();
+        Enchantment enchantment = Registry.ENCHANTMENT.get(GlowEnchantment.GLOW_ENCHANTMENT_KEY);
+        if (enchantment != null)
+            return enchantment;
+
+        enchantment = getGlowEnchant();
 
         Registry<Enchantment> registry = Registry.ENCHANTMENT;
         try {

@@ -13,14 +13,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
+import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.enchantments.CraftEnchantment;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-public class GlowEnchantment extends CraftEnchantment {
+public class GlowEnchantment {
 
     private static final ReflectField<Boolean> REGISTRY_FROZEN = new ReflectField<>(
             MappedRegistry.class, boolean.class, Modifier.PRIVATE, 1);
@@ -42,14 +44,17 @@ public class GlowEnchantment extends CraftEnchantment {
     }
 
     private static final String GLOW_ENCHANTMENT_NAME = "wildstacker_glowing_enchant";
+    public static final NamespacedKey GLOW_ENCHANTMENT_KEY = NamespacedKey.minecraft(GLOW_ENCHANTMENT_NAME);
+
+    private static final HandleType HANDLE_TYPE = findHandleType();
+
+    private static final Object HANDLE = initializeHandle();
 
     @Nullable
-    private static final Holder<Enchantment> HANDLE = initializeHandle();
-
-    @Nullable
-    private static Holder<Enchantment> initializeHandle() {
+    private static Object initializeHandle() {
         Registry<Enchantment> registry = MinecraftServer.getServer().registryAccess()
                 .lookup(Registries.ENCHANTMENT).orElse(null);
+
         if (registry == null)
             return null;
 
@@ -75,13 +80,16 @@ public class GlowEnchantment extends CraftEnchantment {
                 registry.createIntrusiveHolder(handle);
             } catch (Throwable ignored) {
             }
-            holder = Registry.registerForHolder(registry,
-                    ResourceLocation.withDefaultNamespace(GLOW_ENCHANTMENT_NAME), handle);
+            holder = Registry.registerForHolder(registry, ResourceLocation.withDefaultNamespace(GLOW_ENCHANTMENT_NAME), handle);
         } finally {
             freezeRegistry(registry);
         }
 
-        return holder;
+        return switch (HANDLE_TYPE) {
+            case HOLDER -> holder;
+            case RAW -> handle;
+            default -> throw new IllegalStateException("Cannot find valid handle type for enchantments");
+        };
     }
 
     private static void freezeRegistry(Registry<?> registry) {
@@ -115,8 +123,44 @@ public class GlowEnchantment extends CraftEnchantment {
         REGISTRY_ALL_TAGS.set(registry, allTags);
     }
 
-    public GlowEnchantment() {
-        super(HANDLE);
+    private static HandleType findHandleType() {
+        Constructor<?> constructor = CraftEnchantment.class.getConstructors()[0];
+
+        if (constructor.getParameterCount() == 1 && constructor.getParameterTypes()[0] == Holder.class) {
+            return HandleType.HOLDER;
+        } else if (constructor.getParameterCount() == 2 && constructor.getParameterTypes()[0] == NamespacedKey.class &&
+                constructor.getParameterTypes()[1] == Enchantment.class) {
+            return HandleType.RAW;
+        } else {
+            return HandleType.UNKNOWN;
+        }
+    }
+
+    public static CraftEnchantment createEnchantment() {
+        Constructor<?> constructor = CraftEnchantment.class.getConstructors()[0];
+
+        try {
+            return switch (HANDLE_TYPE) {
+                case HOLDER -> (CraftEnchantment) constructor.newInstance(HANDLE);
+                case RAW ->
+                        (CraftEnchantment) constructor.newInstance(NamespacedKey.minecraft(GLOW_ENCHANTMENT_NAME), HANDLE);
+                default -> throw new IllegalStateException("Cannot find valid handle type for enchantments");
+            };
+        } catch (Throwable error) {
+            throw new RuntimeException(error);
+        }
+    }
+
+    private GlowEnchantment() {
+
+    }
+
+    private enum HandleType {
+
+        HOLDER,
+        RAW,
+        UNKNOWN
+
     }
 
 }
