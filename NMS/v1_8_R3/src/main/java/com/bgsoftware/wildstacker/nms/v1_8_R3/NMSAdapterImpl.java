@@ -31,12 +31,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.UUID;
 
 @SuppressWarnings({"unused"})
 public final class NMSAdapterImpl implements NMSAdapter {
+
+    private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
@@ -69,38 +72,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Enchantment getGlowEnchant() {
-        return new Enchantment(101) {
-            @Override
-            public String getName() {
-                return "WildStackerGlow";
-            }
-
-            @Override
-            public int getMaxLevel() {
-                return 1;
-            }
-
-            @Override
-            public int getStartLevel() {
-                return 0;
-            }
-
-            @Override
-            public EnchantmentTarget getItemTarget() {
-                return null;
-            }
-
-            @Override
-            public boolean conflictsWith(Enchantment enchantment) {
-                return false;
-            }
-
-            @Override
-            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
-                return true;
-            }
-        };
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.addEnchant(GLOW_ENCHANT, 1, true);
     }
 
     @Override
@@ -273,4 +246,58 @@ public final class NMSAdapterImpl implements NMSAdapter {
     public void loadItem(StackedItem stackedItem) {
         dataSerializer.loadItem(stackedItem);
     }
+
+    private static Enchantment initializeGlowEnchantment() {
+        int enchantId = 100;
+        while (Enchantment.getById(enchantId) != null)
+            ++enchantId;
+
+        Enchantment glowEnchant = new Enchantment(enchantId) {
+            @Override
+            public String getName() {
+                return "WildStackerGlow";
+            }
+
+            @Override
+            public int getMaxLevel() {
+                return 1;
+            }
+
+            @Override
+            public int getStartLevel() {
+                return 0;
+            }
+
+            @Override
+            public EnchantmentTarget getItemTarget() {
+                return null;
+            }
+
+            @Override
+            public boolean conflictsWith(Enchantment enchantment) {
+                return false;
+            }
+
+            @Override
+            public boolean canEnchantItem(org.bukkit.inventory.ItemStack itemStack) {
+                return true;
+            }
+        };
+
+        try {
+            Field field = Enchantment.class.getDeclaredField("acceptingNew");
+            field.setAccessible(true);
+            field.set(null, true);
+            field.setAccessible(false);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            Enchantment.registerEnchantment(glowEnchant);
+        } catch (Exception ignored) {
+        }
+
+        return glowEnchant;
+    }
+
 }

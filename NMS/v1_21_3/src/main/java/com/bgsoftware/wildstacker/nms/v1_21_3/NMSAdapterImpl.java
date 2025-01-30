@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.nms.v1_21_3;
 
-import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -9,7 +8,6 @@ import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
 import com.bgsoftware.wildstacker.nms.v1_20_3.entity.NMSEntityEquipmentImpl;
-import com.bgsoftware.wildstacker.nms.v1_21_3.enchantment.GlowEnchantment;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -23,11 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,7 +36,6 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.Map;
 import java.util.Optional;
 
 public final class NMSAdapterImpl implements NMSAdapter {
@@ -50,9 +44,6 @@ public final class NMSAdapterImpl implements NMSAdapter {
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
             "Items", "ChestedHorse", "DecorItem", "Leash", "leash"
     };
-
-    private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
-            new ReflectField<>(CraftRegistry.class, Map.class, "cache");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -78,19 +69,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Enchantment getGlowEnchant() {
-        return new GlowEnchantment();
-    }
-
-    @Override
-    public Enchantment createGlowEnchantment() {
-        Enchantment enchantment = getGlowEnchant();
-
-        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
-
-        registryCache.put(enchantment.getKey(), enchantment);
-
-        return enchantment;
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.setEnchantmentGlintOverride(true);
     }
 
     @Override

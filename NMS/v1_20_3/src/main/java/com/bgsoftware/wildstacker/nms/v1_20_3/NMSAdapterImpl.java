@@ -41,13 +41,15 @@ import java.util.UUID;
 
 public final class NMSAdapterImpl implements NMSAdapter {
 
-    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
             "Items", "ChestedHorse", "DecorItem",
     };
 
     private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
             new ReflectField<>(CraftRegistry.class, Map.class, "cache");
+
+    private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -73,23 +75,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Enchantment getGlowEnchant() {
-        try {
-            return new PaperGlowEnchantment("wildstacker_glowing_enchant");
-        } catch (Throwable error) {
-            return new SpigotGlowEnchantment("wildstacker_glowing_enchant");
-        }
-    }
-
-    @Override
-    public Enchantment createGlowEnchantment() {
-        Enchantment enchantment = getGlowEnchant();
-
-        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
-
-        registryCache.put(enchantment.getKey(), enchantment);
-
-        return enchantment;
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.addEnchant(GLOW_ENCHANT, 1, true);
     }
 
     @Override
@@ -293,6 +280,22 @@ public final class NMSAdapterImpl implements NMSAdapter {
             Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
             stackedItem.setStackAmount(stackAmount, false);
         }
+    }
+
+    private static Enchantment initializeGlowEnchantment() {
+        Enchantment glowEnchant;
+
+        try {
+            glowEnchant = new PaperGlowEnchantment("wildstacker_glowing_enchant");
+        } catch (Throwable error) {
+            glowEnchant = new SpigotGlowEnchantment("wildstacker_glowing_enchant");
+        }
+
+        Map<NamespacedKey, Enchantment> registryCache = REGISTRY_CACHE.get(Registry.ENCHANTMENT);
+
+        registryCache.put(glowEnchant.getKey(), glowEnchant);
+
+        return glowEnchant;
     }
 
 }

@@ -37,12 +37,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.UUID;
 
 public final class NMSAdapterImpl implements NMSAdapter {
 
-    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[] {
+    private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
+
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
             "Items", "ChestedHorse", "DecorItem",
     };
@@ -68,12 +71,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Enchantment getGlowEnchant() {
-        try {
-            return new PaperGlowEnchantment("wildstacker_glowing_enchant");
-        } catch (Throwable error) {
-            return new SpigotGlowEnchantment("wildstacker_glowing_enchant");
-        }
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.addEnchant(GLOW_ENCHANT, 1, true);
     }
 
     @Override
@@ -332,6 +331,31 @@ public final class NMSAdapterImpl implements NMSAdapter {
                 }
             }
         }
+    }
+
+    private static Enchantment initializeGlowEnchantment() {
+        Enchantment glowEnchant;
+
+        try {
+            glowEnchant = new PaperGlowEnchantment("wildstacker_glowing_enchant");
+        } catch (Throwable error) {
+            glowEnchant = new SpigotGlowEnchantment("wildstacker_glowing_enchant");
+        }
+
+        try {
+            Field field = Enchantment.class.getDeclaredField("acceptingNew");
+            field.setAccessible(true);
+            field.set(null, true);
+            field.setAccessible(false);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            Enchantment.registerEnchantment(glowEnchant);
+        } catch (Exception ignored) {
+        }
+
+        return glowEnchant;
     }
 
 }

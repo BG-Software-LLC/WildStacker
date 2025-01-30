@@ -4,7 +4,6 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.ChatColor;
@@ -13,13 +12,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.sql.Ref;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -214,9 +211,7 @@ public class LootItem extends FilteredLoot {
         }
 
         if ((Boolean) jsonObject.getOrDefault("glow", false)) {
-            Enchantment glowEnchant = GlowEnchantment.getGlowEnchant();
-            if (glowEnchant != null)
-                itemMeta.addEnchant(glowEnchant, 1, true);
+            plugin.getNMSAdapter().makeItemGlow(itemMeta);
         }
 
         if (itemStack.getType() == TIPPED_ARROW && jsonObject.containsKey("arrow-effect") &&

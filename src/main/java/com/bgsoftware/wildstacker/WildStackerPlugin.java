@@ -39,7 +39,6 @@ import com.bgsoftware.wildstacker.nms.NMSWorld;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
-import com.bgsoftware.wildstacker.utils.items.GlowEnchantment;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bstats.bukkit.Metrics;
@@ -150,8 +149,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         }
 
         log("******** ENABLE START ********");
-
-        GlowEnchantment.registerEnchantment(this);
 
         dataHandler = new DataHandler(this);
         systemManager = new SystemHandler(this);

@@ -1,6 +1,5 @@
 package com.bgsoftware.wildstacker.nms.v1_20_4;
 
-import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -22,10 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,7 +35,6 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
-import java.util.Map;
 import java.util.Optional;
 
 public final class NMSAdapterImpl implements NMSAdapter {
@@ -47,9 +43,6 @@ public final class NMSAdapterImpl implements NMSAdapter {
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
             "Items", "ChestedHorse", "DecorItem", "Leash", "leash"
     };
-
-    private static final ReflectField<Map<NamespacedKey, Enchantment>> REGISTRY_CACHE =
-            new ReflectField<>(CraftRegistry.class, Map.class, "cache");
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -75,13 +68,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Enchantment getGlowEnchant() {
-        return null;
-    }
-
-    @Override
-    public Enchantment createGlowEnchantment() {
-        return null;
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.setEnchantmentGlintOverride(true);
     }
 
     @Override
