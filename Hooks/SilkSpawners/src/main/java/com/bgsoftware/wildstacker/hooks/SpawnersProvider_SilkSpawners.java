@@ -49,9 +49,13 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
             String entityID = silkUtil.getDisplayNameToMobID().get(entityType.getName());
             itemStack = silkUtil.newSpawnerItem(entityID, silkUtil.getCustomSpawnerName(entityID), amount, false);
         } catch (Throwable ex) {
-            //noinspection deprecation
-            short entityID = entityType.getTypeId();
-            itemStack = newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
+            try {
+                //noinspection deprecation
+                short entityID = entityType.getTypeId();
+                itemStack = newSpawnerItem(entityID, getCreatureName(entityID), amount, false);
+            } catch (Throwable err2) {
+                throw new RuntimeException(ex);
+            }
         }
 
         return spawnerUpgrade == null || spawnerUpgrade.isDefault() ? itemStack :
