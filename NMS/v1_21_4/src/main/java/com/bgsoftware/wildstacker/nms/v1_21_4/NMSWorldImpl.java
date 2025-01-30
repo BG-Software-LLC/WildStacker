@@ -88,7 +88,7 @@ public class NMSWorldImpl implements NMSWorld {
         World world = location.getWorld();
         if (world != null) {
             ServerLevel serverLevel = ((CraftWorld) world).getHandle();
-            serverLevel.sendParticles(null,
+            serverLevel.sendParticlesSource(null,
                     CraftParticle.createParticleParam(Particle.valueOf(particle), null),
                     false, false, location.getBlockX(), location.getBlockY(), location.getBlockZ(),
                     count, offsetX, offsetY, offsetZ, extra);
