@@ -4,8 +4,11 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import de.dustplanet.silkspawners.SilkSpawners;
 import de.dustplanet.util.SilkUtil;
 import org.bukkit.Location;
@@ -108,7 +111,14 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
 
     @Override
     public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack) {
+        Block block = creatureSpawner.getBlock();
 
+        Executor.sync(() -> {
+            if (block.getType() != Materials.SPAWNER.toBukkitType())
+                return;
+
+            WStackedSpawner.of(block).updateName();
+        }, 1L);
     }
 
     @Override
