@@ -201,7 +201,10 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
     }
 
     private ResourceLocation getMobName() {
-        String id = getSpawner().nextSpawnData.getEntityToSpawn().getString("id");
+        SpawnData spawnData = getSpawner().nextSpawnData;
+        if (spawnData == null)
+            return null;
+        String id = spawnData.getEntityToSpawn().getString("id");
         return StringUtil.isNullOrEmpty(id) ? null : new ResourceLocation(id);
     }
 
