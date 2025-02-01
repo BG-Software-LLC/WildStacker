@@ -44,7 +44,7 @@ public class BiHandlerList extends HandlerList {
 
     @Override
     public synchronized void register(RegisteredListener listener) {
-        if (listener.getPlugin() == plugin || this.mode == Mode.NEW) {
+        if (listener.getPlugin() == plugin) {
             super.register(listener);
         } else {
             original.register(listener);
