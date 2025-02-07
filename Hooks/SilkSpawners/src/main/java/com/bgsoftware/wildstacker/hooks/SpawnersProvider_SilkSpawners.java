@@ -77,6 +77,9 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
         if (stackedSpawner.getStackAmount() <= brokenAmount)
             brokenAmount = brokenAmount - 1;
 
+        if (brokenAmount <= 0)
+            return;
+
         Object entityId = getSpawnerEntityID(stackedSpawner.getSpawner());
         int randomNumber = ThreadLocalRandom.current().nextInt(100), dropChance;
 
