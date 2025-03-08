@@ -712,21 +712,28 @@ public final class NMSEntitiesImpl implements NMSEntities {
                                    org.bukkit.entity.LivingEntity bukkitLivingEntity, double damage) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         ServerPlayer serverPlayer = ((CraftPlayer) attacker).getHandle();
+        ServerLevel serverLevel = serverPlayer.serverLevel();
         ItemStack itemStack = CraftItemStack.asNMSCopy(usedItem);
 
         // Making sure the player used a sword.
         if (!(itemStack.getItem() instanceof SwordItem))
             return;
 
-        float sweepDamage = 1.0F + (float) serverPlayer.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * (float) damage;
         List<LivingEntity> nearbyEntities = livingEntity.level().getEntitiesOfClass(LivingEntity.class,
                 livingEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D));
+
+        float attackStrengthScale = serverPlayer.getAttackStrengthScale(0.5F);
+        float baseSweepDamage = 1.0F + (float) serverPlayer.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * (float) damage;
 
         for (LivingEntity nearby : nearbyEntities) {
             if (nearby != livingEntity && nearby != serverPlayer && !serverPlayer.skipAttackInteraction(nearby) &&
                     (!(nearby instanceof ArmorStand armorStand) || armorStand.isMarker()) &&
                     serverPlayer.distanceToSqr(nearby) < 9.0D) {
-                nearby.hurt(nearby.damageSources().playerAttack(serverPlayer).sweep(), sweepDamage);
+                DamageSource damageSource = nearby.damageSources().playerAttack(serverPlayer);
+                float finalSweepDamage = EnchantmentHelper.modifyDamage(serverLevel, itemStack, nearby, damageSource, baseSweepDamage)
+                        * attackStrengthScale;
+                nearby.lastDamageCancelled = false;
+                nearby.hurtServer(serverLevel, damageSource.knownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK), finalSweepDamage);
             }
         }
     }
