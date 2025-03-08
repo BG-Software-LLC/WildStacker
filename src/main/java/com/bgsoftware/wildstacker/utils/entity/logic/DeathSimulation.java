@@ -13,7 +13,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityDamageData;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.events.BiHandlerList;
+import com.bgsoftware.wildstacker.utils.events.HandlerListWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -70,7 +70,7 @@ public final class DeathSimulation {
     public static void injectEntityDamageHandlerList() {
         // Changes HandlerList of EntityDamageEvent to only include WildStacker's listener.
         HandlerList original = EntityDamageEvent.getHandlerList();
-        BiHandlerList newHandlerList = new BiHandlerList(original);
+        HandlerListWrapper newHandlerList = new HandlerListWrapper(original);
         EVENT_DAMAGE_HANDLER_LIST.set(null, newHandlerList);
     }
 

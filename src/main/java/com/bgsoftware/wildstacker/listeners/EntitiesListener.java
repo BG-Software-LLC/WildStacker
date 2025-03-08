@@ -17,7 +17,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.FutureEntityTracker;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
-import com.bgsoftware.wildstacker.utils.events.BiHandlerList;
+import com.bgsoftware.wildstacker.utils.events.HandlerListWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -212,13 +212,13 @@ public final class EntitiesListener implements Listener {
     }
 
     private static void recallDamageEvent(EntityDamageEvent damageEvent) {
-        BiHandlerList entityDamageHandlerList = (BiHandlerList) EntityDamageEvent.getHandlerList();
+        HandlerListWrapper entityDamageHandlerList = (HandlerListWrapper) EntityDamageEvent.getHandlerList();
         try {
-            entityDamageHandlerList.setMode(BiHandlerList.Mode.ORIGINAL);
+            entityDamageHandlerList.setMode(HandlerListWrapper.Mode.ORIGINAL);
             // Call the event again.
             Bukkit.getPluginManager().callEvent(damageEvent);
         } finally {
-            entityDamageHandlerList.setMode(BiHandlerList.Mode.NEW);
+            entityDamageHandlerList.setMode(HandlerListWrapper.Mode.NEW);
         }
     }
 
