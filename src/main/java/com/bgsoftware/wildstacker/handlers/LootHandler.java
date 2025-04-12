@@ -112,7 +112,7 @@ public final class LootHandler {
         if (SUPPORT_BABY_1_22)
             saveLootTable("dolphin_baby");
         saveLootTable("donkey", "donkey_baby");
-        saveLootTable(EntityTypes.DROWNED, "drowned");
+        saveLootTable(EntityTypes.DROWNED, "drowned", "drowned_baby");
         saveLootTable("elder_guardian");
         saveLootTable("ender_dragon");
         saveLootTable("enderman");
