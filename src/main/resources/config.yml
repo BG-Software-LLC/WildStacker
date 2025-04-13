@@ -252,6 +252,8 @@ entities:
     CAN_BREED: true
     CAT_COLLAR_COLOR: true
     CAT_TYPE: true
+    CHICKEN_TYPE: true
+    COW_TYPE: true
     CREEPER_CHARGED: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false
@@ -278,6 +280,7 @@ entities:
     PARROT_TYPE: true
     PHANTOM_SIZE: true
     PIG_SADDLE: true
+    PIG_TYPE: true
     PUFFERFISH_STATE: true
     RABBIT_TYPE: true
     SALMON_SIZE: true
