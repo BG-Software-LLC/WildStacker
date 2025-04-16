@@ -36,9 +36,8 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(1);
 
-        if (spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {
-            itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
-        }
+        spawnerUpgrade = spawnerUpgrade != null ? spawnerUpgrade : plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+        itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
 
         int perStackAmount = amount;
 
