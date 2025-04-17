@@ -104,12 +104,15 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
-                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+            SpawnerUpgrade spawnerUpgrade = null;
 
-            if (spawnerUpgrade == null) {
-                Locale.INVALID_UPGRADE.send(sender, args[5]);
-                return;
+            if (args.length == 6) {
+                spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(args[5]);
+
+                if (spawnerUpgrade == null) {
+                    Locale.INVALID_UPGRADE.send(sender, args[5]);
+                    return;
+                }
             }
 
             Material eggType = Materials.getSpawnEgg(entityType);
@@ -125,7 +128,7 @@ public final class CommandGive implements ICommand {
             }
 
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-            if (!spawnerUpgrade.isDefault())
+            if (spawnerUpgrade != null && !spawnerUpgrade.isDefault())
                 itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
         } else if (args[2].equalsIgnoreCase("spawner")) {
             EntityType entityType;
@@ -138,12 +141,15 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            SpawnerUpgrade spawnerUpgrade = args.length == 6 ? plugin.getUpgradesManager().getUpgrade(args[5]) :
-                    plugin.getUpgradesManager().getDefaultUpgrade(entityType);
+            SpawnerUpgrade spawnerUpgrade = null;
 
-            if (spawnerUpgrade == null) {
-                Locale.INVALID_UPGRADE.send(sender, args[5]);
-                return;
+            if (args.length == 6) {
+                spawnerUpgrade = plugin.getUpgradesManager().getUpgrade(args[5]);
+
+                if (spawnerUpgrade == null) {
+                    Locale.INVALID_UPGRADE.send(sender, args[5]);
+                    return;
+                }
             }
 
             itemStack = plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType,

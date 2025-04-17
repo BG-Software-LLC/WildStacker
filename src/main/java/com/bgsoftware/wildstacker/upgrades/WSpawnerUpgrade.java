@@ -58,7 +58,7 @@ public final class WSpawnerUpgrade implements SpawnerUpgrade {
 
     @Override
     public boolean isDefault() {
-        return id == 0;
+        return id <= 0;
     }
 
     @Override
