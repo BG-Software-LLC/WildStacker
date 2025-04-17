@@ -44,22 +44,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiPredicate;
-import java.util.function.Supplier;
 
 public final class NMSSpawnersImpl implements NMSSpawners {
 
-    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED = new ReflectField<>(
-            Level.class, List.class, Modifier.PROTECTED | Modifier.FINAL, 1);
-    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC = new ReflectField<>(
-            Level.class, List.class, Modifier.PUBLIC | Modifier.FINAL, 1);
-    private static final boolean isSparklyPaper = ((Supplier<Boolean>) () -> {
-        try {
-            Class.forName("net.sparklypower.sparklypaper.BlockEntityTickersList");
-            return true;
-        } catch (ClassNotFoundException error) {
-            return false;
-        }
-    }).get();
+    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS =
+            initializeLevelBlockEntityTickersField();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -335,11 +324,20 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     private static List<TickingBlockEntity> getBlockEntityTickers(Level level) {
-        if (LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.isValid())
-            return LEVEL_BLOCK_ENTITY_TICKERS_PROTECTED.get(level);
-        if (isSparklyPaper && LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC.isValid())
-            return LEVEL_BLOCK_ENTITY_TICKERS_PUBLIC.get(level);
+        if (LEVEL_BLOCK_ENTITY_TICKERS.isValid())
+            return LEVEL_BLOCK_ENTITY_TICKERS.get(level);
+
         return level.blockEntityTickers;
+    }
+
+    private static ReflectField<List<TickingBlockEntity>> initializeLevelBlockEntityTickersField() {
+        ReflectField<List<TickingBlockEntity>> field = new ReflectField<>(
+                Level.class, List.class, Modifier.PROTECTED | Modifier.FINAL, 1);
+
+        if (!field.isValid())
+            field = new ReflectField<>(Level.class, List.class, Modifier.PUBLIC | Modifier.FINAL, 1);
+
+        return field;
     }
 
 }
