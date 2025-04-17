@@ -180,21 +180,21 @@ public final class NMSAdapterImpl implements NMSAdapter {
         if (compoundTag == null || !compoundTag.contains(key))
             return valueType.cast(def);
         else if (valueType.equals(Boolean.class))
-            return valueType.cast(compoundTag.getBoolean(key));
+            return valueType.cast(compoundTag.getBooleanOr(key, false));
         else if (valueType.equals(Integer.class))
-            return valueType.cast(compoundTag.getInt(key));
+            return valueType.cast(compoundTag.getIntOr(key, 0));
         else if (valueType.equals(String.class))
-            return valueType.cast(compoundTag.getString(key));
+            return valueType.cast(compoundTag.getStringOr(key, ""));
         else if (valueType.equals(Double.class))
-            return valueType.cast(compoundTag.getDouble(key));
+            return valueType.cast(compoundTag.getDoubleOr(key, 0D));
         else if (valueType.equals(Short.class))
-            return valueType.cast(compoundTag.getShort(key));
+            return valueType.cast(compoundTag.getShortOr(key, (short) 0));
         else if (valueType.equals(Byte.class))
-            return valueType.cast(compoundTag.getByte(key));
+            return valueType.cast(compoundTag.getByteOr(key, (byte) 0));
         else if (valueType.equals(Float.class))
-            return valueType.cast(compoundTag.getFloat(key));
+            return valueType.cast(compoundTag.getFloatOr(key, 0f));
         else if (valueType.equals(Long.class))
-            return valueType.cast(compoundTag.getLong(key));
+            return valueType.cast(compoundTag.getLongOr(key, 0L));
 
         throw new IllegalArgumentException("Cannot find nbt class type: " + valueType);
     }
