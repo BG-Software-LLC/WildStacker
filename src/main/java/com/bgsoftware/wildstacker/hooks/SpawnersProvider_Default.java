@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +34,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, @Nullable SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = Materials.SPAWNER.toBukkitItem(1);
 
         if (spawnerUpgrade != null && !spawnerUpgrade.isDefault()) {

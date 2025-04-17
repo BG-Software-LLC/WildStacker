@@ -8,9 +8,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
+
 public interface SpawnersProvider {
 
-    ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade);
+    ItemStack getSpawnerItem(EntityType entityType, int amount, @Nullable SpawnerUpgrade spawnerUpgrade);
 
     EntityType getSpawnerType(ItemStack itemStack);
 

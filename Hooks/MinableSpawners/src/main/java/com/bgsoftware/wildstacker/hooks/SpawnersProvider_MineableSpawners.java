@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -86,7 +87,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, @Nullable SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack = MineableSpawners.getApi().getSpawnerFromEntityType(entityType);
         itemStack.setAmount(amount);
         return spawnerUpgrade == null || spawnerUpgrade.isDefault() ? itemStack :

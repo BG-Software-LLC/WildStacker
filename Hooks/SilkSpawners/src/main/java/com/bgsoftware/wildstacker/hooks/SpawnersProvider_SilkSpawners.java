@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -45,7 +46,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     }
 
     @Override
-    public ItemStack getSpawnerItem(EntityType entityType, int amount, SpawnerUpgrade spawnerUpgrade) {
+    public ItemStack getSpawnerItem(EntityType entityType, int amount, @Nullable SpawnerUpgrade spawnerUpgrade) {
         ItemStack itemStack;
         try {
             //noinspection deprecation
