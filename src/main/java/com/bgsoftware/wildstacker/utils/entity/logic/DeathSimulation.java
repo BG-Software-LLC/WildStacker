@@ -52,8 +52,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class DeathSimulation {
 
-    private static final ReflectField<HandlerList> EVENT_DAMAGE_HANDLER_LIST = new ReflectField<HandlerList>(
-            EntityDamageEvent.class, HandlerList.class, "handlers").removeFinal();
+    private static final ReflectField<HandlerList> EVENT_DAMAGE_HANDLER_LIST = initializeEntityDamageHandlerListField();
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -420,6 +419,18 @@ public final class DeathSimulation {
         List<ItemStack> toReturn = new ArrayList<>(list2);
         toReturn.removeAll(list1);
         return toReturn;
+    }
+
+    private static ReflectField<HandlerList> initializeEntityDamageHandlerListField() {
+        ReflectField<HandlerList> field = new ReflectField<>(
+                EntityDamageEvent.class, HandlerList.class, "handlers");
+
+        if(!field.isValid()) {
+            field = new ReflectField<>(
+                    EntityDamageEvent.class, HandlerList.class, "HANDLER_LIST");
+        }
+
+        return field.removeFinal();
     }
 
 }
