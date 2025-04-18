@@ -98,6 +98,8 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         shouldEnable = loadNMSAdapter();
         loadAPI();
 
+        this.nmsAdapter.loadLegacy();
+
         if (!shouldEnable)
             log("&cThere was an error while loading the plugin.");
     }

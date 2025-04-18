@@ -10,6 +10,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public interface NMSAdapter {
 
+    default void loadLegacy() {
+
+    }
+
     INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment);
 
     boolean shouldArmorBeDamaged(ItemStack itemStack);

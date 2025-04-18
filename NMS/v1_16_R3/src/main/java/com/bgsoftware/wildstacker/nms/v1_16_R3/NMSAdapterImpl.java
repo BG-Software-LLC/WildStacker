@@ -19,10 +19,12 @@ import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_16_R3.NBTReadLimiter;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import net.minecraft.server.v1_16_R3.NBTTagList;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_16_R3.legacy.CraftLegacy;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -57,6 +59,12 @@ public final class NMSAdapterImpl implements NMSAdapter {
             SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause"),
             NAME_TAG = new NamespacedKey(plugin, "nameTag"),
             UPGRADE = new NamespacedKey(plugin, "upgrade");
+
+    @Override
+    public void loadLegacy() {
+        // Load legacy by accessing the CraftLegacy class.
+        CraftLegacy.fromLegacy(Material.ACACIA_BOAT);
+    }
 
     @Override
     public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack itemStack) {

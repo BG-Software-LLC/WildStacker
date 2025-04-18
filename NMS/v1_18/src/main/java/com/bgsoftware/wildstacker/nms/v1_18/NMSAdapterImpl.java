@@ -18,9 +18,11 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R2.legacy.CraftLegacy;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
@@ -52,6 +54,12 @@ public final class NMSAdapterImpl implements NMSAdapter {
     private static final NamespacedKey SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause");
     private static final NamespacedKey NAME_TAG = new NamespacedKey(plugin, "nameTag");
     private static final NamespacedKey UPGRADE = new NamespacedKey(plugin, "upgrade");
+
+    @Override
+    public void loadLegacy() {
+        // Load legacy by accessing the CraftLegacy class.
+        CraftLegacy.fromLegacy(Material.ACACIA_BOAT);
+    }
 
     @Override
     public INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment) {
