@@ -193,7 +193,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (superResult != StackCheckResult.SUCCESS)
             return superResult;
 
-        StackCheckResult similarResult = EntityUtils.areSimilar(object, ((StackedEntity) stackedObject).getLivingEntity());
+        StackCheckResult similarResult = EntityUtils.areSimilar(this, ((StackedEntity) stackedObject));
 
         if (similarResult != StackCheckResult.SUCCESS)
             return similarResult;

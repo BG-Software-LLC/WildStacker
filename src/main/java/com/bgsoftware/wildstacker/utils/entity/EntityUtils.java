@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -203,10 +204,17 @@ public final class EntityUtils {
     }
 
     @SuppressWarnings("all")
-    public static StackCheckResult areSimilar(LivingEntity en1, LivingEntity en2) {
+    public static StackCheckResult areSimilar(StackedEntity stackedEntity1, StackedEntity stackedEntity2) {
+        LivingEntity en1 = stackedEntity1.getLivingEntity();
+        LivingEntity en2 = stackedEntity2.getLivingEntity();
+
         if (en1.getType() != en2.getType()) {
             return StackCheckResult.NOT_SIMILAR;
         }
+
+        // Demo entities only need to be of the same type to considered being similar
+        if (stackedEntity1.hasFlag(EntityFlag.DEMO_ENTITY) || stackedEntity2.hasFlag(EntityFlag.DEMO_ENTITY))
+            return StackCheckResult.SUCCESS;
 
         StackCheckResult customSimilarityResult = plugin.getProviders().areSimilar(en1, en2);
         if (customSimilarityResult != StackCheckResult.SUCCESS) {
