@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
@@ -24,7 +25,6 @@ import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
@@ -101,7 +101,7 @@ public final class SpawnersListener implements Listener {
         if (player.hasPermission("wildstacker.charge.bypass")) {
             amountToCharge = 0;
         } else {
-            Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersBreakCharge
+            Pair<Double, Boolean> chargeInfo = plugin.getSettings().getSpawners().getBreakCharge()
                     .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
             amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
         }
@@ -136,7 +136,7 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled || e.getBlockPlaced().getType() != Materials.SPAWNER.toBukkitType())
+        if (!plugin.getSettings().getSpawners().isEnabled() || e.getBlockPlaced().getType() != Materials.SPAWNER.toBukkitType())
             return;
 
         if (!alreadySpawnersPlacedPlayers.add(e.getPlayer().getUniqueId())) {
@@ -175,7 +175,7 @@ public final class SpawnersListener implements Listener {
 
             int spawnerItemAmount = ItemUtils.getSpawnerItemAmount(itemInHand);
 
-            if (plugin.getSettings().spawnersPlacementPermission && !e.getPlayer().hasPermission("wildstacker.place.*") &&
+            if (plugin.getSettings().getSpawners().hasPlacementPermission() && !e.getPlayer().hasPermission("wildstacker.place.*") &&
                     !e.getPlayer().hasPermission("wildstacker.place." + spawnerType.name().toLowerCase())) {
                 Locale.SPAWNER_PLACE_BLOCKED.send(e.getPlayer(), "wildstacker.place." + spawnerType.name().toLowerCase());
                 e.setCancelled(true);
@@ -190,7 +190,7 @@ public final class SpawnersListener implements Listener {
             boolean stackPermission = e.getPlayer().hasPermission("wildstacker.stack.*") ||
                     e.getPlayer().hasPermission("wildstacker.stack." + spawnerType.name().toLowerCase());
 
-            if (stackPermission && e.getPlayer().isSneaking() && plugin.getSettings().spawnersShiftPlaceStack) {
+            if (stackPermission && e.getPlayer().isSneaking() && plugin.getSettings().getSpawners().isShiftPlaceStackEnabled()) {
                 replaceAir = true;
                 spawnerItemAmount *= itemInHand.getAmount();
             }
@@ -212,7 +212,7 @@ public final class SpawnersListener implements Listener {
             if (e.getPlayer().hasPermission("wildstacker.charge.bypass")) {
                 amountToCharge = 0;
             } else {
-                Pair<Double, Boolean> chargeInfo = plugin.getSettings().spawnersPlaceCharge
+                Pair<Double, Boolean> chargeInfo = plugin.getSettings().getSpawners().getPlaceCharge()
                         .getOrDefault(spawnerType, new Pair<>(0.0, false));
                 amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
             }
@@ -241,7 +241,7 @@ public final class SpawnersListener implements Listener {
                 }
 
                 //Next Spawner Placement
-                if (!plugin.getSettings().nextSpawnerPlacement && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
+                if (!plugin.getSettings().getSpawners().isNextSpawnerPlacementEnabled() && !e.getPlayer().hasPermission("wildstacker.nextplace")) {
                     for (BlockFace blockFace : blockFaces) {
                         if (e.getBlockPlaced().getRelative(blockFace).getType() == Materials.SPAWNER.toBukkitType()) {
                             Locale.NEXT_SPAWNER_PLACEMENT.send(e.getPlayer());
@@ -252,7 +252,7 @@ public final class SpawnersListener implements Listener {
                     }
                 }
 
-                if (plugin.getSettings().onlyOneSpawner && !stackedSpawner.getNearbySpawners().isEmpty()) {
+                if (plugin.getSettings().getSpawners().isOnlyOneSpawnerEnabled() && !stackedSpawner.getNearbySpawners().isEmpty()) {
                     Locale.ONLY_ONE_SPAWNER.send(e.getPlayer());
                     e.setCancelled(true);
                     stackedSpawner.remove();
@@ -309,7 +309,7 @@ public final class SpawnersListener implements Listener {
     private void finishSpawnerPlace(Player player, StackedSpawner stackedSpawner, double amountToCharge,
                                     boolean replaceAir, EquipmentSlot usedHand, ItemStack limitItem,
                                     EntityType spawnerType, int spawnerItemAmount) {
-        if (plugin.getSettings().spawnersOverrideEnabled)
+        if (plugin.getSettings().getSpawners().isOverrideEnabled())
             plugin.getNMSSpawners().updateStackedSpawner(stackedSpawner);
 
         if (amountToCharge > 0)
@@ -330,7 +330,7 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled || e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
+        if (!plugin.getSettings().getSpawners().isEnabled() || e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlock());
@@ -338,14 +338,14 @@ public final class SpawnersListener implements Listener {
 
         e.setCancelled(true);
 
-        if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().spawnersMineRequireSilk &&
+        if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().getSpawners().isMineRequireSilk() &&
                 !ItemUtils.isPickaxeAndHasSilkTouch(e.getPlayer().getItemInHand())) {
             Locale.SPAWNER_BREAK_WITHOUT_SILK.send(e.getPlayer());
             return;
         }
 
         int originalAmount = stackedSpawner.getStackAmount();
-        int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().shiftGetWholeSpawnerStack ? originalAmount : 1;
+        int stackAmount = e.getPlayer().isSneaking() && plugin.getSettings().getSpawners().isShiftGetWholeStackEnabled() ? originalAmount : 1;
 
         handleSpawnerBreak(plugin, stackedSpawner, stackAmount, e.getPlayer(), false);
     }
@@ -353,7 +353,7 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled ||
+        if (!plugin.getSettings().getSpawners().isEnabled() ||
                 EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
             return;
 
@@ -380,15 +380,15 @@ public final class SpawnersListener implements Listener {
             StackedSpawner stackedSpawner = WStackedSpawner.of(block);
             CreatureSpawner creatureSpawner = (CreatureSpawner) block.getState();
 
-            int breakAmount = plugin.getSettings().explosionsBreakPercentage == -1 ? 1 :
-                    (int) Math.round((plugin.getSettings().explosionsBreakPercentage / 100.0) * stackedSpawner.getStackAmount());
+            int breakAmount = plugin.getSettings().getSpawners().getExplosionBreakChance() == -1 ? 1 :
+                    (int) Math.round((plugin.getSettings().getSpawners().getExplosionBreakChance() / 100.0) * stackedSpawner.getStackAmount());
             // Should fix issues with amount-percentage being below 100 on low stack sizes.
-            breakAmount = Math.max(breakAmount, plugin.getSettings().explosionsBreakMinimum);
+            breakAmount = Math.max(breakAmount, plugin.getSettings().getSpawners().getExplosionBreakMinimum());
 
             if (stackedSpawner.runUnstack(breakAmount, e.getEntity()) == UnstackResult.SUCCESS) {
-                int dropAmount = (int) Math.round((plugin.getSettings().explosionsAmountPercentage / 100.0) * breakAmount);
+                int dropAmount = (int) Math.round((plugin.getSettings().getSpawners().getExplosionAmountPercentage() / 100.0) * breakAmount);
                 // Should fix issues with amount-percentage being below 100 on low stack sizes.
-                dropAmount = Math.max(dropAmount, plugin.getSettings().explosionsAmountMinimum);
+                dropAmount = Math.max(dropAmount, plugin.getSettings().getSpawners().getExplosionAmountMinimum());
 
                 plugin.getProviders().getSpawnersProvider().handleSpawnerExplode(stackedSpawner,
                         e.getEntity(), sourcePlayer, dropAmount);
@@ -407,14 +407,14 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onExplodableLight(PlayerInteractEntityEvent e) {
-        if (plugin.getSettings().explosionsDropToInventory && e.getRightClicked() instanceof Creeper &&
+        if (plugin.getSettings().getSpawners().isExplosionDropToInventoryEnabled() && e.getRightClicked() instanceof Creeper &&
                 e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.FLINT_AND_STEEL)
             explodableSources.put(e.getRightClicked(), e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onExplodableLight(PlayerInteractEvent e) {
-        if (plugin.getSettings().explosionsDropToInventory && e.getClickedBlock() != null &&
+        if (plugin.getSettings().getSpawners().isExplosionDropToInventoryEnabled() && e.getClickedBlock() != null &&
                 e.getClickedBlock().getType() == Material.TNT && e.getItem() != null && e.getItem().getType().equals(Material.FLINT_AND_STEEL)) {
             Location location = e.getClickedBlock().getLocation();
             Executor.sync(() -> {
@@ -444,7 +444,7 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if (plugin.getSettings().listenPaperPreSpawnEvent && !paperPreSpawnChecked.remove(e.getSpawner().getLocation()))
+        if (plugin.getSettings().getSpawners().isListenPaperPreSpawnEnabled() && !paperPreSpawnChecked.remove(e.getSpawner().getLocation()))
             return;
 
         WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(e.getSpawner());
@@ -470,7 +470,7 @@ public final class SpawnersListener implements Listener {
 
         ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
 
-        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 1);
+        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), stackedEntity, 1);
 
         if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "minimumEntityRequirement=" + minimumEntityRequirement);
@@ -570,7 +570,7 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        if (!plugin.getSettings().changeUsingEggs) {
+        if (!plugin.getSettings().getSpawners().isChangeUsingEggsEnabled()) {
             e.setCancelled(true);
 
             if (EntitiesListener.IMP.handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e)) {
@@ -591,7 +591,7 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if ((plugin.getSettings().eggsStackMultiply &&
+        if ((plugin.getSettings().getSpawners().isEggsStackMultiplyEnabled() &&
                 stackedSpawner.getStackAmount() > ItemUtils.countItem(e.getPlayer().getInventory(), e.getItem())) ||
                 EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtils.getEntityType(e.getItem())) {
             e.setCancelled(true);
@@ -602,7 +602,7 @@ public final class SpawnersListener implements Listener {
 
         Executor.sync(() -> {
             stackedSpawner.updateName();
-            if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().eggsStackMultiply)
+            if (e.getPlayer().getGameMode() != GameMode.CREATIVE && plugin.getSettings().getSpawners().isEggsStackMultiplyEnabled())
                 ItemUtils.removeItemFromHand(e.getPlayer().getInventory(), inHand, stackedSpawner.getStackAmount() - 1);
         }, 2L);
     }
@@ -610,21 +610,21 @@ public final class SpawnersListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSpawnerInteract(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK || e.getClickedBlock().getType() != Materials.SPAWNER.toBukkitType() ||
-                !plugin.getSettings().spawnersStackingEnabled || ItemUtils.isOffHand(e))
+                !plugin.getSettings().getSpawners().isEnabled() || ItemUtils.isOffHand(e))
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
-        if (plugin.getSettings().manageMenuEnabled && (!plugin.getSettings().sneakingOpenMenu || e.getPlayer().isSneaking())) {
+        if (plugin.getSettings().getSpawners().isManageMenuEnabled() && (!plugin.getSettings().getSpawners().isSneakingOpenMenuEnabled() || e.getPlayer().isSneaking())) {
             SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
             e.setCancelled(true);
-        } else if (plugin.getSettings().floatingSpawnerNames) {
+        } else if (plugin.getSettings().getSpawners().hasFloatingNames()) {
             int spawnerAmount = stackedSpawner.getStackAmount();
 
-            if (spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().spawnersUnstackedCustomName))
+            if (spawnerAmount < 1 || (spawnerAmount == 1 && !plugin.getSettings().getSpawners().hasUnstackedCustomName()))
                 return;
 
-            String customName = plugin.getSettings().spawnersCustomName;
+            String customName = plugin.getSettings().getSpawners().getCustomName();
 
             if (customName.isEmpty())
                 return;
@@ -632,7 +632,7 @@ public final class SpawnersListener implements Listener {
             ((WStackedSpawner) stackedSpawner).setCachedDisplayName(
                     EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
 
-            customName = plugin.getSettings().spawnersNameBuilder.build(stackedSpawner);
+            customName = plugin.getSettings().getSpawners().getNameBuilder().build(stackedSpawner);
             ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);
 
             Executor.sync(((WStackedSpawner) stackedSpawner)::removeHologram, 60L);
@@ -641,15 +641,15 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent e) {
-        if (!plugin.getSettings().inventoryTweaksEnabled)
+        if (!plugin.getSettings().getSpawners().isInventoryTweaksEnabled())
             return;
 
-        String permission = plugin.getSettings().inventoryTweaksPermission;
+        String permission = plugin.getSettings().getSpawners().getInventoryTweaksPermission();
 
         if (!permission.isEmpty() && e.getWhoClicked().hasPermission(permission))
             return;
 
-        if (!plugin.getSettings().inventoryTweaksCommand.isEmpty() &&
+        if (!plugin.getSettings().getSpawners().getInventoryTweaksCommand().isEmpty() &&
                 !inventoryTweaksToggleCommandPlayers.contains(e.getWhoClicked().getUniqueId()))
             return;
 
@@ -730,15 +730,15 @@ public final class SpawnersListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (plugin.getSettings().inventoryTweaksCommand.isEmpty())
+        if (plugin.getSettings().getSpawners().getInventoryTweaksCommand().isEmpty())
             return;
 
-        String permission = plugin.getSettings().inventoryTweaksPermission;
+        String permission = plugin.getSettings().getSpawners().getInventoryTweaksCommand();
 
         if (!permission.isEmpty() && e.getPlayer().hasPermission(permission))
             return;
 
-        for (String commandSyntax : plugin.getSettings().inventoryTweaksCommand.split(",")) {
+        for (String commandSyntax : plugin.getSettings().getSpawners().getInventoryTweaksCommand().split(",")) {
             commandSyntax = "/" + commandSyntax;
 
             if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
@@ -759,20 +759,20 @@ public final class SpawnersListener implements Listener {
     }
 
     private boolean isChunkLimit(Chunk chunk, EntityType entityType) {
-        int chunkLimit = plugin.getSettings().spawnersChunkLimit;
+        int chunkLimit = plugin.getSettings().getSpawners().getChunkLimit();
 
         if (chunkLimit <= 0)
             return false;
 
         return plugin.getSystemManager().getStackedSpawners(chunk).stream()
-                .filter(stackedSpawner -> !plugin.getSettings().perSpawnerLimit || stackedSpawner.getSpawnedType() == entityType).count() > chunkLimit;
+                .filter(stackedSpawner -> !plugin.getSettings().getSpawners().isPerSpawnerLimit() || stackedSpawner.getSpawnedType() == entityType).count() > chunkLimit;
     }
 
     private final class PaperSpawnersListener implements Listener {
 
         @EventHandler
         public void onPreSpawnSpawner(PreSpawnerSpawnEvent e) {
-            if (!plugin.getSettings().entitiesStackingEnabled || !plugin.getSettings().listenPaperPreSpawnEvent)
+            if (!plugin.getSettings().getEntities().isEnabled() || !plugin.getSettings().getSpawners().isListenPaperPreSpawnEnabled())
                 return;
 
             BlockState spawnerBlockState = e.getSpawnerLocation().getBlock().getState();
@@ -793,7 +793,7 @@ public final class SpawnersListener implements Listener {
             int spawnMobsCount = Random.nextInt(1, creatureSpawner.readData().getSpawnCount(),
                     stackedSpawner.getStackAmount(), 1.5);
 
-            if (plugin.getSettings().linkedEntitiesEnabled) {
+            if (plugin.getSettings().getEntities().isLinkedEntitiesEnabled()) {
                 LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
 
                 if (linkedEntity != null) {
@@ -804,7 +804,7 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            int mergeRadius = plugin.getSettings().entitiesMergeRadius.getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
+            int mergeRadius = plugin.getSettings().getEntities().getMergeRadius().getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
 
             List<StackedEntity> nearbyStackableEntities = mergeRadius <= 0 ? Collections.emptyList() :
                     EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
@@ -829,7 +829,7 @@ public final class SpawnersListener implements Listener {
 
             StackedEntity stackedEntity = targetEntityOptional.get();
 
-            int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, stackedEntity, 0);
+            int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), stackedEntity, 0);
             if (minimumEntityRequirement <= 1) {
                 if (stackedEntity.canGetStacked(spawnMobsCount) != StackCheckResult.SUCCESS)
                     return;

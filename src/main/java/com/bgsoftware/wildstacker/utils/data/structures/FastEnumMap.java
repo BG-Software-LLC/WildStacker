@@ -1,8 +1,9 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
+import com.bgsoftware.wildstacker.api.data.structures.IFastEnumMap;
 import org.bukkit.configuration.ConfigurationSection;
 
-public final class FastEnumMap<E extends Enum<E>, V> {
+public final class FastEnumMap<E extends Enum<E>, V> implements IFastEnumMap<E, V> {
 
     private final V[] arr;
 

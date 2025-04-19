@@ -146,7 +146,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
     @Override
     public ExperienceOrb spawnExpOrb(Location location, SpawnCause spawnCause, int value) {
-        return createEntity(location, org.bukkit.entity.ExperienceOrb.class, spawnCause, bukkitOrb -> {
+        return createEntity(location, ExperienceOrb.class, spawnCause, bukkitOrb -> {
             EntityExperienceOrb orb = ((CraftExperienceOrb) bukkitOrb).getHandle();
             orb.value = value;
             return true;
@@ -349,7 +349,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(org.bukkit.entity.Player playerKiller,
+    public void awardKillScore(Player playerKiller,
                                org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity directDamager) {
         if (!(bukkitDamaged instanceof Monster))
@@ -442,7 +442,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 

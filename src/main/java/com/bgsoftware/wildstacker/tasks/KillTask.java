@@ -15,7 +15,7 @@ public final class KillTask extends BukkitRunnable {
     private static long timeLeft;
 
     private KillTask() {
-        timeLeft = plugin.getSettings().killTaskInterval;
+        timeLeft = plugin.getSettings().getKillTask().getInterval();
         task = runTaskTimer(plugin, 20L, 20L);
     }
 
@@ -32,7 +32,7 @@ public final class KillTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (plugin.getSettings().killTaskInterval > 0) {
+        if (plugin.getSettings().getKillTask().getInterval() > 0) {
             if (timeLeft == 0) {
                 if (Bukkit.getOnlinePlayers().size() > 0) {
                     plugin.getSystemManager().performKillAll(true);
@@ -40,7 +40,7 @@ public final class KillTask extends BukkitRunnable {
                         Locale.KILL_ALL_ANNOUNCEMENT.send(player);
                 }
 
-                timeLeft = plugin.getSettings().killTaskInterval;
+                timeLeft = plugin.getSettings().getKillTask().getInterval();
                 return;
             }
 

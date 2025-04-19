@@ -1,8 +1,10 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
+import com.bgsoftware.wildstacker.api.data.structures.IFast3EnumsArray;
+
 import java.util.List;
 
-public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> {
+public final class Fast3EnumsArray<E extends Enum<E>, T extends Enum<T>, S extends Enum<S>> implements IFast3EnumsArray<E, T, S> {
 
     private final Fast2EnumsArray<E, T> firstKeyArray;
     private final Fast2EnumsArray<E, S> secondKeyArray;

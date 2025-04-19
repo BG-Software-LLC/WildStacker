@@ -218,13 +218,13 @@ public class StackedBaseSpawner extends BaseSpawner {
             return;
         }
 
-        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this.demoEntity, 1);
+        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), this.demoEntity, 1);
 
         int stackedEntityCount = Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 
         boolean canStackToTarget = nearbyAndStackableCount.get() + targetEntityCount + stackedEntityCount >= minimumEntityRequirement;
 
-        boolean spawnStacked = plugin.getSettings().entitiesStackingEnabled && canStackToTarget &&
+        boolean spawnStacked = plugin.getSettings().getEntities().isEnabled() && canStackToTarget &&
                 EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
         failureReason = "";
 
@@ -277,7 +277,7 @@ public class StackedBaseSpawner extends BaseSpawner {
                 targetEntity.increaseStackAmount(increaseStackAmount, true);
                 this.demoEntity.spawnStackParticle(true);
 
-                if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
+                if (plugin.getSettings().getEntities().isLinkedEntitiesEnabled() && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
                     stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
                 serverLevel.levelEvent(2004, blockPos, 0);
@@ -551,7 +551,7 @@ public class StackedBaseSpawner extends BaseSpawner {
     @Nullable
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
                                           List<StackedEntity> nearbyEntities, AtomicLong nearbyAndStackableCount) {
-        if (!plugin.getSettings().entitiesStackingEnabled)
+        if (!plugin.getSettings().getEntities().isEnabled())
             return null;
 
         LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();

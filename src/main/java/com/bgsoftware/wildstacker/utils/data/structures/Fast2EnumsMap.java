@@ -1,8 +1,9 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
+import com.bgsoftware.wildstacker.api.data.structures.IFast2EnumsMap;
 import org.bukkit.configuration.ConfigurationSection;
 
-public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> {
+public final class Fast2EnumsMap<E extends Enum<E>, T extends Enum<T>, V> implements IFast2EnumsMap<E, T, V> {
 
     private final FastEnumMap<E, V> firstKeyArray;
     private final FastEnumMap<T, V> secondKeyArray;

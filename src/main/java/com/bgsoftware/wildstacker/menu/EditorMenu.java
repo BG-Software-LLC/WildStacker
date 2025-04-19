@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -50,7 +49,7 @@ public abstract class EditorMenu extends WildMenu {
         File file = new File(plugin.getDataFolder(), "config.yml");
         config = CommentedConfiguration.loadConfiguration(file);
         try {
-            config.syncWithConfig(file, plugin.getResource("config.yml"), plugin.getSettings().CONFIG_IGNORED_SECTIONS);
+            config.syncWithConfig(file, plugin.getResource("config.yml"), plugin.getSettings().getIgnoredSections());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -85,7 +84,7 @@ public abstract class EditorMenu extends WildMenu {
     protected static void saveConfiguration() {
         try {
             config.save(new File(plugin.getDataFolder(), "config.yml"));
-            SettingsHandler.reload();
+            plugin.getSettings().loadData();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

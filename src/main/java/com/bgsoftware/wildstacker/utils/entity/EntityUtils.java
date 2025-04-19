@@ -98,7 +98,7 @@ public final class EntityUtils {
         if (typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
             return typeName;
 
-        String customName = plugin.getSettings().customNames.get(typeName);
+        String customName = plugin.getSettings().getNameOverrides().getOverrides().get(typeName);
         if (customName != null)
             return customName;
 
@@ -119,7 +119,7 @@ public final class EntityUtils {
         if (name == null)
             return false;
 
-        List<Pattern> blacklistedNames = plugin.getSettings().blacklistedEntitiesNames;
+        List<Pattern> blacklistedNames = plugin.getSettings().getEntities().getBlacklistedNames();
 
         for (Pattern pattern : blacklistedNames) {
             if (pattern.matcher(name).matches())
@@ -180,11 +180,11 @@ public final class EntityUtils {
                 return customNameProvider.replace("{}", String.valueOf(stackAmount));
         }
 
-        if (plugin.getSettings().entitiesCustomName.isEmpty())
+        if (plugin.getSettings().getEntities().getCustomName().isEmpty())
             throw new NullPointerException();
 
         return stackAmount <= 1 && stackedEntity.isDefaultUpgrade() ? "" :
-                plugin.getSettings().entitiesNameBuilder.build(stackedEntity);
+                plugin.getSettings().getEntities().getNameBuilder().build(stackedEntity);
     }
 
     public static int getBadOmenAmplifier(Player player) {
@@ -548,7 +548,7 @@ public final class EntityUtils {
             return;
         }
 
-        boolean clearEquipment = plugin.getSettings().entitiesClearEquipment;
+        boolean clearEquipment = plugin.getSettings().getEntities().isClearEquipmentEnabled();
         EntityEquipment bukkitEntityEquipment = livingEntity.getEquipment();
         INMSEntityEquipment entityEquipment = plugin.getNMSAdapter().createEntityEquipmentWrapper(bukkitEntityEquipment);
 

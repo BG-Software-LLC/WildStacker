@@ -170,7 +170,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         } catch (Throwable ignored) {
         }
 
-        StackedItem stackedItem = WStackedItem.ofBypass((org.bukkit.entity.Item) entityItem.getBukkitEntity());
+        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
 
         itemConsumer.accept(stackedItem);
 
@@ -512,7 +512,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(org.bukkit.entity.Player player, org.bukkit.entity.Item pickItem) {
+    public void awardPickupScore(org.bukkit.entity.Player player, Item pickItem) {
         // Do nothing.
     }
 
@@ -525,7 +525,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void playPickupAnimation(org.bukkit.entity.LivingEntity bukkitLivingEntity, org.bukkit.entity.Item item) {
+    public void playPickupAnimation(org.bukkit.entity.LivingEntity bukkitLivingEntity, Item item) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         ItemEntity itemEntity = (ItemEntity) ((CraftItem) item).getHandle();
 
@@ -598,7 +598,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             ItemStack itemStack = itemEntity.getItem().copy();
 
             if (isPlayerPickup || livingEntity instanceof Fox) {
-                if (plugin.getSettings().itemsFixStackEnabled) {
+                if (plugin.getSettings().getItems().isFixStackEnabled()) {
                     itemStack.setCount(maxStackSize);
                     retryPickup = true;
                 } else {

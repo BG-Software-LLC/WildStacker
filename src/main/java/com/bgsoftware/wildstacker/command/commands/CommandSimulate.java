@@ -62,7 +62,7 @@ public class CommandSimulate implements ICommand {
             }
         }
 
-        targetPlayer.getInventory().addItem(new ItemBuilder(plugin.getSettings().simulateTool).build(amount));
+        targetPlayer.getInventory().addItem(new ItemBuilder(plugin.getSettings().getGlobal().getSimulateTool()).build(amount));
         Locale.SIMULATE_GIVE_PLAYER.send(sender, targetPlayer.getName(), amount);
         if (!targetPlayer.equals(sender))
             Locale.SIMULATE_RECEIVE.send(targetPlayer, amount, sender.getName());

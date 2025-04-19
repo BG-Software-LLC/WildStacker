@@ -87,7 +87,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
 
         double upgradeCost = nextUpgrade.getCost();
 
-        if (plugin.getSettings().spawnerUpgradesMultiplyStackAmount)
+        if (plugin.getSettings().getSpawners().isMultiplyStackAmountEnabled())
             upgradeCost *= stackedSpawner.getStackAmount();
 
         if (upgradeCost > 0 && plugin.getProviders().getEconomyProvider().getMoneyInBank(player) < upgradeCost) {
@@ -138,7 +138,7 @@ public final class SpawnerUpgradeMenu extends WildMenu {
             if (nextUpgrade != null) {
                 double upgradeCost = nextUpgrade.getCost();
 
-                if (plugin.getSettings().spawnerUpgradesMultiplyStackAmount)
+                if (plugin.getSettings().getSpawners().isMultiplyStackAmountEnabled())
                     upgradeCost *= stackedSpawner.getStackAmount();
 
                 ItemStack rawNextIcon = nextUpgrade.getIcon();

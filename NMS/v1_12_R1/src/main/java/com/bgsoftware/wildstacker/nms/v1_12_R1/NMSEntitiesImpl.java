@@ -394,7 +394,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(org.bukkit.entity.Player playerKiller,
+    public void awardKillScore(Player playerKiller,
                                org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity directDamager) {
         EntityPlayer entityPlayer = ((CraftPlayer) playerKiller).getHandle();
@@ -465,7 +465,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
@@ -491,7 +491,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
             if (isPlayerPickup) {
-                if (plugin.getSettings().itemsFixStackEnabled) {
+                if (plugin.getSettings().getItems().isFixStackEnabled()) {
                     itemStack.setCount(maxStackSize);
                     retryPickup = true;
                 } else {
