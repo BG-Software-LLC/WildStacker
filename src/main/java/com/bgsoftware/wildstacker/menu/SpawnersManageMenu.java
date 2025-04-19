@@ -1,11 +1,11 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
+import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -86,11 +86,11 @@ public final class SpawnersManageMenu extends WildMenu {
         }
 
         if (amountsMenuSlots.contains(e.getRawSlot())) {
-            if (plugin.getSettings().amountsMenuEnabled) {
+            if (plugin.getSettings().getSpawners().isAmountsMenuEnabled()) {
                 SpawnerAmountsMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
         } else if (upgradeMenuSlots.contains(e.getRawSlot())) {
-            if (plugin.getSettings().upgradeMenuEnabled) {
+            if (plugin.getSettings().getSpawners().isUpgradeMenuEnabled()) {
                 SpawnerUpgradeMenu.open((Player) e.getWhoClicked(), stackedSpawner);
             }
         }

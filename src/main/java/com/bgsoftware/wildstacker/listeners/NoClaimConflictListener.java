@@ -32,9 +32,9 @@ public final class NoClaimConflictListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockPlace(BlockPlaceEvent e) {
-        if (plugin.getSettings().spawnersStackingEnabled && e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
+        if (plugin.getSettings().getSpawners().isEnabled() && e.getBlockPlaced().getType() == Materials.SPAWNER.toBukkitType()) {
             placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
-        } else if (plugin.getSettings().barrelsStackingEnabled &&
+        } else if (plugin.getSettings().getBarrels().isEnabled() &&
                 plugin.getSystemManager().isBarrelBlock(e.getItemInHand().getType(), e.getPlayer().getWorld())) {
             placers.put(e.getBlockPlaced().getLocation(), e.getPlayer().getUniqueId());
         }

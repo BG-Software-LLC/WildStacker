@@ -20,7 +20,7 @@ public final class SilkSpawnersHook {
     public static void register(WildStackerPlugin plugin) {
         SilkSpawnersHook.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(new SilkSpawnersListener(), plugin);
-        if(plugin.getSettings().spawnersStackingEnabled)
+        if(plugin.getSettings().getSpawners().isEnabled())
             BlockBreakEvent.getHandlerList().unregister(JavaPlugin.getPlugin(SilkSpawners.class));
     }
 
@@ -29,7 +29,7 @@ public final class SilkSpawnersHook {
         //This one will run only if SilkSpawners is enabled
         @EventHandler(priority = EventPriority.HIGHEST)
         public void onSpawnerBreak(SilkSpawnersSpawnerBreakEvent e) {
-            if (plugin.getSettings().spawnersStackingEnabled) {
+            if (plugin.getSettings().getSpawners().isEnabled()) {
                 e.setDrop(WStackedSpawner.of(e.getSpawner()).getDropItem(0));
             }
         }
@@ -37,7 +37,7 @@ public final class SilkSpawnersHook {
         //This one will run only if SilkSpawners is enabled
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onSpawnerChange(SilkSpawnersSpawnerChangeEvent e) {
-            if (plugin.getSettings().spawnersStackingEnabled)
+            if (plugin.getSettings().getSpawners().isEnabled())
                 Executor.sync(() -> WStackedSpawner.of(e.getSpawner()).updateName(), 2L);
         }
 

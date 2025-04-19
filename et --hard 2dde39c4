@@ -1,0 +1,105 @@
+[33m257ccfe8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdb_support[m[33m, [m[1;31morigin/db_support[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33m2dde39c4[m HEAD@{1}: reset: moving to origin/db_support
+[33m2dde39c4[m HEAD@{2}: reset: moving to origin/db_support
+[33m2dde39c4[m HEAD@{3}: reset: moving to origin/db_support
+[33m2dde39c4[m HEAD@{4}: rebase (finish): returning to refs/heads/db_support
+[33m2dde39c4[m HEAD@{5}: rebase (pick): improv. add config changes for 1.21.6
+[33m257ccfe8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdb_support[m[33m, [m[1;31morigin/db_support[m[33m)[m HEAD@{6}: rebase (pick): improv. add access to settings in API
+[33mf407fbe4[m HEAD@{7}: rebase (continue): improv. remove useless changes
+[33mbe01756c[m HEAD@{8}: rebase (continue): improv. rewrite config system and add remote db support
+[33m5a9cb0a3[m[33m ([m[1;31mupstream/dev[m[33m)[m HEAD@{9}: rebase (start): checkout upstream/dev
+[33m522b17d7[m HEAD@{10}: rebase (abort): returning to refs/heads/db_support
+[33m5a9cb0a3[m[33m ([m[1;31mupstream/dev[m[33m)[m HEAD@{11}: rebase (start): checkout upstream/dev
+[33m522b17d7[m HEAD@{12}: rebase (finish): returning to refs/heads/db_support
+[33m522b17d7[m HEAD@{13}: rebase (pick): improv. add config changes for 1.21.6
+[33m7c321e0a[m HEAD@{14}: rebase (pick): improv. add access to settings in API
+[33m01c87894[m HEAD@{15}: rebase (pick): improv. remove useless changes
+[33maa8837b2[m HEAD@{16}: rebase (continue): improv. rewrite config system and add remote db support
+[33m982ee672[m HEAD@{17}: rebase (start): checkout upstream/dev
+[33m74fba00d[m HEAD@{18}: checkout: moving from fix_fire_issue to db_support
+[33m29e5edc1[m[33m ([m[1;31morigin/fix_fire_issue[m[33m, [m[1;32mfix_fire_issue[m[33m)[m HEAD@{19}: checkout: moving from db_support to fix_fire_issue
+[33me1e2394f[m HEAD@{20}: commit (merge): Merge remote-tracking branch 'origin/db_support' into db_support
+[33m7272ba09[m HEAD@{21}: commit: improv. merge changes
+[33ma3ccb1ee[m HEAD@{22}: rebase (abort): returning to refs/heads/db_support
+[33m74fba00d[m HEAD@{23}: rebase (start): checkout origin/db_support
+[33ma3ccb1ee[m HEAD@{24}: commit: improv. merge changes
+[33m8b940c2a[m HEAD@{25}: rebase (finish): returning to refs/heads/db_support
+[33m8b940c2a[m HEAD@{26}: rebase (pick): improv. add config changes for 1.21.6
+[33m9fbed35e[m HEAD@{27}: rebase (pick): improv. add access to settings in API
+[33m66082533[m HEAD@{28}: rebase (pick): improv. remove useless changes
+[33m0e7eedb7[m HEAD@{29}: rebase (continue): improv. rewrite config system and add remote db support
+[33m982ee672[m HEAD@{30}: rebase (start): checkout upstream/dev
+[33m74fba00d[m HEAD@{31}: rebase (abort): returning to refs/heads/db_support
+[33m982ee672[m HEAD@{32}: rebase (start): checkout upstream/dev
+[33m74fba00d[m HEAD@{33}: rebase (abort): returning to refs/heads/db_support
+[33m982ee672[m HEAD@{34}: rebase (start): checkout upstream/dev
+[33m74fba00d[m HEAD@{35}: rebase (abort): returning to refs/heads/db_support
+[33m982ee672[m HEAD@{36}: rebase (start): checkout upstream/dev
+[33m74fba00d[m HEAD@{37}: checkout: moving from fix_fire_issue to db_support
+[33m29e5edc1[m[33m ([m[1;31morigin/fix_fire_issue[m[33m, [m[1;32mfix_fire_issue[m[33m)[m HEAD@{38}: commit: improv. fix issue with fire and dupe on breed in 1.21.5+
+[33m440004f9[m HEAD@{39}: commit: improv. fix issue with fire and dupe on breed in 1.21.5+
+[33m4303acac[m HEAD@{40}: commit: improv. fix issue with fire and dupe on breed in 1.21.5+
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{41}: checkout: moving from dev to fix_fire_issue
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{42}: checkout: moving from db_support to dev
+[33m74fba00d[m HEAD@{43}: rebase (finish): returning to refs/heads/db_support
+[33m74fba00d[m HEAD@{44}: rebase (pick): improv. add config changes for 1.21.6
+[33mdd9c4af6[m HEAD@{45}: rebase (pick): improv. add access to settings in API
+[33m7fb3a967[m HEAD@{46}: rebase (pick): improv. remove useless changes
+[33ma978a8aa[m HEAD@{47}: rebase (pick): improv. rewrite config system and add remote db support
+[33m9ff0da88[m HEAD@{48}: rebase (start): checkout upstream/dev
+[33m01ae9b5e[m HEAD@{49}: checkout: moving from break_natural_spawner to db_support
+[33mfb247846[m[33m ([m[1;31morigin/break_natural_spawner[m[33m, [m[1;32mbreak_natural_spawner[m[33m)[m HEAD@{50}: checkout: moving from db_support to break_natural_spawner
+[33m01ae9b5e[m HEAD@{51}: checkout: moving from remote_db_support to db_support
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{52}: checkout: moving from break_natural_spawner to remote_db_support
+[33mfb247846[m[33m ([m[1;31morigin/break_natural_spawner[m[33m, [m[1;32mbreak_natural_spawner[m[33m)[m HEAD@{53}: commit: improv. add option to disable natural block break
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{54}: rebase (finish): returning to refs/heads/break_natural_spawner
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{55}: rebase (start): checkout upstream/dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{56}: checkout: moving from remote_db_support to break_natural_spawner
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{57}: rebase (finish): returning to refs/heads/remote_db_support
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{58}: rebase (start): checkout upstream/dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{59}: checkout: moving from dev to remote_db_support
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{60}: rebase (finish): returning to refs/heads/dev
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{61}: rebase (start): checkout upstream/dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{62}: checkout: moving from break_natural_spawner to dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{63}: checkout: moving from dev to break_natural_spawner
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{64}: checkout: moving from db_support to dev
+[33m01ae9b5e[m HEAD@{65}: rebase (finish): returning to refs/heads/db_support
+[33m01ae9b5e[m HEAD@{66}: rebase (pick): improv. add config changes for 1.21.6
+[33m8e63728c[m HEAD@{67}: rebase (pick): improv. add access to settings in API
+[33m5e7faf9f[m HEAD@{68}: rebase (pick): improv. remove useless changes
+[33mff986e0f[m HEAD@{69}: rebase (pick): improv. rewrite config system and add remote db support
+[33m1a4a39fa[m[33m ([m[1;32mdev[m[33m)[m HEAD@{70}: rebase (start): checkout upstream/dev
+[33me7c4d22b[m HEAD@{71}: rebase (finish): returning to refs/heads/db_support
+[33me7c4d22b[m HEAD@{72}: rebase (pick): improv. add config changes for 1.21.6
+[33m814e5ffb[m HEAD@{73}: rebase (pick): improv. add access to settings in API
+[33m22842998[m HEAD@{74}: rebase (pick): improv. remove useless changes
+[33m40ea601c[m HEAD@{75}: rebase (continue): improv. rewrite config system and add remote db support
+[33me10389e6[m HEAD@{76}: rebase (start): checkout upstream/dev
+[33mb77f1af1[m HEAD@{77}: rebase (abort): returning to refs/heads/db_support
+[33me10389e6[m HEAD@{78}: rebase (start): checkout upstream/dev
+[33mb77f1af1[m HEAD@{79}: commit: improv. add config changes for 1.21.6
+[33mf566a064[m HEAD@{80}: rebase (finish): returning to refs/heads/db_support
+[33mf566a064[m HEAD@{81}: rebase (pick): improv. add access to settings in API
+[33mbde79cc8[m HEAD@{82}: rebase (pick): improv. remove useless changes
+[33m25405247[m HEAD@{83}: rebase (pick): improv. rewrite config system and add remote db support
+[33mf9acfa54[m HEAD@{84}: rebase (start): checkout upstream/dev
+[33m5f4b2e11[m HEAD@{85}: rebase (abort): returning to refs/heads/db_support
+[33m921ebc9f[m HEAD@{86}: rebase (start): checkout upstream/dev
+[33m5f4b2e11[m HEAD@{87}: reset: moving to HEAD~1
+[33m1cf8c499[m HEAD@{88}: commit: upstream
+[33m5f4b2e11[m HEAD@{89}: checkout: moving from db_support to db_support
+[33m5f4b2e11[m HEAD@{90}: commit: improv. add access to settings in API
+[33m1befc0a3[m HEAD@{91}: commit: improv. remove useless changes
+[33m927cafef[m HEAD@{92}: checkout: moving from dev to db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{93}: checkout: moving from db_support to dev
+[33m927cafef[m HEAD@{94}: checkout: moving from remote_db_support to db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{95}: checkout: moving from dev to remote_db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{96}: checkout: moving from remote_db_support to dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{97}: checkout: moving from dev to remote_db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{98}: checkout: moving from db_support to dev
+[33m927cafef[m HEAD@{99}: checkout: moving from dev to db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{100}: checkout: moving from db_support to dev
+[33m927cafef[m HEAD@{101}: commit: improv. rewrite config system and add remote db support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{102}: checkout: moving from dev to db_support
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{103}: checkout: moving from master to dev
+[33m76481ca6[m[33m ([m[1;33mtag: [m[1;33mv2025.1[m[33m, [m[1;31mupstream/master[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{104}: clone: from github.com:nivcoo/WildStacker.git

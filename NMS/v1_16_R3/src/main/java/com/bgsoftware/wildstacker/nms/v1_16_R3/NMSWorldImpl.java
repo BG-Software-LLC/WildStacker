@@ -38,7 +38,7 @@ public class NMSWorldImpl implements NMSWorld {
     private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(Chunk.class, Collection[].class, "entitySlices");
 
     @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
+    public boolean canSpawnOn(Entity bukkitEntity, Location location) {
         assert location.getWorld() != null;
         World world = ((CraftWorld) location.getWorld()).getHandle();
         EntityTypes<?> entityTypes = ((CraftEntity) bukkitEntity).getHandle().getEntityType();
@@ -93,7 +93,7 @@ public class NMSWorldImpl implements NMSWorld {
     }
 
     @Override
-    public void attemptJoinRaid(Player player, org.bukkit.entity.Entity raider) {
+    public void attemptJoinRaid(Player player, Entity raider) {
         EntityRaider entityRaider = (EntityRaider) ((CraftEntity) raider).getHandle();
         if (entityRaider.fb())
             entityRaider.fa().a((net.minecraft.server.v1_16_R3.Entity) ((CraftPlayer) player).getHandle());

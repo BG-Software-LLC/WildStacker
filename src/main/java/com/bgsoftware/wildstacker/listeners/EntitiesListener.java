@@ -157,7 +157,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityNerfTeleport(EntityTeleportEvent e) {
-        if (!plugin.getSettings().nerfedEntitiesTeleport && EntityUtils.isStackable(e.getEntity()) &&
+        if (!plugin.getSettings().getEntities().isTeleportNerfedEntities() && EntityUtils.isStackable(e.getEntity()) &&
                 WStackedEntity.of(e.getEntity()).isNerfed())
             e.setCancelled(true);
     }
@@ -290,7 +290,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSheepDye(SheepDyeWoolEvent e) {
-        if (!plugin.getSettings().entitiesStackingEnabled || !StackSplit.SHEEP_DYE.isEnabled())
+        if (!plugin.getSettings().getEntities().isEnabled() || !StackSplit.SHEEP_DYE.isEnabled())
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -317,7 +317,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onWoolRegrow(SheepRegrowWoolEvent e) {
-        if (!plugin.getSettings().entitiesStackingEnabled)
+        if (!plugin.getSettings().getEntities().isEnabled())
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
@@ -348,7 +348,7 @@ public final class EntitiesListener implements Listener {
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
-        if (plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
+        if (plugin.getSettings().getEntities().isEnabled() && StackSplit.NAME_TAG.isEnabled()) {
             Executor.sync(() -> {
                 if (stackedEntity.getStackAmount() > 1) {
                     stackedEntity.setCustomName("");
@@ -380,13 +380,13 @@ public final class EntitiesListener implements Listener {
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
-        int inventoryItemsAmount = plugin.getSettings().smartBreedingConsumeEntireInventory ?
+        int inventoryItemsAmount = plugin.getSettings().getEntities().isSmartBreedingConsumeInventory() ?
                 ItemUtils.countItem(e.getPlayer().getInventory(), inHand) : inHand.getAmount();
 
         if (stackedEntity.getStackAmount() > 1) {
             int itemsAmountToRemove;
 
-            if (plugin.getSettings().smartBreedingEnabled) {
+            if (plugin.getSettings().getEntities().isSmartBreedingEnabled()) {
                 int breedableAmount = e.getPlayer().getGameMode() == GameMode.CREATIVE ?
                         stackedEntity.getStackAmount() :
                         Math.min(stackedEntity.getStackAmount(), inventoryItemsAmount);
@@ -468,7 +468,7 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(CreatureSpawnEvent e) {
-        if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().stackAfterBreed) {
+        if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING && plugin.getSettings().getEntities().isStackAfterBreedEnabled()) {
             EntitiesGetter.getNearbyEntities(e.getEntity().getLocation(), 5, entity -> EntityUtils.isStackable(entity) &&
                             (!(entity instanceof Animals) || !plugin.getNMSEntities().isInLove((Animals) entity)))
                     .forEach(entity -> WStackedEntity.of(entity).runStackAsync(null));
@@ -535,7 +535,7 @@ public final class EntitiesListener implements Listener {
 
         e.setCancelled(true);
 
-        if (!plugin.getSettings().entitiesFillVehicles &&
+        if (!plugin.getSettings().getEntities().isFillVehiclesEnabled() &&
                 plugin.getNMSEntities().getPassengersCount(e.getVehicle()) >= 1 && stackedEntity.getStackAmount() > 1)
             return;
 
@@ -599,8 +599,8 @@ public final class EntitiesListener implements Listener {
      */
 
     public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event) {
-        if (!plugin.getSettings().entitiesStackingEnabled || usedItem == null ||
-                plugin.getSettings().blacklistedEntities.contains(SpawnCause.SPAWNER_EGG) ||
+        if (!plugin.getSettings().getEntities().isEnabled() || usedItem == null ||
+                plugin.getSettings().getEntities().getBlacklistedEntities().contains(SpawnCause.SPAWNER_EGG) ||
                 (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
             return false;
 
@@ -647,7 +647,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
-        if (!plugin.getSettings().entitiesStackingEnabled)
+        if (!plugin.getSettings().getEntities().isEnabled())
             return;
 
         if (!EntityUtils.isStackable(entity) || EntityStorage.hasMetadata(entity, EntityFlag.CORPSE))
@@ -735,7 +735,7 @@ public final class EntitiesListener implements Listener {
         if (stackedEntity.getSpawnCause() == SpawnCause.EPIC_SPAWNERS)
             return;
 
-        if (!plugin.getSettings().spawnersStackingEnabled && plugin.getProviders().handleEntityStackingInsideEvent() &&
+        if (!plugin.getSettings().getSpawners().isEnabled() && plugin.getProviders().handleEntityStackingInsideEvent() &&
                 spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
             return;
 
@@ -769,7 +769,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private void handleEntityShear(Cancellable cancellable, Entity entity) {
-        if (!plugin.getSettings().entitiesStackingEnabled || !EntityUtils.isStackable(entity))
+        if (!plugin.getSettings().getEntities().isEnabled() || !EntityUtils.isStackable(entity))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(entity);
@@ -823,7 +823,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private boolean handleEntityTransform(Entity transformedEntityBukkit, String reason, int originalStackAmount, SpawnCause defaultCause) {
-        if (!plugin.getSettings().entitiesFilteredTransforms.contains(reason))
+        if (!plugin.getSettings().getEntities().getFilteredTransforms().contains(reason))
             return false;
 
         StackedEntity transformedEntity = WStackedEntity.of(transformedEntityBukkit);
@@ -854,7 +854,7 @@ public final class EntitiesListener implements Listener {
     }
 
     private boolean isChunkLimit(Chunk chunk) {
-        int chunkLimit = plugin.getSettings().entitiesChunkLimit;
+        int chunkLimit = plugin.getSettings().getEntities().getChunkLimit();
 
         if (chunkLimit <= 0)
             return false;
@@ -905,7 +905,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         public void onTurtleEggLay(EntityChangeBlockEvent e) {
-            if (!plugin.getSettings().smartBreedingEnabled)
+            if (!plugin.getSettings().getEntities().isSmartBreedingEnabled())
                 return;
 
             if (!(e.getEntity() instanceof org.bukkit.entity.Turtle) || e.getTo() != TURTLE_EGG)

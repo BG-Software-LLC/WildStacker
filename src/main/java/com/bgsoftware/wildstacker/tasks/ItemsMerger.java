@@ -17,8 +17,8 @@ public final class ItemsMerger extends BukkitRunnable {
     private static BukkitTask task = null;
 
     private ItemsMerger() {
-        if (plugin.getSettings().itemsStackingEnabled && plugin.getSettings().itemsStackInterval > 0)
-            task = runTaskTimer(plugin, plugin.getSettings().itemsStackInterval, plugin.getSettings().itemsStackInterval);
+        if (plugin.getSettings().getItems().isEnabled() && plugin.getSettings().getItems().getStackInterval() > 0)
+            task = runTaskTimer(plugin, plugin.getSettings().getItems().getStackInterval(), plugin.getSettings().getItems().getStackInterval());
     }
 
     public static void start() {

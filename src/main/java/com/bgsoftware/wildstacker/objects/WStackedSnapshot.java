@@ -1,10 +1,10 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;

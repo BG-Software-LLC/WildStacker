@@ -20,7 +20,7 @@ public final class ClearLaggHook {
                     if (EntityUtils.isStackable(entity))
                         WStackedEntity.of(entity).remove();
                 });
-                if (plugin.getSettings().killTaskSyncClearLagg && System.currentTimeMillis() - lastTime > 1000) {
+                if (plugin.getSettings().getKillTask().isSyncWithClearLaggEnabled() && System.currentTimeMillis() - lastTime > 1000) {
                     lastTime = System.currentTimeMillis();
                     plugin.getSystemManager().performKillAll(true);
                 }

@@ -1,9 +1,10 @@
 package com.bgsoftware.wildstacker.utils.particles;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import org.bukkit.Location;
 
-public final class ParticleWrapper {
+public final class ParticleWrapper implements ParticleEffect {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 

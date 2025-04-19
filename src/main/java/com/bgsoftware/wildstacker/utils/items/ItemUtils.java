@@ -92,7 +92,7 @@ public final class ItemUtils {
         int amount = itemStack.getAmount();
 
         try {
-            if (plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())) {
+            if (plugin.getSettings().getItems().isEnabled() && canBeStacked(itemStack, location.getWorld())) {
                 ItemStack cloned = itemStack.clone();
                 cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
                 plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
@@ -190,11 +190,11 @@ public final class ItemUtils {
         String typeName = itemStack.getType().name().contains("LEGACY") ?
                 itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
 
-        String customName = plugin.getSettings().customNames.get(typeName);
+        String customName = plugin.getSettings().getNameOverrides().getOverrides().get(typeName);
         if (customName != null)
             return customName;
 
-        customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
+        customName = plugin.getSettings().getNameOverrides().getOverrides().get(typeName + ":" + itemStack.getDurability());
         if (customName != null)
             return customName;
 
@@ -202,13 +202,13 @@ public final class ItemUtils {
     }
 
     public static void stackBucket(ItemStack bucket, Inventory inventory) {
-        if (plugin.getSettings().bucketsStackerEnabled)
-            stackItems(bucket, inventory, plugin.getSettings().bucketsMaxStack);
+        if (plugin.getSettings().getBuckets().isEnabled())
+            stackItems(bucket, inventory, plugin.getSettings().getBuckets().getMaxStack());
     }
 
     public static void stackStew(ItemStack stew, Inventory inventory) {
-        if (plugin.getSettings().stewsStackingEnabled)
-            stackItems(stew, inventory, plugin.getSettings().stewsMaxStack);
+        if (plugin.getSettings().getStews().isEnabled())
+            stackItems(stew, inventory, plugin.getSettings().getStews().getMaxStack());
     }
 
     private static void stackItems(ItemStack item, Inventory inventory, int maxStack) {
@@ -399,7 +399,7 @@ public final class ItemUtils {
         if (itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
             return false;
 
-        int requiredLevel = plugin.getSettings().silkTouchMinimumLevel;
+        int requiredLevel = plugin.getSettings().getSpawners().getSilkTouchMinimumLevel();
 
         return plugin.getProviders().hasEnchantmentLevel(itemStack, Enchantment.SILK_TOUCH, requiredLevel) ||
                 itemStack.getEnchantmentLevel(Enchantment.SILK_TOUCH) >= requiredLevel;
@@ -423,9 +423,9 @@ public final class ItemUtils {
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
         Material itemType = itemStack.getType();
-        return !plugin.getSettings().blacklistedItems.contains(itemType) &&
-                (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&
-                !plugin.getSettings().itemsDisabledWorlds.contains(world.getName());
+        return !plugin.getSettings().getItems().getBlacklistedItems().contains(itemType) &&
+                (plugin.getSettings().getItems().getWhitelistedItems().size() == 0 || plugin.getSettings().getItems().getWhitelistedItems().contains(itemType)) &&
+                !plugin.getSettings().getItems().getDisabledWorlds().contains(world.getName());
     }
 
 }

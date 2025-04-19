@@ -33,6 +33,21 @@ database:
   # Should data of worlds that no longer exist be deleted?
   delete-invalid-worlds: false
 
+  # For local database, use "SQLite".
+  # For remote database, use "MySQL" or "MariaDB" (Depends on your setup).
+  type: SQLite
+  # Remote database information
+  address: 'localhost'
+  port: 3306
+  db-name: 'wildstacker'
+  user-name: 'root'
+  password: ''
+  prefix: ''
+  useSSL: false
+  allowPublicKeyRetrieval: true
+  waitTimeout: 600000
+  maxLifetime: 1800000
+
 # Settings related to the automatic kill all
 kill-task:
   # How much time should be passed between auto-killing? (in seconds)

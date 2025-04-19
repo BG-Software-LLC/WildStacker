@@ -86,10 +86,10 @@ public final class ProtocolLibHook {
         }
 
         private static void handleEntitiesCommand(PlayerCommandPreprocessEvent event) {
-            if (!plugin.getSettings().entitiesNamesToggleEnabled)
+            if (!plugin.getSettings().getEntities().isNamesToggleEnabled())
                 return;
 
-            String commandSyntax = "/" + plugin.getSettings().entitiesNamesToggleCommand;
+            String commandSyntax = "/" + plugin.getSettings().getEntities().getNamesToggleCommand();
 
             if (!event.getMessage().equalsIgnoreCase(commandSyntax) && !event.getMessage().startsWith(commandSyntax + " "))
                 return;
@@ -111,10 +111,10 @@ public final class ProtocolLibHook {
         }
 
         private static void handleItemsCommand(PlayerCommandPreprocessEvent event) {
-            if (!plugin.getSettings().itemsNamesToggleEnabled)
+            if (!plugin.getSettings().getItems().isNamesToggleEnabled())
                 return;
 
-            String commandSyntax = "/" + plugin.getSettings().itemsNamesToggleCommand;
+            String commandSyntax = "/" + plugin.getSettings().getItems().getNamesToggleCommand();
 
             if (!event.getMessage().equalsIgnoreCase(commandSyntax) && !event.getMessage().startsWith(commandSyntax + " "))
                 return;

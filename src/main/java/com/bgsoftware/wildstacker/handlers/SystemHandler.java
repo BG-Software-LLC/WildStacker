@@ -7,14 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.handlers.SystemManager;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
-import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.api.objects.*;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
@@ -39,7 +32,6 @@ import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
@@ -427,11 +419,14 @@ public final class SystemHandler implements SystemManager {
             } else if (stackedObject instanceof StackedItem) {
                 dataSerializer.saveItem((StackedItem) stackedObject);
             } else if (stackedObject instanceof StackedSpawner) {
+
                 Query.SPAWNER_INSERT.getStatementHolder()
                         .setLocation(stackedObject.getLocation())
                         .setInt(stackedObject.getStackAmount())
                         .setInt(((WStackedSpawner) stackedObject).getUpgradeId())
                         .execute(true);
+
+
             } else if (stackedObject instanceof StackedBarrel) {
                 Query.BARREL_INSERT.getStatementHolder()
                         .setLocation(stackedObject.getLocation())
@@ -474,7 +469,7 @@ public final class SystemHandler implements SystemManager {
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
         int limit = ItemUtils.canBeStacked(itemStack, location.getWorld()) ?
-                plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE) :
+                plugin.getSettings().getItems().getLimits().getOrDefault(itemStack.getType(), Integer.MAX_VALUE) :
                 itemStack.getMaxStackSize();
 
         limit = limit < 1 ? Integer.MAX_VALUE : limit;
@@ -489,7 +484,7 @@ public final class SystemHandler implements SystemManager {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), itemLimit));
             lastDroppedItem = plugin.getNMSEntities().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
-                if (plugin.getSettings().itemsStackingEnabled)
+                if (plugin.getSettings().getItems().isEnabled())
                     stackedItem.setStackAmount(itemLimit, stackedItem.isCached());
             });
         }
@@ -500,7 +495,7 @@ public final class SystemHandler implements SystemManager {
             itemStack = itemStack.clone();
             itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), leftOvers));
             lastDroppedItem = plugin.getNMSEntities().createItem(location, itemStack, SpawnCause.CUSTOM, stackedItem -> {
-                if (plugin.getSettings().itemsStackingEnabled)
+                if (plugin.getSettings().getItems().isEnabled())
                     stackedItem.setStackAmount(leftOvers, stackedItem.isCached());
             });
         }
@@ -562,15 +557,15 @@ public final class SystemHandler implements SystemManager {
         List<Entity> entityList = new ArrayList<>();
 
         for (World world : Bukkit.getWorlds()) {
-            if (!applyTaskFilter || plugin.getSettings().killTaskEntitiesWorlds.isEmpty() ||
-                    plugin.getSettings().killTaskEntitiesWorlds.contains(world.getName())) {
+            if (!applyTaskFilter || plugin.getSettings().getKillTask().getEntitiesWorlds().isEmpty()
+                    || plugin.getSettings().getKillTask().getEntitiesWorlds().contains(world.getName())) {
                 for (Chunk chunk : world.getLoadedChunks()) {
                     entityList.addAll(Arrays.stream(chunk.getEntities())
                             .filter(entity -> entity instanceof LivingEntity).collect(Collectors.toList()));
                 }
             }
-            if (!applyTaskFilter || plugin.getSettings().killTaskItemsWorlds.isEmpty() ||
-                    plugin.getSettings().killTaskItemsWorlds.contains(world.getName())) {
+            if (!applyTaskFilter || plugin.getSettings().getKillTask().getItemsWorlds().isEmpty()
+                    || plugin.getSettings().getKillTask().getItemsWorlds().contains(world.getName())) {
                 for (Chunk chunk : world.getLoadedChunks()) {
                     entityList.addAll(Arrays.stream(chunk.getEntities())
                             .filter(entity -> entity instanceof Item).collect(Collectors.toList()));
@@ -580,33 +575,39 @@ public final class SystemHandler implements SystemManager {
 
         Executor.async(() -> {
             entityList.stream()
-                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity) &&
-                            (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskEntitiesWhitelist, WStackedEntity.of(entity)) &&
-                                    !GeneralUtils.contains(plugin.getSettings().killTaskEntitiesBlacklist, WStackedEntity.of(entity)))))
+                    .filter(entity -> EntityUtils.isStackable(entity) && entityPredicate.test(entity)
+                            && (!applyTaskFilter
+                            || (GeneralUtils.containsOrEmpty(plugin.getSettings().getKillTask().getEntitiesWhitelist(), WStackedEntity.of(entity))
+                            && !GeneralUtils.contains(plugin.getSettings().getKillTask().getEntitiesBlacklist(), WStackedEntity.of(entity)))))
                     .forEach(entity -> {
                         StackedEntity stackedEntity = WStackedEntity.of(entity);
-                        if (!applyTaskFilter || (((plugin.getSettings().killTaskStackedEntities && stackedEntity.getStackAmount() > 1) ||
-                                (plugin.getSettings().killTaskUnstackedEntities && stackedEntity.getStackAmount() <= 1)) && !stackedEntity.hasNameTag()))
+                        if (!applyTaskFilter || (((plugin.getSettings().getKillTask().isStackedEntitiesKillEnabled() && stackedEntity.getStackAmount() > 1)
+                                || (plugin.getSettings().getKillTask().isUnstackedEntitiesKillEnabled() && stackedEntity.getStackAmount() <= 1))
+                                && !stackedEntity.hasNameTag())) {
                             stackedEntity.remove();
+                        }
                     });
 
-            if (plugin.getSettings().killTaskStackedItems) {
+            if (plugin.getSettings().getKillTask().isStackedItemsKillEnabled()) {
                 entityList.stream()
-                        .filter(entity -> ItemUtils.isStackable(entity) && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity) &&
-                                (!applyTaskFilter || (GeneralUtils.containsOrEmpty(plugin.getSettings().killTaskItemsWhitelist, ((Item) entity).getItemStack().getType()) &&
-                                        !plugin.getSettings().killTaskItemsBlacklist.contains(((Item) entity).getItemStack().getType()))))
+                        .filter(entity -> ItemUtils.isStackable(entity) && ItemUtils.canPickup((Item) entity) && itemPredicate.test((Item) entity)
+                                && (!applyTaskFilter
+                                || (GeneralUtils.containsOrEmpty(plugin.getSettings().getKillTask().getItemsWhitelist(), ((Item) entity).getItemStack().getType())
+                                && !plugin.getSettings().getKillTask().getItemsBlacklist().contains(((Item) entity).getItemStack().getType()))))
                         .forEach(entity -> {
                             StackedItem stackedItem = WStackedItem.of(entity);
                             int maxStackSize = ((Item) entity).getItemStack().getMaxStackSize();
-                            if (!applyTaskFilter || stackedItem.getStackAmount() > maxStackSize ||
-                                    (plugin.getSettings().killTaskUnstackedItems && stackedItem.getStackAmount() <= maxStackSize))
+                            if (!applyTaskFilter || stackedItem.getStackAmount() > maxStackSize
+                                    || (plugin.getSettings().getKillTask().isUnstackedItemsKillEnabled() && stackedItem.getStackAmount() <= maxStackSize)) {
                                 stackedItem.remove();
+                            }
                         });
             }
 
             for (Player pl : Bukkit.getOnlinePlayers()) {
-                if (pl.isOp())
+                if (pl.isOp()) {
                     Locale.KILL_ALL_OPS.send(pl);
+                }
             }
         });
     }
@@ -720,10 +721,10 @@ public final class SystemHandler implements SystemManager {
     }
 
     public boolean isBarrelBlock(Material blockType, World world) {
-        return (plugin.getSettings().whitelistedBarrels.size() == 0 ||
-                plugin.getSettings().whitelistedBarrels.contains(blockType)) &&
-                !plugin.getSettings().blacklistedBarrels.contains(blockType) &&
-                !plugin.getSettings().barrelsDisabledWorlds.contains(world.getName());
+        return (plugin.getSettings().getBarrels().getWhitelisted().size() == 0 ||
+                plugin.getSettings().getBarrels().getWhitelisted().contains(blockType)) &&
+                !plugin.getSettings().getBarrels().getBlacklisted().contains(blockType) &&
+                !plugin.getSettings().getBarrels().getDisabledWorlds().contains(world.getName());
     }
 
     public void markToBeSaved(StackedObject stackedObject) {
@@ -760,7 +761,7 @@ public final class SystemHandler implements SystemManager {
             }
         }
 
-        if (plugin.getSettings().spawnersOverrideEnabled) {
+        if (plugin.getSettings().getSpawners().isOverrideEnabled()) {
             plugin.getNMSSpawners().updateStackedSpawners(chunk);
         }
     }

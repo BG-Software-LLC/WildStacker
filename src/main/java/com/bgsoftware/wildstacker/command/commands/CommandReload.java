@@ -3,8 +3,8 @@ package com.bgsoftware.wildstacker.command.commands;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
+import com.bgsoftware.wildstacker.errors.ManagerLoadException;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
-import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.tasks.ItemsMerger;
 import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
@@ -49,7 +49,11 @@ public final class CommandReload implements ICommand {
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
         Executor.async(() -> {
-            SettingsHandler.reload();
+            try {
+                plugin.getSettings().loadData();
+            } catch (ManagerLoadException e) {
+                throw new RuntimeException(e);
+            }
             LootHandler.reload();
             Locale.reload();
             KillTask.start();

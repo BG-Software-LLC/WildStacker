@@ -18,7 +18,7 @@ public interface LootEntityAttributes {
      * @param entityType The type of the entity to mimic.
      * @return The new {@link Builder}
      */
-    static LootEntityAttributes.Builder newBuilder(EntityType entityType) {
+    static Builder newBuilder(EntityType entityType) {
         return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(entityType);
     }
 
@@ -29,7 +29,7 @@ public interface LootEntityAttributes {
      * @param stackedEntity The entity to get the attributes from.
      * @return The new {@link Builder}
      */
-    static LootEntityAttributes.Builder newBuilder(StackedEntity stackedEntity) {
+    static Builder newBuilder(StackedEntity stackedEntity) {
         return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(stackedEntity);
     }
 
@@ -40,7 +40,7 @@ public interface LootEntityAttributes {
      * @param livingEntity The entity to get the attributes from.
      * @return The new {@link Builder}
      */
-    static LootEntityAttributes.Builder newBuilder(LivingEntity livingEntity) {
+    static Builder newBuilder(LivingEntity livingEntity) {
         return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(livingEntity);
     }
 

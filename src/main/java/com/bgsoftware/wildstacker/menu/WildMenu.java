@@ -1,9 +1,9 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;

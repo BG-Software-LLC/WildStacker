@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -122,12 +123,12 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     public ItemStack getBarrelItem(int amount) {
         ItemStack itemStack = barrelItem.clone();
 
-        if (plugin.getSettings().dropStackedItem) {
+        if (plugin.getSettings().getBarrels().isDropStackedItemEnabled()) {
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
             itemStack.setAmount(1);
 
             ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().getGlobal().getGiveItemNamePattern()
                     .replace("{0}", amount + "")
                     .replace("{1}", ItemUtils.getFormattedType(new ItemStack(getType())))
                     .replace("{2}", "Barrel")
@@ -153,35 +154,35 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().barrelsLimits.getOrDefault(barrelItem.getType(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().getBarrels().getLimit(barrelItem.getType());
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().barrelsMergeRadius.getOrDefault(barrelItem.getType(), 0);
+        int radius = plugin.getSettings().getBarrels().getMergeRadius(barrelItem.getType());
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedBarrels.contains(barrelItem.getType());
+        return plugin.getSettings().getBarrels().getBlacklisted().contains(barrelItem.getType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedBarrels.size() == 0 ||
-                plugin.getSettings().whitelistedBarrels.contains(barrelItem.getType());
+        return plugin.getSettings().getBarrels().getWhitelisted().size() == 0 ||
+                plugin.getSettings().getBarrels().getWhitelisted().contains(barrelItem.getType());
     }
 
     @Override
     public boolean isWorldDisabled() {
-        return plugin.getSettings().barrelsDisabledWorlds.contains(object.getWorld().getName());
+        return plugin.getSettings().getBarrels().getDisabledWorlds().contains(object.getWorld().getName());
     }
 
     @Override
     public boolean isCached() {
-        return plugin.getSettings().barrelsStackingEnabled && super.isCached();
+        return plugin.getSettings().getBarrels().isEnabled() && super.isCached();
     }
 
     @Override
@@ -215,7 +216,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return;
         }
 
-        String customName = plugin.getSettings().barrelsCustomName;
+        String customName = plugin.getSettings().getBarrels().getCustomName();
 
         if (customName.isEmpty())
             return;
@@ -227,13 +228,13 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return;
         }
 
-        customName = plugin.getSettings().barrelsNameBuilder.build(this);
+        customName = plugin.getSettings().getBarrels().getNameBuilder().build(this);
         setHologramName(customName, true);
     }
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().getBarrels().isEnabled())
             return StackCheckResult.NOT_ENABLED;
 
         return super.runStackCheck(stackedObject);
@@ -246,7 +247,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         Chunk chunk = getChunk();
 
-        boolean chunkMerge = plugin.getSettings().chunkMergeBarrels;
+        boolean chunkMerge = plugin.getSettings().getBarrels().isChunkMergeEnabled();
         Location blockLocation = getLocation();
 
         Stream<StackedBarrel> barrelStream;
@@ -332,9 +333,9 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public void spawnStackParticle(boolean checkEnabled) {
-        if (!checkEnabled || plugin.getSettings().barrelsParticlesEnabled) {
+        if (!checkEnabled || plugin.getSettings().getBarrels().hasParticles()) {
             Location location = getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().barrelsParticles)
+            for (ParticleEffect particleWrapper : plugin.getSettings().getBarrels().getParticles())
                 particleWrapper.spawnParticle(location);
         }
     }

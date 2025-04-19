@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 public class NMSWorldImpl implements NMSWorld {
 
     @Override
-    public boolean canSpawnOn(org.bukkit.entity.Entity bukkitEntity, Location location) {
-        net.minecraft.server.v1_8_R3.World world = ((CraftWorld) location.getWorld()).getHandle();
+    public boolean canSpawnOn(Entity bukkitEntity, Location location) {
+        World world = ((CraftWorld) location.getWorld()).getHandle();
         net.minecraft.server.v1_8_R3.Entity entity = EntityTypes.a(bukkitEntity.getEntityId(), world);
 
         if (entity == null)
@@ -40,8 +40,8 @@ public class NMSWorldImpl implements NMSWorld {
     }
 
     @Override
-    public Collection<org.bukkit.entity.Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
-        net.minecraft.server.v1_8_R3.World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
+    public Collection<Entity> getEntitiesAtChunk(ChunkPosition chunkPosition) {
+        World world = ((CraftWorld) Bukkit.getWorld(chunkPosition.getWorld())).getHandle();
 
         Chunk chunk = world.getChunkIfLoaded(chunkPosition.getX(), chunkPosition.getZ());
 

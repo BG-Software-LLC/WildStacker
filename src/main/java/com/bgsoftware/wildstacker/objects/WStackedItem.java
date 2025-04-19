@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
@@ -100,30 +101,30 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().itemsLimits.getOrDefault(object.getItemStack().getType(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().getItems().getLimits().getOrDefault(object.getItemStack().getType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().itemsMergeRadius.getOrDefault(object.getItemStack().getType(), 0);
+        int radius = plugin.getSettings().getItems().getMergeRadius().getOrDefault(object.getItemStack().getType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedItems.contains(object.getItemStack().getType());
+        return plugin.getSettings().getItems().getBlacklistedItems().contains(object.getItemStack().getType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedItems.size() == 0 ||
-                plugin.getSettings().whitelistedItems.contains(object.getItemStack().getType());
+        return plugin.getSettings().getItems().getWhitelistedItems().size() == 0 ||
+                plugin.getSettings().getItems().getWhitelistedItems().contains(object.getItemStack().getType());
     }
 
     @Override
     public boolean isWorldDisabled() {
-        return plugin.getSettings().itemsDisabledWorlds.contains(object.getWorld().getName());
+        return plugin.getSettings().getItems().getDisabledWorlds().contains(object.getWorld().getName());
     }
 
     /*
@@ -132,7 +133,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public boolean isCached() {
-        return plugin.getSettings().itemsStackingEnabled && super.isCached();
+        return plugin.getSettings().getItems().isEnabled() && super.isCached();
     }
 
     @Override
@@ -149,7 +150,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void updateName() {
-        if (!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
+        if (!plugin.getSettings().getItems().isEnabled() || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
             return;
 
         ItemStack itemStack = getItemStack();
@@ -159,24 +160,24 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (mmoItem && mmoItemName == null)
             mmoItemName = getCustomName();
 
-        String customName = plugin.getSettings().itemsCustomName;
+        String customName = plugin.getSettings().getItems().getCustomName();
 
         if (customName.isEmpty())
             return;
 
         int amount = getStackAmount();
-        boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().itemsUnstackedCustomName || amount > 1;
+        boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().getItems().isUnstackedCustomNameEnabled() || amount > 1;
 
         if (updateName) {
             String cachedDisplayName = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : cachedDisplayName;
 
-            if (plugin.getSettings().itemsDisplayEnabled)
+            if (plugin.getSettings().getItems().isDisplayEnabled())
                 cachedDisplayName = displayName;
 
             setCachedDisplayName(DISPLAY_NAME_PLACEHOLDER.matcher(cachedDisplayName).replaceAll(displayName));
 
-            customName = plugin.getSettings().itemsNameBuilder.build(this);
+            customName = plugin.getSettings().getItems().getNameBuilder().build(this);
         }
 
         String CUSTOM_NAME = customName;
@@ -194,7 +195,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if (!plugin.getSettings().itemsStackingEnabled)
+        if (!plugin.getSettings().getItems().isEnabled())
             return StackCheckResult.NOT_ENABLED;
 
         StackCheckResult superResult = super.runStackCheck(stackedObject);
@@ -202,7 +203,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (superResult != StackCheckResult.SUCCESS)
             return superResult;
 
-        if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(object))
+        if (!plugin.getSettings().getItems().isMaxPickupDelayEnabled() && !ItemUtils.canPickup(object))
             return StackCheckResult.PICKUP_DELAY_EXCEEDED;
 
         if (isRemoved() || object.isDead())
@@ -210,7 +211,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         StackedItem targetItem = (StackedItem) stackedObject;
 
-        if (!plugin.getSettings().itemsMaxPickupDelay && !ItemUtils.canPickup(targetItem.getItem()))
+        if (!plugin.getSettings().getItems().isMaxPickupDelayEnabled() && !ItemUtils.canPickup(targetItem.getItem()))
             return StackCheckResult.TARGET_PICKUP_DELAY_EXCEEDED;
 
         if (((WStackedItem) targetItem).isRemoved() || targetItem.getItem().isDead())
@@ -259,9 +260,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void spawnStackParticle(boolean checkEnabled) {
-        if (!checkEnabled || plugin.getSettings().itemsParticlesEnabled) {
+        if (!checkEnabled || plugin.getSettings().getItems().hasParticles()) {
             Location location = getItem().getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().itemsParticles)
+            for (ParticleEffect particleWrapper : plugin.getSettings().getItems().getParticles())
                 particleWrapper.spawnParticle(location);
         }
     }
@@ -328,7 +329,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         int maxStackAmount = itemStack.getMaxStackSize();
         boolean inventoryFull = false;
 
-        if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled &&
+        if (maxStackAmount != 64 && !plugin.getSettings().getItems().isFixStackEnabled() &&
                 !itemStack.getType().name().contains("SHULKER_BOX"))
             maxStackAmount = 64;
 

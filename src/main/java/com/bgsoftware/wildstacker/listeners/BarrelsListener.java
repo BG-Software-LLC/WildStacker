@@ -55,7 +55,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelPlace(BlockPlaceEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().getBarrels().isEnabled())
             return;
 
         ItemStack inHand = e.getItemInHand();
@@ -73,11 +73,11 @@ public final class BarrelsListener implements Listener {
         try {
             int toPlace = ItemUtils.getSpawnerItemAmount(inHand);
 
-            if (toPlace <= 1 && plugin.getSettings().barrelsToggleCommand && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
+            if (toPlace <= 1 && plugin.getSettings().getBarrels().isToggleCommandEnabled() && !barrelsToggleCommandPlayers.contains(e.getPlayer().getUniqueId()))
                 return;
 
-            if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                    !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
+            if (!plugin.getSettings().getBarrels().getRequiredPermission().isEmpty() &&
+                    !e.getPlayer().hasPermission(plugin.getSettings().getBarrels().getRequiredPermission())) {
                 e.setCancelled(true);
                 Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
                 return;
@@ -105,7 +105,7 @@ public final class BarrelsListener implements Listener {
 
             boolean replaceAir = false;
 
-            if (plugin.getSettings().barrelsShiftPlaceStack) {
+            if (plugin.getSettings().getBarrels().isShiftPlaceStackEnabled()) {
                 toPlace *= inHand.getAmount();
                 replaceAir = true;
             }
@@ -188,7 +188,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelBreak(BlockBreakEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled || e.getBlock().getType() != Material.CAULDRON)
+        if (!plugin.getSettings().getBarrels().isEnabled() || e.getBlock().getType() != Material.CAULDRON)
             return;
 
         if (!plugin.getSystemManager().isStackedBarrel(e.getBlock()))
@@ -200,7 +200,7 @@ public final class BarrelsListener implements Listener {
         if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             ItemStack dropStack = EventsCaller.callBarrelDropEvent(stackedBarrel, e.getPlayer(), stackSize);
 
-            if (plugin.getSettings().barrelsAutoPickup) {
+            if (plugin.getSettings().getBarrels().isAutoPickupEnabled()) {
                 ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getBlock().getLocation());
             } else {
                 ItemUtils.dropItem(dropStack, e.getBlock().getLocation());
@@ -221,7 +221,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBarrelClick(PlayerInteractEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().getBarrels().isEnabled())
             return;
 
         if (ItemUtils.isOffHand(e) || e.getAction() != Action.RIGHT_CLICK_BLOCK)
@@ -241,7 +241,7 @@ public final class BarrelsListener implements Listener {
         if (offHandItem != null && offHandItem.getType() == stackedBarrel.getType())
             return;
 
-        if (e.getPlayer().isSneaking() && plugin.getSettings().barrelsPlaceInventory) {
+        if (e.getPlayer().isSneaking() && plugin.getSettings().getBarrels().isPlaceInventoryEnabled()) {
             BarrelsPlaceMenu.open(e.getPlayer(), stackedBarrel);
         } else if (stackedBarrel.runUnstack(1, e.getPlayer()) == UnstackResult.SUCCESS) {
             plugin.getProviders().notifyStackedBlockListeners(e.getPlayer(), stackedBarrel.getLocation(),
@@ -250,7 +250,7 @@ public final class BarrelsListener implements Listener {
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 ItemStack dropStack = EventsCaller.callBarrelDropEvent(stackedBarrel, e.getPlayer(), 1);
 
-                if (plugin.getSettings().barrelsAutoPickup) {
+                if (plugin.getSettings().getBarrels().isAutoPickupEnabled()) {
                     ItemUtils.addItem(dropStack, e.getPlayer().getInventory(), e.getClickedBlock().getLocation());
                 } else {
                     ItemUtils.dropItem(dropStack, e.getClickedBlock().getLocation());
@@ -264,8 +264,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled ||
-                EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
+        if (!plugin.getSettings().getBarrels().isEnabled() || EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
             return;
 
         Iterator<Block> blockListIterator = e.blockList().iterator();
@@ -277,7 +276,8 @@ public final class BarrelsListener implements Listener {
 
             StackedBarrel stackedBarrel = WStackedBarrel.of(block);
 
-            int amount = plugin.getSettings().explosionsBreakBarrelStack ? stackedBarrel.getStackAmount() : 1;
+            int amount = plugin.getSettings().getBarrels().isExplosionBreakStackEnabled()
+                    ? stackedBarrel.getStackAmount() : 1;
 
             if (stackedBarrel.runUnstack(amount, e.getEntity()) == UnstackResult.SUCCESS) {
                 ItemStack barrelItem = EventsCaller.callBarrelDropEvent(stackedBarrel, null, amount);
@@ -298,11 +298,11 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled || !plugin.getSettings().barrelsToggleCommand ||
+        if (!plugin.getSettings().getBarrels().isEnabled() || !plugin.getSettings().getBarrels().isToggleCommandEnabled() ||
                 !e.getPlayer().hasPermission("wildstacker.toggle"))
             return;
 
-        String commandSyntax = "/" + plugin.getSettings().barrelsToggleCommandSyntax;
+        String commandSyntax = "/" + plugin.getSettings().getBarrels().getToggleCommandSyntax();
 
         if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))
             return;
@@ -316,12 +316,12 @@ public final class BarrelsListener implements Listener {
             barrelsToggleCommandPlayers.add(e.getPlayer().getUniqueId());
             Locale.BARREL_TOGGLE_ON.send(e.getPlayer());
         }
-
     }
+
 
     @EventHandler
     public void onPistonExtend(BlockPistonExtendEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().getBarrels().isEnabled())
             return;
 
         for (Block block : e.getBlocks()) {
@@ -334,7 +334,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler
     public void onPistonRetract(BlockPistonRetractEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled)
+        if (!plugin.getSettings().getBarrels().isEnabled())
             return;
 
         for (Block block : e.getBlocks()) {
@@ -347,14 +347,15 @@ public final class BarrelsListener implements Listener {
 
     private boolean isBarrelBlock(Block block) {
         Material type = block.getType();
-        return (plugin.getSettings().whitelistedBarrels.size() == 0 ||
-                plugin.getSettings().whitelistedBarrels.contains(type)) &&
-                !plugin.getSettings().blacklistedBarrels.contains(type) &&
-                !plugin.getSettings().barrelsDisabledWorlds.contains(block.getWorld().getName());
+        return (plugin.getSettings().getBarrels().getWhitelisted().size() == 0 ||
+                plugin.getSettings().getBarrels().getWhitelisted().contains(type)) &&
+                !plugin.getSettings().getBarrels().getBlacklisted().contains(type) &&
+                !plugin.getSettings().getBarrels().getDisabledWorlds().contains(block.getWorld().getName());
     }
 
+
     private boolean isChunkLimit(Chunk chunk) {
-        int chunkLimit = plugin.getSettings().barrelsChunkLimit;
+        int chunkLimit = plugin.getSettings().getBarrels().getChunkLimit();
 
         if (chunkLimit <= 0)
             return false;
@@ -366,7 +367,7 @@ public final class BarrelsListener implements Listener {
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onCauldronFill(CauldronLevelChangeEvent e) {
-            if (!plugin.getSettings().barrelsStackingEnabled)
+            if (!plugin.getSettings().getBarrels().isEnabled())
                 return;
 
             if (plugin.getSystemManager().isStackedBarrel(e.getBlock())) {

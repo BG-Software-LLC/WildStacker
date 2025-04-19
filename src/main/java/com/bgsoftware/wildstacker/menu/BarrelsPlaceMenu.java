@@ -28,7 +28,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
     private BarrelsPlaceMenu(Location location, ItemStack barrelItem) {
         super("barrelsPlace");
         this.location = location;
-        this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().barrelsPlaceInventoryTitle
+        this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().getBarrels().getPlaceInventoryTitle()
                 .replace("{0}", EntityUtils.getFormattedType(barrelItem.getType().name())));
         this.barrelItem = barrelItem;
         this.cancelOnClick = false;
@@ -42,8 +42,8 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
     @Override
     public void onPlayerClick(InventoryClickEvent e) {
-        if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                !e.getWhoClicked().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
+        if (!plugin.getSettings().getBarrels().getRequiredPermission().isEmpty() &&
+                !e.getWhoClicked().hasPermission(plugin.getSettings().getBarrels().getRequiredPermission())) {
             e.setCancelled(true);
             Locale.BARREL_NO_PERMISSION.send(e.getWhoClicked());
             Executor.sync(() -> e.getWhoClicked().closeInventory(), 1L);
@@ -106,8 +106,8 @@ public final class BarrelsPlaceMenu extends WildMenu {
         int amount = 0;
         boolean dropAll = false;
 
-        if (!plugin.getSettings().barrelsRequiredPermission.isEmpty() &&
-                !e.getPlayer().hasPermission(plugin.getSettings().barrelsRequiredPermission)) {
+        if (!plugin.getSettings().getBarrels().getRequiredPermission().isEmpty() &&
+                !e.getPlayer().hasPermission(plugin.getSettings().getBarrels().getRequiredPermission())) {
             Locale.BARREL_NO_PERMISSION.send(e.getPlayer());
             dropAll = true;
         }

@@ -20,8 +20,8 @@ public final class StackTask extends BukkitRunnable {
     private static BukkitTask task;
 
     private StackTask() {
-        if (plugin.getSettings().entitiesStackingEnabled && plugin.getSettings().entitiesStackInterval > 0)
-            task = runTaskTimer(plugin, plugin.getSettings().entitiesStackInterval, plugin.getSettings().entitiesStackInterval);
+        if (plugin.getSettings().getEntities().isEnabled() && plugin.getSettings().getEntities().getStackInterval() > 0)
+            task = runTaskTimer(plugin, plugin.getSettings().getEntities().getStackInterval(), plugin.getSettings().getEntities().getStackInterval());
     }
 
     public static void start() {

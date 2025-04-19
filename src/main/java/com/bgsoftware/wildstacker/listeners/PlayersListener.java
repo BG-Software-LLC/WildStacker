@@ -38,10 +38,10 @@ public final class PlayersListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-        if (plugin.getSettings().killTaskInterval <= 0 || plugin.getSettings().killTaskTimeCommand.isEmpty())
+        if (plugin.getSettings().getKillTask().getInterval() <= 0 || plugin.getSettings().getKillTask().getTimeCommand().isEmpty())
             return;
 
-        for (String commandSyntax : plugin.getSettings().killTaskTimeCommand.split(",")) {
+        for (String commandSyntax : plugin.getSettings().getKillTask().getTimeCommand().split(",")) {
             commandSyntax = "/" + commandSyntax;
 
             if (!e.getMessage().equalsIgnoreCase(commandSyntax) && !e.getMessage().startsWith(commandSyntax + " "))

@@ -1,5 +1,9 @@
 package com.bgsoftware.wildstacker.utils;
 
+import com.bgsoftware.wildstacker.api.data.structures.IFast2EnumsArray;
+import com.bgsoftware.wildstacker.api.data.structures.IFast2EnumsMap;
+import com.bgsoftware.wildstacker.api.data.structures.IFast3EnumsArray;
+import com.bgsoftware.wildstacker.api.data.structures.IFastEnumArray;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
@@ -34,21 +38,21 @@ public final class GeneralUtils {
         numberFormatter.setRoundingMode(RoundingMode.FLOOR);
     }
 
-    public static boolean contains(Fast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity) {
+    public static boolean contains(IFast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity) {
         return fast2EnumsArray.contains(stackedEntity.getType(), stackedEntity.getSpawnCause());
     }
 
-    public static boolean contains(Fast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> fast3EnumsArray,
+    public static boolean contains(IFast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> fast3EnumsArray,
                                    StackedEntity stackedEntity, EntityDamageEvent.DamageCause damageCause) {
         return fast3EnumsArray.containsFirst(stackedEntity.getType(), stackedEntity.getSpawnCause()) ||
                 fast3EnumsArray.containsSecond(stackedEntity.getType(), damageCause);
     }
 
-    public static boolean containsOrEmpty(Fast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity) {
+    public static boolean containsOrEmpty(IFast2EnumsArray<EntityType, SpawnCause> fast2EnumsArray, StackedEntity stackedEntity) {
         return fast2EnumsArray.size() == 0 || contains(fast2EnumsArray, stackedEntity);
     }
 
-    public static boolean containsOrEmpty(FastEnumArray<Material> fastEnumArray, Material itemType) {
+    public static boolean containsOrEmpty(IFastEnumArray<Material> fastEnumArray, Material itemType) {
         return fastEnumArray.size() == 0 || fastEnumArray.contains(itemType);
     }
 
@@ -56,7 +60,7 @@ public final class GeneralUtils {
         return list.isEmpty() || element.isEmpty() || list.contains(element);
     }
 
-    public static int get(Fast2EnumsMap<EntityType, SpawnCause, Integer> fast2EnumsMap, StackedEntity stackedEntity, int def) {
+    public static int get(IFast2EnumsMap<EntityType, SpawnCause, Integer> fast2EnumsMap, StackedEntity stackedEntity, int def) {
         return fast2EnumsMap.getOrDefault(stackedEntity.getType(), stackedEntity.getSpawnCause(), def);
     }
 

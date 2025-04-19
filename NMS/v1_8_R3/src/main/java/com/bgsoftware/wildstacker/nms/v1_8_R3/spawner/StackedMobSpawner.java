@@ -63,7 +63,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     public int spawnRange = 4;
     public String failureReason = "";
     private String mobName;
-    private MobSpawnerAbstract.a spawnData;
+    private a spawnData;
     private int spawnedEntities = 0;
     private WStackedEntity demoEntity = null;
 
@@ -215,13 +215,13 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             return;
         }
 
-        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().minimumRequiredEntities, this.demoEntity, 1);
+        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), this.demoEntity, 1);
 
         int stackedEntityCount = Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 
         boolean canStackToTarget = nearbyAndStackableCount.get() + targetEntityCount + stackedEntityCount >= minimumEntityRequirement;
 
-        boolean spawnStacked = plugin.getSettings().entitiesStackingEnabled && canStackToTarget &&
+        boolean spawnStacked = plugin.getSettings().getEntities().isEnabled() && canStackToTarget &&
                 EventsCaller.callSpawnerStackedEntitySpawnEvent(stackedSpawner.getSpawner());
         failureReason = "";
 
@@ -274,7 +274,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 targetEntity.increaseStackAmount(increaseStackAmount, true);
                 demoEntity.spawnStackParticle(true);
 
-                if (plugin.getSettings().linkedEntitiesEnabled && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
+                if (plugin.getSettings().getEntities().isLinkedEntitiesEnabled() && targetEntity.getLivingEntity() != stackedSpawner.getLinkedEntity())
                     stackedSpawner.setLinkedEntity(targetEntity.getLivingEntity());
 
                 world.triggerEffect(2004, position, 0);
@@ -313,14 +313,14 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             NBTTagList nbttaglist = nbttagcompound.getList("SpawnPotentials", 10);
 
             for (int i = 0; i < nbttaglist.size(); ++i) {
-                this.mobs.add(new MobSpawnerAbstract.a(nbttaglist.get(i)));
+                this.mobs.add(new a(nbttaglist.get(i)));
             }
         }
 
         if (nbttagcompound.hasKeyOfType("SpawnData", 10)) {
-            this.a(new MobSpawnerAbstract.a(nbttagcompound.getCompound("SpawnData"), this.mobName));
+            this.a(new a(nbttagcompound.getCompound("SpawnData"), this.mobName));
         } else {
-            this.a((MobSpawnerAbstract.a) null);
+            this.a((a) null);
         }
 
         if (nbttagcompound.hasKeyOfType("MinSpawnDelay", 99)) {
@@ -361,7 +361,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 NBTTagList nbttaglist = new NBTTagList();
 
                 if (this.mobs.size() > 0) {
-                    for (MobSpawnerAbstract.a mobData : this.mobs)
+                    for (a mobData : this.mobs)
                         nbttaglist.add(mobData.a());
                 } else {
                     nbttaglist.add(spawnData.a());
@@ -373,7 +373,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     }
 
     @Override
-    public void a(MobSpawnerAbstract.a spawnData) {
+    public void a(a spawnData) {
         this.spawnData = spawnData;
     }
 
@@ -598,7 +598,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
 
     private StackedEntity getTargetEntity(StackedSpawner stackedSpawner, StackedEntity demoEntity,
                                           List<StackedEntity> nearbyEntities, AtomicLong nearbyAndStackableCount) {
-        if (!plugin.getSettings().entitiesStackingEnabled)
+        if (!plugin.getSettings().getEntities().isEnabled())
             return null;
 
         LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();

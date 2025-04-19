@@ -609,7 +609,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             ItemStack itemStack = itemEntity.getItem().copy();
 
             if (isPlayerPickup || livingEntity instanceof Fox) {
-                if (plugin.getSettings().itemsFixStackEnabled) {
+                if (plugin.getSettings().getItems().isFixStackEnabled()) {
                     itemStack.setCount(maxStackSize);
                     retryPickup = true;
                 } else {
