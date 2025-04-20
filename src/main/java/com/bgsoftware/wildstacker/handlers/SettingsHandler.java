@@ -10,6 +10,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.config.SettingsManagerImpl;
 import com.bgsoftware.wildstacker.menu.SpawnerAmountsMenu;
 import com.bgsoftware.wildstacker.menu.SpawnerUpgradeMenu;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
@@ -534,7 +535,7 @@ public final class SettingsHandler {
 
     public static void reload() {
         WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-        plugin.setSettings(new SettingsHandler(plugin));
+        plugin.setSettings(new SettingsManagerImpl(plugin));
     }
 
     private String getBoolean(boolean bool) {

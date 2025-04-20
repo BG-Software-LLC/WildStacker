@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.api;
 
+import com.bgsoftware.wildstacker.api.config.SettingsManager;
 import com.bgsoftware.wildstacker.api.loot.LootTable;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -121,6 +122,13 @@ public final class WildStackerAPI {
      */
     public static LootTable getLootTable(LivingEntity livingEntity) {
         return instance.getSystemManager().getLootTable(livingEntity);
+    }
+
+    /**
+     * Get the settings of the plugin.
+     */
+    public static SettingsManager getSettings() {
+        return instance.getSettings();
     }
 
     /**
