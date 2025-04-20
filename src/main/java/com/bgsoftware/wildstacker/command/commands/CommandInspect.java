@@ -62,7 +62,7 @@ public class CommandInspect implements ICommand {
             }
         }
 
-        targetPlayer.getInventory().addItem(new ItemBuilder(plugin.getSettings().inspectTool).build(amount));
+        targetPlayer.getInventory().addItem(new ItemBuilder(plugin.getSettings().getGlobal().getInspectTool()).build(amount));
         Locale.INSPECT_GIVE_PLAYER.send(sender, targetPlayer.getName(), amount);
         if (!targetPlayer.equals(sender))
             Locale.INSPECT_RECEIVE.send(targetPlayer, amount, sender.getName());

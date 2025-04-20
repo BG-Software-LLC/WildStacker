@@ -167,7 +167,7 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            if (!WildStackerPlugin.getPlugin().getSettings().whitelistedBarrels.contains(barrelType)) {
+            if (!WildStackerPlugin.getPlugin().getSettings().getBarrels().getWhitelisted().contains(barrelType)) {
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
             }
@@ -183,7 +183,7 @@ public final class CommandGive implements ICommand {
             args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
 
             ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().getGlobal().getGiveItemNamePattern()
                     .replace("{0}", stackSize + "")
                     .replace("{1}", typeName)
                     .replace("{2}", args[2])
@@ -222,7 +222,7 @@ public final class CommandGive implements ICommand {
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
                 } else if (args[2].equalsIgnoreCase("barrel")) {
-                    plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
+                    plugin.getSettings().getBarrels().getWhitelisted().collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
             case 6:
@@ -257,7 +257,7 @@ public final class CommandGive implements ICommand {
                                     entityType.getEntityClass() != null && LivingEntity.class.isAssignableFrom(entityType.getEntityClass()))
                             .forEach(entityType -> list.add(entityType.name().toLowerCase()));
                 } else if (args[3].equalsIgnoreCase("barrel")) {
-                    plugin.getSettings().whitelistedBarrels.collect().forEach(mat -> list.add(mat.name().toLowerCase()));
+                    plugin.getSettings().getBarrels().getWhitelisted().collect().forEach(mat -> list.add(mat.name().toLowerCase()));
                 }
                 break;
             case 7:

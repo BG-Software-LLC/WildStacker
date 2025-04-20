@@ -34,7 +34,7 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketUse(PlayerBucketFillEvent e) {
-        if (plugin.getSettings().bucketsStackerEnabled && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+        if (plugin.getSettings().getBuckets().isEnabled() && e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             Bukkit.getScheduler().runTask(plugin, () -> ItemUtils.stackBucket(e.getItemStack(), e.getPlayer().getInventory()));
         }
     }
@@ -63,7 +63,7 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent e) {
-        if (!plugin.getSettings().bucketsStackerEnabled)
+        if (!plugin.getSettings().getBuckets().isEnabled())
             return;
 
         //Current Item - in slot, Cursor - holded item
@@ -74,7 +74,7 @@ public final class BucketsListener implements Listener {
             return;
 
         ItemStack cursor, clicked;
-        int maxStack = plugin.getSettings().bucketsMaxStack;
+        int maxStack = plugin.getSettings().getBuckets().getMaxStack();
 
         switch (e.getClick()) {
             case MIDDLE:
@@ -132,7 +132,7 @@ public final class BucketsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBucketConsume(PlayerItemConsumeEvent e) {
-        if (!plugin.getSettings().bucketsStackerEnabled || e.getItem().getType() != Material.MILK_BUCKET ||
+        if (!plugin.getSettings().getBuckets().isEnabled() || e.getItem().getType() != Material.MILK_BUCKET ||
                 ServerVersion.isAtLeast(ServerVersion.v1_21))
             return;
 

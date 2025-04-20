@@ -8,7 +8,7 @@ public record ConflictPluginFixer_FastAsyncWorldEdit2(WildStackerPlugin plugin) 
 
     @Override
     public void fixConflict() {
-        if (plugin.getSettings().itemsStackingEnabled) {
+        if (plugin.getSettings().getItems().isEnabled()) {
             Settings.settings().TICK_LIMITER.ITEMS = Integer.MAX_VALUE;
             WildStackerPlugin.log("");
             WildStackerPlugin.log("Detected FastAsyncWorldEdit - Disabling ticks limiter for items...");

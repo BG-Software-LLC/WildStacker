@@ -491,7 +491,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             ItemStack itemStack = entityItem.getItemStack().cloneItemStack();
 
             if (isPlayerPickup) {
-                if (plugin.getSettings().itemsFixStackEnabled) {
+                if (plugin.getSettings().getItems().isFixStackEnabled()) {
                     itemStack.setCount(maxStackSize);
                     retryPickup = true;
                 } else {

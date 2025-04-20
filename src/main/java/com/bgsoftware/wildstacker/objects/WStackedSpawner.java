@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
+import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
@@ -80,8 +81,8 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public LivingEntity getLinkedEntity() {
-        if (linkedEntity != null && (!plugin.getSettings().linkedEntitiesEnabled || linkedEntity.isDead() || !linkedEntity.isValid() ||
-                linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().linkedEntitiesMaxDistance, 2.0)))
+        if (linkedEntity != null && (!plugin.getSettings().getEntities().isLinkedEntitiesEnabled() || linkedEntity.isDead() || !linkedEntity.isValid() ||
+                linkedEntity.getLocation().distanceSquared(getLocation()) > Math.pow(plugin.getSettings().getEntities().getLinkedEntitiesMaxDistance(), 2.0)))
             linkedEntity = null;
         return linkedEntity;
     }
@@ -93,7 +94,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public List<StackedSpawner> getNearbySpawners() {
-        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+        boolean chunkMerge = plugin.getSettings().getSpawners().isChunkMergeEnabled();
 
         Stream<StackedSpawner> spawnerStream;
 
@@ -135,35 +136,35 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().spawnersLimits.getOrDefault(getSpawnedType(), Integer.MAX_VALUE);
+        int limit = plugin.getSettings().getSpawners().getLimits().getOrDefault(getSpawnedType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().spawnersMergeRadius.getOrDefault(getSpawnedType(), 0);
+        int radius = plugin.getSettings().getSpawners().getMergeRadius().getOrDefault(getSpawnedType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().blacklistedSpawners.contains(getSpawnedType());
+        return plugin.getSettings().getSpawners().getBlacklistedSpawners().contains(getSpawnedType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().whitelistedSpawners.size() == 0 ||
-                plugin.getSettings().whitelistedSpawners.contains(getSpawnedType());
+        return plugin.getSettings().getSpawners().getWhitelistedSpawners().size() == 0 ||
+                plugin.getSettings().getSpawners().getWhitelistedSpawners().contains(getSpawnedType());
     }
 
     @Override
     public boolean isWorldDisabled() {
-        return plugin.getSettings().spawnersDisabledWorlds.contains(object.getWorld().getName());
+        return plugin.getSettings().getSpawners().getDisabledWorlds().contains(object.getWorld().getName());
     }
 
     @Override
     public boolean isCached() {
-        return plugin.getSettings().spawnersStackingEnabled && (!isDefaultUpgrade() || super.isCached());
+        return plugin.getSettings().getSpawners().isEnabled() && (!isDefaultUpgrade() || super.isCached());
     }
 
     @Override
@@ -195,26 +196,26 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             return;
         }
 
-        String customName = plugin.getSettings().spawnersCustomName;
+        String customName = plugin.getSettings().getSpawners().getCustomName();
 
         if (customName.isEmpty())
             return;
 
         int amount = getStackAmount();
 
-        if ((amount < 1 || (amount == 1 && !plugin.getSettings().spawnersUnstackedCustomName)) && isDefaultUpgrade()) {
+        if ((amount < 1 || (amount == 1 && !plugin.getSettings().getSpawners().hasUnstackedCustomName())) && isDefaultUpgrade()) {
             removeHologram();
             return;
         }
 
         setCachedDisplayName(EntityUtils.getFormattedType(getSpawnedType().name()));
-        customName = plugin.getSettings().spawnersNameBuilder.build(this);
-        setHologramName(customName, !plugin.getSettings().floatingSpawnerNames);
+        customName = plugin.getSettings().getSpawners().getNameBuilder().build(this);
+        setHologramName(customName, !plugin.getSettings().getSpawners().hasFloatingNames());
     }
 
     @Override
     public StackCheckResult runStackCheck(StackedObject stackedObject) {
-        if (!plugin.getSettings().spawnersStackingEnabled)
+        if (!plugin.getSettings().getSpawners().isEnabled())
             return StackCheckResult.NOT_ENABLED;
 
         return super.runStackCheck(stackedObject);
@@ -227,7 +228,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         Chunk chunk = getChunk();
 
-        boolean chunkMerge = plugin.getSettings().chunkMergeSpawners;
+        boolean chunkMerge = plugin.getSettings().getSpawners().isChunkMergeEnabled();
         Location blockLocation = getLocation();
 
         Stream<StackedSpawner> spawnerStream;
@@ -333,9 +334,9 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public void spawnStackParticle(boolean checkEnabled) {
-        if (!checkEnabled || plugin.getSettings().spawnersParticlesEnabled) {
+        if (!checkEnabled || plugin.getSettings().getSpawners().hasParticles()) {
             Location location = getLocation();
-            for (ParticleWrapper particleWrapper : plugin.getSettings().spawnersParticles)
+            for (ParticleEffect particleWrapper : plugin.getSettings().getSpawners().getParticles())
                 particleWrapper.spawnParticle(location);
         }
     }

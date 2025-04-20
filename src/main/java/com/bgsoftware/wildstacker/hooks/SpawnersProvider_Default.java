@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.config.SettingsManager;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -17,9 +18,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -43,7 +42,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         int perStackAmount = amount;
 
-        if (plugin.getSettings().getStackedItem) {
+        if (plugin.getSettings().getSpawners().isDropStackedItemEnabled()) {
             itemStack.setAmount(1);
             itemStack = ItemUtils.setSpawnerItemAmount(itemStack, amount);
         } else {
@@ -58,21 +57,18 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             CreatureSpawner creatureSpawner = (CreatureSpawner) blockStateMeta.getBlockState();
 
             creatureSpawner.setSpawnedType(entityType);
-
             blockStateMeta.setBlockState(creatureSpawner);
         } catch (Throwable ignored) {
         }
 
-        String customName = plugin.getSettings().spawnerItemName;
-
+        String customName = plugin.getSettings().getSpawners().getItemName();
         if (!customName.equals("")) {
             itemMeta.setDisplayName(customName.replace("{0}", perStackAmount + "")
                     .replace("{1}", EntityUtils.getFormattedType(entityType.name()))
                     .replace("{2}", spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
         }
 
-        List<String> customLore = plugin.getSettings().spawnerItemLore;
-
+        List<String> customLore = plugin.getSettings().getSpawners().getItemLore();
         if (!customLore.isEmpty()) {
             List<String> lore = new ArrayList<>();
             for (String line : customLore)
@@ -82,7 +78,6 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         }
 
         itemStack.setItemMeta(itemMeta);
-
         return itemStack;
     }
 
@@ -99,7 +94,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
         if ((spawnType == EntityType.PIG || spawnType == null) && itemMeta.hasDisplayName()) {
             String displayName = itemMeta.getDisplayName();
-            Matcher matcher = plugin.getSettings().SPAWNERS_PATTERN.matcher(displayName);
+            Matcher matcher = plugin.getSettings().getSpawners().getSpawnersPattern().matcher(displayName);
             if (matcher.matches()) {
                 List<String> indexes = Stream.of("0", "1", "2")
                         .sorted(Comparator.comparingInt(o -> displayName.indexOf("{" + o + "}"))).collect(Collectors.toList());
@@ -115,24 +110,37 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public void handleSpawnerExplode(StackedSpawner stackedSpawner, Entity entity, Player ignite, int brokenAmount) {
-        if (!plugin.getSettings().explosionsDropSpawner || (!plugin.getSettings().explosionsWorlds.isEmpty() &&
-                !plugin.getSettings().explosionsWorlds.contains(stackedSpawner.getWorld().getName())))
+        SettingsManager.Spawners spawners = plugin.getSettings().getSpawners();
+
+        if (!spawners.isExplosionDropEnabled() ||
+                (!spawners.getExplosionWorlds().isEmpty() &&
+                        !spawners.getExplosionWorlds().contains(stackedSpawner.getWorld().getName())))
             return;
 
-        if (plugin.getSettings().explosionsBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().explosionsBreakChance)
-            _dropSpawner(stackedSpawner, ignite, brokenAmount, plugin.getSettings().explosionsDropToInventory);
+        if (spawners.getExplosionBreakChance() >= 100 ||
+                ThreadLocalRandom.current().nextInt(100) < spawners.getExplosionBreakChance()) {
+            _dropSpawner(stackedSpawner, ignite, brokenAmount, spawners.isExplosionDropToInventoryEnabled());
+        }
     }
 
     @Override
     public void handleSpawnerBreak(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean breakMenu) {
-        if (!breakMenu && (!plugin.getSettings().silkTouchSpawners || (!plugin.getSettings().silkWorlds.isEmpty() &&
-                !plugin.getSettings().silkWorlds.contains(stackedSpawner.getWorld().getName()))))
+        SettingsManager.Spawners spawners = plugin.getSettings().getSpawners();
+
+        if (!breakMenu && (!spawners.isSilkTouchEnabled() ||
+                (!spawners.getSilkTouchWorlds().isEmpty() &&
+                        !spawners.getSilkTouchWorlds().contains(stackedSpawner.getWorld().getName()))))
             return;
 
-        if (breakMenu || (
-                (plugin.getSettings().silkTouchBreakChance >= 100 || ThreadLocalRandom.current().nextInt(100) < plugin.getSettings().silkTouchBreakChance) &&
-                        ((plugin.getSettings().dropSpawnerWithoutSilk && player.hasPermission("wildstacker.nosilkdrop")) ||
-                                (ItemUtils.isPickaxeAndHasSilkTouch(player.getInventory().getItemInHand()) && player.hasPermission("wildstacker.silktouch"))))) {
+        boolean success = spawners.getSilkTouchBreakChance() >= 100 ||
+                ThreadLocalRandom.current().nextInt(100) < spawners.getSilkTouchBreakChance();
+
+        boolean allowed =
+                (spawners.isDropWithoutSilkEnabled() && player.hasPermission("wildstacker.nosilkdrop")) ||
+                        (ItemUtils.isPickaxeAndHasSilkTouch(player.getInventory().getItemInHand()) &&
+                                player.hasPermission("wildstacker.silktouch"));
+
+        if (breakMenu || (success && allowed)) {
             dropSpawner(stackedSpawner, player, brokenAmount);
         }
     }
@@ -146,7 +154,7 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
 
     @Override
     public void dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount) {
-        _dropSpawner(stackedSpawner, player, brokenAmount, plugin.getSettings().dropToInventory);
+        _dropSpawner(stackedSpawner, player, brokenAmount, plugin.getSettings().getSpawners().isDropToInventoryEnabled());
     }
 
     private void _dropSpawner(StackedSpawner stackedSpawner, Player player, int brokenAmount, boolean dropToInventory) {
@@ -159,5 +167,4 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
             ItemUtils.dropItem(dropItem, toDrop);
         }
     }
-
 }

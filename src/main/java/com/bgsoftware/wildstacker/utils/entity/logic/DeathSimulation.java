@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
+import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
@@ -17,7 +18,6 @@ import com.bgsoftware.wildstacker.utils.events.HandlerListWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.statistics.StatisticsUtils;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -76,7 +76,7 @@ public final class DeathSimulation {
     public static EntityDamageData simulateDeath(StackedEntity stackedEntity, EntityDamageEvent damageEvent,
                                                  @Nullable Entity directKiller, @Nullable Entity sourceKiller,
                                                  boolean fromDeathEvent) {
-        if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
+        if (!plugin.getSettings().getEntities().isEnabled() && stackedEntity.getStackAmount() <= 1)
             return new EntityDamageData(false, Collections.emptyMap());
 
         boolean isSourceKillerPlayer = sourceKiller instanceof Player;
@@ -156,7 +156,7 @@ public final class DeathSimulation {
             giveStatisticsToKiller(directKiller, (Player) sourceKiller, unstackAmount, stackedEntity);
         }
 
-        if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+        if (plugin.getSettings().getEntities().isKeepFireEnabled() && livingEntity.getFireTicks() > -1)
             livingEntity.setFireTicks(160);
 
         // We want to cache the killer of the entity
@@ -168,8 +168,8 @@ public final class DeathSimulation {
         Executor.async(() -> {
             livingEntity.setFireTicks(fireTicks);
 
-            List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
-            int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
+            List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().getEntities().isMultiplyDropsEnabled() ? unstackAmount : 1);
+            int asyncXpResult = stackedEntity.getExp(plugin.getSettings().getEntities().isMultiplyExpEnabled() ? unstackAmount : 1, 0);
 
             Executor.sync(() -> {
                 // We want to remove the cache of the killer
@@ -194,7 +194,7 @@ public final class DeathSimulation {
 
                 if (!fromDeathEvent) {
                     int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
-                            stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
+                            stackedEntity.getExp(plugin.getSettings().getEntities().isMultiplyExpEnabled() ? unstackAmount : 1, 0);
                     EntityDeathEvent entityDeathEvent = plugin.getNMSEntities().createDeathEvent(
                             livingEntity, new LinkedList<>(drops), droppedExp, damageEvent);
 
@@ -237,18 +237,18 @@ public final class DeathSimulation {
 
                 // Multiply items that weren't added in the first place
                 // We should call this only when the event was called - aka finalDrops != drops.
-                if (plugin.getSettings().multiplyDrops && finalDrops != drops) {
+                if (plugin.getSettings().getEntities().isMultiplyDropsEnabled() && finalDrops != drops) {
                     subtract(drops, finalDrops).forEach(itemStack -> itemStack.setAmount(itemStack.getAmount() * unstackAmount));
                 }
 
                 finalDrops.forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
 
                 if (finalExp > 0) {
-                    if (GeneralUtils.contains(plugin.getSettings().entitiesAutoExpPickup, stackedEntity) && livingEntity.getKiller() != null) {
+                    if (GeneralUtils.contains(plugin.getSettings().getEntities().getAutoExpPickupTypes(), stackedEntity) && livingEntity.getKiller() != null) {
                         EntityUtils.giveExp(livingEntity.getKiller(), finalExp);
-                        if (plugin.getSettings().entitiesExpPickupSound != null)
+                        if (plugin.getSettings().getEntities().getExpPickupSound() != null)
                             livingEntity.getKiller().playSound(livingEntity.getLocation(),
-                                    plugin.getSettings().entitiesExpPickupSound, 0.1F, 0.1F);
+                                    plugin.getSettings().getEntities().getExpPickupSound(), 0.1F, 0.1F);
                     } else {
                         EntityUtils.spawnExp(livingEntity.getLocation(), finalExp);
                     }
@@ -281,7 +281,7 @@ public final class DeathSimulation {
         int entitiesToKill;
         double damageToNextStack;
 
-        if (plugin.getSettings().spreadDamage && !instantKill) {
+        if (plugin.getSettings().getEntities().isSpreadDamageEnabled() && !instantKill) {
             double entityHealth = stackedEntity.getHealth();
             double entityMaxHealth = stackedEntity.getLivingEntity().getMaxHealth();
 
@@ -299,7 +299,7 @@ public final class DeathSimulation {
     }
 
     private static boolean handleFastKill(LivingEntity livingEntity, Player damager) {
-        if (plugin.getSettings().entitiesFastKill) {
+        if (plugin.getSettings().getEntities().isFastKillEnabled()) {
 
             if (damager != null) {
                 // We make sure the entity has no damage ticks, so it can always be hit.

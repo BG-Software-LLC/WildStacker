@@ -15,7 +15,7 @@ public final class SuperiorSkyblockHook {
     private static boolean registered = false;
 
     public static void register(WildStackerPlugin plugin) {
-        if (!plugin.getSettings().superiorSkyblockHook)
+        if (!plugin.getSettings().getEntities().isSuperiorSkyblockHookEnabled())
             return;
 
         if (registered)

@@ -9,10 +9,12 @@ import com.bgsoftware.common.updater.Updater;
 import com.bgsoftware.wildstacker.api.WildStacker;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.command.CommandsHandler;
+
+import com.bgsoftware.wildstacker.config.SettingsManagerImpl;
+import com.bgsoftware.wildstacker.errors.ManagerLoadException;
 import com.bgsoftware.wildstacker.handlers.DataHandler;
 import com.bgsoftware.wildstacker.handlers.LootHandler;
 import com.bgsoftware.wildstacker.handlers.ProvidersHandler;
-import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.handlers.SystemHandler;
 import com.bgsoftware.wildstacker.handlers.UpgradesHandler;
 import com.bgsoftware.wildstacker.listeners.BarrelsListener;
@@ -54,7 +56,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     private static WildStackerPlugin plugin;
 
-    private SettingsHandler settingsHandler;
+    private SettingsManagerImpl settingsContainer;
     private SystemHandler systemManager;
     private UpgradesHandler upgradesHandler;
     private DataHandler dataHandler;
@@ -152,10 +154,24 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         log("******** ENABLE START ********");
 
+
+
+        settingsContainer = new SettingsManagerImpl(this);
+        try {
+            settingsContainer.loadData();
+        } catch (ManagerLoadException ex) {
+            if (!ManagerLoadException.handle(ex)) {
+                return;
+            }
+        }
         dataHandler = new DataHandler(this);
+
         systemManager = new SystemHandler(this);
         upgradesHandler = new UpgradesHandler();
-        settingsHandler = new SettingsHandler(this);
+
+        settingsContainer.registerSpawnConditions();
+        settingsContainer.updateUpgrades();
+
         providersHandler = new ProvidersHandler(this);
         lootHandler = new LootHandler(this);
 
@@ -275,12 +291,12 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         return upgradesHandler;
     }
 
-    public SettingsHandler getSettings() {
-        return settingsHandler;
+    public SettingsManagerImpl getSettings() {
+        return settingsContainer;
     }
 
-    public void setSettings(SettingsHandler settingsHandler) {
-        this.settingsHandler = settingsHandler;
+    public void setSettings(SettingsManagerImpl settingsContainer) {
+        this.settingsContainer = settingsContainer;
     }
 
     public Updater getUpdater() {

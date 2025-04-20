@@ -67,7 +67,7 @@ public final class ItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent e) {
-        if (!plugin.getSettings().itemsStackingEnabled || e.getEntity().getType() != EntityType.DROPPED_ITEM)
+        if (!plugin.getSettings().getItems().isEnabled() || e.getEntity().getType() != EntityType.DROPPED_ITEM)
             return;
 
         StackedItem stackedItem = WStackedItem.ofBypass(e.getEntity());
@@ -106,7 +106,7 @@ public final class ItemsListener implements Listener {
     }
 
     private void onEggLay(Chicken chicken, Item egg) {
-        if (!plugin.getSettings().eggLayMultiply || !EntityUtils.isStackable(chicken))
+        if (!plugin.getSettings().getEntities().isEggLayMultiplyEnabled() || !EntityUtils.isStackable(chicken))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(chicken);
@@ -143,8 +143,8 @@ public final class ItemsListener implements Listener {
 
         // Should run only if items stacking is enabled, or the item's stack size is larger than the max stack size.
         // Another case is if buckets stacking is enabled and the item is a bucket.
-        if (plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
-                (plugin.getSettings().bucketsStackerEnabled && stackedItem.getItemStack().getType().name().contains("BUCKET")))) {
+        if (plugin.getSettings().getItems().isEnabled() || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
+                (plugin.getSettings().getBuckets().isEnabled() && stackedItem.getItemStack().getType().name().contains("BUCKET")))) {
             plugin.getNMSEntities().handleItemPickup(livingEntity, stackedItem, remaining);
             return true;
         }
@@ -177,7 +177,7 @@ public final class ItemsListener implements Listener {
     }
 
     private void onScuteDrop(Entity turtle, Item scute) {
-        if (!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(turtle))
+        if (!plugin.getSettings().getEntities().isScuteMultiplyEnabled() || !EntityUtils.isStackable(turtle))
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(turtle);
@@ -187,7 +187,7 @@ public final class ItemsListener implements Listener {
     }
 
     private boolean isChunkLimit(Chunk chunk) {
-        int chunkLimit = plugin.getSettings().itemsChunkLimit;
+        int chunkLimit = plugin.getSettings().getItems().getChunkLimit();
 
         if (chunkLimit <= 0)
             return false;
@@ -213,7 +213,7 @@ public final class ItemsListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onItemMerge(ItemMergeEvent e) {
-            if (!plugin.getSettings().itemsStackingEnabled || !ItemUtils.isStackable(e.getEntity()) ||
+            if (!plugin.getSettings().getItems().isEnabled() || !ItemUtils.isStackable(e.getEntity()) ||
                     !ItemUtils.isStackable(e.getTarget()))
                 return;
 
@@ -245,7 +245,7 @@ public final class ItemsListener implements Listener {
 
         @EventHandler
         public void onBlockDropItem(BlockDropItemEvent e) {
-            if (!plugin.getSettings().itemsStackingEnabled)
+            if (!plugin.getSettings().getItems().isEnabled())
                 return;
 
             Map<ItemStack, Item> itemsMap = new HashMap<>();

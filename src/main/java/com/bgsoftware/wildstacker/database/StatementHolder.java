@@ -1,38 +1,30 @@
 package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.database.sql.SQLHelper;
+import com.bgsoftware.wildstacker.database.sql.session.QueryResult;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.PreparedStatement;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class StatementHolder {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private static final EnumMap<Query, IncreasableInteger> queryCalls = new EnumMap<>(Query.class);
-
+    private final String query;
+    private final Map<Integer, Object> values = new HashMap<>();
     private final List<Map<Integer, Object>> batches = new ArrayList<>();
 
-    private final String query;
-    private final Query queryEnum;
-    private final Map<Integer, Object> values = new HashMap<>();
     private int currentIndex = 1;
-
     private boolean isBatch = false;
 
-    StatementHolder(Query query) {
-        this.queryEnum = query;
-        this.query = query.getStatement();
-    }
-
-    public static EnumMap<Query, IncreasableInteger> getQueryCalls() {
-        return queryCalls;
+    StatementHolder(Query queryEnum) {
+        this.query = queryEnum.getStatement();
     }
 
     public StatementHolder setString(String value) {
@@ -66,8 +58,7 @@ public final class StatementHolder {
     }
 
     public StatementHolder setLocation(Location loc) {
-        values.put(currentIndex++, loc == null ? "" : loc.getWorld().getName() + "," + loc.getBlockX() + "," +
-                loc.getBlockY() + "," + loc.getBlockZ());
+        values.put(currentIndex++, loc == null ? "" : loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
         return this;
     }
 
@@ -89,82 +80,46 @@ public final class StatementHolder {
 
         SQLHelper.waitForConnection();
 
-        try {
-            StringHolder errorQuery = new StringHolder(query);
-
-            synchronized (SQLHelper.getMutex()) {
-                queryCalls.computeIfAbsent(queryEnum, q -> new IncreasableInteger()).increase();
-                SQLHelper.buildStatement(query, preparedStatement -> {
+        SQLHelper.customQuery(query, new QueryResult<PreparedStatement>()
+                .onSuccess(statement -> {
                     if (isBatch) {
-                        if (batches.isEmpty()) {
-                            isBatch = false;
-                            return;
+                        for (Map<Integer, Object> batch : batches) {
+                            for (Map.Entry<Integer, Object> entry : batch.entrySet())
+                                statement.setObject(entry.getKey(), entry.getValue());
+                            statement.addBatch();
                         }
-
-                        SQLHelper.setAutoCommit(false);
-
-                        for (Map<Integer, Object> values : batches) {
-                            for (Map.Entry<Integer, Object> entry : values.entrySet()) {
-                                preparedStatement.setObject(entry.getKey(), entry.getValue());
-                                errorQuery.value = errorQuery.value.replaceFirst("\\?", entry.getValue() + "");
-                            }
-                            preparedStatement.addBatch();
-                        }
-
-                        preparedStatement.executeBatch();
-                        try {
-                            SQLHelper.commit();
-                        } catch (Throwable ignored) {
-                        }
-
-                        SQLHelper.setAutoCommit(true);
+                        statement.executeBatch();
                     } else {
-                        for (Map.Entry<Integer, Object> entry : values.entrySet()) {
-                            preparedStatement.setObject(entry.getKey(), entry.getValue());
-                            errorQuery.value = errorQuery.value.replaceFirst("\\?", entry.getValue() + "");
-                        }
-                        preparedStatement.executeUpdate();
+                        for (Map.Entry<Integer, Object> entry : values.entrySet())
+                            statement.setObject(entry.getKey(), entry.getValue());
+                        statement.executeUpdate();
                     }
-                }, ex -> {
-                    WildStackerPlugin.log("&cFailed to execute query " + errorQuery);
-                    ex.printStackTrace();
-                });
-            }
-        } finally {
-            values.clear();
-        }
+                })
+                .onFail(error -> {
+                    WildStackerPlugin.log("&c[SQL] Failed to execute query: " + buildReadableQuery());
+                    error.printStackTrace();
+                })
+        );
+
+        values.clear();
+        batches.clear();
+        currentIndex = 1;
     }
 
-    private static class StringHolder {
+    private String buildReadableQuery() {
+        String formattedQuery = query;
+        List<Object> allValues = new ArrayList<>();
 
-        private String value;
-
-        StringHolder(String value) {
-            this.value = value;
+        if (isBatch && !batches.isEmpty()) {
+            allValues.addAll(batches.get(0).values());
+        } else {
+            allValues.addAll(values.values());
         }
 
-        @Override
-        public String toString() {
-            return value;
+        for (Object value : allValues) {
+            formattedQuery = formattedQuery.replaceFirst(Pattern.quote("?"), Matcher.quoteReplacement(String.valueOf(value)));
         }
+
+        return formattedQuery;
     }
-
-    public static final class IncreasableInteger {
-
-        private int value = 0;
-
-        IncreasableInteger() {
-
-        }
-
-        public int get() {
-            return value;
-        }
-
-        public void increase() {
-            value++;
-        }
-
-    }
-
 }

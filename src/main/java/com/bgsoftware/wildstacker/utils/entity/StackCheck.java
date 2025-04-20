@@ -1,8 +1,9 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
+import com.bgsoftware.wildstacker.api.config.StackCheckType;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 
-public enum StackCheck {
+public enum StackCheck implements StackCheckType {
 
     /**
      * Custom stack checks.
