@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.PickupItemListener;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -23,6 +23,7 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
@@ -85,8 +86,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
@@ -102,7 +101,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -513,11 +511,34 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
+    public void awardPickupScore(org.bukkit.entity.Player player, org.bukkit.entity.Item pickItem) {
+        // Do nothing.
+    }
+
+    @Override
     public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target,
                                   org.bukkit.inventory.ItemStack unused) {
         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
         LivingEntity targetEntity = ((CraftLivingEntity) target).getHandle();
         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(targetEntity));
+    }
+
+    @Override
+    public void playPickupAnimation(org.bukkit.entity.LivingEntity bukkitLivingEntity, org.bukkit.entity.Item item) {
+        LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+        ItemEntity itemEntity = (ItemEntity) ((CraftItem) item).getHandle();
+
+        ServerChunkCache serverChunkCache = (ServerChunkCache) livingEntity.level.getChunkSource();
+
+        ClientboundTakeItemEntityPacket takeItemEntityPacket = new ClientboundTakeItemEntityPacket(
+                itemEntity.getId(), livingEntity.getId(), item.getItemStack().getAmount());
+        ClientboundAddEntityPacket addEntityPacket = new ClientboundAddEntityPacket(itemEntity);
+        ClientboundSetEntityDataPacket setEntityDataPacket = new ClientboundSetEntityDataPacket(
+                itemEntity.getId(), itemEntity.getEntityData(), true);
+
+        serverChunkCache.broadcast(itemEntity, takeItemEntityPacket);
+        serverChunkCache.broadcast(itemEntity, addEntityPacket);
+        serverChunkCache.broadcast(itemEntity, setEntityDataPacket);
     }
 
     @Override
@@ -550,12 +571,12 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public boolean handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = livingEntity instanceof Player;
 
         if (!isPlayerPickup && !(livingEntity instanceof Mob))
-            return false;
+            return;
 
         ItemEntity itemEntity = (ItemEntity) ((CraftItem) stackedItem.getItem()).getHandle();
         if (remaining > 0)
@@ -594,13 +615,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
         boolean isDifferentPickupItem = pickupItem != itemEntity;
         boolean actualItemDupe = originalItemCount != stackAmount;
 
-        AtomicBoolean isEventCancelled = new AtomicBoolean(false);
         try {
             if (isDifferentPickupItem) itemEntity.setNeverPickUp();
-            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
-                handlerListWrapper.setOriginal();
-                handlerListWrapper.startTrackEvents();
-            });
+            EntitiesListener.IMP.secondPickupEventCall = true;
+            EntitiesListener.IMP.secondPickupEvent = null;
             if (isPlayerPickup) {
                 pickupItem.playerTouch((Player) livingEntity);
             } else {
@@ -608,19 +626,9 @@ public final class NMSEntitiesImpl implements NMSEntities {
             }
         } finally {
             if (isDifferentPickupItem) itemEntity.pickupDelay = originalPickupDelay;
-            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
-                handlerListWrapper.setNew();
-                for (Event event : handlerListWrapper.endTrackEvents()) {
-                    if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-                        isEventCancelled.set(true);
-                        break;
-                    }
-                }
-            });
+            EntitiesListener.IMP.secondPickupEventCall = false;
+            EntitiesListener.IMP.secondPickupEvent = null;
         }
-
-        if (isEventCancelled.get())
-            return true;
 
         int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItem().getCount() : 0);
 
@@ -661,8 +669,6 @@ public final class NMSEntitiesImpl implements NMSEntities {
             if (!pickupItem.isAlive())
                 itemEntity.discard();
         }
-
-        return true;
     }
 
     @Override

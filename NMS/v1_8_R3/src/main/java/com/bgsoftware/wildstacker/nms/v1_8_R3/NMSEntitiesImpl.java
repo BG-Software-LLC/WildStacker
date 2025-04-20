@@ -7,14 +7,16 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.PickupItemListener;
+import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import net.minecraft.server.v1_8_R3.AchievementList;
 import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
@@ -28,6 +30,7 @@ import net.minecraft.server.v1_8_R3.EntityTracker;
 import net.minecraft.server.v1_8_R3.EntityVillager;
 import net.minecraft.server.v1_8_R3.EntityZombie;
 import net.minecraft.server.v1_8_R3.ItemStack;
+import net.minecraft.server.v1_8_R3.Items;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagByte;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
@@ -69,8 +72,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.material.MaterialData;
@@ -78,7 +79,6 @@ import org.bukkit.material.MaterialData;
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -369,8 +369,53 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
+    public void awardPickupScore(Player player, org.bukkit.entity.Item pickItem) {
+        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) pickItem).getHandle();
+        net.minecraft.server.v1_8_R3.ItemStack itemStack = CraftItemStack.asNMSCopy(pickItem.getItemStack());
+
+        if (itemStack.getItem() == net.minecraft.server.v1_8_R3.Item.getItemOf(Blocks.LOG)) {
+            entityPlayer.b(AchievementList.g);
+        }
+
+        if (itemStack.getItem() == net.minecraft.server.v1_8_R3.Item.getItemOf(Blocks.LOG2)) {
+            entityPlayer.b(AchievementList.g);
+        }
+
+        if (itemStack.getItem() == Items.LEATHER) {
+            entityPlayer.b(AchievementList.t);
+        }
+
+        if (itemStack.getItem() == Items.DIAMOND) {
+            entityPlayer.b(AchievementList.w);
+        }
+
+        if (itemStack.getItem() == Items.BLAZE_ROD) {
+            entityPlayer.b(AchievementList.A);
+        }
+
+        if (itemStack.getItem() == Items.DIAMOND && entityItem.n() != null) {
+            EntityHuman otherPlayer = entityPlayer.world.a(entityItem.n());
+            if (otherPlayer != null && otherPlayer != entityPlayer) {
+                otherPlayer.b(AchievementList.x);
+            }
+        }
+    }
+
+    @Override
     public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack crossBowItem) {
         // Do nothing
+    }
+
+    @Override
+    public void playPickupAnimation(LivingEntity livingEntity, org.bukkit.entity.Item item) {
+        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
+        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
+        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
+        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId()));
+        //Makes sure the entity is still there.
+        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
+        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override
@@ -393,12 +438,12 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public boolean handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
         if (!isPlayerPickup && !(entityLiving instanceof EntityInsentient))
-            return false;
+            return;
 
         EntityItem entityItem = (EntityItem) ((CraftItem) stackedItem.getItem()).getHandle();
         if (remaining > 0)
@@ -437,13 +482,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
         boolean isDifferentPickupItem = pickupItem != entityItem;
         boolean actualItemDupe = originalItemCount != stackAmount;
 
-        AtomicBoolean isEventCancelled = new AtomicBoolean(false);
         try {
             if (isDifferentPickupItem) entityItem.r(); // setNeverPickUp
-            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
-                handlerListWrapper.setOriginal();
-                handlerListWrapper.startTrackEvents();
-            });
+            EntitiesListener.IMP.secondPickupEventCall = true;
+            EntitiesListener.IMP.secondPickupEvent = null;
             if (isPlayerPickup) {
                 pickupItem.d((EntityHuman) entityLiving); // playerTouch
             } else {
@@ -451,19 +493,9 @@ public final class NMSEntitiesImpl implements NMSEntities {
             }
         } finally {
             if (isDifferentPickupItem) entityItem.pickupDelay = originalPickupDelay;
-            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
-                handlerListWrapper.setNew();
-                for (Event event : handlerListWrapper.endTrackEvents()) {
-                    if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-                        isEventCancelled.set(true);
-                        break;
-                    }
-                }
-            });
+            EntitiesListener.IMP.secondPickupEventCall = false;
+            EntitiesListener.IMP.secondPickupEvent = null;
         }
-
-        if (isEventCancelled.get())
-            return true;
 
         int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItemStack().count : 0);
         if (pickupCount > 0) {
@@ -500,8 +532,6 @@ public final class NMSEntitiesImpl implements NMSEntities {
             if (!pickupItem.isAlive())
                 entityItem.die();
         }
-
-        return true;
     }
 
     @Override
