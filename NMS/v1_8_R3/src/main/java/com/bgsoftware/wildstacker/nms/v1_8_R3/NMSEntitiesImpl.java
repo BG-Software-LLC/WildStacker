@@ -130,7 +130,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
 
         entityItem.pickupDelay = 10;
 
-        StackedItem stackedItem = WStackedItem.ofBypass((Item) entityItem.getBukkitEntity());
+        StackedItem stackedItem = WStackedItem.ofBypass((org.bukkit.entity.Item) entityItem.getBukkitEntity());
 
         itemConsumer.accept(stackedItem);
 
@@ -345,7 +345,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(Player playerKiller,
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
                                org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity directDamager) {
         if (!(bukkitDamaged instanceof Monster))
@@ -369,10 +369,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(Player player, Item pickItem) {
+    public void awardPickupScore(Player player, org.bukkit.entity.Item pickItem) {
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) pickItem).getHandle();
-        ItemStack itemStack = CraftItemStack.asNMSCopy(pickItem.getItemStack());
+        net.minecraft.server.v1_8_R3.ItemStack itemStack = CraftItemStack.asNMSCopy(pickItem.getItemStack());
 
         if (itemStack.getItem() == net.minecraft.server.v1_8_R3.Item.getItemOf(Blocks.LOG)) {
             entityPlayer.b(AchievementList.g);
@@ -408,7 +408,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
+    public void playPickupAnimation(LivingEntity livingEntity, org.bukkit.entity.Item item) {
         EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
         EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
         EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
@@ -438,7 +438,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 

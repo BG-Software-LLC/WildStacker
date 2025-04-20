@@ -394,7 +394,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(Player playerKiller,
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
                                org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity directDamager) {
         EntityPlayer entityPlayer = ((CraftPlayer) playerKiller).getHandle();
@@ -465,7 +465,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 

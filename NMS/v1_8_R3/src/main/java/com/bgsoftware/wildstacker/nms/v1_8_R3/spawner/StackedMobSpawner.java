@@ -63,7 +63,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     public int spawnRange = 4;
     public String failureReason = "";
     private String mobName;
-    private a spawnData;
+    private MobSpawnerAbstract.a spawnData;
     private int spawnedEntities = 0;
     private WStackedEntity demoEntity = null;
 
@@ -313,14 +313,14 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
             NBTTagList nbttaglist = nbttagcompound.getList("SpawnPotentials", 10);
 
             for (int i = 0; i < nbttaglist.size(); ++i) {
-                this.mobs.add(new a(nbttaglist.get(i)));
+                this.mobs.add(new MobSpawnerAbstract.a(nbttaglist.get(i)));
             }
         }
 
         if (nbttagcompound.hasKeyOfType("SpawnData", 10)) {
-            this.a(new a(nbttagcompound.getCompound("SpawnData"), this.mobName));
+            this.a(new MobSpawnerAbstract.a(nbttagcompound.getCompound("SpawnData"), this.mobName));
         } else {
-            this.a((a) null);
+            this.a((MobSpawnerAbstract.a) null);
         }
 
         if (nbttagcompound.hasKeyOfType("MinSpawnDelay", 99)) {
@@ -361,7 +361,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 NBTTagList nbttaglist = new NBTTagList();
 
                 if (this.mobs.size() > 0) {
-                    for (a mobData : this.mobs)
+                    for (MobSpawnerAbstract.a mobData : this.mobs)
                         nbttaglist.add(mobData.a());
                 } else {
                     nbttaglist.add(spawnData.a());
@@ -373,7 +373,7 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
     }
 
     @Override
-    public void a(a spawnData) {
+    public void a(MobSpawnerAbstract.a spawnData) {
         this.spawnData = spawnData;
     }
 

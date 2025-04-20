@@ -16,7 +16,6 @@ public final class StatementHolder {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private final Query queryEnum;
     private final String query;
     private final Map<Integer, Object> values = new HashMap<>();
     private final List<Map<Integer, Object>> batches = new ArrayList<>();
@@ -25,7 +24,6 @@ public final class StatementHolder {
     private boolean isBatch = false;
 
     StatementHolder(Query queryEnum) {
-        this.queryEnum = queryEnum;
         this.query = queryEnum.getStatement();
     }
 
@@ -123,17 +121,5 @@ public final class StatementHolder {
         }
 
         return formattedQuery;
-    }
-
-    public static final class IncreasableInteger {
-        private int value = 0;
-
-        public int get() {
-            return value;
-        }
-
-        public void increase() {
-            value++;
-        }
     }
 }

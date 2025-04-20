@@ -120,7 +120,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     private static final ReflectMethod<Float> GET_SOUND_PITCH = new ReflectMethod<>(EntityLiving.class, "dH");
     private static final ReflectMethod<BlockPosition> TURTLE_SET_HAS_EGG = new ReflectMethod<>(EntityTurtle.class, "setHasEgg", boolean.class);
     private static final ReflectMethod<BlockPosition> TURTLE_HOME_POS = new ReflectMethod<>(EntityTurtle.class, "getHomePos");
-    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(Entity.class, boolean.class, "fromMobSpawner");
+    private static final ReflectField<Boolean> FROM_MOB_SPAWNER = new ReflectField<>(net.minecraft.server.v1_16_R3.Entity.class, boolean.class, "fromMobSpawner");
     private static final ReflectMethod<Void> INSENTIENT_PICK_UP_ITEM = new ReflectMethod<>(EntityInsentient.class, "b", EntityItem.class);
     private static final ReflectMethod<DataWatcher.Item<?>> DATA_WATCHER_GET_ITEM = new ReflectMethod<>(DataWatcher.class, "b", DataWatcherObject.class);
 
@@ -451,7 +451,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardKillScore(Player playerKiller,
+    public void awardKillScore(org.bukkit.entity.Player playerKiller,
                                org.bukkit.entity.Entity bukkitDamaged,
                                org.bukkit.entity.Entity directDamager) {
         EntityPlayer entityPlayer = ((CraftPlayer) playerKiller).getHandle();
@@ -527,7 +527,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         EntityLiving entityLiving = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = entityLiving instanceof EntityHuman;
 
@@ -726,7 +726,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public SpawnCause getEntitySpawnCause(LivingEntity livingEntity) {
+    public SpawnCause getEntitySpawnCause(org.bukkit.entity.LivingEntity livingEntity) {
         try {
             return SpawnCause.valueOf(livingEntity.getEntitySpawnReason());
         } catch (Throwable error) {
