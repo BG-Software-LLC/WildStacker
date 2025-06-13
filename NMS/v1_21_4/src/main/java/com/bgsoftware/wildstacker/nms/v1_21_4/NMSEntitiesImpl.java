@@ -135,6 +135,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "a", ServerLevel.class, ItemEntity.class);
     private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "b", EntityDataAccessor.class);
 
+    private static final boolean DAMAGESOURCE_CAUSE_SUPPORT = new ReflectMethod<>(DamageSource.class,
+            1, EntityDamageEvent.DamageCause.class).isValid();
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type,
@@ -733,7 +735,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 float finalSweepDamage = EnchantmentHelper.modifyDamage(serverLevel, itemStack, nearby, damageSource, baseSweepDamage)
                         * attackStrengthScale;
                 nearby.lastDamageCancelled = false;
-                nearby.hurtServer(serverLevel, damageSource.knownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK), finalSweepDamage);
+                if (DAMAGESOURCE_CAUSE_SUPPORT) {
+                    damageSource = damageSource.knownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK);
+                }
+                nearby.hurtServer(serverLevel, damageSource, finalSweepDamage);
             }
         }
     }
