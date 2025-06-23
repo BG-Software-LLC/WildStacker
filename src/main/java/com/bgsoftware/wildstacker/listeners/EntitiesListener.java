@@ -872,9 +872,12 @@ public final class EntitiesListener implements Listener {
         if (!stackedEntity.isCached())
             return;
 
+        Location entityLocation = entity.getLocation();
+
         //Chunk Limit
         Executor.sync(() -> {
-            if (isChunkLimit(entity.getLocation().getChunk()))
+            if (entityLocation.getWorld().isChunkLoaded(entityLocation.getBlockX() >> 4, entityLocation.getBlockZ() >> 4) &&
+                    isChunkLimit(entityLocation.getChunk()))
                 stackedEntity.remove();
         }, 5L);
 
