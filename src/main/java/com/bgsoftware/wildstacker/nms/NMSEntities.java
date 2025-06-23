@@ -25,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -67,6 +68,14 @@ public interface NMSEntities {
     boolean doesStriderHaveSaddle(Entity strider);
 
     void removeStriderSaddle(Entity strider);
+
+    default Optional<ItemStack> getHappyGhastHaveHarness(Entity happyGhast) {
+        return Optional.empty();
+    }
+
+    default void removeHappyGhastHarness(Entity happyGhast) {
+
+    }
 
     void setTurtleEgg(Entity turtle);
 

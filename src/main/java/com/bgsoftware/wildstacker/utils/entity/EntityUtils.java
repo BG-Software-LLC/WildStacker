@@ -506,6 +506,9 @@ public final class EntityUtils {
                 if (plugin.getNMSEntities().doesStriderHaveSaddle(livingEntity))
                     drops.add(new ItemStack(Material.SADDLE));
                 break;
+            case HAPPY_GHAST:
+                plugin.getNMSEntities().getHappyGhastHaveHarness(livingEntity).ifPresent(drops::add);
+                break;
             case HORSE:
             case DONKEY:
             case MULE:
@@ -576,6 +579,9 @@ public final class EntityUtils {
                 break;
             case STRIDER:
                 plugin.getNMSEntities().removeStriderSaddle(livingEntity);
+                break;
+            case HAPPY_GHAST:
+                plugin.getNMSEntities().removeHappyGhastHarness(livingEntity);
                 break;
             case HORSE:
             case DONKEY:

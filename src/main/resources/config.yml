@@ -262,6 +262,7 @@ entities:
     GLOW_SQUID_DARK_TICKS: false
     GOAT_SCREAMING: false
     GUARDIAN_ELDER: true
+    HAPPY_GHAST_SADDLE: true
     HORSE_CARRYING_CHEST: true
     HORSE_COLOR: true
     HORSE_JUMP: true

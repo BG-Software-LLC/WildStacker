@@ -127,6 +127,7 @@ public final class LootHandler {
             saveLootTable("glow_squid_baby");
         saveLootTable(EntityTypes.GOAT, "goat", "goat_baby");
         saveLootTable("guardian");
+        saveLootTable(EntityTypes.HAPPY_GHAST, "happy_ghast", "happy_ghast_baby");
         saveLootTable(EntityTypes.HOGLIN, "hoglin", "hoglin_baby");
         saveLootTable("horse");
         saveLootTable("horse_baby");

@@ -33,6 +33,7 @@ public enum StackCheck {
     GLOW_SQUID_DARK_TICKS(EntityTypes.GLOW_SQUID),
     GOAT_SCREAMING(EntityTypes.GOAT),
     GUARDIAN_ELDER(EntityTypes.ELDER_GUARDIAN),
+    HAPPY_GHAST_SADDLE(EntityTypes.HAPPY_GHAST),
     HORSE_CARRYING_CHEST(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
     HORSE_COLOR(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),
     HORSE_JUMP(EntityTypes.HORSE, EntityTypes.SKELETON_HORSE, EntityTypes.ZOMBIE_HORSE, EntityTypes.DONKEY, EntityTypes.MULE),

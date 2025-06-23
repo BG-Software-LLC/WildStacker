@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_5;
+package com.bgsoftware.wildstacker.nms.v1_21_6;
 
 import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectField;
@@ -16,6 +16,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
+import com.mojang.logging.LogUtils;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -36,6 +37,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -68,6 +70,7 @@ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
@@ -77,6 +80,7 @@ import org.bukkit.craftbukkit.entity.CraftChicken;
 import org.bukkit.craftbukkit.entity.CraftCow;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftExperienceOrb;
+import org.bukkit.craftbukkit.entity.CraftHappyGhast;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -105,6 +109,7 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
@@ -112,12 +117,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public final class NMSEntitiesImpl implements NMSEntities {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
             new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
@@ -127,15 +135,15 @@ public final class NMSEntitiesImpl implements NMSEntities {
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(
             Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
 
-    private static final ReflectField<Integer> LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME = new ReflectField<>(LivingEntity.class, int.class, "bb");
-    private static final ReflectField<Boolean> LIVING_ENTITY_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "bc");
-    private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "eo");
-    private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "j_");
-    private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fe");
-    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "ff");
-    private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "bO");
-    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "w", boolean.class);
-    private static final ReflectField<BlockPos> TURTLE_HOME_POS = new ReflectField<>(Turtle.class, BlockPos.class, "bQ");
+    private static final ReflectField<Integer> LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME = new ReflectField<>(LivingEntity.class, int.class, "bx");
+    private static final ReflectField<Boolean> LIVING_ENTITY_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "by");
+    private static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "et");
+    private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "f_");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "fk");
+    private static final ReflectMethod<Float> LIVING_ENTITY_GET_VOICE_PITCH = new ReflectMethod<>(LivingEntity.class, "fl");
+    private static final ReflectField<Integer> CHICKEN_EGG_TIME = new ReflectField<>(Chicken.class, Integer.class, "cq");
+    private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "x", boolean.class);
+    private static final ReflectField<BlockPos> TURTLE_HOME_POS = new ReflectField<>(Turtle.class, BlockPos.class, "cs");
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "a", ServerLevel.class, ItemEntity.class);
     private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "b", EntityDataAccessor.class);
 
@@ -295,7 +303,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
             lastDamageByPlayerTime = livingEntity.lastHurtByPlayerMemoryTime;
             isDropExperience = livingEntity.shouldDropExperience();
         } catch (Throwable error) {
-            lastDamageByPlayerTime = LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME.get(livingEntity);
+            lastDamageByPlayerTime = LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME.get(livingEntity);
             isDropExperience = LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
         }
 
@@ -311,7 +319,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
         try {
             livingEntity.lastHurtByPlayerMemoryTime = 100;
         } catch (Throwable error) {
-            LIVING_ENTITY_LAST_HURT_BY_PLAYER_TIME.set(livingEntity, 100);
+            LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME.set(livingEntity, 100);
         }
     }
 
@@ -391,6 +399,19 @@ public final class NMSEntitiesImpl implements NMSEntities {
             Strider strider = ((CraftStrider) bukkitStrider).getHandle();
             strider.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, ItemStack.EMPTY);
         }
+    }
+
+    @Override
+    public Optional<org.bukkit.inventory.ItemStack> getHappyGhastHaveHarness(org.bukkit.entity.Entity strider) {
+        ItemStack harness = ((CraftHappyGhast) strider).getHandle().getBodyArmorItem();
+        if (harness == null || harness.isEmpty())
+            return Optional.empty();
+        return Optional.of(CraftItemStack.asBukkitCopy(harness));
+    }
+
+    @Override
+    public void removeHappyGhastHarness(org.bukkit.entity.Entity strider) {
+        ((CraftHappyGhast) strider).getHandle().setBodyArmorItem(ItemStack.EMPTY);
     }
 
     @Override
@@ -499,6 +520,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 return StackCheckResult.FROG_TYPE;
         }
 
+        if (StackCheck.HAPPY_GHAST_SADDLE.isEnabled() && StackCheck.HAPPY_GHAST_SADDLE.isTypeAllowed(entityType)) {
+            if (((CraftHappyGhast) en1).getHandle().isWearingBodyArmor() != ((CraftHappyGhast) en2).getHandle().isWearingBodyArmor())
+                return StackCheckResult.HAPPY_GHAST_SADDLE;
+        }
+
         if (StackCheck.PIG_TYPE.isEnabled() && StackCheck.PIG_TYPE.isTypeAllowed(entityType)) {
             if (((Pig) en1).getVariant() != ((Pig) en2).getVariant())
                 return StackCheckResult.PIG_TYPE;
@@ -520,8 +546,14 @@ public final class NMSEntitiesImpl implements NMSEntities {
     @Override
     public boolean checkEntityAttributes(org.bukkit.entity.LivingEntity bukkitEntity, Map<String, Object> attributes) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitEntity).getHandle();
-        CompoundTag entityCompound = new CompoundTag();
-        livingEntity.addAdditionalSaveData(entityCompound);
+
+        CompoundTag entityCompound;
+
+        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(livingEntity.problemPath(), LOGGER)) {
+            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, livingEntity.registryAccess());
+            livingEntity.saveWithoutId(tagValueOutput);
+            entityCompound = tagValueOutput.buildResult();
+        }
 
         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
             Tag tag = entityCompound.get(attribute.getKey());
@@ -736,7 +768,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
                                    org.bukkit.entity.LivingEntity bukkitLivingEntity, double damage) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         ServerPlayer serverPlayer = ((CraftPlayer) attacker).getHandle();
-        ServerLevel serverLevel = serverPlayer.serverLevel();
+        ServerLevel serverLevel = serverPlayer.level();
         ItemStack itemStack = CraftItemStack.asNMSCopy(usedItem);
 
         // Making sure the player used a sword.

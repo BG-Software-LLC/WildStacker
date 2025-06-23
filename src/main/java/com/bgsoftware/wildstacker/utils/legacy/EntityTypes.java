@@ -42,6 +42,7 @@ public enum EntityTypes {
     GLOW_SQUID,
     GOAT,
     GUARDIAN,
+    HAPPY_GHAST,
     HOGLIN,
     HORSE,
     HUSK,
