@@ -7,13 +7,39 @@ public interface UnloadedStackedObject {
 
     /**
      * Get the location of the object.
+     *
+     * @deprecated World is not guaranteed to be loaded
      */
+    @Deprecated
     Location getLocation();
 
     /**
      * Get the world of the object.
+     *
+     * @deprecated World is not guaranteed to be loaded
      */
+    @Deprecated
     World getWorld();
+
+    /**
+     * Get the name of the world of the object.
+     */
+    String getWorldName();
+
+    /**
+     * Get the x-coords of the object.
+     */
+    int getX();
+
+    /**
+     * Get the y-coords of the object.
+     */
+    int getY();
+
+    /**
+     * Get the z-coords of the object.
+     */
+    int getZ();
 
     /**
      * Get the stack amount

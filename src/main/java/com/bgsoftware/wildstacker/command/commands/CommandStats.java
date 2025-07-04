@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.command.ICommand;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
-import java.util.Map;
 
 public final class CommandStats implements ICommand {
 
@@ -42,20 +41,14 @@ public final class CommandStats implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size(),
-                unloadedEntitiesAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size(),
-                itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size(),
-                unloadedItemsAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size(),
-                spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size(),
-                barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size();
-
-        int spawnersUnloadedAmount = 0, barrelsUnloadedAmount = 0;
-
-        for (Map<?, ?> map : plugin.getDataHandler().CACHED_SPAWNERS_RAW.values())
-            spawnersUnloadedAmount += map.size();
-
-        for (Map<?, ?> map : plugin.getDataHandler().CACHED_BARRELS_RAW.values())
-            barrelsUnloadedAmount += map.size();
+        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size();
+        int unloadedEntitiesAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size();
+        int itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size();
+        int unloadedItemsAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size();
+        int spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size();
+        int barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size();
+        int spawnersUnloadedAmount = plugin.getDataHandler().CACHED_SPAWNERS_RAW.size();
+        int barrelsUnloadedAmount = plugin.getDataHandler().CACHED_BARRELS_RAW.size();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + unloadedEntitiesAmount + ")" +

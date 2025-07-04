@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_6.spawner;
+package com.bgsoftware.wildstacker.nms.v1_21_7.spawner;
 
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;

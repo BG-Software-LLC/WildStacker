@@ -8,10 +8,10 @@ java {
     }
 }
 
-group 'NMS:v1_21_6'
+group 'NMS:v1_21_7'
 
 dependencies {
-    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.7-R0.1-SNAPSHOT")
     compileOnly project(":NMS:Spigot-1_20_3")
     compileOnly project(":NMS:Paper-1_20_3")
     compileOnly project(":API")

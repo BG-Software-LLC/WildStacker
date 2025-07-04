@@ -3,11 +3,8 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Map;
 
 public final class WUnloadedStackedBarrel extends WUnloadedStackedObject implements UnloadedStackedBarrel {
 
@@ -18,7 +15,12 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
     }
 
     public WUnloadedStackedBarrel(Location location, int stackAmount, ItemStack barrelItem) {
-        super(location, stackAmount);
+        this(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                stackAmount, barrelItem);
+    }
+
+    public WUnloadedStackedBarrel(String worldName, int locX, int locY, int locZ, int stackAmount, ItemStack barrelItem) {
+        super(worldName, locX, locY, locZ, stackAmount);
         this.barrelItem = barrelItem;
     }
 
@@ -31,13 +33,10 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
 
     @Override
     public void remove() {
-        Location location = getLocation();
-        Map<Location, UnloadedStackedBarrel> cachedBarrels = plugin.getDataHandler().CACHED_BARRELS_RAW.get(new ChunkPosition(location));
-        if (cachedBarrels != null)
-            cachedBarrels.remove(location);
+        plugin.getDataHandler().CACHED_BARRELS_RAW.remove(this);
 
         Query.BARREL_DELETE.getStatementHolder()
-                .setLocation(getLocation())
+                .setLocation(this)
                 .execute(true);
     }
 

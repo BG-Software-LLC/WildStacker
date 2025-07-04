@@ -1,12 +1,12 @@
-package com.bgsoftware.wildstacker.nms.v1_21_6;
+package com.bgsoftware.wildstacker.nms.v1_21_7;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
-import com.bgsoftware.wildstacker.nms.v1_21_6.spawner.SpawnerWatcherTickingBlockEntity;
-import com.bgsoftware.wildstacker.nms.v1_21_6.spawner.SyncedCreatureSpawnerImpl;
+import com.bgsoftware.wildstacker.nms.v1_21_7.spawner.SpawnerWatcherTickingBlockEntity;
+import com.bgsoftware.wildstacker.nms.v1_21_7.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;

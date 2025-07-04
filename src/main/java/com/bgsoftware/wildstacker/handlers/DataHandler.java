@@ -15,17 +15,16 @@ import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
+import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,16 +36,16 @@ public final class DataHandler {
 
     public final Map<UUID, StackedItem> CACHED_ITEMS = new ConcurrentHashMap<>();
     public final Map<UUID, StackedEntity> CACHED_ENTITIES = new ConcurrentHashMap<>();
-    public final Map<Location, StackedSpawner> CACHED_SPAWNERS = new ConcurrentHashMap<>();
+    public final Location2ObjectMap<StackedSpawner> CACHED_SPAWNERS = new Location2ObjectMap<>();
     public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
-    public final Map<Location, StackedBarrel> CACHED_BARRELS = new ConcurrentHashMap<>();
+    public final Location2ObjectMap<StackedBarrel> CACHED_BARRELS = new Location2ObjectMap<>();
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
     public final Set<StackedObject> OBJECTS_TO_SAVE = Collections.newSetFromMap(new ConcurrentHashMap<>());
     //References for all the data from database
     public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
     public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
-    public final Map<ChunkPosition, Map<Location, UnloadedStackedSpawner>> CACHED_SPAWNERS_RAW = new ConcurrentHashMap<>();
-    public final Map<ChunkPosition, Map<Location, UnloadedStackedBarrel>> CACHED_BARRELS_RAW = new ConcurrentHashMap<>();
+    public final Location2ObjectMap<UnloadedStackedSpawner> CACHED_SPAWNERS_RAW = new Location2ObjectMap<>();
+    public final Location2ObjectMap<UnloadedStackedBarrel> CACHED_BARRELS_RAW = new Location2ObjectMap<>();
     public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private WildStackerPlugin plugin;
 
@@ -114,11 +113,11 @@ public final class DataHandler {
     }
 
     public List<StackedObject> getStackedObjects() {
-        List<StackedObject> stackedObjects = new ArrayList<>();
+        List<StackedObject> stackedObjects = new LinkedList<>();
         stackedObjects.addAll(CACHED_ITEMS.values());
         stackedObjects.addAll(CACHED_ENTITIES.values());
-        stackedObjects.addAll(CACHED_SPAWNERS.values());
-        stackedObjects.addAll(CACHED_BARRELS.values());
+        CACHED_SPAWNERS.collect(stackedObjects);
+        CACHED_BARRELS.collect(stackedObjects);
         return stackedObjects;
     }
 
@@ -173,28 +172,23 @@ public final class DataHandler {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
-                World blockWorld = Bukkit.getWorld(locationSections[0]);
 
-                String exceptionReason = "Null world.";
+                String worldName = locationSections[0];
+                int locX = Integer.valueOf(locationSections[1]);
+                int locY = Integer.valueOf(locationSections[2]);
+                int locZ = Integer.valueOf(locationSections[3]);
 
-                if (blockWorld != null) {
-                    Location blockLocation = new Location(
-                            blockWorld,
-                            Integer.valueOf(locationSections[1]),
-                            Integer.valueOf(locationSections[2]),
-                            Integer.valueOf(locationSections[3])
-                    );
+                String exceptionReason = null;
 
-
-                    try {
-                        int stackAmount = resultSet.getInt("stackAmount");
-                        int upgradeId = resultSet.getInt("upgrade");
-                        CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(blockLocation), s -> Maps.newConcurrentMap())
-                                .put(blockLocation, new WUnloadedStackedSpawner(blockLocation, stackAmount, upgradeId));
-                        continue;
-                    } catch (Exception ex) {
-                        exceptionReason = "Exception was thrown.";
-                    }
+                try {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    int upgradeId = resultSet.getInt("upgrade");
+                    WUnloadedStackedSpawner unloadedStackedSpawner =
+                            new WUnloadedStackedSpawner(worldName, locX, locY, locZ, stackAmount, upgradeId);
+                    CACHED_SPAWNERS_RAW.put(unloadedStackedSpawner, unloadedStackedSpawner);
+                    continue;
+                } catch (Exception ex) {
+                    exceptionReason = "Exception was thrown.";
                 }
 
                 WildStackerPlugin.log("Couldn't load spawner: " + location);
@@ -215,28 +209,24 @@ public final class DataHandler {
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
-                World blockWorld = Bukkit.getWorld(locationSections[0]);
 
-                String exceptionReason = "Null world.";
+                String worldName = locationSections[0];
+                int locX = Integer.valueOf(locationSections[1]);
+                int locY = Integer.valueOf(locationSections[2]);
+                int locZ = Integer.valueOf(locationSections[3]);
 
-                if (blockWorld != null) {
-                    Location blockLocation = new Location(
-                            blockWorld,
-                            Integer.valueOf(locationSections[1]),
-                            Integer.valueOf(locationSections[2]),
-                            Integer.valueOf(locationSections[3])
-                    );
+                String exceptionReason = null;
 
-                    try {
-                        int stackAmount = resultSet.getInt("stackAmount");
-                        ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
-                                plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
-                        CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(blockLocation), s -> Maps.newConcurrentMap())
-                                .put(blockLocation, new WUnloadedStackedBarrel(blockLocation, stackAmount, barrelItem));
-                        continue;
-                    } catch (Exception ex) {
-                        exceptionReason = "Exception was thrown.";
-                    }
+                try {
+                    int stackAmount = resultSet.getInt("stackAmount");
+                    ItemStack barrelItem = resultSet.getString("item").isEmpty() ? null :
+                            plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
+                    WUnloadedStackedBarrel unloadedStackedBarrel =
+                            new WUnloadedStackedBarrel(worldName, locX, locY, locZ, stackAmount, barrelItem);
+                    CACHED_BARRELS_RAW.put(unloadedStackedBarrel, unloadedStackedBarrel);
+                    continue;
+                } catch (Exception ex) {
+                    exceptionReason = "Exception was thrown.";
                 }
 
                 WildStackerPlugin.log("Couldn't load barrel: " + location);

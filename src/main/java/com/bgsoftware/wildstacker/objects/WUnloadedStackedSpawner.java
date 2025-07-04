@@ -4,10 +4,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.database.Query;
-import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import org.bukkit.Location;
-
-import java.util.Map;
 
 public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implements UnloadedStackedSpawner {
 
@@ -18,7 +15,12 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
     }
 
     public WUnloadedStackedSpawner(Location location, int stackAmount, int spawnerUpgradeId) {
-        super(location, stackAmount);
+        this(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                stackAmount, spawnerUpgradeId);
+    }
+
+    public WUnloadedStackedSpawner(String worldName, int locX, int locY, int locZ, int stackAmount, int spawnerUpgradeId) {
+        super(worldName, locX, locY, locZ, stackAmount);
         this.spawnerUpgradeId = spawnerUpgradeId;
     }
 
@@ -39,13 +41,10 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
 
     @Override
     public void remove() {
-        Location location = getLocation();
-        Map<Location, UnloadedStackedSpawner> cachedSpawners = plugin.getDataHandler().CACHED_SPAWNERS_RAW.get(new ChunkPosition(location));
-        if (cachedSpawners != null)
-            cachedSpawners.remove(location);
+        plugin.getDataHandler().CACHED_SPAWNERS_RAW.remove(this);
 
         Query.SPAWNER_DELETE.getStatementHolder()
-                .setLocation(getLocation())
+                .setLocation(this)
                 .execute(true);
     }
 

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_6;
+package com.bgsoftware.wildstacker.nms.v1_21_7;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.nms.NMSWorld;

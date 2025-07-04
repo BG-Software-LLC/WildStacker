@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.database;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -66,8 +67,20 @@ public final class StatementHolder {
     }
 
     public StatementHolder setLocation(Location loc) {
-        values.put(currentIndex++, loc == null ? "" : loc.getWorld().getName() + "," + loc.getBlockX() + "," +
-                loc.getBlockY() + "," + loc.getBlockZ());
+        if (loc == null) {
+            values.put(currentIndex++, "");
+            return this;
+        } else {
+            return setLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        }
+    }
+
+    public StatementHolder setLocation(Location2ObjectMap.ILocationEntity entity) {
+        return setLocation(entity.getWorldName(), entity.getX(), entity.getY(), entity.getZ());
+    }
+
+    private StatementHolder setLocation(String worldName, int locX, int locY, int locZ) {
+        values.put(currentIndex++, worldName + "," + locX + "," + locY + "," + locZ);
         return this;
     }
 

@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_6;
+package com.bgsoftware.wildstacker.nms.v1_21_7;
 
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.utils.holograms.Hologram;

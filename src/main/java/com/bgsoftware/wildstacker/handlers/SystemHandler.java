@@ -42,7 +42,6 @@ import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -301,7 +300,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedSpawner> getStackedSpawners() {
-        return new ArrayList<>(dataHandler.CACHED_SPAWNERS.values());
+        return (List<StackedSpawner>) dataHandler.CACHED_SPAWNERS.values();
     }
 
     @Override
@@ -319,15 +318,15 @@ public final class SystemHandler implements SystemManager {
     public List<UnloadedStackedSpawner> getAllStackedSpawners() {
         List<UnloadedStackedSpawner> spawners = new ArrayList<>();
 
-        dataHandler.CACHED_SPAWNERS.values().forEach(stackedSpawner -> spawners.add(new WUnloadedStackedSpawner(stackedSpawner)));
-        dataHandler.CACHED_SPAWNERS_RAW.values().forEach(map -> spawners.addAll(map.values()));
+        dataHandler.CACHED_SPAWNERS.collect(spawners, WUnloadedStackedSpawner::new);
+        dataHandler.CACHED_SPAWNERS_RAW.collect(spawners);
 
         return spawners;
     }
 
     @Override
     public List<StackedBarrel> getStackedBarrels() {
-        return new ArrayList<>(dataHandler.CACHED_BARRELS.values());
+        return (List<StackedBarrel>) dataHandler.CACHED_BARRELS.values();
     }
 
     @Override
@@ -345,8 +344,8 @@ public final class SystemHandler implements SystemManager {
     public List<UnloadedStackedBarrel> getAllStackedBarrels() {
         List<UnloadedStackedBarrel> barrels = new ArrayList<>();
 
-        dataHandler.CACHED_BARRELS.values().forEach(stackedBarrel -> barrels.add(new WUnloadedStackedBarrel(stackedBarrel)));
-        dataHandler.CACHED_BARRELS_RAW.values().forEach(map -> barrels.addAll(map.values()));
+        dataHandler.CACHED_BARRELS.collect(barrels, WUnloadedStackedBarrel::new);
+        dataHandler.CACHED_BARRELS_RAW.collect(barrels);
 
         return barrels;
     }
@@ -741,29 +740,24 @@ public final class SystemHandler implements SystemManager {
 
     public void loadSpawners(Chunk chunk) {
         ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Map<Location, UnloadedStackedSpawner> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
+        Collection<UnloadedStackedSpawner> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
 
-        if (spawnersToLoad != null) {
-            for (UnloadedStackedSpawner unloadedStackedSpawner : spawnersToLoad.values()) {
-                Location location = unloadedStackedSpawner.getLocation();
-                if (GeneralUtils.isSameChunk(location, chunk)) {
-                    Block block = location.getBlock();
+        for (UnloadedStackedSpawner unloadedStackedSpawner : spawnersToLoad) {
+            Location spawnerLocation = new Location(chunk.getWorld(), unloadedStackedSpawner.getX(),
+                    unloadedStackedSpawner.getY(), unloadedStackedSpawner.getZ());
+            Block block = spawnerLocation.getBlock();
 
-                    if (block.getType() == Materials.SPAWNER.toBukkitType()) {
-                        WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                        try {
-                            stackedSpawner.setSaveData(false);
-                            stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), null, false);
-                            stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
-                            dataHandler.addStackedSpawner(stackedSpawner);
-                        } finally {
-                            stackedSpawner.setSaveData(true);
-                        }
-                    }
+            if (block.getType() == Materials.SPAWNER.toBukkitType()) {
+                WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                try {
+                    stackedSpawner.setSaveData(false);
+                    stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), null, false);
+                    stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
+                    dataHandler.addStackedSpawner(stackedSpawner);
+                } finally {
+                    stackedSpawner.setSaveData(true);
                 }
             }
-
-            spawnersToLoad.clear();
         }
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
@@ -773,29 +767,24 @@ public final class SystemHandler implements SystemManager {
 
     public void loadBarrels(Chunk chunk) {
         ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Map<Location, UnloadedStackedBarrel> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
+        Collection<UnloadedStackedBarrel> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
 
-        if (barrelsToLoad != null) {
-            for (UnloadedStackedBarrel unloadedStackedBarrel : barrelsToLoad.values()) {
-                Location location = unloadedStackedBarrel.getLocation();
-                if (GeneralUtils.isSameChunk(location, chunk)) {
-                    Block block = location.getBlock();
+        for (UnloadedStackedBarrel unloadedStackedBarrel : barrelsToLoad) {
+            Location barrelLocation = new Location(chunk.getWorld(), unloadedStackedBarrel.getX(),
+                    unloadedStackedBarrel.getY(), unloadedStackedBarrel.getZ());
+            Block block = barrelLocation.getBlock();
 
-                    if (block.getType() == Material.CAULDRON) {
-                        WStackedBarrel stackedBarrel = new WStackedBarrel(block, unloadedStackedBarrel.getBarrelItem(1));
-                        try {
-                            stackedBarrel.setSaveData(false);
-                            stackedBarrel.setStackAmount(unloadedStackedBarrel.getStackAmount(), true);
-                            stackedBarrel.createDisplayBlock();
-                            dataHandler.addStackedBarrel(stackedBarrel);
-                        } finally {
-                            stackedBarrel.setSaveData(true);
-                        }
-                    }
+            if (block.getType() == Material.CAULDRON) {
+                WStackedBarrel stackedBarrel = new WStackedBarrel(block, unloadedStackedBarrel.getBarrelItem(1));
+                try {
+                    stackedBarrel.setSaveData(false);
+                    stackedBarrel.setStackAmount(unloadedStackedBarrel.getStackAmount(), true);
+                    stackedBarrel.createDisplayBlock();
+                    dataHandler.addStackedBarrel(stackedBarrel);
+                } finally {
+                    stackedBarrel.setSaveData(true);
                 }
             }
-
-            barrelsToLoad.clear();
         }
     }
 
@@ -883,15 +872,13 @@ public final class SystemHandler implements SystemManager {
             for (StackedSpawner stackedSpawner : getStackedSpawners(chunk)) {
                 dataHandler.removeStackedSpawner(stackedSpawner);
                 if (stackedSpawner.getStackAmount() > 1 || !stackedSpawner.isDefaultUpgrade()) {
-                    dataHandler.CACHED_SPAWNERS_RAW.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()), s -> Maps.newConcurrentMap())
-                            .put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
+                    dataHandler.CACHED_SPAWNERS_RAW.put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
                 }
             }
 
             for (StackedBarrel stackedBarrel : getStackedBarrels(chunk)) {
                 dataHandler.removeStackedBarrel(stackedBarrel);
-                dataHandler.CACHED_BARRELS_RAW.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()), s -> Maps.newConcurrentMap())
-                        .put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
+                dataHandler.CACHED_BARRELS_RAW.put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
                 stackedBarrel.removeDisplayBlock();
             }
         }

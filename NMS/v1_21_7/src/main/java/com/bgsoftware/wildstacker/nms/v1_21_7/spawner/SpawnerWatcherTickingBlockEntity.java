@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_6.spawner;
+package com.bgsoftware.wildstacker.nms.v1_21_7.spawner;
 
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;

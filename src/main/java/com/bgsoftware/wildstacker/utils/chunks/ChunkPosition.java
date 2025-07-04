@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.utils.chunks;
 
+import com.bgsoftware.wildstacker.api.objects.UnloadedStackedObject;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
@@ -10,12 +11,18 @@ public final class ChunkPosition {
     private final String world;
     private final int x, z;
 
+    private long pairedXZ = -1;
+
     public ChunkPosition(Location location) {
         this(location.getWorld().getName(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
     }
 
     public ChunkPosition(Chunk chunk) {
         this(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+    }
+
+    public ChunkPosition(UnloadedStackedObject unloadedStackedObject) {
+        this(unloadedStackedObject.getWorldName(), unloadedStackedObject.getX() >> 4, unloadedStackedObject.getZ() >> 4);
     }
 
     public ChunkPosition(String world, int x, int z) {
@@ -34,6 +41,13 @@ public final class ChunkPosition {
 
     public int getZ() {
         return z;
+    }
+
+    public long asPair() {
+        if (this.pairedXZ < 0)
+            pairedXZ = ((this.z & 0xFFFFFFFFL) << 32) | (this.x & 0xFFFFFFFFL);
+
+        return pairedXZ;
     }
 
     @Override
