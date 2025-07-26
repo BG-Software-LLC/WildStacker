@@ -481,6 +481,9 @@ spawners:
   # Should spawners get stacked on the server?
   enabled: true
 
+  # Should vanilla spawners be allowed to break?
+  allow-break-vanilla-spawners: true
+
   # How many blocks from the spawner should be checked for other spawners to stack into?
   # EntityType list: https://bg-software.com/entities/
   merge-radius:

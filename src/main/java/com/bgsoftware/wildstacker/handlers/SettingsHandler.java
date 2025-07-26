@@ -102,7 +102,7 @@ public final class SettingsHandler {
     public final List<ParticleWrapper> entitiesParticles;
 
     //Spawners settings
-    public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
+    public final boolean spawnersStackingEnabled, allowBreakVanillaSpawners, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
             silkTouchSpawners, explosionsDropSpawner, explosionsDropToInventory, dropToInventory, shiftGetWholeSpawnerStack,
             getStackedItem, dropSpawnerWithoutSilk, spawnersMineRequireSilk, floatingSpawnerNames, spawnersPlacementPermission,
             spawnersShiftPlaceStack, changeUsingEggs, eggsStackMultiply, nextSpawnerPlacement, onlyOneSpawner, inventoryTweaksEnabled,
@@ -295,6 +295,7 @@ public final class SettingsHandler {
         entitiesFillVehicles = cfg.getBoolean("entities.entities-fill-vehicles");
 
         spawnersStackingEnabled = cfg.getBoolean("spawners.enabled", true);
+        allowBreakVanillaSpawners = cfg.getBoolean("spawners.allow-break-vanilla-spawners", true);
         spawnersMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("spawners.merge-radius"), EntityType.class);
         perSpawnerLimit = cfg.getBoolean("spawners.per-spawner-limit", false);
         spawnersParticlesEnabled = cfg.getBoolean("spawners.particles", true);

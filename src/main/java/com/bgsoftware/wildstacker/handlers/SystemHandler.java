@@ -259,6 +259,11 @@ public final class SystemHandler implements SystemManager {
         //Spawner wasn't found, creating a new object
         stackedSpawner = new WStackedSpawner((CreatureSpawner) location.getBlock().getState());
 
+
+        if (!dataHandler.CACHED_SPAWNERS_RAW.containsKey(location)) {
+            stackedSpawner.setNatural(true);
+        }
+
         //A new spawner was created. Let's see if we need to add him
         if (stackedSpawner.isCached())
             dataHandler.addStackedSpawner(stackedSpawner);
