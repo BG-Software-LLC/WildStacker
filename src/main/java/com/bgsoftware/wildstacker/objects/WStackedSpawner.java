@@ -379,7 +379,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         SpawnerUpgrade currentUpgrade = plugin.getUpgradesManager().getUpgrade(spawnerUpgradeId);
 
         if (currentUpgrade == null) {
-            SpawnerUpgrade defaultUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(getSpawnedType());
+            SpawnerUpgrade defaultUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(this.cachedEntity);
             spawnerUpgradeId = defaultUpgrade.getId();
             return defaultUpgrade;
         }
