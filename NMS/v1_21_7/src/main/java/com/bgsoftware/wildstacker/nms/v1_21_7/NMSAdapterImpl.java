@@ -52,7 +52,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
-            "Items", "ChestedHorse", "DecorItem", "Leash", "leash", "equipment"
+            "Items", "ChestedHorse", "DecorItem", "Leash", "leash", "equipment", "CustomName", "CustomNameVisible",
     };
 
     private static final Logger LOGGER = LogUtils.getLogger();
