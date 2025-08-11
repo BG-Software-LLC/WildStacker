@@ -156,7 +156,7 @@ public final class DeathSimulation {
             giveStatisticsToKiller(directKiller, (Player) sourceKiller, unstackAmount, stackedEntity);
         }
 
-        if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > -1)
+        if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > 0)
             livingEntity.setFireTicks(160);
 
         // We want to cache the killer of the entity
