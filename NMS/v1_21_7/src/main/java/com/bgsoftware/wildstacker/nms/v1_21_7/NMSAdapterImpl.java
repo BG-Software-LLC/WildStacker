@@ -126,7 +126,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
             for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
                 compoundTag.remove(key);
 
-            target.load(TagValueInput.create(scopedCollector, target.registryAccess(), tagValueOutput.buildResult()));
+            target.load(TagValueInput.create(scopedCollector, target.registryAccess(), compoundTag));
         }
     }
 
