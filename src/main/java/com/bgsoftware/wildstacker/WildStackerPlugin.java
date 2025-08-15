@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.listeners.EntitiesListener;
 import com.bgsoftware.wildstacker.listeners.ItemsListener;
 import com.bgsoftware.wildstacker.listeners.MenusListener;
 import com.bgsoftware.wildstacker.listeners.NoClaimConflictListener;
+import com.bgsoftware.wildstacker.listeners.PickupItemListener;
 import com.bgsoftware.wildstacker.listeners.PlayersListener;
 import com.bgsoftware.wildstacker.listeners.ServerTickListener;
 import com.bgsoftware.wildstacker.listeners.ShulkerOversizedPatch;
@@ -88,6 +89,7 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
         DependenciesManager.inject(this);
         DeathSimulation.injectEntityDamageHandlerList();
+        PickupItemListener.injectHandlerLists();
 
         // Setting the default locale to English will fix issues related to using upper case in Turkish.
         // https://stackoverflow.com/questions/11063102/using-locales-with-javas-tolowercase-and-touppercase

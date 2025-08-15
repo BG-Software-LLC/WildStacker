@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -67,7 +66,6 @@ import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -93,15 +91,12 @@ public final class EntitiesListener implements Listener {
 
     private boolean duplicateCow = false;
 
-    public boolean secondPickupEventCall = false;
-    @Nullable
-    public Cancellable secondPickupEvent = null;
-
     public EntitiesListener(WildStackerPlugin plugin) {
         this.plugin = plugin;
         EntitiesListener.IMP = this;
 
         plugin.getServer().getPluginManager().registerEvents(new EntityDeathListener(plugin), plugin);
+        new PickupItemListener(plugin);
 
         if (ServerVersion.isAtLeast(ServerVersion.v1_13))
             plugin.getServer().getPluginManager().registerEvents(new TransformListener(), plugin);
@@ -115,8 +110,6 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BlockShearEntityListener(), plugin);
         } catch (Exception ignored) {
         }
-
-        EventsListener.addEntityPickupListener(this::onEntityPickup, EventPriority.HIGHEST);
     }
 
     /*
@@ -135,10 +128,6 @@ public final class EntitiesListener implements Listener {
                 ex.printStackTrace();
             }
         }
-    }
-
-    private boolean onEntityPickup(Cancellable event, StackedItem stackedItem, LivingEntity livingEntity, int remaining) {
-        return EntityStorage.hasMetadata(livingEntity, EntityFlag.CORPSE);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

@@ -4,6 +4,7 @@ import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
@@ -11,6 +12,8 @@ import org.bukkit.plugin.RegisteredListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class HandlerListWrapper extends HandlerList {
 
@@ -25,8 +28,19 @@ public class HandlerListWrapper extends HandlerList {
 
     private Mode mode = Mode.NEW;
 
+    private List<Event> trackedEvents;
+
     public HandlerListWrapper(HandlerList original) {
         this.injectHandlerList(original);
+
+        RegisteredListener trackEventListener = new RegisteredListener(
+                new Listener() {
+                },
+                new TrackEventExecutor(),
+                EventPriority.LOWEST,
+                plugin,
+                true);
+        super.register(trackEventListener);
 
         // Copy listeners of WildStacker to this HandlerList
         for (RegisteredListener registeredListener : original.getRegisteredListeners()) {
@@ -36,6 +50,24 @@ public class HandlerListWrapper extends HandlerList {
 
     public void setMode(Mode mode) {
         this.mode = mode;
+    }
+
+    public void setOriginal() {
+        setMode(Mode.ORIGINAL);
+    }
+
+    public void setNew() {
+        setMode(Mode.NEW);
+    }
+
+    public void startTrackEvents() {
+        this.trackedEvents = new LinkedList<>();
+    }
+
+    public List<Event> endTrackEvents() {
+        List<Event> trackedEvents = this.trackedEvents;
+        this.trackedEvents = null;
+        return trackedEvents;
     }
 
     @Override
@@ -77,6 +109,16 @@ public class HandlerListWrapper extends HandlerList {
             if (this.callMode == HandlerListWrapper.this.mode) {
                 this.original.execute(listener, event);
             }
+        }
+
+    }
+
+    private class TrackEventExecutor implements EventExecutor {
+
+        @Override
+        public void execute(Listener listener, Event event) {
+            if (trackedEvents != null)
+                trackedEvents.add(event);
         }
 
     }

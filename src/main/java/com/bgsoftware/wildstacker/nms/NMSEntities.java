@@ -100,7 +100,7 @@ public interface NMSEntities {
 
     void playSpawnEffect(LivingEntity livingEntity);
 
-    void handleItemPickup(LivingEntity livingEntity, StackedItem stackedItem, int remaining);
+    boolean handleItemPickup(LivingEntity livingEntity, StackedItem stackedItem, int remaining);
 
     void handleSweepingEdge(Player attacker, ItemStack usedItem, LivingEntity target, double damage);
 

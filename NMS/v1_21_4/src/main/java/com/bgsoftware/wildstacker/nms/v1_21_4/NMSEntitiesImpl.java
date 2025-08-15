@@ -7,7 +7,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.EntitiesListener;
+import com.bgsoftware.wildstacker.listeners.PickupItemListener;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -92,6 +92,8 @@ import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -108,6 +110,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -582,12 +585,12 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
+    public boolean handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
         boolean isPlayerPickup = livingEntity instanceof Player;
 
         if (!isPlayerPickup && !(livingEntity instanceof Mob))
-            return;
+            return false;
 
         ItemEntity itemEntity = ((CraftItem) stackedItem.getItem()).getHandle();
 
@@ -624,10 +627,13 @@ public final class NMSEntitiesImpl implements NMSEntities {
         boolean isDifferentPickupItem = pickupItem != itemEntity;
         boolean actualItemDupe = originalItemCount != stackAmount;
 
+        AtomicBoolean isEventCancelled = new AtomicBoolean(false);
         try {
             if (isDifferentPickupItem) itemEntity.setNeverPickUp();
-            EntitiesListener.IMP.secondPickupEventCall = true;
-            EntitiesListener.IMP.secondPickupEvent = null;
+            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
+                handlerListWrapper.setOriginal();
+                handlerListWrapper.startTrackEvents();
+            });
             if (isPlayerPickup) {
                 pickupItem.playerTouch((Player) livingEntity);
             } else {
@@ -635,9 +641,19 @@ public final class NMSEntitiesImpl implements NMSEntities {
             }
         } finally {
             if (isDifferentPickupItem) itemEntity.pickupDelay = originalPickupDelay;
-            EntitiesListener.IMP.secondPickupEventCall = false;
-            EntitiesListener.IMP.secondPickupEvent = null;
+            PickupItemListener.forEachHandlerList(handlerListWrapper -> {
+                handlerListWrapper.setNew();
+                for (Event event : handlerListWrapper.endTrackEvents()) {
+                    if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
+                        isEventCancelled.set(true);
+                        break;
+                    }
+                }
+            });
         }
+
+        if (isEventCancelled.get())
+            return true;
 
         int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItem().getCount() : 0);
 
@@ -681,6 +697,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
                 itemEntity.discard();
             }
         }
+
+        return true;
     }
 
     @Override

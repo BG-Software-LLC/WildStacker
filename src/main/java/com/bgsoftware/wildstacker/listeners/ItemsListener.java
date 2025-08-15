@@ -21,7 +21,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -62,7 +61,6 @@ public final class ItemsListener implements Listener {
 
         EventsListener.registerEggLayListener(this::onEggLay);
         EventsListener.registerScuteDropListener(this::onScuteDrop);
-        EventsListener.addEntityPickupListener(this::onEntityPickup, EventPriority.HIGHEST);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -122,34 +120,6 @@ public final class ItemsListener implements Listener {
     public void onItemDespawn(ItemDespawnEvent e) {
         if (ItemUtils.isStackable(e.getEntity()))
             WStackedItem.of(e.getEntity()).remove();
-    }
-
-    private boolean onEntityPickup(Cancellable event, StackedItem stackedItem, LivingEntity livingEntity, int remaining) {
-        if (EntitiesListener.IMP.secondPickupEventCall) {
-            EntitiesListener.IMP.secondPickupEvent = event;
-            return false;
-        }
-
-        if (((WStackedItem) stackedItem).isRemoved())
-            return true;
-
-        Item item = stackedItem.getItem();
-
-        if (EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)) {
-            EntityStorage.removeMetadata(item, EntityFlag.RECENTLY_PICKED_UP);
-            stackedItem.remove();
-            return true;
-        }
-
-        // Should run only if items stacking is enabled, or the item's stack size is larger than the max stack size.
-        // Another case is if buckets stacking is enabled and the item is a bucket.
-        if (plugin.getSettings().itemsStackingEnabled || (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize() ||
-                (plugin.getSettings().bucketsStackerEnabled && stackedItem.getItemStack().getType().name().contains("BUCKET")))) {
-            plugin.getNMSEntities().handleItemPickup(livingEntity, stackedItem, remaining);
-            return true;
-        }
-
-        return false;
     }
 
     //This method will be fired even if stacking-drops is disabled.
