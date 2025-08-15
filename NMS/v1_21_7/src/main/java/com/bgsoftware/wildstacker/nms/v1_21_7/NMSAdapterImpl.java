@@ -29,6 +29,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -55,6 +56,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
             Entity.class, 1, ValueOutput.class, boolean.class);
+    private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
+            Entity.class, 2, ValueInput.class);
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
@@ -132,7 +135,8 @@ public final class NMSAdapterImpl implements NMSAdapter {
             for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
                 compoundTag.remove(key);
 
-            target.load(TagValueInput.create(scopedCollector, target.registryAccess(), compoundTag));
+            ValueInput valueInput = TagValueInput.create(scopedCollector, target.registryAccess(), compoundTag);
+            ENTITY_READ_ADDITIONAL_SAVE_DATA.invoke(target, valueInput);
         }
     }
 
