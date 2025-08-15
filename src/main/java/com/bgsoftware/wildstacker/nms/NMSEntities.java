@@ -94,11 +94,7 @@ public interface NMSEntities {
 
     void awardKillScore(Player damangerPlayer, Entity bukkitDamaged, Entity damagerEntity);
 
-    void awardPickupScore(Player player, Item pickItem);
-
     void awardCrossbowShot(Player player, LivingEntity target, ItemStack itemStack);
-
-    void playPickupAnimation(LivingEntity livingEntity, Item item);
 
     void playDeathSound(LivingEntity entity);
 

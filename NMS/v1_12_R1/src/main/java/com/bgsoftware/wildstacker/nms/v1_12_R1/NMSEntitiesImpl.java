@@ -425,24 +425,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(Player player, Item pickItem) {
-        // Do nothing.
-    }
-
-    @Override
     public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack crossBowItem) {
         // Do nothing.
-    }
-
-    @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
-        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
-        //Makes sure the entity is still there.
-        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
-        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override

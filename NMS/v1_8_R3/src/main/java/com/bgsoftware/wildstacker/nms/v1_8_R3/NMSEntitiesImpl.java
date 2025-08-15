@@ -14,9 +14,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
-import net.minecraft.server.v1_8_R3.AchievementList;
 import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityAnimal;
@@ -30,7 +28,6 @@ import net.minecraft.server.v1_8_R3.EntityTracker;
 import net.minecraft.server.v1_8_R3.EntityVillager;
 import net.minecraft.server.v1_8_R3.EntityZombie;
 import net.minecraft.server.v1_8_R3.ItemStack;
-import net.minecraft.server.v1_8_R3.Items;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagByte;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
@@ -369,53 +366,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(Player player, org.bukkit.entity.Item pickItem) {
-        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) pickItem).getHandle();
-        net.minecraft.server.v1_8_R3.ItemStack itemStack = CraftItemStack.asNMSCopy(pickItem.getItemStack());
-
-        if (itemStack.getItem() == net.minecraft.server.v1_8_R3.Item.getItemOf(Blocks.LOG)) {
-            entityPlayer.b(AchievementList.g);
-        }
-
-        if (itemStack.getItem() == net.minecraft.server.v1_8_R3.Item.getItemOf(Blocks.LOG2)) {
-            entityPlayer.b(AchievementList.g);
-        }
-
-        if (itemStack.getItem() == Items.LEATHER) {
-            entityPlayer.b(AchievementList.t);
-        }
-
-        if (itemStack.getItem() == Items.DIAMOND) {
-            entityPlayer.b(AchievementList.w);
-        }
-
-        if (itemStack.getItem() == Items.BLAZE_ROD) {
-            entityPlayer.b(AchievementList.A);
-        }
-
-        if (itemStack.getItem() == Items.DIAMOND && entityItem.n() != null) {
-            EntityHuman otherPlayer = entityPlayer.world.a(entityItem.n());
-            if (otherPlayer != null && otherPlayer != entityPlayer) {
-                otherPlayer.b(AchievementList.x);
-            }
-        }
-    }
-
-    @Override
     public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack crossBowItem) {
         // Do nothing
-    }
-
-    @Override
-    public void playPickupAnimation(LivingEntity livingEntity, org.bukkit.entity.Item item) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        EntityTracker entityTracker = ((WorldServer) entityLiving.world).getTracker();
-        entityTracker.a(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId()));
-        //Makes sure the entity is still there.
-        entityTracker.a(entityItem, new PacketPlayOutSpawnEntity(entityItem, 2, 1));
-        entityTracker.a(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override

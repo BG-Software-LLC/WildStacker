@@ -56,7 +56,6 @@ import net.minecraft.server.v1_16_R3.NBTTagString;
 import net.minecraft.server.v1_16_R3.PacketPlayOutCollect;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutEntityMetadata;
-import net.minecraft.server.v1_16_R3.PacketPlayOutSpawnEntity;
 import net.minecraft.server.v1_16_R3.SoundEffect;
 import net.minecraft.server.v1_16_R3.StatisticList;
 import net.minecraft.server.v1_16_R3.WorldServer;
@@ -485,26 +484,10 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(Player player, Item pickItem) {
-        // Do nothing.
-    }
-
-    @Override
     public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack unused) {
         EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
         EntityLiving targetEntity = ((CraftLivingEntity) target).getHandle();
         CriterionTriggers.G.a(entityPlayer, Arrays.asList(targetEntity));
-    }
-
-    @Override
-    public void playPickupAnimation(LivingEntity livingEntity, Item item) {
-        EntityLiving entityLiving = ((CraftLivingEntity) livingEntity).getHandle();
-        EntityItem entityItem = (EntityItem) ((CraftItem) item).getHandle();
-        ChunkProviderServer chunkProvider = ((WorldServer) entityLiving.world).getChunkProvider();
-        chunkProvider.broadcast(entityItem, new PacketPlayOutCollect(entityItem.getId(), entityLiving.getId(), item.getItemStack().getAmount()));
-        //Makes sure the entity is still there.
-        chunkProvider.broadcast(entityItem, new PacketPlayOutSpawnEntity(entityItem));
-        chunkProvider.broadcast(entityItem, new PacketPlayOutEntityMetadata(entityItem.getId(), entityItem.getDataWatcher(), true));
     }
 
     @Override

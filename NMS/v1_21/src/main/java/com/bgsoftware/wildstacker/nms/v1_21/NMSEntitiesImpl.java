@@ -536,37 +536,11 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardPickupScore(org.bukkit.entity.Player player, Item pickItem) {
-        // Do nothing.
-    }
-
-    @Override
     public void awardCrossbowShot(org.bukkit.entity.Player player, org.bukkit.entity.LivingEntity target,
                                   org.bukkit.inventory.ItemStack unused) {
         ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
         LivingEntity targetEntity = ((CraftLivingEntity) target).getHandle();
         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(targetEntity));
-    }
-
-    @Override
-    public void playPickupAnimation(org.bukkit.entity.LivingEntity bukkitLivingEntity, Item item) {
-        LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
-        ItemEntity itemEntity = (ItemEntity) ((CraftItem) item).getHandle();
-
-        ServerChunkCache serverChunkCache = (ServerChunkCache) livingEntity.level().getChunkSource();
-
-        ClientboundTakeItemEntityPacket takeItemEntityPacket = new ClientboundTakeItemEntityPacket(
-                itemEntity.getId(), livingEntity.getId(), item.getItemStack().getAmount());
-        ClientboundAddEntityPacket addEntityPacket = getAddEntityPacketForEntity(itemEntity);
-
-        serverChunkCache.broadcast(itemEntity, takeItemEntityPacket);
-        serverChunkCache.broadcast(itemEntity, addEntityPacket);
-
-        List<SynchedEntityData.DataValue<?>> packedData = itemEntity.getEntityData().packDirty();
-        if (packedData != null) {
-            ClientboundSetEntityDataPacket setEntityDataPacket = new ClientboundSetEntityDataPacket(itemEntity.getId(), packedData);
-            serverChunkCache.broadcast(itemEntity, setEntityDataPacket);
-        }
     }
 
     @Override
