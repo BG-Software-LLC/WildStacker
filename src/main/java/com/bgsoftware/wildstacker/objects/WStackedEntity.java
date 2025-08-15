@@ -472,8 +472,9 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
             plugin.getNMSAdapter().updateEntity(object, duplicate.getLivingEntity());
 
-            if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > -1)
+            if (plugin.getSettings().keepFireEnabled && object.getFireTicks() > 0)
                 duplicate.getLivingEntity().setFireTicks(160);
+
         }
 
         EventsCaller.callDuplicateSpawnEvent(this, duplicate);
