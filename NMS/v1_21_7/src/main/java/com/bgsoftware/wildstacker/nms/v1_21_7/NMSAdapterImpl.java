@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_21_7;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -21,12 +22,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
@@ -50,9 +53,12 @@ import java.util.Optional;
 
 public final class NMSAdapterImpl implements NMSAdapter {
 
+    private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
+            Entity.class, 1, ValueOutput.class, boolean.class);
+
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
-            "Items", "ChestedHorse", "DecorItem", "Leash", "leash", "equipment", "CustomName", "CustomNameVisible",
+            "Items", "ChestedHorse", "DecorItem", "Leash", "leash", "equipment"
     };
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -112,7 +118,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
         try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(target.problemPath(), LOGGER)) {
             TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, source.registryAccess());
-            source.saveWithoutId(tagValueOutput);
+            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(source, tagValueOutput, true);
 
             CompoundTag compoundTag = tagValueOutput.buildResult();
 
