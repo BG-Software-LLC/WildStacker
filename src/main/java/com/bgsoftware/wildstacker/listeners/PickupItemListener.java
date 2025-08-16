@@ -92,9 +92,9 @@ public class PickupItemListener {
         //  1) Item stacking is enabled
         //  2) The item's stack size is larger than the maximum stack size
         //  3) Buckets stacking is enabled and the item is a bucket
-        if (plugin.getSettings().itemsStackingEnabled ||
+        if (plugin.getSettings().getItems().isEnabled() ||
                 stackedItem.getStackAmount() > itemStack.getMaxStackSize() ||
-                (plugin.getSettings().bucketsStackerEnabled && BUCKET_MATERIALS.contains(itemStack.getType()))) {
+                (plugin.getSettings().getBuckets().isEnabled() && BUCKET_MATERIALS.contains(itemStack.getType()))) {
             return plugin.getNMSEntities().handleItemPickup(entityPicker, stackedItem, remaining);
         }
 

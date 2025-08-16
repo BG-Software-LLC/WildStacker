@@ -77,7 +77,7 @@ public class EntityDeathListener implements Listener {
 
     private void handleEntityDamage(EntityDamageEvent damageEvent, boolean fromDeathEvent) {
         // Making sure the entity is stackable and that we can proceed with handling entity damage
-        if (damageEvent.isCancelled() || !plugin.getSettings().entitiesStackingEnabled ||
+        if (damageEvent.isCancelled() || !plugin.getSettings().getEntities().isEnabled() ||
                 !EntityUtils.isStackable(damageEvent.getEntity())) {
             // If not, we still want to re-call the damage event
             recallDamageEvent(damageEvent);
@@ -140,9 +140,9 @@ public class EntityDeathListener implements Listener {
             // In case the entity has enough health to deal with the damage, we check for one shot.
             boolean hasAvoidOneShot = stackedEntity.getAndRemoveFlag(EntityFlag.AVOID_ONE_SHOT) != null;
             shouldSimulateDeath = !hasAvoidOneShot &&
-                    plugin.getSettings().entitiesOneShotEnabled &&
-                    GeneralUtils.contains(plugin.getSettings().entitiesOneShotWhitelist, stackedEntity) &&
-                    plugin.getSettings().entitiesOneShotTools.contains(damagerTool.getType().toString());
+                    plugin.getSettings().getEntities().isOneShotEnabled() &&
+                    GeneralUtils.contains(plugin.getSettings().getEntities().getOneShotWhitelist(), stackedEntity) &&
+                    plugin.getSettings().getEntities().getOneShotTools().contains(damagerTool.getType().toString());
         } else {
             shouldSimulateDeath = false;
         }
