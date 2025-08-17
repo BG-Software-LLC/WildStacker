@@ -297,7 +297,7 @@ public final class SpawnersListener implements Listener {
 
                 spawnerItemAmount = targetSpawner.getStackAmount();
             }
-
+            if(spawnerType==null) spawnerType = EntityType.PIG;
             finishSpawnerPlace(e.getPlayer(), stackedSpawner, amountToCharge, replaceAir, usedHand, limitItem,
                     spawnerType, spawnerItemAmount);
         } catch (Exception ex) {
@@ -321,8 +321,9 @@ public final class SpawnersListener implements Listener {
 
         if (limitItem != null)
             ItemUtils.addItem(limitItem, player.getInventory(), player.getLocation());
-
-        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, GeneralUtils.format(amountToCharge));
+        String STYPE = "PIG";
+        if(spawnerType!=null) STYPE = spawnerType.name();
+        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(STYPE), spawnerItemAmount, GeneralUtils.format(amountToCharge));
 
         alreadySpawnersPlacedPlayers.remove(player.getUniqueId());
     }
