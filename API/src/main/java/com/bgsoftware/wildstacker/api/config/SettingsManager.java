@@ -513,6 +513,10 @@ public interface SettingsManager {
          */
         boolean isMultiplyDropsEnabled();
 
+
+        // multiply-sniffer-seeds
+        boolean isMultiplySnifferSeedsEnabled();
+
         /**
          * Whether EXP multiplier is enabled.
          * Config-path: entities.multiply-exp

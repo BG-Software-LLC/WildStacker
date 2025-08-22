@@ -29,7 +29,7 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
 
     @Override
     public List<ParticleEffect> getParticles() {
-        return (List<ParticleEffect>)(List<?>) getContainer().entitiesParticles;
+        return (List<ParticleEffect>) (List<?>) getContainer().entitiesParticles;
     }
 
     @Override
@@ -170,6 +170,11 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
     @Override
     public boolean isMultiplyDropsEnabled() {
         return getContainer().multiplyDrops;
+    }
+
+    @Override
+    public boolean isMultiplySnifferSeedsEnabled() {
+        return getContainer().multiplySnifferSeeds;
     }
 
     @Override

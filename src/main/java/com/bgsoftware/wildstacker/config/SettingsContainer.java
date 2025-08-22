@@ -83,7 +83,7 @@ public class SettingsContainer {
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreedingEnabled,
             smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
             eggLayMultiply, scuteMultiply, entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities,
-            superiorSkyblockHook, multiplyDrops, multiplyExp, spreadDamage, entitiesFillVehicles;
+            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -286,6 +286,7 @@ public class SettingsContainer {
         storeEntities = config.getBoolean("entities.store-entities", true);
         superiorSkyblockHook = config.getBoolean("entities.superiorskyblock-hook", false);
         multiplyDrops = config.getBoolean("entities.multiply-drops", true);
+        multiplySnifferSeeds = config.getBoolean("entities.multiply-sniffer-seeds", true);
         multiplyExp = config.getBoolean("entities.multiply-exp", true);
         spreadDamage = config.getBoolean("entities.spread-damage", false);
         entitiesFilteredTransforms = config.getStringList("entities.filtered-transforms");

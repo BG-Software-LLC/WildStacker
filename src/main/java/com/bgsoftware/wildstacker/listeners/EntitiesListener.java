@@ -947,7 +947,7 @@ public final class EntitiesListener implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onBlockShearEntity(org.bukkit.event.entity.EntityDropItemEvent e) {
-            if (!plugin.getSettings().entitiesStackingEnabled || !plugin.getSettings().multiplySnifferSeeds ||
+            if (!plugin.getSettings().getEntities().isEnabled() || !plugin.getSettings().getEntities().isMultiplySnifferSeedsEnabled() ||
                     !EntityUtils.isStackable(e.getEntity()))
                 return;
 
