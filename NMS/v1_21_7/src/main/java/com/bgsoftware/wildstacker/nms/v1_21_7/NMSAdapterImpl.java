@@ -55,9 +55,9 @@ import java.util.Optional;
 public final class NMSAdapterImpl implements NMSAdapter {
 
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, 1, ValueOutput.class, boolean.class);
+            Entity.class, "a", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, 2, ValueInput.class);
+            Entity.class, "a", ValueInput.class);
 
     private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
             "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
@@ -121,7 +121,7 @@ public final class NMSAdapterImpl implements NMSAdapter {
 
         try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(target.problemPath(), LOGGER)) {
             TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, source.registryAccess());
-            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(source, tagValueOutput, true);
+            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(source, tagValueOutput);
 
             CompoundTag compoundTag = tagValueOutput.buildResult();
 
