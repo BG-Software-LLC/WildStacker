@@ -514,7 +514,10 @@ public interface SettingsManager {
         boolean isMultiplyDropsEnabled();
 
 
-        // multiply-sniffer-seeds
+        /**
+         * Whether sniffer seed multiplier is enabled.
+         * Config-path: entities.multiply-sniffer-seeds
+         */
         boolean isMultiplySnifferSeedsEnabled();
 
         /**
