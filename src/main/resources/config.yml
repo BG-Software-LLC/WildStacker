@@ -453,6 +453,9 @@ entities:
   # Should drops get calculated in relation to the amount of mobs that died?
   multiply-drops: true
 
+  # Should sniffer seeds get calculated in relation to the amount of mobs in the stack?
+  multiply-sniffer-seeds: true
+
   # Should exp get calculated in relation to the amount of mobs that died?
   multiply-exp: true
 

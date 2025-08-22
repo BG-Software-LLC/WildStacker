@@ -104,6 +104,8 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new TurtleListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_15))
             plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
+        if (ServerVersion.isAtLeast(ServerVersion.v1_20))
+            plugin.getServer().getPluginManager().registerEvents(new SnifferListener(plugin), plugin);
 
         try {
             Class.forName("org.bukkit.event.block.BlockShearEntityEvent");
@@ -926,6 +928,70 @@ public final class EntitiesListener implements Listener {
         @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
         public void onBlockShearEntity(BlockShearEntityEvent e) {
             handleEntityShear(e, e.getEntity());
+        }
+
+    }
+
+    private static class SnifferListener implements Listener {
+
+        private static final Material[] SNIFFER_DIGGABLE_ITEMS = new Material[]{
+                Materials.getMaterialOrNull("TORCHFLOWER_SEEDS"),
+                Materials.getMaterialOrNull("PITCHER_POD")
+        };
+
+        private final WildStackerPlugin plugin;
+
+        SnifferListener(WildStackerPlugin plugin) {
+            this.plugin = plugin;
+        }
+
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        public void onBlockShearEntity(org.bukkit.event.entity.EntityDropItemEvent e) {
+            if (!plugin.getSettings().entitiesStackingEnabled || !plugin.getSettings().multiplySnifferSeeds ||
+                    !EntityUtils.isStackable(e.getEntity()))
+                return;
+
+            // Only listen to sniffers
+            if (EntityTypes.fromEntity((LivingEntity) e.getEntity()) != EntityTypes.SNIFFER)
+                return;
+
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+            int extraItemsCount = stackedEntity.getStackAmount();
+
+            // Do not multiply drops of single stack mobs
+            if (extraItemsCount <= 1)
+                return;
+
+            e.setCancelled(true);
+
+            Location entityLocation = e.getEntity().getLocation();
+
+            generateItemsTable(extraItemsCount, (itemType, count) -> {
+                ItemStack itemStack = new ItemStack(itemType);
+                plugin.getSystemManager().spawnItemWithAmount(entityLocation, itemStack, count);
+            });
+        }
+
+        private void generateItemsTable(int itemsTableSize, ItemsTableCallback callback) {
+            int i;
+            for (i = 0; i < SNIFFER_DIGGABLE_ITEMS.length - 1; ++i) {
+                int count = Random.nextInt(0, itemsTableSize, 1);
+                if (count > 0) {
+                    itemsTableSize -= count;
+                    callback.apply(SNIFFER_DIGGABLE_ITEMS[i], count);
+                }
+            }
+
+            if (itemsTableSize > 0) {
+                callback.apply(SNIFFER_DIGGABLE_ITEMS[i], itemsTableSize);
+            }
+        }
+
+        private interface ItemsTableCallback {
+
+            void apply(Material itemType, int count);
+
         }
 
     }
