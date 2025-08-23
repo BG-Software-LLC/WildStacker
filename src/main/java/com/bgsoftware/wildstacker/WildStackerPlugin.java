@@ -31,7 +31,6 @@ import com.bgsoftware.wildstacker.listeners.StewListener;
 import com.bgsoftware.wildstacker.listeners.ToolsListener;
 import com.bgsoftware.wildstacker.listeners.WorldsListener;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
-import com.bgsoftware.wildstacker.menu.EditorMenu;
 import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
@@ -160,8 +159,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
         settingsHandler = new SettingsHandler(this);
         providersHandler = new ProvidersHandler(this);
         lootHandler = new LootHandler(this);
-
-        EditorMenu.init(this);
 
         Locale.reload();
 

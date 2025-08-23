@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.command.commands;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.command.ICommand;
-import com.bgsoftware.wildstacker.menu.EditorMainMenu;
+import com.bgsoftware.wildstacker.menu.ConfigEditorMenu;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -48,7 +48,7 @@ public final class CommandSettings implements ICommand {
             return;
         }
 
-        EditorMainMenu.open((Player) sender);
+        ConfigEditorMenu.open((Player) sender);
     }
 
     @Override
