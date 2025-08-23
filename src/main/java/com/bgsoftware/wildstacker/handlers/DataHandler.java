@@ -1,10 +1,12 @@
 package com.bgsoftware.wildstacker.handlers;
 
+import com.bgsoftware.common.databasebridge.sql.query.Column;
+import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.*;
-import com.bgsoftware.wildstacker.database.sql.SQLHelper;
-import com.bgsoftware.wildstacker.database.sql.session.QueryResult;
+
+import com.bgsoftware.wildstacker.database.sql.DBSession;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
@@ -44,7 +46,7 @@ public final class DataHandler {
     public DataHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
         Executor.sync(() -> {
-            if (!SQLHelper.createConnection(plugin)) {
+            if (!DBSession.createConnection(plugin)) {
                 Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
                 return;
             }
@@ -53,20 +55,20 @@ public final class DataHandler {
     }
 
     public void clearDatabase() {
-        SQLHelper.close();
+        DBSession.close();
     }
 
     private void loadDatabase() {
-        SQLHelper.createTable("spawners",
-                new Pair<>("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
-                new Pair<>("stackAmount", "INTEGER"),
-                new Pair<>("upgrade", "INTEGER")
+        DBSession.createTable("spawners",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("stackAmount", "INTEGER"),
+                new Column("upgrade", "INTEGER")
         );
 
-        SQLHelper.createTable("barrels",
-                new Pair<>("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
-                new Pair<>("stackAmount", "INTEGER"),
-                new Pair<>("item", "TEXT")
+        DBSession.createTable("barrels",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("stackAmount", "INTEGER"),
+                new Column("item", "TEXT")
         );
 
         if (plugin.getSettings().getEntities().isStoreEntitiesEnabled()) {
@@ -90,7 +92,7 @@ public final class DataHandler {
     }
 
     private void loadEntities() {
-        SQLHelper.select("entities", "", new QueryResult<ResultSet>()
+        DBSession.select("entities", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         UUID uuid = UUID.fromString(resultSet.getString("uuid"));
@@ -104,7 +106,7 @@ public final class DataHandler {
     }
 
     private void loadItems() {
-        SQLHelper.select("items", "", new QueryResult<ResultSet>()
+        DBSession.select("items", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         UUID uuid = UUID.fromString(resultSet.getString("uuid"));
@@ -117,7 +119,7 @@ public final class DataHandler {
     }
 
     private void loadSpawners() {
-        SQLHelper.select("spawners", "", new QueryResult<ResultSet>()
+        DBSession.select("spawners", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         parseLocationData(resultSet, true);
@@ -128,7 +130,7 @@ public final class DataHandler {
     }
 
     private void loadBarrels() {
-        SQLHelper.select("barrels", "", new QueryResult<ResultSet>()
+        DBSession.select("barrels", "", new QueryResult<ResultSet>()
                 .onSuccess(resultSet -> {
                     while (resultSet.next()) {
                         parseLocationData(resultSet, false);

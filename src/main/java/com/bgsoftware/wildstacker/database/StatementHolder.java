@@ -1,8 +1,8 @@
 package com.bgsoftware.wildstacker.database;
 
+import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.database.sql.SQLHelper;
-import com.bgsoftware.wildstacker.database.sql.session.QueryResult;
+import com.bgsoftware.wildstacker.database.sql.DBSession;
 import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Location;
@@ -92,9 +92,9 @@ public final class StatementHolder {
             return;
         }
 
-        SQLHelper.waitForConnection();
+        DBSession.waitForConnection();
 
-        SQLHelper.customQuery(query, new QueryResult<PreparedStatement>()
+        DBSession.customQuery(query, new QueryResult<PreparedStatement>()
                 .onSuccess(statement -> {
                     if (isBatch) {
                         for (Map<Integer, Object> batch : batches) {

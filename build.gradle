@@ -71,8 +71,7 @@ dependencies {
     implementation 'com.bgsoftware.common.reflection:ReflectionUtils:b8'
     implementation 'com.bgsoftware.common.dependencies:DependenciesManager:b2'
     implementation 'com.bgsoftware.common.nmsloader:NMSLoader:b14'
-
-    implementation 'com.zaxxer:HikariCP:4.0.3'
+    implementation 'com.bgsoftware.common.databasebridge:DatabaseBridge:b1'
 
     implementation 'org.bstats:bstats-bukkit:3.0.0'
 
