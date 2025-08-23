@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.handlers.SettingsHandler;
+import com.bgsoftware.wildstacker.errors.ManagerLoadException;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
@@ -168,7 +168,11 @@ public final class ConfigEditorMenu extends WildMenu {
     public void saveConfig() {
         try {
             config.save(CONFIG_FILE);
-            SettingsHandler.reload();
+            try {
+                plugin.getSettings().loadData();
+            } catch (ManagerLoadException e) {
+                throw new RuntimeException(e);
+            }
         } catch (Exception error) {
             WildStackerPlugin.log("An unexpected error occurred while saving config file:");
             error.printStackTrace();
