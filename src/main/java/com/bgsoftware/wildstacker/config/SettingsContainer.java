@@ -75,7 +75,7 @@ public class SettingsContainer {
     public final NameBuilder<StackedItem> itemsNameBuilder;
     public final FastEnumMap<Material, Integer> itemsMergeRadius;
     public final FastEnumMap<Material, Integer> itemsLimits;
-    public final List<ParticleWrapper> itemsParticles;
+    public final List<ParticleEffect> itemsParticles;
     public final long itemsStackInterval;
 
     //Entities settings
@@ -97,7 +97,7 @@ public class SettingsContainer {
     public final List<Pattern> blacklistedEntitiesNames;
     public final Fast2EnumsMap<EntityType, SpawnCause, Integer> entitiesMergeRadius, entitiesLimits,
             minimumRequiredEntities, defaultUnstack;
-    public final List<ParticleWrapper> entitiesParticles;
+    public final List<ParticleEffect> entitiesParticles;
 
     //Spawners settings
     public final boolean spawnersStackingEnabled, perSpawnerLimit, spawnersParticlesEnabled, chunkMergeSpawners,
@@ -113,7 +113,7 @@ public class SettingsContainer {
     public final String spawnersCustomName, spawnerItemName, inventoryTweaksPermission, inventoryTweaksCommand;
     public final NameBuilder<StackedSpawner> spawnersNameBuilder;
     public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
-    public final List<ParticleWrapper> spawnersParticles;
+    public final List<ParticleEffect> spawnersParticles;
     public final FastEnumMap<EntityType, Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
 
     //Barrels settings
@@ -125,7 +125,7 @@ public class SettingsContainer {
     public final List<String> barrelsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedBarrels, whitelistedBarrels;
     public final FastEnumMap<Material, Integer> barrelsMergeRadius, barrelsLimits;
-    public final List<ParticleWrapper> barrelsParticles;
+    public final List<ParticleEffect> barrelsParticles;
 
     //Buckets settings
     public final boolean bucketsStackerEnabled;
@@ -479,7 +479,7 @@ public class SettingsContainer {
         }
     }
 
-    private List<ParticleWrapper> getParticles(WildStackerPlugin plugin, String sectionPath) {
+    private List<ParticleEffect> getParticles(WildStackerPlugin plugin, String sectionPath) {
         if (particlesYaml == null) {
             File file = new File(plugin.getDataFolder(), "particles.yml");
 
@@ -489,7 +489,7 @@ public class SettingsContainer {
             particlesYaml = YamlConfiguration.loadConfiguration(file);
         }
 
-        List<ParticleWrapper> particleWrappers = new ArrayList<>();
+        List<ParticleEffect> particleWrappers = new ArrayList<>();
         ConfigurationSection section = particlesYaml.getConfigurationSection(sectionPath);
 
         if (section != null) {

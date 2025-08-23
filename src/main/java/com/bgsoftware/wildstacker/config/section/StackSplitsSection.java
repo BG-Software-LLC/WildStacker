@@ -4,7 +4,7 @@ import com.bgsoftware.wildstacker.api.config.SettingsManager;
 import com.bgsoftware.wildstacker.config.SettingsContainerHolder;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 
-public class StackSplitsSection extends SettingsContainerHolder implements SettingsManager.StackSplits {
+public class StackSplitsSection extends SettingsContainerHolder implements SettingsManager.Entities.StackSplits {
 
     @Override
     public boolean isSplitEnabled(StackSplit split) {

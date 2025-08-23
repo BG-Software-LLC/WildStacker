@@ -37,7 +37,6 @@ public class SettingsManagerImpl extends Manager implements SettingsManager {
     private final BucketsSection buckets = new BucketsSection();
     private final StewsSection stews = new StewsSection();
     private final KillTaskSection killTask = new KillTaskSection();
-    private final SpawnerUpgradeSection spawnerUpgrades = new SpawnerUpgradeSection();
     private final NameOverridesSection nameOverrides = new NameOverridesSection();
     private final StackChecksSection stackChecks = new StackChecksSection();
     private final StackSplitsSection stackSplits = new StackSplitsSection();
@@ -77,10 +76,11 @@ public class SettingsManagerImpl extends Manager implements SettingsManager {
         this.buckets.setContainer(container);
         this.stews.setContainer(container);
         this.killTask.setContainer(container);
-        this.spawnerUpgrades.setContainer(container);
         this.nameOverrides.setContainer(container);
-        this.stackChecks.setContainer(container);
-        this.stackSplits.setContainer(container);
+
+        this.spawners.spawnerUpgrades.setContainer(container);
+        this.entities.stackChecks.setContainer(container);
+        this.entities.stackSplits.setContainer(container);
     }
 
     public void registerSpawnConditions() {
@@ -205,23 +205,8 @@ public class SettingsManagerImpl extends Manager implements SettingsManager {
     }
 
     @Override
-    public SpawnerUpgrades getSpawnerUpgrades() {
-        return this.spawnerUpgrades;
-    }
-
-    @Override
     public NameOverrides getNameOverrides() {
         return this.nameOverrides;
-    }
-
-    @Override
-    public StackChecks getStackChecks() {
-        return this.stackChecks;
-    }
-
-    @Override
-    public StackSplits getStackSplits() {
-        return this.stackSplits;
     }
 
     public String[] getIgnoredSections() {

@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 
 public class SpawnersSection extends SettingsContainerHolder implements SettingsManager.Spawners {
 
+    public final SpawnerUpgradeSection spawnerUpgrades = new SpawnerUpgradeSection();
+
     @Override
     public boolean isEnabled() {
         return getContainer().spawnersStackingEnabled;
@@ -279,5 +281,10 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
     @Override
     public boolean isMultiplyStackAmountEnabled() {
         return getContainer().spawnerUpgradesMultiplyStackAmount;
+    }
+
+    @Override
+    public SpawnerUpgrades getSpawnerUpgrades() {
+        return this.spawnerUpgrades;
     }
 }

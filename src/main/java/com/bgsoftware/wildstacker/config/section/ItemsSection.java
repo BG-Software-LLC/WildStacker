@@ -27,7 +27,7 @@ public class ItemsSection extends SettingsContainerHolder implements SettingsMan
 
     @Override
     public List<ParticleEffect> getParticles() {
-        return (List<ParticleEffect>)(List<?>) getContainer().itemsParticles;
+        return getContainer().itemsParticles;
     }
 
     @Override

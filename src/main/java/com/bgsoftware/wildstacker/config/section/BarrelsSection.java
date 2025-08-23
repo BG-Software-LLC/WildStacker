@@ -25,7 +25,7 @@ public class BarrelsSection extends SettingsContainerHolder implements SettingsM
 
     @Override
     public List<ParticleEffect> getParticles() {
-        return new ArrayList<>(getContainer().barrelsParticles);
+        return getContainer().barrelsParticles;
     }
 
     @Override

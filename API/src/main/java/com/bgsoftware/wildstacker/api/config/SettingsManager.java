@@ -72,11 +72,6 @@ public interface SettingsManager {
      */
     KillTask getKillTask();
 
-    /**
-     * Settings related to spawner upgrades.
-     * Config path: spawners.spawner-upgrades
-     */
-    SpawnerUpgrades getSpawnerUpgrades();
 
     /**
      * Custom name overrides for entities/items.
@@ -84,17 +79,6 @@ public interface SettingsManager {
      */
     NameOverrides getNameOverrides();
 
-    /**
-     * Entity stacking checks.
-     * Config path: entities.stack-checks
-     */
-    StackChecks getStackChecks();
-
-    /**
-     * Entity stack splitting behavior.
-     * Config path: entities.stack-split
-     */
-    StackSplits getStackSplits();
 
     interface Global {
 
@@ -639,6 +623,28 @@ public interface SettingsManager {
          * Config-path: entities.spawn-corpses
          */
         boolean isSpawnCorpsesEnabled();
+
+        /**
+         * Entity stack splitting behavior.
+         * Config path: entities.stack-split
+         */
+        StackSplits getStackSplits();
+
+        /**
+         * Entity stacking checks.
+         * Config path: entities.stack-checks
+         */
+        StackChecks getStackChecks();
+
+        interface StackSplits {
+            /** Config-path: entities.stack-split */
+            boolean isSplitEnabled(StackSplit split);
+        }
+
+        interface StackChecks {
+            /** Config-path: entities.stack-checks */
+            boolean isCheckEnabled(StackCheckType check);
+        }
     }
 
     interface Spawners {
@@ -906,6 +912,17 @@ public interface SettingsManager {
          */
         boolean isMultiplyStackAmountEnabled();
 
+        /**
+         * Settings related to spawner upgrades.
+         * Config path: spawners.spawner-upgrades
+         */
+        SpawnerUpgrades getSpawnerUpgrades();
+
+        interface SpawnerUpgrades {
+            /** Config-path: spawners.spawner-upgrades.multiply-stack-amount */
+            boolean shouldMultiplyStackAmount();
+        }
+
     }
 
     interface Barrels {
@@ -1142,23 +1159,8 @@ public interface SettingsManager {
         List<String> getItemsWorlds();
     }
 
-    interface SpawnerUpgrades {
-        /** Config-path: spawners.spawner-upgrades.multiply-stack-amount */
-        boolean shouldMultiplyStackAmount();
-    }
-
     interface NameOverrides {
         /** Config-path: custom-names.yml */
         Map<String, String> getOverrides();
-    }
-
-    interface StackChecks {
-        /** Config-path: entities.stack-checks */
-        boolean isCheckEnabled(StackCheckType check);
-    }
-
-    interface StackSplits {
-        /** Config-path: entities.stack-split */
-        boolean isSplitEnabled(StackSplit split);
     }
 }

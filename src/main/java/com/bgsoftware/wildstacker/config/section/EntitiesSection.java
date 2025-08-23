@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 
 public class EntitiesSection extends SettingsContainerHolder implements SettingsManager.Entities {
 
+    public final StackChecksSection stackChecks = new StackChecksSection();
+    public final StackSplitsSection stackSplits = new StackSplitsSection();
+
+
     @Override
     public boolean isEnabled() {
         return getContainer().entitiesStackingEnabled;
@@ -29,7 +33,7 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
 
     @Override
     public List<ParticleEffect> getParticles() {
-        return (List<ParticleEffect>) (List<?>) getContainer().entitiesParticles;
+        return getContainer().entitiesParticles;
     }
 
     @Override
@@ -275,5 +279,15 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
     @Override
     public boolean isSpawnCorpsesEnabled() {
         return getContainer().spawnCorpses;
+    }
+
+    @Override
+    public StackChecks getStackChecks() {
+        return this.stackChecks;
+    }
+
+    @Override
+    public StackSplits getStackSplits() {
+        return this.stackSplits;
     }
 }
