@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.config.section;
 
 import com.bgsoftware.wildstacker.api.config.SettingsManager;
-import com.bgsoftware.wildstacker.api.data.structures.IFast2EnumsArray;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -51,12 +50,10 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().linkedEntitiesMaxDistance;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getBlacklistedEntities() {
         return getContainer().blacklistedEntities;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getWhitelistedEntities() {
         return getContainer().whitelistedEntities;
     }
@@ -66,17 +63,14 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().blacklistedEntitiesNames;
     }
 
-    @Override
     public Fast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> getInstantKills() {
         return getContainer().entitiesInstantKills;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getNerfedWhitelist() {
         return getContainer().entitiesNerfedWhitelist;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getNerfedBlacklist() {
         return getContainer().entitiesNerfedBlacklist;
     }
@@ -91,7 +85,6 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().stackDownEnabled;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getStackDownTypes() {
         return getContainer().stackDownTypes;
     }
@@ -106,7 +99,6 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().mythicMobsCustomNameEnabled;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getKeepLowestHealthTypes() {
         return getContainer().keepLowestHealth;
     }
@@ -156,7 +148,6 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().entitiesOneShotTools;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getOneShotWhitelist() {
         return getContainer().entitiesOneShotWhitelist;
     }
@@ -236,27 +227,22 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().entitiesFilteredTransforms;
     }
 
-    @Override
     public Fast2EnumsMap<EntityType, SpawnCause, Integer> getMergeRadius() {
         return getContainer().entitiesMergeRadius;
     }
 
-    @Override
     public Fast2EnumsMap<EntityType, SpawnCause, Integer> getLimits() {
         return getContainer().entitiesLimits;
     }
 
-    @Override
     public Fast2EnumsMap<EntityType, SpawnCause, Integer> getMinimumRequiredEntities() {
         return getContainer().minimumRequiredEntities;
     }
 
-    @Override
     public Fast2EnumsMap<EntityType, SpawnCause, Integer> getDefaultUnstack() {
         return getContainer().defaultUnstack;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getAutoExpPickupTypes() {
         return getContainer().entitiesAutoExpPickup;
     }

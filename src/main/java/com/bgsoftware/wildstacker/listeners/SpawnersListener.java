@@ -10,6 +10,8 @@ import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
+import com.bgsoftware.wildstacker.config.section.SpawnersSection;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -101,7 +103,7 @@ public final class SpawnersListener implements Listener {
         if (player.hasPermission("wildstacker.charge.bypass")) {
             amountToCharge = 0;
         } else {
-            Pair<Double, Boolean> chargeInfo = plugin.getSettings().getSpawners().getBreakCharge()
+            Pair<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getBreakCharge()
                     .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
             amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
         }
@@ -212,7 +214,7 @@ public final class SpawnersListener implements Listener {
             if (e.getPlayer().hasPermission("wildstacker.charge.bypass")) {
                 amountToCharge = 0;
             } else {
-                Pair<Double, Boolean> chargeInfo = plugin.getSettings().getSpawners().getPlaceCharge()
+                Pair<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getPlaceCharge()
                         .getOrDefault(spawnerType, new Pair<>(0.0, false));
                 amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
             }
@@ -470,7 +472,7 @@ public final class SpawnersListener implements Listener {
 
         ((WStackedEntity) stackedEntity).setUpgradeId(stackedSpawner.getUpgradeId());
 
-        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), stackedEntity, 1);
+        int minimumEntityRequirement = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getMinimumRequiredEntities(), stackedEntity, 1);
 
         if (stackedSpawner.isDebug())
             Debug.debug("SpawnersListener", "onSpawnerSpawn", "minimumEntityRequirement=" + minimumEntityRequirement);
@@ -804,7 +806,7 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            int mergeRadius = plugin.getSettings().getEntities().getMergeRadius().getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
+            int mergeRadius = ((EntitiesSection) plugin.getSettings().getEntities()).getMergeRadius().getOrDefault(e.getType(), SpawnCause.valueOf(e.getReason()), 0);
 
             List<StackedEntity> nearbyStackableEntities = mergeRadius <= 0 ? Collections.emptyList() :
                     EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
@@ -829,7 +831,7 @@ public final class SpawnersListener implements Listener {
 
             StackedEntity stackedEntity = targetEntityOptional.get();
 
-            int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), stackedEntity, 0);
+            int minimumEntityRequirement = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getMinimumRequiredEntities(), stackedEntity, 0);
             if (minimumEntityRequirement <= 1) {
                 if (stackedEntity.canGetStacked(spawnMobsCount) != StackCheckResult.SUCCESS)
                     return;

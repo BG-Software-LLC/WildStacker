@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Debug;
@@ -215,7 +216,7 @@ public class StackedBaseSpawner extends BaseSpawner {
             return;
         }
 
-        int minimumEntityRequirement = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), this.demoEntity, 1);
+        int minimumEntityRequirement = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getMinimumRequiredEntities(), this.demoEntity, 1);
 
         int stackedEntityCount = Random.nextInt(1, this.spawnCount, stackAmount, 1.5);
 

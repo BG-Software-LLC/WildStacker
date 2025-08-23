@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -141,7 +142,7 @@ public class EntityDeathListener implements Listener {
             boolean hasAvoidOneShot = stackedEntity.getAndRemoveFlag(EntityFlag.AVOID_ONE_SHOT) != null;
             shouldSimulateDeath = !hasAvoidOneShot &&
                     plugin.getSettings().getEntities().isOneShotEnabled() &&
-                    GeneralUtils.contains(plugin.getSettings().getEntities().getOneShotWhitelist(), stackedEntity) &&
+                    GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getOneShotWhitelist(), stackedEntity) &&
                     plugin.getSettings().getEntities().getOneShotTools().contains(damagerTool.getType().toString());
         } else {
             shouldSimulateDeath = false;

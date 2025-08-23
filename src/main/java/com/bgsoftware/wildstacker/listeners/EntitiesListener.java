@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -600,7 +601,7 @@ public final class EntitiesListener implements Listener {
 
     public boolean handleSpawnerEggUse(ItemStack usedItem, Block clickedBlock, BlockFace blockFace, PlayerInteractEvent event) {
         if (!plugin.getSettings().getEntities().isEnabled() || usedItem == null ||
-                plugin.getSettings().getEntities().getBlacklistedEntities().contains(SpawnCause.SPAWNER_EGG) ||
+                ((EntitiesSection) plugin.getSettings().getEntities()).getBlacklistedEntities().contains(SpawnCause.SPAWNER_EGG) ||
                 (!Materials.isValidAndSpawnEgg(usedItem) && !Materials.isFishBucket(usedItem)))
             return false;
 

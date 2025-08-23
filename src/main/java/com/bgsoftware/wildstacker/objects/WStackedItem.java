@@ -7,12 +7,12 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
+import com.bgsoftware.wildstacker.config.section.ItemsSection;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -101,25 +101,26 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().getItems().getLimits().getOrDefault(object.getItemStack().getType(), Integer.MAX_VALUE);
+        int limit = ((ItemsSection) plugin.getSettings().getItems()).getLimits().getOrDefault(object.getItemStack().getType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().getItems().getMergeRadius().getOrDefault(object.getItemStack().getType(), 0);
+        int radius = ((ItemsSection) plugin.getSettings().getItems()).getMergeRadius().getOrDefault(object.getItemStack().getType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().getItems().getBlacklistedItems().contains(object.getItemStack().getType());
+        return ((ItemsSection) plugin.getSettings().getItems()).getBlacklistedItems().contains(object.getItemStack().getType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().getItems().getWhitelistedItems().size() == 0 ||
-                plugin.getSettings().getItems().getWhitelistedItems().contains(object.getItemStack().getType());
+        ItemsSection pluginSettings = (ItemsSection) plugin.getSettings().getItems();
+        return pluginSettings.getWhitelistedItems().size() == 0 ||
+                pluginSettings.getWhitelistedItems().contains(object.getItemStack().getType());
     }
 
     @Override

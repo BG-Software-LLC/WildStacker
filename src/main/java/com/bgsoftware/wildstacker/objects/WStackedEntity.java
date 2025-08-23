@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.loot.LootTable;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
@@ -107,24 +108,24 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public int getStackLimit() {
-        int limit = GeneralUtils.get(plugin.getSettings().getEntities().getLimits(), this, Integer.MAX_VALUE);
+        int limit = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getLimits(), this, Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = GeneralUtils.get(plugin.getSettings().getEntities().getMergeRadius(), this, 0);
+        int radius = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getMergeRadius(), this, 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return GeneralUtils.contains(plugin.getSettings().getEntities().getBlacklistedEntities(), this);
+        return GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getBlacklistedEntities(), this);
     }
 
     @Override
     public boolean isWhitelisted() {
-        return GeneralUtils.containsOrEmpty(plugin.getSettings().getEntities().getWhitelistedEntities(), this);
+        return GeneralUtils.containsOrEmpty(((EntitiesSection) plugin.getSettings().getEntities()).getWhitelistedEntities(), this);
     }
 
     @Override
@@ -253,7 +254,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 return StackCheckResult.DISABLED_REGION;
         }
 
-        if (plugin.getSettings().getEntities().isStackDownEnabled() && GeneralUtils.contains(plugin.getSettings().getEntities().getStackDownTypes(), this)) {
+        if (plugin.getSettings().getEntities().isStackDownEnabled() && GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getStackDownTypes(), this)) {
             if (object.getLocation().getY() < targetEntity.getLivingEntity().getLocation().getY()) {
                 targetEntity.runStackAsync(this, null);
                 return StackCheckResult.NOT_BELOW;
@@ -279,7 +280,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (!EventsCaller.callEntityStackEvent(targetEntity, this))
             return StackResult.EVENT_CANCELLED;
 
-        double health = GeneralUtils.contains(plugin.getSettings().getEntities().getKeepLowestHealthTypes(), this) ?
+        double health = GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getKeepLowestHealthTypes(), this) ?
                 Math.min(getHealth(), targetEntity.getHealth()) : targetEntity.getHealth();
 
         targetEntity.increaseStackAmount(getStackAmount(), false);
@@ -566,8 +567,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean isNerfed() {
-        return GeneralUtils.containsOrEmpty(plugin.getSettings().getEntities().getNerfedWhitelist(), this) &&
-                !GeneralUtils.contains(plugin.getSettings().getEntities().getNerfedBlacklist(), this) &&
+        return GeneralUtils.containsOrEmpty(((EntitiesSection) plugin.getSettings().getEntities()).getNerfedWhitelist(), this) &&
+                !GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getNerfedBlacklist(), this) &&
                 (plugin.getSettings().getEntities().getNerfedWorlds().isEmpty() || plugin.getSettings().getEntities().getNerfedWorlds().contains(object.getWorld().getName()));
     }
 
@@ -588,12 +589,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public boolean isInstantKill(EntityDamageEvent.DamageCause damageCause) {
-        return GeneralUtils.contains(plugin.getSettings().getEntities().getInstantKills(), this, damageCause);
+        return GeneralUtils.contains(((EntitiesSection) plugin.getSettings().getEntities()).getInstantKills(), this, damageCause);
     }
 
     @Override
     public int getDefaultUnstack() {
-        return Math.max(1, GeneralUtils.get(plugin.getSettings().getEntities().getDefaultUnstack(), this, 1));
+        return Math.max(1, GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getDefaultUnstack(), this, 1));
     }
 
     @Override
@@ -663,7 +664,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                 .collect(Collectors.toList());
 
         if (!nearbyEntities.isEmpty()) {
-            int minimumStackSize = GeneralUtils.get(plugin.getSettings().getEntities().getMinimumRequiredEntities(), this, 1);
+            int minimumStackSize = GeneralUtils.get(((EntitiesSection) plugin.getSettings().getEntities()).getMinimumRequiredEntities(), this, 1);
             StackedEntity targetEntity = nearbyEntities.get(0);
 
             if (minimumStackSize > 2) {

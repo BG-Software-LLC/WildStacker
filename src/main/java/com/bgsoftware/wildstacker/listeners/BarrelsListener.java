@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
+import com.bgsoftware.wildstacker.config.section.BarrelsSection;
 import com.bgsoftware.wildstacker.hooks.listeners.IStackedBlockListener;
 import com.bgsoftware.wildstacker.menu.BarrelsPlaceMenu;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
@@ -347,10 +348,13 @@ public final class BarrelsListener implements Listener {
 
     private boolean isBarrelBlock(Block block) {
         Material type = block.getType();
-        return (plugin.getSettings().getBarrels().getWhitelisted().size() == 0 ||
-                plugin.getSettings().getBarrels().getWhitelisted().contains(type)) &&
-                !plugin.getSettings().getBarrels().getBlacklisted().contains(type) &&
-                !plugin.getSettings().getBarrels().getDisabledWorlds().contains(block.getWorld().getName());
+
+        BarrelsSection barrelsSection =  (BarrelsSection) plugin.getSettings().getBarrels();
+
+        return (barrelsSection.getWhitelisted().size() == 0 ||
+                barrelsSection.getWhitelisted().contains(type)) &&
+                !barrelsSection.getBlacklisted().contains(type) &&
+                !barrelsSection.getDisabledWorlds().contains(block.getWorld().getName());
     }
 
 

@@ -49,12 +49,10 @@ public class KillTaskSection extends SettingsContainerHolder implements Settings
         return getContainer().killTaskTimeCommand;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getEntitiesWhitelist() {
         return getContainer().killTaskEntitiesWhitelist;
     }
 
-    @Override
     public Fast2EnumsArray<EntityType, SpawnCause> getEntitiesBlacklist() {
         return getContainer().killTaskEntitiesBlacklist;
     }
@@ -64,12 +62,10 @@ public class KillTaskSection extends SettingsContainerHolder implements Settings
         return getContainer().killTaskEntitiesWorlds;
     }
 
-    @Override
     public FastEnumArray<Material> getItemsWhitelist() {
         return getContainer().killTaskItemsWhitelist;
     }
 
-    @Override
     public FastEnumArray<Material> getItemsBlacklist() {
         return getContainer().killTaskItemsBlacklist;
     }

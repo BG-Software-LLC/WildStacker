@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.items;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.config.section.ItemsSection;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -423,9 +424,10 @@ public final class ItemUtils {
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
         Material itemType = itemStack.getType();
-        return !plugin.getSettings().getItems().getBlacklistedItems().contains(itemType) &&
-                (plugin.getSettings().getItems().getWhitelistedItems().size() == 0 || plugin.getSettings().getItems().getWhitelistedItems().contains(itemType)) &&
-                !plugin.getSettings().getItems().getDisabledWorlds().contains(world.getName());
+        ItemsSection itemsSection = (ItemsSection) plugin.getSettings().getItems();
+        return !itemsSection.getBlacklistedItems().contains(itemType) &&
+                (itemsSection.getWhitelistedItems().size() == 0 || itemsSection.getWhitelistedItems().contains(itemType)) &&
+                !itemsSection.getDisabledWorlds().contains(world.getName());
     }
 
 }

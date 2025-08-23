@@ -1,13 +1,11 @@
 package com.bgsoftware.wildstacker.utils.data.structures;
 
-import com.bgsoftware.wildstacker.api.data.structures.IFastEnumArray;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class FastEnumArray<E extends Enum<E>> implements IFastEnumArray<E> {
+public final class FastEnumArray<E extends Enum<E>> {
 
     private final Boolean[] arr;
     private final Class<E> keyType;
@@ -73,11 +71,6 @@ public final class FastEnumArray<E extends Enum<E>> implements IFastEnumArray<E>
         //noinspection unchecked
         E[] allValues = (E[]) FastEnumUtils.getEnumValues(keyType);
         return Arrays.stream(allValues).filter(e -> arr[e.ordinal()]).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean isAllEnabled() {
-        return containsAll;
     }
 
     @Override

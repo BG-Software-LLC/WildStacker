@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import com.bgsoftware.wildstacker.config.section.SpawnersSection;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
@@ -136,25 +137,27 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public int getStackLimit() {
-        int limit = plugin.getSettings().getSpawners().getLimits().getOrDefault(getSpawnedType(), Integer.MAX_VALUE);
+        int limit = ((SpawnersSection) plugin.getSettings().getSpawners()).getLimits().getOrDefault(getSpawnedType(), Integer.MAX_VALUE);
         return limit < 1 ? Integer.MAX_VALUE : limit;
     }
 
     @Override
     public int getMergeRadius() {
-        int radius = plugin.getSettings().getSpawners().getMergeRadius().getOrDefault(getSpawnedType(), 0);
+        int radius = ((SpawnersSection) plugin.getSettings().getSpawners()).getMergeRadius().getOrDefault(getSpawnedType(), 0);
         return radius < 1 ? 0 : radius;
     }
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().getSpawners().getBlacklistedSpawners().contains(getSpawnedType());
+        return ((SpawnersSection) plugin.getSettings().getSpawners()).getBlacklistedSpawners().contains(getSpawnedType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().getSpawners().getWhitelistedSpawners().size() == 0 ||
-                plugin.getSettings().getSpawners().getWhitelistedSpawners().contains(getSpawnedType());
+
+        SpawnersSection spawnersSection = (SpawnersSection) plugin.getSettings().getSpawners();
+        return spawnersSection.getWhitelistedSpawners().size() == 0 ||
+                spawnersSection.getWhitelistedSpawners().contains(getSpawnedType());
     }
 
     @Override

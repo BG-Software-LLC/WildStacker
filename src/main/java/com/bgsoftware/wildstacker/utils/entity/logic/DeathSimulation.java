@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
 import com.bgsoftware.wildstacker.nms.entity.IEntityWrapper;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -244,7 +245,7 @@ public final class DeathSimulation {
                 finalDrops.forEach(itemStack -> ItemUtils.dropItem(itemStack, dropLocation));
 
                 if (finalExp > 0) {
-                    if (GeneralUtils.contains(plugin.getSettings().getEntities().getAutoExpPickupTypes(), stackedEntity) && livingEntity.getKiller() != null) {
+                    if (GeneralUtils.contains(((EntitiesSection)plugin.getSettings().getEntities()).getAutoExpPickupTypes(), stackedEntity) && livingEntity.getKiller() != null) {
                         EntityUtils.giveExp(livingEntity.getKiller(), finalExp);
                         if (plugin.getSettings().getEntities().getExpPickupSound() != null)
                             livingEntity.getKiller().playSound(livingEntity.getLocation(),

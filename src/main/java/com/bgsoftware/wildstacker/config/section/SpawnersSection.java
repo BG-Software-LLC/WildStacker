@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.config.section;
 
 import com.bgsoftware.wildstacker.api.config.SettingsManager;
-import com.bgsoftware.wildstacker.api.data.structures.IFastEnumMap;
 import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.Pair;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -44,12 +43,10 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
         return getContainer().chunkMergeSpawners;
     }
 
-    @Override
     public FastEnumArray<EntityType> getBlacklistedSpawners() {
         return getContainer().blacklistedSpawners;
     }
 
-    @Override
     public FastEnumArray<EntityType> getWhitelistedSpawners() {
         return getContainer().whitelistedSpawners;
     }
@@ -199,12 +196,10 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
         return getContainer().spawnersUnstackedCustomName;
     }
 
-    @Override
     public FastEnumMap<EntityType, Integer> getMergeRadius() {
         return getContainer().spawnersMergeRadius;
     }
 
-    @Override
     public FastEnumMap<EntityType, Integer> getLimits() {
         return getContainer().spawnersLimits;
     }
@@ -229,13 +224,11 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
         return getContainer().inventoryTweaksCommand;
     }
 
-    @Override
-    public IFastEnumMap<EntityType, Pair<Double, Boolean>> getBreakCharge() {
+    public FastEnumMap<EntityType, Pair<Double, Boolean>> getBreakCharge() {
         return getContainer().spawnersBreakCharge;
     }
 
-    @Override
-    public IFastEnumMap<EntityType, Pair<Double, Boolean>> getPlaceCharge() {
+    public FastEnumMap<EntityType, Pair<Double, Boolean>> getPlaceCharge() {
         return getContainer().spawnersPlaceCharge;
     }
 

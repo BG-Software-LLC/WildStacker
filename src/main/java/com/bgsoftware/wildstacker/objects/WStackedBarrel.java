@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
+import com.bgsoftware.wildstacker.config.section.BarrelsSection;
 import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
@@ -166,13 +167,14 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
     @Override
     public boolean isBlacklisted() {
-        return plugin.getSettings().getBarrels().getBlacklisted().contains(barrelItem.getType());
+        return ((BarrelsSection) plugin.getSettings().getBarrels()).getBlacklisted().contains(barrelItem.getType());
     }
 
     @Override
     public boolean isWhitelisted() {
-        return plugin.getSettings().getBarrels().getWhitelisted().size() == 0 ||
-                plugin.getSettings().getBarrels().getWhitelisted().contains(barrelItem.getType());
+        BarrelsSection barrelsSection = (BarrelsSection) plugin.getSettings().getBarrels();
+        return barrelsSection.getWhitelisted().size() == 0 ||
+                barrelsSection.getWhitelisted().contains(barrelItem.getType());
     }
 
     @Override

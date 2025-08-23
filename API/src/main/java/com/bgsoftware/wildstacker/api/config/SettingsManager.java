@@ -1,15 +1,11 @@
 package com.bgsoftware.wildstacker.api.config;
 
-import com.bgsoftware.wildstacker.api.data.structures.*;
-import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.*;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -260,17 +256,6 @@ public interface SettingsManager {
          */
         List<String> getDisabledWorlds();
 
-        /**
-         * List of blacklisted materials for stacking.
-         * Config-path: items.blacklist
-         */
-        IFastEnumArray<Material> getBlacklistedItems();
-
-        /**
-         * List of whitelisted materials for stacking.
-         * Config-path: items.whitelist
-         */
-        IFastEnumArray<Material> getWhitelistedItems();
 
         /**
          * Max number of stacked items allowed per chunk.
@@ -290,17 +275,6 @@ public interface SettingsManager {
          */
         DisplayNameBuilder<StackedItem> getNameBuilder();
 
-        /**
-         * Merge radius for item stacking per material.
-         * Config-path: items.merge-radius
-         */
-        IFastEnumMap<Material, Integer> getMergeRadius();
-
-        /**
-         * Limits per material for stacking.
-         * Config-path: items.limits
-         */
-        IFastEnumMap<Material, Integer> getLimits();
 
         /**
          * Delay in ticks between stacking operations.
@@ -347,17 +321,6 @@ public interface SettingsManager {
          */
         int getLinkedEntitiesMaxDistance();
 
-        /**
-         * List of blacklisted entity types and spawn causes.
-         * Config-path: entities.blacklist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getBlacklistedEntities();
-
-        /**
-         * List of whitelisted entity types and spawn causes.
-         * Config-path: entities.whitelist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getWhitelistedEntities();
 
         /**
          * List of blacklisted names (regex patterns).
@@ -365,23 +328,6 @@ public interface SettingsManager {
          */
         List<Pattern> getBlacklistedNames();
 
-        /**
-         * List of instant kill mappings.
-         * Config-path: entities.instant-kill
-         */
-        IFast3EnumsArray<EntityType, SpawnCause, EntityDamageEvent.DamageCause> getInstantKills();
-
-        /**
-         * Whitelist of nerfed entity types and spawn causes.
-         * Config-path: entities.nerfed-entities.whitelist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getNerfedWhitelist();
-
-        /**
-         * Blacklist of nerfed entity types and spawn causes.
-         * Config-path: entities.nerfed-entities.blacklist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getNerfedBlacklist();
 
         /**
          * Worlds where nerfing applies.
@@ -395,11 +341,6 @@ public interface SettingsManager {
          */
         boolean isStackDownEnabled();
 
-        /**
-         * Types affected by stack-down.
-         * Config-path: entities.stack-down.stack-down-types
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getStackDownTypes();
 
         /**
          * Whether fire is kept after stacking.
@@ -413,11 +354,6 @@ public interface SettingsManager {
          */
         boolean isMythicMobsCustomNameEnabled();
 
-        /**
-         * Types that keep lowest health.
-         * Config-path: entities.keep-lowest-health
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getKeepLowestHealthTypes();
 
         /**
          * Whether stack after breeding is enabled.
@@ -473,11 +409,6 @@ public interface SettingsManager {
          */
         List<String> getOneShotTools();
 
-        /**
-         * Whitelisted types for one-shot.
-         * Config-path: entities.one-shot.whitelist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getOneShotWhitelist();
 
         /**
          * Whether stacked entities are stored.
@@ -571,36 +502,6 @@ public interface SettingsManager {
         List<String> getFilteredTransforms();
 
         /**
-         * Merge radius per entity type and spawn cause.
-         * Config-path: entities.merge-radius
-         */
-        IFast2EnumsMap<EntityType, SpawnCause, Integer> getMergeRadius();
-
-        /**
-         * Stack limits per entity type and spawn cause.
-         * Config-path: entities.limits
-         */
-        IFast2EnumsMap<EntityType, SpawnCause, Integer> getLimits();
-
-        /**
-         * Minimum required per entity type and spawn cause.
-         * Config-path: entities.minimum-required
-         */
-        IFast2EnumsMap<EntityType, SpawnCause, Integer> getMinimumRequiredEntities();
-
-        /**
-         * Default unstack values.
-         * Config-path: entities.default-unstack
-         */
-        IFast2EnumsMap<EntityType, SpawnCause, Integer> getDefaultUnstack();
-
-        /**
-         * Types for auto EXP pickup.
-         * Config-path: entities.auto-exp-pickup
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getAutoExpPickupTypes();
-
-        /**
          * Whether egg-laying multiplier is enabled.
          * Config-path: entities.egg-lay-multiply
          */
@@ -673,16 +574,6 @@ public interface SettingsManager {
          * Config-path: spawners.chunk-merge
          */
         boolean isChunkMergeEnabled();
-
-        /**
-         * Config-path: spawners.blacklist
-         */
-        IFastEnumArray<EntityType> getBlacklistedSpawners();
-
-        /**
-         * Config-path: spawners.whitelist
-         */
-        IFastEnumArray<EntityType> getWhitelistedSpawners();
 
         /**
          * Config-path: spawners.chunk-limit
@@ -826,15 +717,6 @@ public interface SettingsManager {
          */
         boolean hasUnstackedCustomName();
 
-        /**
-         * Config-path: spawners.merge-radius
-         */
-        IFastEnumMap<EntityType, Integer> getMergeRadius();
-
-        /**
-         * Config-path: spawners.limits
-         */
-        IFastEnumMap<EntityType, Integer> getLimits();
 
         /**
          * Config-path: spawners.disabled-worlds
@@ -855,16 +737,6 @@ public interface SettingsManager {
          * Config-path: spawners.inventory-tweaks.toggle-command
          */
         String getInventoryTweaksCommand();
-
-        /**
-         * Config-path: spawners.break-charge
-         */
-        IFastEnumMap<EntityType, Pair<Double, Boolean>> getBreakCharge();
-
-        /**
-         * Config-path: spawners.place-charge
-         */
-        IFastEnumMap<EntityType, Pair<Double, Boolean>> getPlaceCharge();
 
         // isNextSpawnerPlacement
         /**
@@ -973,18 +845,6 @@ public interface SettingsManager {
          * Config-path: barrels.disabled-worlds
          */
         List<String> getDisabledWorlds();
-
-        /**
-         * List of blacklisted barrel materials.
-         * Config-path: barrels.blacklist
-         */
-        IFastEnumArray<Material> getBlacklisted();
-
-        /**
-         * List of whitelisted barrel materials.
-         * Config-path: barrels.whitelist
-         */
-        IFastEnumArray<Material> getWhitelisted();
 
         /**
          * Merge radius per material.
@@ -1123,34 +983,10 @@ public interface SettingsManager {
         String getTimeCommand();
 
         /**
-         * The whitelist of entities to kill.
-         * Config-path: kill-task.kill-entities.whitelist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getEntitiesWhitelist();
-
-        /**
-         * The blacklist of entities to not kill.
-         * Config-path: kill-task.kill-entities.blacklist
-         */
-        IFast2EnumsArray<EntityType, SpawnCause> getEntitiesBlacklist();
-
-        /**
          * The worlds where entity killing should take place.
          * Config-path: kill-task.kill-entities.worlds
          */
         List<String> getEntitiesWorlds();
-
-        /**
-         * The whitelist of item types to kill.
-         * Config-path: kill-task.kill-items.whitelist
-         */
-        IFastEnumArray<Material> getItemsWhitelist();
-
-        /**
-         * The blacklist of item types to exclude from killing.
-         * Config-path: kill-task.kill-items.blacklist
-         */
-        IFastEnumArray<Material> getItemsBlacklist();
 
         /**
          * The worlds where item killing should take place.
