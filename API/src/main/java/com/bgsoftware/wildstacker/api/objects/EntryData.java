@@ -12,7 +12,7 @@ import java.util.Map;
  * @param <K> the type of the key
  * @param <V> the type of the value
  */
-public final class Pair<K, V> implements Map.Entry<K, V> {
+public final class EntryData<K, V> implements Map.Entry<K, V> {
 
     /**
      * The key of the pair.
@@ -30,7 +30,7 @@ public final class Pair<K, V> implements Map.Entry<K, V> {
      * @param key   the key element of the pair
      * @param value the value element of the pair
      */
-    public Pair(K key, V value) {
+    public EntryData(K key, V value) {
         this.key = key;
         this.value = value;
     }

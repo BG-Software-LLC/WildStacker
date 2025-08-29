@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.api.data;
 
 
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,14 +16,14 @@ public abstract class DatabaseFilter {
         return new DatabaseFilterSingle(filterKey, filterValue);
     }
 
-    public static DatabaseFilter fromFilters(List<Pair<String, Object>> filters) {
+    public static DatabaseFilter fromFilters(List<EntryData<String, Object>> filters) {
         if (filters.isEmpty()) {
             if (EMPTY_FILTER == null)
                 EMPTY_FILTER = new DatabaseFilterEmpty();
 
             return EMPTY_FILTER;
         } else if (filters.size() == 1) {
-            Pair<String, Object> filter = filters.get(0);
+            EntryData<String, Object> filter = filters.get(0);
             return fromFilter(filter.getKey(), filter.getValue());
         } else {
             return new DatabaseFilterList(filters);
@@ -35,13 +35,13 @@ public abstract class DatabaseFilter {
 
     public abstract void forEach(BiConsumer<String, Object> consumer);
 
-    public abstract Collection<Pair<String, Object>> getFilters();
+    public abstract Collection<EntryData<String, Object>> getFilters();
 
     private static class DatabaseFilterList extends DatabaseFilter {
 
-        private final Collection<Pair<String, Object>> filters;
+        private final Collection<EntryData<String, Object>> filters;
 
-        DatabaseFilterList(Collection<Pair<String, Object>> filters) {
+        DatabaseFilterList(Collection<EntryData<String, Object>> filters) {
             this.filters = filters;
         }
 
@@ -51,7 +51,7 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<Pair<String, Object>> getFilters() {
+        public Collection<EntryData<String, Object>> getFilters() {
             return Collections.unmodifiableCollection(filters);
         }
 
@@ -65,7 +65,7 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<Pair<String, Object>> getFilters() {
+        public Collection<EntryData<String, Object>> getFilters() {
             return Collections.emptyList();
         }
 
@@ -87,8 +87,8 @@ public abstract class DatabaseFilter {
         }
 
         @Override
-        public Collection<Pair<String, Object>> getFilters() {
-            return Collections.singleton(new Pair<>(filterKey, filterValue));
+        public Collection<EntryData<String, Object>> getFilters() {
+            return Collections.singleton(new EntryData<>(filterKey, filterValue));
         }
 
     }

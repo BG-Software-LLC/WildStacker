@@ -138,7 +138,7 @@ public final class SystemHandler implements SystemManager {
         //Entity wasn't found, creating a new object
         stackedEntity = new WStackedEntity(livingEntity);
 
-        Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
+        EntryData<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
         if (entityData != null) {
             stackedEntity.setStackAmount(entityData.getKey(), false);
             stackedEntity.setSpawnCause(entityData.getValue());

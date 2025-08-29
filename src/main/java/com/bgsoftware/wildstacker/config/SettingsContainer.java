@@ -108,7 +108,7 @@ public class SettingsContainer {
     public final NameBuilder<StackedSpawner> spawnersNameBuilder;
     public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleEffect> spawnersParticles;
-    public final FastEnumMap<EntityType, Pair<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
+    public final FastEnumMap<EntityType, EntryData<Double, Boolean>> spawnersBreakCharge, spawnersPlaceCharge;
 
     //Barrels settings
     public final boolean barrelsStackingEnabled, barrelsParticlesEnabled, chunkMergeBarrels, explosionsBreakBarrelStack,
@@ -337,7 +337,7 @@ public class SettingsContainer {
                 continue;
 
             if (key.equalsIgnoreCase("ALL")) {
-                spawnersBreakCharge.putGlobal(new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersBreakCharge.putGlobal(new EntryData<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             } else {
                 EntityType entityType;
 
@@ -347,7 +347,7 @@ public class SettingsContainer {
                     continue;
                 }
 
-                spawnersBreakCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersBreakCharge.put(entityType, new EntryData<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
         spawnersPlaceCharge = new FastEnumMap<>(EntityType.class);
@@ -359,7 +359,7 @@ public class SettingsContainer {
                 continue;
 
             if (key.equalsIgnoreCase("ALL")) {
-                spawnersPlaceCharge.putGlobal(new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersPlaceCharge.putGlobal(new EntryData<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             } else {
                 EntityType entityType;
 
@@ -369,7 +369,7 @@ public class SettingsContainer {
                     continue;
                 }
 
-                spawnersPlaceCharge.put(entityType, new Pair<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
+                spawnersPlaceCharge.put(entityType, new EntryData<>(amount, mobSection.getBoolean("multiply-stack-amount", false)));
             }
         }
         changeUsingEggs = config.getBoolean("spawners.change-using-eggs", true);

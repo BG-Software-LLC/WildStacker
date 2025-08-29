@@ -43,7 +43,6 @@ public class BarrelsSection extends SettingsContainerHolder implements SettingsM
         return getContainer().barrelsCustomName;
     }
 
-    @Override
     public NameBuilder<StackedBarrel> getNameBuilder() {
         return getContainer().barrelsNameBuilder;
     }

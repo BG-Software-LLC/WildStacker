@@ -1,13 +1,13 @@
 package com.bgsoftware.wildstacker.config.section;
 
 import com.bgsoftware.wildstacker.api.config.SettingsManager;
-import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.config.SettingsContainerHolder;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 
+import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import org.bukkit.Material;
 
 import java.util.List;
@@ -92,8 +92,8 @@ public class ItemsSection extends SettingsContainerHolder implements SettingsMan
         return getContainer().itemsCustomName;
     }
 
-    @Override
-    public DisplayNameBuilder<StackedItem> getNameBuilder() {
+
+    public NameBuilder<StackedItem> getNameBuilder() {
         return getContainer().itemsNameBuilder;
     }
 

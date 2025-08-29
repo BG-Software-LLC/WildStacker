@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -184,7 +185,7 @@ public final class EntityUtils {
             throw new NullPointerException();
 
         return stackAmount <= 1 && stackedEntity.isDefaultUpgrade() ? "" :
-                plugin.getSettings().getEntities().getNameBuilder().build(stackedEntity);
+                ((EntitiesSection) plugin.getSettings().getEntities()).getNameBuilder().build(stackedEntity);
     }
 
     public static int getBadOmenAmplifier(Player player) {

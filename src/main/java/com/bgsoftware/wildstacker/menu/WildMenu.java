@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -77,7 +77,7 @@ public abstract class WildMenu implements InventoryHolder {
                 });
             }
 
-            Pair<String, SoundWrapper> permission = getPermission(e.getRawSlot());
+            EntryData<String, SoundWrapper> permission = getPermission(e.getRawSlot());
             if (permission != null && !player.hasPermission(permission.getKey())) {
                 if (permission.getValue() != null)
                     permission.getValue().playSound(player);
@@ -172,7 +172,7 @@ public abstract class WildMenu implements InventoryHolder {
 
     public void addPermission(int slot, String permission, SoundWrapper noAccessSound) {
         if (permission != null && !permission.isEmpty())
-            getData().permissions.put(slot, new Pair<>(permission, noAccessSound));
+            getData().permissions.put(slot, new EntryData<>(permission, noAccessSound));
     }
 
     public void addFillItem(int slot, ItemBuilder itemBuilder) {
@@ -188,7 +188,7 @@ public abstract class WildMenu implements InventoryHolder {
         return getData().commands.get(slot);
     }
 
-    private Pair<String, SoundWrapper> getPermission(int slot) {
+    private EntryData<String, SoundWrapper> getPermission(int slot) {
         return getData().permissions.get(slot);
     }
 
@@ -204,7 +204,7 @@ public abstract class WildMenu implements InventoryHolder {
 
         public final Map<Integer, SoundWrapper> sounds = new HashMap<>();
         public final Map<Integer, List<String>> commands = new HashMap<>();
-        public final Map<Integer, Pair<String, SoundWrapper>> permissions = new HashMap<>();
+        public final Map<Integer, EntryData<String, SoundWrapper>> permissions = new HashMap<>();
         public final Map<Integer, ItemBuilder> fillItems = new HashMap<>();
         public String title = "";
         public int rowsSize = 6;

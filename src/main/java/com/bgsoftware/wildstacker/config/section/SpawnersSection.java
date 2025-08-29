@@ -1,13 +1,13 @@
 package com.bgsoftware.wildstacker.config.section;
 
 import com.bgsoftware.wildstacker.api.config.SettingsManager;
-import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.config.SettingsContainerHolder;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
+import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
@@ -61,8 +61,7 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
         return getContainer().spawnersCustomName;
     }
 
-    @Override
-    public DisplayNameBuilder<StackedSpawner> getNameBuilder() {
+    public NameBuilder<StackedSpawner> getNameBuilder() {
         return getContainer().spawnersNameBuilder;
     }
 
@@ -224,11 +223,11 @@ public class SpawnersSection extends SettingsContainerHolder implements Settings
         return getContainer().inventoryTweaksCommand;
     }
 
-    public FastEnumMap<EntityType, Pair<Double, Boolean>> getBreakCharge() {
+    public FastEnumMap<EntityType, EntryData<Double, Boolean>> getBreakCharge() {
         return getContainer().spawnersBreakCharge;
     }
 
-    public FastEnumMap<EntityType, Pair<Double, Boolean>> getPlaceCharge() {
+    public FastEnumMap<EntityType, EntryData<Double, Boolean>> getPlaceCharge() {
         return getContainer().spawnersPlaceCharge;
     }
 

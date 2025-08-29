@@ -71,10 +71,10 @@ public final class EventsCaller {
         return !entityStackEvent.isCancelled();
     }
 
-    public static Pair<Boolean, Integer> callEntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount) {
+    public static EntryData<Boolean, Integer> callEntityUnstackEvent(StackedEntity entity, Entity unstackSource, int unstackAmount) {
         EntityUnstackEvent entityUnstackEvent = new EntityUnstackEvent(entity, unstackSource, unstackAmount);
         Bukkit.getPluginManager().callEvent(entityUnstackEvent);
-        return new Pair<>(!entityUnstackEvent.isCancelled(), entityUnstackEvent.getAmount());
+        return new EntryData<>(!entityUnstackEvent.isCancelled(), entityUnstackEvent.getAmount());
     }
 
     public static boolean callItemStackEvent(StackedItem item, StackedItem target) {

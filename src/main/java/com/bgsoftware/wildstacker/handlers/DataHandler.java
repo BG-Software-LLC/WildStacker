@@ -38,7 +38,7 @@ public final class DataHandler {
     public final Set<StackedObject> OBJECTS_TO_SAVE = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
-    public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
+    public final Map<UUID, EntryData<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
     public final Location2ObjectMap<UnloadedStackedSpawner> CACHED_SPAWNERS_RAW = new Location2ObjectMap<>();
     public final Location2ObjectMap<UnloadedStackedBarrel> CACHED_BARRELS_RAW = new Location2ObjectMap<>();
     public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -98,7 +98,7 @@ public final class DataHandler {
                         UUID uuid = UUID.fromString(resultSet.getString("uuid"));
                         int stackAmount = resultSet.getInt("stackAmount");
                         SpawnCause cause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
-                        CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, cause));
+                        CACHED_ENTITIES_RAW.put(uuid, new EntryData<>(stackAmount, cause));
                     }
                 })
                 .onFail(Throwable::printStackTrace)

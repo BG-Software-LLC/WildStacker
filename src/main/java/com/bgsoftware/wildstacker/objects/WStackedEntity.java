@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -24,7 +24,6 @@ import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -308,7 +307,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (hasFlag(EntityFlag.DEAD_ENTITY))
             return UnstackResult.ALREADY_DEAD;
 
-        Pair<Boolean, Integer> eventResult = EventsCaller.callEntityUnstackEvent(this, entity, amount);
+        EntryData<Boolean, Integer> eventResult = EventsCaller.callEntityUnstackEvent(this, entity, amount);
 
         if (!eventResult.getKey())
             return UnstackResult.EVENT_CANCELLED;

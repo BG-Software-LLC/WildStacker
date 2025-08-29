@@ -6,7 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
@@ -103,8 +103,8 @@ public final class SpawnersListener implements Listener {
         if (player.hasPermission("wildstacker.charge.bypass")) {
             amountToCharge = 0;
         } else {
-            Pair<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getBreakCharge()
-                    .getOrDefault(stackedSpawner.getSpawnedType(), new Pair<>(0.0, false));
+            EntryData<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getBreakCharge()
+                    .getOrDefault(stackedSpawner.getSpawnedType(), new EntryData<>(0.0, false));
             amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? breakAmount : 1);
         }
 
@@ -214,8 +214,8 @@ public final class SpawnersListener implements Listener {
             if (e.getPlayer().hasPermission("wildstacker.charge.bypass")) {
                 amountToCharge = 0;
             } else {
-                Pair<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getPlaceCharge()
-                        .getOrDefault(spawnerType, new Pair<>(0.0, false));
+                EntryData<Double, Boolean> chargeInfo = ((SpawnersSection) plugin.getSettings().getSpawners()).getPlaceCharge()
+                        .getOrDefault(spawnerType, new EntryData<>(0.0, false));
                 amountToCharge = chargeInfo.getKey() * (chargeInfo.getValue() ? spawnerItemAmount : 1);
             }
 
@@ -634,7 +634,7 @@ public final class SpawnersListener implements Listener {
             ((WStackedSpawner) stackedSpawner).setCachedDisplayName(
                     EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
 
-            customName = plugin.getSettings().getSpawners().getNameBuilder().build(stackedSpawner);
+            customName = ((SpawnersSection) plugin.getSettings().getSpawners()).getNameBuilder().build(stackedSpawner);
             ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);
 
             Executor.sync(((WStackedSpawner) stackedSpawner)::removeHologram, 60L);

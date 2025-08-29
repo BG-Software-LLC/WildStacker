@@ -212,7 +212,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         }
 
         setCachedDisplayName(EntityUtils.getFormattedType(getSpawnedType().name()));
-        customName = plugin.getSettings().getSpawners().getNameBuilder().build(this);
+        customName = ((SpawnersSection) plugin.getSettings().getSpawners()).getNameBuilder().build(this);
         setHologramName(customName, !plugin.getSettings().getSpawners().hasFloatingNames());
     }
 

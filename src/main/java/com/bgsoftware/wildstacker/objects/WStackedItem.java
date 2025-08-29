@@ -178,7 +178,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
             setCachedDisplayName(DISPLAY_NAME_PLACEHOLDER.matcher(cachedDisplayName).replaceAll(displayName));
 
-            customName = plugin.getSettings().getItems().getNameBuilder().build(this);
+            customName = ((ItemsSection) plugin.getSettings().getItems()).getNameBuilder().build(this);
         }
 
         String CUSTOM_NAME = customName;

@@ -5,7 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.config.section.EntitiesSection;
 import com.bgsoftware.wildstacker.hooks.listeners.IEntityDeathListener;
@@ -92,7 +92,7 @@ public final class DeathSimulation {
         if (stackedEntity.hasFlag(EntityFlag.ATTACKED_ENTITY))
             return new EntityDamageData(true, Collections.emptyMap());
 
-        Pair<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
+        EntryData<Integer, Double> spreadDamageResult = checkForSpreadDamage(stackedEntity,
                 stackedEntity.isInstantKill(damageEvent.getCause()), damageEvent.getFinalDamage());
 
         int entitiesToKill = spreadDamageResult.getKey();
@@ -277,8 +277,8 @@ public final class DeathSimulation {
         return result;
     }
 
-    private static Pair<Integer, Double> checkForSpreadDamage(StackedEntity stackedEntity,
-                                                              boolean instantKill, double finalDamage) {
+    private static EntryData<Integer, Double> checkForSpreadDamage(StackedEntity stackedEntity,
+                                                                   boolean instantKill, double finalDamage) {
         int entitiesToKill;
         double damageToNextStack;
 
@@ -296,7 +296,7 @@ public final class DeathSimulation {
             damageToNextStack = 0;
         }
 
-        return new Pair<>(entitiesToKill, damageToNextStack);
+        return new EntryData<>(entitiesToKill, damageToNextStack);
     }
 
     private static boolean handleFastKill(LivingEntity livingEntity, Player damager) {

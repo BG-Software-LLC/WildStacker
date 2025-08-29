@@ -230,7 +230,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             return;
         }
 
-        customName = plugin.getSettings().getBarrels().getNameBuilder().build(this);
+        customName = ((BarrelsSection) plugin.getSettings().getBarrels()).getNameBuilder().build(this);
         setHologramName(customName, true);
     }
 

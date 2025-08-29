@@ -2,11 +2,11 @@ package com.bgsoftware.wildstacker.config.section;
 
 import com.bgsoftware.wildstacker.api.config.SettingsManager;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import com.bgsoftware.wildstacker.config.SettingsContainerHolder;
 import com.bgsoftware.wildstacker.utils.data.structures.*;
+import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -202,8 +202,7 @@ public class EntitiesSection extends SettingsContainerHolder implements Settings
         return getContainer().entitiesCustomName;
     }
 
-    @Override
-    public DisplayNameBuilder<StackedEntity> getNameBuilder() {
+    public NameBuilder<StackedEntity> getNameBuilder() {
         return getContainer().entitiesNameBuilder;
     }
 

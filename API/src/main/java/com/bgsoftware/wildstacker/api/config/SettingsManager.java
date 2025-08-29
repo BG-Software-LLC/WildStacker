@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.api.config;
 
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
-import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
 import com.bgsoftware.wildstacker.api.objects.*;
 import com.bgsoftware.wildstacker.api.particles.ParticleEffect;
 import org.bukkit.Material;
@@ -270,13 +269,6 @@ public interface SettingsManager {
         String getCustomName();
 
         /**
-         * Builder used to generate item display names.
-         * Based on the placeholders and format.
-         */
-        DisplayNameBuilder<StackedItem> getNameBuilder();
-
-
-        /**
          * Delay in ticks between stacking operations.
          * Config-path: items.stack-interval
          */
@@ -472,12 +464,6 @@ public interface SettingsManager {
         String getCustomName();
 
         /**
-         * The name builder used for stacked entities.
-         * Config-path: entities.custom-name
-         */
-        DisplayNameBuilder<StackedEntity> getNameBuilder();
-
-        /**
          * EXP pickup sound.
          * Config-path: entities.exp-pickup-sound
          */
@@ -584,11 +570,6 @@ public interface SettingsManager {
          * Config-path: spawners.custom-name
          */
         String getCustomName();
-
-        /**
-         * Config-path: spawners.custom-name
-         */
-        DisplayNameBuilder<StackedSpawner> getNameBuilder();
 
         /**
          * Config-path: spawners.spawner-item.name
@@ -834,11 +815,6 @@ public interface SettingsManager {
          * Config-path: barrels.custom-name
          */
         String getCustomName();
-
-        /**
-         * Name builder for stacked barrels.
-         */
-        DisplayNameBuilder<StackedBarrel> getNameBuilder();
 
         /**
          * List of disabled worlds for barrels stacking.

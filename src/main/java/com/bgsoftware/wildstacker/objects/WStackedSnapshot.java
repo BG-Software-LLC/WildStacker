@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedSnapshot;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
@@ -20,20 +20,20 @@ public final class WStackedSnapshot implements StackedSnapshot {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    private final Map<Location, Pair<Integer, EntityType>> stackedSpawners = new HashMap<>();
-    private final Map<Location, Pair<Integer, ItemStack>> stackedBarrels = new HashMap<>();
+    private final Map<Location, EntryData<Integer, EntityType>> stackedSpawners = new HashMap<>();
+    private final Map<Location, EntryData<Integer, ItemStack>> stackedBarrels = new HashMap<>();
 
     public WStackedSnapshot(Chunk chunk, SnapshotOptions... snapshotOptions) {
         for (SnapshotOptions loadingOption : snapshotOptions) {
             switch (loadingOption) {
                 case LOAD_SPAWNERS:
                     for (StackedSpawner stackedSpawner : plugin.getSystemManager().getStackedSpawners(chunk)) {
-                        stackedSpawners.put(stackedSpawner.getLocation(), new Pair<>(stackedSpawner.getStackAmount(), stackedSpawner.getSpawnedType()));
+                        stackedSpawners.put(stackedSpawner.getLocation(), new EntryData<>(stackedSpawner.getStackAmount(), stackedSpawner.getSpawnedType()));
                     }
                     break;
                 case LOAD_BARRELS:
                     for (StackedBarrel stackedBarrel : plugin.getSystemManager().getStackedBarrels(chunk)) {
-                        stackedBarrels.put(stackedBarrel.getLocation(), new Pair<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
+                        stackedBarrels.put(stackedBarrel.getLocation(), new EntryData<>(stackedBarrel.getStackAmount(), stackedBarrel.getBarrelItem(1)));
                     }
                     break;
             }
@@ -42,7 +42,7 @@ public final class WStackedSnapshot implements StackedSnapshot {
 
     @Override
     public Map.Entry<Integer, EntityType> getStackedSpawner(Location location) {
-        return stackedSpawners.getOrDefault(location, new Pair<>(1, null));
+        return stackedSpawners.getOrDefault(location, new EntryData<>(1, null));
     }
 
     @Override
@@ -53,12 +53,12 @@ public final class WStackedSnapshot implements StackedSnapshot {
     @Override
     public Map.Entry<Integer, Material> getStackedBarrel(Location location) {
         Map.Entry<Integer, ItemStack> pair = getStackedBarrelItem(location);
-        return new Pair<>(pair.getKey(), pair.getValue().getType());
+        return new EntryData<>(pair.getKey(), pair.getValue().getType());
     }
 
     @Override
     public Map.Entry<Integer, ItemStack> getStackedBarrelItem(Location location) {
-        return stackedBarrels.getOrDefault(location, new Pair<>(1, new ItemStack(Material.AIR)));
+        return stackedBarrels.getOrDefault(location, new EntryData<>(1, new ItemStack(Material.AIR)));
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class WStackedSnapshot implements StackedSnapshot {
     public Map<Location, Map.Entry<Integer, Material>> getAllBarrels() {
         return Collections.unmodifiableMap(getAllBarrelsItems().entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> new Pair<>(entry.getValue().getKey(), entry.getValue().getValue().getType())
+                entry -> new EntryData<>(entry.getValue().getKey(), entry.getValue().getValue().getType())
         )));
     }
 

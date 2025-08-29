@@ -1,12 +1,10 @@
 package com.bgsoftware.wildstacker.utils.names;
 
-import com.bgsoftware.wildstacker.api.names.DisplayNameBuilder;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class NameBuilder<T> implements DisplayNameBuilder<T> {
+public final class NameBuilder<T> {
 
     private NamePart<T> namePart;
 

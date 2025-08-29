@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.menu;
 
 import com.bgsoftware.common.config.CommentedConfiguration;
-import com.bgsoftware.wildstacker.api.objects.Pair;
+import com.bgsoftware.wildstacker.api.objects.EntryData;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
@@ -23,7 +23,7 @@ import java.util.Map;
 public final class SpawnersManageMenu extends WildMenu {
 
     private static List<Integer> amountsMenuSlots = new ArrayList<>(), upgradeMenuSlots = new ArrayList<>();
-    private static List<Pair<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
+    private static List<EntryData<Integer, ItemBuilder>> statisticSlots = new ArrayList<>();
     private final WeakReference<StackedSpawner> stackedSpawner;
     private final BukkitTask bukkitTask;
 
@@ -70,7 +70,7 @@ public final class SpawnersManageMenu extends WildMenu {
 
         for (Character character : cfg.getString("statistics", "").toCharArray()) {
             for (int slot : charSlots.getOrDefault(character, new ArrayList<>())) {
-                statisticSlots.add(new Pair<>(slot, spawnersManageMenu.getData().fillItems.get(slot)));
+                statisticSlots.add(new EntryData<>(slot, spawnersManageMenu.getData().fillItems.get(slot)));
             }
         }
     }
@@ -121,7 +121,7 @@ public final class SpawnersManageMenu extends WildMenu {
         SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
         SpawnerCachedData spawnerData = creatureSpawner.readData();
 
-        for (Pair<Integer, ItemBuilder> statisticItem : statisticSlots) {
+        for (EntryData<Integer, ItemBuilder> statisticItem : statisticSlots) {
             inventory.setItem(statisticItem.getKey(), statisticItem.getValue().copy()
                     .replaceAll("%min-spawn-delay%", spawnerData.getMinSpawnDelay() + "")
                     .replaceAll("%max-spawn-delay%", spawnerData.getMaxSpawnDelay() + "")
