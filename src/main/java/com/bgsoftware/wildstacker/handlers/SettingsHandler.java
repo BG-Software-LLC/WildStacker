@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -56,6 +57,19 @@ public final class SettingsHandler {
     public final String[] CONFIG_IGNORED_SECTIONS = {"merge-radius", "limits", "minimum-required", "default-unstack",
             "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
             "spawner-upgrades.ladders"};
+
+    // Database settings
+    public final String databaseType;
+    public final String databaseMySQLAddress;
+    public final int databaseMySQLPort;
+    public final String databaseMySQLDBName;
+    public final String databaseMySQLUsername;
+    public final String databaseMySQLPassword;
+    public final String databaseMySQLPrefix;
+    public final boolean databaseMySQLSSL;
+    public final boolean databaseMySQLPublicKeyRetrieval;
+    public final long databaseMySQLWaitTimeout;
+    public final long databaseMySQLMaxLifetime;
 
     //Global settings
     public final String giveItemName, killTaskTimeCommand;
@@ -157,6 +171,18 @@ public final class SettingsHandler {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        databaseType = cfg.getString("database.type").toUpperCase(Locale.ENGLISH);
+        databaseMySQLAddress = cfg.getString("database.address");
+        databaseMySQLPort = cfg.getInt("database.port");
+        databaseMySQLDBName = cfg.getString("database.db-name");
+        databaseMySQLUsername = cfg.getString("database.user-name");
+        databaseMySQLPassword = cfg.getString("database.password");
+        databaseMySQLPrefix = cfg.getString("database.prefix");
+        databaseMySQLSSL = cfg.getBoolean("database.useSSL");
+        databaseMySQLPublicKeyRetrieval = cfg.getBoolean("database.allowPublicKeyRetrieval");
+        databaseMySQLWaitTimeout = cfg.getLong("database.waitTimeout");
+        databaseMySQLMaxLifetime = cfg.getLong("database.maxLifetime");
 
         giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&6x{0} &f&o{1} {2}"));
         SPAWNERS_PATTERN = Pattern.compile(giveItemName

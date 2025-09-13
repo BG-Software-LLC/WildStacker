@@ -1,5 +1,7 @@
 package com.bgsoftware.wildstacker.handlers;
 
+import com.bgsoftware.common.databasebridge.sql.transaction.SQLDatabaseTransaction;
+import com.bgsoftware.common.databasebridge.transaction.IDatabaseTransaction;
 import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
@@ -16,7 +18,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
-import com.bgsoftware.wildstacker.database.Query;
+import com.bgsoftware.wildstacker.database.DBSession;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.loot.entity.EntityLootDataBuilder;
@@ -65,6 +67,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -421,25 +424,30 @@ public final class SystemHandler implements SystemManager {
         Set<StackedObject> savedObjects = new HashSet<>(dataHandler.OBJECTS_TO_SAVE);
         dataHandler.OBJECTS_TO_SAVE.clear();
 
-        savedObjects.forEach(stackedObject -> {
+        SQLDatabaseTransaction<?> spawnersInsertTransaction = null;
+        SQLDatabaseTransaction<?> barrelsInsertTransaction = null;
+
+        for (StackedObject<?> stackedObject : savedObjects) {
             if (stackedObject instanceof StackedEntity) {
                 dataSerializer.saveEntity((StackedEntity) stackedObject);
             } else if (stackedObject instanceof StackedItem) {
                 dataSerializer.saveItem((StackedItem) stackedObject);
             } else if (stackedObject instanceof StackedSpawner) {
-                Query.SPAWNER_INSERT.getStatementHolder()
-                        .setLocation(stackedObject.getLocation())
-                        .setInt(stackedObject.getStackAmount())
-                        .setInt(((WStackedSpawner) stackedObject).getUpgradeId())
-                        .execute(true);
+                spawnersInsertTransaction = plugin.getDataHandler()
+                        .insertSpawner(((WStackedSpawner) stackedObject), spawnersInsertTransaction);
             } else if (stackedObject instanceof StackedBarrel) {
-                Query.BARREL_INSERT.getStatementHolder()
-                        .setLocation(stackedObject.getLocation())
-                        .setInt(stackedObject.getStackAmount())
-                        .setItemStack(((StackedBarrel) stackedObject).getBarrelItem(1))
-                        .execute(true);
+                barrelsInsertTransaction = plugin.getDataHandler()
+                        .insertBarrel(((StackedBarrel) stackedObject), barrelsInsertTransaction);
             }
-        });
+        }
+
+        List<IDatabaseTransaction> transactionsToExecute = new LinkedList<>();
+        if (spawnersInsertTransaction != null)
+            transactionsToExecute.add(spawnersInsertTransaction);
+        if (barrelsInsertTransaction != null)
+            transactionsToExecute.add(barrelsInsertTransaction);
+        if (!transactionsToExecute.isEmpty())
+            DBSession.execute(transactionsToExecute);
     }
 
     @Override

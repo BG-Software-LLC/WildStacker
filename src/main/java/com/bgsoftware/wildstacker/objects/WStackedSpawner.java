@@ -6,7 +6,6 @@ import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
@@ -175,9 +174,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         plugin.getSystemManager().removeStackObject(this);
 
-        Query.SPAWNER_DELETE.getStatementHolder()
-                .setLocation(getLocation())
-                .execute(true);
+        plugin.getDataHandler().deleteSpawner(getLocation());
 
         removeHologram();
 

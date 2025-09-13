@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
-import com.bgsoftware.wildstacker.database.Query;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
@@ -193,9 +192,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         plugin.getSystemManager().removeStackObject(this);
 
-        Query.BARREL_DELETE.getStatementHolder()
-                .setLocation(getLocation())
-                .execute(true);
+        plugin.getDataHandler().deleteBarrel(getLocation());
 
         removeHologram();
         removeDisplayBlock();

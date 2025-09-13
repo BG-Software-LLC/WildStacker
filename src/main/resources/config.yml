@@ -30,6 +30,21 @@ simulate-tool:
 
 # Settings related to database.
 database:
+  # For local database, use "SQLite".
+  # For remote database, use "MySQL" or "MariaDB" (Depends on your setup).
+  type: SQLite
+  # Remote database information
+  address: 'localhost'
+  port: 3306
+  db-name: 'WildStacker'
+  user-name: 'root'
+  password: 'root'
+  prefix: ''
+  useSSL: false
+  allowPublicKeyRetrieval: true
+  waitTimeout: 600000
+  maxLifetime: 1800000
+
   # Should data of worlds that no longer exist be deleted?
   delete-invalid-worlds: false
 

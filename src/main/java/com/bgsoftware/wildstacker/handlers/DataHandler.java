@@ -1,5 +1,11 @@
 package com.bgsoftware.wildstacker.handlers;
 
+import com.bgsoftware.common.databasebridge.sql.query.Column;
+import com.bgsoftware.common.databasebridge.sql.query.QueryResult;
+import com.bgsoftware.common.databasebridge.sql.transaction.DeleteSQLDatabaseTransaction;
+import com.bgsoftware.common.databasebridge.sql.transaction.InsertSQLDatabaseTransaction;
+import com.bgsoftware.common.databasebridge.sql.transaction.SQLDatabaseTransaction;
+import com.bgsoftware.common.databasebridge.transaction.IDatabaseTransaction;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
@@ -9,7 +15,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
-import com.bgsoftware.wildstacker.database.SQLHelper;
+import com.bgsoftware.wildstacker.database.DBSession;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
@@ -20,9 +26,13 @@ import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
+import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,8 +64,12 @@ public final class DataHandler {
 
         Executor.sync(() -> {
             try {
-                //Database.start(new File(plugin.getDataFolder(), "database.db"));
-                SQLHelper.createConnection(plugin);
+                if (!DBSession.createConnection(plugin)) {
+                    WildStackerPlugin.log("&cCouldn't connect to database, closing server...");
+                    Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().disablePlugin(plugin));
+                    return;
+                }
+
                 loadDatabase();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -65,22 +79,8 @@ public final class DataHandler {
         }, 1L);
     }
 
-    private static void addColumnIfNotExists(String column, String table, String def, String type) {
-        String defaultSection = " DEFAULT " + def;
-
-        String statementStr = "ALTER TABLE " + table + " ADD " + column + " " + type + defaultSection + ";";
-
-        SQLHelper.executeUpdate(statementStr, ex -> {
-            if (!ex.getMessage().toLowerCase().contains("duplicate")) {
-                WildStackerPlugin.log("Statement: " + statementStr);
-                ex.printStackTrace();
-            }
-        });
-    }
-
     public void clearDatabase() {
-        //Database.stop();
-        SQLHelper.close();
+        DBSession.close();
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner) {
@@ -121,54 +121,156 @@ public final class DataHandler {
         return stackedObjects;
     }
 
+    public SQLDatabaseTransaction<?> insertSpawner(WStackedSpawner stackedSpawner,
+                                                          @Nullable SQLDatabaseTransaction<?> transaction) {
+        if (transaction == null) {
+            transaction = new InsertSQLDatabaseTransaction(
+                    "spawners", Arrays.asList("location", "stackAmount", "upgrade"));
+        }
+
+        transaction
+                .bindObject(serializeLocationInternal(stackedSpawner.getLocation()))
+                .bindObject(stackedSpawner.getStackAmount())
+                .bindObject(stackedSpawner.getUpgradeId())
+                .newBatch();
+
+        return transaction;
+    }
+
+    public void insertSpawner(WStackedSpawner stackedSpawner) {
+        insertSpawner(stackedSpawner, null);
+    }
+
+    public void deleteSpawner(@Nullable Location location) {
+        DBSession.execute(new DeleteSQLDatabaseTransaction("spawners", Arrays.asList("location"))
+                .bindObject(serializeLocationInternal(location)));
+    }
+
+    public void deleteSpawner(Location2ObjectMap.ILocationEntity locationEntity) {
+        DBSession.execute(new DeleteSQLDatabaseTransaction("spawners", Arrays.asList("location"))
+                .bindObject(serializeLocationInternal(locationEntity.getWorldName(),
+                        locationEntity.getX(), locationEntity.getY(), locationEntity.getZ())));
+    }
+
+    public SQLDatabaseTransaction<?> insertBarrel(StackedBarrel stackedBarrel,
+                                                          @Nullable SQLDatabaseTransaction<?> transaction) {
+        if (transaction == null) {
+            transaction = new InsertSQLDatabaseTransaction(
+                    "barrels", Arrays.asList("location", "stackAmount", "item"));
+        }
+
+        transaction
+                .bindObject(serializeLocationInternal(stackedBarrel.getLocation()))
+                .bindObject(stackedBarrel.getStackAmount())
+                .bindObject(serializeItemInternal(stackedBarrel.getBarrelItem(1)))
+                .newBatch();
+
+        return transaction;
+    }
+
+    public void insertBarrel(StackedBarrel stackedBarrel) {
+        insertBarrel(stackedBarrel, null);
+    }
+
+    public void deleteBarrel(@Nullable Location location) {
+        DBSession.execute(new DeleteSQLDatabaseTransaction("barrels", Arrays.asList("location"))
+                .bindObject(serializeLocationInternal(location)));
+    }
+
+    public void deleteBarrel(Location2ObjectMap.ILocationEntity locationEntity) {
+        DBSession.execute(new DeleteSQLDatabaseTransaction("barrels", Arrays.asList("location"))
+                .bindObject(serializeLocationInternal(locationEntity.getWorldName(),
+                        locationEntity.getX(), locationEntity.getY(), locationEntity.getZ())));
+    }
+
     private void loadDatabase() {
-        //Creating default spawners table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS spawners (location VARCHAR PRIMARY KEY, stackAmount INTEGER, upgrade INTEGER);");
+        prepareDatabase();
+
+        loadEntities();
+        loadItems();
+
+        List<IDatabaseTransaction> transactionsToExecute = new LinkedList<>();
+
+        try {
+            loadSpawners(transactionsToExecute);
+            loadBarrles(transactionsToExecute);
+        } finally {
+            if (!transactionsToExecute.isEmpty())
+                DBSession.execute(transactionsToExecute);
+        }
+
+        plugin.getSystemManager().setDataLoaded();
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks())
+                plugin.getSystemManager().handleChunkLoad(chunk, SystemHandler.CHUNK_FULL_STAGE);
+        }
+    }
+
+    private void prepareDatabase() {
+        DBSession.createTable("spawners",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("stackAmount", "INTEGER"),
+                new Column("upgrade", "INTEGER"));
+
         // Adding upgrade column if it doesn't exist
         addColumnIfNotExists("upgrade", "spawners", "0", "INTEGER");
 
         //Creating default barrels table
-        SQLHelper.executeUpdate("CREATE TABLE IF NOT EXISTS barrels (location VARCHAR PRIMARY KEY, stackAmount INTEGER, item VARCHAR);");
+        DBSession.createTable("barrels",
+                new Column("location", "LONG_UNIQUE_TEXT PRIMARY KEY"),
+                new Column("stackAmount", "INTEGER"),
+                new Column("item", "TEXT"));
+    }
+
+    private void loadEntities() {
+        if (!plugin.getSettings().storeEntities)
+            return;
 
         long startTime = System.currentTimeMillis();
 
-        if (plugin.getSettings().storeEntities) {
-            WildStackerPlugin.log("Starting to load entities...");
+        WildStackerPlugin.log("Starting to load entities...");
 
-            SQLHelper.executeQuery("SELECT * FROM entities;", resultSet -> {
-                while (resultSet.next()) {
-                    int stackAmount = resultSet.getInt("stackAmount");
-                    SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
-                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
-                }
-            }, ex -> {
-            });
+        DBSession.select("entities", "", new QueryResult<ResultSet>().onSuccess(resultSet -> {
+            while (resultSet.next()) {
+                int stackAmount = resultSet.getInt("stackAmount");
+                SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
+            }
+        }));
 
-            WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
-        }
+        WildStackerPlugin.log("Loading entities done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+    }
 
-        startTime = System.currentTimeMillis();
+    private void loadItems() {
+        if (!plugin.getSettings().storeItems)
+            return;
 
-        if (plugin.getSettings().storeItems) {
-            WildStackerPlugin.log("Starting to load items...");
+        long startTime = System.currentTimeMillis();
 
-            SQLHelper.executeQuery("SELECT * FROM items;", resultSet -> {
-                while (resultSet.next()) {
-                    int stackAmount = resultSet.getInt("stackAmount");
-                    UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                    CACHED_ITEMS_RAW.put(uuid, stackAmount);
-                }
-            }, ex -> {
-            });
+        WildStackerPlugin.log("Starting to load items...");
 
-            WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
-        }
+        DBSession.select("items", "", new QueryResult<ResultSet>().onSuccess(resultSet -> {
+            while (resultSet.next()) {
+                int stackAmount = resultSet.getInt("stackAmount");
+                UUID uuid = UUID.fromString(resultSet.getString("uuid"));
+                CACHED_ITEMS_RAW.put(uuid, stackAmount);
+            }
+        }));
 
-        startTime = System.currentTimeMillis();
+        WildStackerPlugin.log("Loading items done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+    }
+
+    private void loadSpawners(List<IDatabaseTransaction> transactionsToExecute) {
+        long startTime = System.currentTimeMillis();
+
         WildStackerPlugin.log("Starting to load spawners...");
 
-        SQLHelper.executeQuery("SELECT * FROM spawners;", resultSet -> {
+        DBSession.select("spawners", "", new QueryResult<ResultSet>().onSuccess(resultSet -> {
+            DeleteSQLDatabaseTransaction deleteNullWorldTransaction = new DeleteSQLDatabaseTransaction(
+                    "spawners", Arrays.asList("location"));
+
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -195,17 +297,24 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if (exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    SQLHelper.executeUpdate("DELETE FROM spawners WHERE location = '" + location + "';");
+                    deleteNullWorldTransaction.bindObject(location).newBatch();
                     WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
                 }
             }
-        });
+        }));
 
         WildStackerPlugin.log("Loading spawners done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
-        startTime = System.currentTimeMillis();
+    }
+
+    private void loadBarrles(List<IDatabaseTransaction> transactionsToExecute) {
+        long startTime = System.currentTimeMillis();
+
         WildStackerPlugin.log("Starting to load barrels...");
 
-        SQLHelper.executeQuery("SELECT * FROM barrels;", resultSet -> {
+        DBSession.select("barrels", "", new QueryResult<ResultSet>().onSuccess(resultSet -> {
+            DeleteSQLDatabaseTransaction deleteNullWorldTransaction = new DeleteSQLDatabaseTransaction(
+                    "barrels", Arrays.asList("location"));
+
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -233,20 +342,31 @@ public final class DataHandler {
                 WildStackerPlugin.log(exceptionReason);
 
                 if (exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
-                    SQLHelper.executeUpdate("DELETE FROM barrels WHERE location = '" + location + "';");
+                    deleteNullWorldTransaction.bindObject(location).newBatch();
                     WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
                 }
             }
-        });
+        }));
 
         WildStackerPlugin.log("Loading barrels done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
+    }
 
-        plugin.getSystemManager().setDataLoaded();
+    private String serializeItemInternal(@Nullable ItemStack itemStack) {
+        return itemStack == null ? "" : plugin.getNMSAdapter().serialize(itemStack);
+    }
 
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks())
-                plugin.getSystemManager().handleChunkLoad(chunk, SystemHandler.CHUNK_FULL_STAGE);
-        }
+    private static void addColumnIfNotExists(String column, String table, String def, String type) {
+        String defaultSection = " DEFAULT " + def;
+        DBSession.addColumn(table, column, type + defaultSection);
+    }
+
+    private static String serializeLocationInternal(@Nullable Location location) {
+        return location == null ? "" : serializeLocationInternal(
+                location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    private static String serializeLocationInternal(String worldName, int x, int y, int z) {
+        return worldName + "," + x + "," + y + "," + z;
     }
 
 }

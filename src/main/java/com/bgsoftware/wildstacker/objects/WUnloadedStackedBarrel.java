@@ -2,7 +2,6 @@ package com.bgsoftware.wildstacker.objects;
 
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
-import com.bgsoftware.wildstacker.database.Query;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,9 +34,7 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
     public void remove() {
         plugin.getDataHandler().CACHED_BARRELS_RAW.remove(this);
 
-        Query.BARREL_DELETE.getStatementHolder()
-                .setLocation(this)
-                .execute(true);
+        plugin.getDataHandler().deleteBarrel(this);
     }
 
 }

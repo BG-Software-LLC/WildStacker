@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.objects;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.database.Query;
 import org.bukkit.Location;
 
 public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implements UnloadedStackedSpawner {
@@ -43,9 +42,7 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
     public void remove() {
         plugin.getDataHandler().CACHED_SPAWNERS_RAW.remove(this);
 
-        Query.SPAWNER_DELETE.getStatementHolder()
-                .setLocation(this)
-                .execute(true);
+        plugin.getDataHandler().deleteSpawner(this);
     }
 
 }
