@@ -224,6 +224,11 @@ public final class ProvidersHandler {
             Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_IslandNPC");
             entityTypeProvider.ifPresent(entityTypeProviders::add);
         }
+
+        if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
+            Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_MyPet");
+            entityTypeProvider.ifPresent(entityTypeProviders::add);
+        }
     }
 
     private void loadRegionsProviders() {
@@ -359,7 +364,7 @@ public final class ProvidersHandler {
         }
         if (enable && isPlugin(toCheck, "CrazyEnchantments") && pluginManager.isPluginEnabled("CrazyEnchantments")) {
             Plugin crazyEnchantments = pluginManager.getPlugin("CrazyEnchantments");
-            if(crazyEnchantments.getDescription().getVersion().startsWith("2")) {
+            if (crazyEnchantments.getDescription().getVersion().startsWith("2")) {
                 registerHook("CrazyEnchantments2Hook");
             } else {
                 registerHook("CrazyEnchantmentsHook");
