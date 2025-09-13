@@ -271,6 +271,8 @@ public final class DataHandler {
             DeleteSQLDatabaseTransaction deleteNullWorldTransaction = new DeleteSQLDatabaseTransaction(
                     "spawners", Arrays.asList("location"));
 
+            boolean calledDeleteTransaction = false;
+
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
                 String[] locationSections = location.split(",");
@@ -299,8 +301,13 @@ public final class DataHandler {
                 if (exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
                     deleteNullWorldTransaction.bindObject(location).newBatch();
                     WildStackerPlugin.log("Deleted spawner (" + location + ") from database.");
+                    calledDeleteTransaction = true;
                 }
             }
+
+            if(calledDeleteTransaction)
+                transactionsToExecute.add(deleteNullWorldTransaction);
+
         }));
 
         WildStackerPlugin.log("Loading spawners done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
@@ -314,6 +321,8 @@ public final class DataHandler {
         DBSession.select("barrels", "", new QueryResult<ResultSet>().onSuccess(resultSet -> {
             DeleteSQLDatabaseTransaction deleteNullWorldTransaction = new DeleteSQLDatabaseTransaction(
                     "barrels", Arrays.asList("location"));
+
+            boolean calledDeleteTransaction = false;
 
             while (resultSet.next()) {
                 String location = resultSet.getString("location");
@@ -344,8 +353,12 @@ public final class DataHandler {
                 if (exceptionReason.contains("Null") && plugin.getSettings().deleteInvalidWorlds) {
                     deleteNullWorldTransaction.bindObject(location).newBatch();
                     WildStackerPlugin.log("Deleted barrel (" + location + ") from database.");
+                    calledDeleteTransaction = true;
                 }
             }
+
+            if(calledDeleteTransaction)
+                transactionsToExecute.add(deleteNullWorldTransaction);
         }));
 
         WildStackerPlugin.log("Loading barrels done! Took " + (System.currentTimeMillis() - startTime) + " ms.");
