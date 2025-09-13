@@ -469,6 +469,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
         if (pickupCount > 0) {
             stackedItem.decreaseStackAmount(pickupCount, true);
             entityItem.pickupDelay = 10; // setDefaultPickUpDelay
+        } else {
+            return true;
         }
 
         if (!actualItemDupe && isDifferentPickupItem) {

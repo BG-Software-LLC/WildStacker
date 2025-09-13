@@ -594,6 +594,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
             } else {
                 entityItem.defaultPickupDelay();
             }
+        } else {
+            return true;
         }
 
         if (!actualItemDupe && isDifferentPickupItem) {
