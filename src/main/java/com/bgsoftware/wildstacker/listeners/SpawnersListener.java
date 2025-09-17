@@ -25,7 +25,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.destroystokyo.paper.event.entity.PreSpawnerSpawnEvent;
 import org.bukkit.Bukkit;
@@ -780,27 +780,45 @@ public final class SpawnersListener implements Listener {
             if (!(spawnerBlockState instanceof CreatureSpawner))
                 return;
 
-            WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of((CreatureSpawner) spawnerBlockState);
+            CreatureSpawner creatureSpawner = (CreatureSpawner) spawnerBlockState;
 
-            // If the event was called from the spawner override spawner, we can safely ignore this section.
-            // All the checks here were already been performed by the overridden spawner.
-            if (stackedSpawner.isSpawnerOverridenTick())
-                return;
-
-            SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
             Optional<StackedEntity> targetEntityOptional = Optional.empty();
 
-            int spawnMobsCount = Random.nextInt(1, creatureSpawner.readData().getSpawnCount(),
-                    stackedSpawner.getStackAmount(), 1.5);
+            LivingEntity linkedEntity = null;
+            int spawnerStackAmount;
+            SpawnerUpgrade spawnerUpgrade;
 
-            if (plugin.getSettings().linkedEntitiesEnabled) {
-                LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
+            if (plugin.getSettings().spawnersStackingEnabled) {
+                WStackedSpawner stackedSpawner = (WStackedSpawner) WStackedSpawner.of(creatureSpawner);
 
-                if (linkedEntity != null) {
-                    StackedEntity stackedLinkedEntity = WStackedEntity.of(linkedEntity);
-                    if (stackedLinkedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
-                        targetEntityOptional = Optional.of(stackedLinkedEntity);
-                    }
+                // If the event was called from the spawner override spawner, we can safely ignore this section.
+                // All the checks here were already been performed by the overridden spawner.
+                if (stackedSpawner.isSpawnerOverridenTick())
+                    return;
+
+                spawnerStackAmount = stackedSpawner.getStackAmount();
+                spawnerUpgrade = stackedSpawner.getUpgrade();
+
+                if (plugin.getSettings().linkedEntitiesEnabled) {
+                    linkedEntity = stackedSpawner.getLinkedEntity();
+                }
+            } else {
+                spawnerStackAmount = 1;
+                spawnerUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(creatureSpawner.getSpawnedType());
+
+                if (plugin.getSettings().linkedEntitiesEnabled) {
+                    linkedEntity = plugin.getDataHandler().CACHED_LINKED_ENTITIES.get(creatureSpawner.getLocation());
+                }
+            }
+
+            SpawnerCachedData spawnerCachedData = plugin.getNMSSpawners().readData(creatureSpawner);
+            int spawnMobsCount = Random.nextInt(1, spawnerCachedData.getSpawnCount(),
+                    spawnerStackAmount, 1.5);
+
+            if (linkedEntity != null) {
+                StackedEntity stackedLinkedEntity = WStackedEntity.of(linkedEntity);
+                if (stackedLinkedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS) {
+                    targetEntityOptional = Optional.of(stackedLinkedEntity);
                 }
             }
 
@@ -810,7 +828,7 @@ public final class SpawnersListener implements Listener {
                     EntitiesGetter.getNearbyEntities(e.getSpawnLocation(), mergeRadius,
                                     entity -> entity.getType() == e.getType() && EntityUtils.isStackable(entity))
                             .map(WStackedEntity::of)
-                            .filter(stackedEntity -> stackedEntity.getUpgrade().equals(stackedSpawner.getUpgrade()) &&
+                            .filter(stackedEntity -> stackedEntity.getUpgrade().equals(spawnerUpgrade) &&
                                     stackedEntity.canGetStacked(spawnMobsCount) == StackCheckResult.SUCCESS)
                             .collect(Collectors.toList());
 

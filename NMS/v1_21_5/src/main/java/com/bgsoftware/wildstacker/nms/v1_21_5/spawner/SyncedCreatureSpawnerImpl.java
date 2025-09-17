@@ -263,33 +263,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         );
     }
 
-
-    @Override
-    public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-        BaseSpawner baseSpawner = getSpawner();
-        baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-        baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-        baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
-        baseSpawner.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-        baseSpawner.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-        baseSpawner.spawnRange = spawnerUpgrade.getSpawnRange();
-    }
-
-    @Override
-    public SpawnerCachedData readData() {
-        BaseSpawner baseSpawner = getSpawner();
-        return new SpawnerCachedData(
-                baseSpawner.minSpawnDelay,
-                baseSpawner.maxSpawnDelay,
-                baseSpawner.spawnCount,
-                baseSpawner.maxNearbyEntities,
-                baseSpawner.requiredPlayerRange,
-                baseSpawner.spawnRange,
-                baseSpawner.spawnDelay / 20,
-                baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
-        );
-    }
-
     @Override
     public boolean update(boolean force, boolean applyPhysics) {
         return blockLocation.getBlock().getState().update(force, applyPhysics);

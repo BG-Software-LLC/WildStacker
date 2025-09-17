@@ -28,6 +28,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
@@ -49,6 +50,7 @@ public final class DataHandler {
     public final Location2ObjectMap<StackedSpawner> CACHED_SPAWNERS = new Location2ObjectMap<>();
     public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
     public final Location2ObjectMap<StackedBarrel> CACHED_BARRELS = new Location2ObjectMap<>();
+    public final Location2ObjectMap<LivingEntity> CACHED_LINKED_ENTITIES = new Location2ObjectMap<>();
     public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
     public final Set<StackedObject> OBJECTS_TO_SAVE = Collections.newSetFromMap(new ConcurrentHashMap<>());
     //References for all the data from database

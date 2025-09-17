@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.nms.v1_20_3.spawner;
 
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.google.common.base.Preconditions;
 import net.minecraft.core.BlockPos;
@@ -236,33 +234,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
                 this.isPlaced() ? this.world.getHandle() : null,
                 this.getPosition(),
                 new SpawnData(entity, Optional.empty())
-        );
-    }
-
-
-    @Override
-    public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-        BaseSpawner baseSpawner = getSpawner();
-        baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-        baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-        baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
-        baseSpawner.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-        baseSpawner.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-        baseSpawner.spawnRange = spawnerUpgrade.getSpawnRange();
-    }
-
-    @Override
-    public SpawnerCachedData readData() {
-        BaseSpawner baseSpawner = getSpawner();
-        return new SpawnerCachedData(
-                baseSpawner.minSpawnDelay,
-                baseSpawner.maxSpawnDelay,
-                baseSpawner.spawnCount,
-                baseSpawner.maxNearbyEntities,
-                baseSpawner.requiredPlayerRange,
-                baseSpawner.spawnRange,
-                baseSpawner.spawnDelay / 20,
-                baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
         );
     }
 

@@ -412,11 +412,20 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             return;
         }
 
-        LivingEntity linkedEntity = stackedSpawner.getLinkedEntity();
+        LivingEntity linkedEntity;
+        if (stackedSpawner.isCached()) {
+            linkedEntity = stackedSpawner.getLinkedEntity();
+        } else {
+            linkedEntity = plugin.getDataHandler().CACHED_LINKED_ENTITIES.get(stackedSpawner.getLocation());
+        }
 
         Runnable regularStackAsync = () -> runStackAsync(entityOptional -> {
             LivingEntity targetEntity = entityOptional.orElse(object);
-            stackedSpawner.setLinkedEntity(targetEntity);
+            if (stackedSpawner.isCached()) {
+                stackedSpawner.setLinkedEntity(targetEntity);
+            } else {
+                plugin.getDataHandler().CACHED_LINKED_ENTITIES.put(stackedSpawner.getLocation(), targetEntity);
+            }
             if (result != null)
                 result.accept(Optional.of(targetEntity));
         });

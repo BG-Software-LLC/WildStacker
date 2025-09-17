@@ -4,11 +4,14 @@ import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.nms.v1_18.spawner.SpawnerWatcherTickingBlockEntity;
+import com.bgsoftware.wildstacker.nms.v1_18.spawner.StackedBaseSpawner;
 import com.bgsoftware.wildstacker.nms.v1_18.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -36,6 +40,7 @@ import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftCreatureSpawner;
 import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Modifier;
@@ -319,6 +324,36 @@ public final class NMSSpawnersImpl implements NMSSpawners {
         BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
         SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
         return new SyncedCreatureSpawnerImpl(bukkitWorld, spawnerBlockEntity);
+    }
+
+    @Override
+    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
+        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
+                .getHandle().getBlockEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
+        baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
+        baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
+        baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
+        baseSpawner.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
+        baseSpawner.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
+        baseSpawner.spawnRange = spawnerUpgrade.getSpawnRange();
+    }
+
+    @Override
+    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
+        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
+                .getHandle().getBlockEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
+        return new SpawnerCachedData(
+                baseSpawner.minSpawnDelay,
+                baseSpawner.maxSpawnDelay,
+                baseSpawner.spawnCount,
+                baseSpawner.maxNearbyEntities,
+                baseSpawner.requiredPlayerRange,
+                baseSpawner.spawnRange,
+                baseSpawner.spawnDelay / 20,
+                baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
+        );
     }
 
 }

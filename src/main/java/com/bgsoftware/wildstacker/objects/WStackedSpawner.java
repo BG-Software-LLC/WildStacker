@@ -434,7 +434,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         if (fireEvent)
             EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade, who);
 
-        SyncedCreatureSpawner.of(object).updateSpawner(spawnerUpgrade);
+        plugin.getNMSSpawners().updateSpawner(object, spawnerUpgrade);
 
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);

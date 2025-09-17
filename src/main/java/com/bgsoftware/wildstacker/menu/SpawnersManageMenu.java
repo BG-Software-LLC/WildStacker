@@ -119,7 +119,7 @@ public final class SpawnersManageMenu extends WildMenu {
         }
 
         SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
-        SpawnerCachedData spawnerData = creatureSpawner.readData();
+        SpawnerCachedData spawnerData = plugin.getNMSSpawners().readData(creatureSpawner);
 
         for (Pair<Integer, ItemBuilder> statisticItem : statisticSlots) {
             inventory.setItem(statisticItem.getKey(), statisticItem.getValue().copy()

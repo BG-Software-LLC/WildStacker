@@ -152,35 +152,6 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<TileEntityM
     }
 
     @Override
-    public void updateSpawner(SpawnerUpgrade spawnerUpgrade) {
-        MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-        mobSpawnerAbstract.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-        mobSpawnerAbstract.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-        mobSpawnerAbstract.spawnCount = spawnerUpgrade.getSpawnCount();
-        mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-        mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-        mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
-        if (mobSpawnerAbstract instanceof StackedMobSpawner)
-            ((StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
-    }
-
-    @Override
-    public SpawnerCachedData readData() {
-        MobSpawnerAbstract mobSpawnerAbstract = getSpawner().getSpawner();
-        return new SpawnerCachedData(
-                mobSpawnerAbstract.minSpawnDelay,
-                mobSpawnerAbstract.maxSpawnDelay,
-                mobSpawnerAbstract.spawnCount,
-                mobSpawnerAbstract.maxNearbyEntities,
-                mobSpawnerAbstract.requiredPlayerRange,
-                mobSpawnerAbstract.spawnRange,
-                mobSpawnerAbstract.spawnDelay / 20,
-                mobSpawnerAbstract instanceof StackedMobSpawner ?
-                        ((StackedMobSpawner) mobSpawnerAbstract).failureReason : ""
-        );
-    }
-
-    @Override
     public boolean update(boolean force, boolean applyPhysics) {
         return blockLocation.getBlock().getState().update(force, applyPhysics);
     }

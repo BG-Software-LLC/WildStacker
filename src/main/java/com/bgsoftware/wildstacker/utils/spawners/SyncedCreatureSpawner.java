@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.utils.spawners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import org.bukkit.block.CreatureSpawner;
 
 public interface SyncedCreatureSpawner extends CreatureSpawner {
@@ -12,9 +11,5 @@ public interface SyncedCreatureSpawner extends CreatureSpawner {
         return creatureSpawner instanceof SyncedCreatureSpawner ? (SyncedCreatureSpawner) creatureSpawner :
                 plugin.getNMSSpawners().createSyncedSpawner(creatureSpawner);
     }
-
-    void updateSpawner(SpawnerUpgrade spawnerUpgrade);
-
-    SpawnerCachedData readData();
 
 }

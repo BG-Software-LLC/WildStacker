@@ -3,11 +3,14 @@ package com.bgsoftware.wildstacker.nms.v1_16_R3;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
+import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.StackedMobSpawner;
 import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.TileEntityMobSpawnerWatcher;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_16_R3.BiomeBase;
 import net.minecraft.server.v1_16_R3.Biomes;
@@ -21,6 +24,7 @@ import net.minecraft.server.v1_16_R3.EnumDifficulty;
 import net.minecraft.server.v1_16_R3.EnumDirection;
 import net.minecraft.server.v1_16_R3.EnumSkyBlock;
 import net.minecraft.server.v1_16_R3.GeneratorAccessSeed;
+import net.minecraft.server.v1_16_R3.MobSpawnerAbstract;
 import net.minecraft.server.v1_16_R3.ResourceKey;
 import net.minecraft.server.v1_16_R3.SeededRandom;
 import net.minecraft.server.v1_16_R3.TagsBlock;
@@ -33,6 +37,7 @@ import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R3.block.CraftCreatureSpawner;
 import org.bukkit.entity.EntityType;
 
 import java.util.LinkedList;
@@ -263,6 +268,39 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     @Override
     public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
         return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
+    }
+
+    @Override
+    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
+        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
+                .getHandle().getTileEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
+        mobSpawnerAbstract.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
+        mobSpawnerAbstract.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
+        mobSpawnerAbstract.spawnCount = spawnerUpgrade.getSpawnCount();
+        mobSpawnerAbstract.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
+        mobSpawnerAbstract.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
+        mobSpawnerAbstract.spawnRange = spawnerUpgrade.getSpawnRange();
+        if (mobSpawnerAbstract instanceof StackedMobSpawner)
+            ((StackedMobSpawner) mobSpawnerAbstract).updateUpgrade(spawnerUpgrade.getId());
+    }
+
+    @Override
+    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
+        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
+                .getHandle().getTileEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
+        return new SpawnerCachedData(
+                mobSpawnerAbstract.minSpawnDelay,
+                mobSpawnerAbstract.maxSpawnDelay,
+                mobSpawnerAbstract.spawnCount,
+                mobSpawnerAbstract.maxNearbyEntities,
+                mobSpawnerAbstract.requiredPlayerRange,
+                mobSpawnerAbstract.spawnRange,
+                mobSpawnerAbstract.spawnDelay / 20,
+                mobSpawnerAbstract instanceof StackedMobSpawner ?
+                        ((StackedMobSpawner) mobSpawnerAbstract).failureReason : ""
+        );
     }
 
 }
