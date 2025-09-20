@@ -68,8 +68,12 @@ public class PickupItemListener {
 
         StackedItem stackedItem = WStackedItem.of(item);
 
-        if (((WStackedItem) stackedItem).isRemoved())
-            return false;
+        if (((WStackedItem) stackedItem).isRemoved()) {
+            // We did not call the original event, however this item is removed and we pretend we did,
+            // so the entity won't pick this item as well.
+            // https://github.com/BG-Software-LLC/WildStacker/issues/1074
+            return true;
+        }
 
         if (EntityStorage.hasMetadata(item, EntityFlag.RECENTLY_PICKED_UP)) {
             EntityStorage.removeMetadata(item, EntityFlag.RECENTLY_PICKED_UP);
