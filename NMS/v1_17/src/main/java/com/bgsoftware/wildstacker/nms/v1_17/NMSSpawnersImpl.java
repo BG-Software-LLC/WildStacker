@@ -40,7 +40,7 @@ import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.block.CraftCreatureSpawner;
+import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlockState;
 import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Modifier;
@@ -310,7 +310,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     @Override
     public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
         SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
         BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
         baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
@@ -323,7 +323,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     @Override
     public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
         SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftCreatureSpawner) creatureSpawner).getPosition());
+                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
         BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         return new SpawnerCachedData(
                 baseSpawner.minSpawnDelay,
