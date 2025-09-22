@@ -9,26 +9,23 @@ import com.bgsoftware.common.databasebridge.transaction.IDatabaseTransaction;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
-import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
+import com.bgsoftware.wildstacker.data.StackedBarrelStore;
+import com.bgsoftware.wildstacker.data.StackedEntityStore;
+import com.bgsoftware.wildstacker.data.StackedItemStore;
+import com.bgsoftware.wildstacker.data.StackedSpawnerStore;
 import com.bgsoftware.wildstacker.database.DBSession;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedSpawner;
-import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
 import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
@@ -37,7 +34,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,21 +41,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings({"WeakerAccess", "all"})
 public final class DataHandler {
 
-    public final Map<UUID, StackedItem> CACHED_ITEMS = new ConcurrentHashMap<>();
-    public final Map<UUID, StackedEntity> CACHED_ENTITIES = new ConcurrentHashMap<>();
-    public final Location2ObjectMap<StackedSpawner> CACHED_SPAWNERS = new Location2ObjectMap<>();
-    public final Map<ChunkPosition, Set<StackedSpawner>> CACHED_SPAWNERS_BY_CHUNKS = new ConcurrentHashMap<>();
-    public final Location2ObjectMap<StackedBarrel> CACHED_BARRELS = new Location2ObjectMap<>();
-    public final Location2ObjectMap<LivingEntity> CACHED_LINKED_ENTITIES = new Location2ObjectMap<>();
-    public final Map<ChunkPosition, Set<StackedBarrel>> CACHED_BARRELS_BY_CHUNKS = new ConcurrentHashMap<>();
+    public final StackedItemStore stackedItemStore = new StackedItemStore();
+    public final StackedEntityStore stackedEntityStore = new StackedEntityStore();
+    public final StackedSpawnerStore stackedSpawnerStore = new StackedSpawnerStore();
+    public final StackedBarrelStore stackedBarrelStore = new StackedBarrelStore();
+
     public final Set<StackedObject> OBJECTS_TO_SAVE = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    //References for all the data from database
-    public final Map<UUID, Integer> CACHED_ITEMS_RAW = new ConcurrentHashMap<>();
-    public final Map<UUID, Pair<Integer, SpawnCause>> CACHED_ENTITIES_RAW = new ConcurrentHashMap<>();
-    public final Location2ObjectMap<UnloadedStackedSpawner> CACHED_SPAWNERS_RAW = new Location2ObjectMap<>();
-    public final Location2ObjectMap<UnloadedStackedBarrel> CACHED_BARRELS_RAW = new Location2ObjectMap<>();
-    public final Set<UUID> CACHED_DEAD_ENTITIES = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private WildStackerPlugin plugin;
+
+    private final WildStackerPlugin plugin;
 
     public DataHandler(WildStackerPlugin plugin) {
         this.plugin = plugin;
@@ -86,45 +75,35 @@ public final class DataHandler {
     }
 
     public void addStackedSpawner(StackedSpawner stackedSpawner) {
-        CACHED_SPAWNERS.put(stackedSpawner.getLocation(), stackedSpawner);
-        CACHED_SPAWNERS_BY_CHUNKS.computeIfAbsent(new ChunkPosition(stackedSpawner.getLocation()),
-                s -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(stackedSpawner);
+        this.stackedSpawnerStore.store(stackedSpawner.getLocation(), stackedSpawner);
     }
 
     public void removeStackedSpawner(StackedSpawner stackedSpawner) {
-        CACHED_SPAWNERS.remove(stackedSpawner.getLocation());
-        Set<StackedSpawner> chunkSpawners = CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(stackedSpawner.getLocation()));
-        if (chunkSpawners != null)
-            chunkSpawners.remove(stackedSpawner);
+        this.stackedSpawnerStore.remove(stackedSpawner.getLocation());
         Executor.sync(() -> ((WStackedSpawner) stackedSpawner).removeHologram());
     }
 
     public void addStackedBarrel(StackedBarrel stackedBarrel) {
-        CACHED_BARRELS.put(stackedBarrel.getLocation(), stackedBarrel);
-        CACHED_BARRELS_BY_CHUNKS.computeIfAbsent(new ChunkPosition(stackedBarrel.getLocation()),
-                s -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(stackedBarrel);
+        this.stackedBarrelStore.store(stackedBarrel.getLocation(), stackedBarrel);
     }
 
     public void removeStackedBarrel(StackedBarrel stackedBarrel) {
-        CACHED_BARRELS.remove(stackedBarrel.getLocation());
-        Set<StackedBarrel> chunkBarrels = CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(stackedBarrel.getLocation()));
-        if (chunkBarrels != null)
-            chunkBarrels.remove(stackedBarrel);
+        this.stackedSpawnerStore.remove(stackedBarrel.getLocation());
         stackedBarrel.removeDisplayBlock();
         Executor.sync(() -> ((WStackedBarrel) stackedBarrel).removeHologram());
     }
 
     public List<StackedObject> getStackedObjects() {
         List<StackedObject> stackedObjects = new LinkedList<>();
-        stackedObjects.addAll(CACHED_ITEMS.values());
-        stackedObjects.addAll(CACHED_ENTITIES.values());
-        CACHED_SPAWNERS.collect(stackedObjects);
-        CACHED_BARRELS.collect(stackedObjects);
-        return stackedObjects;
+        this.stackedItemStore.collect(stackedObjects);
+        this.stackedEntityStore.collect(stackedObjects);
+        this.stackedSpawnerStore.collect(stackedObjects);
+        this.stackedBarrelStore.collect(stackedObjects);
+        return stackedObjects.isEmpty() ? Collections.emptyList() : stackedObjects;
     }
 
     public SQLDatabaseTransaction<?> insertSpawner(WStackedSpawner stackedSpawner,
-                                                          @Nullable SQLDatabaseTransaction<?> transaction) {
+                                                   @Nullable SQLDatabaseTransaction<?> transaction) {
         if (transaction == null) {
             transaction = new InsertSQLDatabaseTransaction(
                     "spawners", Arrays.asList("location", "stackAmount", "upgrade"));
@@ -155,7 +134,7 @@ public final class DataHandler {
     }
 
     public SQLDatabaseTransaction<?> insertBarrel(StackedBarrel stackedBarrel,
-                                                          @Nullable SQLDatabaseTransaction<?> transaction) {
+                                                  @Nullable SQLDatabaseTransaction<?> transaction) {
         if (transaction == null) {
             transaction = new InsertSQLDatabaseTransaction(
                     "barrels", Arrays.asList("location", "stackAmount", "item"));
@@ -238,7 +217,7 @@ public final class DataHandler {
                 int stackAmount = resultSet.getInt("stackAmount");
                 SpawnCause spawnCause = SpawnCause.matchCause(resultSet.getString("spawnCause"));
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                CACHED_ENTITIES_RAW.put(uuid, new Pair<>(stackAmount, spawnCause));
+                this.stackedEntityStore.storeUnloaded(uuid, new StackedEntityStore.Unloaded(stackAmount, spawnCause));
             }
         }));
 
@@ -257,7 +236,7 @@ public final class DataHandler {
             while (resultSet.next()) {
                 int stackAmount = resultSet.getInt("stackAmount");
                 UUID uuid = UUID.fromString(resultSet.getString("uuid"));
-                CACHED_ITEMS_RAW.put(uuid, stackAmount);
+                this.stackedItemStore.storeUnloaded(uuid, new StackedItemStore.Unloaded(stackAmount));
             }
         }));
 
@@ -291,7 +270,7 @@ public final class DataHandler {
                     int upgradeId = resultSet.getInt("upgrade");
                     WUnloadedStackedSpawner unloadedStackedSpawner =
                             new WUnloadedStackedSpawner(worldName, locX, locY, locZ, stackAmount, upgradeId);
-                    CACHED_SPAWNERS_RAW.put(unloadedStackedSpawner, unloadedStackedSpawner);
+                    this.stackedSpawnerStore.storeUnloaded(unloadedStackedSpawner);
                     continue;
                 } catch (Exception ex) {
                     exceptionReason = "Exception was thrown.";
@@ -307,7 +286,7 @@ public final class DataHandler {
                 }
             }
 
-            if(calledDeleteTransaction)
+            if (calledDeleteTransaction)
                 transactionsToExecute.add(deleteNullWorldTransaction);
 
         }));
@@ -343,7 +322,7 @@ public final class DataHandler {
                             plugin.getNMSAdapter().deserialize(resultSet.getString("item"));
                     WUnloadedStackedBarrel unloadedStackedBarrel =
                             new WUnloadedStackedBarrel(worldName, locX, locY, locZ, stackAmount, barrelItem);
-                    CACHED_BARRELS_RAW.put(unloadedStackedBarrel, unloadedStackedBarrel);
+                    this.stackedBarrelStore.storeUnloaded(unloadedStackedBarrel);
                     continue;
                 } catch (Exception ex) {
                     exceptionReason = "Exception was thrown.";
@@ -359,7 +338,7 @@ public final class DataHandler {
                 }
             }
 
-            if(calledDeleteTransaction)
+            if (calledDeleteTransaction)
                 transactionsToExecute.add(deleteNullWorldTransaction);
         }));
 

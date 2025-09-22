@@ -11,7 +11,11 @@ public final class ChunkPosition {
     private final String world;
     private final int x, z;
 
-    private long pairedXZ = -1;
+    private final long packedPos;
+
+    public static long getPackedPos(int chunkX, int chunkZ) {
+        return ((chunkZ & 0xFFFFFFFFL) << 32) | (chunkX & 0xFFFFFFFFL);
+    }
 
     public ChunkPosition(Location location) {
         this(location.getWorld().getName(), location.getBlockX() >> 4, location.getBlockZ() >> 4);
@@ -29,6 +33,7 @@ public final class ChunkPosition {
         this.world = world;
         this.x = x;
         this.z = z;
+        this.packedPos = getPackedPos(x, z);
     }
 
     public String getWorld() {
@@ -43,16 +48,13 @@ public final class ChunkPosition {
         return z;
     }
 
-    public long asPair() {
-        if (this.pairedXZ < 0)
-            pairedXZ = ((this.z & 0xFFFFFFFFL) << 32) | (this.x & 0xFFFFFFFFL);
-
-        return pairedXZ;
+    public long pack() {
+        return this.packedPos;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(world, x, z);
+        return Objects.hash(world, this.packedPos);
     }
 
     @Override
@@ -60,8 +62,7 @@ public final class ChunkPosition {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChunkPosition that = (ChunkPosition) o;
-        return x == that.x &&
-                z == that.z &&
+        return packedPos == that.packedPos &&
                 world.equals(that.world);
     }
 }

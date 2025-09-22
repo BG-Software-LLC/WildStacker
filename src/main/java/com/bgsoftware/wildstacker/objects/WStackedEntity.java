@@ -160,10 +160,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void updateName() {
-        if (isNameBlacklisted() || hasNameTag())
-            return;
-
-        if (!plugin.getDataHandler().CACHED_ENTITIES.containsKey(getUniqueId()))
+        if (isNameBlacklisted() || hasNameTag() || !isCached())
             return;
 
         try {
@@ -416,7 +413,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         if (stackedSpawner.isCached()) {
             linkedEntity = stackedSpawner.getLinkedEntity();
         } else {
-            linkedEntity = plugin.getDataHandler().CACHED_LINKED_ENTITIES.get(stackedSpawner.getLocation());
+            linkedEntity = plugin.getDataHandler().stackedSpawnerStore.getLinkedEntity(stackedSpawner.getLocation());
         }
 
         Runnable regularStackAsync = () -> runStackAsync(entityOptional -> {
@@ -424,7 +421,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             if (stackedSpawner.isCached()) {
                 stackedSpawner.setLinkedEntity(targetEntity);
             } else {
-                plugin.getDataHandler().CACHED_LINKED_ENTITIES.put(stackedSpawner.getLocation(), targetEntity);
+                plugin.getDataHandler().stackedSpawnerStore.storeLinkedEntity(stackedSpawner.getLocation(), targetEntity);
             }
             if (result != null)
                 result.accept(Optional.of(targetEntity));
@@ -756,7 +753,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             removeFlag(EntityFlag.DEAD_ENTITY);
 
         if (!isCached())
-            plugin.getDataHandler().CACHED_DEAD_ENTITIES.add(object.getUniqueId());
+            plugin.getDataHandler().stackedEntityStore.setDead(getUniqueId());
     }
 
     public boolean shouldBeStacked() {

@@ -167,7 +167,7 @@ public class Location2ObjectMap<V> {
 
     public void forEach(ChunkPosition chunkPosition, Consumer<V> consumer) {
         List<V> values = read(() -> {
-            ChunkMap<V> chunkMap = this.backendMap.get(chunkPosition.getWorld(), chunkPosition.asPair());
+            ChunkMap<V> chunkMap = this.backendMap.get(chunkPosition.getWorld(), chunkPosition.pack());
             if (chunkMap == null)
                 return Collections.emptyList();
 

@@ -40,8 +40,7 @@ public final class WUnloadedStackedSpawner extends WUnloadedStackedObject implem
 
     @Override
     public void remove() {
-        plugin.getDataHandler().CACHED_SPAWNERS_RAW.remove(this);
-
+        plugin.getDataHandler().stackedSpawnerStore.removeUnloaded(this);
         plugin.getDataHandler().deleteSpawner(this);
     }
 

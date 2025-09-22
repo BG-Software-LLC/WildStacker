@@ -635,11 +635,11 @@ public final class EntitiesListener implements Listener {
     // Handle entity removed from world.
     public void handleEntityRemove(Entity entity) {
         if (EntityUtils.isStackable(entity)) {
-            StackedEntity stackedEntity = plugin.getDataHandler().CACHED_ENTITIES.remove(entity.getUniqueId());
+            StackedEntity stackedEntity = plugin.getDataHandler().stackedEntityStore.remove(entity.getEntityId());
             if (stackedEntity != null)
                 plugin.getSystemManager().saveEntity(stackedEntity);
         } else if (entity instanceof Item) {
-            StackedItem stackedItem = plugin.getDataHandler().CACHED_ITEMS.remove(entity.getUniqueId());
+            StackedItem stackedItem = plugin.getDataHandler().stackedItemStore.remove(entity.getEntityId());
             if (stackedItem != null)
                 plugin.getSystemManager().saveItem(stackedItem);
         }
@@ -764,7 +764,7 @@ public final class EntitiesListener implements Listener {
 
     private void handleEntityCacheClear(LivingEntity livingEntity) {
         // Removing the entity from cache.
-        plugin.getDataHandler().CACHED_ENTITIES.remove(livingEntity.getUniqueId());
+        plugin.getDataHandler().stackedEntityStore.remove(livingEntity.getEntityId());
         EntityStorage.clearMetadata(livingEntity);
     }
 

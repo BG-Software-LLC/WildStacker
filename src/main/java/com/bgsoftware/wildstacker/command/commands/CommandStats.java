@@ -41,14 +41,14 @@ public final class CommandStats implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        int entitiesAmount = plugin.getDataHandler().CACHED_ENTITIES.size();
-        int unloadedEntitiesAmount = plugin.getDataHandler().CACHED_ENTITIES_RAW.size();
-        int itemsAmount = plugin.getDataHandler().CACHED_ITEMS.size();
-        int unloadedItemsAmount = plugin.getDataHandler().CACHED_ITEMS_RAW.size();
-        int spawnersAmount = plugin.getDataHandler().CACHED_SPAWNERS.size();
-        int barrelsAmount = plugin.getDataHandler().CACHED_BARRELS.size();
-        int spawnersUnloadedAmount = plugin.getDataHandler().CACHED_SPAWNERS_RAW.size();
-        int barrelsUnloadedAmount = plugin.getDataHandler().CACHED_BARRELS_RAW.size();
+        int entitiesAmount = plugin.getDataHandler().stackedEntityStore.size();
+        int unloadedEntitiesAmount = plugin.getDataHandler().stackedEntityStore.sizeUnloaded();
+        int itemsAmount = plugin.getDataHandler().stackedItemStore.size();
+        int unloadedItemsAmount = plugin.getDataHandler().stackedItemStore.sizeUnloaded();
+        int spawnersAmount = plugin.getDataHandler().stackedSpawnerStore.size();
+        int barrelsAmount = plugin.getDataHandler().stackedBarrelStore.size();
+        int spawnersUnloadedAmount = plugin.getDataHandler().stackedSpawnerStore.sizeUnloaded();
+        int barrelsUnloadedAmount = plugin.getDataHandler().stackedBarrelStore.sizeUnloaded();
 
         String message = "&eWildStacker Stats:" +
                 "\n&e - Stacked Entities: (Loaded: " + entitiesAmount + ", Unloaded: " + unloadedEntitiesAmount + ")" +

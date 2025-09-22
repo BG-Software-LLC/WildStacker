@@ -32,8 +32,7 @@ public final class WUnloadedStackedBarrel extends WUnloadedStackedObject impleme
 
     @Override
     public void remove() {
-        plugin.getDataHandler().CACHED_BARRELS_RAW.remove(this);
-
+        plugin.getDataHandler().stackedBarrelStore.removeUnloaded(this);
         plugin.getDataHandler().deleteBarrel(this);
     }
 

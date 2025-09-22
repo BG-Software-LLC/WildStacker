@@ -34,14 +34,11 @@ import com.bgsoftware.wildstacker.tasks.KillTask;
 import com.bgsoftware.wildstacker.tasks.StackTask;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
-import com.bgsoftware.wildstacker.utils.data.DataSerializer;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumMap;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
-import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
@@ -113,6 +110,10 @@ public final class SystemHandler implements SystemManager {
         Bukkit.getScheduler().runTaskTimer(plugin, this::performCacheSave, 300L, 300L);
     }
 
+    public IDataSerializer getDataSerializer() {
+        return dataSerializer;
+    }
+
     /*
      * StackedObject's methods
      */
@@ -120,10 +121,10 @@ public final class SystemHandler implements SystemManager {
     @Override
     public void removeStackObject(StackedObject stackedObject) {
         if (stackedObject instanceof StackedEntity) {
-            dataHandler.CACHED_ENTITIES.remove(((StackedEntity) stackedObject).getUniqueId());
+            dataHandler.stackedEntityStore.remove(((StackedEntity) stackedObject).getLivingEntity().getEntityId());
             ((StackedEntity) stackedObject).clearFlags();
         } else if (stackedObject instanceof StackedItem)
-            dataHandler.CACHED_ITEMS.remove(((StackedItem) stackedObject).getUniqueId());
+            dataHandler.stackedItemStore.remove(((StackedItem) stackedObject).getItem().getEntityId());
         else if (stackedObject instanceof StackedSpawner)
             dataHandler.removeStackedSpawner((StackedSpawner) stackedObject);
         else if (stackedObject instanceof StackedBarrel)
@@ -134,63 +135,27 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedEntity getStackedEntity(LivingEntity livingEntity) {
-        StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.get(livingEntity.getUniqueId());
-
-        if (stackedEntity != null && stackedEntity.getLivingEntity() != null)
+        StackedEntity stackedEntity = dataHandler.stackedEntityStore.get(livingEntity.getEntityId());
+        if (stackedEntity != null)
             return stackedEntity;
 
         if (!EntityUtils.isStackable(livingEntity))
             throw new IllegalArgumentException("Cannot convert " + livingEntity.getType() + " into a stacked entity.");
 
-
         //Entity wasn't found, creating a new object
         stackedEntity = new WStackedEntity(livingEntity);
 
-        Pair<Integer, SpawnCause> entityData = dataHandler.CACHED_ENTITIES_RAW.remove(livingEntity.getUniqueId());
-        if (entityData != null) {
-            stackedEntity.setStackAmount(entityData.getKey(), false);
-            stackedEntity.setSpawnCause(entityData.getValue());
-        } else {
-            String cachedData = DataSerializer.deserializeData(stackedEntity.getCustomName());
-
-            try {
-                ((WStackedEntity) stackedEntity).setSaveData(false);
-                if (!cachedData.isEmpty()) {
-                    String[] dataSections = cachedData.split("-");
-                    try {
-                        stackedEntity.setStackAmount(Integer.parseInt(dataSections[0]), false);
-                    } catch (Exception ignored) {
-                    }
-                    try {
-                        stackedEntity.setSpawnCause(SpawnCause.valueOf(Integer.parseInt(dataSections[1])));
-                    } catch (Exception ignored) {
-                    }
-                    try {
-                        if (dataSections[2].equals("1"))
-                            ((WStackedEntity) stackedEntity).setNameTag();
-                    } catch (Exception ignored) {
-                    }
-
-                    stackedEntity.setCustomName(DataSerializer.stripData(stackedEntity.getCustomName()));
-                } else {
-                    dataSerializer.loadEntity(stackedEntity);
-                }
-            } finally {
-                ((WStackedEntity) stackedEntity).setSaveData(true);
-            }
-        }
+        dataHandler.stackedEntityStore.loadUnloaded(livingEntity.getUniqueId(), stackedEntity);
 
         boolean shouldBeCached = stackedEntity.isCached() || stackedEntity.getStackAmount() > 1 ||
                 !stackedEntity.isDefaultUpgrade();
 
         //A new entity was created. Let's see if we need to add him
         if (shouldBeCached)
-            dataHandler.CACHED_ENTITIES.put(stackedEntity.getUniqueId(), stackedEntity);
+            dataHandler.stackedEntityStore.store(livingEntity.getEntityId(), stackedEntity);
 
-        boolean deadFlag = shouldBeCached ? dataHandler.CACHED_DEAD_ENTITIES.remove(livingEntity.getUniqueId()) :
-                dataHandler.CACHED_DEAD_ENTITIES.contains(livingEntity.getUniqueId());
-
-        if (deadFlag)
+        boolean isDead = dataHandler.stackedEntityStore.isDead(livingEntity.getUniqueId(), shouldBeCached);
+        if (isDead)
             ((WStackedEntity) stackedEntity).setDeadFlag(true);
 
         return stackedEntity;
@@ -198,51 +163,26 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem getStackedItem(Item item) {
-        StackedItem stackedItem = dataHandler.CACHED_ITEMS.get(item.getUniqueId());
-
-        if (stackedItem != null && stackedItem.getItem() != null)
+        StackedItem stackedItem = dataHandler.stackedItemStore.get(item.getEntityId());
+        if (stackedItem != null) {
             return stackedItem;
+        }
 
         //Item wasn't found, creating a new object.
         stackedItem = new WStackedItem(item);
 
-        //Checks if the item still exists after a few ticks
-        Executor.sync(() -> {
-            if (item.isDead())
-                dataHandler.CACHED_ITEMS.remove(item.getUniqueId());
-        }, 10L);
-
         //A new item was created. Let's see if we need to add him
-        if (stackedItem.isCached())
-            dataHandler.CACHED_ITEMS.put(stackedItem.getUniqueId(), stackedItem);
+        if (stackedItem.isCached()) {
+            dataHandler.stackedItemStore.store(item.getEntityId(), stackedItem);
 
-        Integer entityData = dataHandler.CACHED_ITEMS_RAW.remove(item.getUniqueId());
-        if (entityData != null) {
-            stackedItem.setStackAmount(entityData, false);
-        } else {
-            String cachedData = DataSerializer.deserializeData(stackedItem.getCustomName());
-
-            try {
-                ((WStackedItem) stackedItem).setSaveData(false);
-                if (!cachedData.isEmpty()) {
-                    try {
-                        stackedItem.setStackAmount(Integer.parseInt(cachedData), false);
-                    } catch (Exception ignored) {
-                    }
-
-                    stackedItem.setCustomName(DataSerializer.stripData(stackedItem.getCustomName()));
-                } else {
-                    dataSerializer.loadItem(stackedItem);
-                }
-
-                // We want to update the item's size if it's above max stack size.
-                // We do it here so item will not be saved.
-                if (stackedItem.getStackAmount() > stackedItem.getItemStack().getMaxStackSize())
-                    stackedItem.setStackAmount(stackedItem.getStackAmount(), false);
-            } finally {
-                ((WStackedItem) stackedItem).setSaveData(true);
-            }
+            //Checks if the item still exists after a few ticks
+            Executor.sync(() -> {
+                if (item.isDead())
+                    dataHandler.stackedItemStore.remove(item.getEntityId());
+            }, 10L);
         }
+
+        dataHandler.stackedItemStore.loadUnloaded(item.getUniqueId(), stackedItem);
 
         return stackedItem;
     }
@@ -254,8 +194,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedSpawner getStackedSpawner(Location location) {
-        StackedSpawner stackedSpawner = dataHandler.CACHED_SPAWNERS.get(location);
-
+        StackedSpawner stackedSpawner = dataHandler.stackedSpawnerStore.get(location);
         if (stackedSpawner != null)
             return stackedSpawner;
 
@@ -276,8 +215,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedBarrel getStackedBarrel(Location location) {
-        StackedBarrel stackedBarrel = dataHandler.CACHED_BARRELS.get(location);
-
+        StackedBarrel stackedBarrel = dataHandler.stackedBarrelStore.get(location);
         if (stackedBarrel != null)
             return stackedBarrel;
 
@@ -293,17 +231,17 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedEntity> getStackedEntities() {
-        return new ArrayList<>(dataHandler.CACHED_ENTITIES.values());
+        return dataHandler.stackedEntityStore.getAll();
     }
 
     @Override
     public List<StackedItem> getStackedItems() {
-        return new ArrayList<>(dataHandler.CACHED_ITEMS.values());
+        return dataHandler.stackedItemStore.getAll();
     }
 
     @Override
     public List<StackedSpawner> getStackedSpawners() {
-        return (List<StackedSpawner>) dataHandler.CACHED_SPAWNERS.values();
+        return dataHandler.stackedSpawnerStore.getAll();
     }
 
     @Override
@@ -313,23 +251,26 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedSpawner> getStackedSpawners(World world, int chunkX, int chunkZ) {
-        Set<StackedSpawner> chunkSpawners = dataHandler.CACHED_SPAWNERS_BY_CHUNKS.get(new ChunkPosition(world.getName(), chunkX, chunkZ));
-        return chunkSpawners == null ? new ArrayList<>() : new ArrayList<>(chunkSpawners);
+        return dataHandler.stackedSpawnerStore.getAllFromChunk(world.getName(), chunkX, chunkZ);
     }
 
     @Override
     public List<UnloadedStackedSpawner> getAllStackedSpawners() {
-        List<UnloadedStackedSpawner> spawners = new ArrayList<>();
+        if (dataHandler.stackedSpawnerStore.size() == 0 && dataHandler.stackedSpawnerStore.sizeUnloaded() == 0)
+            return Collections.emptyList();
 
-        dataHandler.CACHED_SPAWNERS.collect(spawners, WUnloadedStackedSpawner::new);
-        dataHandler.CACHED_SPAWNERS_RAW.collect(spawners);
+        List<UnloadedStackedSpawner> spawners = new LinkedList<>();
 
-        return spawners;
+        dataHandler.stackedSpawnerStore.iterateUnloaded(spawners::add);
+        dataHandler.stackedSpawnerStore.getAll().forEach(stackedSpawner ->
+                spawners.add(new WUnloadedStackedSpawner(stackedSpawner)));
+
+        return spawners.isEmpty() ? Collections.emptyList() : spawners;
     }
 
     @Override
     public List<StackedBarrel> getStackedBarrels() {
-        return (List<StackedBarrel>) dataHandler.CACHED_BARRELS.values();
+        return dataHandler.stackedBarrelStore.getAll();
     }
 
     @Override
@@ -339,18 +280,21 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public List<StackedBarrel> getStackedBarrels(World world, int chunkX, int chunkZ) {
-        Set<StackedBarrel> chunkBarrels = dataHandler.CACHED_BARRELS_BY_CHUNKS.get(new ChunkPosition(world.getName(), chunkX, chunkZ));
-        return chunkBarrels == null ? new ArrayList<>() : new ArrayList<>(chunkBarrels);
+        return dataHandler.stackedBarrelStore.getAllFromChunk(world.getName(), chunkX, chunkZ);
     }
 
     @Override
     public List<UnloadedStackedBarrel> getAllStackedBarrels() {
-        List<UnloadedStackedBarrel> barrels = new ArrayList<>();
+        if (dataHandler.stackedBarrelStore.size() == 0 && dataHandler.stackedBarrelStore.sizeUnloaded() == 0)
+            return Collections.emptyList();
 
-        dataHandler.CACHED_BARRELS.collect(barrels, WUnloadedStackedBarrel::new);
-        dataHandler.CACHED_BARRELS_RAW.collect(barrels);
+        List<UnloadedStackedBarrel> barrels = new LinkedList<>();
 
-        return barrels;
+        dataHandler.stackedBarrelStore.iterateUnloaded(barrels::add);
+        dataHandler.stackedBarrelStore.getAll().forEach(stackedBarrel ->
+                barrels.add(new WUnloadedStackedBarrel(stackedBarrel)));
+
+        return barrels.isEmpty() ? Collections.emptyList() : barrels;
     }
 
     @Override
@@ -360,7 +304,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public boolean isStackedSpawner(Location location) {
-        return location != null && dataHandler.CACHED_SPAWNERS.containsKey(location);
+        return location != null && dataHandler.stackedSpawnerStore.get(location) != null;
     }
 
     @Override
@@ -370,7 +314,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public boolean isStackedBarrel(Location location) {
-        return dataHandler.CACHED_BARRELS.containsKey(location);
+        return dataHandler.stackedBarrelStore.get(location) != null;
     }
 
     @Override
@@ -747,26 +691,25 @@ public final class SystemHandler implements SystemManager {
     }
 
     public void loadSpawners(Chunk chunk) {
-        ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Collection<UnloadedStackedSpawner> spawnersToLoad = dataHandler.CACHED_SPAWNERS_RAW.remove(chunkPosition);
+        World world = chunk.getWorld();
+        dataHandler.stackedSpawnerStore.loadUnloaded(world.getName(), chunk.getX(), chunk.getZ(),
+                unloadedStackedSpawner -> {
+                    Location spawnerLocation = new Location(world, unloadedStackedSpawner.getX(),
+                            unloadedStackedSpawner.getY(), unloadedStackedSpawner.getZ());
+                    Block block = spawnerLocation.getBlock();
 
-        for (UnloadedStackedSpawner unloadedStackedSpawner : spawnersToLoad) {
-            Location spawnerLocation = new Location(chunk.getWorld(), unloadedStackedSpawner.getX(),
-                    unloadedStackedSpawner.getY(), unloadedStackedSpawner.getZ());
-            Block block = spawnerLocation.getBlock();
-
-            if (block.getType() == Materials.SPAWNER.toBukkitType()) {
-                WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
-                try {
-                    stackedSpawner.setSaveData(false);
-                    stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), null, false);
-                    stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
-                    dataHandler.addStackedSpawner(stackedSpawner);
-                } finally {
-                    stackedSpawner.setSaveData(true);
-                }
-            }
-        }
+                    if (block.getType() == Materials.SPAWNER.toBukkitType()) {
+                        WStackedSpawner stackedSpawner = new WStackedSpawner((CreatureSpawner) block.getState());
+                        try {
+                            stackedSpawner.setSaveData(false);
+                            stackedSpawner.setUpgradeId(((WUnloadedStackedSpawner) unloadedStackedSpawner).getUpgradeId(), null, false);
+                            stackedSpawner.setStackAmount(unloadedStackedSpawner.getStackAmount(), true);
+                            dataHandler.addStackedSpawner(stackedSpawner);
+                        } finally {
+                            stackedSpawner.setSaveData(true);
+                        }
+                    }
+                });
 
         if (plugin.getSettings().spawnersOverrideEnabled) {
             plugin.getNMSSpawners().updateStackedSpawners(chunk);
@@ -774,11 +717,9 @@ public final class SystemHandler implements SystemManager {
     }
 
     public void loadBarrels(Chunk chunk) {
-        ChunkPosition chunkPosition = new ChunkPosition(chunk);
-        Collection<UnloadedStackedBarrel> barrelsToLoad = dataHandler.CACHED_BARRELS_RAW.remove(chunkPosition);
-
-        for (UnloadedStackedBarrel unloadedStackedBarrel : barrelsToLoad) {
-            Location barrelLocation = new Location(chunk.getWorld(), unloadedStackedBarrel.getX(),
+        World world = chunk.getWorld();
+        dataHandler.stackedBarrelStore.loadUnloaded(world.getName(), chunk.getX(), chunk.getZ(), unloadedStackedBarrel -> {
+            Location barrelLocation = new Location(world, unloadedStackedBarrel.getX(),
                     unloadedStackedBarrel.getY(), unloadedStackedBarrel.getZ());
             Block block = barrelLocation.getBlock();
 
@@ -793,7 +734,7 @@ public final class SystemHandler implements SystemManager {
                     stackedBarrel.setSaveData(true);
                 }
             }
-        }
+        });
     }
 
     public void handleChunkLoad(Chunk chunk, int unloadStage) {
@@ -863,13 +804,13 @@ public final class SystemHandler implements SystemManager {
         if (isEntitiesLoad) {
             for (Entity entity : unloadedEntities) {
                 if (EntityUtils.isStackable(entity)) {
-                    StackedEntity stackedEntity = dataHandler.CACHED_ENTITIES.remove(entity.getUniqueId());
+                    StackedEntity stackedEntity = dataHandler.stackedEntityStore.remove(entity.getEntityId());
                     if (stackedEntity != null) {
                         dataSerializer.saveEntity(stackedEntity);
                         stackedEntity.clearFlags();
                     }
                 } else if (entity instanceof Item) {
-                    StackedItem stackedItem = dataHandler.CACHED_ITEMS.remove(entity.getUniqueId());
+                    StackedItem stackedItem = dataHandler.stackedItemStore.remove(entity.getEntityId());
                     if (stackedItem != null)
                         dataSerializer.saveItem(stackedItem);
                 }
@@ -880,13 +821,15 @@ public final class SystemHandler implements SystemManager {
             for (StackedSpawner stackedSpawner : getStackedSpawners(chunk)) {
                 dataHandler.removeStackedSpawner(stackedSpawner);
                 if (stackedSpawner.getStackAmount() > 1 || !stackedSpawner.isDefaultUpgrade()) {
-                    dataHandler.CACHED_SPAWNERS_RAW.put(stackedSpawner.getLocation(), new WUnloadedStackedSpawner(stackedSpawner));
+                    WUnloadedStackedSpawner unloadedStackedSpawner = new WUnloadedStackedSpawner(stackedSpawner);
+                    dataHandler.stackedSpawnerStore.storeUnloaded(unloadedStackedSpawner);
                 }
             }
 
             for (StackedBarrel stackedBarrel : getStackedBarrels(chunk)) {
                 dataHandler.removeStackedBarrel(stackedBarrel);
-                dataHandler.CACHED_BARRELS_RAW.put(stackedBarrel.getLocation(), new WUnloadedStackedBarrel(stackedBarrel));
+                WUnloadedStackedBarrel unloadedStackedBarrel = new WUnloadedStackedBarrel(stackedBarrel);
+                dataHandler.stackedBarrelStore.storeUnloaded(unloadedStackedBarrel);
                 stackedBarrel.removeDisplayBlock();
             }
         }

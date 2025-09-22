@@ -55,7 +55,7 @@ public class Chunk2ObjectMap<V> extends AbstractMap<ChunkPosition, V> {
 
     @Nullable
     public V get(ChunkPosition chunkPosition) {
-        return get(chunkPosition.getWorld(), chunkPosition.asPair());
+        return get(chunkPosition.getWorld(), chunkPosition.pack());
     }
 
     @Nullable
@@ -78,7 +78,7 @@ public class Chunk2ObjectMap<V> extends AbstractMap<ChunkPosition, V> {
     @Nullable
     @Override
     public V put(ChunkPosition chunkPosition, V value) {
-        return put(chunkPosition.getWorld(), chunkPosition.asPair(), value);
+        return put(chunkPosition.getWorld(), chunkPosition.pack(), value);
     }
 
     @Nullable
@@ -100,7 +100,7 @@ public class Chunk2ObjectMap<V> extends AbstractMap<ChunkPosition, V> {
 
     @Nullable
     public V remove(ChunkPosition chunkPosition) {
-        return remove(chunkPosition.getWorld(), chunkPosition.asPair());
+        return remove(chunkPosition.getWorld(), chunkPosition.pack());
     }
 
     @Nullable
@@ -298,7 +298,7 @@ public class Chunk2ObjectMap<V> extends AbstractMap<ChunkPosition, V> {
 
                         Map<Long, V> worldBackendData = Chunk2ObjectMap.this.backendMap.get(currWorld);
 
-                        worldBackendData.put(chunkPosition.asPair(), currValue);
+                        worldBackendData.put(chunkPosition.pack(), currValue);
 
                         return oldValue;
                     }

@@ -330,8 +330,15 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled || e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
+        if (e.getBlock().getType() != Materials.SPAWNER.toBukkitType())
             return;
+
+        if (!plugin.getSettings().spawnersStackingEnabled) {
+            // In the case spawners stacking is disabled, we might still need to remove linked entities
+            if (plugin.getSettings().linkedEntitiesEnabled)
+                plugin.getDataHandler().stackedSpawnerStore.removeLinkedEntity(e.getBlock().getLocation());
+            return;
+        }
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlock());
         CreatureSpawner creatureSpawner = (CreatureSpawner) e.getBlock().getState();
@@ -807,7 +814,7 @@ public final class SpawnersListener implements Listener {
                 spawnerUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(creatureSpawner.getSpawnedType());
 
                 if (plugin.getSettings().linkedEntitiesEnabled) {
-                    linkedEntity = plugin.getDataHandler().CACHED_LINKED_ENTITIES.get(creatureSpawner.getLocation());
+                    linkedEntity = plugin.getDataHandler().stackedSpawnerStore.getLinkedEntity(creatureSpawner.getLocation());
                 }
             }
 
