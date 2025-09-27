@@ -88,7 +88,7 @@ public final class DataHandler {
     }
 
     public void removeStackedBarrel(StackedBarrel stackedBarrel) {
-        this.stackedSpawnerStore.remove(stackedBarrel.getLocation());
+        this.stackedBarrelStore.remove(stackedBarrel.getLocation());
         stackedBarrel.removeDisplayBlock();
         Executor.sync(() -> ((WStackedBarrel) stackedBarrel).removeHologram());
     }
