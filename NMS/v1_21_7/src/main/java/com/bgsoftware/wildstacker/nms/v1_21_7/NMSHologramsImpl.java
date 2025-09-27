@@ -24,6 +24,8 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftArmorStand;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
+import org.bukkit.event.entity.EntityRemoveEvent;
+import org.jetbrains.annotations.Nullable;
 
 public final class NMSHologramsImpl implements NMSHolograms {
 
@@ -64,7 +66,7 @@ public final class NMSHologramsImpl implements NMSHolograms {
 
         @Override
         public void removeHologram() {
-            super.remove(RemovalReason.DISCARDED);
+            super.remove(RemovalReason.DISCARDED, null);
         }
 
         @Override
@@ -136,6 +138,11 @@ public final class NMSHologramsImpl implements NMSHolograms {
 
         @Override
         public void remove(RemovalReason removalReason) {
+            // Prevent being killed.
+        }
+
+        @Override
+        public void remove(RemovalReason reason, @Nullable EntityRemoveEvent.Cause eventCause) {
             // Prevent being killed.
         }
 

@@ -78,37 +78,34 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
         removeDisplayBlock();
 
-        if (location.getBlock().getType() == Material.CAULDRON) {
-            blockDisplay = plugin.getNMSEntities().createEntity(location.add(0.5, 0, 0.5), ArmorStand.class,
-                    SpawnCause.CUSTOM, entity -> {
-                        ArmorStand armorStand = (ArmorStand) entity;
-                        armorStand.setVisible(false);
-                        armorStand.setSmall(true);
-                        armorStand.setGravity(false);
-                        armorStand.setHelmet(barrelItem);
-                        plugin.getNMSEntities().setCustomName(armorStand, "BlockDisplay");
-                        plugin.getNMSEntities().setCustomNameVisible(armorStand, false);
-                        return true;
-                    }, null);
-        }
+        if (location.getBlock().getType() != Material.CAULDRON)
+            return;
+
+        this.blockDisplay = plugin.getNMSEntities().createEntity(location.add(0.5, 0, 0.5),
+                ArmorStand.class, SpawnCause.CUSTOM, entity -> {
+                    ArmorStand armorStand = (ArmorStand) entity;
+                    armorStand.setVisible(false);
+                    armorStand.setSmall(true);
+                    armorStand.setGravity(false);
+                    armorStand.setHelmet(barrelItem);
+                    plugin.getNMSEntities().setCustomName(armorStand, "BlockDisplay");
+                    plugin.getNMSEntities().setCustomNameVisible(armorStand, false);
+                    return true;
+                }, null);
     }
 
     @Override
     public void removeDisplayBlock() {
-        if (ServerVersion.isAtLeast(ServerVersion.v1_17) && !Bukkit.isPrimaryThread()) {
-            Executor.sync(this::removeDisplayBlock);
+        ArmorStand blockDisplay = this.blockDisplay;
+        if (blockDisplay == null)
             return;
-        }
 
-        Location location = getLocation();
-        //Making sure there isn't already a blockDisplay
-        for (Entity entity : location.getChunk().getEntities()) {
-            //Entity should be on this barrel
-            if (entity instanceof ArmorStand && ((ArmorStand) entity).getHelmet() != null &&
-                    !((ArmorStand) entity).isVisible() && ((ArmorStand) entity).isSmall() &&
-                    entity.getLocation().getBlock().getLocation().equals(location)) {
-                entity.remove();
-            }
+        this.blockDisplay = null;
+
+        if (ServerVersion.isAtLeast(ServerVersion.v1_17) && !Bukkit.isPrimaryThread()) {
+            Executor.sync(blockDisplay::remove);
+        } else {
+            blockDisplay.remove();
         }
     }
 
