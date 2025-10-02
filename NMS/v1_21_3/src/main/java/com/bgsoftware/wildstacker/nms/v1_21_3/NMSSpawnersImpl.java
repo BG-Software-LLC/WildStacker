@@ -1,159 +1,21 @@
 package com.bgsoftware.wildstacker.nms.v1_21_3;
 
-import com.bgsoftware.common.reflection.ReflectField;
-import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
-import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.nms.NMSSpawners;
-import com.bgsoftware.wildstacker.nms.v1_21_3.spawner.SpawnerWatcherTickingBlockEntity;
-import com.bgsoftware.wildstacker.nms.v1_21_3.spawner.StackedBaseSpawner;
-import com.bgsoftware.wildstacker.nms.v1_21_3.spawner.SyncedCreatureSpawnerImpl;
-import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.CreatureSpawner;
-import org.bukkit.craftbukkit.CraftChunk;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.block.CraftBlockState;
 import org.bukkit.entity.EntityType;
 
-import java.lang.reflect.Modifier;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.BiPredicate;
-
-public final class NMSSpawnersImpl implements NMSSpawners {
-
-    private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS =
-            initializeLevelBlockEntityTickersField();
-
-    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-
-    private static void createCondition(String id, BiPredicate<ServerLevel, BlockPos> predicate, EntityType... entityTypes) {
-        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
-            @Override
-            public boolean test(Location location) {
-                return predicate.test(((CraftWorld) location.getWorld()).getHandle(),
-                        new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-            }
-        });
-        plugin.getSystemManager().addSpawnCondition(spawnCondition, entityTypes);
-    }
-
-    private static BlockState getBlockBelow(ServerLevel serverLevel, BlockPos blockPos) {
-        return serverLevel.getBlockState(blockPos.below());
-    }
-
-    private static boolean isChunkContainsSpawners(LevelChunk levelChunk) {
-        for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
-            if (blockEntity instanceof SpawnerBlockEntity)
-                return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void updateStackedSpawners(Chunk chunk) {
-        World bukkitWorld = chunk.getWorld();
-        LevelChunk levelChunk = (LevelChunk) ((CraftChunk) chunk).getHandle(ChunkStatus.FULL);
-
-        if (!isChunkContainsSpawners(levelChunk))
-            return;
-
-        ServerLevel serverLevel = levelChunk.level;
-
-        int chunkX = chunk.getX();
-        int chunkZ = chunk.getZ();
-
-        List<TickingBlockEntity> blockEntityTickers = getBlockEntityTickers(serverLevel);
-
-        List<TickingBlockEntity> watchersToAdd = new LinkedList<>();
-        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
-
-        while (blockEntityIterator.hasNext()) {
-            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
-            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
-                continue;
-            ChunkPos chunkPos = new ChunkPos(tickingBlockEntity.getPos());
-            if (chunkPos.x == chunkX && chunkPos.z == chunkZ) {
-                BlockPos blockPos = tickingBlockEntity.getPos();
-                BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos);
-                if (blockEntity instanceof SpawnerBlockEntity) {
-                    StackedSpawner stackedSpawner = WStackedSpawner.of(bukkitWorld.getBlockAt(
-                            blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                    watchersToAdd.add(new SpawnerWatcherTickingBlockEntity(
-                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity));
-                    blockEntityIterator.remove();
-                }
-            }
-        }
-
-        blockEntityTickers.addAll(watchersToAdd);
-    }
-
-    @Override
-    public void updateStackedSpawner(StackedSpawner stackedSpawner) {
-        Location location = stackedSpawner.getLocation();
-
-        ServerLevel serverLevel = ((CraftWorld) location.getWorld()).getHandle();
-        int blockX = location.getBlockX();
-        int blockY = location.getBlockY();
-        int blockZ = location.getBlockZ();
-
-        List<TickingBlockEntity> blockEntityTickers = getBlockEntityTickers(serverLevel);
-
-        TickingBlockEntity watcherToAdd = null;
-        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
-
-        while (blockEntityIterator.hasNext()) {
-            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
-            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
-                continue;
-
-            BlockPos blockPos = tickingBlockEntity.getPos();
-            if (blockPos.getX() == blockX && blockPos.getY() == blockY && blockPos.getZ() == blockZ) {
-                BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-                if (blockEntity instanceof SpawnerBlockEntity) {
-                    watcherToAdd = new SpawnerWatcherTickingBlockEntity(
-                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity);
-                    blockEntityIterator.remove();
-                    break;
-                }
-            }
-        }
-
-        if (watcherToAdd != null)
-            blockEntityTickers.add(watcherToAdd);
-    }
+public class NMSSpawnersImpl extends com.bgsoftware.wildstacker.nms.v1_21_3.AbstractNMSSpawners {
 
     @Override
     public void registerSpawnConditions() {
@@ -225,7 +87,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
                 return true;
 
             ChunkPos chunkPos = new ChunkPos(position);
-            boolean isSlimeChunk = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel) world).getSeed(),
+            boolean isSlimeChunk = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, world.getSeed(),
                     world.spigotConfig.slimeSeed).nextInt(10) == 0;
             return isSlimeChunk && position.getY() < 40;
         }, EntityType.SLIME);
@@ -317,62 +179,6 @@ public final class NMSSpawnersImpl implements NMSSpawners {
             return blockState.is(BlockTags.LEAVES) || blockState.is(Blocks.GRASS_BLOCK) ||
                     blockState.is(BlockTags.LOGS) || blockState.is(Blocks.AIR);
         }, EntityType.PARROT);
-    }
-
-    @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        World bukkitWorld = creatureSpawner.getWorld();
-        ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
-        BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
-        return new SyncedCreatureSpawnerImpl(bukkitWorld, spawnerBlockEntity);
-    }
-
-    @Override
-    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
-        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
-        baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
-        baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
-        baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
-        baseSpawner.maxNearbyEntities = spawnerUpgrade.getMaxNearbyEntities();
-        baseSpawner.requiredPlayerRange = spawnerUpgrade.getRequiredPlayerRange();
-        baseSpawner.spawnRange = spawnerUpgrade.getSpawnRange();
-    }
-
-    @Override
-    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
-        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
-        return new SpawnerCachedData(
-                baseSpawner.minSpawnDelay,
-                baseSpawner.maxSpawnDelay,
-                baseSpawner.spawnCount,
-                baseSpawner.maxNearbyEntities,
-                baseSpawner.requiredPlayerRange,
-                baseSpawner.spawnRange,
-                baseSpawner.spawnDelay / 20,
-                baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
-        );
-    }
-
-    private static List<TickingBlockEntity> getBlockEntityTickers(Level level) {
-        if (LEVEL_BLOCK_ENTITY_TICKERS.isValid())
-            return LEVEL_BLOCK_ENTITY_TICKERS.get(level);
-
-        return level.blockEntityTickers;
-    }
-
-    private static ReflectField<List<TickingBlockEntity>> initializeLevelBlockEntityTickersField() {
-        ReflectField<List<TickingBlockEntity>> field = new ReflectField<>(
-                Level.class, List.class, Modifier.PROTECTED | Modifier.FINAL, 1);
-
-        if (!field.isValid())
-            field = new ReflectField<>(Level.class, List.class, Modifier.PUBLIC | Modifier.FINAL, 1);
-
-        return field;
     }
 
 }

@@ -1,7 +1,5 @@
 package com.bgsoftware.wildstacker.nms.v1_19.spawner;
 
-import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.google.common.base.Preconditions;
 import net.minecraft.core.BlockPos;

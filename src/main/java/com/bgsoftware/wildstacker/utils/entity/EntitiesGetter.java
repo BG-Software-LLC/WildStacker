@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -92,7 +93,7 @@ public final class EntitiesGetter {
 
                 @Override
                 public Collection<Entity> get(ChunkPosition chunkPosition) {
-                    return entitiesCache.computeIfAbsent(chunkPosition, unused -> new ArrayList<>());
+                    return entitiesCache.computeIfAbsent(chunkPosition, unused -> new LinkedList<>());
                 }
             };
         }

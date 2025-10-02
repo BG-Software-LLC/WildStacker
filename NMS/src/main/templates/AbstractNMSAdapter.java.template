@@ -1,0 +1,236 @@
+package com.bgsoftware.wildstacker.nms.${NMS_VERSION};
+
+import com.bgsoftware.wildstacker.WildStackerPlugin;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
+import com.bgsoftware.wildstacker.api.objects.StackedEntity;
+import com.bgsoftware.wildstacker.api.objects.StackedItem;
+import com.bgsoftware.wildstacker.listeners.ServerTickListener;
+import com.bgsoftware.wildstacker.nms.NMSAdapter;
+import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
+import ${COMMON_NMS_PACKAGE}.entity.NMSEntityEquipmentImpl;
+import com.bgsoftware.wildstacker.objects.WStackedEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import ${CRAFTBUKKIT_PACKAGE}.entity.CraftLivingEntity;
+import ${CRAFTBUKKIT_PACKAGE}.inventory.CraftItemStack;
+import ${CRAFTBUKKIT_PACKAGE}.legacy.CraftLegacy;
+import org.bukkit.entity.Zombie;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.math.BigInteger;
+
+public abstract class AbstractNMSAdapter implements NMSAdapter {
+
+    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
+            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems",
+            "Items", "ChestedHorse", "DecorItem", "Leash", "leash", "equipment"
+    };
+
+    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
+
+    private static final NamespacedKey STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount");
+    private static final NamespacedKey SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause");
+    private static final NamespacedKey NAME_TAG = new NamespacedKey(plugin, "nameTag");
+    private static final NamespacedKey UPGRADE = new NamespacedKey(plugin, "upgrade");
+
+    @Override
+    public void loadLegacy() {
+        // Load legacy by accessing the CraftLegacy class.
+        CraftLegacy.fromLegacy(Material.ACACIA_BOAT);
+    }
+
+    @Override
+    public INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment) {
+        return new NMSEntityEquipmentImpl(bukkitEntityEquipment);
+    }
+
+    @Override
+    public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack bukkitItem) {
+        return bukkitItem != null && CraftItemStack.asNMSCopy(bukkitItem).isDamageableItem();
+    }
+
+    @Override
+    public boolean isUnbreakable(org.bukkit.inventory.ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        return itemMeta != null && itemMeta.isUnbreakable();
+    }
+
+    @Override
+    public abstract void makeItemGlow(ItemMeta itemMeta);
+
+    @Override
+    public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+        setTextureForItem(itemStack, texture);
+        return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    protected abstract void setTextureForItem(ItemStack itemStack, String texture);
+
+    @Override
+    public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {
+        LivingEntity source = ((CraftLivingEntity) sourceBukkit).getHandle();
+        LivingEntity target = ((CraftLivingEntity) targetBukkit).getHandle();
+
+        CompoundTag compoundTag = addAdditionalSaveData(source);
+
+        compoundTag.putFloat("Health", source.getMaxHealth());
+
+        if (targetBukkit instanceof Zombie) {
+            //noinspection deprecation
+            ((Zombie) targetBukkit).setBaby(getIsBaby(compoundTag));
+        }
+
+        for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
+            compoundTag.remove(key);
+
+        readAdditionalSaveData(target, compoundTag);
+    }
+
+
+    protected abstract CompoundTag addAdditionalSaveData(LivingEntity livingEntity);
+
+    protected abstract void readAdditionalSaveData(LivingEntity livingEntity, CompoundTag compoundTag);
+
+    protected abstract boolean getIsBaby(CompoundTag compoundTag);
+
+    @Override
+    public String serialize(org.bukkit.inventory.ItemStack bukkitItem) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(outputStream);
+
+        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+        CompoundTag compoundTag = saveItemStack(itemStack);
+
+        try {
+            NbtIo.write(compoundTag, dataOutput);
+        } catch (Exception ex) {
+            return null;
+        }
+
+        return new BigInteger(1, outputStream.toByteArray()).toString(32);
+    }
+
+    protected abstract CompoundTag saveItemStack(ItemStack itemStack);
+
+    @Override
+    public org.bukkit.inventory.ItemStack deserialize(String serialized) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
+
+        try {
+            CompoundTag compoundTag = NbtIo.read(new DataInputStream(inputStream));
+            ItemStack itemStack = parseItemStack(compoundTag);
+            return CraftItemStack.asBukkitCopy(itemStack);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    protected abstract ItemStack parseItemStack(CompoundTag compoundTag);
+
+    @Override
+    public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Object value) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+        setTagInternal(itemStack, key, value);
+        return CraftItemStack.asBukkitCopy(itemStack);
+    }
+
+    protected abstract void setTagInternal(ItemStack itemStack, String key, Object value);
+
+    @Override
+    public <T> T getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Class<T> valueType, Object def) {
+        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+
+        if (itemStack == null || itemStack.isEmpty())
+            return valueType.cast(def);
+
+        return getTagInternal(itemStack, key, valueType, def);
+    }
+
+    protected abstract <T> T getTagInternal(ItemStack itemStack, String key, Class<T> valueType, Object def);
+
+    @Override
+    public abstract void setOminousBottleAmplifier(ItemMeta itemMeta, int amplifier);
+
+    @Override
+    public Object getChatMessage(String message) {
+        return Component.nullToEmpty(message);
+    }
+
+    @Override
+    public void runAtEndOfTick(Runnable code) {
+        ServerTickListener.addTickEndTask(code);
+    }
+
+    @Override
+    public void saveEntity(StackedEntity stackedEntity) {
+        org.bukkit.entity.LivingEntity livingEntity = stackedEntity.getLivingEntity();
+        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
+
+        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedEntity.getStackAmount());
+        dataContainer.set(SPAWN_CAUSE, PersistentDataType.STRING, stackedEntity.getSpawnCause().name());
+
+        if (stackedEntity.hasNameTag())
+            dataContainer.set(NAME_TAG, PersistentDataType.BYTE, (byte) 1);
+
+        int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
+        if (upgradeId != 0)
+            dataContainer.set(UPGRADE, PersistentDataType.INTEGER, upgradeId);
+    }
+
+    @Override
+    public void loadEntity(StackedEntity stackedEntity) {
+        org.bukkit.entity.LivingEntity livingEntity = stackedEntity.getLivingEntity();
+        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
+
+        if (dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)) {
+            try {
+                Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
+                stackedEntity.setStackAmount(stackAmount, false);
+
+                String spawnCause = dataContainer.get(SPAWN_CAUSE, PersistentDataType.STRING);
+                if (spawnCause != null)
+                    stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
+
+                if (dataContainer.has(NAME_TAG, PersistentDataType.BYTE))
+                    ((WStackedEntity) stackedEntity).setNameTag();
+
+                Integer upgradeId = dataContainer.get(UPGRADE, PersistentDataType.INTEGER);
+                if (upgradeId != null && upgradeId > 0)
+                    ((WStackedEntity) stackedEntity).setUpgradeId(upgradeId);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    @Override
+    public void saveItem(StackedItem stackedItem) {
+        org.bukkit.entity.Item item = stackedItem.getItem();
+        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
+        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedItem.getStackAmount());
+    }
+
+    @Override
+    public void loadItem(StackedItem stackedItem) {
+        org.bukkit.entity.Item item = stackedItem.getItem();
+        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
+        if (dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)) {
+            Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
+            stackedItem.setStackAmount(stackAmount, false);
+        }
+    }
+
+}

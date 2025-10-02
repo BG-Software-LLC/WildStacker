@@ -1,90 +1,23 @@
 package com.bgsoftware.wildstacker.nms.v1_17;
 
-import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.api.enums.SpawnCause;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.api.objects.StackedItem;
-import com.bgsoftware.wildstacker.listeners.ServerTickListener;
-import com.bgsoftware.wildstacker.nms.NMSAdapter;
 import com.bgsoftware.wildstacker.nms.algorithms.PaperGlowEnchantment;
 import com.bgsoftware.wildstacker.nms.algorithms.SpigotGlowEnchantment;
-import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
-import com.bgsoftware.wildstacker.nms.entity.NMSEntityEquipmentImpl;
-import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_17_R1.legacy.CraftLegacy;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Zombie;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.util.UUID;
 
-public final class NMSAdapterImpl implements NMSAdapter {
+public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_17.AbstractNMSAdapter {
 
     private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
 
-    private static final String[] ENTITY_NBT_TAGS_TO_REMOVE = new String[]{
-            "SaddleItem", "Saddle", "ArmorItem", "ArmorItems", "HandItems", "Leash",
-            "Items", "ChestedHorse", "DecorItem",
-    };
-
-    private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-
-    private static final NamespacedKey STACK_AMOUNT = new NamespacedKey(plugin, "stackAmount");
-    private static final NamespacedKey SPAWN_CAUSE = new NamespacedKey(plugin, "spawnCause");
-    private static final NamespacedKey NAME_TAG = new NamespacedKey(plugin, "nameTag");
-    private static final NamespacedKey UPGRADE = new NamespacedKey(plugin, "upgrade");
-
     @Override
-    public void loadLegacy() {
-        // Load legacy by accessing the CraftLegacy class.
-        CraftLegacy.fromLegacy(Material.ACACIA_BOAT);
-    }
-
-    @Override
-    public INMSEntityEquipment createEntityEquipmentWrapper(EntityEquipment bukkitEntityEquipment) {
-        return new NMSEntityEquipmentImpl(bukkitEntityEquipment);
-    }
-
-    @Override
-    public boolean shouldArmorBeDamaged(org.bukkit.inventory.ItemStack bukkitItem) {
-        return bukkitItem != null && CraftItemStack.asNMSCopy(bukkitItem).isDamageableItem();
-    }
-
-    @Override
-    public boolean isUnbreakable(org.bukkit.inventory.ItemStack itemStack) {
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        return itemMeta != null && itemMeta.isUnbreakable();
-    }
-
-    @Override
-    public void makeItemGlow(ItemMeta itemMeta) {
-        itemMeta.addEnchant(GLOW_ENCHANT, 1, true);
-    }
-
-    @Override
-    public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
-        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+    protected void setTextureForItem(ItemStack itemStack, String texture) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
 
         CompoundTag skullOwner = compoundTag.contains("SkullOwner") ?
@@ -104,66 +37,37 @@ public final class NMSAdapterImpl implements NMSAdapter {
         skullOwner.put("Properties", properties);
 
         compoundTag.put("SkullOwner", skullOwner);
-
-        return CraftItemStack.asBukkitCopy(itemStack);
     }
 
     @Override
-    public void updateEntity(org.bukkit.entity.LivingEntity sourceBukkit, org.bukkit.entity.LivingEntity targetBukkit) {
-        LivingEntity source = ((CraftLivingEntity) sourceBukkit).getHandle();
-        LivingEntity target = ((CraftLivingEntity) targetBukkit).getHandle();
-
+    protected CompoundTag addAdditionalSaveData(LivingEntity livingEntity) {
         CompoundTag compoundTag = new CompoundTag();
-        source.addAdditionalSaveData(compoundTag);
-
-        compoundTag.putFloat("Health", source.getMaxHealth());
-
-        if (targetBukkit instanceof Zombie) {
-            //noinspection deprecation
-            ((Zombie) targetBukkit).setBaby(compoundTag.contains("IsBaby") && compoundTag.getBoolean("IsBaby"));
-        }
-
-        for (String key : ENTITY_NBT_TAGS_TO_REMOVE)
-            compoundTag.remove(key);
-
-        target.readAdditionalSaveData(compoundTag);
+        livingEntity.addAdditionalSaveData(compoundTag);
+        return compoundTag;
     }
 
     @Override
-    public String serialize(org.bukkit.inventory.ItemStack bukkitItem) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DataOutput dataOutput = new DataOutputStream(outputStream);
-
-        CompoundTag compoundTag = new CompoundTag();
-
-        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-        itemStack.save(compoundTag);
-
-        try {
-            NbtIo.write(compoundTag, dataOutput);
-        } catch (Exception ex) {
-            return null;
-        }
-
-        return new BigInteger(1, outputStream.toByteArray()).toString(32);
+    protected void readAdditionalSaveData(LivingEntity livingEntity, CompoundTag compoundTag) {
+        livingEntity.readAdditionalSaveData(compoundTag);
     }
 
     @Override
-    public org.bukkit.inventory.ItemStack deserialize(String serialized) {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(new BigInteger(serialized, 32).toByteArray());
-
-        try {
-            CompoundTag compoundTag = NbtIo.read(new DataInputStream(inputStream), NbtAccounter.UNLIMITED);
-            ItemStack itemStack = ItemStack.of(compoundTag);
-            return CraftItemStack.asBukkitCopy(itemStack);
-        } catch (Exception ex) {
-            return null;
-        }
+    protected boolean getIsBaby(CompoundTag compoundTag) {
+        return compoundTag.contains("IsBaby") && compoundTag.getBoolean("IsBaby");
     }
 
     @Override
-    public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Object value) {
-        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
+    protected CompoundTag saveItemStack(ItemStack itemStack) {
+        return itemStack.save(new CompoundTag());
+    }
+
+    @Override
+    protected ItemStack parseItemStack(CompoundTag compoundTag) {
+        return ItemStack.of(compoundTag);
+    }
+
+    @Override
+    protected void setTagInternal(ItemStack itemStack, String key, Object value) {
         CompoundTag compoundTag = itemStack.getOrCreateTag();
 
         if (value instanceof Boolean)
@@ -182,17 +86,10 @@ public final class NMSAdapterImpl implements NMSAdapter {
             compoundTag.putFloat(key, (float) value);
         else if (value instanceof Long)
             compoundTag.putLong(key, (long) value);
-
-        return CraftItemStack.asBukkitCopy(itemStack);
     }
 
     @Override
-    public <T> T getTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Class<T> valueType, Object def) {
-        ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
-
-        if (itemStack == null || itemStack.isEmpty())
-            return valueType.cast(def);
-
+    protected <T> T getTagInternal(ItemStack itemStack, String key, Class<T> valueType, Object def) {
         CompoundTag compoundTag = itemStack.getTag();
 
         if (compoundTag == null || !compoundTag.contains(key))
@@ -218,71 +115,13 @@ public final class NMSAdapterImpl implements NMSAdapter {
     }
 
     @Override
-    public Object getChatMessage(String message) {
-        return Component.nullToEmpty(message);
+    public void makeItemGlow(ItemMeta itemMeta) {
+        itemMeta.addEnchant(GLOW_ENCHANT, 1, true);
     }
 
     @Override
-    public void runAtEndOfTick(Runnable code) {
-        ServerTickListener.addTickEndTask(code);
-    }
-
-    @Override
-    public void saveEntity(StackedEntity stackedEntity) {
-        org.bukkit.entity.LivingEntity livingEntity = stackedEntity.getLivingEntity();
-        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
-
-        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedEntity.getStackAmount());
-        dataContainer.set(SPAWN_CAUSE, PersistentDataType.STRING, stackedEntity.getSpawnCause().name());
-
-        if (stackedEntity.hasNameTag())
-            dataContainer.set(NAME_TAG, PersistentDataType.BYTE, (byte) 1);
-
-        int upgradeId = ((WStackedEntity) stackedEntity).getUpgradeId();
-        if (upgradeId != 0)
-            dataContainer.set(UPGRADE, PersistentDataType.INTEGER, upgradeId);
-    }
-
-    @Override
-    public void loadEntity(StackedEntity stackedEntity) {
-        org.bukkit.entity.LivingEntity livingEntity = stackedEntity.getLivingEntity();
-        PersistentDataContainer dataContainer = livingEntity.getPersistentDataContainer();
-
-        if (dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)) {
-            try {
-                Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
-                stackedEntity.setStackAmount(stackAmount, false);
-
-                String spawnCause = dataContainer.get(SPAWN_CAUSE, PersistentDataType.STRING);
-                if (spawnCause != null)
-                    stackedEntity.setSpawnCause(SpawnCause.valueOf(spawnCause));
-
-                if (dataContainer.has(NAME_TAG, PersistentDataType.BYTE))
-                    ((WStackedEntity) stackedEntity).setNameTag();
-
-                Integer upgradeId = dataContainer.get(UPGRADE, PersistentDataType.INTEGER);
-                if (upgradeId != null && upgradeId > 0)
-                    ((WStackedEntity) stackedEntity).setUpgradeId(upgradeId);
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
-    @Override
-    public void saveItem(StackedItem stackedItem) {
-        org.bukkit.entity.Item item = stackedItem.getItem();
-        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
-        dataContainer.set(STACK_AMOUNT, PersistentDataType.INTEGER, stackedItem.getStackAmount());
-    }
-
-    @Override
-    public void loadItem(StackedItem stackedItem) {
-        org.bukkit.entity.Item item = stackedItem.getItem();
-        PersistentDataContainer dataContainer = item.getPersistentDataContainer();
-        if (dataContainer.has(STACK_AMOUNT, PersistentDataType.INTEGER)) {
-            Integer stackAmount = dataContainer.get(STACK_AMOUNT, PersistentDataType.INTEGER);
-            stackedItem.setStackAmount(stackAmount, false);
-        }
+    public void setOminousBottleAmplifier(ItemMeta itemMeta, int amplifier) {
+        // Do nothing
     }
 
     private static Enchantment initializeGlowEnchantment() {
