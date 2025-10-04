@@ -25,6 +25,7 @@ public enum EntityTypes {
     CREAKING,
     CHICKEN,
     COD,
+    COPPER_GOLEM,
     COW,
     CREEPER,
     DOLPHIN,

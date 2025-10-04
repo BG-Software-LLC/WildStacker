@@ -92,6 +92,10 @@ public final class EntityUtils {
     @Nullable
     private static final EntityType BREEZE_WIND_CHARGE = getEntityTypeSafe("BREEZE_WIND_CHARGE");
     @Nullable
+    private static final EntityType ARMOR_STAND = getEntityTypeSafe("ARMOR_STAND");
+    @Nullable
+    private static final EntityType MANNEQUIN = getEntityTypeSafe("MANNEQUIN");
+    @Nullable
     private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
 
     public static String getFormattedType(String typeName) {
@@ -149,8 +153,9 @@ public final class EntityUtils {
     }
 
     public static boolean isStackable(Entity entity) {
-        return entity instanceof LivingEntity && (!entity.getType().name().equals("ARMOR_STAND") &&
-                !(entity instanceof Player) && plugin.getProviders().checkStackEntity(entity) == null);
+        EntityType entityType = entity.getType();
+        return entity instanceof LivingEntity && entityType != ARMOR_STAND && entityType != MANNEQUIN &&
+                entityType != EntityType.PLAYER && plugin.getProviders().checkStackEntity(entity) == null;
     }
 
     public static void giveExp(Player player, int amount) {
@@ -654,6 +659,15 @@ public final class EntityUtils {
         return entityType == WIND_CHARGE || entityType == BREEZE_WIND_CHARGE;
     }
 
+    @Nullable
+    public static EntityType getEntityTypeSafe(String entityType) {
+        try {
+            return EntityType.valueOf(entityType);
+        } catch (IllegalArgumentException error) {
+            return null;
+        }
+    }
+
     private static void addDropArmor(List<ItemStack> drops, LivingEntity livingEntity, ItemStack itemStack, int lootBonusLevel, double dropChance) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (itemStack != null && itemStack.getType() != Material.AIR &&
@@ -669,15 +683,6 @@ public final class EntityUtils {
             }
 
             drops.add(toDrop);
-        }
-    }
-
-    @Nullable
-    private static EntityType getEntityTypeSafe(String entityType) {
-        try {
-            return EntityType.valueOf(entityType);
-        } catch (IllegalArgumentException error) {
-            return null;
         }
     }
 

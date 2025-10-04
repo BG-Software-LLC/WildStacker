@@ -51,6 +51,9 @@ public enum SpawnCause {
     DUPLICATION(39),
     ENCHANTMENT(40),
     TRIAL_SPAWNER(41),
+    BUILD_COPPERGOLEM(42),
+    POTION_EFFECT(43),
+    REANIMATE(44),
 
     /**
      * Custom spawn causes.

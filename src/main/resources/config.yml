@@ -269,6 +269,7 @@ entities:
     CAT_TYPE: true
     CHICKEN_TYPE: true
     COW_TYPE: true
+    COPPER_GOLEM_WEATHER_STATE: true
     CREEPER_CHARGED: true
     ENDERMAN_CARRIED_BLOCK: true
     EXACT_AGE: false

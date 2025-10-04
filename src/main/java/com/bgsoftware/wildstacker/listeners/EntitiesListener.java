@@ -51,6 +51,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityEnterBlockEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.SheepDyeWoolEvent;
@@ -66,6 +67,7 @@ import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +82,10 @@ public final class EntitiesListener implements Listener {
 
     private final static Map<Location, Integer[]> beesAmount = new HashMap<>();
     private final static Map<Location, Integer> turtleEggsAmounts = new HashMap<>();
+    private final static Map<Location, Integer> copperGolemStateAmounts = new HashMap<>();
     private final static Material TURTLE_EGG = Materials.getMaterialOrNull("TURTLE_EGG");
+    @Nullable
+    private final static EntityType COPPER_GOLEM = EntityUtils.getEntityTypeSafe("COPPER_GOLEM");
 
     public static EntitiesListener IMP;
 
@@ -106,6 +111,8 @@ public final class EntitiesListener implements Listener {
             plugin.getServer().getPluginManager().registerEvents(new BeeListener(), plugin);
         if (ServerVersion.isAtLeast(ServerVersion.v1_20))
             plugin.getServer().getPluginManager().registerEvents(new SnifferListener(plugin), plugin);
+        if (COPPER_GOLEM != null)
+            plugin.getServer().getPluginManager().registerEvents(new CopperGolemListener(), plugin);
 
         try {
             Class.forName("org.bukkit.event.block.BlockShearEntityEvent");
@@ -182,6 +189,14 @@ public final class EntitiesListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntitySpawn(EntitySpawnEvent e) {
+        if (e.getEntityType() != COPPER_GOLEM)
+            return;
+
+        handleEntitySpawn((LivingEntity) e.getEntity(), SpawnCause.REANIMATE);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent e) {
         if (duplicateCow && e.getEntityType() == EntityType.COW) {
             duplicateCow = false;
@@ -190,7 +205,7 @@ public final class EntitiesListener implements Listener {
             return;
         }
 
-        handleEntitySpawn(e.getEntity(), e.getSpawnReason());
+        handleEntitySpawn(e.getEntity(), SpawnCause.valueOf(e.getSpawnReason()));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -646,7 +661,7 @@ public final class EntitiesListener implements Listener {
         Executor.sync(() -> EntityStorage.clearMetadata(entity), 100L);
     }
 
-    private void handleEntitySpawn(LivingEntity entity, CreatureSpawnEvent.SpawnReason spawnReason) {
+    private void handleEntitySpawn(LivingEntity entity, SpawnCause spawnCause) {
         if (!plugin.getSettings().entitiesStackingEnabled)
             return;
 
@@ -655,33 +670,31 @@ public final class EntitiesListener implements Listener {
 
         EntitiesGetter.handleEntitySpawn(entity);
 
-        SpawnCause spawnCause = SpawnCause.valueOf(spawnReason);
-
         EntityStorage.setMetadata(entity, EntityFlag.SPAWN_CAUSE, spawnCause);
         StackedEntity stackedEntity = WStackedEntity.of(entity);
 
+        EntityTypes entityType = EntityTypes.fromEntity(entity);
+
         // In case the entity with a name already, we want to treat is as he was nametagged
-        if (entity.getCustomName() != null) {
+        // The exception to this is copper golem that born from statue
+        if (entity.getCustomName() != null && entityType != EntityTypes.COPPER_GOLEM &&
+                spawnCause != SpawnCause.REANIMATE) {
             if ((stackedEntity.getStackAmount() <= 1 && stackedEntity.isDefaultUpgrade()) ||
                     !entity.getCustomName().equals(EntityUtils.getEntityName(stackedEntity)))
                 ((WStackedEntity) stackedEntity).setNameTag();
         }
 
-        if (stackedEntity.getType() == EntityType.COW) {
+        if (entityType == EntityTypes.COW) {
             mushroomTracker.getTrackedData().ifPresent(mushroomCount -> {
                 stackedEntity.setStackAmount(mushroomCount, true);
                 mushroomTracker.decreaseTrackCount();
             });
-        }
-
-        if (spawnReason == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
+        } else if (spawnCause == SpawnCause.SLIME_SPLIT) {
             this.slimeSplitTracker.getTrackedData().ifPresent(originalStackAmount -> {
                 stackedEntity.setStackAmount(originalStackAmount, true);
                 this.slimeSplitTracker.decreaseTrackCount();
             });
-        }
-
-        if (spawnCause == SpawnCause.BEEHIVE && EntityTypes.fromEntity(entity) == EntityTypes.BEE) {
+        } else if (spawnCause == SpawnCause.BEEHIVE && entityType == EntityTypes.BEE) {
             org.bukkit.entity.Bee bee = (org.bukkit.entity.Bee) entity;
             Integer[] beesAmount = EntitiesListener.beesAmount.get(bee.getHive());
             if (beesAmount != null) {
@@ -695,7 +708,7 @@ public final class EntitiesListener implements Listener {
                         EntitiesListener.beesAmount.remove(bee.getHive());
                 }
             }
-        } else if (spawnCause == SpawnCause.EGG && EntityTypes.fromEntity(entity) == EntityTypes.TURTLE) {
+        } else if (spawnCause == SpawnCause.EGG && entityType == EntityTypes.TURTLE) {
             Location homeLocation = plugin.getNMSEntities().getTurtleHome(entity);
             Integer cachedEggs = homeLocation == null ? null : turtleEggsAmounts.remove(homeLocation);
             if (cachedEggs != null && cachedEggs > 1) {
@@ -712,6 +725,18 @@ public final class EntitiesListener implements Listener {
 
                 if (newBabiesAmount > 0)
                     WStackedEntity.of(entity).setStackAmount(newBabiesAmount, true);
+            }
+        } else if (spawnCause == SpawnCause.REANIMATE && entityType == EntityTypes.COPPER_GOLEM) {
+            Location entityLocation = entity.getLocation();
+            Location statueLocation = new Location(entityLocation.getWorld(), entityLocation.getBlockX(),
+                    entityLocation.getBlockY(), entityLocation.getBlockZ());
+            Integer cachedStatueCount = copperGolemStateAmounts.remove(statueLocation);
+            if (cachedStatueCount != null && cachedStatueCount > 1) {
+                // Update in the next tick as the name of the copper golem is updated by NMS.
+                Executor.runAtEndOfTick(() -> {
+                    stackedEntity.setSpawnCause(spawnCause);
+                    stackedEntity.setStackAmount(cachedStatueCount, true);
+                });
             }
         }
 
@@ -736,7 +761,7 @@ public final class EntitiesListener implements Listener {
             return;
 
         if (!plugin.getSettings().spawnersStackingEnabled && plugin.getProviders().handleEntityStackingInsideEvent() &&
-                spawnReason == CreatureSpawnEvent.SpawnReason.SPAWNER)
+                spawnCause == SpawnCause.SPAWNER)
             return;
 
         Consumer<Optional<LivingEntity>> entityConsumer = entityOptional -> {
@@ -747,8 +772,6 @@ public final class EntitiesListener implements Listener {
         boolean stackWithDelay = Optional.ofNullable((Boolean)
                         EntityStorage.removeMetadata(entity, EntityFlag.DELAY_STACK))
                 .orElse(false);
-
-        EntityTypes entityType = EntityTypes.fromEntity(entity);
 
         //Need to add a delay so eggs will get removed from inventory
         if (stackWithDelay || plugin.getProviders().handleEntityStackingWithDelay() ||
@@ -919,6 +942,24 @@ public final class EntitiesListener implements Listener {
 
             Executor.sync(() -> plugin.getNMSWorld().setTurtleEggsAmount(e.getBlock(), 1), 1L);
             turtleEggsAmounts.put(e.getBlock().getLocation(), breedableAmount);
+        }
+
+    }
+
+    private static class CopperGolemListener implements Listener {
+
+        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+        public void onCopperGolemStatue(EntityChangeBlockEvent e) {
+            if (e.getEntityType() != COPPER_GOLEM)
+                return;
+
+            StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
+
+            int stackAmount = stackedEntity.getStackAmount();
+            if (stackAmount <= 1)
+                return;
+
+            copperGolemStateAmounts.put(e.getBlock().getLocation(), stackedEntity.getStackAmount());
         }
 
     }

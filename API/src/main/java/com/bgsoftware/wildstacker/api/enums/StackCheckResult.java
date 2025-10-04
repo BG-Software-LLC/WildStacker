@@ -15,6 +15,7 @@ public enum StackCheckResult {
     CAT_TYPE,
     CHICKEN_TYPE,
     COW_TYPE,
+    COPPER_GOLEM_WEATHER_STATE,
     CREEPER_CHARGED,
     ENDERMAN_CARRIED_BLOCK,
     EXACT_AGE,

@@ -25,6 +25,7 @@ public enum StackCheck {
     CAT_TYPE(EntityTypes.CAT),
     CHICKEN_TYPE(EntityTypes.CHICKEN),
     COW_TYPE(EntityTypes.COW),
+    COPPER_GOLEM_WEATHER_STATE(EntityTypes.COPPER_GOLEM),
     CREEPER_CHARGED(EntityTypes.CREEPER),
     ENDERMAN_CARRIED_BLOCK(EntityTypes.ENDERMAN),
     EXACT_AGE(),

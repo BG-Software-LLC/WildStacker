@@ -107,6 +107,7 @@ public final class LootHandler {
         saveLootTable(EntityTypes.COD, "cod");
         saveLootTable("cow");
         saveLootTable("cow_baby");
+        saveLootTable(EntityTypes.COPPER_GOLEM, "copper_golem");
         saveLootTable("creeper");
         saveLootTable(EntityTypes.DOLPHIN, "dolphin");
         if (SUPPORT_BABY_1_22)
