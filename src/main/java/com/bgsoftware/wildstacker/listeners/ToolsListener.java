@@ -36,7 +36,8 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityInspect(PlayerInteractEntityEvent e) {
-        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null ||
+                !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().inspectTool) ||
                 !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
@@ -56,7 +57,8 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBarrelInspect(PlayerInteractEvent e) {
-        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
+        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) ||
+                !plugin.getSystemManager().isStackedBarrel(e.getClickedBlock()))
             return;
 
         e.setCancelled(true);
@@ -71,7 +73,8 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onSpawnerInspect(PlayerInteractEvent e) {
-        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) || !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
+        if (e.getItem() == null || !e.getItem().isSimilar(plugin.getSettings().inspectTool) ||
+                !plugin.getSystemManager().isStackedSpawner(e.getClickedBlock()))
             return;
 
         e.setCancelled(true);
@@ -87,7 +90,9 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEntitySimulate(PlayerInteractEntityEvent e) {
-        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null ||
+                !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) ||
+                !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
         e.setCancelled(true);
@@ -97,7 +102,8 @@ public final class ToolsListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockSimulate(PlayerInteractEvent e) {
-        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool) || e.getClickedBlock() == null)
+        if (ItemUtils.isOffHand(e) || e.getPlayer().getItemInHand() == null || e.getClickedBlock() == null ||
+                !e.getPlayer().getItemInHand().isSimilar(plugin.getSettings().simulateTool))
             return;
 
         e.setCancelled(true);
