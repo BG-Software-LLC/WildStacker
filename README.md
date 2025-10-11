@@ -56,3 +56,5 @@ for bug fixes.
 ## License
 
 This plugin is licensed under GNU GPL v3.0
+
+This plugin uses HikariCP which you can find [here](https://github.com/brettwooldridge/HikariCP).
