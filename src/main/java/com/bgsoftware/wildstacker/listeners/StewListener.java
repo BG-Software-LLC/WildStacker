@@ -2,6 +2,7 @@ package com.bgsoftware.wildstacker.listeners;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -20,20 +21,21 @@ public final class StewListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onStewEat(PlayerItemConsumeEvent e) {
-        if (e.getItem().getType().name().contains("STEW") || e.getItem().getType().name().contains("SOUP")) {
-            ItemStack inHand = e.getItem().clone();
-            inHand.setAmount(inHand.getAmount() - 1);
+        if(!Materials.isSoup(e.getItem()))
+            return;
 
-            int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
+        ItemStack inHand = e.getItem().clone();
+        inHand.setAmount(inHand.getAmount() - 1);
 
-            int consumedItemSlot = e.getItem().equals(e.getPlayer().getInventory().getItem(heldSlot)) ? heldSlot : 40;
+        int heldSlot = e.getPlayer().getInventory().getHeldItemSlot();
 
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                e.getPlayer().getInventory().setItem(consumedItemSlot, inHand);
-                e.getPlayer().getInventory().addItem(new ItemStack(Material.BOWL));
-                ItemUtils.stackStew(e.getItem(), e.getPlayer().getInventory());
-            });
-        }
+        int consumedItemSlot = e.getItem().equals(e.getPlayer().getInventory().getItem(heldSlot)) ? heldSlot : 40;
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            e.getPlayer().getInventory().setItem(consumedItemSlot, inHand);
+            e.getPlayer().getInventory().addItem(new ItemStack(Material.BOWL));
+            ItemUtils.stackStew(e.getItem(), e.getPlayer().getInventory());
+        });
     }
 
 }

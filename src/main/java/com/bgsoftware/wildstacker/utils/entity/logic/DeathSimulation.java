@@ -375,7 +375,7 @@ public final class DeathSimulation {
     }
 
     private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {
-        int damage = ItemUtils.isSword(damagerTool.getType()) ? 1 : ItemUtils.isTool(damagerTool.getType()) ? 2 : 0;
+        int damage = Materials.isSword(damagerTool.getType()) ? 1 : Materials.isTool(damagerTool.getType()) ? 2 : 0;
         ThreadLocalRandom random = ThreadLocalRandom.current();
         if (damage > 0) {
             int unbreakingLevel = damagerTool.getEnchantmentLevel(Enchantment.DURABILITY);

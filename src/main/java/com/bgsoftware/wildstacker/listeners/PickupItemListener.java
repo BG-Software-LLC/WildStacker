@@ -8,8 +8,8 @@ import com.bgsoftware.wildstacker.objects.WStackedItem;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.HandlerListWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -22,20 +22,11 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.function.Consumer;
 
 public class PickupItemListener {
 
     private static final EnumMap<EventType, HandlerListWrapper> CACHED_HANDLER_LIST = new EnumMap<>(EventType.class);
-    private static final EnumSet<Material> BUCKET_MATERIALS = EnumSet.noneOf(Material.class);
-
-    static {
-        for (Material material : Material.values()) {
-            if (material.name().contains("BUCKET"))
-                BUCKET_MATERIALS.add(material);
-        }
-    }
 
     private final WildStackerPlugin plugin;
 
@@ -98,7 +89,7 @@ public class PickupItemListener {
         //  3) Buckets stacking is enabled and the item is a bucket
         if (plugin.getSettings().itemsStackingEnabled ||
                 stackedItem.getStackAmount() > itemStack.getMaxStackSize() ||
-                (plugin.getSettings().bucketsStackerEnabled && BUCKET_MATERIALS.contains(itemStack.getType()))) {
+                (plugin.getSettings().bucketsStackerEnabled && Materials.isBucket(itemStack.getType()))) {
             return plugin.getNMSEntities().handleItemPickup(entityPicker, stackedItem, remaining);
         }
 

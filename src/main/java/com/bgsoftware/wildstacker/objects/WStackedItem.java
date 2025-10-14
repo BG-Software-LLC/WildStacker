@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -328,8 +329,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         int maxStackAmount = itemStack.getMaxStackSize();
         boolean inventoryFull = false;
 
-        if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled &&
-                !itemStack.getType().name().contains("SHULKER_BOX"))
+        if (maxStackAmount != 64 && !plugin.getSettings().itemsFixStackEnabled && !Materials.isShulkerBox(itemStack))
             maxStackAmount = 64;
 
         itemStack.setAmount(maxStackAmount);
@@ -437,9 +437,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     private int giveItem(Inventory inventory, ItemStack itemStack) {
         Map<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
 
-        if (itemStack.getType().name().contains("BUCKET"))
+        if (Materials.isBucket(itemStack.getType()))
             ItemUtils.stackBucket(itemStack, inventory);
-        if (itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
+        if (Materials.isSoup(itemStack))
             ItemUtils.stackStew(itemStack, inventory);
 
         if (additionalItems.isEmpty())

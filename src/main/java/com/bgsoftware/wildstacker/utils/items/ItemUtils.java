@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public final class ItemUtils {
 
@@ -48,6 +49,8 @@ public final class ItemUtils {
             PlayerInventory.class, "getItemInOffHand");
     private static final ReflectMethod<ItemStack> PLAYER_INVENTORY_SET_ITEM_IN_OFFHAND = new ReflectMethod<>(
             PlayerInventory.class, "setItemInOffHand", ItemStack.class);
+
+    private static final Pattern LEGACY_PATTERN = Pattern.compile("LEGACY_");
 
     private static final EquipmentSlot OFF_HAND_EQUIPMENT_SLOT = ((Supplier<EquipmentSlot>) () -> {
         try {
@@ -69,9 +72,9 @@ public final class ItemUtils {
     public static void addItem(ItemStack itemStack, Inventory inventory, Location location) {
         HashMap<Integer, ItemStack> additionalItems = inventory.addItem(itemStack);
 
-        if (itemStack.getType().name().contains("BUCKET"))
+        if (Materials.isBucket(itemStack.getType()))
             stackBucket(itemStack, inventory);
-        if (itemStack.getType().name().contains("STEW") || itemStack.getType().name().contains("SOUP"))
+        if (Materials.isSoup(itemStack))
             stackStew(itemStack, inventory);
 
         if (location != null && !additionalItems.isEmpty()) {
@@ -151,7 +154,7 @@ public final class ItemUtils {
                     return EntityTypes.fromName(EntityType.fromId(itemStack.getDurability()).name());
                 }
             } else {
-                return EntityTypes.fromName(itemStack.getType().name().replace("_SPAWN_EGG", ""));
+                return Materials.getSpawnEgg(itemStack.getType());
             }
         } catch (NullPointerException ex) {
             return null;
@@ -172,7 +175,7 @@ public final class ItemUtils {
                 itemStack.setDurability(entityType.getTypeId());
             }
         } else {
-            itemStack.setType(Material.valueOf(EntityTypes.fromName(entityType.name()).name() + "_SPAWN_EGG"));
+            itemStack.setType(Materials.getSpawnEgg(entityType));
         }
     }
 
@@ -187,8 +190,7 @@ public final class ItemUtils {
     }
 
     public static String getFormattedType(ItemStack itemStack) {
-        String typeName = itemStack.getType().name().contains("LEGACY") ?
-                itemStack.getType().name().replace("LEGACY_", "") : itemStack.getType().name();
+        String typeName = LEGACY_PATTERN.matcher(itemStack.getType().name()).replaceAll("");
 
         String customName = plugin.getSettings().customNames.get(typeName);
         if (customName != null)
@@ -359,45 +361,11 @@ public final class ItemUtils {
         return OFF_HAND_EQUIPMENT_SLOT == getHand(event);
     }
 
-    public static boolean isSword(Material material) {
-        return material.name().contains("SWORD");
-    }
-
-    public static boolean isTool(Material material) {
-        switch (material.name()) {
-            case "IRON_SPADE":
-            case "IRON_SHOVEL":
-            case "IRON_PICKAXE":
-            case "IRON_AXE":
-            case "WOOD_SPADE":
-            case "WOOD_PICKAXE":
-            case "WOOD_AXE":
-            case "WOODEN_SHOVEL":
-            case "WOODEN_PICKAXE":
-            case "WOODEN_AXE":
-            case "STONE_SPADE":
-            case "STONE_SHOVEL":
-            case "STONE_PICKAXE":
-            case "STONE_AXE":
-            case "DIAMOND_SPADE":
-            case "DIAMOND_SHOVEL":
-            case "DIAMOND_PICKAXE":
-            case "DIAMOND_AXE":
-            case "GOLD_SPADE":
-            case "GOLD_PICKAXE":
-            case "GOLD_AXE":
-            case "GOLDEN_SHOVEL":
-            case "GOLDEN_PICKAXE":
-            case "GOLDEN_AXE":
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public static boolean isPickaxeAndHasSilkTouch(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.getType().name().contains("PICKAXE"))
+    public static boolean isPickaxeAndHasSilkTouch(@Nullable ItemStack itemStack) {
+        if (!Materials.isPickaxe(itemStack))
             return false;
+
+        assert itemStack != null;
 
         int requiredLevel = plugin.getSettings().silkTouchMinimumLevel;
 

@@ -1,7 +1,6 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.entity.Sheep;
@@ -10,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -49,18 +49,23 @@ public class LootTableSheep extends LootTable {
             Sheep sheep = (Sheep) stackedEntity.getLivingEntity();
 
             if (sheep.isSheared()) {
-                drops.removeIf(itemStack -> itemStack.getType().name().contains("WOOL"));
+                drops.removeIf(Materials::isWool);
             } else {
-                ItemStack wool = Materials.getWool(sheep.getColor());
-                for (ItemStack itemStack : drops) {
-                    if (itemStack.getType().name().contains("WOOL")) {
-                        if (ServerVersion.isLegacy()) {
-                            //noinspection deprecation
-                            itemStack.setDurability(wool.getData().getData());
-                        } else {
-                            itemStack.setType(wool.getType());
-                        }
+                Iterator<ItemStack> dropsIterator = drops.iterator();
+                int woolCount = 0;
+
+                while (dropsIterator.hasNext()) {
+                    ItemStack itemStack = dropsIterator.next();
+                    if (Materials.isWool(itemStack)) {
+                        ++woolCount;
+                        dropsIterator.remove();
                     }
+                }
+
+                if (woolCount > 0) {
+                    ItemStack wool = Materials.getWool(sheep.getColor());
+                    wool.setAmount(woolCount);
+                    drops.add(wool);
                 }
             }
         }

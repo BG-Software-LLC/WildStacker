@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.songoda.skyblock.SkyBlock;
 import com.songoda.skyblock.api.SkyBlockAPI;
 import com.songoda.skyblock.core.compatibility.CompatibleMaterial;
@@ -16,6 +17,7 @@ import com.songoda.skyblock.levelling.calculator.Calculator;
 import com.songoda.skyblock.levelling.calculator.CalculatorRegistry;
 import com.songoda.skyblock.permission.BasicPermission;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -71,8 +73,12 @@ public final class FabledSkyblockHook {
 
         @EventHandler(priority = EventPriority.LOW)
         public void onCauldronInteract(PlayerInteractEvent e) {
-            if (e.getClickedBlock() == null || (!e.getClickedBlock().getType().name().contains("CAULDRON") &&
-                    !e.getClickedBlock().getType().name().contains("SPAWNER")))
+            if (e.getClickedBlock() == null)
+                return;
+
+            Material blockType = e.getClickedBlock().getType();
+
+            if (!Materials.isCauldron(blockType) && !Materials.isSpawner(blockType))
                 return;
 
             Island island = SkyBlock.getInstance().getIslandManager().getIslandAtLocation(e.getClickedBlock().getLocation());

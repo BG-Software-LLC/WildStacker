@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.listeners.events;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.Material;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
@@ -44,7 +45,7 @@ public final class EventsListener {
 
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
         public void onEggLay(ItemSpawnEvent e) {
-            if (eggLayListener == null || e.getEntity().getItemStack().getType() != Material.EGG)
+            if (eggLayListener == null || !Materials.isChickenEgg(e.getEntity().getItemStack()))
                 return;
 
             Item egg = e.getEntity();
