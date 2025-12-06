@@ -624,8 +624,12 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             });
         }
 
-        if (isEventCancelled.get())
+        if (isEventCancelled.get()) {
+            if (!pickupItem.isAlive()) {
+                itemEntity.discard();
+            }
             return true;
+        }
 
         int pickupCount = originalItemCount - (pickupItem.isAlive() ? pickupItem.getItem().getCount() : 0);
 
