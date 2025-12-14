@@ -22,18 +22,12 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -45,21 +39,17 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Fox;
-import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.${CHICKEN_SUBPACKAGE}.Chicken;
+import net.minecraft.world.entity.${FOX_SUBPACKAGE}.Fox;
+import net.minecraft.world.entity.${TURTLE_SUBPACKAGE}.Turtle;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Strider;
-import net.minecraft.world.entity.monster.ZombieVillager;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.${ZOMBIE_VILLAGER_SUBPACKAGE}.ZombieVillager;
+import net.minecraft.world.entity.${VILLAGER_SUBPACKAGE}.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Fireball;
-import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -84,9 +74,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
@@ -120,9 +108,6 @@ public abstract class AbstractNMSEntities implements NMSEntities {
     private static final ReflectField<BlockPos> TURTLE_HOME_POS = new ReflectField<>(Turtle.class, BlockPos.class, "${TURTLE_HOME_POS}");
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "${MOB_PICK_UP_ITEM}", ServerLevel.class, ItemEntity.class);
     private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "${SYNCHED_ENTITY_DATA_GET_ITEM}", EntityDataAccessor.class);
-
-    private static final boolean DAMAGESOURCE_CAUSE_SUPPORT = new ReflectMethod<>(DamageSource.class,
-            1, EntityDamageEvent.DamageCause.class).isValid();
 
     @Override
     public <T extends org.bukkit.entity.Entity> T createEntity(Location location, Class<T> type,
@@ -290,13 +275,12 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             lastDamageByPlayerTime = LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME.get(livingEntity);
         }
 
-        boolean isDropExperience = shouldDropExperience(livingEntity);
-
-        return lastDamageByPlayerTime > 0 && isDropExperience &&
-                serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
+        return lastDamageByPlayerTime > 0 && shouldDropExperience(livingEntity) && hasGameRuleDoMobLoot(serverLevel);
     }
 
     protected abstract boolean shouldDropExperience(LivingEntity livingEntity);
+
+    protected abstract boolean hasGameRuleDoMobLoot(ServerLevel serverLevel);
 
     @Override
     public void updateLastDamageTime(org.bukkit.entity.LivingEntity bukkitLivingEntity) {

@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.GameRules;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -101,6 +102,11 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_3.Abst
         } catch (Throwable error) {
             return com.bgsoftware.wildstacker.nms.v1_21_3.AbstractNMSEntities.LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
         }
+    }
+
+    @Override
+    protected boolean hasGameRuleDoMobLoot(ServerLevel serverLevel) {
+        return serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
     }
 
     @Override

@@ -20,6 +20,7 @@ public enum EntityTypes {
     BOGGED,
     BREEZE,
     CAMEL,
+    CAMEL_HUSK,
     CAT,
     CAVE_SPIDER,
     CREAKING,
@@ -53,8 +54,10 @@ public enum EntityTypes {
     MAGMA_CUBE,
     MULE,
     MOOSHROOM,
+    NAUTILUS,
     OCELOT,
     PANDA,
+    PARCHED,
     PARROT,
     PHANTOM,
     PIG,
@@ -96,7 +99,8 @@ public enum EntityTypes {
     ZOMBIE,
     ZOMBIE_HORSE,
     ZOMBIE_PIGMAN,
-    ZOMBIE_VILLAGER;
+    ZOMBIE_VILLAGER,
+    ZOMBIE_NAUTILUS;
 
     private static final EntityTypes[] bukkitTypeConverter = new EntityTypes[EntityType.values().length];
 

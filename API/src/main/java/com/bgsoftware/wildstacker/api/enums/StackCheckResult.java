@@ -57,6 +57,7 @@ public enum StackCheckResult {
     WOLF_TYPE,
     ZOMBIE_BABY,
     ZOMBIE_PIGMAN_ANGRY,
+    ZOMBIE_NAUTILUS_TYPE,
 
     /**
      * Custom stack results.

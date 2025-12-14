@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_4;
+package com.bgsoftware.wildstacker.nms.v1_21_10;
 
 import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.common.reflection.ReflectMethod;
@@ -6,9 +6,9 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -20,8 +20,10 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,42 +32,54 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Strider;
-import net.minecraft.world.entity.monster.ZombieVillager;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Fireball;
-import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
+import net.minecraft.world.entity.projectile.hurtingprojectile.Fireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftCow;
 import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftHappyGhast;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Wolf;
+import org.bukkit.entity.ZombieNautilus;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
 
-public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.AbstractNMSEntities {
+public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.AbstractNMSEntities {
 
     private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
-            new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
+            new ReflectConstructor<>(LivingEntity.class, List.class, int.class);
     private static final boolean DAMAGESOURCE_CAUSE_SUPPORT = new ReflectMethod<>(DamageSource.class,
             1, EntityDamageEvent.DamageCause.class).isValid();
+    private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
+            Entity.class, "a", ValueOutput.class);
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
     protected Entity createEntity(CraftWorld craftWorld, Location location, Class<? extends org.bukkit.entity.Entity> entityType) {
@@ -74,7 +88,7 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
 
     @Override
     protected void setExperienceOrbValue(ExperienceOrb orb, int value) {
-        orb.value = value;
+        orb.setValue(value);
     }
 
     @Override
@@ -84,7 +98,7 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
 
     @Override
     protected void copyGossipsAndTradeOffers(Villager source, ZombieVillager dest) {
-        dest.setGossips(source.getGossips().store(NbtOps.INSTANCE));
+        dest.setGossips(source.getGossips());
         dest.setTradeOffers(source.getOffers());
     }
 
@@ -103,34 +117,44 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
         try {
             return livingEntity.shouldDropExperience();
         } catch (Throwable error) {
-            return com.bgsoftware.wildstacker.nms.v1_21_4.AbstractNMSEntities.LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
+            return com.bgsoftware.wildstacker.nms.v1_21_10.AbstractNMSEntities.LIVING_ENTITY_SHOULD_DROP_EXPERIENCE.invoke(livingEntity);
         }
     }
 
     @Override
     protected boolean hasGameRuleDoMobLoot(ServerLevel serverLevel) {
-        return serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT);
+        return serverLevel.getGameRules().get(GameRules.MOB_DROPS);
     }
 
     @Override
     public void setKiller(LivingEntity bukkitLivingEntity, Player killer) {
         net.minecraft.world.entity.LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
-        livingEntity.lastHurtByPlayer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+        livingEntity.lastHurtByPlayer = killer == null ? null : EntityReference.of(((CraftPlayer) killer).getHandle());
     }
 
     @Override
     protected void removeStriderSaddle(Strider strider) {
-        strider.steering.setSaddle(false);
+        strider.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
     }
 
     @Override
-    protected EntityResurrectEvent createEntityResurrectEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity,
+    protected EntityResurrectEvent createEntityResurrectEvent(LivingEntity bukkitLivingEntity,
                                                               org.bukkit.inventory.EquipmentSlot equipmentSlot) {
         return new EntityResurrectEvent(bukkitLivingEntity, equipmentSlot);
     }
 
     @Override
     public StackCheckResult areSimilar(EntityTypes entityType, LivingEntity en1, LivingEntity en2) {
+        if (StackCheck.CHICKEN_TYPE.isEnabled() && StackCheck.CHICKEN_TYPE.isTypeAllowed(entityType)) {
+            if (((org.bukkit.entity.Chicken) en1).getVariant() != ((org.bukkit.entity.Chicken) en2).getVariant())
+                return StackCheckResult.CHICKEN_TYPE;
+        }
+
+        if (StackCheck.COW_TYPE.isEnabled() && StackCheck.COW_TYPE.isTypeAllowed(entityType)) {
+            if (((CraftCow) en1).getVariant() != ((CraftCow) en2).getVariant())
+                return StackCheckResult.COW_TYPE;
+        }
+
         if (StackCheck.FROG_TOUNGE_TARGET.isEnabled() && StackCheck.FROG_TOUNGE_TARGET.isTypeAllowed(entityType)) {
             if (!Objects.equals(((Frog) en1).getTongueTarget(), ((Frog) en2).getTongueTarget()))
                 return StackCheckResult.FROG_TOUNGE_TARGET;
@@ -139,6 +163,16 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
         if (StackCheck.FROG_TYPE.isEnabled() && StackCheck.FROG_TYPE.isTypeAllowed(entityType)) {
             if (((Frog) en1).getVariant() != ((Frog) en2).getVariant())
                 return StackCheckResult.FROG_TYPE;
+        }
+
+        if (StackCheck.HAPPY_GHAST_SADDLE.isEnabled() && StackCheck.HAPPY_GHAST_SADDLE.isTypeAllowed(entityType)) {
+            if (((CraftHappyGhast) en1).getHandle().isWearingBodyArmor() != ((CraftHappyGhast) en2).getHandle().isWearingBodyArmor())
+                return StackCheckResult.HAPPY_GHAST_SADDLE;
+        }
+
+        if (StackCheck.PIG_TYPE.isEnabled() && StackCheck.PIG_TYPE.isTypeAllowed(entityType)) {
+            if (((Pig) en1).getVariant() != ((Pig) en2).getVariant())
+                return StackCheckResult.PIG_TYPE;
         }
 
         if (StackCheck.SALMON_SIZE.isEnabled() && StackCheck.SALMON_SIZE.isTypeAllowed(entityType)) {
@@ -151,24 +185,33 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
                 return StackCheckResult.WOLF_TYPE;
         }
 
+        if (StackCheck.ZOMBIE_NAUTILUS_TYPE.isEnabled() && StackCheck.ZOMBIE_NAUTILUS_TYPE.isTypeAllowed(entityType)) {
+            if (((ZombieNautilus) en1).getVariant() != ((ZombieNautilus) en2).getVariant())
+                return StackCheckResult.ZOMBIE_NAUTILUS_TYPE;
+        }
+
+
+
         return StackCheckResult.SUCCESS;
     }
 
     @Override
     protected Number getNumericTagValue(NumericTag tag) {
-        return tag.getAsNumber();
+        return tag.box();
     }
 
     @Override
     protected String getStringTagValue(StringTag tag) {
-        return tag.getAsString();
+        return tag.value();
     }
 
     @Override
     protected CompoundTag getEntityCompoundTag(net.minecraft.world.entity.LivingEntity livingEntity) {
-        CompoundTag compoundTag = new CompoundTag();
-        livingEntity.addAdditionalSaveData(compoundTag);
-        return compoundTag;
+        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(livingEntity.problemPath(), LOGGER)) {
+            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, livingEntity.registryAccess());
+            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(livingEntity, tagValueOutput);
+            return tagValueOutput.buildResult();
+        }
     }
 
     @Override
@@ -201,14 +244,14 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
         List<SynchedEntityData.DataValue<?>> entityData = simulatedEntityItemPickup.getEntityData().packDirty();
 
         ServerChunkCache serverChunkCache = ((ServerLevel) simulatedEntityItemPickup.level()).getChunkSource();
-        serverChunkCache.broadcastAndSend(livingEntity, getAddEntityPacketForEntity(simulatedEntityItemPickup));
+        serverChunkCache.sendToTrackingPlayersAndSelf(livingEntity, getAddEntityPacketForEntity(simulatedEntityItemPickup));
         if (entityData != null) {
-            serverChunkCache.broadcastAndSend(livingEntity, new ClientboundSetEntityDataPacket(
+            serverChunkCache.sendToTrackingPlayersAndSelf(livingEntity, new ClientboundSetEntityDataPacket(
                     simulatedEntityItemPickup.getId(), entityData));
         }
-        serverChunkCache.broadcastAndSend(livingEntity, new ClientboundTakeItemEntityPacket(
+        serverChunkCache.sendToTrackingPlayersAndSelf(livingEntity, new ClientboundTakeItemEntityPacket(
                 simulatedEntityItemPickup.getId(), livingEntity.getId(), simulatedItemPickupCount));
-        serverChunkCache.broadcastAndSend(livingEntity, new ClientboundRemoveEntitiesPacket(
+        serverChunkCache.sendToTrackingPlayersAndSelf(livingEntity, new ClientboundRemoveEntitiesPacket(
                 simulatedEntityItemPickup.getId()));
     }
 
@@ -267,7 +310,7 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.Abst
     }
 
     @Override
-    public EntityDeathEvent createDeathEvent(org.bukkit.entity.LivingEntity livingEntity,
+    public EntityDeathEvent createDeathEvent(LivingEntity livingEntity,
                                              List<org.bukkit.inventory.ItemStack> drops, int droppedExp,
                                              EntityDamageEvent lastDamage) {
         if (OLD_DEATH_EVENT_CONSTRUCTOR.isValid()) {

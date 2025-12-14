@@ -67,7 +67,8 @@ public enum StackCheck {
     WOLF_COLLAR_COLOR(EntityTypes.WOLF),
     WOLF_TYPE(EntityTypes.WOLF),
     ZOMBIE_BABY(EntityTypes.ZOMBIE, EntityTypes.ZOMBIE_VILLAGER),
-    ZOMBIE_PIGMAN_ANGRY(EntityTypes.ZOMBIE_PIGMAN);
+    ZOMBIE_PIGMAN_ANGRY(EntityTypes.ZOMBIE_PIGMAN),
+    ZOMBIE_NAUTILUS_TYPE(EntityTypes.ZOMBIE_NAUTILUS);
 
     private final boolean[] allowedTypes = new boolean[EntityTypes.values().length];
     private boolean enabled;
