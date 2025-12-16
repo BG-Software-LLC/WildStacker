@@ -100,6 +100,7 @@ public final class LootHandler {
         saveLootTable(EntityTypes.BOGGED, "bogged");
         saveLootTable(EntityTypes.BREEZE, "breeze");
         saveLootTable(EntityTypes.CAMEL, "camel", "camel_baby");
+        saveLootTable(EntityTypes.CAMEL_HUSK, "camel_husk");
         saveLootTable(EntityTypes.CAT, "cat", "cat_baby");
         saveLootTable("cave_spider");
         saveLootTable("chicken");
@@ -145,9 +146,11 @@ public final class LootHandler {
         saveLootTable("mooshroom_baby");
         saveLootTable("mule");
         saveLootTable("mule_baby");
+        saveLootTable(EntityTypes.NAUTILUS, "nautilus", "nautilus_baby");
         saveLootTable("ocelot");
         saveLootTable("ocelot_baby");
         saveLootTable(EntityTypes.PANDA, "panda", "panda_baby");
+        saveLootTable(EntityTypes.PARCHED, "parched");
         saveLootTable(EntityTypes.PARROT, "parrot");
         saveLootTable(EntityTypes.PHANTOM, "phantom");
         saveLootTable("pig");
@@ -195,6 +198,7 @@ public final class LootHandler {
         saveLootTable("zombie");
         saveLootTable("zombie_baby");
         saveLootTable("zombie_horse");
+        saveLootTable("zombie_nautilus");
         saveLootTable("zombie_pigman");
         saveLootTable("zombie_pigman_baby");
         saveLootTable("zombie_villager");

@@ -1,0 +1,16 @@
+{
+  "pairs": [
+    {
+      "chance": 100,
+      "items": [
+        {
+          "type": "ROTTEN_FLESH",
+          "chance": 100,
+          "min": 2,
+          "max": 3,
+          "looting": true
+        }
+      ]
+    }
+  ]
+}
