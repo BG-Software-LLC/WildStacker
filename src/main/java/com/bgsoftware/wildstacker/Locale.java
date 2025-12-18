@@ -57,6 +57,7 @@ public final class Locale {
     public static Locale SPAWNER_PLACE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_PLACE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_PLACE_BLOCKED = new Locale("SPAWNER_PLACE_BLOCKED");
     public static Locale SPAWNER_UPDATE = new Locale("SPAWNER_UPDATE");
+    public static Locale SPAWNER_CHANGE_NOT_ENOUGH_ITEMS = new Locale("SPAWNER_CHANGE_NOT_ENOUGH_ITEMS");
     public static Locale SPAWNER_UPGRADE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_UPGRADE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_UPGRADE_SUCCESS = new Locale("SPAWNER_UPGRADE_SUCCESS");
     public static Locale STACK_GIVE_PLAYER = new Locale("STACK_GIVE_PLAYER");

@@ -598,11 +598,19 @@ public final class SpawnersListener implements Listener {
             return;
         }
 
-        if ((plugin.getSettings().eggsStackMultiply &&
-                stackedSpawner.getStackAmount() > ItemUtils.countItem(e.getPlayer().getInventory(), e.getItem())) ||
-                EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtils.getEntityType(e.getItem())) {
+        if (EntityTypes.fromName(stackedSpawner.getSpawnedType().name()) == ItemUtils.getEntityType(e.getItem())) {
             e.setCancelled(true);
             return;
+        }
+
+        if (plugin.getSettings().eggsStackMultiply) {
+            int eggsCountInInventory = ItemUtils.countItem(e.getPlayer().getInventory(), e.getItem());
+            int requiredCount = stackedSpawner.getStackAmount();
+            if (requiredCount > eggsCountInInventory) {
+                Locale.SPAWNER_CHANGE_NOT_ENOUGH_ITEMS.send(e.getPlayer(), eggsCountInInventory, requiredCount);
+                e.setCancelled(true);
+                return;
+            }
         }
 
         ItemStack inHand = e.getItem().clone();
