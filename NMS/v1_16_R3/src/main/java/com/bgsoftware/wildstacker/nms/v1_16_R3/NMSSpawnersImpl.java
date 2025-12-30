@@ -9,7 +9,7 @@ import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.StackedMobSpawner;
 import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_16_R3.spawner.TileEntityMobSpawnerWatcher;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_16_R3.BiomeBase;
@@ -52,7 +52,7 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     private static void createCondition(String id, BiPredicate<World, BlockPosition> predicate, EntityType... entityTypes) {
-        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, EntityUtils.format(id)) {
+        SpawnCondition spawnCondition = SpawnCondition.register(new SpawnCondition(id, CustomNames.format(id)) {
             @Override
             public boolean test(Location location) {
                 return predicate.test(((CraftWorld) location.getWorld()).getHandle(),

@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -97,27 +96,6 @@ public final class EntityUtils {
     private static final EntityType MANNEQUIN = getEntityTypeSafe("MANNEQUIN");
     @Nullable
     private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
-
-    public static String getFormattedType(String typeName) {
-        if (typeName.contains(String.valueOf(ChatColor.COLOR_CHAR)))
-            return typeName;
-
-        String customName = plugin.getSettings().customNames.get(typeName);
-        if (customName != null)
-            return customName;
-
-        return format(typeName);
-    }
-
-    public static String format(String type) {
-        StringBuilder name = new StringBuilder();
-
-        for (String section : type.split("_")) {
-            name.append(section.substring(0, 1).toUpperCase()).append(section.substring(1).toLowerCase()).append(" ");
-        }
-
-        return name.substring(0, name.length() - 1);
-    }
 
     public static boolean isNameBlacklisted(String name) {
         if (name == null)

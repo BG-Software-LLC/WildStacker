@@ -5,12 +5,6 @@
 ##                                           ##
 ###############################################
 
-# How should the item that is given to players by the give command be called?
-# {0} represents stack size
-# {1} represents entity/block type
-# {2} represents item type (Egg / Spawner / Barrel)
-give-item-name: '&6x{0} &f&o{1} {2}'
-
 # The inspect tool of the plugin.
 # When clicking an item, entity, barrel or spawner, all the information
 # about the object will be displayed to the player.
@@ -98,6 +92,24 @@ kill-task:
     # A list of worlds that items will be cleared inside.
     # If you want all worlds, set this to []
     worlds: []
+
+# Here you can configurable all features related to stacked eggs.
+eggs:
+  # All settings related to the egg items.
+  egg-item:
+    # Custom name for the item.
+    # If you don't want a custom name, use "name: ''"
+    # {0} represents stack amount
+    # {1} represents entity type
+    # {2} represents the upgrade's display name
+    name: '&6x{0} &f&o{1} Egg{2}'
+
+    # Custom lore for the item.
+    # If you don't want a custom lore, use "lore: []"
+    # {0} represents stack amount
+    # {1} represents entity type
+    # {2} represents the upgrade's display name
+    lore: [ ]
 
 # Here you can configurable all features related to stacked items.
 items:
@@ -556,17 +568,18 @@ spawners:
   # All settings related to the spawner items.
   spawner-item:
     # Custom name for the item.
-    # If you don't want a custom name, use "custom-name: ''"
+    # If you don't want a custom name, use "name: ''"
     # {0} represents stack amount
     # {1} represents entity type
     # {2} represents the upgrade's display name
-    name: '&6x{0} &f&o{1} Spawners{2}'
+    name: '&6x{0} &f&o{1} Spawner{2}'
 
     # Custom lore for the item.
-    # If you don't want a custom lore, use "custom-lore: []"
+    # If you don't want a custom lore, use "lore: []"
     # {0} represents stack amount
     # {1} represents entity type
-    lore: []
+    # {2} represents the upgrade's display name
+    lore: [ ]
 
   # Here you can configurable all features related to silk-touch enchantment.
   # Other spawner plugins, such as SilkSpawners and MineableSpawners, will override this section.
@@ -863,6 +876,20 @@ barrels:
   # of only in the provided radius. merge-radius will be overridden, and will be used
   # as a y-level range only.
   chunk-merge: false
+
+  # All settings related to the barrel items.
+  barrel-item:
+    # Custom name for the item.
+    # If you don't want a custom name, use "name: ''"
+    # {0} represents stack amount
+    # {1} represents material
+    name: '&6x{0} &f&o{1} Barrel'
+
+    # Custom lore for the item.
+    # If you don't want a custom lore, use "lore: []"
+    # {0} represents stack amount
+    # {1} represents material
+    lore: [ ]
 
   # Should explosions break the entire stack, or just reducing it by one?
   explosions-break-stack: true

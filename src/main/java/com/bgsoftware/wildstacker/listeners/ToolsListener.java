@@ -12,6 +12,7 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,7 +48,7 @@ public final class ToolsListener implements Listener {
 
         Locale.ENTITY_INFO_HEADER.send(e.getPlayer());
         Locale.ENTITY_INFO_UUID.send(e.getPlayer(), stackedEntity.getUniqueId());
-        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedEntity.getType().name()));
+        Locale.ENTITY_INFO_TYPE.send(e.getPlayer(), CustomNames.getEntityCustomName(stackedEntity.getType()));
         Locale.ENTITY_INFO_AMOUNT.send(e.getPlayer(), stackedEntity.getStackAmount());
         Locale.ENTITY_INFO_SPAWN_REASON.send(e.getPlayer(), stackedEntity.getSpawnCause().name());
         Locale.ENTITY_INFO_NERFED.send(e.getPlayer(), stackedEntity.isNerfed() ? "True" : "False");
@@ -66,7 +67,7 @@ public final class ToolsListener implements Listener {
         StackedBarrel stackedBarrel = WStackedBarrel.of(e.getClickedBlock());
 
         Locale.BARREL_INFO_HEADER.send(e.getPlayer());
-        Locale.BARREL_INFO_TYPE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+        Locale.BARREL_INFO_TYPE.send(e.getPlayer(), CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
         Locale.BARREL_INFO_AMOUNT.send(e.getPlayer(), stackedBarrel.getStackAmount());
         Locale.BARREL_INFO_FOOTER.send(e.getPlayer());
     }
@@ -82,7 +83,7 @@ public final class ToolsListener implements Listener {
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
         Locale.SPAWNER_INFO_HEADER.send(e.getPlayer());
-        Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
+        Locale.SPAWNER_INFO_TYPE.send(e.getPlayer(), CustomNames.getSpawnerCustomName(stackedSpawner.getSpawnedType()));
         Locale.SPAWNER_INFO_AMOUNT.send(e.getPlayer(), stackedSpawner.getStackAmount());
         Locale.SPAWNER_INFO_UPGRADE.send(e.getPlayer(), stackedSpawner.getUpgrade().getName());
         Locale.SPAWNER_INFO_FOOTER.send(e.getPlayer());

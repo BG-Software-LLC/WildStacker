@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -46,7 +47,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
     public WStackedBarrel(Block block, ItemStack itemStack, int stackAmount) {
         super(block, stackAmount);
         this.barrelItem = itemStack;
-        setCachedDisplayName(ItemUtils.getFormattedType(barrelItem));
+        setCachedDisplayName(CustomNames.getBarrelCustomName(barrelItem));
     }
 
     public static StackedBarrel of(Block block) {
@@ -123,11 +124,16 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             itemStack.setAmount(1);
 
             ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
-                    .replace("{0}", amount + "")
-                    .replace("{1}", ItemUtils.getFormattedType(new ItemStack(getType())))
-                    .replace("{2}", "Barrel")
+            String barrelName = CustomNames.getBarrelCustomName(new ItemStack(getType()));
+
+            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().barrelsItemName
+                    .replace("{0}", amount + "").replace("{1}", barrelName)
             );
+
+            List<String> lore = new ArrayList<>();
+            for (String line : plugin.getSettings().barrelsItemLore)
+                lore.add(line.replace("{0}", amount + "").replace("{1}", barrelName));
+            itemMeta.setLore(lore);
 
             itemStack.setItemMeta(itemMeta);
         } else {

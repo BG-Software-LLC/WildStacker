@@ -40,13 +40,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -57,6 +51,7 @@ public final class SettingsHandler {
     public final String[] CONFIG_IGNORED_SECTIONS = {"merge-radius", "limits", "minimum-required", "default-unstack",
             "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
             "spawner-upgrades.ladders"};
+    public final String[] CUSTOM_NAMES_IGNORED_SECTIONS = {"global", "eggs", "items", "entities", "spawners", "barrels"};
 
     // Database settings
     public final String databaseType;
@@ -72,15 +67,18 @@ public final class SettingsHandler {
     public final long databaseMySQLMaxLifetime;
 
     //Global settings
-    public final String giveItemName, killTaskTimeCommand;
+    public final String killTaskTimeCommand;
     public final ItemStack inspectTool, simulateTool;
     public final boolean deleteInvalidWorlds, killTaskStackedEntities, killTaskUnstackedEntities,
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
-    public final Map<String, String> customNames;
     public final long killTaskInterval;
     public final Fast2EnumsArray<EntityType, SpawnCause> killTaskEntitiesWhitelist, killTaskEntitiesBlacklist;
     public final FastEnumArray<Material> killTaskItemsWhitelist, killTaskItemsBlacklist;
     public final List<String> killTaskEntitiesWorlds, killTaskItemsWorlds;
+
+    //Eggs settings
+    public final String eggsItemName;
+    public final List<String> eggsItemLore;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
@@ -124,9 +122,9 @@ public final class SettingsHandler {
             spawnerUpgradesMultiplyStackAmount, listenPaperPreSpawnEvent, spawnersUnstackedCustomName;
     public final int explosionsBreakChance, explosionsBreakPercentage, explosionsBreakMinimum, explosionsAmountPercentage,
             explosionsAmountMinimum, silkTouchBreakChance, silkTouchMinimumLevel, spawnersChunkLimit;
-    public final List<String> spawnersDisabledWorlds, spawnerItemLore, silkWorlds, explosionsWorlds;
+    public final List<String> spawnersDisabledWorlds, spawnersItemLore, silkWorlds, explosionsWorlds;
     public final FastEnumArray<EntityType> blacklistedSpawners, whitelistedSpawners;
-    public final String spawnersCustomName, spawnerItemName, inventoryTweaksPermission, inventoryTweaksCommand;
+    public final String spawnersCustomName, spawnersItemName, inventoryTweaksPermission, inventoryTweaksCommand;
     public final NameBuilder<StackedSpawner> spawnersNameBuilder;
     public final FastEnumMap<EntityType, Integer> spawnersMergeRadius, spawnersLimits;
     public final List<ParticleWrapper> spawnersParticles;
@@ -142,6 +140,8 @@ public final class SettingsHandler {
     public final FastEnumArray<Material> blacklistedBarrels, whitelistedBarrels;
     public final FastEnumMap<Material, Integer> barrelsMergeRadius, barrelsLimits;
     public final List<ParticleWrapper> barrelsParticles;
+    public final String barrelsItemName;
+    public final List<String> barrelsItemLore;
 
     //Buckets settings
     public final boolean bucketsStackerEnabled;
@@ -151,6 +151,16 @@ public final class SettingsHandler {
     //Stews settings
     public final boolean stewsStackingEnabled;
     public final int stewsMaxStack;
+
+    //Custom names settings
+    public final Map<String, String> globalCustomNames;
+    public final Map<String, String> eggsCustomNames;
+    public final Map<String, String> itemsCustomNames;
+    public final Map<String, String> entitiesCustomNames;
+    public final Map<String, String> spawnersCustomNames;
+    public final Map<String, String> barrelsCustomNames;
+
+    //Particles settings
     private YamlConfiguration particlesYaml = null;
 
     public SettingsHandler(WildStackerPlugin plugin) {
@@ -184,12 +194,6 @@ public final class SettingsHandler {
         databaseMySQLWaitTimeout = cfg.getLong("database.waitTimeout");
         databaseMySQLMaxLifetime = cfg.getLong("database.maxLifetime");
 
-        giveItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("give-item-name", "&6x{0} &f&o{1} {2}"));
-        SPAWNERS_PATTERN = Pattern.compile(giveItemName
-                .replace("{0}", "(.*)")
-                .replace("{1}", "(.*)")
-                .replace("{2}", "(.*)")
-        );
         inspectTool = new ItemBuilder(Material.valueOf(cfg.getString("inspect-tool.type")), cfg.getInt("inspect-tool.data", 0))
                 .withName(cfg.getString("inspect-tool.name"))
                 .withLore(cfg.getStringList("inspect-tool.lore")).build();
@@ -212,8 +216,18 @@ public final class SettingsHandler {
         killTaskItemsWhitelist = FastEnumArray.fromList(cfg.getStringList("kill-task.kill-items.whitelist"), Material.class);
         killTaskItemsBlacklist = FastEnumArray.fromList(cfg.getStringList("kill-task.kill-items.blacklist"), Material.class);
         killTaskItemsWorlds = cfg.getStringList("kill-task.kill-items.worlds");
-        customNames = new HashMap<>();
+
+        globalCustomNames = new HashMap<>();
+        eggsCustomNames = new HashMap<>();
+        itemsCustomNames = new HashMap<>();
+        entitiesCustomNames = new HashMap<>();
+        spawnersCustomNames = new HashMap<>();
+        barrelsCustomNames = new HashMap<>();
         loadCustomNames(plugin);
+
+        eggsItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("eggs.egg-item.name", "&6x{0} &f&o{1} Egg{2}"));
+        eggsItemLore = cfg.getStringList("eggs.egg-item.lore").stream().map(line ->
+                ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
 
         itemsStackingEnabled = cfg.getBoolean("items.enabled", true);
         itemsMergeRadius = FastEnumMap.fromSection(cfg.getConfigurationSection("items.merge-radius"), Material.class);
@@ -340,9 +354,14 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{2}", stackedSpawner -> ((WStackedSpawner) stackedSpawner).getCachedDisplayName().toUpperCase()),
                 new NamePlaceholder<>("{3}", stackedSpawner -> stackedSpawner.getUpgrade().getDisplayName())
         );
-        spawnerItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.spawner-item.name", "&e{0} &fSpawner"));
-        spawnerItemLore = cfg.getStringList("spawners.spawner-item.lore").stream().map(line ->
+        spawnersItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners.spawner-item.name", "&6x{0} &f&o{1} Spawner{2}"));
+        spawnersItemLore = cfg.getStringList("spawners.spawner-item.lore").stream().map(line ->
                 ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
+        SPAWNERS_PATTERN = Pattern.compile(spawnersItemName
+                .replace("{0}", "(.*)")
+                .replace("{1}", "(.*)")
+                .replace("{2}", "(.*)")
+        );
         silkTouchSpawners = cfg.getBoolean("spawners.silk-touch.enabled", true);
         dropToInventory = cfg.getBoolean("spawners.silk-touch.drop-to-inventory", true);
         silkWorlds = cfg.getStringList("spawners.silk-touch.worlds");
@@ -516,6 +535,9 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{1}", stackedBarrel -> ((WStackedBarrel) stackedBarrel).getCachedDisplayName()),
                 new NamePlaceholder<>("{2}", stackedBarrel -> ((WStackedBarrel) stackedBarrel).getCachedDisplayName().toUpperCase())
         );
+        barrelsItemName = ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels.barrel-item.name", "&6x{0} &f&o{1} Barrel"));
+        barrelsItemLore = cfg.getStringList("barrels.barrel-item.lore").stream().map(line ->
+                ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
         blacklistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.blacklist"), Material.class);
         whitelistedBarrels = FastEnumArray.fromList(cfg.getStringList("barrels.whitelist"), Material.class);
         barrelsChunkLimit = cfg.getInt("barrels.chunk-limit", 0);
@@ -574,11 +596,30 @@ public final class SettingsHandler {
         if (!file.exists())
             plugin.saveResource("custom-names.yml", false);
 
-        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+        CommentedConfiguration cfg = CommentedConfiguration.loadConfiguration(file);
+
+        customNamesConvertor(cfg);
+
+        try {
+            cfg.syncWithConfig(file, plugin.getResource("custom-names.yml"), CUSTOM_NAMES_IGNORED_SECTIONS);
+            cfg.save(file);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         if (cfg.getBoolean("enabled", true)) {
-            for (String key : cfg.getConfigurationSection("").getKeys(false))
-                customNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString(key)));
+            for (String key : cfg.getConfigurationSection("global").getKeys(false))
+                globalCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("global." + key)));
+            for (String key : cfg.getConfigurationSection("eggs").getKeys(false))
+                eggsCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("eggs." + key)));
+            for (String key : cfg.getConfigurationSection("items").getKeys(false))
+                itemsCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("items." + key)));
+            for (String key : cfg.getConfigurationSection("entities").getKeys(false))
+                entitiesCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("entities." + key)));
+            for (String key : cfg.getConfigurationSection("spawners").getKeys(false))
+                spawnersCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("spawners." + key)));
+            for (String key : cfg.getConfigurationSection("barrels").getKeys(false))
+                barrelsCustomNames.put(key, ChatColor.translateAlternateColorCodes('&', cfg.getString("barrels." + key)));
         }
     }
 
@@ -616,7 +657,42 @@ public final class SettingsHandler {
         return particleWrappers;
     }
 
+    private void customNamesConvertor(YamlConfiguration cfg) {
+        if (!cfg.isConfigurationSection("global")) {
+            Map<String, String> global = new HashMap<>();
+            Set<String> ignored = new HashSet<>(Arrays.asList(CUSTOM_NAMES_IGNORED_SECTIONS));
+            for (String key : cfg.getKeys(false)) {
+                if (key.equals("enabled") || ignored.contains(key))
+                    continue;
+                global.put(key, cfg.getString(key));
+            }
+            cfg.createSection("global");
+            for (Map.Entry<String, String> entry : global.entrySet()) {
+                cfg.set("global." + entry.getKey(), entry.getValue());
+                cfg.set(entry.getKey(), null);
+            }
+        }
+        if (!cfg.isConfigurationSection("eggs"))
+            cfg.createSection("eggs");
+        if (!cfg.isConfigurationSection("items"))
+            cfg.createSection("items");
+        if (!cfg.isConfigurationSection("entities"))
+            cfg.createSection("entities");
+        if (!cfg.isConfigurationSection("spawners"))
+            cfg.createSection("spawners");
+        if (!cfg.isConfigurationSection("barrels"))
+            cfg.createSection("barrels");
+    }
+
     private void dataConvertor(YamlConfiguration cfg) {
+        if (!cfg.isConfigurationSection("eggs.egg-item")) {
+            String name = cfg.getString("give-item-name").replace("{2}", "Egg");
+            cfg.set("eggs.egg-item.name", name);
+        }
+        if (!cfg.isConfigurationSection("barrels.barrel-item")) {
+            String name = cfg.getString("give-item-name").replace("{2}", "Barrel");
+            cfg.set("barrels.barrel-item.name", name);
+        }
         if (cfg.contains("items.kill-all"))
             cfg.set("kill-task.stacked-items", cfg.getBoolean("items.kill-all"));
         if (cfg.contains("items.check-range"))

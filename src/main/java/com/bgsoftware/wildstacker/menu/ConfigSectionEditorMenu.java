@@ -1,8 +1,8 @@
 package com.bgsoftware.wildstacker.menu;
 
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -186,7 +186,7 @@ public final class ConfigSectionEditorMenu extends WildMenu {
                 continue;
 
             ItemBuilder itemBuilder = new ItemBuilder(Materials.CLOCK.toBukkitItem()).withName("&6" +
-                    EntityUtils.format(path.replace("-", "_")
+                    CustomNames.format(path.replace("-", "_")
                             .replace(".", "_").replace(" ", "_")));
 
             if (section.isBoolean(path))

@@ -11,6 +11,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
@@ -122,7 +123,7 @@ public final class BarrelsListener implements Listener {
 
             if (!blockOptional.isPresent()) {
                 if (isChunkLimit(chunk)) {
-                    Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)) + " Barrels");
+                    Locale.BARREL_CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
                     stackedBarrel.remove();
                     return;
                 }
@@ -148,7 +149,7 @@ public final class BarrelsListener implements Listener {
 
                         stackedBarrel.updateName();
 
-                        Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+                        Locale.BARREL_PLACE.send(e.getPlayer(), CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
 
                         finishBarrelPlace(e.getPlayer(), usedHand, stackedBarrel, REPLACE_AIR);
                     }
@@ -159,13 +160,13 @@ public final class BarrelsListener implements Listener {
 
                 stackedBarrel.updateName();
 
-                Locale.BARREL_PLACE.send(e.getPlayer(), ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+                Locale.BARREL_PLACE.send(e.getPlayer(), CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
             } else {
                 if (e.getPlayer().getGameMode() != GameMode.CREATIVE)
                     ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
 
                 StackedBarrel targetBarrel = WStackedBarrel.of(blockOptional.get());
-                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
+                Locale.BARREL_UPDATE.send(e.getPlayer(), CustomNames.getBarrelCustomName(targetBarrel.getBarrelItem(1)), targetBarrel.getStackAmount());
             }
 
             finishBarrelPlace(e.getPlayer(), usedHand, stackedBarrel, REPLACE_AIR);
@@ -215,7 +216,7 @@ public final class BarrelsListener implements Listener {
 
             e.getBlock().setType(Material.AIR);
 
-            Locale.BARREL_BREAK.send(e.getPlayer(), stackSize, ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+            Locale.BARREL_BREAK.send(e.getPlayer(), stackSize, CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
         }
     }
 

@@ -4,9 +4,9 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,11 +27,14 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -118,6 +121,77 @@ public final class ItemUtils {
         }
     }
 
+    public static ItemStack getEggItem(EntityType entityType, int amount, @Nullable SpawnerUpgrade spawnerUpgrade) {
+        ItemStack itemStack;
+
+        Material eggType = Materials.getSpawnEgg(entityType);
+        if (eggType == null || ServerVersion.isLegacy()) {
+            if (ServerVersion.isLegacy()) {
+                itemStack = new ItemStack(Material.MONSTER_EGG);
+                setEntityType(itemStack, entityType);
+            } else {
+                itemStack = getItemNMSEntityType(entityType);
+            }
+        } else {
+            itemStack = new ItemStack(eggType);
+        }
+
+        itemStack = setSpawnerItemAmount(itemStack, amount);
+
+        if (spawnerUpgrade != null && !spawnerUpgrade.isDefault())
+            itemStack = setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        String eggName = CustomNames.getEggCustomName(entityType);
+        String upgradeName = spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName();
+
+        String customName = plugin.getSettings().eggsItemName;
+        if (!customName.isEmpty()) {
+            itemMeta.setDisplayName(customName.replace("{0}", amount + "")
+                    .replace("{1}", eggName).replace("{2}", upgradeName));
+        }
+
+        List<String> customLore = plugin.getSettings().eggsItemLore;
+        if (!customLore.isEmpty()) {
+            List<String> lore = new ArrayList<>();
+            for (String line : customLore)
+                lore.add(line.replace("{0}", amount + "")
+                        .replace("{1}", eggName).replace("{2}", upgradeName));
+            itemMeta.setLore(lore);
+        }
+
+        itemStack.setItemMeta(itemMeta);
+
+        return itemStack;
+    }
+
+    public static ItemStack getBarrelItem(Material material, int amount) {
+        ItemStack itemStack = new ItemStack(material);
+
+        itemStack = setSpawnerItemAmount(itemStack, amount);
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        String barrelName = CustomNames.getBarrelCustomName(itemStack);
+
+        String customName = plugin.getSettings().barrelsItemName;
+        if (!customName.isEmpty()) {
+            itemMeta.setDisplayName(customName.replace("{0}", amount + "")
+                    .replace("{1}", barrelName));
+        }
+
+        List<String> customLore = plugin.getSettings().barrelsItemLore;
+        if (!customLore.isEmpty()) {
+            List<String> lore = new ArrayList<>();
+            for (String line : customLore)
+                lore.add(line.replace("{0}", amount + "").replace("{1}", barrelName));
+            itemMeta.setLore(lore);
+        }
+
+        itemStack.setItemMeta(itemMeta);
+
+        return itemStack;
+    }
+
     public static ItemStack setSpawnerItemAmount(ItemStack itemStack, int amount) {
         return plugin.getNMSAdapter().setTag(itemStack, "spawners-amount", amount);
     }
@@ -187,20 +261,6 @@ public final class ItemUtils {
     public static EntityType getNMSEntityType(ItemStack itemStack) {
         String entityType = plugin.getNMSAdapter().getTag(itemStack, "entity-type", String.class, "");
         return entityType.isEmpty() ? null : EntityType.valueOf(entityType);
-    }
-
-    public static String getFormattedType(ItemStack itemStack) {
-        String typeName = LEGACY_PATTERN.matcher(itemStack.getType().name()).replaceAll("");
-
-        String customName = plugin.getSettings().customNames.get(typeName);
-        if (customName != null)
-            return customName;
-
-        customName = plugin.getSettings().customNames.get(typeName + ":" + itemStack.getDurability());
-        if (customName != null)
-            return customName;
-
-        return EntityUtils.getFormattedType(typeName);
     }
 
     public static void stackBucket(ItemStack bucket, Inventory inventory) {

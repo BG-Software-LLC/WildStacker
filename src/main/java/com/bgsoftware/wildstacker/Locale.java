@@ -21,7 +21,7 @@ public final class Locale {
     public static Locale BARREL_TOGGLE_ON = new Locale("BARREL_TOGGLE_ON");
     public static Locale BARREL_TOGGLE_OFF = new Locale("BARREL_TOGGLE_OFF");
     public static Locale BARREL_NO_PERMISSION = new Locale("BARREL_NO_PERMISSION");
-    public static Locale CHUNK_LIMIT_EXCEEDED = new Locale("CHUNK_LIMIT_EXCEEDED");
+    public static Locale BARREL_CHUNK_LIMIT_EXCEEDED = new Locale("BARREL_CHUNK_LIMIT_EXCEEDED");
     public static Locale COMMAND_USAGE = new Locale("COMMAND_USAGE");
     public static Locale ENTITY_NAMES_TOGGLE_ON = new Locale("ENTITY_NAMES_TOGGLE_ON");
     public static Locale ENTITY_NAMES_TOGGLE_OFF = new Locale("ENTITY_NAMES_TOGGLE_OFF");
@@ -60,6 +60,7 @@ public final class Locale {
     public static Locale SPAWNER_CHANGE_NOT_ENOUGH_ITEMS = new Locale("SPAWNER_CHANGE_NOT_ENOUGH_ITEMS");
     public static Locale SPAWNER_UPGRADE_NOT_ENOUGH_MONEY = new Locale("SPAWNER_UPGRADE_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_UPGRADE_SUCCESS = new Locale("SPAWNER_UPGRADE_SUCCESS");
+    public static Locale SPAWNER_CHUNK_LIMIT_EXCEEDED = new Locale("SPAWNER_CHUNK_LIMIT_EXCEEDED");
     public static Locale STACK_GIVE_PLAYER = new Locale("STACK_GIVE_PLAYER");
     public static Locale STACK_RECEIVE = new Locale("STACK_RECEIVE");
     public static Locale STACK_INFO_INVALID = new Locale("STACK_INFO_INVALID");
