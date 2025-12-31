@@ -41,6 +41,11 @@ public final class ItemBuilder {
         itemMeta = itemStack.getItemMeta();
     }
 
+    public ItemBuilder withAmount(int amount) {
+        itemStack.setAmount(amount);
+        return this;
+    }
+
     public ItemBuilder withName(String name) {
         itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
         return this;
@@ -145,13 +150,13 @@ public final class ItemBuilder {
         return this;
     }
 
-    public ItemStack build() {
-        return build(1);
+    public ItemStack build(int amount) {
+        itemStack.setAmount(amount);
+        return build();
     }
 
-    public ItemStack build(int amount) {
+    public ItemStack build() {
         itemStack.setItemMeta(itemMeta);
-        itemStack.setAmount(amount);
         return texture == null ? itemStack : plugin.getNMSAdapter().getPlayerSkull(itemStack, texture);
     }
 

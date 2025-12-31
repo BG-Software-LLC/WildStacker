@@ -42,10 +42,12 @@ items:
     name: '&aAdd +1'
   '%':
     type: LIME_STAINED_GLASS_PANE
+    amount: 16
     deposit: 16
     name: '&aAdd +16'
   '^':
     type: LIME_STAINED_GLASS_PANE
+    amount: 64
     deposit: 64
     name: '&aAdd +64'
   '*':
@@ -54,9 +56,11 @@ items:
     name: '&cRemove -1'
   '-':
     type: RED_STAINED_GLASS_PANE
+    amount: 16
     withdraw: 16
     name: '&cRemove -16'
   '+':
     type: RED_STAINED_GLASS_PANE
+    amount: 64
     withdraw: 64
     name: '&cRemove -64'

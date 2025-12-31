@@ -15,10 +15,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class FileUtils {
 
@@ -63,49 +60,61 @@ public final class FileUtils {
     }
 
     public static ItemBuilder getItemStack(String fileName, ConfigurationSection section) {
-        if (section == null || !section.contains("type"))
+        if (section == null || !section.isString("type"))
             return null;
 
+        String materialName = section.getString("type");
         Material type;
         short data;
 
         try {
-            type = Material.valueOf(section.getString("type"));
+            type = Material.valueOf(materialName);
             data = (short) section.getInt("data");
-        } catch (IllegalArgumentException ex) {
-            WildStackerPlugin.log("&c[" + fileName + "] Couldn't convert " + section.getCurrentPath() + " into an itemstack. Check type & data sections!");
+        } catch (IllegalArgumentException e) {
+            WildStackerPlugin.log("&c[" + fileName + "] Couldn't convert '" + materialName +
+                    "' into an material in '" + section.getCurrentPath() + ".type', skipping...");
             return null;
         }
 
         ItemBuilder itemBuilder = new ItemBuilder(type, data);
 
-        if (section.contains("name"))
-            itemBuilder.withName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
+        if (section.isInt("amount"))
+            itemBuilder.withAmount(section.getInt("amount"));
 
-        if (section.contains("lore"))
+        if (section.isString("name"))
+            itemBuilder.withName(section.getString("name"));
+
+        if (section.isList("lore"))
             itemBuilder.withLore(section.getStringList("lore"));
 
-        if (section.contains("enchants")) {
-            for (String _enchantment : section.getConfigurationSection("enchants").getKeys(false)) {
+        if (section.isConfigurationSection("enchants")) {
+            for (String enchantName : section.getConfigurationSection("enchants").getKeys(false)) {
                 Enchantment enchantment;
 
                 try {
-                    enchantment = Enchantment.getByName(_enchantment);
-                } catch (Exception ex) {
-                    WildStackerPlugin.log("&c[" + fileName + "] Couldn't convert " + section.getCurrentPath() + ".enchants." + _enchantment + " into an enchantment, skipping...");
+                    enchantment = Enchantment.getByName(enchantName);
+                } catch (IllegalArgumentException e) {
+                    WildStackerPlugin.log("&c[" + fileName + "] Couldn't convert '" + enchantName +
+                            "' into an enchantment in '" + section.getCurrentPath() + ".enchants', skipping...");
                     continue;
                 }
 
-                itemBuilder.withEnchant(enchantment, section.getInt("enchants." + _enchantment));
+                itemBuilder.withEnchant(enchantment, section.getInt("enchants." + enchantName));
             }
         }
 
-        if (section.contains("flags")) {
-            for (String flag : section.getStringList("flags"))
-                itemBuilder.withFlags(ItemFlag.valueOf(flag));
+        if (section.isList("flags")) {
+            for (String flagName : section.getStringList("flags")) {
+                try {
+                    itemBuilder.withFlags(ItemFlag.valueOf(flagName));
+                } catch (IllegalArgumentException e) {
+                    WildStackerPlugin.log("&c[" + fileName + "] Couldn't convert '" + flagName +
+                            "' into an item flag in '" + section.getCurrentPath() + ".flags', skipping...");
+                }
+            }
         }
 
-        if (section.contains("skull"))
+        if (section.isString("skull"))
             itemBuilder.asSkullOf(section.getString("skull"));
 
         return itemBuilder;
