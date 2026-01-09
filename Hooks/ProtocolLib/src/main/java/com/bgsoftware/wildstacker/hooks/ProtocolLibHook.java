@@ -165,7 +165,8 @@ public final class ProtocolLibHook {
             try {
                 onPacketSendingInternal(event);
             } catch (Throwable error) {
-                error.printStackTrace();
+                if (!(error instanceof UnsupportedOperationException))
+                    error.printStackTrace();
             }
         }
 
