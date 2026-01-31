@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms.v1_20_4;
 
 import com.bgsoftware.common.reflection.ReflectConstructor;
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -55,6 +56,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_20_4.AbstractNMSEntities {
+
+    private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
+            Entity.class, "a", CompoundTag.class);
 
     private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
             new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
@@ -153,9 +157,9 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_20_4.Abst
     }
 
     @Override
-    protected CompoundTag getEntityCompoundTag(net.minecraft.world.entity.LivingEntity livingEntity) {
+    protected CompoundTag getEntityCompoundTag(Entity entity) {
         CompoundTag compoundTag = new CompoundTag();
-        livingEntity.addAdditionalSaveData(compoundTag);
+        ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(entity, compoundTag);
         return compoundTag;
     }
 

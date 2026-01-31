@@ -197,10 +197,10 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_7.Abst
     }
 
     @Override
-    protected CompoundTag getEntityCompoundTag(net.minecraft.world.entity.LivingEntity livingEntity) {
-        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(livingEntity.problemPath(), LOGGER)) {
-            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, livingEntity.registryAccess());
-            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(livingEntity, tagValueOutput);
+    protected CompoundTag getEntityCompoundTag(Entity entity) {
+        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(entity.problemPath(), LOGGER)) {
+            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, entity.registryAccess());
+            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(entity, tagValueOutput);
             return tagValueOutput.buildResult();
         }
     }

@@ -9,7 +9,6 @@ import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
@@ -18,17 +17,17 @@ import java.util.Optional;
 
 public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
 
-    private final LivingEntity livingEntity;
+    private final Entity entity;
     private final StackedEntity stackedEntity;
 
-    public LivingLootEntityAttributes(LivingEntity livingEntity, EntityLootDataBuilder builder) {
+    public LivingLootEntityAttributes(Entity entity, EntityLootDataBuilder builder) {
         super(builder);
-        this.livingEntity = livingEntity;
-        this.stackedEntity = EntityUtils.isStackable(livingEntity) ? WStackedEntity.of(livingEntity) : null;
+        this.entity = entity;
+        this.stackedEntity = EntityUtils.isStackable(entity) ? WStackedEntity.of(entity) : null;
     }
 
-    public LivingEntity getLivingEntity() {
-        return this.livingEntity;
+    public Entity getEntity() {
+        return this.entity;
     }
 
     @Nullable
@@ -41,10 +40,9 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         Entity entityKiller = this.stackedEntity == null ? null : this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
 
         if (entityKiller == null)
-            entityKiller = EntityUtils.getDamagerFromEvent(this.livingEntity.getLastDamageCause(), false, true);
+            entityKiller = EntityUtils.getDamagerFromEvent(this.entity.getLastDamageCause(), false, true);
 
-        return !(entityKiller instanceof LivingEntity) ? null :
-                LootEntityAttributes.newBuilder((LivingEntity) entityKiller).build();
+        return LootEntityAttributes.newBuilder(entityKiller).build();
     }
 
     @Override
@@ -78,7 +76,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
 
     @Nullable
     private EntityDamageEvent.DamageCause getDeathCauseFromEntity() {
-        EntityDamageEvent lastCause = this.livingEntity.getLastDamageCause();
+        EntityDamageEvent lastCause = this.entity.getLastDamageCause();
         return lastCause == null ? null : lastCause.getCause();
     }
 
@@ -88,7 +86,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private boolean isBurningFromEntity() {
-        return this.livingEntity.getFireTicks() > 0;
+        return this.entity.getFireTicks() > 0;
     }
 
     @Override
@@ -98,7 +96,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private int getSlimeSizeFromEntity() {
-        Slime slime = (Slime) this.livingEntity;
+        Slime slime = (Slime) this.entity;
         return slime.getSize();
     }
 
@@ -108,7 +106,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private boolean isCreeperChargedFromEntity() {
-        Creeper creeper = (Creeper) this.livingEntity;
+        Creeper creeper = (Creeper) this.entity;
         return creeper.isPowered();
     }
 
@@ -118,7 +116,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     }
 
     private boolean isRaidCaptainFromEntity() {
-        org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) this.livingEntity;
+        org.bukkit.entity.Raider raider = (org.bukkit.entity.Raider) this.entity;
         return raider.isPatrolLeader();
     }
 }

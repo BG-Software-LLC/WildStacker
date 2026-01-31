@@ -126,10 +126,10 @@ public class LootPair extends FilteredLoot {
     public List<ItemStack> getItems(LootEntityAttributes lootEntityAttributes, int amountOfPairs, int lootBonusLevel) {
         List<ItemStack> items = new LinkedList<>();
 
-        LootEntityAttributes killerEntityData = lootEntityAttributes.getKiller();
+        LootEntityAttributes directKillerEntityData = lootEntityAttributes.getKiller();
 
         for (LootItem lootItem : lootItems) {
-            if (!lootItem.checkKiller(killerEntityData) || !lootItem.checkEntity(lootEntityAttributes))
+            if(!lootItem.checkKiller(directKillerEntityData) || !lootItem.checkEntity(lootEntityAttributes))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);

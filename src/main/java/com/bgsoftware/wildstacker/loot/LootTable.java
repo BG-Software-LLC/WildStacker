@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.json.JsonUtils;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,10 +93,10 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     public List<ItemStack> getDrops(LootEntityAttributes lootEntityAttributes, int lootBonusLevel, int stackAmount) {
         List<ItemStack> drops = new LinkedList<>();
 
-        LootEntityAttributes killerEntityData = lootEntityAttributes.getKiller();
+        LootEntityAttributes directKillerEntityData = lootEntityAttributes.getKiller();
 
         List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                lootPair.checkKiller(killerEntityData) && lootPair.checkEntity(lootEntityAttributes)
+                lootPair.checkKiller(directKillerEntityData) && lootPair.checkEntity(lootEntityAttributes)
         ).collect(Collectors.toList());
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
@@ -108,20 +110,23 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             }
 
             drops.addAll(lootPair.getItems(lootEntityAttributes, amountOfPairs, lootBonusLevel));
-            if (killerEntityData instanceof LivingLootEntityAttributes && killerEntityData.getEntityType() == EntityType.PLAYER) {
-                lootPair.executeCommands((Player) ((LivingLootEntityAttributes) killerEntityData).getLivingEntity(),
-                        amountOfPairs, lootBonusLevel);
+            LootEntityAttributes sourceKillerEntityData = getKillerSourceEntityData(directKillerEntityData);
+            LootEntityAttributes killerEntityDataToCheck = sourceKillerEntityData == null ? directKillerEntityData : sourceKillerEntityData;
+            if (killerEntityDataToCheck instanceof LivingLootEntityAttributes &&
+                    killerEntityDataToCheck.getEntityType() == EntityType.PLAYER) {
+                lootPair.executeCommands((Player) ((LivingLootEntityAttributes) killerEntityDataToCheck).getEntity(), amountOfPairs, lootBonusLevel);
             }
         }
 
         if (lootEntityAttributes instanceof LivingLootEntityAttributes) {
-            LivingEntity livingEntity = ((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity();
+            Entity entity = ((LivingLootEntityAttributes) lootEntityAttributes).getEntity();
+            if (entity instanceof LivingEntity) {
+                if (dropEquipment) {
+                    drops.addAll(EntityUtils.getEquipment((LivingEntity) entity, lootBonusLevel));
+                }
 
-            if (dropEquipment) {
-                drops.addAll(EntityUtils.getEquipment(livingEntity, lootBonusLevel));
+                EntityUtils.clearEquipment((LivingEntity) entity);
             }
-
-            EntityUtils.clearEquipment(livingEntity);
         }
 
         return drops;
@@ -138,20 +143,24 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
         if (minExp >= 0 && maxExp >= 0) {
             if (alwaysDropsExp) {
-                LivingEntity livingEntity = lootEntityAttributes instanceof LivingLootEntityAttributes ?
-                        ((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity() : null;
-                if (livingEntity == null || plugin.getNMSEntities().canDropExp(livingEntity)) {
+                Entity entity = lootEntityAttributes instanceof LivingLootEntityAttributes ?
+                        ((LivingLootEntityAttributes) lootEntityAttributes).getEntity() : null;
+                if (entity == null || (entity instanceof LivingEntity &&
+                        plugin.getNMSEntities().canDropExp((LivingEntity) entity))) {
                     for (int i = 0; i < stackAmount; i++)
                         exp += Random.nextInt(maxExp - minExp + 1) + minExp;
                 }
             }
         } else if (lootEntityAttributes instanceof LivingLootEntityAttributes) {
-            exp = plugin.getNMSEntities().getEntityExp(((LivingLootEntityAttributes) lootEntityAttributes).getLivingEntity());
+            Entity entity = ((LivingLootEntityAttributes) lootEntityAttributes).getEntity();
+            if (entity instanceof LivingEntity) {
+                exp = plugin.getNMSEntities().getEntityExp((LivingEntity) entity);
 
-            if (exp < 0)
-                return exp;
+                if (exp < 0)
+                    return exp;
 
-            exp *= stackAmount;
+                exp *= stackAmount;
+            }
         }
 
         return exp;
@@ -160,6 +169,17 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     @Override
     public String toString() {
         return "LootTable{pairs=" + lootPairs + "}";
+    }
+
+    @Nullable
+    private static LootEntityAttributes getKillerSourceEntityData(LootEntityAttributes killerEntityData) {
+        if (!(killerEntityData instanceof LivingLootEntityAttributes))
+            return null;
+
+        Entity directKiller = ((LivingLootEntityAttributes) killerEntityData).getEntity();
+        Entity sourceKiller = EntityUtils.getSourceDamager(directKiller, true);
+
+        return sourceKiller == directKiller ? null : LootEntityAttributes.newBuilder(sourceKiller).build();
     }
 
 }

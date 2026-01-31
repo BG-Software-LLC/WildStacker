@@ -52,7 +52,6 @@ import org.bukkit.craftbukkit.entity.CraftHappyGhast;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Frog;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pig;
@@ -71,6 +70,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.AbstractNMSEntities {
+
 
     private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
             new ReflectConstructor<>(LivingEntity.class, List.class, int.class);
@@ -206,10 +206,10 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.Abs
     }
 
     @Override
-    protected CompoundTag getEntityCompoundTag(net.minecraft.world.entity.LivingEntity livingEntity) {
-        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(livingEntity.problemPath(), LOGGER)) {
-            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, livingEntity.registryAccess());
-            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(livingEntity, tagValueOutput);
+    protected CompoundTag getEntityCompoundTag(Entity entity) {
+        try (ProblemReporter.ScopedCollector scopedCollector = new ProblemReporter.ScopedCollector(entity.problemPath(), LOGGER)) {
+            TagValueOutput tagValueOutput = TagValueOutput.createWithContext(scopedCollector, entity.registryAccess());
+            ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(entity, tagValueOutput);
             return tagValueOutput.buildResult();
         }
     }

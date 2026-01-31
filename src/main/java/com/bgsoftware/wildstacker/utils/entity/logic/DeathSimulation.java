@@ -161,7 +161,7 @@ public final class DeathSimulation {
 
         // We want to cache the killer of the entity
         if (sourceKiller != null)
-            stackedEntity.setFlag(EntityFlag.CACHED_KILLER, sourceKiller);
+            stackedEntity.setFlag(EntityFlag.CACHED_KILLER, directKiller);
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
 

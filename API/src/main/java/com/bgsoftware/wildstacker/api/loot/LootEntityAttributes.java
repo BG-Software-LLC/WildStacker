@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -42,6 +43,17 @@ public interface LootEntityAttributes {
      */
     static LootEntityAttributes.Builder newBuilder(LivingEntity livingEntity) {
         return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(livingEntity);
+    }
+
+    /**
+     * Create a {@link Builder} for the given entity.
+     * You can overwrite its attributes using the returned {@link Builder}
+     *
+     * @param entity The entity to get the attributes from.
+     * @return The new {@link Builder}
+     */
+    static LootEntityAttributes.Builder newBuilder(Entity entity) {
+        return WildStackerAPI.getWildStacker().getSystemManager().createLootContextBuilder(entity);
     }
 
     /**

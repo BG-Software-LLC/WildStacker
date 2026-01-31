@@ -630,6 +630,11 @@ public final class EntityUtils {
         if (directDamager)
             return damager;
 
+        return getSourceDamager(damager, checkUnusualSources);
+    }
+
+    @Nullable
+    public static Entity getSourceDamager(Entity damager, boolean checkUnusualSources) {
         if (damager instanceof Fireball) {
             Entity fireballDamager = getDamagerFromEvent(damager.getLastDamageCause(), checkUnusualSources, false);
             if (fireballDamager != null) {

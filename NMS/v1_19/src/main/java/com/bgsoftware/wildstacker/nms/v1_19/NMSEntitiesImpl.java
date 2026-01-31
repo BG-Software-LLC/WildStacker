@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v1_19;
 
+import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -50,6 +51,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_19.AbstractNMSEntities {
+
+    private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
+            Entity.class, "a", CompoundTag.class);
 
     @Override
     protected Entity createEntity(CraftWorld craftWorld, Location location, Class<? extends org.bukkit.entity.Entity> entityType) {
@@ -140,9 +144,9 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_19.Abstra
     }
 
     @Override
-    protected CompoundTag getEntityCompoundTag(LivingEntity livingEntity) {
+    protected CompoundTag getEntityCompoundTag(Entity entity) {
         CompoundTag compoundTag = new CompoundTag();
-        livingEntity.addAdditionalSaveData(compoundTag);
+        ENTITY_ADD_ADDITIONAL_SAVE_DATA.invoke(entity, compoundTag);
         return compoundTag;
     }
 

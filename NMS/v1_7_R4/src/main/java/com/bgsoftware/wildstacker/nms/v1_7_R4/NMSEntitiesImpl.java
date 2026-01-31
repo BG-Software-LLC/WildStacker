@@ -315,7 +315,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public boolean checkEntityAttributes(LivingEntity bukkitEntity, Map<String, Object> attributes) {
+    public boolean checkEntityAttributes(org.bukkit.entity.Entity bukkitEntity, Map<String, Object> attributes) {
         Entity entity = ((CraftEntity) bukkitEntity).getHandle();
         NBTTagCompound entityCompound = new NBTTagCompound();
         entity.e(entityCompound);

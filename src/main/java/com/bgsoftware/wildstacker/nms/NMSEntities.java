@@ -90,7 +90,7 @@ public interface NMSEntities {
 
     StackCheckResult areSimilar(EntityTypes entityType, LivingEntity en1, LivingEntity en2);
 
-    boolean checkEntityAttributes(LivingEntity livingEntity, Map<String, Object> attributes);
+    boolean checkEntityAttributes(Entity entity, Map<String, Object> attributes);
 
     void awardKillScore(Player damangerPlayer, Entity bukkitDamaged, Entity damagerEntity);
 

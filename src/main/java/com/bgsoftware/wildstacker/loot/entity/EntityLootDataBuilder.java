@@ -4,15 +4,15 @@ import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
 
     @Nullable
-    private final LivingEntity livingEntity;
+    private final Entity entity;
     public final EntityType entityType;
     private final boolean isRaider;
 
@@ -40,14 +40,14 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
         this(entityType, null);
     }
 
-    public EntityLootDataBuilder(LivingEntity livingEntity) {
-        this(livingEntity.getType(), livingEntity);
+    public EntityLootDataBuilder(Entity entity) {
+        this(entity.getType(), entity);
     }
 
-    private EntityLootDataBuilder(EntityType entityType, @Nullable LivingEntity livingEntity) {
+    private EntityLootDataBuilder(EntityType entityType, @Nullable Entity entity) {
         this.entityType = entityType;
         this.isRaider = EntityTypes.isRaider(entityType);
-        this.livingEntity = livingEntity;
+        this.entity = entity;
     }
 
     @Override
@@ -160,10 +160,10 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
 
     @Override
     public LootEntityAttributes build() {
-        if (this.livingEntity == null) {
+        if (this.entity == null) {
             return new CustomLootEntityAttributes(this);
         } else {
-            return new LivingLootEntityAttributes(this.livingEntity, this);
+            return new LivingLootEntityAttributes(this.entity, this);
         }
     }
 

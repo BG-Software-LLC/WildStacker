@@ -587,6 +587,12 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
+    public LootEntityAttributes.Builder createLootContextBuilder(Entity entity) {
+        Preconditions.checkNotNull(entity, "entity parameter cannot be null.");
+        return new EntityLootDataBuilder(entity);
+    }
+
+    @Override
     public StackedSnapshot getStackedSnapshot(Chunk chunk, boolean loadData) {
         return getStackedSnapshot(chunk);
     }

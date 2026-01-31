@@ -7,8 +7,8 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.data.structures.FastEnumArray;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.json.simple.JSONArray;
 
@@ -27,7 +27,7 @@ public class EntityFilters {
     public static Predicate<LootEntityAttributes> checkPermissionFilter(String permission) {
         return entityData -> entityData.getEntityType() != EntityType.PLAYER ||
                 !(entityData instanceof LivingLootEntityAttributes) ||
-                ((LivingLootEntityAttributes) entityData).getLivingEntity().hasPermission(permission);
+                ((LivingLootEntityAttributes) entityData).getEntity().hasPermission(permission);
     }
 
     public static Predicate<LootEntityAttributes> checkUpgradeFilter(String upgrade) {
@@ -172,8 +172,8 @@ public class EntityFilters {
             if (entityData.getEntityType() != entityType)
                 return false;
 
-            LivingEntity livingEntity = ((LivingLootEntityAttributes) entityData).getLivingEntity();
-            return plugin.getNMSEntities().checkEntityAttributes(livingEntity, advancedFilter);
+            Entity entity = ((LivingLootEntityAttributes) entityData).getEntity();
+            return plugin.getNMSEntities().checkEntityAttributes(entity, advancedFilter);
         };
     }
 

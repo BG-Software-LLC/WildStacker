@@ -462,10 +462,10 @@ public abstract class AbstractNMSEntities implements NMSEntities {
                                        org.bukkit.entity.LivingEntity en2);
 
     @Override
-    public boolean checkEntityAttributes(org.bukkit.entity.LivingEntity bukkitEntity, Map<String, Object> attributes) {
-        LivingEntity livingEntity = ((CraftLivingEntity) bukkitEntity).getHandle();
+    public boolean checkEntityAttributes(org.bukkit.entity.Entity bukkitEntity, Map<String, Object> attributes) {
+        Entity entity = ((CraftEntity) bukkitEntity).getHandle();
 
-        CompoundTag entityCompound = getEntityCompoundTag(livingEntity);
+        CompoundTag entityCompound = getEntityCompoundTag(entity);
 
         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
             Tag tag = entityCompound.get(attribute.getKey());
@@ -487,7 +487,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
 
     protected abstract String getStringTagValue(StringTag tag);
 
-    protected abstract CompoundTag getEntityCompoundTag(LivingEntity livingEntity);
+    protected abstract CompoundTag getEntityCompoundTag(Entity entity);
 
     @Override
     public void awardKillScore(org.bukkit.entity.Player playerKiller,
