@@ -42,7 +42,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         if (entityKiller == null)
             entityKiller = EntityUtils.getDamagerFromEvent(this.entity.getLastDamageCause(), false, true);
 
-        return LootEntityAttributes.newBuilder(entityKiller).build();
+        return entityKiller == null ? null : LootEntityAttributes.newBuilder(entityKiller).build();
     }
 
     @Override
