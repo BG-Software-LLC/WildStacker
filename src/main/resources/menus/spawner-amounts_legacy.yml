@@ -47,11 +47,13 @@ items:
   '%':
     type: STAINED_GLASS_PANE
     data: 5
+    amount: 16
     deposit: 16
     name: '&aAdd +16'
   '^':
     type: STAINED_GLASS_PANE
     data: 5
+    amount: 64
     deposit: 64
     name: '&aAdd +64'
   '*':
@@ -62,10 +64,12 @@ items:
   '-':
     type: STAINED_GLASS_PANE
     data: 14
+    amount: 16
     withdraw: 16
     name: '&cRemove -16'
   '+':
     type: STAINED_GLASS_PANE
     data: 14
+    amount: 64
     withdraw: 64
     name: '&cRemove -64'
