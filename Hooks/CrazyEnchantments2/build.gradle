@@ -10,7 +10,7 @@ dependencies {
     compileOnly 'me.badbones69:CrazyEnchantments:2.5.1'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
-    compileOnly rootProject
+    compileOnly project(":")
 }
 
 if (project.hasProperty('hook.compile_crazyenchantments') &&

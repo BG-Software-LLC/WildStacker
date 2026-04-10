@@ -4,7 +4,7 @@ dependencies {
     compileOnly "org.spigotmc:v1_12_R1:latest"
     compileOnly project(":NMS:Spigot")
     compileOnly project(":API")
-    compileOnly rootProject
+    compileOnly project(":")
 }
 
 if (project.hasProperty('nms.compile_v1_12') && !Boolean.valueOf(project.findProperty("nms.compile_v1_12").toString())) {

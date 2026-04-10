@@ -5,7 +5,7 @@ dependencies {
     compileOnly 'com.sk89q:WorldEdit:7.0.0-beta-05'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
-    compileOnly rootProject
+    compileOnly project(":")
 }
 
 if (project.hasProperty('hook.compile_plotsquared4') &&

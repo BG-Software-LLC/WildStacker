@@ -14,9 +14,9 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseSpawner;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -66,8 +66,10 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
             TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
             if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
                 continue;
-            ChunkPos chunkPos = new ChunkPos(tickingBlockEntity.getPos());
-            if (chunkPos.x == chunkX && chunkPos.z == chunkZ) {
+            BlockPos blockEntityPos = tickingBlockEntity.getPos();
+            int blockEntityChunkX = SectionPos.blockToSectionCoord(blockEntityPos.getX());
+            int blockEntityChunkZ = SectionPos.blockToSectionCoord(blockEntityPos.getZ());
+            if (blockEntityChunkX == chunkX && blockEntityChunkZ == chunkZ) {
                 BlockPos blockPos = tickingBlockEntity.getPos();
                 BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos);
                 if (blockEntity instanceof SpawnerBlockEntity) {

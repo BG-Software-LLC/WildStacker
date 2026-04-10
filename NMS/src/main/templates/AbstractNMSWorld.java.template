@@ -16,10 +16,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TurtleEgg;
 import ${CRAFTBUKKIT_PACKAGE}.CraftWorld;
-import ${CRAFTBUKKIT_PACKAGE}.block.CraftBlock;
-import ${CRAFTBUKKIT_PACKAGE}.block.data.CraftBlockData;
 import ${CRAFTBUKKIT_PACKAGE}.entity.CraftEntity;
 import ${CRAFTBUKKIT_PACKAGE}.entity.CraftPlayer;
 import ${CRAFTBUKKIT_PACKAGE}.entity.CraftRaider;
@@ -108,14 +107,19 @@ public abstract class AbstractNMSWorld implements NMSWorld {
 
     @Override
     public Object getBlockData(Material type, short data) {
-        return CraftBlockData.fromData(CraftMagicNumbers.getBlock(type, (byte) data));
+        BlockState blockState = CraftMagicNumbers.getBlock(type, (byte) data);
+        return getBlockData(blockState);
     }
+
+    protected abstract BlockData getBlockData(BlockState blockState);
 
     @Override
     public boolean isRotatable(Block block) {
-        BlockState blockState = ((CraftBlock) block).getNMS();
+        BlockState blockState = getBlockState(block);
         return blockState.getBlock() instanceof RotatedPillarBlock;
     }
+
+    protected abstract BlockState getBlockState(Block block);
 
     @Override
     public void setTurtleEggsAmount(Block turtleEggBlock, int amount) {
