@@ -57,7 +57,7 @@ public class LootTableSheep extends LootTable {
                 while (dropsIterator.hasNext()) {
                     ItemStack itemStack = dropsIterator.next();
                     if (Materials.isWool(itemStack)) {
-                        ++woolCount;
+                        woolCount += itemStack.getAmount();
                         dropsIterator.remove();
                     }
                 }
