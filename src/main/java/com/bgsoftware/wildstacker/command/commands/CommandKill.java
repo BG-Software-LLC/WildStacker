@@ -14,13 +14,28 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public final class CommandKill implements ICommand {
+
+    private static final Map<String, ApplyFilterFunction> FILTERS = initializeFilters();
+
+    private static Map<String, ApplyFilterFunction> initializeFilters() {
+        Map<String, ApplyFilterFunction> filters = new LinkedHashMap<>();
+
+        filters.put("radius=", CommandKill::applyFilterRadius);
+        filters.put("type=", CommandKill::applyFilterType);
+        filters.put("spawn=", CommandKill::applyFilterSpawn);
+        filters.put("config=", CommandKill::applyFilterConfig);
+
+        return Collections.unmodifiableMap(filters);
+    }
 
     @Override
     public String getLabel() {
@@ -54,108 +69,138 @@ public final class CommandKill implements ICommand {
 
     @Override
     public void perform(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        Set<EntityTypes> entityTypes = new HashSet<>();
-        Set<SpawnCause> spawnCauses = new HashSet<>();
-        IntegerValue integerValue = new IntegerValue(-1);
-        boolean applyTaskFilter = true;
+        KillFilter killFilter = new KillFilter();
 
         if (args.length > 1) {
             for (int i = 1; i < args.length; i++) {
-                if (!args[i].contains("=")) {
+                if (args[i].indexOf('=') < 0) {
                     Locale.COMMAND_USAGE.send(sender, getUsage());
                     return;
                 }
 
-                String value = args[i].split("=")[1];
-                if (args[i].toLowerCase().startsWith("radius=")) {
-                    if (!(sender instanceof Player)) {
-                        sender.sendMessage(ChatColor.RED + "You must be a player to use the radius filter.");
-                        return;
-                    }
-
-                    try {
-                        integerValue.i = Integer.parseInt(value);
-                    } catch (Exception ignored) {
-                        Locale.INVALID_NUMBER.send(sender);
-                        return;
-                    }
-                } else if (args[i].toLowerCase().startsWith("type=")) {
-                    for (String entityType : value.split(",")) {
-                        try {
-                            entityTypes.add(EntityTypes.fromName(entityType.toUpperCase()));
-                        } catch (IllegalArgumentException ex) {
-                            Locale.INVALID_ENTITY.send(sender, entityType);
-                            return;
-                        }
-                    }
-                } else if (args[i].toLowerCase().startsWith("spawn=")) {
-                    for (String spawnCause : value.split(",")) {
-                        try {
-                            spawnCauses.add(SpawnCause.valueOf(spawnCause));
-                        } catch (IllegalArgumentException ex) {
-                            Locale.INVALID_SPAWN_CAUSE.send(sender, spawnCause);
-                            return;
-                        }
-                    }
-                } else if (args[i].toLowerCase().startsWith("config=")) {
-                    applyTaskFilter = Boolean.parseBoolean(value);
+                String[] sections = args[i].split("=");
+                if (sections.length != 2) {
+                    Locale.COMMAND_USAGE.send(sender, getUsage());
+                    return;
                 }
+
+                String type = sections[0].toLowerCase(java.util.Locale.ENGLISH) + "=";
+
+                ApplyFilterFunction filterFunction = FILTERS.get(type);
+                if (filterFunction == null) {
+                    Locale.COMMAND_USAGE.send(sender, getUsage());
+                    return;
+                }
+
+                String value = sections[1];
+
+                if (!filterFunction.apply(sender, value, killFilter))
+                    return;
             }
         }
 
         Predicate<Entity> entityPredicate = entity ->
-                (integerValue.i == -1 || inRadius(((Player) sender).getLocation(), entity.getLocation(), integerValue.i)) &&
-                        (entityTypes.isEmpty() || entityTypes.contains(EntityTypes.fromEntity((LivingEntity) entity))) &&
-                        (spawnCauses.isEmpty() || spawnCauses.contains(WStackedEntity.of(entity).getSpawnCause()));
+                killFilter.isInRange(((Player) sender).getLocation(), entity.getLocation()) &&
+                        killFilter.hasEntityType(EntityTypes.fromEntity((LivingEntity) entity)) &&
+                        killFilter.hasSpawnCause(WStackedEntity.of(entity).getSpawnCause());
 
         Predicate<Item> itemPredicate = item ->
-                integerValue.i == -1 || inRadius(((Player) sender).getLocation(), item.getLocation(), integerValue.i);
+                killFilter.isInRange(((Player) sender).getLocation(), item.getLocation());
 
-        plugin.getSystemManager().performKillAll(entityPredicate, itemPredicate, applyTaskFilter);
+        plugin.getSystemManager().performKillAll(entityPredicate, itemPredicate, killFilter.applyTaskFilter);
     }
 
     @Override
     public List<String> tabComplete(WildStackerPlugin plugin, CommandSender sender, String[] args) {
-        List<String> list = new ArrayList<>();
-        List<String> alreadyFiltered = new ArrayList<>();
+        List<String> list = new LinkedList<>();
 
-        for (int i = 1; i < args.length; i++)
-            alreadyFiltered.add(args[i].toLowerCase());
-
-        if (args.length > 1 && args.length <= 4) {
-            String arg = args[args.length - 1];
-            if ("type=".startsWith(arg.toLowerCase()))
-                list.add("type=");
-            if ("radius=".startsWith(arg.toLowerCase()))
-                list.add("radius=");
-            if ("spawn=".startsWith(arg.toLowerCase()))
-                list.add("spawn=");
-            if ("config=".startsWith(arg.toLowerCase()))
-                list.add("config=");
-        }
-
-        if (alreadyFiltered.stream().anyMatch(arg -> !arg.equals("") && !arg.equals("type=") && !arg.equals("radius=") && !arg.equals("spawn=") && !arg.equals("config="))) {
-            list.clear();
-        } else {
-            list.removeAll(alreadyFiltered);
+        if (args.length > getMinArgs() && args.length <= getMaxArgs()) {
+            String value = args[args.length - 1].toLowerCase(java.util.Locale.ENGLISH);
+            for (String type : FILTERS.keySet()) {
+                if (type.startsWith(value))
+                    list.add(type);
+            }
         }
 
         return list;
     }
 
-    private boolean inRadius(Location player, Location entity, int radius) {
-        return Math.abs(player.getBlockX() - entity.getBlockX()) <= radius &&
-                Math.abs(player.getBlockY() - entity.getBlockY()) <= radius &&
-                Math.abs(player.getBlockY() - entity.getBlockY()) <= radius;
+    private static boolean applyFilterRadius(CommandSender sender, String value, KillFilter filter) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "You must be a player to use the radius filter.");
+            return false;
+        }
+
+        try {
+            filter.radius = Integer.parseInt(value);
+        } catch (Exception ignored) {
+            Locale.INVALID_NUMBER.send(sender);
+            return false;
+        }
+
+        return true;
     }
 
-    private static class IntegerValue {
-
-        private int i;
-
-        IntegerValue(int i) {
-            this.i = i;
+    private static boolean applyFilterType(CommandSender sender, String value, KillFilter filter) {
+        for (String entityType : value.split(",")) {
+            try {
+                filter.entityTypes.add(EntityTypes.fromName(entityType.toUpperCase()));
+            } catch (IllegalArgumentException ex) {
+                Locale.INVALID_ENTITY.send(sender, entityType);
+                return false;
+            }
         }
+
+        return true;
+    }
+
+    private static boolean applyFilterSpawn(CommandSender sender, String value, KillFilter filter) {
+        for (String spawnCause : value.split(",")) {
+            try {
+                filter.spawnCauses.add(SpawnCause.valueOf(spawnCause));
+            } catch (IllegalArgumentException ex) {
+                Locale.INVALID_SPAWN_CAUSE.send(sender, spawnCause);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean applyFilterConfig(CommandSender sender, String value, KillFilter filter) {
+        filter.applyTaskFilter = Boolean.parseBoolean(value);
+        return true;
+    }
+
+    private static class KillFilter {
+
+        private final EnumSet<EntityTypes> entityTypes = EnumSet.noneOf(EntityTypes.class);
+        private final EnumSet<SpawnCause> spawnCauses = EnumSet.noneOf(SpawnCause.class);
+        private int radius = -1;
+        private boolean applyTaskFilter = true;
+
+        private boolean isInRange(Location player, Location entity) {
+            if (radius < 0)
+                return true;
+
+            return Math.abs(player.getBlockX() - entity.getBlockX()) <= radius &&
+                    Math.abs(player.getBlockY() - entity.getBlockY()) <= radius &&
+                    Math.abs(player.getBlockY() - entity.getBlockY()) <= radius;
+        }
+
+        private boolean hasEntityType(EntityTypes entityType) {
+            return entityTypes.isEmpty() || entityTypes.contains(entityType);
+        }
+
+        private boolean hasSpawnCause(SpawnCause spawnCause) {
+            return spawnCauses.isEmpty() || spawnCauses.contains(spawnCause);
+        }
+
+    }
+
+    private interface ApplyFilterFunction {
+
+        boolean apply(CommandSender sender, String value, KillFilter filter);
 
     }
 
