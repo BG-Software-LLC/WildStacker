@@ -53,7 +53,7 @@ import java.util.Objects;
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_19.AbstractNMSEntities {
 
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", CompoundTag.class);
+            Entity.class, "b", CompoundTag.class);
 
     @Override
     protected Entity createEntity(CraftWorld craftWorld, Location location, Class<? extends org.bukkit.entity.Entity> entityType) {

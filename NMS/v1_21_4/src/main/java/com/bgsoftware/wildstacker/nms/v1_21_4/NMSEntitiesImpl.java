@@ -63,7 +63,7 @@ import java.util.Objects;
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.AbstractNMSEntities {
 
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", CompoundTag.class);
+            Entity.class, "b", CompoundTag.class);
     private static final ReflectConstructor<EntityDeathEvent> OLD_DEATH_EVENT_CONSTRUCTOR =
             new ReflectConstructor<>(org.bukkit.entity.LivingEntity.class, List.class, int.class);
     private static final boolean DAMAGESOURCE_CAUSE_SUPPORT = new ReflectMethod<>(DamageSource.class,
