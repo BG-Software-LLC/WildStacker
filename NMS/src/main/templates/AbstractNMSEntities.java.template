@@ -15,7 +15,7 @@ import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.${CRITERIA_TRIGGERS_SUBPACKAGE}.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NumericTag;
@@ -185,7 +185,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
         ServerLevel serverLevel = ((CraftWorld) bukkitVillager.getWorld()).getHandle();
 
         Villager villager = ((CraftVillager) bukkitVillager).getHandle();
-        ZombieVillager zombieVillager = createEntityType(EntityType.ZOMBIE_VILLAGER, serverLevel, false);
+        ZombieVillager zombieVillager = createEntityType(${ENTITY_TYPE_VALUES_CLASS}.ZOMBIE_VILLAGER, serverLevel, false);
 
         if (zombieVillager == null)
             return null;
@@ -700,7 +700,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
         ItemStack mendingItem = mendingItemAndEquipmentSlot.getValue();
 
         if (!mendingItem.isEmpty()) {
-            ExperienceOrb experienceOrb = createEntityType(EntityType.EXPERIENCE_ORB, serverLevel, true);
+            ExperienceOrb experienceOrb = createEntityType(${ENTITY_TYPE_VALUES_CLASS}.EXPERIENCE_ORB, serverLevel, true);
             setExperienceOrbValue(experienceOrb, amount);
 
             try {

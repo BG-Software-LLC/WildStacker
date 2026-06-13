@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.nms.entity.INMSEntityEquipment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +37,10 @@ public interface NMSAdapter {
 
     default void setOminousBottleAmplifier(ItemMeta itemMeta, int amplifier) {
         // Not implemented
+    }
+
+    default ItemStack createSulfurCubeBucketItem(Entity sulfurCube) {
+        throw new UnsupportedOperationException("Not supported in this version");
     }
 
     Object getChatMessage(String message);

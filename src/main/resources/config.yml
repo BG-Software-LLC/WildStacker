@@ -306,6 +306,7 @@ entities:
     SKELETON_TYPE: true
     SLIME_SIZE: true
     SPAWN_REASON: false
+    SULFUR_CUBE_BLOCK: true
     TROPICALFISH_BODY_COLOR: true
     TROPICALFISH_TYPE: true
     TROPICALFISH_TYPE_COLOR: true

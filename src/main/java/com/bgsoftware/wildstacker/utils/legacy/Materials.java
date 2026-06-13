@@ -61,8 +61,8 @@ public enum Materials {
         return hasTag(itemStack, Tag.WOOL);
     }
 
-    public static boolean isFishBucket(@Nullable ItemStack itemStack) {
-        return hasTag(itemStack, Tag.FISH_BUCKET);
+    public static boolean isFishBucket(@Nullable Material type) {
+        return hasTag(type, Tag.FISH_BUCKET);
     }
 
     public static boolean isSoup(@Nullable ItemStack itemStack) {

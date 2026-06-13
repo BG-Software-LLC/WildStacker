@@ -64,10 +64,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.AbstractNMSEntities {
 
@@ -318,6 +321,21 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.Abs
         } else {
             return new EntityDeathEvent(livingEntity, lastDamage.getDamageSource(), drops, droppedExp);
         }
+    }
+
+    @Override
+    public Optional<org.bukkit.inventory.ItemStack> getBodyItem(org.bukkit.entity.Entity entity) {
+        EntityEquipment entityEquipment = ((LivingEntity) entity).getEquipment();
+        org.bukkit.inventory.ItemStack bodyItem = entityEquipment == null ? null :
+                entityEquipment.getItem(org.bukkit.inventory.EquipmentSlot.BODY);
+        return bodyItem == null || bodyItem.getType().isAir() ? Optional.empty() : Optional.of(bodyItem);
+    }
+
+    @Override
+    public void setBodyItem(org.bukkit.entity.Entity entity, @Nullable org.bukkit.inventory.ItemStack itemStack) {
+        EntityEquipment entityEquipment = ((LivingEntity) entity).getEquipment();
+        if(entityEquipment != null)
+            entityEquipment.setItem(org.bukkit.inventory.EquipmentSlot.BODY, itemStack);
     }
 
     private static ClientboundAddEntityPacket getAddEntityPacketForEntity(Entity entity) {

@@ -69,12 +69,13 @@ public interface NMSEntities {
 
     void removeStriderSaddle(Entity strider);
 
-    default Optional<ItemStack> getHappyGhastHaveHarness(Entity happyGhast) {
+    default Optional<ItemStack> getBodyItem(Entity entity) {
+        // Implemented only in 1.21.6+ for Happy Ghasts
         return Optional.empty();
     }
 
-    default void removeHappyGhastHarness(Entity happyGhast) {
-
+    default void setBodyItem(Entity entity, @Nullable ItemStack itemStack) {
+        // Implemented only in 1.21.6+ for Happy Ghasts
     }
 
     void setTurtleEgg(Entity turtle);

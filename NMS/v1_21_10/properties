@@ -21,3 +21,5 @@ FOX_SUBPACKAGE=animal.fox
 TURTLE_SUBPACKAGE=animal.turtle
 ZOMBIE_VILLAGER_SUBPACKAGE=monster.zombie
 VILLAGER_SUBPACKAGE=npc.villager
+CRITERIA_TRIGGERS_SUBPACKAGE=advancements
+ENTITY_TYPE_VALUES_CLASS=net.minecraft.world.entity.EntityType

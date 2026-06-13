@@ -60,6 +60,8 @@ public final class DeathSimulation {
     private static final Material CROSSBOW_TYPE = Materials.getMaterialOrNull("CROSSBOW");
     @Nullable
     private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
+    @Nullable
+    private static final EntityType WITHER_SKULL_TYPE = EntityUtils.getEntityTypeSafe("WITHER_SKULL");
 
     private static boolean sweepingEdgeHandled = false;
 
@@ -78,6 +80,10 @@ public final class DeathSimulation {
                                                  boolean fromDeathEvent) {
         if (!plugin.getSettings().entitiesStackingEnabled && stackedEntity.getStackAmount() <= 1)
             return new EntityDamageData(false, Collections.emptyMap());
+
+        // We change WITHER_SKULL to the actual WITHER that shoot the skull
+        if (directKiller != null && directKiller.getType() == WITHER_SKULL_TYPE)
+            directKiller = sourceKiller;
 
         boolean isSourceKillerPlayer = sourceKiller instanceof Player;
 
@@ -425,7 +431,7 @@ public final class DeathSimulation {
         ReflectField<HandlerList> field = new ReflectField<>(
                 EntityDamageEvent.class, HandlerList.class, "handlers");
 
-        if(!field.isValid()) {
+        if (!field.isValid()) {
             field = new ReflectField<>(
                     EntityDamageEvent.class, HandlerList.class, "HANDLER_LIST");
         }

@@ -179,6 +179,7 @@ public final class LootHandler {
             saveLootTable("squid_baby");
         saveLootTable(EntityTypes.STRAY, "stray");
         saveLootTable(EntityTypes.STRIDER, "strider", "strider_baby");
+        saveLootTable(EntityTypes.SULFUR_CUBE, "sulfur_cube", "sulfur_cube_baby");
         saveLootTable(EntityTypes.TADPOLE, "tadpole");
         saveLootTable(EntityTypes.TRADER_LLAMA, "trader_llama");
         saveLootTable(EntityTypes.TROPICAL_FISH, "tropical_fish");

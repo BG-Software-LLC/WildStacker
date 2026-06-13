@@ -81,6 +81,7 @@ public enum EntityTypes {
     SQUID,
     STRAY,
     STRIDER,
+    SULFUR_CUBE,
     TADPOLE,
     TRADER_LLAMA,
     TROPICAL_FISH,
