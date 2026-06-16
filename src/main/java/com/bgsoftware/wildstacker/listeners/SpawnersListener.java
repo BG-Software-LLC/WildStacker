@@ -580,7 +580,7 @@ public final class SpawnersListener implements Listener {
         if (!plugin.getSettings().changeUsingEggs) {
             e.setCancelled(true);
 
-            if (EntitiesListener.IMP.handleSpawnerEggUse(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e)) {
+            if (EntitiesListener.IMP.handleSpawnEggInteraction(e.getItem(), e.getClickedBlock(), e.getBlockFace(), e)) {
                 try {
                     EntityType entityType = EntityType.valueOf(ItemUtils.getEntityType(e.getItem()).name());
                     plugin.getNMSEntities().createEntity(e.getClickedBlock().getRelative(e.getBlockFace())

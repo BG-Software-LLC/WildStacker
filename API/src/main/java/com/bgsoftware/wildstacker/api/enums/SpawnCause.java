@@ -3,6 +3,8 @@ package com.bgsoftware.wildstacker.api.enums;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 
 public enum SpawnCause {
 
@@ -54,6 +56,7 @@ public enum SpawnCause {
     BUILD_COPPERGOLEM(42),
     POTION_EFFECT(43),
     REANIMATE(44),
+    BUCKET(45),
 
     /**
      * Custom spawn causes.
@@ -71,6 +74,21 @@ public enum SpawnCause {
     MINIATURE_PETS(111),
     CRAZY_ENCHANTMENTS(112);
 
+    private static final Map<CreatureSpawnEvent.SpawnReason, SpawnCause> BUKKIT_MAP = initializeBukkitMap();
+
+    private static Map<CreatureSpawnEvent.SpawnReason, SpawnCause> initializeBukkitMap() {
+        EnumMap<CreatureSpawnEvent.SpawnReason, SpawnCause> map = new EnumMap<>(CreatureSpawnEvent.SpawnReason.class);
+
+        for (CreatureSpawnEvent.SpawnReason spawnReason : CreatureSpawnEvent.SpawnReason.values()) {
+            try {
+                map.put(spawnReason, SpawnCause.valueOf(spawnReason.name()));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return map;
+    }
+
     private final int id;
 
     SpawnCause(int id) {
@@ -78,7 +96,7 @@ public enum SpawnCause {
     }
 
     public static SpawnCause valueOf(CreatureSpawnEvent.SpawnReason spawnReason) {
-        return matchCause(spawnReason.name());
+        return BUKKIT_MAP.getOrDefault(spawnReason, DEFAULT);
     }
 
     public static SpawnCause valueOf(int id) {
