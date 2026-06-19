@@ -88,10 +88,6 @@ public final class EntityUtils {
             .findFirst().orElse(null);
 
     @Nullable
-    private static final EntityType WIND_CHARGE = getEntityTypeSafe("WIND_CHARGE");
-    @Nullable
-    private static final EntityType BREEZE_WIND_CHARGE = getEntityTypeSafe("BREEZE_WIND_CHARGE");
-    @Nullable
     private static final EntityType ARMOR_STAND = getEntityTypeSafe("ARMOR_STAND");
     @Nullable
     private static final EntityType MANNEQUIN = getEntityTypeSafe("MANNEQUIN");
@@ -657,11 +653,6 @@ public final class EntityUtils {
         }
 
         return damager;
-    }
-
-    public static boolean shouldIgnoreExplodeEvent(EntityType entityType) {
-        // WindCharge don't affect blocks
-        return entityType == WIND_CHARGE || entityType == BREEZE_WIND_CHARGE;
     }
 
     @Nullable

@@ -360,8 +360,7 @@ public final class SpawnersListener implements Listener {
     //Priority is high so it can be fired before SilkSpawners
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().spawnersStackingEnabled ||
-                EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
+        if (!plugin.getSettings().spawnersStackingEnabled || plugin.getNMSAdapter().isSoftExplosion(e))
             return;
 
         UUID explodeSource = explodableSources.get(e.getEntity());

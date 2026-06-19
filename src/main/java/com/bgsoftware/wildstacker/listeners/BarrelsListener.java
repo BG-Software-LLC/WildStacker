@@ -264,8 +264,7 @@ public final class BarrelsListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent e) {
-        if (!plugin.getSettings().barrelsStackingEnabled ||
-                EntityUtils.shouldIgnoreExplodeEvent(e.getEntityType()))
+        if (!plugin.getSettings().barrelsStackingEnabled || plugin.getNMSAdapter().isSoftExplosion(e))
             return;
 
         Iterator<Block> blockListIterator = e.blockList().iterator();

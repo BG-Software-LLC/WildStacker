@@ -9,6 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
+import org.bukkit.ExplosionResult;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
 
@@ -116,6 +118,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_3.Abstr
             return;
 
         ominousBottleMeta.setAmplifier(amplifier);
+    }
+
+    @Override
+    public boolean isSoftExplosion(EntityExplodeEvent event) {
+        return event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK;
     }
 
 }

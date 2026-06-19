@@ -24,6 +24,8 @@ import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.bukkit.ExplosionResult;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.slf4j.Logger;
@@ -150,6 +152,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_10.Abst
             return;
 
         ominousBottleMeta.setAmplifier(amplifier);
+    }
+
+    @Override
+    public boolean isSoftExplosion(EntityExplodeEvent event) {
+        return event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK;
     }
 
 }
