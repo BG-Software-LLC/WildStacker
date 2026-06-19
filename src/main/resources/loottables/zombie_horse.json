@@ -6,8 +6,8 @@
         {
           "type": "ROTTEN_FLESH",
           "chance": 100,
-          "min": 0,
-          "max": 2,
+          "min": 2,
+          "max": 3,
           "looting": true
         }
       ]

@@ -6,20 +6,15 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.json.JsonUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable {
 
@@ -39,51 +34,6 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         this.alwaysDropsExp = alwaysDropsExp;
     }
 
-//    @Nullable
-//    static Entity getEntityKiller(StackedEntity stackedEntity) {
-//        Entity entityKillerCached = stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
-//        if (entityKillerCached != null)
-//            return entityKillerCached;
-//
-//        return EntityUtils.getDamagerFromEvent(stackedEntity.getLivingEntity().getLastDamageCause(), false);
-//    }
-//
-//    static boolean isKilledByPlayer(StackedEntity stackedEntity) {
-//        return getKiller(stackedEntity) != null;
-//    }
-//
-//    static Player getKiller(StackedEntity stackedEntity) {
-//        return stackedEntity.getLivingEntity().getKiller();
-//    }
-//
-//    @Nullable
-//    static EntityDamageEvent.DamageCause getDeathCause(Entity entity) {
-//        EntityDamageEvent lastCause = entity.getLastDamageCause();
-//        return lastCause == null ? null : lastCause.getCause();
-//    }
-
-    public static LootTable fromJson(JSONObject jsonObject, String lootTableName) {
-        boolean dropEquipment = (boolean) jsonObject.getOrDefault("dropEquipment", true);
-        boolean alwaysDropsExp = false;
-        int min = JsonUtils.getInt(jsonObject, "min", -1);
-        int max = JsonUtils.getInt(jsonObject, "max", -1);
-        int minExp = -1, maxExp = -1;
-
-        if (jsonObject.containsKey("exp")) {
-            JSONObject expObject = (JSONObject) jsonObject.get("exp");
-            minExp = JsonUtils.getInt(expObject, "min", -1);
-            maxExp = JsonUtils.getInt(expObject, "max", -1);
-            alwaysDropsExp = (boolean) expObject.getOrDefault("always-drop", false);
-        }
-
-        List<LootPair> lootPairs = new ArrayList<>();
-        if (jsonObject.containsKey("pairs")) {
-            ((JSONArray) jsonObject.get("pairs")).forEach(element -> lootPairs.add(LootPair.fromJson(((JSONObject) element), lootTableName)));
-        }
-
-        return new LootTable(lootPairs, min, max, minExp, maxExp, dropEquipment, alwaysDropsExp);
-    }
-
     @Override
     public List<ItemStack> getDrops(StackedEntity stackedEntity, int lootBonusLevel, int stackAmount) {
         return getDrops(LootEntityAttributes.newBuilder(stackedEntity).build(), lootBonusLevel, stackAmount);
@@ -94,15 +44,17 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new LinkedList<>();
 
         LootEntityAttributes directKillerEntityData = lootEntityAttributes.getKiller();
-
-        List<LootPair> filteredPairs = lootPairs.stream().filter(lootPair ->
-                lootPair.checkKiller(directKillerEntityData) && lootPair.checkEntity(lootEntityAttributes)
-        ).collect(Collectors.toList());
+        LootEntityAttributes vehicleEntityData = lootEntityAttributes.getVehicle();
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
                 Random.nextInt(min, max, stackAmount);
 
-        for (LootPair lootPair : filteredPairs) {
+        for (LootPair lootPair : this.lootPairs) {
+            if (!lootPair.checkEntity(lootEntityAttributes) ||
+                    (!lootEntityAttributes.isIgnoreEntityKiller() && !lootPair.checkKiller(directKillerEntityData)) ||
+                    (!lootEntityAttributes.isIgnoreEntityVehicle() && !lootPair.checkVehicle(vehicleEntityData)))
+                continue;
+
             int amountOfPairs = (int) (lootPair.getChance() * amountOfDifferentPairs / 100);
 
             if (amountOfPairs == 0) {

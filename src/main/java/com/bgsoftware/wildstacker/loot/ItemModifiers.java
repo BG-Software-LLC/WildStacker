@@ -6,19 +6,26 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class ItemModifiers {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
     public static ItemModifierFunction countModifier(int min, int max, int limit) {
         return (lootItem, itemStack, itemMeta, amountOfItems, lootBonusLevel) -> {
-            int lootingBonus = 0;
+            int lootingBonusMin = 0;
+            int lootingBonusMax = 0;
 
-            if (lootItem.isLooting() && lootBonusLevel > 0) {
-                lootingBonus = Random.nextInt(lootBonusLevel + 1);
+            if (lootBonusLevel > 0) {
+                Optional<LootItem.Looting> lootingOpt = lootItem.getLooting();
+                if (lootingOpt.isPresent()) {
+                    lootingBonusMin += lootingOpt.get().getMin() * lootBonusLevel;
+                    lootingBonusMax = lootingOpt.get().getMax() * lootBonusLevel;
+                }
             }
 
-            int itemAmount = Random.nextInt(min + lootingBonus, max + lootingBonus, amountOfItems);
+            int itemAmount = Random.nextInt(min + lootingBonusMin, max + lootingBonusMax, amountOfItems);
 
             if (itemAmount <= 0)
                 return false;

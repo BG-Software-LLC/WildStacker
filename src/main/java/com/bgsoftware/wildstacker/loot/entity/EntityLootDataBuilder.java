@@ -20,6 +20,9 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     public LootEntityAttributes killerEntityData;
     public boolean ignoreEntityKiller;
     @Nullable
+    public LootEntityAttributes vehicleEntityData;
+    public boolean ignoreEntityVehicle;
+    @Nullable
     public SpawnerUpgrade upgrade;
     public boolean ignoreUpgrade;
     @Nullable
@@ -59,6 +62,18 @@ public class EntityLootDataBuilder implements LootEntityAttributes.Builder {
     @Override
     public LootEntityAttributes.Builder setIgnoreEntityKiller(boolean ignoreEntityKiller) {
         this.ignoreEntityKiller = ignoreEntityKiller;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setVehicle(LootEntityAttributes vehicleEntityData) {
+        this.vehicleEntityData = vehicleEntityData;
+        return this;
+    }
+
+    @Override
+    public LootEntityAttributes.Builder setIgnoreEntityVehicle(boolean ignoreEntityVehicle) {
+        this.ignoreEntityVehicle = ignoreEntityVehicle;
         return this;
     }
 

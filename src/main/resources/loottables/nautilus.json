@@ -1,6 +1,7 @@
 {
   "pairs": [
     {
+      "killedByPlayer": true,
       "chance": 100,
       "lootingChance": 1,
       "items": [

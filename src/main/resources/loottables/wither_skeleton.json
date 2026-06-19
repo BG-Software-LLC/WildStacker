@@ -5,8 +5,8 @@
       "items": [
         {
           "type": "COAL",
-          "chance": 33,
-          "min": 1,
+          "chance": 100,
+          "min": -1,
           "max": 1,
           "looting": true
         }

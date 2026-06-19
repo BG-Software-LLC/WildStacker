@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.loot;
+package com.bgsoftware.wildstacker.loot.filters;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.SpawnCause;

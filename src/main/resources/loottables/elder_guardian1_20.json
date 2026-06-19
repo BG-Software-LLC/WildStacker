@@ -49,8 +49,6 @@
     {
       "killedByPlayer": true,
       "chance": 100,
-      "min": 1,
-      "max": 1,
       "items": [
         {
           "type": "WET_SPONGE",
@@ -91,13 +89,11 @@
       ]
     },
     {
-      "chance": 20,
-      "min": 1,
-      "max": 1,
+      "chance": 100,
       "items": [
         {
           "type": "TIDE_ARMOR_TRIM_SMITHING_TEMPLATE",
-          "chance": 100,
+          "chance": 20,
           "min": 1,
           "max": 1
         }

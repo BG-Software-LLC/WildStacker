@@ -6,7 +6,7 @@
         {
           "type": "STRING",
           "chance": 100,
-          "min": 0,
+          "min": 2,
           "max": 5,
           "looting": true
         }

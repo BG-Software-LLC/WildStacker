@@ -22,7 +22,7 @@
           "type": "LEATHER",
           "chance": 100,
           "min": 0,
-          "max": 2,
+          "max": 1,
           "looting": true
         }
       ]

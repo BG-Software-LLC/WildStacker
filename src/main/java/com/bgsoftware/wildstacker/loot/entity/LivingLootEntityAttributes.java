@@ -36,6 +36,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
         return Optional.ofNullable(super.getKiller()).orElseGet(this::getKillerFromEntity);
     }
 
+    @Nullable
     private LootEntityAttributes getKillerFromEntity() {
         Entity entityKiller = this.stackedEntity == null ? null : this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
 
@@ -43,6 +44,18 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
             entityKiller = EntityUtils.getDamagerFromEvent(this.entity.getLastDamageCause(), false, true);
 
         return entityKiller == null ? null : LootEntityAttributes.newBuilder(entityKiller).build();
+    }
+
+    @Override
+    @Nullable
+    public LootEntityAttributes getVehicle() {
+        return Optional.ofNullable(super.getKiller()).orElseGet(this::getVehicleFromEntity);
+    }
+
+    @Nullable
+    private LootEntityAttributes getVehicleFromEntity() {
+        Entity vehicleEntity = this.entity.getVehicle();
+        return vehicleEntity == null ? null : LootEntityAttributes.newBuilder(vehicleEntity).build();
     }
 
     @Override

@@ -73,6 +73,16 @@ public interface LootEntityAttributes {
     boolean isIgnoreEntityKiller();
 
     /**
+     * Get the vehicle of the entity, if exists.
+     */
+    @Nullable
+    LootEntityAttributes getVehicle();
+
+    /**
+     * Whether to ignore vehicle related checks when filtering out drops.
+     */
+    boolean isIgnoreEntityVehicle();
+    /**
      * Get the upgrade of the entity, if exists.
      */
     @Nullable
@@ -183,6 +193,20 @@ public interface LootEntityAttributes {
          * @param ignoreEntityKiller Whether to ignore killer related checks.
          */
         Builder setIgnoreEntityKiller(boolean ignoreEntityKiller);
+
+        /**
+         * Set the attributes of the entity's vehicle.
+         *
+         * @param vehicleEntityAttributes The vehicle entity attributes.
+         */
+        Builder setVehicle(LootEntityAttributes vehicleEntityAttributes);
+
+        /**
+         * Set whether to ignore vehicle related checks when filtering out drops.
+         *
+         * @param ignoreEntityVehicle Whether to ignore vehicle related checks.
+         */
+        Builder setIgnoreEntityVehicle(boolean ignoreEntityVehicle);
 
         /**
          * Set the upgrade of the entity.

@@ -13,9 +13,7 @@
       ]
     },
     {
-      "killer": [
-        "PLAYER"
-      ],
+      "killedByPlayer": true,
       "chance": 100,
       "items": [
         {

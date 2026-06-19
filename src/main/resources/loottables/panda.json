@@ -6,9 +6,8 @@
         {
           "type": "BAMBOO",
           "chance": 100,
-          "min": 0,
-          "max": 2,
-          "looting": true
+          "min": 1,
+          "max": 1
         }
       ]
     },

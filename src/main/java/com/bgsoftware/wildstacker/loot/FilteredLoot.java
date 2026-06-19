@@ -11,10 +11,14 @@ public abstract class FilteredLoot {
 
     private final List<Predicate<LootEntityAttributes>> entityFilters = new LinkedList<>();
     private final List<Predicate<LootEntityAttributes>> killerFilters = new LinkedList<>();
+    private final List<Predicate<LootEntityAttributes>> vehicleFilters = new LinkedList<>();
 
-    protected FilteredLoot(List<Predicate<LootEntityAttributes>> entityFilters, List<Predicate<LootEntityAttributes>> killerFilters) {
+    protected FilteredLoot(List<Predicate<LootEntityAttributes>> entityFilters,
+                           List<Predicate<LootEntityAttributes>> killerFilters,
+                           List<Predicate<LootEntityAttributes>> vehicleFilters) {
         this.entityFilters.addAll(entityFilters);
         this.killerFilters.addAll(killerFilters);
+        this.vehicleFilters.addAll(vehicleFilters);
     }
 
     public boolean checkEntity(@Nullable LootEntityAttributes entity) {
@@ -23,6 +27,10 @@ public abstract class FilteredLoot {
 
     public boolean checkKiller(@Nullable LootEntityAttributes killer) {
         return checkFiltersOnEntity(this.killerFilters, killer);
+    }
+
+    public boolean checkVehicle(@Nullable LootEntityAttributes vehicle) {
+        return checkFiltersOnEntity(this.vehicleFilters, vehicle);
     }
 
     private static boolean checkFiltersOnEntity(List<Predicate<LootEntityAttributes>> filters, @Nullable LootEntityAttributes entity) {

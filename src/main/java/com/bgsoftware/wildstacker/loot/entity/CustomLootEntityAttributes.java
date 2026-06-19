@@ -17,6 +17,9 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     private final LootEntityAttributes killerEntityData;
     private final boolean ignoreEntityKiller;
     @Nullable
+    private final LootEntityAttributes vehicleEntityData;
+    private final boolean ignoreEntityVehicle;
+    @Nullable
     private final SpawnerUpgrade upgrade;
     private final boolean ignoreUpgrade;
     @Nullable
@@ -38,6 +41,8 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
         this.isRaider = EntityTypes.isRaider(this.entityType);
         this.killerEntityData = builder.killerEntityData;
         this.ignoreEntityKiller = builder.ignoreEntityKiller;
+        this.vehicleEntityData = builder.vehicleEntityData;
+        this.ignoreEntityVehicle = builder.ignoreEntityVehicle;
         this.upgrade = builder.upgrade;
         this.ignoreUpgrade = builder.ignoreUpgrade;
         this.spawnCause = builder.spawnCause;
@@ -67,6 +72,17 @@ public class CustomLootEntityAttributes implements LootEntityAttributes {
     @Override
     public boolean isIgnoreEntityKiller() {
         return this.ignoreEntityKiller;
+    }
+
+    @Override
+    @Nullable
+    public LootEntityAttributes getVehicle() {
+        return this.vehicleEntityData;
+    }
+
+    @Override
+    public boolean isIgnoreEntityVehicle() {
+        return this.ignoreEntityVehicle;
     }
 
     @Nullable

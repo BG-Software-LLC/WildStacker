@@ -13,9 +13,22 @@
       ]
     },
     {
-      "killedByPlayer": true,
-      "chance": 2.5,
-      "lootingChance": 1,
+      "chance": 100,
+      "vehicle": [
+        "CAMEL_HUSK"
+      ],
+      "items": [
+        {
+          "type": "RABBIT_FOOT",
+          "chance": 100,
+          "min": 0,
+          "max": 1,
+          "looting": true
+        }
+      ]
+    },
+    {
+      "chance": 1.5,
       "items": [
         {
           "type": "IRON_INGOT",

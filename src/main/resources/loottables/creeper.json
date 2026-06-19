@@ -39,7 +39,10 @@
     {
       "killer": [
         "SKELETON",
-        "STRAY"
+        "STRAY",
+        "BOGGED",
+        "WITHER_SKELETON",
+        "PARCHED"
       ],
       "chance": 100,
       "items": [

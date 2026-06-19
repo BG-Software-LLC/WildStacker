@@ -2,7 +2,7 @@ package com.bgsoftware.wildstacker.handlers;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.loot.LootTable;
-import com.bgsoftware.wildstacker.loot.LootTableSheep;
+import com.bgsoftware.wildstacker.loot.parser.LootParser;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"FieldCanBeLocal", "ResultOfMethodCallIgnored", "ConstantConditions"})
 public final class LootHandler {
 
     private static final boolean SUPPORT_BABY_1_22 = isSupportBaby122();
@@ -58,7 +57,7 @@ public final class LootHandler {
                     WildStackerPlugin.log("&cDetected entity of this file is " + key);
                 }
 
-                lootTables.put(key, key.contains("SHEEP") ? LootTableSheep.fromJson(jsonObject, file.getName()) : LootTable.fromJson(jsonObject, file.getName()));
+                lootTables.put(key, LootParser.parseLootTable(jsonObject, file.getName()));
             } catch (Exception ex) {
                 ex.printStackTrace();
                 WildStackerPlugin.log("[" + file.getName() + "] Couldn't load loot table:");
