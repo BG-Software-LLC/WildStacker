@@ -12,6 +12,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.spawning.SpawnerRateContext;
+import com.bgsoftware.wildstacker.api.spawning.SpawnerRateModifier;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -432,5 +434,27 @@ public interface SystemManager {
      * @param spawnCondition The spawn condition to register.
      */
     SpawnCondition registerSpawnCondition(SpawnCondition spawnCondition);
+
+    /**
+     * Register a spawner-rate modifier into the system.
+     * If a modifier already exists with the same id, the new one will override the old one.
+     *
+     * @param modifier The modifier to register.
+     */
+    SpawnerRateModifier registerSpawnerRateModifier(SpawnerRateModifier modifier);
+
+    /**
+     * Remove a spawner-rate modifier from the system.
+     *
+     * @param id The id of the modifier to remove.
+     */
+    void unregisterSpawnerRateModifier(String id);
+
+    /**
+     * Get the combined spawner-rate multiplier for the given context.
+     *
+     * @param context The current spawner ticking context.
+     */
+    double getSpawnerRateMultiplier(SpawnerRateContext context);
 
 }

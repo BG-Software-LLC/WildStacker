@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.spawning.SpawnerRateContext;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.Debug;
@@ -57,6 +58,7 @@ public abstract class AbstractStackedBaseSpawner extends BaseSpawner {
 
     private int spawnedEntities = 0;
     private int tickDelay = 0;
+    private double spawnerRateRemainder = 0.0D;
     private WStackedEntity demoEntity = null;
 
     public AbstractStackedBaseSpawner(SpawnerBlockEntity spawnerBlockEntity, StackedSpawner stackedSpawner) {
@@ -122,11 +124,14 @@ public abstract class AbstractStackedBaseSpawner extends BaseSpawner {
             return;
         }
 
-        if (this.spawnDelay <= -tickDelay)
+        int consumedTickDelay = getModifiedTickDelay(serverLevel, blockPos, tickDelay, stackedSpawner);
+
+        if (this.spawnDelay <= -consumedTickDelay)
             resetSpawnDelay(serverLevel, blockPos);
 
         if (this.spawnDelay > 0) {
-            this.spawnDelay -= tickDelay;
+            if (consumedTickDelay > 0)
+                this.spawnDelay -= consumedTickDelay;
             return;
         }
 
@@ -313,6 +318,32 @@ public abstract class AbstractStackedBaseSpawner extends BaseSpawner {
     }
 
     protected abstract int getConfigTickDelay(ServerLevel serverLevel);
+
+    private int getModifiedTickDelay(ServerLevel serverLevel, BlockPos blockPos, int baseTickDelay, WStackedSpawner stackedSpawner) {
+        if (baseTickDelay <= 0)
+            return baseTickDelay;
+
+        Location location = new Location(serverLevel.getWorld(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        SpawnerRateContext context = new SpawnerRateContext(
+                stackedSpawner,
+                location,
+                stackedSpawner.getSpawnedType(),
+                stackedSpawner.getStackAmount(),
+                baseTickDelay,
+                this.spawnDelay
+        );
+
+        double multiplier = plugin.getSystemManager().getSpawnerRateMultiplier(context);
+        if (Double.isNaN(multiplier) || Double.isInfinite(multiplier))
+            multiplier = 1.0D;
+
+        multiplier = Math.max(0.0D, multiplier);
+        double modifiedTickDelay = baseTickDelay * multiplier + this.spawnerRateRemainder;
+        int consumedTickDelay = (int) modifiedTickDelay;
+        this.spawnerRateRemainder = modifiedTickDelay - consumedTickDelay;
+
+        return consumedTickDelay;
+    }
 
     protected abstract Pair<Optional<EntityType<?>>, CompoundTag> getEntityDataFromSpawnData(ServerLevel serverLevel, SpawnData spawnData);
 

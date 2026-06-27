@@ -18,6 +18,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedBarrel;
 import com.bgsoftware.wildstacker.api.objects.UnloadedStackedSpawner;
 import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
+import com.bgsoftware.wildstacker.api.spawning.SpawnerRateContext;
+import com.bgsoftware.wildstacker.api.spawning.SpawnerRateModifier;
 import com.bgsoftware.wildstacker.database.DBSession;
 import com.bgsoftware.wildstacker.hooks.DataSerializer_Default;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
@@ -88,6 +90,7 @@ public final class SystemHandler implements SystemManager {
 
     private final FastEnumMap<EntityType, Set<SpawnCondition>> spawnConditions = new FastEnumMap<>(EntityType.class);
     private final Map<String, SpawnCondition> spawnConditionsIds = new HashMap<>();
+    private final Map<String, SpawnerRateModifier> spawnerRateModifiers = new HashMap<>();
     private boolean loadedData = false;
 
     private IDataSerializer dataSerializer;
@@ -675,6 +678,42 @@ public final class SystemHandler implements SystemManager {
     public SpawnCondition registerSpawnCondition(SpawnCondition spawnCondition) {
         spawnConditionsIds.put(spawnCondition.getId().toLowerCase(), spawnCondition);
         return spawnCondition;
+    }
+
+    @Override
+    public SpawnerRateModifier registerSpawnerRateModifier(SpawnerRateModifier modifier) {
+        Preconditions.checkNotNull(modifier, "modifier parameter cannot be null.");
+        spawnerRateModifiers.put(modifier.getId().toLowerCase(), modifier);
+        return modifier;
+    }
+
+    @Override
+    public void unregisterSpawnerRateModifier(String id) {
+        if (id != null)
+            spawnerRateModifiers.remove(id.toLowerCase());
+    }
+
+    @Override
+    public double getSpawnerRateMultiplier(SpawnerRateContext context) {
+        double multiplier = 1.0D;
+
+        for (SpawnerRateModifier modifier : spawnerRateModifiers.values()) {
+            double modifierMultiplier;
+            try {
+                modifierMultiplier = modifier.getMultiplier(context);
+            } catch (Throwable error) {
+                WildStackerPlugin.log("An error occurred while calculating spawner-rate modifier " + modifier.getId() + ":");
+                error.printStackTrace();
+                continue;
+            }
+
+            if (Double.isNaN(modifierMultiplier) || Double.isInfinite(modifierMultiplier))
+                continue;
+
+            multiplier *= Math.max(0.0D, modifierMultiplier);
+        }
+
+        return multiplier;
     }
 
     public boolean isBarrelBlock(Material blockType, World world) {
