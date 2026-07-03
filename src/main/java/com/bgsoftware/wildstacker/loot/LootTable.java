@@ -12,7 +12,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,6 +43,7 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
         List<ItemStack> drops = new LinkedList<>();
 
         LootEntityAttributes directKillerEntityData = lootEntityAttributes.getKiller();
+        LootEntityAttributes sourceKillerEntityData = LivingLootEntityAttributes.getSourceKiller(lootEntityAttributes);
         LootEntityAttributes vehicleEntityData = lootEntityAttributes.getVehicle();
 
         int amountOfDifferentPairs = max == -1 || min == -1 ? stackAmount : max == min ? max * stackAmount :
@@ -51,7 +51,8 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
 
         for (LootPair lootPair : this.lootPairs) {
             if (!lootPair.checkEntity(lootEntityAttributes) ||
-                    (!lootEntityAttributes.isIgnoreEntityKiller() && !lootPair.checkKiller(directKillerEntityData)) ||
+                    (!lootEntityAttributes.isIgnoreEntityKiller() && !lootPair.checkKiller(directKillerEntityData) &&
+                            !lootPair.checkKiller(sourceKillerEntityData)) ||
                     (!lootEntityAttributes.isIgnoreEntityVehicle() && !lootPair.checkVehicle(vehicleEntityData)))
                 continue;
 
@@ -62,7 +63,6 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
             }
 
             drops.addAll(lootPair.getItems(lootEntityAttributes, amountOfPairs, lootBonusLevel));
-            LootEntityAttributes sourceKillerEntityData = getKillerSourceEntityData(directKillerEntityData);
             LootEntityAttributes killerEntityDataToCheck = sourceKillerEntityData == null ? directKillerEntityData : sourceKillerEntityData;
             if (killerEntityDataToCheck instanceof LivingLootEntityAttributes &&
                     killerEntityDataToCheck.getEntityType() == EntityType.PLAYER) {
@@ -121,17 +121,6 @@ public class LootTable implements com.bgsoftware.wildstacker.api.loot.LootTable 
     @Override
     public String toString() {
         return "LootTable{pairs=" + lootPairs + "}";
-    }
-
-    @Nullable
-    private static LootEntityAttributes getKillerSourceEntityData(LootEntityAttributes killerEntityData) {
-        if (!(killerEntityData instanceof LivingLootEntityAttributes))
-            return null;
-
-        Entity directKiller = ((LivingLootEntityAttributes) killerEntityData).getEntity();
-        Entity sourceKiller = EntityUtils.getSourceDamager(directKiller, true);
-
-        return sourceKiller == directKiller ? null : LootEntityAttributes.newBuilder(sourceKiller).build();
     }
 
 }

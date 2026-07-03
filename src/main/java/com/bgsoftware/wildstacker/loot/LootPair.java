@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.loot;
 
 import com.bgsoftware.wildstacker.api.loot.LootEntityAttributes;
+import com.bgsoftware.wildstacker.loot.entity.LivingLootEntityAttributes;
 import com.bgsoftware.wildstacker.utils.Random;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
@@ -33,9 +34,11 @@ public class LootPair extends FilteredLoot {
         List<ItemStack> items = new LinkedList<>();
 
         LootEntityAttributes directKillerEntityData = lootEntityAttributes.getKiller();
+        LootEntityAttributes sourceKillerEntityData = LivingLootEntityAttributes.getSourceKiller(lootEntityAttributes);
 
         for (LootItem lootItem : lootItems) {
-            if (!lootItem.checkKiller(directKillerEntityData) || !lootItem.checkEntity(lootEntityAttributes))
+            if ((!lootItem.checkKiller(directKillerEntityData) && !lootItem.checkKiller(sourceKillerEntityData)) ||
+                    !lootItem.checkEntity(lootEntityAttributes))
                 continue;
 
             int amountOfItems = (int) (lootItem.getChance(lootBonusLevel, lootingChance) * amountOfPairs / 100);

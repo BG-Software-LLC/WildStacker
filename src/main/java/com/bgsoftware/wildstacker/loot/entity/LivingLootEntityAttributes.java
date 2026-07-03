@@ -20,6 +20,12 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     private final Entity entity;
     private final StackedEntity stackedEntity;
 
+    @Nullable
+    public static LootEntityAttributes getSourceKiller(LootEntityAttributes lootEntityAttributes) {
+        return lootEntityAttributes instanceof LivingLootEntityAttributes ?
+                ((LivingLootEntityAttributes) lootEntityAttributes).getSourceKiller() : null;
+    }
+
     public LivingLootEntityAttributes(Entity entity, EntityLootDataBuilder builder) {
         super(builder);
         this.entity = entity;
@@ -34,6 +40,18 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     @Override
     public LootEntityAttributes getKiller() {
         return Optional.ofNullable(super.getKiller()).orElseGet(this::getKillerFromEntity);
+    }
+
+    @Nullable
+    public LootEntityAttributes getSourceKiller() {
+        LootEntityAttributes directKillerAttributes = getKiller();
+        if (!(directKillerAttributes instanceof LivingLootEntityAttributes))
+            return null;
+
+        Entity directKiller = ((LivingLootEntityAttributes) directKillerAttributes).getEntity();
+        Entity sourceKiller = EntityUtils.getSourceDamager(directKiller, true);
+
+        return sourceKiller == null || sourceKiller == directKiller ? null : LootEntityAttributes.newBuilder(sourceKiller).build();
     }
 
     @Nullable
