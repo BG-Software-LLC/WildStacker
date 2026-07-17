@@ -84,7 +84,9 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
-            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems;
+            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems,
+            itemsLocalizedNames, itemsLocalizedNamesCraftEngine, itemsLocalizedNamesItemsAdder,
+            itemsLocalizedNamesNexo, itemsLocalizedNamesOraxen;
     public final List<String> itemsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
@@ -99,7 +101,8 @@ public final class SettingsHandler {
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreedingEnabled,
             smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
             eggLayMultiply, scuteMultiply, entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities,
-            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles;
+            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles,
+            entitiesLocalizedNames, entitiesLocalizedNamesExcludeCustomMobs;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -233,6 +236,11 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{1}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName()),
                 new NamePlaceholder<>("{2}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName().toUpperCase())
         );
+        itemsLocalizedNames = cfg.getBoolean("items.localized-names.enabled", false);
+        itemsLocalizedNamesCraftEngine = cfg.getBoolean("items.localized-names.hooks.craftengine", true);
+        itemsLocalizedNamesItemsAdder = cfg.getBoolean("items.localized-names.hooks.itemsadder", true);
+        itemsLocalizedNamesNexo = cfg.getBoolean("items.localized-names.hooks.nexo", true);
+        itemsLocalizedNamesOraxen = cfg.getBoolean("items.localized-names.hooks.oraxen", true);
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
@@ -260,6 +268,9 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{2}", stackedEntity -> ((WStackedEntity) stackedEntity).getCachedDisplayName().toUpperCase()),
                 new NamePlaceholder<>("{3}", stackedEntity -> stackedEntity.getUpgrade().getDisplayName())
         );
+        entitiesLocalizedNames = cfg.getBoolean("entities.localized-names.enabled", false);
+        entitiesLocalizedNamesExcludeCustomMobs = cfg.getBoolean(
+                "entities.localized-names.exclude-custom-mobs", true);
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);

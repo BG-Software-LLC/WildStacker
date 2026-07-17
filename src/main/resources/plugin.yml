@@ -15,6 +15,7 @@ class-depends:
   - ClearLag
   - CMI
   - CoreProtect
+  - CraftEngine
   - CrazyEnchantments
   - CustomBosses
   - EpicBosses
@@ -22,11 +23,14 @@ class-depends:
   - Factions
   - Holograms
   - HolographicDisplays
+  - ItemsAdder
   - MassiveCore
   - mcMMO
   - MineableSpawners
   - MyPet
   - MythicMobs
+  - Nexo
+  - Oraxen
   - FactionsTop
   - PlotSquared
   - ProtocolLib

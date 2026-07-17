@@ -6,12 +6,14 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -27,9 +29,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -37,10 +41,17 @@ import java.util.regex.Pattern;
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
 
     private static final Pattern DISPLAY_NAME_PLACEHOLDER = Pattern.compile(Pattern.quote("{0}"));
+    private static final long NAME_REFRESH_INTERVAL_NANOS = TimeUnit.MINUTES.toNanos(5);
 
     private final UUID cachedUUID;
     private final int cachedEntityId;
+    private final Object nameStateLock = new Object();
     private String mmoItemName = null;
+    private ItemStack lastNamedItem;
+    private WeakReference<SettingsHandler> lastNameSettings = new WeakReference<>(null);
+    private int lastNamedAmount = Integer.MIN_VALUE;
+    private long nextNameRefreshNanos;
+    private long nameRevision;
 
     public WStackedItem(Item item) {
         this(item, item.getItemStack().getAmount());
@@ -150,40 +161,52 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void updateName() {
-        if (!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
+        SettingsHandler settings = plugin.getSettings();
+        if (!settings.itemsStackingEnabled || !ItemUtils.canPickup(object) ||
+                ServerVersion.isLessThan(ServerVersion.v1_8))
             return;
 
         ItemStack itemStack = getItemStack();
+
+        String customName = settings.itemsCustomName;
+        if (customName.isEmpty())
+            return;
+
+        int amount = getStackAmount();
+        boolean localizedNamesEnabled = settings.itemsLocalizedNames;
+        long currentNameRevision = localizedNamesEnabled ? prepareNameUpdate(itemStack, settings, amount) : -1L;
+        if (currentNameRevision == 0L)
+            return;
 
         boolean mmoItem = !plugin.getNMSAdapter().getTag(itemStack, "MMOITEMS_ITEM_TYPE", String.class, "NULL").equals("NULL");
 
         if (mmoItem && mmoItemName == null)
             mmoItemName = getCustomName();
 
-        String customName = plugin.getSettings().itemsCustomName;
-
-        if (customName.isEmpty())
-            return;
-
-        int amount = getStackAmount();
-        boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().itemsUnstackedCustomName || amount > 1;
+        boolean updateName = (mmoItem && mmoItemName != null) || settings.itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
             String cachedDisplayName = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : cachedDisplayName;
 
-            if (plugin.getSettings().itemsDisplayEnabled)
+            if (settings.itemsDisplayEnabled)
                 cachedDisplayName = displayName;
 
             setCachedDisplayName(DISPLAY_NAME_PLACEHOLDER.matcher(cachedDisplayName).replaceAll(displayName));
 
-            customName = plugin.getSettings().itemsNameBuilder.build(this);
+            customName = settings.itemsNameBuilder.build(this);
         }
 
         String CUSTOM_NAME = customName;
+        boolean useLocalizedName = updateName && settings.itemsLocalizedNames;
 
         Executor.sync(() -> {
-            if (updateName) {
+            if (localizedNamesEnabled && (!isCurrentNameRevision(currentNameRevision) ||
+                    !object.isValid() || isRemoved()))
+                return;
+
+            if (updateName && (!useLocalizedName || !ClientLocalizedNameService.setItemName(object, itemStack,
+                    settings.itemsCustomName, amount))) {
                 setCustomName(CUSTOM_NAME);
             }
             setCustomNameVisible(updateName);
@@ -191,6 +214,30 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);
+    }
+
+    private long prepareNameUpdate(ItemStack itemStack, SettingsHandler settings, int amount) {
+        long currentTime = System.nanoTime();
+
+        synchronized (nameStateLock) {
+            if (lastNameSettings.get() == settings && lastNamedAmount == amount && lastNamedItem != null &&
+                    lastNamedItem.isSimilar(itemStack) && currentTime - nextNameRefreshNanos < 0) {
+                return 0L;
+            }
+
+            lastNameSettings = new WeakReference<>(settings);
+            lastNamedAmount = amount;
+            lastNamedItem = itemStack.clone();
+            lastNamedItem.setAmount(1);
+            nextNameRefreshNanos = currentTime + NAME_REFRESH_INTERVAL_NANOS;
+            return ++nameRevision;
+        }
+    }
+
+    private boolean isCurrentNameRevision(long revision) {
+        synchronized (nameStateLock) {
+            return nameRevision == revision;
+        }
     }
 
     @Override

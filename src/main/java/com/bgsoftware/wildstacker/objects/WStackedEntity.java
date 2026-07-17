@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -166,9 +167,16 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         try {
             String customName = EntityUtils.getEntityName(this);
             boolean nameVisible = (getStackAmount() > 1 || !isDefaultUpgrade()) && !plugin.getSettings().entitiesHideNames;
+            boolean customMob = getSpawnCause() == SpawnCause.MYTHIC_MOBS ||
+                    (getCustomName() != null && plugin.getProviders().getCustomName(this) != null);
+            boolean useLocalizedName = plugin.getSettings().entitiesLocalizedNames &&
+                    (!plugin.getSettings().entitiesLocalizedNamesExcludeCustomMobs || !customMob);
 
             Executor.sync(() -> {
-                setCustomName(customName);
+                if (!useLocalizedName || !ClientLocalizedNameService.setEntityName(object, getType(),
+                        plugin.getSettings().entitiesCustomName, getStackAmount(), getUpgrade().getDisplayName())) {
+                    setCustomName(customName);
+                }
                 setCustomNameVisible(nameVisible);
                 plugin.getProviders().notifyNameChangeListeners(object);
             });

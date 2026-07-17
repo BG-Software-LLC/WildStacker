@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
+import com.bgsoftware.wildstacker.hooks.LocalizedItemNameProvider;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
@@ -59,6 +60,7 @@ public final class ProvidersHandler {
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
     private final List<CustomItemProvider> customItemProviders = new ArrayList<>();
+    private final List<LocalizedItemNameProvider> localizedItemNameProviders = new ArrayList<>();
     private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
@@ -84,6 +86,7 @@ public final class ProvidersHandler {
             loadRegionsProviders();
             loadEntitySimilarityProviders();
             loadEntityNameProviders();
+            loadLocalizedItemNameProviders();
             loadDataSerializers();
             loadConflictPluginFixers();
             loadPluginHooks(plugin, null, true);
@@ -302,6 +305,22 @@ public final class ProvidersHandler {
         }
     }
 
+    private void loadLocalizedItemNameProviders() {
+        localizedItemNameProviders.clear();
+
+        loadLocalizedItemNameProvider("CraftEngine", "LocalizedItemNameProviderCraftEngine");
+        loadLocalizedItemNameProvider("ItemsAdder", "LocalizedItemNameProviderItemsAdder");
+        loadLocalizedItemNameProvider("Nexo", "LocalizedItemNameProviderNexo");
+        loadLocalizedItemNameProvider("Oraxen", "LocalizedItemNameProviderOraxen");
+    }
+
+    private void loadLocalizedItemNameProvider(String pluginName, String providerClassName) {
+        if (Bukkit.getPluginManager().isPluginEnabled(pluginName)) {
+            Optional<LocalizedItemNameProvider> localizedItemNameProvider = createInstance(providerClassName);
+            localizedItemNameProvider.ifPresent(localizedItemNameProviders::add);
+        }
+    }
+
     private void loadDataSerializers() {
         if (Bukkit.getPluginManager().isPluginEnabled("NBTAPI")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
@@ -506,6 +525,38 @@ public final class ProvidersHandler {
         }
 
         return true;
+    }
+
+    @Nullable
+    public ItemStack resolveLocalizedItemName(ItemStack itemStack) {
+        for (LocalizedItemNameProvider localizedItemNameProvider : localizedItemNameProviders) {
+            if (!isLocalizedItemNameProviderEnabled(localizedItemNameProvider.getPluginName()))
+                continue;
+
+            try {
+                ItemStack registryItem = localizedItemNameProvider.resolveRegistryItem(itemStack);
+                if (registryItem != null)
+                    return registryItem;
+            } catch (Throwable ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isLocalizedItemNameProviderEnabled(String pluginName) {
+        switch (pluginName) {
+            case "CraftEngine":
+                return plugin.getSettings().itemsLocalizedNamesCraftEngine;
+            case "ItemsAdder":
+                return plugin.getSettings().itemsLocalizedNamesItemsAdder;
+            case "Nexo":
+                return plugin.getSettings().itemsLocalizedNamesNexo;
+            case "Oraxen":
+                return plugin.getSettings().itemsLocalizedNamesOraxen;
+            default:
+                return false;
+        }
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
