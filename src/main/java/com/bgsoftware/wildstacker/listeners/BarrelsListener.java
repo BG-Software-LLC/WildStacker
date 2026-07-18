@@ -137,10 +137,18 @@ public final class BarrelsListener implements Listener {
 
                 boolean attemptPlaceDelayed = ServerVersion.isLessThan(ServerVersion.v1_9);
 
+                // Down below we set the block type to CAULDRON only one tick in delay, which could
+                // cause a race-condition with performCacheClear. For this reason, we mark the barrel
+                // as "not-ready" and only mark it as ready again after the block type is changed.
+                // https://github.com/BG-Software-LLC/WildStacker/issues/1089
+                ((WStackedBarrel) stackedBarrel).setReady(false);
+
                 //Because we cancel the event (tile entity issues), we need to change the block on a tick after that.
                 Executor.sync(() -> {
                     e.getBlock().setType(Material.CAULDRON);
                     stackedBarrel.createDisplayBlock();
+
+                    ((WStackedBarrel) stackedBarrel).setReady(true);
 
                     if (attemptPlaceDelayed) {
                         if (e.getBlockPlaced().getType() != Material.CAULDRON)

@@ -23,6 +23,7 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     protected boolean saveData = true;
     private String cachedDisplayName = "";
+    protected volatile boolean isReady = true;
 
     protected WStackedObject(T object, int stackAmount) {
         this.object = object;
@@ -44,6 +45,14 @@ public abstract class WStackedObject<T> implements StackedObject<T> {
 
     public void setCachedDisplayName(String cachedDisplayName) {
         this.cachedDisplayName = cachedDisplayName;
+    }
+
+    public void setReady(boolean isReady) {
+        this.isReady = isReady;
+    }
+
+    public boolean isReady() {
+        return isReady;
     }
 
     @Override

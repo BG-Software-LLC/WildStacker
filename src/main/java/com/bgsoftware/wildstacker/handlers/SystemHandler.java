@@ -25,6 +25,7 @@ import com.bgsoftware.wildstacker.loot.entity.EntityLootDataBuilder;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.objects.WStackedItem;
+import com.bgsoftware.wildstacker.objects.WStackedObject;
 import com.bgsoftware.wildstacker.objects.WStackedSnapshot;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.objects.WUnloadedStackedBarrel;
@@ -79,6 +80,9 @@ public final class SystemHandler implements SystemManager {
     public static final int ENTITIES_STAGE = (1 << 0);
     public static final int CHUNK_STAGE = (1 << 1);
     public static final int CHUNK_FULL_STAGE = ENTITIES_STAGE | CHUNK_STAGE;
+
+    @Nullable
+    private static final Material WATER_CAULDRON = Materials.getMaterialOrNull("WATER_CAULDRON");
 
     private final WildStackerPlugin plugin;
     private final DataHandler dataHandler;
@@ -322,6 +326,11 @@ public final class SystemHandler implements SystemManager {
         List<StackedObject> stackedObjects = dataHandler.getStackedObjects();
 
         for (StackedObject stackedObject : stackedObjects) {
+            if (!((WStackedObject<?>) stackedObject).isReady()) {
+                // In the case the object was marked as not ready, ignore it.
+                continue;
+            }
+
             if (stackedObject instanceof StackedItem) {
                 StackedItem stackedItem = (StackedItem) stackedObject;
                 if (stackedItem.getItem() == null || (GeneralUtils.isChunkLoaded(stackedItem.getItem().getLocation()) && stackedItem.getItem().isDead()))
@@ -347,7 +356,7 @@ public final class SystemHandler implements SystemManager {
                 if (GeneralUtils.isChunkLoaded(stackedBarrel.getLocation()) && !isStackedBarrel(block)) {
                     // In some versions, cauldron material can be WATER_CAULDRON.
                     // Instead of removing the barrel, we just want to set it to CAULDRON.
-                    if (block.getType().name().equals("WATER_CAULDRON")) {
+                    if (WATER_CAULDRON != null && block.getType() == WATER_CAULDRON) {
                         Executor.sync(() -> block.setType(Material.CAULDRON));
                     } else {
                         removeStackObject(stackedObject);
