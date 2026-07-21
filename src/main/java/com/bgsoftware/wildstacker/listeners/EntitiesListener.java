@@ -26,6 +26,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Beehive;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.EnderDragon;
@@ -345,7 +346,8 @@ public final class EntitiesListener implements Listener {
             return;
 
         ItemStack inHand = e.getPlayer().getItemInHand();
-        if (inHand == null || inHand.getType() != Material.BUCKET || e.getRightClicked().getType() != SULFUR_CUBE)
+        if (inHand == null || inHand.getType() != Material.BUCKET || e.getRightClicked().getType() != SULFUR_CUBE ||
+                !((Ageable) e.getRightClicked()).isAdult())
             return;
 
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
@@ -360,8 +362,11 @@ public final class EntitiesListener implements Listener {
 
         stackedEntity.remove();
 
-        EquipmentSlot usedHand = ItemUtils.getHand(e);
-        ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
+        // Do not remove bucket from Creative players
+        if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+            EquipmentSlot usedHand = ItemUtils.getHand(e);
+            ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
+        }
 
         // Adding the item back at the end of the tick as sometimes the right-click was triggered
         // with the given bucket, causing an extra Sulfur Cube to spawn
