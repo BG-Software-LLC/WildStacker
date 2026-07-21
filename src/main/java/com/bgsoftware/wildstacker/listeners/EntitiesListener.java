@@ -363,7 +363,10 @@ public final class EntitiesListener implements Listener {
         EquipmentSlot usedHand = ItemUtils.getHand(e);
         ItemUtils.removeItemFromHand(e.getPlayer(), 1, usedHand);
 
-        ItemUtils.addItem(sulfurBucketItem, e.getPlayer().getInventory(), e.getRightClicked().getLocation());
+        // Adding the item back at the end of the tick as sometimes the right-click was triggered
+        // with the given bucket, causing an extra Sulfur Cube to spawn
+        Executor.runAtEndOfTick(() ->
+                ItemUtils.addItem(sulfurBucketItem, e.getPlayer().getInventory(), e.getRightClicked().getLocation()));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
