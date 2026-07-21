@@ -75,7 +75,7 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
     public org.bukkit.inventory.ItemStack getPlayerSkull(org.bukkit.inventory.ItemStack bukkitItem, String texture) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
         setTextureForItem(itemStack, texture);
-        return CraftItemStack.asBukkitCopy(itemStack);
+        return CraftItemStack.asCraftMirror(itemStack);
     }
 
     protected abstract void setTextureForItem(ItemStack itemStack, String texture);
@@ -133,7 +133,7 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
         try {
             CompoundTag compoundTag = NbtIo.read(new DataInputStream(inputStream));
             ItemStack itemStack = parseItemStack(compoundTag);
-            return CraftItemStack.asBukkitCopy(itemStack);
+            return CraftItemStack.asCraftMirror(itemStack);
         } catch (Exception ex) {
             return null;
         }
@@ -145,7 +145,7 @@ public abstract class AbstractNMSAdapter implements NMSAdapter {
     public org.bukkit.inventory.ItemStack setTag(org.bukkit.inventory.ItemStack bukkitItem, String key, Object value) {
         ItemStack itemStack = CraftItemStack.asNMSCopy(bukkitItem);
         setTagInternal(itemStack, key, value);
-        return CraftItemStack.asBukkitCopy(itemStack);
+        return CraftItemStack.asCraftMirror(itemStack);
     }
 
     protected abstract void setTagInternal(ItemStack itemStack, String key, Object value);
