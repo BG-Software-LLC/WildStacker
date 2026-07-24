@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemDescriptor;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.items.ItemBuilder;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +28,23 @@ public final class LocalizedItemNameProvider_Oraxen implements LocalizedItemName
                 return null;
             ItemBuilder builder = OraxenItems.getItemById(itemId);
             return builder == null ? null : builder.build();
+        } catch (Throwable error) {
+            if (error instanceof Error)
+                throw (Error) error;
+            return null;
+        }
+    }
+
+    @Override
+    @Nullable
+    public LocalizedItemDescriptor resolveDescriptor(ItemStack itemStack) {
+        try {
+            String itemId = OraxenItems.getIdByItem(itemStack);
+            if (itemId == null)
+                return null;
+            ItemBuilder builder = OraxenItems.getItemById(itemId);
+            ItemStack registryItem = builder == null ? null : builder.build();
+            return registryItem == null ? null : LocalizedItemDescriptor.ofItemStack(getId(), "oraxen:" + itemId, registryItem);
         } catch (Throwable error) {
             if (error instanceof Error)
                 throw (Error) error;

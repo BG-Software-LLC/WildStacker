@@ -38,16 +38,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemDescriptor;
 import org.bukkit.plugin.PluginManager;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -65,6 +68,7 @@ public final class ProvidersHandler {
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
     private final List<CustomItemProvider> customItemProviders = new ArrayList<>();
     private final Map<String, LocalizedItemNameProvider> localizedItemNameProviders = new LinkedHashMap<>();
+    private final Map<String, ProviderCircuitState> providerCircuitStates = new HashMap<>();
     private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
 
     private long localizedItemNameProviderRevision = 0L;
@@ -573,25 +577,51 @@ public final class ProvidersHandler {
 
     @Nullable
     public ItemStack resolveLocalizedItemName(ItemStack itemStack) {
+        LocalizedItemDescriptor descriptor = resolveLocalizedItemDescriptor(itemStack);
+        return descriptor == null ? null : descriptor.getCanonicalItem();
+    }
+
+    @Nullable
+    public LocalizedItemDescriptor resolveLocalizedItemDescriptor(ItemStack itemStack) {
         if (itemStack == null)
             return null;
 
+        long currentTime = System.nanoTime();
+
         for (String providerId : plugin.getSettings().itemsLocalizedNameProviders) {
             LocalizedItemNameProvider provider = localizedItemNameProviders.get(providerId);
-            if (provider == null)
+            if (provider == null || provider.getState() != LocalizedItemNameProvider.ProviderState.READY)
+                continue;
+
+            ProviderCircuitState circuit = providerCircuitStates.computeIfAbsent(providerId, k -> new ProviderCircuitState());
+            if (currentTime - circuit.circuitOpenUntilNanos < 0)
                 continue;
 
             try {
-                ItemStack registryItem = provider.resolveRegistryItem(itemStack);
-                if (registryItem != null)
-                    return registryItem;
+                LocalizedItemDescriptor descriptor = provider.resolveDescriptor(itemStack);
+                if (descriptor != null) {
+                    circuit.consecutiveFailures = 0;
+                    return descriptor;
+                }
             } catch (Throwable error) {
                 if (error instanceof Error)
                     throw (Error) error;
+
+                circuit.consecutiveFailures++;
+                if (circuit.consecutiveFailures >= 3) {
+                    circuit.circuitOpenUntilNanos = currentTime + TimeUnit.SECONDS.toNanos(30);
+                    plugin.getLogger().warning("[WildStacker] Provider '" + providerId +
+                            "' threw consecutive exceptions. Circuit opened for 30s: " + error.getMessage());
+                }
             }
         }
 
         return null;
+    }
+
+    private static final class ProviderCircuitState {
+        private int consecutiveFailures = 0;
+        private long circuitOpenUntilNanos = 0L;
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {

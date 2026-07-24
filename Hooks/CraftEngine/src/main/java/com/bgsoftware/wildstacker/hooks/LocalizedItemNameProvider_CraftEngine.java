@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.hooks;
 
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemDescriptor;
 import net.momirealms.craftengine.bukkit.api.CraftEngineItems;
 import net.momirealms.craftengine.core.item.CustomItem;
 import net.momirealms.craftengine.core.item.Item;
@@ -29,6 +30,23 @@ public final class LocalizedItemNameProvider_CraftEngine implements LocalizedIte
                 return null;
             Item<ItemStack> item = customItem.buildItem((ItemBuildContext) null);
             return item == null ? null : item.getItem();
+        } catch (Throwable error) {
+            if (error instanceof Error)
+                throw (Error) error;
+            return null;
+        }
+    }
+
+    @Override
+    @Nullable
+    public LocalizedItemDescriptor resolveDescriptor(ItemStack itemStack) {
+        try {
+            CustomItem<ItemStack> customItem = CraftEngineItems.byItemStack(itemStack);
+            if (customItem == null)
+                return null;
+            Item<ItemStack> item = customItem.buildItem((ItemBuildContext) null);
+            ItemStack registryItem = item == null ? null : item.getItem();
+            return registryItem == null ? null : LocalizedItemDescriptor.ofItemStack(getId(), "craftengine:" + customItem.id(), registryItem);
         } catch (Throwable error) {
             if (error instanceof Error)
                 throw (Error) error;
