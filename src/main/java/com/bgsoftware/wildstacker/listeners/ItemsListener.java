@@ -94,6 +94,9 @@ public final class ItemsListener implements Listener {
                     EntityStorage.removeMetadata(e.getEntity(), EntityFlag.DROPPED_BY_PLAYER);
                 else if (isChunkLimit(e.getLocation().getChunk()))
                     stackedItem.remove();
+
+                if (e.getEntity().isValid())
+                    stackedItem.updateName();
             });
         });
     }

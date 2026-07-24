@@ -216,7 +216,9 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                 if (result != LocalizedNameApplyResult.APPLIED) {
                     setCustomName(CUSTOM_NAME);
                 }
-                setCustomNameVisible(updateName);
+                setCustomNameVisible(true);
+            } else {
+                setCustomNameVisible(false);
             }
         });
 
