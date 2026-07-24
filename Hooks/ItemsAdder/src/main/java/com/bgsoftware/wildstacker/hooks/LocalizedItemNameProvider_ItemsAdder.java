@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItemNameProvider, Listener {
 
     private volatile boolean ready = false;
+    private volatile ProviderState state = ProviderState.LOADING;
 
     public LocalizedItemNameProvider_ItemsAdder(WildStackerPlugin plugin) {
         try {
@@ -34,18 +35,26 @@ public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItem
 
     @Override
     public ProviderState getState() {
+        if (state == ProviderState.INCOMPATIBLE)
+            return ProviderState.INCOMPATIBLE;
         return ready ? ProviderState.READY : ProviderState.LOADING;
     }
 
     @Override
     @Nullable
     public ItemStack resolveRegistryItem(ItemStack itemStack) {
+        if (state == ProviderState.INCOMPATIBLE)
+            return null;
+
         try {
             CustomStack customStack = CustomStack.byItemStack(itemStack);
             return customStack == null ? null : customStack.getItemStack();
+        } catch (LinkageError error) {
+            markIncompatible("Installed ItemsAdder API signature is incompatible with hook: " + error.getMessage());
+            return null;
         } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+            if (error instanceof VirtualMachineError)
+                throw (VirtualMachineError) error;
             return null;
         }
     }
@@ -53,14 +62,20 @@ public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItem
     @Override
     @Nullable
     public LocalizedItemDescriptor resolveDescriptor(ItemStack itemStack) {
+        if (state == ProviderState.INCOMPATIBLE)
+            return null;
+
         try {
             CustomStack customStack = CustomStack.byItemStack(itemStack);
             if (customStack == null)
                 return null;
-            return LocalizedItemDescriptor.ofItemStack(getId(), "itemsadder:" + customStack.getNamespacedID(), customStack.getItemStack());
+            return LocalizedItemDescriptor.ofCanonicalItem(getId(), "itemsadder:" + customStack.getNamespacedID(), customStack.getItemStack());
+        } catch (LinkageError error) {
+            markIncompatible("Installed ItemsAdder API signature is incompatible with hook: " + error.getMessage());
+            return null;
         } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+            if (error instanceof VirtualMachineError)
+                throw (VirtualMachineError) error;
             return null;
         }
     }
@@ -74,6 +89,18 @@ public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItem
                 plugin.getProviders().registerLocalizedItemNameProvider(this);
             }
         } catch (Throwable ignored) {
+        }
+    }
+
+    private void markIncompatible(String reason) {
+        if (state != ProviderState.INCOMPATIBLE) {
+            state = ProviderState.INCOMPATIBLE;
+            try {
+                WildStackerPlugin.getPlugin().getLogger().warning(
+                        "[WildStacker] Disabled localized-name provider 'itemsadder': " + reason +
+                        ". Vanilla and other providers remain active.");
+            } catch (Throwable ignored) {
+            }
         }
     }
 

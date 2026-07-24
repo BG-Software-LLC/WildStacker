@@ -603,9 +603,13 @@ public final class ProvidersHandler {
                     circuit.consecutiveFailures = 0;
                     return descriptor;
                 }
+            } catch (LinkageError error) {
+                plugin.getLogger().warning("[WildStacker] Provider '" + providerId +
+                        "' threw LinkageError during descriptor resolution. Continuing fallback: " + error.getMessage());
+                continue;
             } catch (Throwable error) {
-                if (error instanceof Error)
-                    throw (Error) error;
+                if (error instanceof VirtualMachineError)
+                    throw (VirtualMachineError) error;
 
                 circuit.consecutiveFailures++;
                 if (circuit.consecutiveFailures >= 3) {

@@ -62,8 +62,8 @@ public final class ClientLocalizedNameService {
             LocalizedItemDescriptor descriptor = resolveCachedDescriptor(itemStack);
             return RENDERER.applyItemName(itemEntity, itemStack, template, amount, descriptor);
         } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+            if (error instanceof VirtualMachineError)
+                throw (VirtualMachineError) error;
             return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
         }
     }
@@ -77,8 +77,8 @@ public final class ClientLocalizedNameService {
         try {
             return RENDERER.applyEntityName(entity, entityType, template, amount, upgradeDisplayName);
         } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+            if (error instanceof VirtualMachineError)
+                throw (VirtualMachineError) error;
             return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
         }
     }

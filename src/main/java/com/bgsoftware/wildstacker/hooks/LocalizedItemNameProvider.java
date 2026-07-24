@@ -15,6 +15,7 @@ public interface LocalizedItemNameProvider {
         LOADING,
         READY,
         FAILED,
+        INCOMPATIBLE,
         DISABLED
     }
 
@@ -47,7 +48,7 @@ public interface LocalizedItemNameProvider {
     @Nullable
     default LocalizedItemDescriptor resolveDescriptor(ItemStack itemStack) {
         ItemStack registryItem = resolveRegistryItem(itemStack);
-        return registryItem == null ? null : LocalizedItemDescriptor.ofItemStack(getId(), getId() + ":" + itemStack.getType().name(), registryItem);
+        return registryItem == null ? null : LocalizedItemDescriptor.ofCanonicalItem(getId(), getId() + ":" + itemStack.getType().name(), registryItem);
     }
 
 }
