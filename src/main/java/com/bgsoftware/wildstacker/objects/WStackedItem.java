@@ -14,6 +14,7 @@ import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameApplyResult;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -206,11 +207,17 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                     !object.isValid() || isRemoved()))
                 return;
 
-            if (updateName && (!useLocalizedName || !ClientLocalizedNameService.setItemName(object, itemStack,
-                    settings.itemsCustomName, amount))) {
-                setCustomName(CUSTOM_NAME);
+            if (updateName) {
+                LocalizedNameApplyResult result = LocalizedNameApplyResult.PLATFORM_UNSUPPORTED;
+                if (useLocalizedName) {
+                    result = ClientLocalizedNameService.setItemName(object, itemStack,
+                            settings.itemsLocalizedNameTemplate, amount);
+                }
+                if (result != LocalizedNameApplyResult.APPLIED) {
+                    setCustomName(CUSTOM_NAME);
+                }
+                setCustomNameVisible(updateName);
             }
-            setCustomNameVisible(updateName);
         });
 
         if (saveData)

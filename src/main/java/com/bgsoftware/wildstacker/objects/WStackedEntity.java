@@ -22,6 +22,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameApplyResult;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -173,8 +174,12 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                     (!plugin.getSettings().entitiesLocalizedNamesExcludeCustomMobs || !customMob);
 
             Executor.sync(() -> {
-                if (!useLocalizedName || !ClientLocalizedNameService.setEntityName(object, getType(),
-                        plugin.getSettings().entitiesCustomName, getStackAmount(), getUpgrade().getDisplayName())) {
+                LocalizedNameApplyResult result = LocalizedNameApplyResult.PLATFORM_UNSUPPORTED;
+                if (useLocalizedName) {
+                    result = ClientLocalizedNameService.setEntityName(object, getType(),
+                            plugin.getSettings().entitiesLocalizedNameTemplate, getStackAmount(), getUpgrade().getDisplayName());
+                }
+                if (result != LocalizedNameApplyResult.APPLIED) {
                     setCustomName(customName);
                 }
                 setCustomNameVisible(nameVisible);

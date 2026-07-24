@@ -28,6 +28,7 @@ import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import com.bgsoftware.wildstacker.utils.names.NamePlaceholder;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameTemplate;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import org.bukkit.ChatColor;
@@ -93,6 +94,7 @@ public final class SettingsHandler {
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final NameBuilder<StackedItem> itemsNameBuilder;
+    public final LocalizedNameTemplate itemsLocalizedNameTemplate, entitiesLocalizedNameTemplate;
     public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
@@ -237,6 +239,7 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{1}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName()),
                 new NamePlaceholder<>("{2}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName().toUpperCase())
         );
+        itemsLocalizedNameTemplate = LocalizedNameTemplate.compile(cfg.getString("items.custom-name", "&6&lx{0} {1}"));
         itemsLocalizedNames = cfg.getBoolean("items.localized-names.enabled", false);
         List<String> rawProviders = cfg.getStringList("items.localized-names.providers");
         if (rawProviders.isEmpty() && cfg.contains("items.localized-names.hooks")) {
@@ -284,6 +287,7 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{2}", stackedEntity -> ((WStackedEntity) stackedEntity).getCachedDisplayName().toUpperCase()),
                 new NamePlaceholder<>("{3}", stackedEntity -> stackedEntity.getUpgrade().getDisplayName())
         );
+        entitiesLocalizedNameTemplate = LocalizedNameTemplate.compile(cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
         entitiesLocalizedNames = cfg.getBoolean("entities.localized-names.enabled", false);
         entitiesLocalizedNamesExcludeCustomMobs = cfg.getBoolean(
                 "entities.localized-names.exclude-custom-mobs", true);
