@@ -2,9 +2,11 @@ package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameRenderer;
 import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemDescriptor;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemNameSourceType;
 import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameApplyResult;
 import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameTemplate;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Nameable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -49,10 +51,14 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
         }
 
         if (localizedNameComponent == null && descriptor != null) {
-            if (descriptor.getComponent() instanceof Component) {
-                localizedNameComponent = (Component) descriptor.getComponent();
-            } else if (descriptor.getTranslationKey() != null) {
-                localizedNameComponent = Component.translatable(descriptor.getTranslationKey());
+            LocalizedItemNameSourceType sourceType = descriptor.getSourceType();
+
+            if (sourceType == LocalizedItemNameSourceType.CUSTOM_COMPONENT && descriptor.getCustomComponent() instanceof Component) {
+                localizedNameComponent = (Component) descriptor.getCustomComponent();
+            } else if (sourceType == LocalizedItemNameSourceType.CUSTOM_TRANSLATION_KEY && descriptor.getCustomTranslationKey() != null) {
+                localizedNameComponent = Component.translatable(descriptor.getCustomTranslationKey());
+            } else if (sourceType == LocalizedItemNameSourceType.CUSTOM_LITERAL_NAME && descriptor.getCustomLiteralName() != null) {
+                localizedNameComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(descriptor.getCustomLiteralName());
             } else if (descriptor.getCanonicalItem() != null) {
                 ItemStack canonical = descriptor.getCanonicalItem();
                 if (canonical.hasItemMeta()) {
@@ -61,19 +67,10 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
                         localizedNameComponent = extractItemMetaComponent(meta);
                     }
                 }
-                if (localizedNameComponent == null) {
-                    try {
-                        String key = canonical.translationKey();
-                        if (key != null && !key.isEmpty()) {
-                            localizedNameComponent = Component.translatable(key);
-                        }
-                    } catch (Throwable ignored) {
-                    }
-                }
             }
         }
 
-        if (localizedNameComponent == null) {
+        if (localizedNameComponent == null && descriptor == null) {
             try {
                 String key = itemStack.translationKey();
                 if (key != null && !key.isEmpty()) {
@@ -134,6 +131,15 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
     }
 
     private static Component extractItemMetaComponent(ItemMeta meta) {
+        if (meta.hasDisplayName()) {
+            try {
+                Component comp = meta.displayName();
+                if (comp != null)
+                    return comp;
+            } catch (Throwable ignored) {
+            }
+        }
+
         Component comp = getOptionalComponent(meta, "customName");
         if (comp != null)
             return comp;
@@ -141,13 +147,6 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
         comp = getOptionalComponent(meta, "itemName");
         if (comp != null)
             return comp;
-
-        if (meta.hasDisplayName()) {
-            try {
-                return meta.displayName();
-            } catch (Throwable ignored) {
-            }
-        }
 
         return null;
     }
