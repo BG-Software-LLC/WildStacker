@@ -122,13 +122,13 @@ items:
   # The existing custom-name format is preserved. {2} uses the localized name without forced upper casing.
   localized-names:
     enabled: false
-    # Provider hooks are only used as safe fallbacks when the dropped item has no embedded display component.
-    # Missing or incompatible plugins are ignored and the vanilla/client name is used instead.
-    hooks:
-      craftengine: true
-      itemsadder: true
-      nexo: true
-      oraxen: true
+    # Custom item providers used before the vanilla translation-key fallback.
+    # Order controls provider priority. Missing or incompatible plugins are ignored.
+    providers:
+      - craftengine
+      - itemsadder
+      - nexo
+      - oraxen
 
   # Blacklisted items are items that won't get stacked.
   # Material list: https://bg-software.com/materials/

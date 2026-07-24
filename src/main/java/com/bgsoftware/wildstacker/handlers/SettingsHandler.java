@@ -43,10 +43,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -85,9 +87,8 @@ public final class SettingsHandler {
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
             itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems,
-            itemsLocalizedNames, itemsLocalizedNamesCraftEngine, itemsLocalizedNamesItemsAdder,
-            itemsLocalizedNamesNexo, itemsLocalizedNamesOraxen;
-    public final List<String> itemsDisabledWorlds;
+            itemsLocalizedNames;
+    public final List<String> itemsLocalizedNameProviders, itemsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
@@ -237,10 +238,25 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{2}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName().toUpperCase())
         );
         itemsLocalizedNames = cfg.getBoolean("items.localized-names.enabled", false);
-        itemsLocalizedNamesCraftEngine = cfg.getBoolean("items.localized-names.hooks.craftengine", true);
-        itemsLocalizedNamesItemsAdder = cfg.getBoolean("items.localized-names.hooks.itemsadder", true);
-        itemsLocalizedNamesNexo = cfg.getBoolean("items.localized-names.hooks.nexo", true);
-        itemsLocalizedNamesOraxen = cfg.getBoolean("items.localized-names.hooks.oraxen", true);
+        List<String> rawProviders = cfg.getStringList("items.localized-names.providers");
+        if (rawProviders.isEmpty() && cfg.contains("items.localized-names.hooks")) {
+            List<String> migrated = new ArrayList<>();
+            if (cfg.getBoolean("items.localized-names.hooks.craftengine", false)) migrated.add("craftengine");
+            if (cfg.getBoolean("items.localized-names.hooks.itemsadder", false)) migrated.add("itemsadder");
+            if (cfg.getBoolean("items.localized-names.hooks.nexo", false)) migrated.add("nexo");
+            if (cfg.getBoolean("items.localized-names.hooks.oraxen", false)) migrated.add("oraxen");
+            rawProviders = migrated;
+        }
+        List<String> parsedProviders = new ArrayList<>();
+        Set<String> seenProviders = new HashSet<>();
+        for (String raw : rawProviders) {
+            if (raw == null) continue;
+            String normalized = raw.trim().toLowerCase(Locale.ENGLISH);
+            if (!normalized.isEmpty() && seenProviders.add(normalized)) {
+                parsedProviders.add(normalized);
+            }
+        }
+        itemsLocalizedNameProviders = Collections.unmodifiableList(parsedProviders);
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
