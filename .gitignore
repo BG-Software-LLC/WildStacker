@@ -12,3 +12,5 @@ build
 # Ignore output generated files
 target
 out
+prompt.md
+WildStacker-PR1134-Typed-Hooks-Provider-List-Gemini-3.6-Flash-Prompt.md

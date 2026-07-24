@@ -52,6 +52,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     private int lastNamedAmount = Integer.MIN_VALUE;
     private long nextNameRefreshNanos;
     private long nameRevision;
+    private long lastProviderRevision = -1L;
 
     public WStackedItem(Item item) {
         this(item, item.getItemStack().getAmount());
@@ -218,10 +219,12 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     private long prepareNameUpdate(ItemStack itemStack, SettingsHandler settings, int amount) {
         long currentTime = System.nanoTime();
+        long providerRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
 
         synchronized (nameStateLock) {
             if (lastNameSettings.get() == settings && lastNamedAmount == amount && lastNamedItem != null &&
-                    lastNamedItem.isSimilar(itemStack) && currentTime - nextNameRefreshNanos < 0) {
+                    lastNamedItem.isSimilar(itemStack) && lastProviderRevision == providerRevision &&
+                    currentTime - nextNameRefreshNanos < 0) {
                 return 0L;
             }
 
@@ -229,6 +232,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             lastNamedAmount = amount;
             lastNamedItem = itemStack.clone();
             lastNamedItem.setAmount(1);
+            lastProviderRevision = providerRevision;
             nextNameRefreshNanos = currentTime + NAME_REFRESH_INTERVAL_NANOS;
             return ++nameRevision;
         }

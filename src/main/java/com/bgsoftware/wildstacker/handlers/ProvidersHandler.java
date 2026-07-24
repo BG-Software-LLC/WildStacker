@@ -37,13 +37,17 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
 import org.bukkit.plugin.PluginManager;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -60,8 +64,17 @@ public final class ProvidersHandler {
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
     private final List<CustomItemProvider> customItemProviders = new ArrayList<>();
-    private final List<LocalizedItemNameProvider> localizedItemNameProviders = new ArrayList<>();
+    private final Map<String, LocalizedItemNameProvider> localizedItemNameProviders = new LinkedHashMap<>();
     private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
+
+    private long localizedItemNameProviderRevision = 0L;
+
+    private static final ProviderHookDescriptor[] LOCALIZED_NAME_DESCRIPTORS = new ProviderHookDescriptor[]{
+            new ProviderHookDescriptor("craftengine", "CraftEngine", "LocalizedItemNameProvider_CraftEngine"),
+            new ProviderHookDescriptor("itemsadder", "ItemsAdder", "LocalizedItemNameProvider_ItemsAdder"),
+            new ProviderHookDescriptor("nexo", "Nexo", "LocalizedItemNameProvider_Nexo"),
+            new ProviderHookDescriptor("oraxen", "Oraxen", "LocalizedItemNameProvider_Oraxen")
+    };
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
@@ -305,20 +318,40 @@ public final class ProvidersHandler {
         }
     }
 
-    private void loadLocalizedItemNameProviders() {
-        localizedItemNameProviders.clear();
-
-        loadLocalizedItemNameProvider("CraftEngine", "LocalizedItemNameProviderCraftEngine");
-        loadLocalizedItemNameProvider("ItemsAdder", "LocalizedItemNameProviderItemsAdder");
-        loadLocalizedItemNameProvider("Nexo", "LocalizedItemNameProviderNexo");
-        loadLocalizedItemNameProvider("Oraxen", "LocalizedItemNameProviderOraxen");
+    public long getLocalizedItemNameProviderRevision() {
+        return localizedItemNameProviderRevision;
     }
 
-    private void loadLocalizedItemNameProvider(String pluginName, String providerClassName) {
-        if (Bukkit.getPluginManager().isPluginEnabled(pluginName)) {
-            Optional<LocalizedItemNameProvider> localizedItemNameProvider = createInstance(providerClassName);
-            localizedItemNameProvider.ifPresent(localizedItemNameProviders::add);
+    public void registerLocalizedItemNameProvider(LocalizedItemNameProvider provider) {
+        if (provider == null || provider.getId() == null)
+            return;
+        String id = provider.getId().toLowerCase(Locale.ENGLISH).trim();
+        localizedItemNameProviders.put(id, provider);
+        localizedItemNameProviderRevision++;
+        ClientLocalizedNameService.invalidateCaches();
+    }
+
+    public void unregisterLocalizedItemNameProvider(String providerId) {
+        if (providerId == null)
+            return;
+        String id = providerId.toLowerCase(Locale.ENGLISH).trim();
+        if (localizedItemNameProviders.remove(id) != null) {
+            localizedItemNameProviderRevision++;
+            ClientLocalizedNameService.invalidateCaches();
         }
+    }
+
+    private void loadLocalizedItemNameProviders() {
+        localizedItemNameProviders.clear();
+        localizedItemNameProviderRevision++;
+
+        for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
+            if (Bukkit.getPluginManager().isPluginEnabled(descriptor.pluginName)) {
+                Optional<LocalizedItemNameProvider> provider = createInstance(descriptor.implementationClass);
+                provider.ifPresent(p -> localizedItemNameProviders.put(descriptor.id, p));
+            }
+        }
+        ClientLocalizedNameService.invalidateCaches();
     }
 
     private void loadDataSerializers() {
@@ -450,6 +483,17 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             registerHook("SuperiorSkyblockHook");
 
+        for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
+            if (isPlugin(toCheck, descriptor.pluginName)) {
+                if (enable && pluginManager.isPluginEnabled(descriptor.pluginName)) {
+                    Optional<LocalizedItemNameProvider> provider = createInstance(descriptor.implementationClass);
+                    provider.ifPresent(this::registerLocalizedItemNameProvider);
+                } else if (!enable) {
+                    unregisterLocalizedItemNameProvider(descriptor.id);
+                }
+            }
+        }
+
         if (doesClassExist("org.bukkit.event.world.EntitiesLoadEvent"))
             registerHook("PaperChunksHook");
     }
@@ -529,34 +573,25 @@ public final class ProvidersHandler {
 
     @Nullable
     public ItemStack resolveLocalizedItemName(ItemStack itemStack) {
-        for (LocalizedItemNameProvider localizedItemNameProvider : localizedItemNameProviders) {
-            if (!isLocalizedItemNameProviderEnabled(localizedItemNameProvider.getPluginName()))
+        if (itemStack == null)
+            return null;
+
+        for (String providerId : plugin.getSettings().itemsLocalizedNameProviders) {
+            LocalizedItemNameProvider provider = localizedItemNameProviders.get(providerId);
+            if (provider == null)
                 continue;
 
             try {
-                ItemStack registryItem = localizedItemNameProvider.resolveRegistryItem(itemStack);
+                ItemStack registryItem = provider.resolveRegistryItem(itemStack);
                 if (registryItem != null)
                     return registryItem;
-            } catch (Throwable ignored) {
+            } catch (Throwable error) {
+                if (error instanceof Error)
+                    throw (Error) error;
             }
         }
 
         return null;
-    }
-
-    private boolean isLocalizedItemNameProviderEnabled(String pluginName) {
-        switch (pluginName) {
-            case "CraftEngine":
-                return plugin.getSettings().itemsLocalizedNamesCraftEngine;
-            case "ItemsAdder":
-                return plugin.getSettings().itemsLocalizedNamesItemsAdder;
-            case "Nexo":
-                return plugin.getSettings().itemsLocalizedNamesNexo;
-            case "Oraxen":
-                return plugin.getSettings().itemsLocalizedNamesOraxen;
-            default:
-                return false;
-        }
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
@@ -660,6 +695,18 @@ public final class ProvidersHandler {
         } catch (Exception error) {
             error.printStackTrace();
             return Optional.empty();
+        }
+    }
+
+    private static final class ProviderHookDescriptor {
+        private final String id;
+        private final String pluginName;
+        private final String implementationClass;
+
+        private ProviderHookDescriptor(String id, String pluginName, String implementationClass) {
+            this.id = id;
+            this.pluginName = pluginName;
+            this.implementationClass = implementationClass;
         }
     }
 

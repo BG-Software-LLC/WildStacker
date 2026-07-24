@@ -30,9 +30,16 @@ public final class ClientLocalizedNameService {
                 }
             };
 
-    private static int cachedProviderConfiguration = -1;
+    private static long cachedProviderRevision = -1L;
 
     private ClientLocalizedNameService() {
+    }
+
+    public static void invalidateCaches() {
+        synchronized (ITEM_NAME_CACHE) {
+            ITEM_NAME_CACHE.clear();
+            cachedProviderRevision = -1L;
+        }
     }
 
     public static boolean setItemName(Entity itemEntity, ItemStack itemStack, String pattern, int amount) {
@@ -54,15 +61,15 @@ public final class ClientLocalizedNameService {
 
     private static Object resolveCachedItemName(ItemStack itemStack) throws Exception {
         WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-        int providerConfiguration = getProviderConfiguration(plugin.getSettings());
+        long providerRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
         ItemStack cacheKey = itemStack.clone();
         cacheKey.setAmount(1);
         long currentTime = System.nanoTime();
 
         synchronized (ITEM_NAME_CACHE) {
-            if (cachedProviderConfiguration != providerConfiguration) {
+            if (cachedProviderRevision != providerRevision) {
                 ITEM_NAME_CACHE.clear();
-                cachedProviderConfiguration = providerConfiguration;
+                cachedProviderRevision = providerRevision;
             }
 
             CachedItemName cachedItemName = ITEM_NAME_CACHE.get(cacheKey);
@@ -87,14 +94,6 @@ public final class ClientLocalizedNameService {
                     new CachedItemName(itemName, currentTime + ITEM_NAME_CACHE_LIFETIME_NANOS));
             return itemName;
         }
-    }
-
-    private static int getProviderConfiguration(SettingsHandler settings) {
-        int configuration = settings.itemsLocalizedNamesCraftEngine ? 1 : 0;
-        configuration |= settings.itemsLocalizedNamesItemsAdder ? 1 << 1 : 0;
-        configuration |= settings.itemsLocalizedNamesNexo ? 1 << 2 : 0;
-        configuration |= settings.itemsLocalizedNamesOraxen ? 1 << 3 : 0;
-        return configuration;
     }
 
     public static boolean setEntityName(Entity entity, EntityType entityType, String pattern, int amount,
