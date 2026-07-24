@@ -1,275 +1,150 @@
 package com.bgsoftware.wildstacker.utils.names.localization;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.Method;
+import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Applies client-translatable Adventure names when the running server exposes the API.
- * Unsupported servers and malformed third-party components fail back to WildStacker's legacy String names.
- */
 public final class ClientLocalizedNameService {
 
-    private static final String NAME_TOKEN = "\u0001wildstacker_localized_name\u0002";
-    private static final int ITEM_NAME_CACHE_MAX_SIZE = 256;
-    private static final long ITEM_NAME_CACHE_LIFETIME_NANOS = TimeUnit.MINUTES.toNanos(5);
-    private static final AdventureBridge ADVENTURE = AdventureBridge.create();
-    private static final Map<ItemStack, CachedItemName> ITEM_NAME_CACHE =
-            new LinkedHashMap<ItemStack, CachedItemName>(ITEM_NAME_CACHE_MAX_SIZE, 0.75F, true) {
+    private static final int CACHE_MAX_SIZE = 512;
+    private static final long CACHE_LIFETIME_NANOS = TimeUnit.MINUTES.toNanos(5);
+    private static final ClientLocalizedNameRenderer RENDERER = createRenderer();
+    private static final Map<String, CachedDescriptor> DESCRIPTOR_CACHE =
+            new LinkedHashMap<String, CachedDescriptor>(CACHE_MAX_SIZE, 0.75F, true) {
                 @Override
-                protected boolean removeEldestEntry(Map.Entry<ItemStack, CachedItemName> eldest) {
-                    return size() > ITEM_NAME_CACHE_MAX_SIZE;
+                protected boolean removeEldestEntry(Map.Entry<String, CachedDescriptor> eldest) {
+                    return size() > CACHE_MAX_SIZE;
                 }
             };
 
     private static long cachedProviderRevision = -1L;
+    private static boolean warnedUnsupported = false;
 
     private ClientLocalizedNameService() {
     }
 
+    private static ClientLocalizedNameRenderer createRenderer() {
+        try {
+            Class<?> clazz = Class.forName("com.bgsoftware.wildstacker.hooks.ClientLocalizedNameRenderer_Paper");
+            ClientLocalizedNameRenderer renderer = (ClientLocalizedNameRenderer) clazz.newInstance();
+            if (renderer.isSupported())
+                return renderer;
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
     public static void invalidateCaches() {
-        synchronized (ITEM_NAME_CACHE) {
-            ITEM_NAME_CACHE.clear();
+        synchronized (DESCRIPTOR_CACHE) {
+            DESCRIPTOR_CACHE.clear();
             cachedProviderRevision = -1L;
         }
     }
 
-    public static boolean setItemName(Entity itemEntity, ItemStack itemStack, String pattern, int amount) {
-        if (ADVENTURE == null)
-            return false;
+    public static LocalizedNameApplyResult setItemName(Entity itemEntity, ItemStack itemStack, LocalizedNameTemplate template, int amount) {
+        if (RENDERER == null) {
+            logUnsupportedOnce();
+            return LocalizedNameApplyResult.PLATFORM_UNSUPPORTED;
+        }
 
         try {
-            Object itemName = ADVENTURE.findEmbeddedName(itemStack);
-            if (itemName == null)
-                itemName = resolveCachedItemName(itemStack);
-            if (itemName == null)
-                return false;
+            if (isPristineVanilla(itemStack)) {
+                return RENDERER.applyItemName(itemEntity, itemStack, template, amount, null);
+            }
 
-            return ADVENTURE.apply(itemEntity, pattern.replace("{0}", String.valueOf(amount)), itemName);
-        } catch (Throwable ignored) {
-            return false;
+            LocalizedItemDescriptor descriptor = resolveCachedDescriptor(itemStack);
+            return RENDERER.applyItemName(itemEntity, itemStack, template, amount, descriptor);
+        } catch (Throwable error) {
+            if (error instanceof Error)
+                throw (Error) error;
+            return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
         }
     }
 
-    private static Object resolveCachedItemName(ItemStack itemStack) throws Exception {
+    public static LocalizedNameApplyResult setEntityName(Entity entity, EntityType entityType, LocalizedNameTemplate template, int amount, @Nullable String upgradeDisplayName) {
+        if (RENDERER == null) {
+            logUnsupportedOnce();
+            return LocalizedNameApplyResult.PLATFORM_UNSUPPORTED;
+        }
+
+        try {
+            return RENDERER.applyEntityName(entity, entityType, template, amount, upgradeDisplayName);
+        } catch (Throwable error) {
+            if (error instanceof Error)
+                throw (Error) error;
+            return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
+        }
+    }
+
+    private static boolean isPristineVanilla(ItemStack itemStack) {
+        return !itemStack.hasItemMeta();
+    }
+
+    private static LocalizedItemDescriptor resolveCachedDescriptor(ItemStack itemStack) {
         WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
-        long providerRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
-        ItemStack cacheKey = itemStack.clone();
-        cacheKey.setAmount(1);
+        long currentRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
+        String cacheKey = buildCacheKey(itemStack);
         long currentTime = System.nanoTime();
 
-        synchronized (ITEM_NAME_CACHE) {
-            if (cachedProviderRevision != providerRevision) {
-                ITEM_NAME_CACHE.clear();
-                cachedProviderRevision = providerRevision;
+        synchronized (DESCRIPTOR_CACHE) {
+            if (cachedProviderRevision != currentRevision) {
+                DESCRIPTOR_CACHE.clear();
+                cachedProviderRevision = currentRevision;
             }
 
-            CachedItemName cachedItemName = ITEM_NAME_CACHE.get(cacheKey);
-            if (cachedItemName != null) {
-                if (currentTime - cachedItemName.expirationTimeNanos < 0)
-                    return cachedItemName.component;
-                ITEM_NAME_CACHE.remove(cacheKey);
+            CachedDescriptor cached = DESCRIPTOR_CACHE.get(cacheKey);
+            if (cached != null) {
+                if (currentTime - cached.expirationTimeNanos < 0) {
+                    return cached.descriptor;
+                }
+                DESCRIPTOR_CACHE.remove(cacheKey);
             }
+        }
 
-            Object itemName = null;
-            ItemStack registryItem = plugin.getProviders().resolveLocalizedItemName(itemStack);
-            if (registryItem != null)
-                itemName = ADVENTURE.findEmbeddedName(registryItem);
+        LocalizedItemDescriptor descriptor = plugin.getProviders().resolveLocalizedItemDescriptor(itemStack);
 
-            if (itemName == null) {
-                String translationKey = ADVENTURE.getItemTranslationKey(itemStack);
-                if (translationKey != null)
-                    itemName = ADVENTURE.translatable(translationKey);
+        synchronized (DESCRIPTOR_CACHE) {
+            if (cachedProviderRevision == currentRevision) {
+                DESCRIPTOR_CACHE.put(cacheKey, new CachedDescriptor(descriptor, currentTime + CACHE_LIFETIME_NANOS));
             }
+        }
 
-            ITEM_NAME_CACHE.put(cacheKey,
-                    new CachedItemName(itemName, currentTime + ITEM_NAME_CACHE_LIFETIME_NANOS));
-            return itemName;
+        return descriptor;
+    }
+
+    private static String buildCacheKey(ItemStack itemStack) {
+        if (!itemStack.hasItemMeta())
+            return itemStack.getType().name();
+
+        ItemMeta meta = itemStack.getItemMeta();
+        return itemStack.getType().name() + ":meta:" + (meta == null ? 0 : meta.hashCode());
+    }
+
+    private static void logUnsupportedOnce() {
+        if (!warnedUnsupported) {
+            warnedUnsupported = true;
+            try {
+                WildStackerPlugin.getPlugin().getLogger().info(
+                        "[WildStacker] Client-localized names require Paper 1.19.3+ with Adventure API. Falling back to legacy String names.");
+            } catch (Throwable ignored) {
+            }
         }
     }
 
-    public static boolean setEntityName(Entity entity, EntityType entityType, String pattern, int amount,
-                                        String upgradeDisplayName) {
-        if (ADVENTURE == null)
-            return false;
-
-        try {
-            String translationKey = ADVENTURE.getEntityTranslationKey(entityType);
-            if (translationKey == null)
-                return false;
-
-            String preparedPattern = pattern.replace("{0}", String.valueOf(amount))
-                    .replace("{3}", upgradeDisplayName == null ? "" : upgradeDisplayName);
-            return ADVENTURE.apply(entity, preparedPattern, ADVENTURE.translatable(translationKey));
-        } catch (Throwable ignored) {
-            return false;
-        }
-    }
-
-    private static final class AdventureBridge {
-
-        private final Class<?> componentClass;
-        private final Object legacySerializer;
-        private final Method deserializeMethod;
-        private final Method translatableMethod;
-        private final Method replaceTextMethod;
-        private final Method customNameMethod;
-        private final Method itemHasCustomNameMethod;
-        private final Method itemCustomNameMethod;
-        private final Method itemHasItemNameMethod;
-        private final Method itemNameMethod;
-        private final Method itemHasDisplayNameMethod;
-        private final Method itemDisplayNameMethod;
-        private final Method itemTranslationKeyMethod;
-        private final Method entityTranslationKeyMethod;
-
-        private AdventureBridge(Class<?> componentClass, Object legacySerializer, Method deserializeMethod,
-                                Method translatableMethod, Method replaceTextMethod, Method customNameMethod,
-                                Method itemHasCustomNameMethod, Method itemCustomNameMethod,
-                                Method itemHasItemNameMethod, Method itemNameMethod,
-                                Method itemHasDisplayNameMethod, Method itemDisplayNameMethod,
-                                Method itemTranslationKeyMethod, Method entityTranslationKeyMethod) {
-            this.componentClass = componentClass;
-            this.legacySerializer = legacySerializer;
-            this.deserializeMethod = deserializeMethod;
-            this.translatableMethod = translatableMethod;
-            this.replaceTextMethod = replaceTextMethod;
-            this.customNameMethod = customNameMethod;
-            this.itemHasCustomNameMethod = itemHasCustomNameMethod;
-            this.itemCustomNameMethod = itemCustomNameMethod;
-            this.itemHasItemNameMethod = itemHasItemNameMethod;
-            this.itemNameMethod = itemNameMethod;
-            this.itemHasDisplayNameMethod = itemHasDisplayNameMethod;
-            this.itemDisplayNameMethod = itemDisplayNameMethod;
-            this.itemTranslationKeyMethod = itemTranslationKeyMethod;
-            this.entityTranslationKeyMethod = entityTranslationKeyMethod;
-        }
-
-        static AdventureBridge create() {
-            try {
-                Class<?> componentClass = Class.forName("net.kyori.adventure.text.Component");
-                Class<?> componentLikeClass = Class.forName("net.kyori.adventure.text.ComponentLike");
-                Class<?> serializerClass = Class.forName(
-                        "net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer");
-                Class<?> nameableClass = Class.forName("org.bukkit.Nameable");
-
-                Object serializer = serializerClass.getMethod("legacySection").invoke(null);
-                Method deserialize = serializerClass.getMethod("deserialize", String.class);
-                Method translatable = componentClass.getMethod("translatable", String.class);
-                Method replaceText = componentClass.getMethod("replaceText", String.class, componentLikeClass);
-                Method customName = nameableClass.getMethod("customName", componentClass);
-
-                return new AdventureBridge(componentClass, serializer, deserialize, translatable, replaceText,
-                        customName,
-                        getOptionalMethod(ItemMeta.class, "hasCustomName"),
-                        getOptionalMethod(ItemMeta.class, "customName"),
-                        getOptionalMethod(ItemMeta.class, "hasItemName"),
-                        getOptionalMethod(ItemMeta.class, "itemName"),
-                        getOptionalMethod(ItemMeta.class, "hasDisplayName"),
-                        getOptionalMethod(ItemMeta.class, "displayName"),
-                        firstMethod(ItemStack.class, "getTranslationKey", "translationKey"),
-                        firstMethod(EntityType.class, "getTranslationKey", "translationKey"));
-            } catch (Throwable ignored) {
-                return null;
-            }
-        }
-
-        private static Method getOptionalMethod(Class<?> owner, String methodName) {
-            try {
-                return owner.getMethod(methodName);
-            } catch (Throwable ignored) {
-                return null;
-            }
-        }
-
-        private static Method firstMethod(Class<?> owner, String... methodNames) {
-            for (String methodName : methodNames) {
-                Method method = getOptionalMethod(owner, methodName);
-                if (method != null)
-                    return method;
-            }
-            return null;
-        }
-
-        Object translatable(String translationKey) throws Exception {
-            return translatableMethod.invoke(null, translationKey);
-        }
-
-        Object findEmbeddedName(ItemStack itemStack) {
-            if (!itemStack.hasItemMeta())
-                return null;
-
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            Object component = invokeComponent(itemMeta, itemHasCustomNameMethod, itemCustomNameMethod);
-            if (component == null)
-                component = invokeComponent(itemMeta, itemHasItemNameMethod, itemNameMethod);
-            if (component == null)
-                component = invokeComponent(itemMeta, itemHasDisplayNameMethod, itemDisplayNameMethod);
-            return component;
-        }
-
-        String getItemTranslationKey(ItemStack itemStack) {
-            return invokeString(itemStack, itemTranslationKeyMethod);
-        }
-
-        String getEntityTranslationKey(EntityType entityType) {
-            return invokeString(entityType, entityTranslationKeyMethod);
-        }
-
-        private Object invokeComponent(Object instance, Method hasMethod, Method componentMethod) {
-            if (hasMethod == null || componentMethod == null)
-                return null;
-
-            try {
-                return Boolean.TRUE.equals(hasMethod.invoke(instance)) ? componentMethod.invoke(instance) : null;
-            } catch (Throwable ignored) {
-                return null;
-            }
-        }
-
-        private String invokeString(Object instance, Method method) {
-            if (method == null)
-                return null;
-
-            try {
-                Object result = method.invoke(instance);
-                return result instanceof String && !((String) result).isEmpty() ? (String) result : null;
-            } catch (Throwable ignored) {
-                return null;
-            }
-        }
-
-        boolean apply(Entity entity, String pattern, Object localizedName) throws Exception {
-            if (!componentClass.isInstance(localizedName) ||
-                    (!pattern.contains("{1}") && !pattern.contains("{2}"))) {
-                return false;
-            }
-
-            String tokenizedPattern = pattern.replace("{1}", NAME_TOKEN).replace("{2}", NAME_TOKEN);
-            Object patternComponent = deserializeMethod.invoke(legacySerializer, tokenizedPattern);
-            Object localizedComponent = replaceTextMethod.invoke(patternComponent, NAME_TOKEN, localizedName);
-            customNameMethod.invoke(entity, localizedComponent);
-            return true;
-        }
-    }
-
-    private static final class CachedItemName {
-
-        private final Object component;
+    private static final class CachedDescriptor {
+        private final LocalizedItemDescriptor descriptor;
         private final long expirationTimeNanos;
 
-        private CachedItemName(Object component, long expirationTimeNanos) {
-            this.component = component;
+        private CachedDescriptor(LocalizedItemDescriptor descriptor, long expirationTimeNanos) {
+            this.descriptor = descriptor;
             this.expirationTimeNanos = expirationTimeNanos;
         }
-
     }
 }
