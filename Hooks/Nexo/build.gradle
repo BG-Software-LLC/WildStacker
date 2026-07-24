@@ -1,6 +1,26 @@
 group 'Hooks:Nexo'
 
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://repo.nexomc.com/releases'
+    }
+    maven {
+        url 'https://maven.enginehub.org/repo/'
+    }
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 dependencies {
+    compileOnly 'com.nexomc:nexo:1.26.0'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly project(":")

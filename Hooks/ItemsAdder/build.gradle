@@ -1,6 +1,13 @@
 group 'Hooks:ItemsAdder'
 
+repositories {
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
 dependencies {
+    compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.6.3-beta-14'
     compileOnly "org.spigotmc:v1_8_R3-Taco:latest"
     compileOnly project(":API")
     compileOnly project(":")

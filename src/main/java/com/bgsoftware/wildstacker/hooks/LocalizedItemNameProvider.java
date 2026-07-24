@@ -9,8 +9,19 @@ import javax.annotation.Nullable;
  */
 public interface LocalizedItemNameProvider {
 
+    /**
+     * Stable provider ID in lowercase ASCII (e.g. "craftengine", "itemsadder", "nexo", "oraxen").
+     */
+    String getId();
+
+    /**
+     * Bukkit plugin name for lifecycle registration matching.
+     */
     String getPluginName();
 
+    /**
+     * Resolve pure canonical ItemStack from third-party registry or null.
+     */
     @Nullable
     ItemStack resolveRegistryItem(ItemStack itemStack);
 
