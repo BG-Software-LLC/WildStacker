@@ -213,7 +213,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                     result = ClientLocalizedNameService.setItemName(object, itemStack,
                             settings.itemsLocalizedNameTemplate, amount);
                 }
-                if (result != LocalizedNameApplyResult.APPLIED) {
+                if (result != LocalizedNameApplyResult.APPLIED && result != LocalizedNameApplyResult.NO_NAME_SOURCE) {
                     setCustomName(CUSTOM_NAME);
                 }
                 setCustomNameVisible(true);

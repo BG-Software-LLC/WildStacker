@@ -43,14 +43,7 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
 
         Component localizedNameComponent = null;
 
-        if (itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                localizedNameComponent = extractItemMetaComponent(meta);
-            }
-        }
-
-        if (localizedNameComponent == null && descriptor != null) {
+        if (descriptor != null) {
             LocalizedItemNameSourceType sourceType = descriptor.getSourceType();
 
             if (sourceType == LocalizedItemNameSourceType.CUSTOM_COMPONENT && descriptor.getCustomComponent() instanceof Component) {
@@ -67,6 +60,22 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
                         localizedNameComponent = extractItemMetaComponent(meta);
                     }
                 }
+                if (localizedNameComponent == null) {
+                    try {
+                        Component eff = getOptionalItemComponent(canonical, "effectiveName");
+                        if (eff != null && !isBaseMaterialTranslationKey(eff, canonical)) {
+                            localizedNameComponent = eff;
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+        }
+
+        if (localizedNameComponent == null && itemStack.hasItemMeta()) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                localizedNameComponent = extractItemMetaComponent(meta);
             }
         }
 
@@ -160,6 +169,30 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
         } catch (Throwable ignored) {
         }
         return null;
+    }
+
+    private static Component getOptionalItemComponent(ItemStack item, String methodName) {
+        try {
+            Method method = item.getClass().getMethod(methodName);
+            Object res = method.invoke(item);
+            if (res instanceof Component)
+                return (Component) res;
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private static boolean isBaseMaterialTranslationKey(Component component, ItemStack item) {
+        if (component instanceof net.kyori.adventure.text.TranslatableComponent) {
+            String key = ((net.kyori.adventure.text.TranslatableComponent) component).key();
+            try {
+                String baseKey = item.translationKey();
+                if (key.equals(baseKey))
+                    return true;
+            } catch (Throwable ignored) {
+            }
+        }
+        return false;
     }
 
 }
