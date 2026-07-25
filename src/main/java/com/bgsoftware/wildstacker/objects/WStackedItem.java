@@ -232,8 +232,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
         synchronized (nameStateLock) {
             if (lastNameSettings.get() == settings && lastNamedAmount == amount && lastNamedItem != null &&
-                    lastNamedItem.isSimilar(itemStack) && lastProviderRevision == providerRevision &&
-                    currentTime - nextNameRefreshNanos < 0) {
+                    lastNamedItem.isSimilar(itemStack) && lastProviderRevision == providerRevision) {
                 return 0L;
             }
 
@@ -242,7 +241,6 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             lastNamedItem = itemStack.clone();
             lastNamedItem.setAmount(1);
             lastProviderRevision = providerRevision;
-            nextNameRefreshNanos = currentTime + NAME_REFRESH_INTERVAL_NANOS;
             return ++nameRevision;
         }
     }
