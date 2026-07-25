@@ -74,7 +74,7 @@ public final class ProvidersHandler {
     private long localizedItemNameProviderRevision = 0L;
 
     private static final ProviderHookDescriptor[] LOCALIZED_NAME_DESCRIPTORS = new ProviderHookDescriptor[]{
-            new ProviderHookDescriptor("craftengine", "CraftEngine", "LocalizedItemNameProvider_CraftEngine"),
+            new ProviderHookDescriptor("craftengine", "CraftEngine", "LocalizedItemNameProvider_CraftEngineModern", "LocalizedItemNameProvider_CraftEngineLegacy", "LocalizedItemNameProvider_CraftEngine"),
             new ProviderHookDescriptor("itemsadder", "ItemsAdder", "LocalizedItemNameProvider_ItemsAdder"),
             new ProviderHookDescriptor("nexo", "Nexo", "LocalizedItemNameProvider_Nexo"),
             new ProviderHookDescriptor("oraxen", "Oraxen", "LocalizedItemNameProvider_Oraxen")
@@ -330,6 +330,10 @@ public final class ProvidersHandler {
         if (provider == null || provider.getId() == null)
             return;
         String id = provider.getId().toLowerCase(Locale.ENGLISH).trim();
+        LocalizedItemNameProvider existing = localizedItemNameProviders.get(id);
+        if (existing == provider && existing.getState() == provider.getState())
+            return;
+
         localizedItemNameProviders.put(id, provider);
         localizedItemNameProviderRevision++;
         ClientLocalizedNameService.invalidateCaches();
@@ -347,12 +351,18 @@ public final class ProvidersHandler {
 
     private void loadLocalizedItemNameProviders() {
         localizedItemNameProviders.clear();
+        providerCircuitStates.clear();
         localizedItemNameProviderRevision++;
 
         for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
             if (Bukkit.getPluginManager().isPluginEnabled(descriptor.pluginName)) {
-                Optional<LocalizedItemNameProvider> provider = createInstance(descriptor.implementationClass);
-                provider.ifPresent(p -> localizedItemNameProviders.put(descriptor.id, p));
+                for (String className : descriptor.implementationClasses) {
+                    Optional<LocalizedItemNameProvider> provider = createInstance(className);
+                    if (provider.isPresent() && provider.get().getState() != LocalizedItemNameProvider.ProviderState.INCOMPATIBLE) {
+                        localizedItemNameProviders.put(descriptor.id, provider.get());
+                        break;
+                    }
+                }
             }
         }
         ClientLocalizedNameService.invalidateCaches();
@@ -490,8 +500,13 @@ public final class ProvidersHandler {
         for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
             if (isPlugin(toCheck, descriptor.pluginName)) {
                 if (enable && pluginManager.isPluginEnabled(descriptor.pluginName)) {
-                    Optional<LocalizedItemNameProvider> provider = createInstance(descriptor.implementationClass);
-                    provider.ifPresent(this::registerLocalizedItemNameProvider);
+                    for (String className : descriptor.implementationClasses) {
+                        Optional<LocalizedItemNameProvider> provider = createInstance(className);
+                        if (provider.isPresent() && provider.get().getState() != LocalizedItemNameProvider.ProviderState.INCOMPATIBLE) {
+                            registerLocalizedItemNameProvider(provider.get());
+                            break;
+                        }
+                    }
                 } else if (!enable) {
                     unregisterLocalizedItemNameProvider(descriptor.id);
                 }
@@ -735,12 +750,12 @@ public final class ProvidersHandler {
     private static final class ProviderHookDescriptor {
         private final String id;
         private final String pluginName;
-        private final String implementationClass;
+        private final String[] implementationClasses;
 
-        private ProviderHookDescriptor(String id, String pluginName, String implementationClass) {
+        private ProviderHookDescriptor(String id, String pluginName, String... implementationClasses) {
             this.id = id;
             this.pluginName = pluginName;
-            this.implementationClass = implementationClass;
+            this.implementationClasses = implementationClasses;
         }
     }
 
