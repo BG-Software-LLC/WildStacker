@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class LocalizedItemNameProvider_Oraxen implements LocalizedItemNameProvider {
 
     private volatile ProviderState state = ProviderState.READY;
@@ -42,9 +43,9 @@ public final class LocalizedItemNameProvider_Oraxen implements LocalizedItemName
         } catch (LinkageError error) {
             markIncompatible("Installed Oraxen API signature is incompatible with hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }
@@ -65,9 +66,9 @@ public final class LocalizedItemNameProvider_Oraxen implements LocalizedItemName
         } catch (LinkageError error) {
             markIncompatible("Installed Oraxen API signature is incompatible with hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }

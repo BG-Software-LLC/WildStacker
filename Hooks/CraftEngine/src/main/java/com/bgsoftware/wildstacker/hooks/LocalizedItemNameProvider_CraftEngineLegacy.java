@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class LocalizedItemNameProvider_CraftEngineLegacy implements LocalizedItemNameProvider {
 
     private volatile ProviderState state = ProviderState.READY;
@@ -44,9 +45,9 @@ public final class LocalizedItemNameProvider_CraftEngineLegacy implements Locali
         } catch (LinkageError error) {
             markIncompatible("Installed CraftEngine API signature is incompatible with legacy 0.0.x hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }
@@ -67,9 +68,9 @@ public final class LocalizedItemNameProvider_CraftEngineLegacy implements Locali
         } catch (LinkageError error) {
             markIncompatible("Installed CraftEngine API signature is incompatible with legacy 0.0.x hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }

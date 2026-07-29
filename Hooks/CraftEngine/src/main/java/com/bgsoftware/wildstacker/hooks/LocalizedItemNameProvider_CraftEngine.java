@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("PMD.ClassNamingConventions")
 public class LocalizedItemNameProvider_CraftEngine implements LocalizedItemNameProvider {
 
     private final LocalizedItemNameProvider_CraftEngineLegacy delegate = new LocalizedItemNameProvider_CraftEngineLegacy();

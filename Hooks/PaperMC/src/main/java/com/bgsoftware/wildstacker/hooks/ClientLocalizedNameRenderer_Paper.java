@@ -16,7 +16,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedNameRenderer {
+
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
+            LegacyComponentSerializer.legacyAmpersand();
 
     @Override
     public boolean isSupported() {
@@ -41,65 +45,16 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
         if (!(itemEntity instanceof Nameable) || !itemEntity.isValid())
             return LocalizedNameApplyResult.ENTITY_INVALID;
 
-        Component localizedNameComponent = null;
-
-        if (descriptor != null) {
-            LocalizedItemNameSourceType sourceType = descriptor.getSourceType();
-
-            if (sourceType == LocalizedItemNameSourceType.CUSTOM_COMPONENT && descriptor.getCustomComponent() instanceof Component) {
-                localizedNameComponent = (Component) descriptor.getCustomComponent();
-            } else if (sourceType == LocalizedItemNameSourceType.CUSTOM_TRANSLATION_KEY && descriptor.getCustomTranslationKey() != null) {
-                localizedNameComponent = Component.translatable(descriptor.getCustomTranslationKey());
-            } else if (sourceType == LocalizedItemNameSourceType.CUSTOM_LITERAL_NAME && descriptor.getCustomLiteralName() != null) {
-                localizedNameComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(descriptor.getCustomLiteralName());
-            } else if (descriptor.getCanonicalItem() != null) {
-                ItemStack canonical = descriptor.getCanonicalItem();
-                if (canonical.hasItemMeta()) {
-                    ItemMeta meta = canonical.getItemMeta();
-                    if (meta != null) {
-                        localizedNameComponent = extractItemMetaComponent(meta);
-                    }
-                }
-                if (localizedNameComponent == null) {
-                    try {
-                        Component eff = getOptionalItemComponent(canonical, "effectiveName");
-                        if (eff != null && !isBaseMaterialTranslationKey(eff, canonical)) {
-                            localizedNameComponent = eff;
-                        }
-                    } catch (Throwable ignored) {
-                    }
-                }
-            }
-        }
-
-        if (localizedNameComponent == null && itemStack.hasItemMeta()) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                localizedNameComponent = extractItemMetaComponent(meta);
-            }
-        }
-
-        if (localizedNameComponent == null && descriptor == null) {
-            try {
-                String key = itemStack.translationKey();
-                if (key != null && !key.isEmpty()) {
-                    localizedNameComponent = Component.translatable(key);
-                }
-            } catch (Throwable ignored) {
-            }
-        }
-
-        if (localizedNameComponent == null)
-            return LocalizedNameApplyResult.NO_NAME_SOURCE;
-
         try {
-            Component finalName = template.renderItemName(amount, localizedNameComponent);
-            ((Nameable) itemEntity).customName(finalName);
-            itemEntity.setCustomNameVisible(true);
+            Component finalName = renderItemName(itemStack, template, amount, descriptor);
+            if (finalName == null)
+                return LocalizedNameApplyResult.NO_NAME_SOURCE;
+
+            applyCustomName((Nameable) itemEntity, finalName);
             return LocalizedNameApplyResult.APPLIED;
-        } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+        } catch (Error error) {
+            throw error;
+        } catch (Throwable ignored) {
             return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
         }
     }
@@ -115,28 +70,116 @@ public final class ClientLocalizedNameRenderer_Paper implements ClientLocalizedN
         if (!(entity instanceof Nameable) || !entity.isValid())
             return LocalizedNameApplyResult.ENTITY_INVALID;
 
-        Component localizedNameComponent = null;
+        String localizedTranslationKey = null;
         try {
             String key = entityType.translationKey();
             if (key != null && !key.isEmpty()) {
-                localizedNameComponent = Component.translatable(key);
+                localizedTranslationKey = key;
             }
         } catch (Throwable ignored) {
         }
 
-        if (localizedNameComponent == null)
+        if (localizedTranslationKey == null)
             return LocalizedNameApplyResult.NO_NAME_SOURCE;
 
         try {
-            Component finalName = template.renderEntityName(amount, localizedNameComponent, upgradeDisplayName);
-            ((Nameable) entity).customName(finalName);
-            entity.setCustomNameVisible(true);
+            Component finalName = template.renderEntityTranslation(
+                    amount, localizedTranslationKey, upgradeDisplayName);
+            applyCustomName((Nameable) entity, finalName);
             return LocalizedNameApplyResult.APPLIED;
-        } catch (Throwable error) {
-            if (error instanceof Error)
-                throw (Error) error;
+        } catch (Error error) {
+            throw error;
+        } catch (Throwable ignored) {
             return LocalizedNameApplyResult.COMPONENT_BUILD_FAILED;
         }
+    }
+
+    @Nullable
+    private static Component renderItemName(ItemStack itemStack, LocalizedNameTemplate template, int amount,
+                                            @Nullable LocalizedItemDescriptor descriptor) {
+        if (descriptor != null) {
+            Component providerName = renderProviderItemName(descriptor, template, amount);
+            if (providerName != null)
+                return providerName;
+        }
+
+        Component embeddedName = extractItemStackComponent(itemStack);
+        if (embeddedName != null)
+            return template.renderItemName(amount, embeddedName);
+
+        if (descriptor != null)
+            return null;
+
+        String translationKey = getItemTranslationKey(itemStack);
+        return translationKey == null ? null : template.renderItemTranslation(amount, translationKey);
+    }
+
+    @Nullable
+    private static Component renderProviderItemName(LocalizedItemDescriptor descriptor,
+                                                    LocalizedNameTemplate template, int amount) {
+        LocalizedItemNameSourceType sourceType = descriptor.getSourceType();
+        switch (sourceType) {
+            case CUSTOM_COMPONENT:
+                Object customComponent = descriptor.getCustomComponent();
+                return customComponent instanceof Component ?
+                        template.renderItemName(amount, (Component) customComponent) : null;
+            case CUSTOM_TRANSLATION_KEY:
+                String translationKey = descriptor.getCustomTranslationKey();
+                return translationKey == null ? null : template.renderItemTranslation(amount, translationKey);
+            case CUSTOM_LITERAL_NAME:
+                String literalName = descriptor.getCustomLiteralName();
+                return literalName == null ? null :
+                        template.renderItemName(amount, LEGACY_SERIALIZER.deserialize(literalName));
+            case CANONICAL_EFFECTIVE_NAME:
+                Component canonicalName = extractCanonicalItemComponent(descriptor.getCanonicalItem());
+                return canonicalName == null ? null : template.renderItemName(amount, canonicalName);
+            default:
+                return null;
+        }
+    }
+
+    @Nullable
+    private static Component extractCanonicalItemComponent(@Nullable ItemStack itemStack) {
+        if (itemStack == null)
+            return null;
+
+        Component embeddedName = extractItemStackComponent(itemStack);
+        if (embeddedName != null)
+            return embeddedName;
+
+        Component effectiveName = getOptionalItemComponent(itemStack, "effectiveName");
+        return effectiveName == null || isBaseMaterialTranslationKey(effectiveName, itemStack) ?
+                null : effectiveName;
+    }
+
+    @Nullable
+    private static Component extractItemStackComponent(ItemStack itemStack) {
+        if (!itemStack.hasItemMeta())
+            return null;
+
+        ItemMeta meta = itemStack.getItemMeta();
+        return meta == null ? null : extractItemMetaComponent(meta);
+    }
+
+    @Nullable
+    private static String getItemTranslationKey(ItemStack itemStack) {
+        try {
+            String translationKey = itemStack.translationKey();
+            return translationKey == null || translationKey.isEmpty() ? null : translationKey;
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private static void applyCustomName(Nameable entity, Component component) {
+        /*
+         * Paper stores Adventure names in a lazy NMS wrapper. Comparing an old wrapper with a new one
+         * can serialize both components to JSON inside Entity#setCustomName. Clearing the optional
+         * value first keeps both equality checks constant-time; entity metadata only exposes the final
+         * value when the tracker flushes after this synchronous update.
+         */
+        entity.customName(null);
+        entity.customName(component);
     }
 
     private static Component extractItemMetaComponent(ItemMeta meta) {

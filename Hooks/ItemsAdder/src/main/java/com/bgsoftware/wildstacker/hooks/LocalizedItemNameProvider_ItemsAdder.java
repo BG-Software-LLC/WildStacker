@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItemNameProvider, Listener {
 
     private volatile boolean ready = false;
@@ -52,9 +53,9 @@ public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItem
         } catch (LinkageError error) {
             markIncompatible("Installed ItemsAdder API signature is incompatible with hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }
@@ -73,9 +74,9 @@ public final class LocalizedItemNameProvider_ItemsAdder implements LocalizedItem
         } catch (LinkageError error) {
             markIncompatible("Installed ItemsAdder API signature is incompatible with hook: " + error.getMessage());
             return null;
-        } catch (Throwable error) {
-            if (error instanceof VirtualMachineError)
-                throw (VirtualMachineError) error;
+        } catch (VirtualMachineError error) {
+            throw error;
+        } catch (Throwable ignored) {
             return null;
         }
     }

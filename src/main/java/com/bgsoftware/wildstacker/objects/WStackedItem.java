@@ -30,11 +30,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -42,16 +40,13 @@ import java.util.regex.Pattern;
 public final class WStackedItem extends WAsyncStackedObject<Item> implements StackedItem {
 
     private static final Pattern DISPLAY_NAME_PLACEHOLDER = Pattern.compile(Pattern.quote("{0}"));
-    private static final long NAME_REFRESH_INTERVAL_NANOS = TimeUnit.MINUTES.toNanos(5);
 
     private final UUID cachedUUID;
     private final int cachedEntityId;
-    private final Object nameStateLock = new Object();
     private String mmoItemName = null;
-    private ItemStack lastNamedItem;
-    private WeakReference<SettingsHandler> lastNameSettings = new WeakReference<>(null);
+    private boolean localizedNameStateInitialized;
     private int lastNamedAmount = Integer.MIN_VALUE;
-    private long nextNameRefreshNanos;
+    private long lastSettingsRevision = Long.MIN_VALUE;
     private long nameRevision;
     private long lastProviderRevision = -1L;
 
@@ -168,17 +163,17 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
                 ServerVersion.isLessThan(ServerVersion.v1_8))
             return;
 
-        ItemStack itemStack = getItemStack();
-
         String customName = settings.itemsCustomName;
         if (customName.isEmpty())
             return;
 
         int amount = getStackAmount();
         boolean localizedNamesEnabled = settings.itemsLocalizedNames;
-        long currentNameRevision = localizedNamesEnabled ? prepareNameUpdate(itemStack, settings, amount) : -1L;
+        long currentNameRevision = localizedNamesEnabled ? prepareNameUpdate(settings, amount) : -1L;
         if (currentNameRevision == 0L)
             return;
+
+        ItemStack itemStack = getItemStack();
 
         boolean mmoItem = !plugin.getNMSAdapter().getTag(itemStack, "MMOITEMS_ITEM_TYPE", String.class, "NULL").equals("NULL");
 
@@ -226,28 +221,33 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
             plugin.getSystemManager().markToBeSaved(this);
     }
 
-    private long prepareNameUpdate(ItemStack itemStack, SettingsHandler settings, int amount) {
-        long currentTime = System.nanoTime();
+    private long prepareNameUpdate(SettingsHandler settings, int amount) {
         long providerRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
 
-        synchronized (nameStateLock) {
-            if (lastNameSettings.get() == settings && lastNamedAmount == amount && lastNamedItem != null &&
-                    lastNamedItem.isSimilar(itemStack) && lastProviderRevision == providerRevision) {
+        synchronized (this) {
+            if (localizedNameStateInitialized && lastSettingsRevision == settings.localizationRevision &&
+                    lastNamedAmount == amount && lastProviderRevision == providerRevision) {
                 return 0L;
             }
 
-            lastNameSettings = new WeakReference<>(settings);
+            localizedNameStateInitialized = true;
+            lastSettingsRevision = settings.localizationRevision;
             lastNamedAmount = amount;
-            lastNamedItem = itemStack.clone();
-            lastNamedItem.setAmount(1);
             lastProviderRevision = providerRevision;
             return ++nameRevision;
         }
     }
 
     private boolean isCurrentNameRevision(long revision) {
-        synchronized (nameStateLock) {
+        synchronized (this) {
             return nameRevision == revision;
+        }
+    }
+
+    private void invalidateLocalizedNameState() {
+        synchronized (this) {
+            localizedNameStateInitialized = false;
+            ++nameRevision;
         }
     }
 
@@ -366,8 +366,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     public void setItemStack(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType() == Material.AIR)
             remove();
-        else
+        else {
+            mmoItemName = null;
+            invalidateLocalizedNameState();
             object.setItemStack(itemStack);
+        }
     }
 
     @Override

@@ -622,10 +622,9 @@ public final class ProvidersHandler {
                 plugin.getLogger().warning("[WildStacker] Provider '" + providerId +
                         "' threw LinkageError during descriptor resolution. Continuing fallback: " + error.getMessage());
                 continue;
+            } catch (VirtualMachineError error) {
+                throw error;
             } catch (Throwable error) {
-                if (error instanceof VirtualMachineError)
-                    throw (VirtualMachineError) error;
-
                 circuit.consecutiveFailures++;
                 if (circuit.consecutiveFailures >= 3) {
                     circuit.circuitOpenUntilNanos = currentTime + TimeUnit.SECONDS.toNanos(30);

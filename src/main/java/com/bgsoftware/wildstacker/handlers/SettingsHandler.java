@@ -50,12 +50,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
 
+    private static final AtomicLong REVISION_SEQUENCE = new AtomicLong();
+
+    public final long localizationRevision;
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = {"merge-radius", "limits", "minimum-required", "default-unstack",
             "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
@@ -89,13 +93,16 @@ public final class SettingsHandler {
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
             itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems,
             itemsLocalizedNames;
-    public final List<String> itemsLocalizedNameProviders, itemsDisabledWorlds;
+    public final List<String> itemsLocalizedNameProviders;
+    public final List<String> itemsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final NameBuilder<StackedItem> itemsNameBuilder;
-    public final LocalizedNameTemplate itemsLocalizedNameTemplate, entitiesLocalizedNameTemplate;
-    public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
+    public final LocalizedNameTemplate itemsLocalizedNameTemplate;
+    public final LocalizedNameTemplate entitiesLocalizedNameTemplate;
+    public final FastEnumMap<Material, Integer> itemsMergeRadius;
+    public final FastEnumMap<Material, Integer> itemsLimits;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
 
@@ -160,6 +167,7 @@ public final class SettingsHandler {
     private YamlConfiguration particlesYaml = null;
 
     public SettingsHandler(WildStackerPlugin plugin) {
+        localizationRevision = REVISION_SEQUENCE.incrementAndGet();
         WildStackerPlugin.log("Loading configuration started...");
         long startTime = System.currentTimeMillis();
         File file = new File(plugin.getDataFolder(), "config.yml");
