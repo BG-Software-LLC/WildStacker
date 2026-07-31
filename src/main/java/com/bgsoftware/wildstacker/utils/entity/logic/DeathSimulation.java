@@ -377,7 +377,8 @@ public final class DeathSimulation {
         } catch (IllegalArgumentException ignored) {
         }
 
-        plugin.getNMSEntities().awardKillScore(sourceKiller, stackedEntity.getLivingEntity(), directKiller);
+        if (directKiller != null)
+            plugin.getNMSEntities().awardKillScore(sourceKiller, stackedEntity.getLivingEntity(), directKiller);
     }
 
     private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {
