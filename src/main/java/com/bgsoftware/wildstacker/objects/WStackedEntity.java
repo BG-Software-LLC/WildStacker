@@ -140,17 +140,19 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     public void remove() {
         plugin.getSystemManager().removeStackObject(this);
 
-        //Drop leash if exists
-        if (object.isLeashed()) {
-            ItemUtils.dropItem(new ItemStack(Materials.LEAD.toBukkitType()), getLocation());
-            object.setLeashHolder(null);
-        }
-
         /* Entities must be removed sync, otherwise they are not properly removed from chunks.
         Also, in 1.17, the remove() function must be called sync.
         Other than that, slimes must be removed sync as well.
+        The leash check/drop must also run sync - isLeashed() resolves the leash
+        holder via chunk getEntities(), which is main-thread-only.
         */
-        Executor.sync(() -> {
+        Executor.runAtEndOfTick(() -> {
+            //Drop leash if exists
+            if (object.isLeashed()) {
+                ItemUtils.dropItem(new ItemStack(Materials.LEAD.toBukkitType()), getLocation());
+                object.setLeashHolder(null);
+            }
+
             object.remove();
             Executor.sync(this::clearFlags, 100L);
         });
