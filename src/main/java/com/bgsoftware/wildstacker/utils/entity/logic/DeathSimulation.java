@@ -171,11 +171,13 @@ public final class DeathSimulation {
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
 
+        int unstackAmountExp = plugin.getSettings().multiplyExp ? unstackAmount : 1;
+
         Executor.async(() -> {
             livingEntity.setFireTicks(fireTicks);
 
             List<ItemStack> drops = stackedEntity.getDrops(lootBonusLevel, plugin.getSettings().multiplyDrops ? unstackAmount : 1);
-            int asyncXpResult = stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
+            int asyncXpResult = stackedEntity.getExp(unstackAmountExp, 0);
 
             Executor.sync(() -> {
                 // We want to remove the cache of the killer
@@ -192,15 +194,15 @@ public final class DeathSimulation {
                 plugin.getProviders().notifyEntityDeathListeners(stackedEntity,
                         IEntityDeathListener.Type.BEFORE_DEATH_EVENT);
 
+                int droppedExp = asyncXpResult >= 0 ? asyncXpResult : stackedEntity.getExp(unstackAmountExp, 0);
+
                 // We fire the entity_die game event
-                plugin.getNMSEntities().sendEntityDieEvent(livingEntity);
+                droppedExp = plugin.getNMSEntities().sendEntityDieEvent(livingEntity, unstackAmountExp, droppedExp);
 
                 List<ItemStack> finalDrops;
                 int finalExp;
 
                 if (!fromDeathEvent) {
-                    int droppedExp = asyncXpResult >= 0 ? asyncXpResult :
-                            stackedEntity.getExp(plugin.getSettings().multiplyExp ? unstackAmount : 1, 0);
                     EntityDeathEvent entityDeathEvent = plugin.getNMSEntities().createDeathEvent(
                             livingEntity, new LinkedList<>(drops), droppedExp, damageEvent);
 

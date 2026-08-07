@@ -84,7 +84,7 @@ public interface NMSEntities {
 
     boolean handleTotemOfUndying(LivingEntity livingEntity);
 
-    void sendEntityDieEvent(LivingEntity livingEntity);
+    int sendEntityDieEvent(LivingEntity livingEntity, int unstackAmount, int droppedExp);
 
     boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father,
                                  @Nullable LivingEntity breeder, @Nullable ItemStack bredWith, int experience);

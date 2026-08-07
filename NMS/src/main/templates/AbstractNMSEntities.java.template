@@ -99,6 +99,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
     private static final ReflectField<Entity.RemovalReason> ENTITY_REMOVE_REASON = new ReflectField<>(Entity.class, Entity.RemovalReason.class, Modifier.PRIVATE, 1);
     private static final ReflectField<Integer> LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME = new ReflectField<>(LivingEntity.class, int.class, "${LIVING_ENTITY_LAST_HURT_BY_PLAYER_MEMORY_TIME}");
     private static final ReflectField<Boolean> LIVING_ENTITY_DEAD = new ReflectField<>(LivingEntity.class, boolean.class, "${LIVING_ENTITY_DEAD}");
+    private static final ReflectField<Boolean> LIVING_ENTITY_SKIP_DROP_EXPERIENCE = new ReflectField<>(LivingEntity.class, boolean.class, "${LIVING_ENTITY_SKIP_DROP_EXPERIENCE}");
     public static final ReflectMethod<Boolean> LIVING_ENTITY_SHOULD_DROP_EXPERIENCE = new ReflectMethod<>(LivingEntity.class, boolean.class, "${LIVING_ENTITY_SHOULD_DROP_EXPERIENCE}");
     private static final ReflectMethod<SoundEvent> LIVING_ENTITY_GET_DEATH_SOUND = new ReflectMethod<>(LivingEntity.class, "${LIVING_ENTITY_GET_DEATH_SOUND}");
     private static final ReflectMethod<Float> LIVING_ENTITY_GET_SOUND_VOLUME = new ReflectMethod<>(LivingEntity.class, "${LIVING_ENTITY_GET_SOUND_VOLUME}");
@@ -440,9 +441,32 @@ public abstract class AbstractNMSEntities implements NMSEntities {
                                                                        org.bukkit.inventory.EquipmentSlot equipmentSlot);
 
     @Override
-    public void sendEntityDieEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity) {
+    public int sendEntityDieEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity, int unstackAmount, int droppedExp) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
-        livingEntity.gameEvent(GameEvent.${GAME_EVENT_ENTITY_DIE});
+
+        if (unstackAmount > 1 && livingEntity instanceof Mob mob) {
+            // Temporarily scale the entity's experience reward so a nearby Sculk Catalyst spreads
+            // sculk for the whole killed stack instead of a single entity. The game event is
+            // dispatched synchronously, so the catalyst reads the boosted value before we restore it.
+            int defaultEntityExp = ENTITY_EXP.get(mob);
+            try {
+                ENTITY_EXP.set(mob, droppedExp);
+                livingEntity.gameEvent(GameEvent.${GAME_EVENT_ENTITY_DIE});
+            } finally {
+                ENTITY_EXP.set(mob, defaultEntityExp);
+            }
+        } else {
+            livingEntity.gameEvent(GameEvent.${GAME_EVENT_ENTITY_DIE});
+        }
+
+        // The entity survives across unstacks; clear any "experience consumed" flag a Sculk
+        // Catalyst may have set on a previous unstack so it processes this death again.
+        if (LIVING_ENTITY_SKIP_DROP_EXPERIENCE.isValid() && LIVING_ENTITY_SKIP_DROP_EXPERIENCE.get(livingEntity)) {
+            LIVING_ENTITY_SKIP_DROP_EXPERIENCE.set(livingEntity, false);
+            return 0;
+        }
+
+        return droppedExp;
     }
 
     @Override
