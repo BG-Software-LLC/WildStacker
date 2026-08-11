@@ -108,6 +108,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
     private static final ReflectMethod<Void> TURTLE_SET_HAS_EGG = new ReflectMethod<>(Turtle.class, "${TURTLE_SET_HAS_EGG}", boolean.class);
     private static final ReflectField<BlockPos> TURTLE_HOME_POS = new ReflectField<>(Turtle.class, BlockPos.class, "${TURTLE_HOME_POS}");
     private static final ReflectMethod<Void> MOB_PICK_UP_ITEM = new ReflectMethod<>(Mob.class, "${MOB_PICK_UP_ITEM}", ServerLevel.class, ItemEntity.class);
+    private static final ReflectMethod<Void> MOB_PICK_UP_ITEM_LEGACY = new ReflectMethod<>(Mob.class, "${MOB_PICK_UP_ITEM}", ItemEntity.class);
     private static final ReflectMethod<SynchedEntityData.DataItem<?>> SYNCHED_ENTITY_DATA_GET_ITEM = new ReflectMethod<>(SynchedEntityData.class, "${SYNCHED_ENTITY_DATA_GET_ITEM}", EntityDataAccessor.class);
 
     @Override
@@ -617,7 +618,11 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             if (isPlayerPickup) {
                 pickupItem.playerTouch((Player) livingEntity);
             } else {
-                MOB_PICK_UP_ITEM.invoke(livingEntity, serverLevel, pickupItem);
+                if (MOB_PICK_UP_ITEM.isValid()) {
+                    MOB_PICK_UP_ITEM.invoke(livingEntity, serverLevel, pickupItem);
+                } else {
+                    MOB_PICK_UP_ITEM_LEGACY.invoke(livingEntity, pickupItem);
+                }
             }
         } finally {
             if (isDifferentPickupItem) itemEntity.pickupDelay = originalPickupDelay;
