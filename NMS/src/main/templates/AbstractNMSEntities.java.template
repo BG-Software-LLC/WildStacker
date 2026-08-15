@@ -442,16 +442,13 @@ public abstract class AbstractNMSEntities implements NMSEntities {
                                                                        org.bukkit.inventory.EquipmentSlot equipmentSlot);
 
     @Override
-    public int sendEntityDieEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity, int unstackAmount, int droppedExp) {
+    public void sendEntityDieEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity, int unstackAmount) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
 
         if (unstackAmount > 1 && livingEntity instanceof Mob mob) {
-            // Temporarily scale the entity's experience reward so a nearby Sculk Catalyst spreads
-            // sculk for the whole killed stack instead of a single entity. The game event is
-            // dispatched synchronously, so the catalyst reads the boosted value before we restore it.
             int defaultEntityExp = ENTITY_EXP.get(mob);
             try {
-                ENTITY_EXP.set(mob, droppedExp);
+                ENTITY_EXP.set(mob, defaultEntityExp * unstackAmount);
                 livingEntity.gameEvent(GameEvent.${GAME_EVENT_ENTITY_DIE});
             } finally {
                 ENTITY_EXP.set(mob, defaultEntityExp);
@@ -460,14 +457,10 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             livingEntity.gameEvent(GameEvent.${GAME_EVENT_ENTITY_DIE});
         }
 
-        // The entity survives across unstacks; clear any "experience consumed" flag a Sculk
-        // Catalyst may have set on a previous unstack so it processes this death again.
+        // If the catalyst consumed the experience, don't also drop XP orbs for it.
         if (LIVING_ENTITY_SKIP_DROP_EXPERIENCE.isValid() && LIVING_ENTITY_SKIP_DROP_EXPERIENCE.get(livingEntity)) {
             LIVING_ENTITY_SKIP_DROP_EXPERIENCE.set(livingEntity, false);
-            return 0;
         }
-
-        return droppedExp;
     }
 
     @Override

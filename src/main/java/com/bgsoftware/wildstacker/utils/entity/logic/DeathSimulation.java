@@ -197,7 +197,7 @@ public final class DeathSimulation {
                 int droppedExp = asyncXpResult >= 0 ? asyncXpResult : stackedEntity.getExp(unstackAmountExp, 0);
 
                 // We fire the entity_die game event
-                droppedExp = plugin.getNMSEntities().sendEntityDieEvent(livingEntity, unstackAmountExp, droppedExp);
+                plugin.getNMSEntities().sendEntityDieEvent(livingEntity, unstackAmountExp);
 
                 List<ItemStack> finalDrops;
                 int finalExp;

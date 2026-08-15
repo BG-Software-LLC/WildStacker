@@ -345,8 +345,8 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public int sendEntityDieEvent(LivingEntity livingEntity, int unstackAmount, int droppedExp) {
-        return droppedExp;
+    public void sendEntityDieEvent(LivingEntity livingEntity, int unstackAmount) {
+        // Do nothing.
     }
 
     @Override
