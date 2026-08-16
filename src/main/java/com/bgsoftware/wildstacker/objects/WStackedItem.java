@@ -6,12 +6,15 @@ import com.bgsoftware.wildstacker.api.enums.StackResult;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.api.objects.StackedObject;
+import com.bgsoftware.wildstacker.handlers.SettingsHandler;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntitiesGetter;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameApplyResult;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
@@ -41,6 +44,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     private final UUID cachedUUID;
     private final int cachedEntityId;
     private String mmoItemName = null;
+    private boolean localizedNameStateInitialized;
+    private int lastNamedAmount = Integer.MIN_VALUE;
+    private long lastSettingsRevision = Long.MIN_VALUE;
+    private long nameRevision;
+    private long lastProviderRevision = -1L;
 
     public WStackedItem(Item item) {
         this(item, item.getItemStack().getAmount());
@@ -150,7 +158,19 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
 
     @Override
     public void updateName() {
-        if (!plugin.getSettings().itemsStackingEnabled || !ItemUtils.canPickup(object) || ServerVersion.isLessThan(ServerVersion.v1_8))
+        SettingsHandler settings = plugin.getSettings();
+        if (!settings.itemsStackingEnabled || !ItemUtils.canPickup(object) ||
+                ServerVersion.isLessThan(ServerVersion.v1_8))
+            return;
+
+        String customName = settings.itemsCustomName;
+        if (customName.isEmpty())
+            return;
+
+        int amount = getStackAmount();
+        boolean localizedNamesEnabled = settings.itemsLocalizedNames;
+        long currentNameRevision = localizedNamesEnabled ? prepareNameUpdate(settings, amount) : -1L;
+        if (currentNameRevision == 0L)
             return;
 
         ItemStack itemStack = getItemStack();
@@ -160,37 +180,75 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         if (mmoItem && mmoItemName == null)
             mmoItemName = getCustomName();
 
-        String customName = plugin.getSettings().itemsCustomName;
-
-        if (customName.isEmpty())
-            return;
-
-        int amount = getStackAmount();
-        boolean updateName = (mmoItem && mmoItemName != null) || plugin.getSettings().itemsUnstackedCustomName || amount > 1;
+        boolean updateName = (mmoItem && mmoItemName != null) || settings.itemsUnstackedCustomName || amount > 1;
 
         if (updateName) {
             String cachedDisplayName = mmoItem && mmoItemName != null ? mmoItemName : ItemUtils.getFormattedType(itemStack);
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : cachedDisplayName;
 
-            if (plugin.getSettings().itemsDisplayEnabled)
+            if (settings.itemsDisplayEnabled)
                 cachedDisplayName = displayName;
 
             setCachedDisplayName(DISPLAY_NAME_PLACEHOLDER.matcher(cachedDisplayName).replaceAll(displayName));
 
-            customName = plugin.getSettings().itemsNameBuilder.build(this);
+            customName = settings.itemsNameBuilder.build(this);
         }
 
         String CUSTOM_NAME = customName;
+        boolean useLocalizedName = updateName && settings.itemsLocalizedNames;
 
         Executor.sync(() -> {
+            if (localizedNamesEnabled && (!isCurrentNameRevision(currentNameRevision) ||
+                    !object.isValid() || isRemoved()))
+                return;
+
             if (updateName) {
-                setCustomName(CUSTOM_NAME);
+                LocalizedNameApplyResult result = LocalizedNameApplyResult.PLATFORM_UNSUPPORTED;
+                if (useLocalizedName) {
+                    result = ClientLocalizedNameService.setItemName(object, itemStack,
+                            settings.itemsLocalizedNameTemplate, amount);
+                }
+                if (result != LocalizedNameApplyResult.APPLIED && result != LocalizedNameApplyResult.NO_NAME_SOURCE) {
+                    setCustomName(CUSTOM_NAME);
+                }
+                setCustomNameVisible(true);
+            } else {
+                setCustomNameVisible(false);
             }
-            setCustomNameVisible(updateName);
         });
 
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);
+    }
+
+    private long prepareNameUpdate(SettingsHandler settings, int amount) {
+        long providerRevision = plugin.getProviders().getLocalizedItemNameProviderRevision();
+
+        synchronized (this) {
+            if (localizedNameStateInitialized && lastSettingsRevision == settings.localizationRevision &&
+                    lastNamedAmount == amount && lastProviderRevision == providerRevision) {
+                return 0L;
+            }
+
+            localizedNameStateInitialized = true;
+            lastSettingsRevision = settings.localizationRevision;
+            lastNamedAmount = amount;
+            lastProviderRevision = providerRevision;
+            return ++nameRevision;
+        }
+    }
+
+    private boolean isCurrentNameRevision(long revision) {
+        synchronized (this) {
+            return nameRevision == revision;
+        }
+    }
+
+    private void invalidateLocalizedNameState() {
+        synchronized (this) {
+            localizedNameStateInitialized = false;
+            ++nameRevision;
+        }
     }
 
     @Override
@@ -308,8 +366,11 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
     public void setItemStack(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType() == Material.AIR)
             remove();
-        else
+        else {
+            mmoItemName = null;
+            invalidateLocalizedNameState();
             object.setItemStack(itemStack);
+        }
     }
 
     @Override

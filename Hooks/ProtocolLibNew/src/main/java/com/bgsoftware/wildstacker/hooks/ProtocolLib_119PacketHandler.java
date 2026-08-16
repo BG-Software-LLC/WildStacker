@@ -30,8 +30,7 @@ public final class ProtocolLib_119PacketHandler implements ProtocolLibHook.IPack
             wrappedDataValues = new LinkedList<>();
         }
 
-        Optional<?> customName = entity == null ? Optional.empty() :
-                parseCustomName(plugin.getNMSEntities().getCustomName(entity, true));
+        Optional<?> customName = parseRawCustomName(entity);
         boolean nameVisible = entity != null && plugin.getNMSEntities().isCustomNameVisible(entity);
 
         wrappedDataValues.add(new WrappedDataValue(2, ProtocolLibHook.NAME_SERIALIZER, customName));
@@ -40,7 +39,13 @@ public final class ProtocolLib_119PacketHandler implements ProtocolLibHook.IPack
         structureModifier.write(0, wrappedDataValues);
     }
 
-    private Optional<?> parseCustomName(@Nullable String customName) {
+    private Optional<?> parseRawCustomName(@Nullable Entity entity) {
+        if (entity == null)
+            return Optional.empty();
+        Object rawNmsComponent = plugin.getNMSEntities().getRawCustomName(entity);
+        if (rawNmsComponent != null)
+            return Optional.of(rawNmsComponent);
+        String customName = plugin.getNMSEntities().getCustomName(entity, true);
         return customName == null || customName.isEmpty() ? Optional.empty() :
                 Optional.of(plugin.getNMSAdapter().getChatMessage(customName));
     }

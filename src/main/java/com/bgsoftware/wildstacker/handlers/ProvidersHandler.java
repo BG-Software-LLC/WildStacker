@@ -13,6 +13,7 @@ import com.bgsoftware.wildstacker.hooks.EntitySimilarityProvider;
 import com.bgsoftware.wildstacker.hooks.EntityTypeProvider;
 import com.bgsoftware.wildstacker.hooks.IDataSerializer;
 import com.bgsoftware.wildstacker.hooks.ItemEnchantProvider;
+import com.bgsoftware.wildstacker.hooks.LocalizedItemNameProvider;
 import com.bgsoftware.wildstacker.hooks.RegionsProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider;
 import com.bgsoftware.wildstacker.hooks.SpawnersProvider_Default;
@@ -36,13 +37,20 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import com.bgsoftware.wildstacker.utils.names.localization.ClientLocalizedNameService;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedItemDescriptor;
 import org.bukkit.plugin.PluginManager;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -59,7 +67,18 @@ public final class ProvidersHandler {
     private final List<EntityNameProvider> entityNameProviders = new ArrayList<>();
     private final List<ItemEnchantProvider> itemEnchantProviders = new ArrayList<>();
     private final List<CustomItemProvider> customItemProviders = new ArrayList<>();
+    private final Map<String, LocalizedItemNameProvider> localizedItemNameProviders = new LinkedHashMap<>();
+    private final Map<String, ProviderCircuitState> providerCircuitStates = new HashMap<>();
     private final List<ConflictPluginFixer> conflictPluginFixers = new ArrayList<>();
+
+    private long localizedItemNameProviderRevision = 0L;
+
+    private static final ProviderHookDescriptor[] LOCALIZED_NAME_DESCRIPTORS = new ProviderHookDescriptor[]{
+            new ProviderHookDescriptor("craftengine", "CraftEngine", "LocalizedItemNameProvider_CraftEngineModern", "LocalizedItemNameProvider_CraftEngineLegacy", "LocalizedItemNameProvider_CraftEngine"),
+            new ProviderHookDescriptor("itemsadder", "ItemsAdder", "LocalizedItemNameProvider_ItemsAdder"),
+            new ProviderHookDescriptor("nexo", "Nexo", "LocalizedItemNameProvider_Nexo"),
+            new ProviderHookDescriptor("oraxen", "Oraxen", "LocalizedItemNameProvider_Oraxen")
+    };
 
     private final List<IStackedBlockListener> stackedBlocksListeners = new ArrayList<>();
     private final List<IStackedItemListener> stackedItemsListeners = new ArrayList<>();
@@ -84,6 +103,7 @@ public final class ProvidersHandler {
             loadRegionsProviders();
             loadEntitySimilarityProviders();
             loadEntityNameProviders();
+            loadLocalizedItemNameProviders();
             loadDataSerializers();
             loadConflictPluginFixers();
             loadPluginHooks(plugin, null, true);
@@ -302,6 +322,52 @@ public final class ProvidersHandler {
         }
     }
 
+    public long getLocalizedItemNameProviderRevision() {
+        return localizedItemNameProviderRevision;
+    }
+
+    public void registerLocalizedItemNameProvider(LocalizedItemNameProvider provider) {
+        if (provider == null || provider.getId() == null)
+            return;
+        String id = provider.getId().toLowerCase(Locale.ENGLISH).trim();
+        LocalizedItemNameProvider existing = localizedItemNameProviders.get(id);
+        if (existing == provider && existing.getState() == provider.getState())
+            return;
+
+        localizedItemNameProviders.put(id, provider);
+        localizedItemNameProviderRevision++;
+        ClientLocalizedNameService.invalidateCaches();
+    }
+
+    public void unregisterLocalizedItemNameProvider(String providerId) {
+        if (providerId == null)
+            return;
+        String id = providerId.toLowerCase(Locale.ENGLISH).trim();
+        if (localizedItemNameProviders.remove(id) != null) {
+            localizedItemNameProviderRevision++;
+            ClientLocalizedNameService.invalidateCaches();
+        }
+    }
+
+    private void loadLocalizedItemNameProviders() {
+        localizedItemNameProviders.clear();
+        providerCircuitStates.clear();
+        localizedItemNameProviderRevision++;
+
+        for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
+            if (Bukkit.getPluginManager().isPluginEnabled(descriptor.pluginName)) {
+                for (String className : descriptor.implementationClasses) {
+                    Optional<LocalizedItemNameProvider> provider = createInstance(className);
+                    if (provider.isPresent() && provider.get().getState() != LocalizedItemNameProvider.ProviderState.INCOMPATIBLE) {
+                        localizedItemNameProviders.put(descriptor.id, provider.get());
+                        break;
+                    }
+                }
+            }
+        }
+        ClientLocalizedNameService.invalidateCaches();
+    }
+
     private void loadDataSerializers() {
         if (Bukkit.getPluginManager().isPluginEnabled("NBTAPI")) {
             Optional<IDataSerializer> dataSerializer = createInstance("DataSerializer_NBTInjector");
@@ -431,6 +497,22 @@ public final class ProvidersHandler {
         if (enable && isPlugin(toCheck, "SuperiorSkyblock2") && pluginManager.isPluginEnabled("SuperiorSkyblock2"))
             registerHook("SuperiorSkyblockHook");
 
+        for (ProviderHookDescriptor descriptor : LOCALIZED_NAME_DESCRIPTORS) {
+            if (isPlugin(toCheck, descriptor.pluginName)) {
+                if (enable && pluginManager.isPluginEnabled(descriptor.pluginName)) {
+                    for (String className : descriptor.implementationClasses) {
+                        Optional<LocalizedItemNameProvider> provider = createInstance(className);
+                        if (provider.isPresent() && provider.get().getState() != LocalizedItemNameProvider.ProviderState.INCOMPATIBLE) {
+                            registerLocalizedItemNameProvider(provider.get());
+                            break;
+                        }
+                    }
+                } else if (!enable) {
+                    unregisterLocalizedItemNameProvider(descriptor.id);
+                }
+            }
+        }
+
         if (doesClassExist("org.bukkit.event.world.EntitiesLoadEvent"))
             registerHook("PaperChunksHook");
     }
@@ -506,6 +588,58 @@ public final class ProvidersHandler {
         }
 
         return true;
+    }
+
+    @Nullable
+    public ItemStack resolveLocalizedItemName(ItemStack itemStack) {
+        LocalizedItemDescriptor descriptor = resolveLocalizedItemDescriptor(itemStack);
+        return descriptor == null ? null : descriptor.getCanonicalItem();
+    }
+
+    @Nullable
+    public LocalizedItemDescriptor resolveLocalizedItemDescriptor(ItemStack itemStack) {
+        if (itemStack == null)
+            return null;
+
+        long currentTime = System.nanoTime();
+
+        for (String providerId : plugin.getSettings().itemsLocalizedNameProviders) {
+            LocalizedItemNameProvider provider = localizedItemNameProviders.get(providerId);
+            if (provider == null || provider.getState() != LocalizedItemNameProvider.ProviderState.READY)
+                continue;
+
+            ProviderCircuitState circuit = providerCircuitStates.computeIfAbsent(providerId, k -> new ProviderCircuitState());
+            if (currentTime - circuit.circuitOpenUntilNanos < 0)
+                continue;
+
+            try {
+                LocalizedItemDescriptor descriptor = provider.resolveDescriptor(itemStack);
+                if (descriptor != null) {
+                    circuit.consecutiveFailures = 0;
+                    return descriptor;
+                }
+            } catch (LinkageError error) {
+                plugin.getLogger().warning("[WildStacker] Provider '" + providerId +
+                        "' threw LinkageError during descriptor resolution. Continuing fallback: " + error.getMessage());
+                continue;
+            } catch (VirtualMachineError error) {
+                throw error;
+            } catch (Throwable error) {
+                circuit.consecutiveFailures++;
+                if (circuit.consecutiveFailures >= 3) {
+                    circuit.circuitOpenUntilNanos = currentTime + TimeUnit.SECONDS.toNanos(30);
+                    plugin.getLogger().warning("[WildStacker] Provider '" + providerId +
+                            "' threw consecutive exceptions. Circuit opened for 30s: " + error.getMessage());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static final class ProviderCircuitState {
+        private int consecutiveFailures = 0;
+        private long circuitOpenUntilNanos = 0L;
     }
 
     public void registerStackedBlockListener(IStackedBlockListener stackedBlockListener) {
@@ -609,6 +743,18 @@ public final class ProvidersHandler {
         } catch (Exception error) {
             error.printStackTrace();
             return Optional.empty();
+        }
+    }
+
+    private static final class ProviderHookDescriptor {
+        private final String id;
+        private final String pluginName;
+        private final String[] implementationClasses;
+
+        private ProviderHookDescriptor(String id, String pluginName, String... implementationClasses) {
+            this.id = id;
+            this.pluginName = pluginName;
+            this.implementationClasses = implementationClasses;
         }
     }
 

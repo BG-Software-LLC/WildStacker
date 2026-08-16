@@ -785,6 +785,18 @@ public abstract class AbstractNMSEntities implements NMSEntities {
     }
 
     @Override
+    public Object getRawCustomName(org.bukkit.entity.Entity bukkitEntity) {
+        if (bukkitEntity == null)
+            return null;
+        try {
+            Entity entity = ((CraftEntity) bukkitEntity).getHandle();
+            return entity.getCustomName();
+        } catch (Throwable error) {
+            return null;
+        }
+    }
+
+    @Override
     public void setCustomName(org.bukkit.entity.Entity entity, String name) {
         entity.setCustomName(name);
     }

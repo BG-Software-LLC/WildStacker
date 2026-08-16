@@ -117,6 +117,10 @@ public interface NMSEntities {
         return getCustomName(entity);
     }
 
+    default Object getRawCustomName(Entity entity) {
+        return null;
+    }
+
     void setCustomName(Entity entity, String name);
 
     boolean isCustomNameVisible(Entity entity);

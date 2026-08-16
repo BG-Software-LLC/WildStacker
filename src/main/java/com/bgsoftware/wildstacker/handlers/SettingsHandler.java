@@ -28,6 +28,7 @@ import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.names.NameBuilder;
 import com.bgsoftware.wildstacker.utils.names.NamePlaceholder;
+import com.bgsoftware.wildstacker.utils.names.localization.LocalizedNameTemplate;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import org.bukkit.ChatColor;
@@ -43,16 +44,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public final class SettingsHandler {
 
+    private static final AtomicLong REVISION_SEQUENCE = new AtomicLong();
+
+    public final long localizationRevision;
     public final Pattern SPAWNERS_PATTERN;
     public final String[] CONFIG_IGNORED_SECTIONS = {"merge-radius", "limits", "minimum-required", "default-unstack",
             "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
@@ -84,13 +91,18 @@ public final class SettingsHandler {
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
-            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems;
+            itemsUnstackedCustomName, itemsNamesToggleEnabled, itemsSoundEnabled, itemsMaxPickupDelay, storeItems,
+            itemsLocalizedNames;
+    public final List<String> itemsLocalizedNameProviders;
     public final List<String> itemsDisabledWorlds;
     public final FastEnumArray<Material> blacklistedItems, whitelistedItems;
     public final int itemsChunkLimit;
     public final String itemsCustomName, itemsNamesToggleCommand;
     public final NameBuilder<StackedItem> itemsNameBuilder;
-    public final FastEnumMap<Material, Integer> itemsMergeRadius, itemsLimits;
+    public final LocalizedNameTemplate itemsLocalizedNameTemplate;
+    public final LocalizedNameTemplate entitiesLocalizedNameTemplate;
+    public final FastEnumMap<Material, Integer> itemsMergeRadius;
+    public final FastEnumMap<Material, Integer> itemsLimits;
     public final List<ParticleWrapper> itemsParticles;
     public final long itemsStackInterval;
 
@@ -99,7 +111,8 @@ public final class SettingsHandler {
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreedingEnabled,
             smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
             eggLayMultiply, scuteMultiply, entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities,
-            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles;
+            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles,
+            entitiesLocalizedNames, entitiesLocalizedNamesExcludeCustomMobs;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -154,6 +167,7 @@ public final class SettingsHandler {
     private YamlConfiguration particlesYaml = null;
 
     public SettingsHandler(WildStackerPlugin plugin) {
+        localizationRevision = REVISION_SEQUENCE.incrementAndGet();
         WildStackerPlugin.log("Loading configuration started...");
         long startTime = System.currentTimeMillis();
         File file = new File(plugin.getDataFolder(), "config.yml");
@@ -233,6 +247,27 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{1}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName()),
                 new NamePlaceholder<>("{2}", stackedItem -> ((WStackedItem) stackedItem).getCachedDisplayName().toUpperCase())
         );
+        itemsLocalizedNameTemplate = LocalizedNameTemplate.compile(cfg.getString("items.custom-name", "&6&lx{0} {1}"));
+        itemsLocalizedNames = cfg.getBoolean("items.localized-names.enabled", false);
+        List<String> rawProviders = cfg.getStringList("items.localized-names.providers");
+        if (rawProviders.isEmpty() && cfg.contains("items.localized-names.hooks")) {
+            List<String> migrated = new ArrayList<>();
+            if (cfg.getBoolean("items.localized-names.hooks.craftengine", false)) migrated.add("craftengine");
+            if (cfg.getBoolean("items.localized-names.hooks.itemsadder", false)) migrated.add("itemsadder");
+            if (cfg.getBoolean("items.localized-names.hooks.nexo", false)) migrated.add("nexo");
+            if (cfg.getBoolean("items.localized-names.hooks.oraxen", false)) migrated.add("oraxen");
+            rawProviders = migrated;
+        }
+        List<String> parsedProviders = new ArrayList<>();
+        Set<String> seenProviders = new HashSet<>();
+        for (String raw : rawProviders) {
+            if (raw == null) continue;
+            String normalized = raw.trim().toLowerCase(Locale.ENGLISH);
+            if (!normalized.isEmpty() && seenProviders.add(normalized)) {
+                parsedProviders.add(normalized);
+            }
+        }
+        itemsLocalizedNameProviders = Collections.unmodifiableList(parsedProviders);
         itemsDisplayEnabled = cfg.getBoolean("items.item-display", false);
         itemsNamesToggleEnabled = cfg.getBoolean("items.names-toggle.enabled", false);
         itemsNamesToggleCommand = cfg.getString("items.names-toggle.command", "stacker names item");
@@ -260,6 +295,10 @@ public final class SettingsHandler {
                 new NamePlaceholder<>("{2}", stackedEntity -> ((WStackedEntity) stackedEntity).getCachedDisplayName().toUpperCase()),
                 new NamePlaceholder<>("{3}", stackedEntity -> stackedEntity.getUpgrade().getDisplayName())
         );
+        entitiesLocalizedNameTemplate = LocalizedNameTemplate.compile(cfg.getString("entities.custom-name", "&d&lx{0} {1}"));
+        entitiesLocalizedNames = cfg.getBoolean("entities.localized-names.enabled", false);
+        entitiesLocalizedNamesExcludeCustomMobs = cfg.getBoolean(
+                "entities.localized-names.exclude-custom-mobs", true);
         entitiesChunkLimit = cfg.getInt("entities.chunk-limit", 0);
         entitiesDisabledRegions = cfg.getStringList("entities.disabled-regions");
         linkedEntitiesEnabled = cfg.getBoolean("entities.linked-entities.enabled", true);

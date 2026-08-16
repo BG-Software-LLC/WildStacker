@@ -225,7 +225,7 @@ public final class ProtocolLibHook {
             } else {
                 watcher = new WrappedDataWatcher(entity);
 
-                Object customName = parseCustomName(plugin.getNMSEntities().getCustomName(entity, true));
+                Object customName = parseRawCustomName(entity);
                 setWatcherObject(watcher, 2, NAME_SERIALIZER, customName);
 
                 boolean nameVisible = plugin.getNMSEntities().isCustomNameVisible(entity);
@@ -234,6 +234,18 @@ public final class ProtocolLibHook {
             }
 
             structureModifier.write(0, watcher.getWatchableObjects());
+        }
+
+        private Object parseRawCustomName(@Nullable Entity entity) {
+            if (entity == null)
+                return EMPTY_CUSTOM_NAME;
+            if (!isLegacy) {
+                Object rawNmsComponent = plugin.getNMSEntities().getRawCustomName(entity);
+                if (rawNmsComponent != null)
+                    return Optional.of(rawNmsComponent);
+            }
+            String customName = plugin.getNMSEntities().getCustomName(entity, true);
+            return parseCustomName(customName);
         }
 
         private Object parseCustomName(String customName) {

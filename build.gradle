@@ -75,6 +75,22 @@ dependencies {
     compileOnly 'org.spigotmc:v1_17_R1:latest'
 }
 
+tasks.register('verifyLocalizedNameCache', JavaExec) {
+    group = 'verification'
+    description = 'Verifies bounded localized-name render cache behavior.'
+    dependsOn(tasks.named('testClasses'))
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass.set('com.bgsoftware.wildstacker.utils.names.localization.BoundedLoadingCacheTest')
+}
+
+tasks.named('test') {
+    failOnNoDiscoveredTests = false
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('verifyLocalizedNameCache'))
+}
+
 processResources {
     outputs.upToDateWhen { false }
     eachFile { details ->
