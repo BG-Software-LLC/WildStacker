@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Slime;
@@ -49,7 +50,16 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
             return null;
 
         Entity directKiller = ((LivingLootEntityAttributes) directKillerAttributes).getEntity();
-        Entity sourceKiller = EntityUtils.getSourceDamager(directKiller, true);
+
+        // Prefer a source killer that was already resolved on the main thread and cached on the dead
+        // entity. Deriving it here via EntityUtils.getSourceDamager may trigger NMS lookups (e.g.
+        // Projectile#getShooter) that are illegal off the main thread, and this method can run from
+        // the asynchronous drop calculation.
+        Entity sourceKiller = this.stackedEntity == null ? null :
+                this.stackedEntity.getFlag(EntityFlag.CACHED_SOURCE_KILLER);
+
+        if (sourceKiller == null && Bukkit.isPrimaryThread())
+            sourceKiller = EntityUtils.getSourceDamager(directKiller, true);
 
         return sourceKiller == null || sourceKiller == directKiller ? null : LootEntityAttributes.newBuilder(sourceKiller).build();
     }
@@ -58,7 +68,7 @@ public class LivingLootEntityAttributes extends CustomLootEntityAttributes {
     private LootEntityAttributes getKillerFromEntity() {
         Entity entityKiller = this.stackedEntity == null ? null : this.stackedEntity.getFlag(EntityFlag.CACHED_KILLER);
 
-        if (entityKiller == null)
+        if (entityKiller == null && Bukkit.isPrimaryThread())
             entityKiller = EntityUtils.getDamagerFromEvent(this.entity.getLastDamageCause(), false, true);
 
         return entityKiller == null ? null : LootEntityAttributes.newBuilder(entityKiller).build();

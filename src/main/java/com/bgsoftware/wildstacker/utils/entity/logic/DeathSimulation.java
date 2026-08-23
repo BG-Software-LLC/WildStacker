@@ -165,9 +165,14 @@ public final class DeathSimulation {
         if (plugin.getSettings().keepFireEnabled && livingEntity.getFireTicks() > 0)
             livingEntity.setFireTicks(160);
 
-        // We want to cache the killer of the entity
-        if (sourceKiller != null)
+        // We want to cache the killer of the entity.
+        // The source killer is resolved here on the main thread and cached as well, so the async
+        // drop calculation doesn't have to re-derive it (which triggers NMS lookups such as
+        // Projectile#getShooter that are illegal off the main thread).
+        if (sourceKiller != null) {
             stackedEntity.setFlag(EntityFlag.CACHED_KILLER, directKiller);
+            stackedEntity.setFlag(EntityFlag.CACHED_SOURCE_KILLER, sourceKiller);
+        }
 
         Location dropLocation = livingEntity.getLocation().add(0, 0.5, 0);
 
@@ -182,6 +187,7 @@ public final class DeathSimulation {
             Executor.sync(() -> {
                 // We want to remove the cache of the killer
                 stackedEntity.removeFlag(EntityFlag.CACHED_KILLER);
+                stackedEntity.removeFlag(EntityFlag.CACHED_SOURCE_KILLER);
 
                 IEntityWrapper nmsEntity = plugin.getNMSEntities().wrapEntity(livingEntity);
 

@@ -19,6 +19,7 @@ public enum EntityFlag {
     ADD_TO_VEHICLE(Boolean.class),
     DELAY_STACK(Boolean.class),
     CACHED_KILLER(Entity.class),
+    CACHED_SOURCE_KILLER(Entity.class),
 
     // Items related flags
     DROPPED_BY_PLAYER(Boolean.class),
