@@ -40,7 +40,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -54,13 +54,15 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     private final UUID cachedUUID;
     private final int cachedEntityId;
-    private List<ItemStack> drops = null;
-    private int dropsMultiplier = 1;
+
     private SpawnCause spawnCause;
     private int spawnerUpgradeId = -1;
     private Predicate<LivingEntity> stackFlag = null;
     private EntityType cachedType;
     private boolean spawnCorpse = true;
+
+    private ItemStackList drops = null;
+    private int dropsMultiplier = 1;
 
     public WStackedEntity(LivingEntity livingEntity) {
         super(livingEntity, 1);
@@ -533,7 +535,8 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void setDrops(List<ItemStack> itemStacks) {
-        this.drops = new ArrayList<>(itemStacks);
+        this.drops = new ItemStackList();
+        this.drops.addAll(itemStacks);
     }
 
     @Override
@@ -721,25 +724,38 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
     }
 
     private List<ItemStack> getTempDrops(int stackAmount) {
-        List<ItemStack> filteredDrops = this.dropsMultiplier <= 0 ? new ArrayList<>() : this.drops.stream()
-                .filter(itemStack -> itemStack != null && itemStack.getType() != Material.AIR && itemStack.getAmount() > 0)
-                .collect(Collectors.toList());
+        List<ItemStack> calculatedDrops = this.dropsMultiplier <= 0 ? Collections.emptyList() : this.drops.toList();
 
         int dropsMultiplier = Math.max(0, this.dropsMultiplier);
+
+        // The captured death-event drops include the mob's equipment (held item, armor),
+        // which vanilla rolled a single time at its per-mob drop chance. It must not be
+        // flat-multiplied by the stack amount, otherwise one lucky roll floods the drops
+        // with `stackAmount` identical copies. Equipment is not cleared on this path, so
+        // it is still readable from the entity; we match by material because vanilla
+        // damages dropped gear, so the dropped copy never equals the equipped item.
+        Set<Material> equipmentMaterials = EntityUtils.getEquipmentMaterials(object);
 
         // Reset drop fields
         this.drops = null;
         this.dropsMultiplier = 1;
 
-        List<ItemStack> finalDrops = new ArrayList<>();
+        // Each worn/held equipment material is emitted at most once (no multiply).
+        Set<Material> droppedEquipment = new HashSet<>();
 
-        filteredDrops.forEach(itemStack -> {
-            ItemStack cloned = itemStack.clone();
-            cloned.setAmount(itemStack.getAmount() * stackAmount * dropsMultiplier);
-            finalDrops.add(cloned);
+        calculatedDrops.forEach(itemStack -> {
+            Material type = itemStack.getType();
+            if (equipmentMaterials.contains(type) && droppedEquipment.add(type)) {
+                // Equipment: keep the single vanilla-rolled amount, do not multiply by the kill count.
+                return;
+            }
+
+            // Clamp to avoid int overflow wrapping to a negative/garbage amount on huge stacks.
+            long amount = (long) itemStack.getAmount() * stackAmount * dropsMultiplier;
+            itemStack.setAmount((int) Math.min(amount, Integer.MAX_VALUE));
         });
 
-        return finalDrops;
+        return calculatedDrops;
     }
 
     public void setNameTag() {

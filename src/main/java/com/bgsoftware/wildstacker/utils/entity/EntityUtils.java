@@ -67,10 +67,12 @@ import org.bukkit.projectiles.ProjectileSource;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -544,6 +546,38 @@ public final class EntityUtils {
         }
 
         return drops;
+    }
+
+    // Returns the set of materials currently worn/held by the entity (main hand,
+    // off hand, armor). Used to detect equipment inside a captured death-drops list
+    // so it is not flat-multiplied by the stack amount. Matches by material rather
+    // than the full ItemStack because vanilla randomizes the durability of dropped
+    // gear, so the dropped copy never equals the equipped item.
+    public static Set<Material> getEquipmentMaterials(LivingEntity livingEntity) {
+        Set<Material> materials = EnumSet.noneOf(Material.class);
+
+        EntityEquipment bukkitEntityEquipment = livingEntity.getEquipment();
+        if (bukkitEntityEquipment == null)
+            return materials;
+
+        INMSEntityEquipment entityEquipment = plugin.getNMSAdapter().createEntityEquipmentWrapper(bukkitEntityEquipment);
+
+        addEquipmentMaterial(materials, entityEquipment.getItemInMainHand());
+
+        if (ServerVersion.isAtLeast(ServerVersion.v1_9))
+            addEquipmentMaterial(materials, entityEquipment.getItemInOffHand());
+
+        addEquipmentMaterial(materials, bukkitEntityEquipment.getHelmet());
+        addEquipmentMaterial(materials, bukkitEntityEquipment.getChestplate());
+        addEquipmentMaterial(materials, bukkitEntityEquipment.getLeggings());
+        addEquipmentMaterial(materials, bukkitEntityEquipment.getBoots());
+
+        return materials;
+    }
+
+    private static void addEquipmentMaterial(Set<Material> materials, ItemStack itemStack) {
+        if (itemStack != null && itemStack.getType() != Material.AIR)
+            materials.add(itemStack.getType());
     }
 
     public static void clearEquipment(LivingEntity livingEntity) {

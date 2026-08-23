@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class ItemStackList {
 
-    private final Map<ItemStack, Integer> map = new HashMap<>();
+    private final Map<ItemStack, Counter> map = new HashMap<>();
 
     public ItemStackList() {
     }
@@ -24,14 +24,16 @@ public final class ItemStackList {
         if (itemStack == null)
             return false;
 
+        int amount = itemStack.getAmount();
+
         //If the item is AIR, we don't add it but we're considering it as a "successful" operation.
-        if (itemStack.getType() == Material.AIR)
+        if (itemStack.getType() == Material.AIR || amount <= 0)
             return true;
 
         itemStack = itemStack.clone();
-        int amount = itemStack.getAmount();
         itemStack.setAmount(1);
-        map.put(itemStack, map.getOrDefault(itemStack, 0) + amount);
+        Counter counter = map.computeIfAbsent(itemStack, i -> new Counter());
+        counter.value += amount;
 
         return true;
     }
@@ -48,15 +50,19 @@ public final class ItemStackList {
     public List<ItemStack> toList() {
         List<ItemStack> list = new LinkedList<>();
 
-        ItemStack itemStack;
-
-        for (ItemStack _itemStack : map.keySet()) {
-            itemStack = _itemStack.clone();
-            itemStack.setAmount(map.get(_itemStack));
+        this.map.forEach((itemTemplate, counter) -> {
+            ItemStack itemStack = itemTemplate.clone();
+            itemStack.setAmount(counter.value);
             list.add(itemStack);
-        }
+        });
 
         return list;
+    }
+
+    private static class Counter {
+
+        private int value = 0;
+
     }
 
 }
