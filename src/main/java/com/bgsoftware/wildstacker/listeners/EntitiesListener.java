@@ -439,6 +439,7 @@ public final class EntitiesListener implements Listener {
                 || e.getRightClicked() instanceof EnderDragon || !EntityUtils.isStackable(e.getRightClicked()))
             return;
 
+        String displayName = inHand.getItemMeta().getDisplayName();
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
         if (plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
@@ -447,7 +448,7 @@ public final class EntitiesListener implements Listener {
                     stackedEntity.setCustomName("");
                     stackedEntity.decreaseStackAmount(1, true);
                     StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-                    duplicated.setCustomName(inHand.getItemMeta().getDisplayName());
+                    duplicated.setCustomName(displayName);
                     ((WStackedEntity) duplicated).setNameTag();
                 } else {
                     ((WStackedEntity) stackedEntity).setNameTag();
