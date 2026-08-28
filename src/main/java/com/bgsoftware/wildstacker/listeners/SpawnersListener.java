@@ -24,6 +24,7 @@ import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -126,7 +127,7 @@ public final class SpawnersListener implements Listener {
             if (amountToCharge > 0)
                 plugin.getProviders().getEconomyProvider().withdrawMoney(player, amountToCharge);
 
-            Locale.SPAWNER_BREAK.send(player, EntityUtils.getFormattedType(entityType.name()), breakAmount, GeneralUtils.format(amountToCharge));
+            Locale.SPAWNER_BREAK.send(player, CustomNames.getSpawnerCustomName(entityType), breakAmount, GeneralUtils.format(amountToCharge));
 
             return true;
         }
@@ -235,7 +236,7 @@ public final class SpawnersListener implements Listener {
             if (!spawnerOptional.isPresent()) {
                 if (isChunkLimit(chunk, spawnerType)) {
                     e.setCancelled(true);
-                    Locale.CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()) + " Spawners");
+                    Locale.SPAWNER_CHUNK_LIMIT_EXCEEDED.send(e.getPlayer(), CustomNames.getSpawnerCustomName(stackedSpawner.getSpawnedType()));
                     stackedSpawner.remove();
                     return;
                 }
@@ -322,7 +323,7 @@ public final class SpawnersListener implements Listener {
         if (limitItem != null)
             ItemUtils.addItem(limitItem, player.getInventory(), player.getLocation());
 
-        Locale.SPAWNER_PLACE.send(player, EntityUtils.getFormattedType(spawnerType.name()), spawnerItemAmount, GeneralUtils.format(amountToCharge));
+        Locale.SPAWNER_PLACE.send(player, CustomNames.getSpawnerCustomName(spawnerType), spawnerItemAmount, GeneralUtils.format(amountToCharge));
 
         alreadySpawnersPlacedPlayers.remove(player.getUniqueId());
     }
@@ -644,7 +645,7 @@ public final class SpawnersListener implements Listener {
                 return;
 
             ((WStackedSpawner) stackedSpawner).setCachedDisplayName(
-                    EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
+                    CustomNames.getSpawnerCustomName(stackedSpawner.getSpawnedType()));
 
             customName = plugin.getSettings().spawnersNameBuilder.build(stackedSpawner);
             ((WStackedSpawner) stackedSpawner).setHologramName(customName, true);

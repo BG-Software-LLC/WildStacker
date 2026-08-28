@@ -21,6 +21,7 @@ import com.bgsoftware.wildstacker.utils.items.ItemStackList;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -71,7 +72,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         this.spawnCause = getAndRemoveFlag(EntityFlag.SPAWN_CAUSE);
         if (this.spawnCause == null)
             this.spawnCause = plugin.getNMSEntities().getEntitySpawnCause(livingEntity);
-        setCachedDisplayName(EntityUtils.getFormattedType(getType().name()));
+        setCachedDisplayName(CustomNames.getEntityCustomName(getType()));
     }
 
     public static StackedEntity of(Entity entity) {

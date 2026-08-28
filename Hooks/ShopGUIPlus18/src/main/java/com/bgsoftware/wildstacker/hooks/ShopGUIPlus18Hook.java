@@ -1,7 +1,7 @@
 package com.bgsoftware.wildstacker.hooks;
 
 import com.bgsoftware.wildstacker.WildStackerPlugin;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import net.brcdev.shopgui.ShopGuiPlusApi;
 import net.brcdev.shopgui.provider.spawner.SpawnerProvider;
 import org.bukkit.entity.EntityType;
@@ -33,12 +33,16 @@ public final class ShopGUIPlus18Hook {
 
         @Override
         public String getSpawnerEntityId(ItemStack itemStack) {
-            return plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack).name();
+            return getSpawnerEntityType(itemStack).name();
         }
 
         @Override
         public String getSpawnerEntityName(ItemStack itemStack) {
-            return EntityUtils.getFormattedType(getSpawnerEntityId(itemStack));
+            return CustomNames.getSpawnerCustomName(getSpawnerEntityType(itemStack));
+        }
+
+        private EntityType getSpawnerEntityType(ItemStack itemStack) {
+            return plugin.getProviders().getSpawnersProvider().getSpawnerType(itemStack);
         }
 
     }
