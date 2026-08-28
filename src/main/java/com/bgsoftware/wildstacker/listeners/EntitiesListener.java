@@ -680,7 +680,7 @@ public final class EntitiesListener implements Listener {
         if (!nearbyEntitiesAmounts.isEmpty()) {
             Executor.sync(() -> {
                 for (Entity entity : event.getWorld().getNearbyEntities(event.getLightning().getLocation(), 2, 2, 2)) {
-                    if (entity instanceof PigZombie) {
+                    if (entity instanceof PigZombie && !nearbyEntitiesAmounts.isEmpty()) {
                         this.handleEntityTransform(entity, "LIGHTNING", nearbyEntitiesAmounts.remove(0), SpawnCause.LIGHTNING);
                     }
                 }
