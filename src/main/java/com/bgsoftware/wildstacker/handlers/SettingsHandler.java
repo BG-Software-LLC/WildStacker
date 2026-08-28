@@ -58,6 +58,11 @@ public final class SettingsHandler {
             "break-slots", "manage-menu", "break-charge", "place-charge", "spawners-override.spawn-conditions",
             "spawner-upgrades.ladders"};
 
+    // Global settings
+    public final String giveItemName;
+    public final ItemStack inspectTool, simulateTool;
+    public final Map<String, String> customNames;
+
     // Database settings
     public final String databaseType;
     public final String databaseMySQLAddress;
@@ -70,17 +75,17 @@ public final class SettingsHandler {
     public final boolean databaseMySQLPublicKeyRetrieval;
     public final long databaseMySQLWaitTimeout;
     public final long databaseMySQLMaxLifetime;
+    public final boolean deleteInvalidWorlds;
 
-    //Global settings
-    public final String giveItemName, killTaskTimeCommand;
-    public final ItemStack inspectTool, simulateTool;
-    public final boolean deleteInvalidWorlds, killTaskStackedEntities, killTaskUnstackedEntities,
+    // Kill task settings
+    public final String killTaskTimeCommand;
+    public final boolean killTaskStackedEntities, killTaskUnstackedEntities,
             killTaskStackedItems, killTaskUnstackedItems, killTaskSyncClearLagg;
-    public final Map<String, String> customNames;
     public final long killTaskInterval;
     public final Fast2EnumsArray<EntityType, SpawnCause> killTaskEntitiesWhitelist, killTaskEntitiesBlacklist;
     public final FastEnumArray<Material> killTaskItemsWhitelist, killTaskItemsBlacklist;
     public final List<String> killTaskEntitiesWorlds, killTaskItemsWorlds;
+    public final List<Long> killTaskRemainingTimes;
 
     //Items settings
     public final boolean itemsStackingEnabled, itemsParticlesEnabled, itemsFixStackEnabled, itemsDisplayEnabled,
@@ -205,6 +210,7 @@ public final class SettingsHandler {
         killTaskUnstackedItems = cfg.getBoolean("kill-task.unstacked-items", true);
         killTaskSyncClearLagg = cfg.getBoolean("kill-task.sync-clear-lagg", false);
         killTaskTimeCommand = cfg.getString("kill-task.time-command", "stacker timeleft");
+        killTaskRemainingTimes = cfg.getLongList("kill-task.remaining-times");
         killTaskEntitiesWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.whitelist"),
                 EntityType.class, SpawnCause.class);
         killTaskEntitiesBlacklist = Fast2EnumsArray.fromList(cfg.getStringList("kill-task.kill-entities.blacklist"),
