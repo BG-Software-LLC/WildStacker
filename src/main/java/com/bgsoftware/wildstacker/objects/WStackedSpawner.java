@@ -40,6 +40,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     private int spawnerUpgradeId = -1;
     private EntityType cachedEntity;
     private boolean isSpawnerOverridenTick;
+    private boolean isNatural = false;
     private boolean debug = false;
 
     public WStackedSpawner(CreatureSpawner creatureSpawner) {
@@ -165,6 +166,14 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         return plugin.getSettings().spawnersStackingEnabled && (!isDefaultUpgrade() || super.isCached());
     }
 
+    public boolean isNatural() {
+        return isNatural;
+    }
+
+    public void setNatural(boolean natural) {
+        this.isNatural = natural;
+    }
+
     @Override
     public void remove() {
         if (!Bukkit.isPrimaryThread()) {
@@ -254,6 +263,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         Optional<StackedSpawner> spawnerOptional = GeneralUtils.getClosest(blockLocation, spawnerStream
                 .filter(stackedSpawner -> runStackCheck(stackedSpawner) == StackCheckResult.SUCCESS));
 
+
         if (spawnerOptional.isPresent()) {
             StackedSpawner targetSpawner = spawnerOptional.get();
 
@@ -276,6 +286,10 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             return StackResult.NOT_SIMILAR;
 
         StackedSpawner targetSpawner = (StackedSpawner) stackedObject;
+
+        if (!plugin.getSettings().allowBreakVanillaSpawners && targetSpawner.isNatural()) {
+            return StackResult.NOT_SIMILAR;
+        }
 
         if (!EventsCaller.callSpawnerStackEvent(targetSpawner, this))
             return StackResult.EVENT_CANCELLED;

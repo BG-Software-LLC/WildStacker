@@ -51,6 +51,7 @@ public final class Locale {
     public static Locale ONLY_ONE_SPAWNER = new Locale("ONLY_ONE_SPAWNER");
     public static Locale RELOAD_SUCCESS = new Locale("RELOAD_SUCCESS");
     public static Locale SPAWNER_BREAK = new Locale("SPAWNER_BREAK");
+    public static Locale SPAWNER_BREAK_NATURAL_NOT_ALLOWED = new Locale("SPAWNER_BREAK_NATURAL_NOT_ALLOWED");
     public static Locale SPAWNER_BREAK_NOT_ENOUGH_MONEY = new Locale("SPAWNER_BREAK_NOT_ENOUGH_MONEY");
     public static Locale SPAWNER_BREAK_WITHOUT_SILK = new Locale("SPAWNER_BREAK_WITHOUT_SILK");
     public static Locale SPAWNER_PLACE = new Locale("SPAWNER_PLACE");
