@@ -434,12 +434,6 @@ entities:
   # You can set this to '' if you want to disable it.
   exp-pickup-sound: ENTITY_EXPERIENCE_ORB_PICKUP
 
-  # Should eggs that are laid by stacked chickens be multiplied by it's stack size?
-  egg-lay-multiply: true
-
-  # Should scout that are dropped by grown turtles by multiplied by it's stack size?
-  scute-multiply: true
-
   # Should vanilla equipment of entities get cleared after they unstack?
   clear-equipment: false
 
@@ -471,11 +465,24 @@ entities:
   # Should drops get calculated in relation to the amount of mobs that died?
   multiply-drops: true
 
-  # Should sniffer seeds get calculated in relation to the amount of mobs in the stack?
-  multiply-sniffer-seeds: true
-
   # Should exp get calculated in relation to the amount of mobs that died?
   multiply-exp: true
+
+  # Should armadillo scutes that are dropped by stacked armadillos
+  # get calculated in relation to the amount of mobs in the stack?
+  multiply-armadillo-scutes: true
+
+  # Should chicken eggs that are laid by stacked chickens
+  # get calculated in relation to the amount of mobs in the stack?
+  multiply-chicken-eggs: true
+
+  # Should sniffer seeds that are dropped by stacked sniffers
+  # get calculated in relation to the amount of mobs in the stack?
+  multiply-sniffer-seeds: true
+
+  # Should turtle scutes that are dropped by stacked turtles
+  # get calculated in relation to the amount of mobs in the stack?
+  multiply-turtle-scutes: true
 
   # Should damage be spread to the next stack?
   # If you deal more damage than the health of the entity, the rest of the damage will be dealt to the next stack.

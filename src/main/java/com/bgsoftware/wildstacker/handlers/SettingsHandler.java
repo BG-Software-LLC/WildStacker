@@ -98,8 +98,9 @@ public final class SettingsHandler {
     public final boolean entitiesStackingEnabled, entitiesParticlesEnabled, linkedEntitiesEnabled, nerfedEntitiesTeleport,
             stackDownEnabled, keepFireEnabled, mythicMobsCustomNameEnabled, stackAfterBreed, smartBreedingEnabled,
             smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
-            eggLayMultiply, scuteMultiply, entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities,
-            superiorSkyblockHook, multiplyDrops, multiplySnifferSeeds, multiplyExp, spreadDamage, entitiesFillVehicles;
+            entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
+            multiplyDrops, multiplyExp, multiplyArmadilloScutes, multiplyChickenEggs, multiplySnifferSeeds,
+            multiplyTurtleScutes, spreadDamage, entitiesFillVehicles;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -304,8 +305,6 @@ public final class SettingsHandler {
             entitiesExpPickupSound = null;
         }
         this.entitiesExpPickupSound = entitiesExpPickupSound;
-        eggLayMultiply = cfg.getBoolean("entities.egg-lay-multiply", true);
-        scuteMultiply = cfg.getBoolean("entities.scute-multiply", true);
         entitiesClearEquipment = cfg.getBoolean("entities.clear-equipment", false);
         spawnCorpses = cfg.getBoolean("entities.spawn-corpses", true);
         entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);
@@ -315,8 +314,11 @@ public final class SettingsHandler {
         storeEntities = cfg.getBoolean("entities.store-entities", true);
         superiorSkyblockHook = cfg.getBoolean("entities.superiorskyblock-hook", false);
         multiplyDrops = cfg.getBoolean("entities.multiply-drops", true);
-        multiplySnifferSeeds = cfg.getBoolean("entities.multiply-sniffer-seeds", true);
         multiplyExp = cfg.getBoolean("entities.multiply-exp", true);
+        multiplyArmadilloScutes = cfg.getBoolean("entities.multiply-armadillo-scutes", true);
+        multiplyChickenEggs = cfg.getBoolean("entities.multiply-chicken-eggs", true);
+        multiplySnifferSeeds = cfg.getBoolean("entities.multiply-sniffer-seeds", true);
+        multiplyTurtleScutes = cfg.getBoolean("entities.multiply-turtle-eggs", true);
         spreadDamage = cfg.getBoolean("entities.spread-damage", false);
         entitiesFilteredTransforms = cfg.getStringList("entities.filtered-transforms");
         entitiesFillVehicles = cfg.getBoolean("entities.entities-fill-vehicles");
@@ -764,6 +766,12 @@ public final class SettingsHandler {
         }
         if (cfg.isBoolean("entities.smart-breeding")) {
             cfg.set("entities.smart-breeding.enabled", cfg.getBoolean("entities.smart-breeding"));
+        }
+        if (cfg.contains("entities.egg-lay-multiply")) {
+            cfg.set("entities.multiply-chicken-eggs", cfg.getBoolean("entities.egg-lay-multiply"));
+        }
+        if (cfg.contains("entities.scute-multiply")) {
+            cfg.set("entities.multiply-turtle-scutes", cfg.getBoolean("entities.scute-multiply"));
         }
     }
 

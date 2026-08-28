@@ -3,7 +3,6 @@ package com.bgsoftware.wildstacker.listeners;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
-import com.bgsoftware.wildstacker.api.objects.StackedEntity;
 import com.bgsoftware.wildstacker.api.objects.StackedItem;
 import com.bgsoftware.wildstacker.listeners.events.EventsListener;
 import com.bgsoftware.wildstacker.objects.WStackedEntity;
@@ -59,8 +58,9 @@ public final class ItemsListener implements Listener {
         } catch (Exception ignored) {
         }
 
-        EventsListener.registerEggLayListener(this::onEggLay);
-        EventsListener.registerScuteDropListener(this::onScuteDrop);
+        EventsListener.registerArmadilloScuteDropListener(this::onArmadilloScuteDrop);
+        EventsListener.registerChickenEggLayListener(this::onChickenEggLay);
+        EventsListener.registerTurtleScuteDropListener(this::onTurtleScuteDrop);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -103,18 +103,6 @@ public final class ItemsListener implements Listener {
         EntityStorage.setMetadata(e.getItemDrop(), EntityFlag.DROPPED_BY_PLAYER, true);
     }
 
-    private void onEggLay(Chicken chicken, Item egg) {
-        if (!plugin.getSettings().eggLayMultiply || !EntityUtils.isStackable(chicken))
-            return;
-
-        StackedEntity stackedEntity = WStackedEntity.of(chicken);
-        if (stackedEntity.getStackAmount() > 1) {
-            ItemStack eggItem = egg.getItemStack();
-            eggItem.setAmount(stackedEntity.getStackAmount());
-            egg.setItemStack(eggItem);
-        }
-    }
-
     //This method will be fired even if stacking-drops is disabled.
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemDespawn(ItemDespawnEvent e) {
@@ -146,14 +134,46 @@ public final class ItemsListener implements Listener {
         }
     }
 
-    private void onScuteDrop(Entity turtle, Item scute) {
-        if (!plugin.getSettings().scuteMultiply || !EntityUtils.isStackable(turtle))
+    private void onArmadilloScuteDrop(Entity armadillo, Item armadilloScute) {
+        if (!plugin.getSettings().multiplyArmadilloScutes || !EntityUtils.isStackable(armadillo)) {
             return;
+        }
 
-        StackedEntity stackedEntity = WStackedEntity.of(turtle);
-        ItemStack scuteItem = scute.getItemStack();
-        scuteItem.setAmount(scuteItem.getAmount() * stackedEntity.getStackAmount());
-        scute.setItemStack(scuteItem);
+        int stackAmount = WStackedEntity.of(armadillo).getStackAmount();
+
+        if (stackAmount > 1) {
+            ItemStack armadilloScuteItem = armadilloScute.getItemStack();
+            armadilloScuteItem.setAmount(armadilloScuteItem.getAmount() * stackAmount);
+            armadilloScute.setItemStack(armadilloScuteItem);
+        }
+    }
+
+    private void onChickenEggLay(Chicken chicken, Item egg) {
+        if (!plugin.getSettings().multiplyChickenEggs || !EntityUtils.isStackable(chicken)) {
+            return;
+        }
+
+        int stackAmount = WStackedEntity.of(chicken).getStackAmount();
+
+        if (stackAmount > 1) {
+            ItemStack eggItem = egg.getItemStack();
+            eggItem.setAmount(eggItem.getAmount() * stackAmount);
+            egg.setItemStack(eggItem);
+        }
+    }
+
+    private void onTurtleScuteDrop(Entity turtle, Item turtleScute) {
+        if (!plugin.getSettings().multiplyTurtleScutes || !EntityUtils.isStackable(turtle)) {
+            return;
+        }
+
+        int stackAmount = WStackedEntity.of(turtle).getStackAmount();
+
+        if (stackAmount > 1) {
+            ItemStack turtleScuteItem = turtleScute.getItemStack();
+            turtleScuteItem.setAmount(turtleScuteItem.getAmount() * stackAmount);
+            turtleScute.setItemStack(turtleScuteItem);
+        }
     }
 
     private boolean isChunkLimit(Chunk chunk) {

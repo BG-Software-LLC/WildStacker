@@ -153,6 +153,18 @@ public enum Materials {
         }
     }
 
+    @Nullable
+    public static Material getMaterialOrNull(String... names) {
+        for (String name : names) {
+            try {
+                return Material.valueOf(name);
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
+    }
+
     private static EnumMap<Material, EnumSet<Tag>> setupMaterialTags() {
         EnumMap<Material, EnumSet<Tag>> enumMap = new EnumMap<>(Material.class);
 
