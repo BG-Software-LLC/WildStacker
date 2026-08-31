@@ -440,6 +440,9 @@ entities:
   # Should corpses be spawned when entity dies ("death animations")?
   spawn-corpses: true
 
+  # Should villager infection be simulated when villagers are killed by zombies?
+  simulate-villager-infection: true
+
   # When enabled, entities will be one shot by specific tools.
   one-shot:
     # Should this feature be enabled?

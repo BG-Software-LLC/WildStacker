@@ -335,6 +335,9 @@ public final class DeathSimulation {
         if (livingEntity.getType() != EntityType.VILLAGER || !(entityDamager instanceof Zombie))
             return false;
 
+        if (!plugin.getSettings().simulateVillagerInfection)
+            return false;
+
         switch (livingEntity.getWorld().getDifficulty()) {
             case NORMAL:
                 if (!ThreadLocalRandom.current().nextBoolean())

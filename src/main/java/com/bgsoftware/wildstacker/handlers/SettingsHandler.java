@@ -100,7 +100,7 @@ public final class SettingsHandler {
             smartBreedingConsumeEntireInventory, entitiesHideNames, entitiesNamesToggleEnabled, entitiesFastKill,
             entitiesClearEquipment, spawnCorpses, entitiesOneShotEnabled, storeEntities, superiorSkyblockHook,
             multiplyDrops, multiplyExp, multiplyArmadilloScutes, multiplyChickenEggs, multiplySnifferSeeds,
-            multiplyTurtleScutes, spreadDamage, entitiesFillVehicles;
+            multiplyTurtleScutes, spreadDamage, entitiesFillVehicles, simulateVillagerInfection;
     public final long entitiesStackInterval;
     public final String entitiesCustomName, entitiesNamesToggleCommand;
     public final NameBuilder<StackedEntity> entitiesNameBuilder;
@@ -307,6 +307,7 @@ public final class SettingsHandler {
         this.entitiesExpPickupSound = entitiesExpPickupSound;
         entitiesClearEquipment = cfg.getBoolean("entities.clear-equipment", false);
         spawnCorpses = cfg.getBoolean("entities.spawn-corpses", true);
+        simulateVillagerInfection = cfg.getBoolean("entities.simulate-villager-infection", true);
         entitiesOneShotEnabled = cfg.getBoolean("entities.one-shot.enabled", false);
         entitiesOneShotTools = cfg.getStringList("entities.one-shot.tools");
         entitiesOneShotWhitelist = Fast2EnumsArray.fromList(cfg.getStringList("entities.one-shot.whitelist"),
