@@ -255,10 +255,27 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
 
             Location location = getLocation();
 
-            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
+            long maxX = (long) location.getBlockX() + range, maxY = (long) location.getBlockY() + range, maxZ = (long) location.getBlockZ() + range;
+            long minX = (long) location.getBlockX() - range, minY = (long) location.getBlockY() - range, minZ = (long) location.getBlockZ() - range;
 
-            barrelStream = plugin.getSystemManager().getStackedBarrels().stream()
+            long chunksInRange = ((maxX >> 4) - (minX >> 4) + 1) * ((maxZ >> 4) - (minZ >> 4) + 1);
+
+            // Avoid walking a large number of empty chunks for large merge radii.
+            if (chunksInRange < plugin.getDataHandler().stackedBarrelStore.size()) {
+                List<StackedBarrel> nearbyBarrels = new ArrayList<>();
+                String worldName = location.getWorld().getName();
+                for (int chunkX = (int) (minX >> 4); chunkX <= (maxX >> 4); chunkX++) {
+                    for (int chunkZ = (int) (minZ >> 4); chunkZ <= (maxZ >> 4); chunkZ++) {
+                        plugin.getDataHandler().stackedBarrelStore.collectFromChunk(
+                                worldName, chunkX, chunkZ, nearbyBarrels);
+                    }
+                }
+                barrelStream = nearbyBarrels.stream();
+            } else {
+                barrelStream = plugin.getSystemManager().getStackedBarrels().stream();
+            }
+
+            barrelStream = barrelStream
                     .filter(stackedBarrel -> {
                         Location loc = stackedBarrel.getLocation();
                         return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
