@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
 import org.bukkit.Location;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -175,6 +176,44 @@ public abstract class AbstractBlockDataStore<T extends StackedObject<?>, U exten
         List<T> all = new LinkedList<>();
         collectFromChunk(worldName, x, z, all);
         return all;
+    }
+
+    /**
+     * Returns cached objects in the same world within the inclusive XYZ block bounds.
+     */
+    public List<T> collectInRange(Location location, int range) {
+        if (this.store.isEmpty() || range < 0)
+            return Collections.emptyList();
+
+        String worldName = location.getWorld().getName();
+        long minX = (long) location.getBlockX() - range, minY = (long) location.getBlockY() - range, minZ = (long) location.getBlockZ() - range;
+        long maxX = (long) location.getBlockX() + range, maxY = (long) location.getBlockY() + range, maxZ = (long) location.getBlockZ() + range;
+
+        int minChunkX = (int) (minX >> 4), maxChunkX = (int) (maxX >> 4);
+        int minChunkZ = (int) (minZ >> 4), maxChunkZ = (int) (maxZ >> 4);
+        long chunksInRange = ((long) maxChunkX - minChunkX + 1) * ((long) maxChunkZ - minChunkZ + 1);
+
+        List<T> nearby = new ArrayList<>();
+        // Use the chunk index while there are fewer chunk lookups (including empty chunks)
+        // than cached objects to check. This avoids excessive lookups for large radii.
+        if (chunksInRange < size()) {
+            for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+                for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                    collectFromChunk(worldName, chunkX, chunkZ, nearby);
+                }
+            }
+        } else {
+            collect(nearby);
+        }
+
+        nearby.removeIf(object -> {
+            Location loc = object.getLocation();
+            return !worldName.equals(loc.getWorld().getName()) ||
+                    loc.getBlockX() < minX || loc.getBlockX() > maxX ||
+                    loc.getBlockY() < minY || loc.getBlockY() > maxY ||
+                    loc.getBlockZ() < minZ || loc.getBlockZ() > maxZ;
+        });
+        return nearby;
     }
 
     public void collect(List<? super T> list) {
