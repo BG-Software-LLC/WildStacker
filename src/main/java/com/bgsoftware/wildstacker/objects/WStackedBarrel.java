@@ -253,35 +253,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             if (range <= 0)
                 return Optional.empty();
 
-            Location location = getLocation();
-
-            long maxX = (long) location.getBlockX() + range, maxY = (long) location.getBlockY() + range, maxZ = (long) location.getBlockZ() + range;
-            long minX = (long) location.getBlockX() - range, minY = (long) location.getBlockY() - range, minZ = (long) location.getBlockZ() - range;
-
-            long chunksInRange = ((maxX >> 4) - (minX >> 4) + 1) * ((maxZ >> 4) - (minZ >> 4) + 1);
-
-            // Avoid walking a large number of empty chunks for large merge radii.
-            if (chunksInRange < plugin.getDataHandler().stackedBarrelStore.size()) {
-                List<StackedBarrel> nearbyBarrels = new ArrayList<>();
-                String worldName = location.getWorld().getName();
-                for (int chunkX = (int) (minX >> 4); chunkX <= (maxX >> 4); chunkX++) {
-                    for (int chunkZ = (int) (minZ >> 4); chunkZ <= (maxZ >> 4); chunkZ++) {
-                        plugin.getDataHandler().stackedBarrelStore.collectFromChunk(
-                                worldName, chunkX, chunkZ, nearbyBarrels);
-                    }
-                }
-                barrelStream = nearbyBarrels.stream();
-            } else {
-                barrelStream = plugin.getSystemManager().getStackedBarrels().stream();
-            }
-
-            barrelStream = barrelStream
-                    .filter(stackedBarrel -> {
-                        Location loc = stackedBarrel.getLocation();
-                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                    });
+            barrelStream = plugin.getDataHandler().stackedBarrelStore.collectInRange(blockLocation, range).stream();
         }
 
         Optional<StackedBarrel> barrelOptional = GeneralUtils.getClosest(blockLocation, barrelStream
