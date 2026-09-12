@@ -462,12 +462,13 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFeed(PlayerInteractEntityEvent e) {
-        if (!(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
+        if (!(e.getRightClicked() instanceof Animals))
             return;
 
-        ItemStack inHand = e.getPlayer().getItemInHand();
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+        ItemStack inHand = ItemUtils.getItemFromHand(e.getPlayer().getInventory(), usedHand);
 
-        if (!plugin.getNMSEntities().isAnimalFood((Animals) e.getRightClicked(), inHand))
+        if (inHand == null || !plugin.getNMSEntities().isAnimalFood((Animals) e.getRightClicked(), inHand))
             return;
 
         if (!EntityUtils.canBeBred((Animals) e.getRightClicked()))
@@ -544,7 +545,6 @@ public final class EntitiesListener implements Listener {
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 int inHandItemsAmount = inHand.getAmount();
-                EquipmentSlot usedHand = ItemUtils.getHand(e);
 
                 if (itemsAmountToRemove >= inHandItemsAmount) {
                     ItemUtils.setItemInHand(e.getPlayer().getInventory(), usedHand, null);
