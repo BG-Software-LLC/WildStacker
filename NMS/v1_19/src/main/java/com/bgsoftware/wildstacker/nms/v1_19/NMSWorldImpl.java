@@ -24,6 +24,11 @@ public class NMSWorldImpl extends com.bgsoftware.wildstacker.nms.v1_19.AbstractN
     }
 
     @Override
+    protected double getVillagerInfectionChance(ServerLevel serverLevel) {
+        return serverLevel.paperConfig().entities.behavior.zombieVillagerInfectionChance;
+    }
+
+    @Override
     protected BlockData getBlockData(BlockState blockState) {
         return CraftBlockData.fromData(blockState);
     }
