@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.nms;
 
 import com.bgsoftware.wildstacker.utils.chunks.ChunkPosition;
+import com.bgsoftware.wildstacker.utils.legacy.LegacyPaperWorldConfig;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -24,6 +25,10 @@ public interface NMSWorld {
     void playParticle(String particle, Location location, int count, int offsetX, int offsetY, int offsetZ, double extra);
 
     void attemptJoinRaid(Player player, Entity raider);
+
+    default double getVillagerInfectionChance(World world) {
+        return LegacyPaperWorldConfig.getVillagerInfectionChance(world);
+    }
 
     void startEntityListen(World world);
 
