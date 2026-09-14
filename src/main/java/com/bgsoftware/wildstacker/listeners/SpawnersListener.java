@@ -148,7 +148,7 @@ public final class SpawnersListener implements Listener {
 
         try {
             StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlockPlaced());
-
+            stackedSpawner.setNatural(false);
             if (!stackedSpawner.isCached())
                 return;
 
@@ -341,6 +341,15 @@ public final class SpawnersListener implements Listener {
         }
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getBlock());
+
+        if (stackedSpawner.isNatural()) {
+            if (!plugin.getSettings().allowBreakVanillaSpawners && !e.getPlayer().hasPermission("wildstacker.break.natural.bypass")) {
+                e.setCancelled(true);
+                Locale.SPAWNER_BREAK_NATURAL_NOT_ALLOWED.send(e.getPlayer());
+            }
+            return;
+        }
+
         CreatureSpawner creatureSpawner = (CreatureSpawner) e.getBlock().getState();
 
         e.setCancelled(true);
@@ -576,6 +585,11 @@ public final class SpawnersListener implements Listener {
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
 
+        if (stackedSpawner.isNatural() && !plugin.getSettings().allowBreakVanillaSpawners && !e.getPlayer().hasPermission("wildstacker.break.natural.bypass")) {
+            e.setCancelled(true);
+            return;
+        }
+
         if (!plugin.getSettings().changeUsingEggs) {
             e.setCancelled(true);
 
@@ -628,6 +642,11 @@ public final class SpawnersListener implements Listener {
             return;
 
         StackedSpawner stackedSpawner = WStackedSpawner.of(e.getClickedBlock());
+
+        if (stackedSpawner.isNatural() && !plugin.getSettings().allowBreakVanillaSpawners && !e.getPlayer().hasPermission("wildstacker.break.natural.bypass")) {
+            e.setCancelled(true);
+            return;
+        }
 
         if (plugin.getSettings().manageMenuEnabled && (!plugin.getSettings().sneakingOpenMenu || e.getPlayer().isSneaking())) {
             SpawnersManageMenu.open(e.getPlayer(), stackedSpawner);
