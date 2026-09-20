@@ -8,10 +8,30 @@
 # Should this feature be enabled?
 enabled: true
 
-# Here you can specify custom types for entities & items.
-# Please follow the "ITEM_TYPE: CUSTOM_NAME", "'ITEM_TYPE:ITEM_DATA': CUSTOM_NAME" and "ENTITY_TYPE: CUSTOM_NAME" formats.
-# {0} represents item's name, if found
+# Global translations applied to all categories unless specifically overridden below.
+# Make sure you follow the "MATERIAL: CUSTOM_NAME", "'MATERIAL:DATA': CUSTOM_NAME"
+# and "ENTITY_TYPE: CUSTOM_NAME" formats. {0} represents item's name, if found.
+global:
+  'INK_SACK:15': 'Bone Meal'
+  MOB_SPAWNER: '{0}'
+  PIG: 'Piggy'
 
-'INK_SACK:15': 'Bone Meal'
-MOB_SPAWNER: '{0}'
-PIG: 'Piggy'
+# Translations used by stacked eggs.
+# Make sure you follow the "ENTITY_TYPE: CUSTOM_NAME" format.
+eggs: { }
+
+# Translations used by stacked items.
+# Make sure you follow the "MATERIAL: CUSTOM_NAME" and "'MATERIAL:DATA': CUSTOM_NAME" formats.
+items: { }
+
+# Translations used by stacked entities.
+# Make sure you follow the "ENTITY_TYPE: CUSTOM_NAME" format.
+entities: { }
+
+# Translations used by stacked spawners.
+# Make sure you follow the "ENTITY_TYPE: CUSTOM_NAME" format.
+spawners: { }
+
+# Translations used by stacked barrels.
+# Make sure you follow the "MATERIAL: CUSTOM_NAME" and "'MATERIAL:DATA': CUSTOM_NAME" formats.
+barrels: { }

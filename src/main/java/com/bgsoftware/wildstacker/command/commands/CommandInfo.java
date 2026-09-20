@@ -7,9 +7,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.command.ICommand;
 import com.bgsoftware.wildstacker.objects.WStackedBarrel;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
-import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.google.common.collect.Sets;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -68,7 +67,7 @@ public final class CommandInfo implements ICommand {
             StackedSpawner stackedSpawner = WStackedSpawner.of(targetBlock);
 
             Locale.SPAWNER_INFO_HEADER.send(sender);
-            Locale.SPAWNER_INFO_TYPE.send(sender, EntityUtils.getFormattedType(stackedSpawner.getSpawnedType().name()));
+            Locale.SPAWNER_INFO_TYPE.send(sender, CustomNames.getSpawnerCustomName(stackedSpawner.getSpawnedType()));
             Locale.SPAWNER_INFO_AMOUNT.send(sender, stackedSpawner.getStackAmount());
             Locale.SPAWNER_INFO_UPGRADE.send(sender, stackedSpawner.getUpgrade().getName());
             Locale.SPAWNER_INFO_FOOTER.send(sender);
@@ -77,7 +76,7 @@ public final class CommandInfo implements ICommand {
             StackedBarrel stackedBarrel = WStackedBarrel.of(targetBlock);
 
             Locale.BARREL_INFO_HEADER.send(sender);
-            Locale.BARREL_INFO_TYPE.send(sender, ItemUtils.getFormattedType(stackedBarrel.getBarrelItem(1)));
+            Locale.BARREL_INFO_TYPE.send(sender, CustomNames.getBarrelCustomName(stackedBarrel.getBarrelItem(1)));
             Locale.BARREL_INFO_AMOUNT.send(sender, stackedBarrel.getStackAmount());
             Locale.BARREL_INFO_FOOTER.send(sender);
             return;

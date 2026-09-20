@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,7 +30,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
         super("barrelsPlace");
         this.location = location;
         this.inventory = Bukkit.createInventory(this, 9 * 4, plugin.getSettings().barrelsPlaceInventoryTitle
-                .replace("{0}", EntityUtils.getFormattedType(barrelItem.getType().name())));
+                .replace("{0}", CustomNames.getBarrelCustomName(barrelItem)));
         this.barrelItem = barrelItem;
         this.cancelOnClick = false;
     }
@@ -136,7 +137,7 @@ public final class BarrelsPlaceMenu extends WildMenu {
 
             if (EventsCaller.callBarrelPlaceInventoryEvent((Player) e.getPlayer(), stackedBarrel, increaseStackAmount)) {
                 int newStackAmount = stackedBarrel.increaseStackAmount(increaseStackAmount, true);
-                Locale.BARREL_UPDATE.send(e.getPlayer(), ItemUtils.getFormattedType(barrelItem), newStackAmount);
+                Locale.BARREL_UPDATE.send(e.getPlayer(), CustomNames.getBarrelCustomName(barrelItem), newStackAmount);
             } else {
                 ItemUtils.addItems(e.getInventory().getContents(), e.getPlayer().getInventory(), stackedBarrel.getLocation());
             }

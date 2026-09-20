@@ -18,7 +18,7 @@ BARREL_TOGGLE_OFF: '&6&lWildStacker &7Barrels placement has been disabled.'
 BARREL_NO_PERMISSION: '&6&lWildStacker &7You don''t have permission to use barrels.'
 
 # Called when the chunk limit is exceeded.
-CHUNK_LIMIT_EXCEEDED: '&6&lWildStacker &7You exceeded the chunk limit of {0} for this chunk.'
+BARREL_CHUNK_LIMIT_EXCEEDED: '&6&lWildStacker &7You exceeded the chunk limit of {0} Barrel for this chunk.'
 
 # Called when a player runs a command not in the required usage
 COMMAND_USAGE: '&6&lWildStacker &7Usage: /{0}'
@@ -87,6 +87,9 @@ SPAWNER_CHANGE_NOT_ENOUGH_ITEMS: '&6&lWildStacker &7You don''t have enough spawn
 # Called when a player attempts to upgrade a spawner.
 SPAWNER_UPGRADE_NOT_ENOUGH_MONEY: '&6&lWildStacker &7You need ${0} in order to upgrade this spawner.'
 SPAWNER_UPGRADE_SUCCESS: '&6&lWildStacker &7Successfully upgraded the spawner!'
+
+# Called when the chunk limit is exceeded.
+SPAWNER_CHUNK_LIMIT_EXCEEDED: '&6&lWildStacker &7You exceeded the chunk limit of {0} Spawner for this chunk.'
 
 # Called when a player successfully runs a give command.
 STACK_GIVE_PLAYER: '&6&lWildStacker &7Successfully gave {0} x{1} {2} {3}.'

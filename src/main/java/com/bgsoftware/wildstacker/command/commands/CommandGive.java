@@ -4,10 +4,8 @@ import com.bgsoftware.wildstacker.Locale;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.command.ICommand;
-import com.bgsoftware.wildstacker.utils.ServerVersion;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
-import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -15,7 +13,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,9 +76,6 @@ public final class CommandGive implements ICommand {
             return;
         }
 
-        ItemStack itemStack;
-        String typeName;
-
         int stackSize;
 
         try {
@@ -91,14 +85,15 @@ public final class CommandGive implements ICommand {
             return;
         }
 
-        boolean reformatItem = true;
+        ItemStack itemStack;
+        String typeName;
 
         if (args[2].equalsIgnoreCase("egg")) {
             EntityType entityType;
 
             try {
                 entityType = EntityType.valueOf(args[3].toUpperCase());
-                typeName = EntityUtils.getFormattedType(entityType.name());
+                typeName = CustomNames.getEggCustomName(entityType);
             } catch (IllegalArgumentException ex) {
                 Locale.INVALID_ENTITY.send(sender, args[3]);
                 return;
@@ -115,27 +110,13 @@ public final class CommandGive implements ICommand {
                 }
             }
 
-            Material eggType = Materials.getSpawnEgg(entityType);
-            if (eggType == null || ServerVersion.isLegacy()) {
-                if (ServerVersion.isLegacy()) {
-                    itemStack = new ItemStack(Material.MONSTER_EGG);
-                    ItemUtils.setEntityType(itemStack, entityType);
-                } else {
-                    itemStack = ItemUtils.getItemNMSEntityType(entityType);
-                }
-            } else {
-                itemStack = new ItemStack(eggType);
-            }
-
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
-            if (spawnerUpgrade != null && !spawnerUpgrade.isDefault())
-                itemStack = ItemUtils.setSpawnerUpgrade(itemStack, spawnerUpgrade.getId());
+            itemStack = ItemUtils.getEggItem(entityType, stackSize, spawnerUpgrade);
         } else if (args[2].equalsIgnoreCase("spawner")) {
             EntityType entityType;
 
             try {
                 entityType = EntityType.valueOf(args[3].toUpperCase());
-                typeName = EntityUtils.getFormattedType(entityType.name());
+                typeName = CustomNames.getSpawnerCustomName(entityType);
             } catch (IllegalArgumentException ex) {
                 Locale.INVALID_ENTITY.send(sender, args[3]);
                 return;
@@ -154,14 +135,12 @@ public final class CommandGive implements ICommand {
 
             itemStack = plugin.getProviders().getSpawnersProvider().getSpawnerItem(entityType,
                     stackSize, spawnerUpgrade);
-
-            reformatItem = false;
         } else if (args[2].equalsIgnoreCase("barrel")) {
             Material barrelType;
 
             try {
                 barrelType = Material.getMaterial(args[3].toUpperCase());
-                typeName = ItemUtils.getFormattedType(new ItemStack(barrelType));
+                typeName = CustomNames.getBarrelCustomName(new ItemStack(barrelType));
             } catch (IllegalArgumentException | NullPointerException ex) {
                 Locale.INVALID_BARREL.send(sender, args[3]);
                 return;
@@ -172,23 +151,10 @@ public final class CommandGive implements ICommand {
                 return;
             }
 
-            itemStack = new ItemStack(barrelType);
-            itemStack = ItemUtils.setSpawnerItemAmount(itemStack, stackSize);
+            itemStack = ItemUtils.getBarrelItem(barrelType, stackSize);
         } else {
             Locale.INVALID_TYPE.send(sender);
             return;
-        }
-
-        if (reformatItem) {
-            args[2] = args[2].substring(0, 1).toUpperCase() + args[2].substring(1).toLowerCase();
-
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            itemMeta.setDisplayName(WildStackerPlugin.getPlugin().getSettings().giveItemName
-                    .replace("{0}", stackSize + "")
-                    .replace("{1}", typeName)
-                    .replace("{2}", args[2])
-            );
-            itemStack.setItemMeta(itemMeta);
         }
 
         ItemUtils.addItem(itemStack, target.getInventory(), target.getLocation());

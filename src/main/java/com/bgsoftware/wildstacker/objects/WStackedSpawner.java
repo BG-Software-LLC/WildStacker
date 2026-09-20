@@ -8,8 +8,8 @@ import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.menu.SpawnersManageMenu;
 import com.bgsoftware.wildstacker.utils.GeneralUtils;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
@@ -204,7 +204,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             return;
         }
 
-        setCachedDisplayName(EntityUtils.getFormattedType(getSpawnedType().name()));
+        setCachedDisplayName(CustomNames.getSpawnerCustomName(getSpawnedType()));
         customName = plugin.getSettings().spawnersNameBuilder.build(this);
         setHologramName(customName, !plugin.getSettings().floatingSpawnerNames);
     }

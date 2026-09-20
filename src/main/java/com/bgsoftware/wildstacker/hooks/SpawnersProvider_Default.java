@@ -3,10 +3,10 @@ package com.bgsoftware.wildstacker.hooks;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
-import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.items.ItemUtils;
 import com.bgsoftware.wildstacker.utils.legacy.Materials;
+import com.bgsoftware.wildstacker.utils.names.CustomNames;
 import org.bukkit.Location;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
@@ -63,21 +63,20 @@ public final class SpawnersProvider_Default implements SpawnersProvider {
         } catch (Throwable ignored) {
         }
 
-        String customName = plugin.getSettings().spawnerItemName;
-
-        if (!customName.equals("")) {
+        String customName = plugin.getSettings().spawnersItemName;
+        if (!customName.isEmpty()) {
             itemMeta.setDisplayName(customName.replace("{0}", perStackAmount + "")
-                    .replace("{1}", EntityUtils.getFormattedType(entityType.name()))
+                    .replace("{1}", CustomNames.getSpawnerCustomName(entityType))
                     .replace("{2}", spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
         }
 
-        List<String> customLore = plugin.getSettings().spawnerItemLore;
-
+        List<String> customLore = plugin.getSettings().spawnersItemLore;
         if (!customLore.isEmpty()) {
             List<String> lore = new ArrayList<>();
             for (String line : customLore)
                 lore.add(line.replace("{0}", perStackAmount + "")
-                        .replace("{1}", EntityUtils.getFormattedType(entityType.name())));
+                        .replace("{1}", CustomNames.getSpawnerCustomName(entityType))
+                        .replace("{2}", spawnerUpgrade == null ? "" : spawnerUpgrade.getDisplayName()));
             itemMeta.setLore(lore);
         }
 
