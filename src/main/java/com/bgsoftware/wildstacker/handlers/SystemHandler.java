@@ -434,7 +434,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem spawnItemWithAmount(Location location, ItemStack itemStack, int amount) {
-        int limit = ItemUtils.canBeStacked(itemStack, location.getWorld()) ?
+        int limit = plugin.getSettings().itemsStackingEnabled && ItemUtils.canBeStacked(itemStack, location.getWorld()) ?
                 plugin.getSettings().itemsLimits.getOrDefault(itemStack.getType(), Integer.MAX_VALUE) :
                 itemStack.getMaxStackSize();
 
