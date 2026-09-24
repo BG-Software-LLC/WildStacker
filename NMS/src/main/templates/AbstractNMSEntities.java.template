@@ -557,6 +557,22 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             mob.spawnAnim();
     }
 
+    private int getInventorySum(LivingEntity livingEntity) {
+        List<ItemStack> items = null;
+        if (livingEntity instanceof Player) {
+            items = ((Player) livingEntity).getInventory().getContents();
+        }
+
+        if (items == null) return 0;
+
+        int sum = 0;
+        for (ItemStack itemStack : items) {
+            sum += itemStack.getCount();
+        }
+
+        return sum;
+    }
+
     @Override
     public boolean handleItemPickup(org.bukkit.entity.LivingEntity bukkitLivingEntity, StackedItem stackedItem, int remaining) {
         LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
@@ -600,6 +616,7 @@ public abstract class AbstractNMSEntities implements NMSEntities {
         int originalPickupDelay = itemEntity.pickupDelay;
         boolean isDifferentPickupItem = pickupItem != itemEntity;
         boolean actualItemDupe = originalItemCount != stackAmount;
+        int inventorySum = getInventorySum(livingEntity);
 
         AtomicBoolean isEventCancelled = new AtomicBoolean(false);
         try {
@@ -631,8 +648,12 @@ public abstract class AbstractNMSEntities implements NMSEntities {
         }
 
         if (isEventCancelled.get()) {
-            if (!pickupItem.isAlive()) {
-                itemEntity.discard();
+            int newInventorySum = getInventorySum(livingEntity);
+            if (inventorySum < newInventorySum) {
+                stackedItem.decreaseStackAmount(newInventorySum - inventorySum, true);
+                if (stackedItem.getStackAmount() <= 0) {
+                    itemEntity.discard();
+                }
             }
             return true;
         }
