@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v26_2;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -27,16 +28,18 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.ExplosionResult;
 import org.bukkit.craftbukkit.entity.CraftSulfurCube;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.AbstractNMSAdapter {
 
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
+            CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
             Entity.class, "addAdditionalSaveData", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
@@ -120,7 +123,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
     @Override
     protected <T> T getTagInternal(ItemStack itemStack, String key, Class<T> valueType, Object def) {
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        CompoundTag compoundTag = customData == null ? null : customData.getUnsafe();
+        CompoundTag compoundTag = customData == null ? null : getCustomDataTag(customData);
 
         if (compoundTag == null || !compoundTag.contains(key))
             return valueType.cast(def);
@@ -162,12 +165,20 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
         SulfurCube sulfurCube = ((CraftSulfurCube) bukkitSulfurCube).getHandle();
         ItemStack bucketItem = sulfurCube.getBucketItemStack();
         sulfurCube.saveToBucketTag(bucketItem);
-        return CraftItemStack.asCraftMirror(bucketItem);
+        return NMSUtils.asMirror(bucketItem);
     }
 
     @Override
     public boolean isSoftExplosion(EntityExplodeEvent event) {
         return event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK;
+    }
+
+    private static CompoundTag getCustomDataTag(CustomData customData) {
+        try {
+            return customData.getUnsafe();
+        } catch (Throwable error) {
+            return CUSTOM_DATA_TAG.get(customData);
+        }
     }
 
 }

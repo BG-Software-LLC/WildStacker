@@ -1,4 +1,4 @@
-package com.bgsoftware.wildstacker.nms.v1_21_9;
+package com.bgsoftware.wildstacker.nms.v26_3;
 
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
@@ -17,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.cubemob.SulfurCube;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.ExplosionResult;
+import org.bukkit.craftbukkit.entity.CraftSulfurCube;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
@@ -34,14 +36,14 @@ import org.slf4j.Logger;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_9.AbstractNMSAdapter {
+public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_3.AbstractNMSAdapter {
 
     private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
             CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", ValueOutput.class);
+            Entity.class, "addAdditionalSaveData", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", ValueInput.class);
+            Entity.class, "readAdditionalSaveData", ValueInput.class);
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -156,6 +158,14 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_9.Abstr
             return;
 
         ominousBottleMeta.setAmplifier(amplifier);
+    }
+
+    @Override
+    public org.bukkit.inventory.ItemStack createSulfurCubeBucketItem(org.bukkit.entity.Entity bukkitSulfurCube) {
+        SulfurCube sulfurCube = ((CraftSulfurCube) bukkitSulfurCube).getHandle();
+        ItemStack bucketItem = sulfurCube.getBucketItemStack();
+        sulfurCube.saveToBucketTag(bucketItem);
+        return NMSUtils.asMirror(bucketItem);
     }
 
     @Override
