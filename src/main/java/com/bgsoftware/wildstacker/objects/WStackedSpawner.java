@@ -100,18 +100,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             spawnerStream = plugin.getSystemManager().getStackedSpawners(getChunk()).stream();
         } else {
             int range = getMergeRadius();
-            Location location = getLocation();
-
-            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
-
-            spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
-                    .filter(stackedSpawner -> {
-                        Location loc = stackedSpawner.getLocation();
-                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                    });
+            spawnerStream = plugin.getDataHandler().stackedSpawnerStore.collectInRange(getLocation(), range).stream();
         }
 
         return spawnerStream.filter(this::canStackIntoNoLimit).collect(Collectors.toList());
@@ -237,18 +226,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
             if (range <= 0)
                 return Optional.empty();
 
-            Location location = getLocation();
-
-            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
-
-            spawnerStream = plugin.getSystemManager().getStackedSpawners().stream()
-                    .filter(stackedSpawner -> {
-                        Location loc = stackedSpawner.getLocation();
-                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                    });
+            spawnerStream = plugin.getDataHandler().stackedSpawnerStore.collectInRange(blockLocation, range).stream();
         }
 
         Optional<StackedSpawner> spawnerOptional = GeneralUtils.getClosest(blockLocation, spawnerStream
