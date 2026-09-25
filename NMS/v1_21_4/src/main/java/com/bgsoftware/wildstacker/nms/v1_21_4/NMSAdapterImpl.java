@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.bukkit.ExplosionResult;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
@@ -17,6 +18,11 @@ import org.bukkit.inventory.meta.OminousBottleMeta;
 import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_4.AbstractNMSAdapter {
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {

@@ -28,6 +28,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.ExplosionResult;
 import org.bukkit.craftbukkit.entity.CraftSulfurCube;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
@@ -46,6 +47,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
             Entity.class, "readAdditionalSaveData", ValueInput.class);
 
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {
@@ -165,7 +171,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
         SulfurCube sulfurCube = ((CraftSulfurCube) bukkitSulfurCube).getHandle();
         ItemStack bucketItem = sulfurCube.getBucketItemStack();
         sulfurCube.saveToBucketTag(bucketItem);
-        return NMSUtils.asMirror(bucketItem);
+        return asBukkitItemMirror(bucketItem);
     }
 
     @Override
