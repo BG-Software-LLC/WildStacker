@@ -39,8 +39,9 @@ import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.AbstractNMSAdapter {
 
-    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = new ReflectField<>(CustomData.class,
-            CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
+    private static final boolean SUPPORT_CUSTOM_DATA_UNSAFE = new ReflectMethod<>(CustomData.class, "getUnsafe").isValid();
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = SUPPORT_CUSTOM_DATA_UNSAFE ? null :
+            new ReflectField<>(CustomData.class, CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
             Entity.class, "addAdditionalSaveData", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
@@ -180,11 +181,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
     }
 
     private static CompoundTag getCustomDataTag(CustomData customData) {
-        try {
-            return customData.getUnsafe();
-        } catch (Throwable error) {
-            return CUSTOM_DATA_TAG.get(customData);
-        }
+        return SUPPORT_CUSTOM_DATA_UNSAFE ? customData.getUnsafe() : CUSTOM_DATA_TAG.get(customData);
     }
 
 }
