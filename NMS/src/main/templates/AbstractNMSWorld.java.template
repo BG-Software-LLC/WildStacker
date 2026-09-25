@@ -101,6 +101,17 @@ public abstract class AbstractNMSWorld implements NMSWorld {
     }
 
     @Override
+    public double getVillagerInfectionChance(World world) {
+        try {
+            return getVillagerInfectionChance(((CraftWorld) world).getHandle());
+        } catch (LinkageError ignored) {
+            return -1.0D;
+        }
+    }
+
+    protected abstract double getVillagerInfectionChance(ServerLevel serverLevel);
+
+    @Override
     public void startEntityListen(World world) {
         // Do nothing.
     }

@@ -335,15 +335,23 @@ public final class DeathSimulation {
         if (livingEntity.getType() != EntityType.VILLAGER || !(entityDamager instanceof Zombie))
             return false;
 
-        switch (livingEntity.getWorld().getDifficulty()) {
-            case NORMAL:
-                if (!ThreadLocalRandom.current().nextBoolean())
+        double infectionChance = plugin.getNMSWorld().getVillagerInfectionChance(livingEntity.getWorld());
+
+        if (infectionChance == -1.0D) {
+            switch (livingEntity.getWorld().getDifficulty()) {
+                case NORMAL:
+                    infectionChance = 50.0D;
+                    break;
+                case HARD:
+                    infectionChance = 100.0D;
+                    break;
+                default:
                     return false;
-                break;
-            case EASY:
-            case PEACEFUL:
-                return false;
+            }
         }
+
+        if (!(ThreadLocalRandom.current().nextDouble() * 100.0D < infectionChance))
+            return false;
 
         Zombie zombieVillager = plugin.getNMSEntities().spawnZombieVillager((Villager) livingEntity);
 
