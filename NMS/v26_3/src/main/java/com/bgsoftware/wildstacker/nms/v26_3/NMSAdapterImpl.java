@@ -1,8 +1,12 @@
-package com.bgsoftware.wildstacker.nms.v1_21_7;
+package com.bgsoftware.wildstacker.nms.v26_3;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +17,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.cubemob.SulfurCube;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -21,34 +27,48 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.ExplosionResult;
+import org.bukkit.craftbukkit.entity.CraftSulfurCube;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_7.AbstractNMSAdapter {
+public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_3.AbstractNMSAdapter {
 
+    private static final boolean SUPPORT_CUSTOM_DATA_UNSAFE = new ReflectMethod<>(CustomData.class, "getUnsafe").isValid();
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = SUPPORT_CUSTOM_DATA_UNSAFE ? null :
+            new ReflectField<>(CustomData.class, CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", ValueOutput.class);
+            Entity.class, "addAdditionalSaveData", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
-            Entity.class, "a", ValueInput.class);
+            Entity.class, "readAdditionalSaveData", ValueInput.class);
+    private static final ReflectMethod<org.bukkit.inventory.ItemStack> CRAFT_ITEM_STACK_AS_CRAFT_MIRROR = new ReflectMethod<>(
+            CraftItemStack.class, org.bukkit.inventory.ItemStack.class, "asCraftMirror", ItemStack.class);
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
     protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
-        return CraftItemStack.asCraftMirror(itemStack);
+        // Spigot still uses the CraftItemStack#asCraftMirror(ItemStack).
+        if (CRAFT_ITEM_STACK_AS_CRAFT_MIRROR.isValid()) {
+            return CRAFT_ITEM_STACK_AS_CRAFT_MIRROR.invoke(null, itemStack);
+        }
+
+        return CraftItemStack.asBukkitMirror(itemStack);
     }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {
-        PropertyMap propertyMap = new PropertyMap();
-        propertyMap.put("textures", new Property("textures", texture));
+        Multimap<String, Property> properties = HashMultimap.create();
+        properties.put("textures", new Property("textures", texture));
 
-        ResolvableProfile resolvableProfile = new ResolvableProfile(Optional.empty(), Optional.empty(), propertyMap);
+        ResolvableProfile.Partial partialProfile = new ResolvableProfile.Partial(
+                Optional.empty(), Optional.empty(), new PropertyMap(properties));
+        ResolvableProfile resolvableProfile = new ResolvableProfile.Static(Either.right(partialProfile), PlayerSkin.Patch.EMPTY);
 
         itemStack.set(DataComponents.PROFILE, resolvableProfile);
     }
@@ -117,7 +137,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_7.Abstr
     @Override
     protected <T> T getTagInternal(ItemStack itemStack, String key, Class<T> valueType, Object def) {
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        CompoundTag compoundTag = customData == null ? null : customData.getUnsafe();
+        CompoundTag compoundTag = customData == null ? null : getCustomDataTag(customData);
 
         if (compoundTag == null || !compoundTag.contains(key))
             return valueType.cast(def);
@@ -155,8 +175,20 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_7.Abstr
     }
 
     @Override
+    public org.bukkit.inventory.ItemStack createSulfurCubeBucketItem(org.bukkit.entity.Entity bukkitSulfurCube) {
+        SulfurCube sulfurCube = ((CraftSulfurCube) bukkitSulfurCube).getHandle();
+        ItemStack bucketItem = sulfurCube.getBucketItemStack();
+        sulfurCube.saveToBucketTag(bucketItem);
+        return asBukkitItemMirror(bucketItem);
+    }
+
+    @Override
     public boolean isSoftExplosion(EntityExplodeEvent event) {
         return event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK;
+    }
+
+    private static CompoundTag getCustomDataTag(CustomData customData) {
+        return SUPPORT_CUSTOM_DATA_UNSAFE ? customData.getUnsafe() : CUSTOM_DATA_TAG.get(customData);
     }
 
 }

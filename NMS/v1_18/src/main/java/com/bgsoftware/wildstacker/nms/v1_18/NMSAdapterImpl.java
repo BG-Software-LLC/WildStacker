@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -15,6 +16,11 @@ import java.util.UUID;
 public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_18.AbstractNMSAdapter {
 
     private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {
