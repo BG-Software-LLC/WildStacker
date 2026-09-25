@@ -185,7 +185,7 @@ public final class CommandKill implements ICommand {
 
             return Math.abs(player.getBlockX() - entity.getBlockX()) <= radius &&
                     Math.abs(player.getBlockY() - entity.getBlockY()) <= radius &&
-                    Math.abs(player.getBlockY() - entity.getBlockY()) <= radius;
+                    Math.abs(player.getBlockZ() - entity.getBlockZ()) <= radius;
         }
 
         private boolean hasEntityType(EntityTypes entityType) {

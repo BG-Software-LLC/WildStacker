@@ -151,7 +151,7 @@ public final class SpawnersProvider_MineableSpawners implements SpawnersProvider
             }
 
             if (mineableSpawners.getEcon() != null && mineableSpawners.getConfigurationHandler().getBoolean("mining", "charge")) {
-                double cost = !allSamePrice ? globalPrice : prices.getOrDefault(entityType, globalPrice);
+                double cost = allSamePrice ? globalPrice : prices.getOrDefault(entityType, globalPrice);
 
                 if (!mineableSpawners.getEcon().withdrawPlayer(player, cost).transactionSuccess())
                     return;
