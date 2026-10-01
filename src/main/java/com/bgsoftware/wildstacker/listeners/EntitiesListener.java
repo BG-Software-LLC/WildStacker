@@ -74,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -258,12 +259,12 @@ public final class EntitiesListener implements Listener {
         if (spawnEggData.entityType != null && EntityTypes.fromEntity(e.getEntity()) != spawnEggData.entityType)
             return;
 
-        int stackAmount = spawnEggData.stackAmount;
+        OptionalInt stackAmount = spawnEggData.stackAmount;
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(stackAmount, false);
-        if (stackAmount > 1) {
+        if (stackAmount.isPresent()) {
+            stackedEntity.setStackAmount(stackAmount.getAsInt(), false);
             // Remove the name tag from the custom name of the egg
             e.getEntity().setCustomName(null);
             Executor.sync(stackedEntity::updateName, 1L);
@@ -714,7 +715,7 @@ public final class EntitiesListener implements Listener {
             return false;
 
         SpawnEggTrackedData trackedData = new SpawnEggTrackedData();
-        trackedData.stackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        trackedData.stackAmount = ItemUtils.getSpawnerItemAmountOptional(usedItem);
         trackedData.upgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
 
         if (Materials.isValidAndSpawnEgg(usedItem)) {
@@ -1133,7 +1134,7 @@ public final class EntitiesListener implements Listener {
 
     private static class SpawnEggTrackedData {
 
-        private int stackAmount;
+        private OptionalInt stackAmount;
         private int upgradeId;
         private EntityTypes entityType;
 

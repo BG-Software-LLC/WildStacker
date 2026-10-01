@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -127,8 +128,14 @@ public final class ItemUtils {
     }
 
     public static int getSpawnerItemAmount(ItemStack itemStack) {
-        int spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1);
-        return Math.max(1, spawnersAmount);
+        return getSpawnerItemAmountOptional(itemStack).orElse(1);
+    }
+
+    public static OptionalInt getSpawnerItemAmountOptional(ItemStack itemStack) {
+        Integer spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, null);
+        if (spawnersAmount == null)
+            return OptionalInt.empty();
+        return OptionalInt.of(Math.max(1, spawnersAmount));
     }
 
     public static int getSpawnerUpgrade(ItemStack itemStack) {
