@@ -535,7 +535,7 @@ public final class EntitiesListener implements Listener {
                 }, 50L);
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
                 stackedEntity.decreaseStackAmount(1, true);
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(1, SpawnCause.BREEDING);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 plugin.getNMSEntities().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
                 itemsAmountToRemove = 1;
             } else {
