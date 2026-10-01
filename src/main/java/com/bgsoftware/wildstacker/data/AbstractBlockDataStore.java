@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.utils.data.structures.Location2ObjectMap;
 import org.bukkit.Location;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -193,7 +192,7 @@ public abstract class AbstractBlockDataStore<T extends StackedObject<?>, U exten
         int minChunkZ = (int) (minZ >> 4), maxChunkZ = (int) (maxZ >> 4);
         long chunksInRange = ((long) maxChunkX - minChunkX + 1) * ((long) maxChunkZ - minChunkZ + 1);
 
-        List<T> nearby = new ArrayList<>();
+        List<T> nearby = new LinkedList<>();
         // Use the chunk index while there are fewer chunk lookups (including empty chunks)
         // than cached objects to check. This avoids excessive lookups for large radii.
         if (chunksInRange < size()) {
