@@ -95,7 +95,7 @@ public final class ItemUtils {
         int amount = itemStack.getAmount();
 
         try {
-            if (plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())) {
+            if (canBeStacked(itemStack, location.getWorld())) {
                 ItemStack cloned = itemStack.clone();
                 cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
                 plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
@@ -390,6 +390,9 @@ public final class ItemUtils {
     }
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
+        if (!plugin.getSettings().itemsStackingEnabled)
+            return false;
+
         Material itemType = itemStack.getType();
         return !plugin.getSettings().blacklistedItems.contains(itemType) &&
                 (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&
