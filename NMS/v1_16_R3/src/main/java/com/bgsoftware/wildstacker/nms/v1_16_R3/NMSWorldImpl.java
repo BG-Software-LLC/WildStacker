@@ -100,15 +100,6 @@ public class NMSWorldImpl implements NMSWorld {
     }
 
     @Override
-    public double getVillagerInfectionChance(org.bukkit.World world) {
-        try {
-            return ((CraftWorld) world).getHandle().paperConfig.zombieVillagerInfectionChance;
-        } catch (LinkageError ignored) {
-            return -1.0D;
-        }
-    }
-
-    @Override
     public void startEntityListen(org.bukkit.World world) {
         // Do nothing.
     }

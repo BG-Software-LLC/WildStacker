@@ -335,7 +335,7 @@ public final class DeathSimulation {
         if (livingEntity.getType() != EntityType.VILLAGER || !(entityDamager instanceof Zombie))
             return false;
 
-        double infectionChance = plugin.getNMSWorld().getVillagerInfectionChance(livingEntity.getWorld());
+        double infectionChance = plugin.getNMSWorldConfig().getVillagerInfectionChance(livingEntity.getWorld());
 
         if (infectionChance == -1.0D) {
             switch (livingEntity.getWorld().getDifficulty()) {

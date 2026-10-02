@@ -1,0 +1,21 @@
+package com.bgsoftware.wildstacker.nms.${NMS_VERSION};
+
+import com.bgsoftware.wildstacker.nms.NMSWorldConfig;
+import net.minecraft.server.level.ServerLevel;
+import org.bukkit.World;
+import ${CRAFTBUKKIT_PACKAGE}.CraftWorld;
+
+public abstract class AbstractNMSWorldConfig implements NMSWorldConfig {
+
+    @Override
+    public double getVillagerInfectionChance(World world) {
+        try {
+            return getVillagerInfectionChance(((CraftWorld) world).getHandle());
+        } catch (LinkageError ignored) {
+            return -1.0D;
+        }
+    }
+
+    protected abstract double getVillagerInfectionChance(ServerLevel serverLevel);
+
+}
