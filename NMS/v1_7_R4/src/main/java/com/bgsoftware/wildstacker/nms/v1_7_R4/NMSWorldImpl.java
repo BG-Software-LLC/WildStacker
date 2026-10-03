@@ -73,6 +73,11 @@ public class NMSWorldImpl implements NMSWorld {
     }
 
     @Override
+    public double getVillagerInfectionChance(org.bukkit.World world) {
+        return -1.0D;
+    }
+
+    @Override
     public Object getBlockData(Material type, short data) {
         throw new UnsupportedOperationException("Not supported in this version.");
     }

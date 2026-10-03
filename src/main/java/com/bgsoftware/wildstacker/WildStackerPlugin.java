@@ -36,7 +36,6 @@ import com.bgsoftware.wildstacker.nms.NMSEntities;
 import com.bgsoftware.wildstacker.nms.NMSHolograms;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.nms.NMSWorld;
-import com.bgsoftware.wildstacker.nms.NMSWorldConfig;
 import com.bgsoftware.wildstacker.utils.ServerVersion;
 import com.bgsoftware.wildstacker.utils.entity.EntityStorage;
 import com.bgsoftware.wildstacker.utils.entity.logic.DeathSimulation;
@@ -67,7 +66,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
     private NMSSpawners nmsSpawners;
     private NMSEntities nmsEntities;
     private NMSWorld nmsWorld;
-    private NMSWorldConfig nmsWorldConfig;
 
     private boolean shouldEnable = true;
 
@@ -219,7 +217,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
             this.nmsHolograms = nmsLoader.loadNMSHandler(NMSHolograms.class);
             this.nmsSpawners = nmsLoader.loadNMSHandler(NMSSpawners.class);
             this.nmsWorld = nmsLoader.loadNMSHandler(NMSWorld.class);
-            this.nmsWorldConfig = nmsLoader.loadNMSHandler(NMSWorldConfig.class);
 
             return true;
         } catch (NMSLoadException error) {
@@ -249,10 +246,6 @@ public final class WildStackerPlugin extends JavaPlugin implements WildStacker {
 
     public NMSWorld getNMSWorld() {
         return nmsWorld;
-    }
-
-    public NMSWorldConfig getNMSWorldConfig() {
-        return nmsWorldConfig;
     }
 
     public LootHandler getLootHandler() {
