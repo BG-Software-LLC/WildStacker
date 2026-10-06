@@ -273,7 +273,7 @@ public final class DataHandler {
                     this.stackedSpawnerStore.storeUnloaded(unloadedStackedSpawner);
                     continue;
                 } catch (Exception ex) {
-                    exceptionReason = "Exception was thrown.";
+                    exceptionReason = ex.getMessage() == null ? ex.toString() : ex.getMessage();
                 }
 
                 WildStackerPlugin.log("Couldn't load spawner: " + location);
@@ -325,7 +325,7 @@ public final class DataHandler {
                     this.stackedBarrelStore.storeUnloaded(unloadedStackedBarrel);
                     continue;
                 } catch (Exception ex) {
-                    exceptionReason = "Exception was thrown.";
+                    exceptionReason = ex.getMessage() == null ? ex.toString() : ex.getMessage();
                 }
 
                 WildStackerPlugin.log("Couldn't load barrel: " + location);
