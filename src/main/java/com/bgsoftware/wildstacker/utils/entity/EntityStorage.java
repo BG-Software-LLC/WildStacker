@@ -1,6 +1,7 @@
 package com.bgsoftware.wildstacker.utils.entity;
 
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
+import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.entity.Entity;
 
 import java.util.Map;
@@ -80,12 +81,30 @@ public final class EntityStorage {
         entityStorage.remove(entityUUID);
     }
 
+    public static void cancelMetadataRemoval(Entity entity) {
+        entityStorage.computeIfPresent(entity.getUniqueId(), (uuid, flagsMap) -> {
+            ++flagsMap.generation;
+            return flagsMap;
+        });
+    }
+
+    public static void clearMetadata(Entity entity, long delay) {
+        UUID entityUUID = entity.getUniqueId();
+        entityStorage.computeIfPresent(entityUUID, (uuid, flagsMap) -> {
+            long generation = flagsMap.generation;
+            Executor.sync(() -> entityStorage.computeIfPresent(entityUUID, (ignored, currentFlags) ->
+                    currentFlags == flagsMap && currentFlags.generation == generation ? null : currentFlags), delay);
+            return flagsMap;
+        });
+    }
+
     public static void clearCache() {
         entityStorage.clear();
     }
 
     private static class FlagsMap {
 
+        private long generation;
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
         private final Object[] values = new Object[EntityFlag.values().length];
 

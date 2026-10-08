@@ -156,7 +156,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
             }
 
             object.remove();
-            Executor.sync(this::clearFlags, 100L);
+            EntityStorage.clearMetadata(object, 100L);
         });
 
         setFlag(EntityFlag.REMOVED_ENTITY, true);
@@ -164,20 +164,19 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
 
     @Override
     public void updateName() {
-        if (isNameBlacklisted() || hasNameTag() || !isCached())
-            return;
+        Executor.sync(() -> {
+            if (isNameBlacklisted() || hasNameTag() || !isCached())
+                return;
 
-        try {
-            String customName = EntityUtils.getEntityName(this);
-            boolean nameVisible = (getStackAmount() > 1 || !isDefaultUpgrade()) && !plugin.getSettings().entitiesHideNames;
-
-            Executor.sync(() -> {
+            try {
+                String customName = EntityUtils.getEntityName(this);
+                boolean nameVisible = (getStackAmount() > 1 || !isDefaultUpgrade()) && !plugin.getSettings().entitiesHideNames;
                 setCustomName(customName);
                 setCustomNameVisible(nameVisible);
                 plugin.getProviders().notifyNameChangeListeners(object);
-            });
-        } catch (NullPointerException ignored) {
-        }
+            } catch (NullPointerException ignored) {
+            }
+        });
     }
 
     /*
@@ -328,7 +327,7 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
                         setFlag(EntityFlag.ORIGINAL_AMOUNT, newStackAmount + eventResult.getValue());
                     plugin.getNMSEntities().setHealthDirectly(object, 0, false);
                     plugin.getNMSEntities().playDeathSound(object);
-                    Executor.sync(this::clearFlags, 100L);
+                    EntityStorage.clearMetadata(object, 100L);
                 }, 2L);
             }
         }
@@ -762,6 +761,18 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         setFlag(EntityFlag.NAME_TAG, true);
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);
+    }
+
+    public void restoreNameTag() {
+        if (hasNameTag() || getStackAmount() > 1 || !isDefaultUpgrade())
+            return;
+
+        String customName = object.getCustomName();
+        if (customName == null || customName.isEmpty() || EntityTypes.fromEntity(object) == EntityTypes.COPPER_GOLEM ||
+                spawnCause == SpawnCause.REANIMATE || plugin.getProviders().getCustomName(this) != null)
+            return;
+
+        setNameTag();
     }
 
     public void setDeadFlag(boolean deadEntityFlag) {
