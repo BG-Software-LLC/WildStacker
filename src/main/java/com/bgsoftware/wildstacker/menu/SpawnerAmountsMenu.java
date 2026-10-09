@@ -86,7 +86,8 @@ public final class SpawnerAmountsMenu extends WildMenu {
     public void onPlayerClick(InventoryClickEvent e) {
         StackedSpawner stackedSpawner = this.stackedSpawner.get();
 
-        if (stackedSpawner == null) {
+        if (stackedSpawner == null ||
+                stackedSpawner.getLocation().getBlock().getType() != Materials.SPAWNER.toBukkitType()) {
             e.getWhoClicked().closeInventory();
             return;
         }
