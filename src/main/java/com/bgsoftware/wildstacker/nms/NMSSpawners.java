@@ -16,6 +16,8 @@ public interface NMSSpawners {
 
     void setSpawnerDelay(Location location, int spawnDelay);
 
+    void resetSpawnerType(Location location);
+
     void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade);
 
     SpawnerCachedData readData(Location location);

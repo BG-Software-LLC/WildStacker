@@ -220,6 +220,15 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     @Override
+    public void resetSpawnerType(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.setMobName(EntityType.PIG.getName());
+    }
+
+    @Override
     public SpawnerCachedData readData(Location location) {
         MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
         if (mobSpawnerAbstract == null)

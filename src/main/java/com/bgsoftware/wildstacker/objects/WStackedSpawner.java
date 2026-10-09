@@ -81,8 +81,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
         if (entityType == null) {
             entityType = EntityType.PIG;
-            creatureSpawner.setSpawnedType(entityType);
-            creatureSpawner.update();
+            plugin.getNMSSpawners().resetSpawnerType(getLocation());
         }
 
         return cachedEntity = entityType;

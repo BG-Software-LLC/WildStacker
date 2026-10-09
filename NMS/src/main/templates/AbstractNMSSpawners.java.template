@@ -121,10 +121,11 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
 
     @Override
     public void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade) {
-        BaseSpawner baseSpawner = getSpawner(location);
-        if (baseSpawner == null)
+        SpawnerBlockEntity spawnerBlockEntity = getSpawnerBlockEntity(location);
+        if (spawnerBlockEntity == null)
             return;
 
+        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
         baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
         baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
@@ -135,19 +136,32 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
 
     @Override
     public void setSpawnerDelay(Location location, int spawnDelay) {
-        BaseSpawner baseSpawner = getSpawner(location);
-        if (baseSpawner == null)
+        SpawnerBlockEntity spawnerBlockEntity = getSpawnerBlockEntity(location);
+        if (spawnerBlockEntity == null)
             return;
 
+        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         baseSpawner.spawnDelay = spawnDelay;
     }
 
     @Override
+    public void resetSpawnerType(Location location) {
+        SpawnerBlockEntity spawnerBlockEntity = getSpawnerBlockEntity(location);
+        if (spawnerBlockEntity == null)
+            return;
+
+        resetSpawnerType(spawnerBlockEntity);
+    }
+
+    protected abstract void resetSpawnerType(SpawnerBlockEntity spawnerBlockEntity);
+
+    @Override
     public SpawnerCachedData readData(Location location) {
-        BaseSpawner baseSpawner = getSpawner(location);
-        if (baseSpawner == null)
+        SpawnerBlockEntity spawnerBlockEntity = getSpawnerBlockEntity(location);
+        if (spawnerBlockEntity == null)
             return null;
 
+        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         return new SpawnerCachedData(
                 baseSpawner.minSpawnDelay,
                 baseSpawner.maxSpawnDelay,
@@ -160,14 +174,14 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
         );
     }
 
-    private BaseSpawner getSpawner(Location location) {
+    private SpawnerBlockEntity getSpawnerBlockEntity(Location location) {
         if (location.getWorld() == null)
             return null;
 
         ServerLevel serverLevel = ((CraftWorld) location.getWorld()).getHandle();
         BlockPos blockPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-        return blockEntity instanceof SpawnerBlockEntity ? ((SpawnerBlockEntity) blockEntity).getSpawner() : null;
+        return blockEntity instanceof SpawnerBlockEntity ? (SpawnerBlockEntity) blockEntity : null;
     }
 
     protected final void createCondition(String id, BiPredicate<ServerLevel, BlockPos> predicate, EntityType... entityTypes) {

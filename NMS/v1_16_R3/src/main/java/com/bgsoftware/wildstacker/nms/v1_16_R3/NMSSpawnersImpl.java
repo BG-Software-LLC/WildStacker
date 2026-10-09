@@ -18,6 +18,7 @@ import net.minecraft.server.v1_16_R3.Blocks;
 import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.ChunkCoordIntPair;
 import net.minecraft.server.v1_16_R3.EntityMonster;
+import net.minecraft.server.v1_16_R3.EntityTypes;
 import net.minecraft.server.v1_16_R3.EnumDifficulty;
 import net.minecraft.server.v1_16_R3.EnumDirection;
 import net.minecraft.server.v1_16_R3.EnumSkyBlock;
@@ -284,6 +285,15 @@ public final class NMSSpawnersImpl implements NMSSpawners {
             return;
 
         mobSpawnerAbstract.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public void resetSpawnerType(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.setMobName(EntityTypes.PIG);
     }
 
     @Override

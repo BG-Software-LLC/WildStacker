@@ -22,6 +22,7 @@ import net.minecraft.server.v1_12_R1.EnumDifficulty;
 import net.minecraft.server.v1_12_R1.EnumSkyBlock;
 import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.Material;
+import net.minecraft.server.v1_12_R1.MinecraftKey;
 import net.minecraft.server.v1_12_R1.MobSpawnerAbstract;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.TileEntity;
@@ -248,6 +249,15 @@ public final class NMSSpawnersImpl implements NMSSpawners {
             return;
 
         mobSpawnerAbstract.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public void resetSpawnerType(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.setMobName(new MinecraftKey(EntityType.PIG.getName()));
     }
 
     @Override
