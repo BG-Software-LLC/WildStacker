@@ -11,7 +11,6 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.events.EventsCaller;
 import com.bgsoftware.wildstacker.utils.particles.ParticleWrapper;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import com.bgsoftware.wildstacker.utils.threads.StackService;
 import org.bukkit.Bukkit;
@@ -19,6 +18,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -47,7 +47,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
     }
 
     public WStackedSpawner(CreatureSpawner creatureSpawner, int stackAmount) {
-        super(SyncedCreatureSpawner.of(creatureSpawner), stackAmount);
+        super(creatureSpawner, stackAmount);
         cachedEntity = creatureSpawner.getSpawnedType();
     }
 
@@ -63,14 +63,29 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public CreatureSpawner getSpawner() {
-        return object;
+        BlockState blockState = object.getBlock().getState();
+        return blockState instanceof CreatureSpawner ? (CreatureSpawner) blockState : object;
     }
 
     @Override
     public EntityType getSpawnedType() {
-        if (object.getSpawnedType() == null)
-            object.setSpawnedType(EntityType.PIG);
-        return Bukkit.isPrimaryThread() ? (cachedEntity = object.getSpawnedType()) : cachedEntity;
+        if (!Bukkit.isPrimaryThread())
+            return cachedEntity;
+
+        BlockState blockState = object.getBlock().getState();
+        if (!(blockState instanceof CreatureSpawner))
+            return cachedEntity;
+
+        CreatureSpawner creatureSpawner = (CreatureSpawner) blockState;
+        EntityType entityType = creatureSpawner.getSpawnedType();
+
+        if (entityType == null) {
+            entityType = EntityType.PIG;
+            creatureSpawner.setSpawnedType(entityType);
+            creatureSpawner.update();
+        }
+
+        return cachedEntity = entityType;
     }
 
     /*
@@ -113,7 +128,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
 
     @Override
     public ItemStack getDropItem(int amount) {
-        return plugin.getProviders().getSpawnersProvider().getSpawnerItem(object.getSpawnedType(), amount, getUpgrade());
+        return plugin.getProviders().getSpawnersProvider().getSpawnerItem(getSpawnedType(), amount, getUpgrade());
     }
 
     @Override
@@ -412,7 +427,7 @@ public final class WStackedSpawner extends WStackedHologramObject<CreatureSpawne
         if (fireEvent)
             EventsCaller.callSpawnerUpgradeEvent(this, spawnerUpgrade, who);
 
-        plugin.getNMSSpawners().updateSpawner(object, spawnerUpgrade);
+        plugin.getNMSSpawners().updateSpawner(getLocation(), spawnerUpgrade);
 
         if (saveData)
             plugin.getSystemManager().markToBeSaved(this);

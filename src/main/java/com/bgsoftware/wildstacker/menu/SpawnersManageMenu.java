@@ -7,7 +7,6 @@ import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -118,8 +117,12 @@ public final class SpawnersManageMenu extends WildMenu {
             return;
         }
 
-        SyncedCreatureSpawner creatureSpawner = (SyncedCreatureSpawner) stackedSpawner.getSpawner();
-        SpawnerCachedData spawnerData = plugin.getNMSSpawners().readData(creatureSpawner);
+        SpawnerCachedData spawnerData = plugin.getNMSSpawners().readData(stackedSpawner.getLocation());
+
+        if (spawnerData == null) {
+            stop();
+            return;
+        }
 
         for (Pair<Integer, ItemBuilder> statisticItem : statisticSlots) {
             inventory.setItem(statisticItem.getKey(), statisticItem.getValue().copy()

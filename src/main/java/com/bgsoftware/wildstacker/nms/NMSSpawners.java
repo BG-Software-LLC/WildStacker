@@ -3,9 +3,8 @@ package com.bgsoftware.wildstacker.nms;
 import com.bgsoftware.wildstacker.api.objects.StackedSpawner;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import org.bukkit.Chunk;
-import org.bukkit.block.CreatureSpawner;
+import org.bukkit.Location;
 
 public interface NMSSpawners {
 
@@ -15,10 +14,10 @@ public interface NMSSpawners {
 
     void registerSpawnConditions();
 
-    SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner);
+    void setSpawnerDelay(Location location, int spawnDelay);
 
-    void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade);
+    void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade);
 
-    SpawnerCachedData readData(CreatureSpawner creatureSpawner);
+    SpawnerCachedData readData(Location location);
 
 }

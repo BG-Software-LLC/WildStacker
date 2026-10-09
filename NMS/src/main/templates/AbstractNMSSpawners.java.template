@@ -8,11 +8,9 @@ import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.nms.${NMS_VERSION}.spawner.SpawnerWatcherTickingBlockEntity;
 import com.bgsoftware.wildstacker.nms.${NMS_VERSION}.spawner.StackedBaseSpawner;
-import com.bgsoftware.wildstacker.nms.${NMS_VERSION}.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
@@ -26,9 +24,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.CreatureSpawner;
 import ${CRAFTBUKKIT_PACKAGE}.CraftWorld;
-import ${CRAFTBUKKIT_PACKAGE}.block.CraftBlockState;
 import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Modifier;
@@ -124,19 +120,11 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
     public abstract void registerSpawnConditions();
 
     @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        World bukkitWorld = creatureSpawner.getWorld();
-        ServerLevel serverLevel = ((CraftWorld) bukkitWorld).getHandle();
-        BlockPos blockPos = new BlockPos(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) serverLevel.getBlockEntity(blockPos);
-        return new SyncedCreatureSpawnerImpl(bukkitWorld, spawnerBlockEntity);
-    }
+    public void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade) {
+        BaseSpawner baseSpawner = getSpawner(location);
+        if (baseSpawner == null)
+            return;
 
-    @Override
-    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
-        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
         baseSpawner.minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
         baseSpawner.maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
         baseSpawner.spawnCount = spawnerUpgrade.getSpawnCount();
@@ -146,10 +134,20 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
     }
 
     @Override
-    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
-        SpawnerBlockEntity spawnerBlockEntity = (SpawnerBlockEntity) ((CraftWorld) creatureSpawner.getWorld())
-                .getHandle().getBlockEntity(((CraftBlockState) creatureSpawner).getPosition());
-        BaseSpawner baseSpawner = spawnerBlockEntity.getSpawner();
+    public void setSpawnerDelay(Location location, int spawnDelay) {
+        BaseSpawner baseSpawner = getSpawner(location);
+        if (baseSpawner == null)
+            return;
+
+        baseSpawner.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public SpawnerCachedData readData(Location location) {
+        BaseSpawner baseSpawner = getSpawner(location);
+        if (baseSpawner == null)
+            return null;
+
         return new SpawnerCachedData(
                 baseSpawner.minSpawnDelay,
                 baseSpawner.maxSpawnDelay,
@@ -160,6 +158,16 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
                 baseSpawner.spawnDelay / 20,
                 baseSpawner instanceof StackedBaseSpawner stackedBaseSpawner ? stackedBaseSpawner.failureReason : ""
         );
+    }
+
+    private BaseSpawner getSpawner(Location location) {
+        if (location.getWorld() == null)
+            return null;
+
+        ServerLevel serverLevel = ((CraftWorld) location.getWorld()).getHandle();
+        BlockPos blockPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
+        return blockEntity instanceof SpawnerBlockEntity ? ((SpawnerBlockEntity) blockEntity).getSpawner() : null;
     }
 
     protected final void createCondition(String id, BiPredicate<ServerLevel, BlockPos> predicate, EntityType... entityTypes) {

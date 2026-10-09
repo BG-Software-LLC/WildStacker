@@ -166,9 +166,9 @@ public final class SpawnersListener implements Listener {
                 spawnerUpgrade = plugin.getUpgradesManager().getDefaultUpgrade(spawnerType);
 
             if (spawnerUpgrade.getMinSpawnDelay() >= spawnerUpgrade.getMaxSpawnDelay()) {
-                stackedSpawner.getSpawner().setDelay(spawnerUpgrade.getMinSpawnDelay());
+                plugin.getNMSSpawners().setSpawnerDelay(stackedSpawner.getLocation(), spawnerUpgrade.getMinSpawnDelay());
             } else {
-                stackedSpawner.getSpawner().setDelay(ThreadLocalRandom.current().nextInt(
+                plugin.getNMSSpawners().setSpawnerDelay(stackedSpawner.getLocation(), ThreadLocalRandom.current().nextInt(
                         spawnerUpgrade.getMinSpawnDelay(), spawnerUpgrade.getMaxSpawnDelay()
                 ));
             }
@@ -825,7 +825,10 @@ public final class SpawnersListener implements Listener {
                 }
             }
 
-            SpawnerCachedData spawnerCachedData = plugin.getNMSSpawners().readData(creatureSpawner);
+            SpawnerCachedData spawnerCachedData = plugin.getNMSSpawners().readData(creatureSpawner.getLocation());
+            if (spawnerCachedData == null)
+                return;
+
             int spawnMobsCount = Random.nextInt(1, spawnerCachedData.getSpawnCount(),
                     spawnerStackAmount, 1.5);
 
