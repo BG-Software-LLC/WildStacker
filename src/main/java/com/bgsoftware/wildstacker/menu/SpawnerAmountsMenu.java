@@ -195,6 +195,11 @@ public final class SpawnerAmountsMenu extends WildMenu {
             return;
         }
 
+        if (stackedSpawner.getLocation().getBlock().getType() != Materials.SPAWNER.toBukkitType()) {
+            e.getWhoClicked().closeInventory();
+            return;
+        }
+
         stackedSpawner.increaseStackAmount(depositAmount, true);
         Locale.SPAWNER_UPDATE.send(e.getWhoClicked(), stackedSpawner.getStackAmount());
 

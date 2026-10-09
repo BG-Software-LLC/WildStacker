@@ -101,6 +101,11 @@ public final class SpawnerUpgradeMenu extends WildMenu {
 
         stackedSpawner.setUpgrade(nextUpgrade, player);
 
+        if (stackedSpawner.getLocation().getBlock().getType() != Materials.SPAWNER.toBukkitType()) {
+            player.closeInventory();
+            return;
+        }
+
         if (successSound != null)
             successSound.playSound(player);
 
