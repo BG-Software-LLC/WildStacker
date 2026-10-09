@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v26_3.spawner;
 
+import com.bgsoftware.common.reflection.ReflectConstructor;
 import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
@@ -41,14 +42,20 @@ import java.util.Optional;
 
 public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBlockEntity> implements SyncedCreatureSpawner {
 
+    private static final ReflectConstructor<CraftCreatureSpawner> OLD_SPAWNER_CONSTRUCTOR =
+            new ReflectConstructor<>(CraftCreatureSpawner.class, World.class, SpawnerBlockEntity.class);
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private final SpawnerBlockEntity spawnerBlockEntity;
     private final ServerLevel serverLevel;
     private final BlockPos blockPos;
     private final Location blockLocation;
 
     public SyncedCreatureSpawnerImpl(World bukkitWorld, SpawnerBlockEntity spawnerBlockEntity) {
-        super(bukkitWorld, spawnerBlockEntity, true);
+        super(createSpawnerState(bukkitWorld, spawnerBlockEntity), new Location(bukkitWorld,
+                spawnerBlockEntity.getBlockPos().getX(), spawnerBlockEntity.getBlockPos().getY(), spawnerBlockEntity.getBlockPos().getZ()));
+        this.spawnerBlockEntity = spawnerBlockEntity;
         this.serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         this.blockPos = spawnerBlockEntity.getBlockPos();
         this.blockLocation = new Location(bukkitWorld, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
@@ -56,10 +63,24 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
 
     public SyncedCreatureSpawnerImpl(CraftBlockEntityState<SpawnerBlockEntity> entityState, Location location) {
         super(entityState, location);
+        this.spawnerBlockEntity = super.getBlockEntity();
         World bukkitWorld = location.getWorld();
         this.serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         this.blockPos = entityState.getPosition();
         this.blockLocation = new Location(bukkitWorld, this.blockPos.getX(), this.blockPos.getY(), this.blockPos.getZ());
+    }
+
+    private static CraftCreatureSpawner createSpawnerState(World bukkitWorld, SpawnerBlockEntity spawnerBlockEntity) {
+        if (OLD_SPAWNER_CONSTRUCTOR.isValid()) {
+            return OLD_SPAWNER_CONSTRUCTOR.newInstance(bukkitWorld, spawnerBlockEntity);
+        } else {
+            return new CraftCreatureSpawner(bukkitWorld, spawnerBlockEntity, true);
+        }
+    }
+
+    @Override
+    public SpawnerBlockEntity getBlockEntity() {
+        return this.spawnerBlockEntity;
     }
 
     @Override
