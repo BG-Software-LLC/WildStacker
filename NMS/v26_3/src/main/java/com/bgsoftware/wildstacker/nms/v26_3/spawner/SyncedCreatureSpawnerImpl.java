@@ -63,7 +63,7 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
 
     public SyncedCreatureSpawnerImpl(CraftBlockEntityState<SpawnerBlockEntity> entityState, Location location) {
         super(entityState, location);
-        this.spawnerBlockEntity = super.getBlockEntity();
+        this.spawnerBlockEntity = this.getSnapshot();
         World bukkitWorld = location.getWorld();
         this.serverLevel = ((CraftWorld) bukkitWorld).getHandle();
         this.blockPos = entityState.getPosition();
