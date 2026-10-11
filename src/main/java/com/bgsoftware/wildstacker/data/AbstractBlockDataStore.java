@@ -104,8 +104,13 @@ public abstract class AbstractBlockDataStore<T extends StackedObject<?>, U exten
     public void storeUnloaded(U unloaded) {
         String worldName = unloaded.getWorldName();
         long packedPos = ChunkPosition.getPackedPos(unloaded.getX() >> 4, unloaded.getZ() >> 4);
-        this.unloadedStore.computeIfAbsent(worldName, packedPos, LinkedHashSet::new).add(unloaded);
-        ++this.unloadedStoreSize;
+        try {
+            this.unloadedStoreLock.writeLock().lock();
+            this.unloadedStore.computeIfAbsent(worldName, packedPos, LinkedHashSet::new).add(unloaded);
+            ++this.unloadedStoreSize;
+        } finally {
+            this.unloadedStoreLock.writeLock().unlock();
+        }
     }
 
 
