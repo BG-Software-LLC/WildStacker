@@ -5,6 +5,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NumericTag;
@@ -47,6 +48,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -175,6 +177,13 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_19.Abstra
         }
 
         serverPlayer.awardKillScore(damaged, 0, damageSource);
+    }
+
+    @Override
+    protected void awardKilledByArrow(ServerPlayer serverPlayer, AbstractArrow abstractArrow,
+                                      Collection<Entity> victims) {
+        if (abstractArrow.shotFromCrossbow())
+            CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, victims);
     }
 
     @Override

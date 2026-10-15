@@ -99,7 +99,7 @@ public interface NMSEntities {
 
     void awardKillScore(Player damangerPlayer, Entity bukkitDamaged, Entity damagerEntity);
 
-    void awardCrossbowShot(Player player, LivingEntity target, ItemStack itemStack);
+    void awardKilledByArrow(Player damagerPlayer, Entity bukkitDamaged, Entity damagerEntity);
 
     void playDeathSound(LivingEntity entity);
 

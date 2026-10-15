@@ -6,6 +6,7 @@ import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -37,6 +38,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
@@ -59,6 +61,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -194,6 +197,9 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_3.Abst
             damageSource = damaged.damageSources().arrow(abstractArrow, abstractArrow.getOwner());
         } else if (damager instanceof Fireball fireball) {
             damageSource = damaged.damageSources().fireball(fireball, fireball.getOwner());
+        } else if (damager instanceof AbstractWindCharge abstractWindCharge) {
+            damageSource = damaged.damageSources().windCharge(abstractWindCharge,
+                    abstractWindCharge.getOwner() instanceof net.minecraft.world.entity.LivingEntity owner ? owner : null);
         } else if (damager instanceof net.minecraft.world.entity.LivingEntity livingEntity) {
             damageSource = damaged.damageSources().mobAttack(livingEntity);
         } else {
@@ -201,6 +207,12 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_3.Abst
         }
 
         serverPlayer.awardKillScore(damaged, 0, damageSource);
+    }
+
+    @Override
+    protected void awardKilledByArrow(ServerPlayer serverPlayer, AbstractArrow abstractArrow,
+                                      Collection<Entity> victims) {
+        CriteriaTriggers.KILLED_BY_ARROW.trigger(serverPlayer, victims, abstractArrow.getWeaponItem());
     }
 
     @Override

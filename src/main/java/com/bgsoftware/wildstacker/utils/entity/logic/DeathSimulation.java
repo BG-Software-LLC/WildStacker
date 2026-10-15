@@ -27,7 +27,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -36,7 +35,6 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -58,8 +56,6 @@ public final class DeathSimulation {
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
-    @Nullable
-    private static final Material CROSSBOW_TYPE = Materials.getMaterialOrNull("CROSSBOW");
     @Nullable
     private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
     @Nullable
@@ -283,15 +279,8 @@ public final class DeathSimulation {
                     }
                 }
 
-                if (isSourceKillerPlayer) {
+                if (isSourceKillerPlayer)
                     attemptJoinRaid((Player) sourceKiller, livingEntity);
-
-                    ItemStack killerTool = ((Player) sourceKiller).getItemInHand();
-
-                    if (killerTool.getType() == CROSSBOW_TYPE &&
-                            ((EntityDamageByEntityEvent) damageEvent).getDamager() instanceof Arrow)
-                        plugin.getNMSEntities().awardCrossbowShot((Player) sourceKiller, livingEntity, killerTool);
-                }
 
                 ((WStackedEntity) stackedEntity).setDeadFlag(false);
 
@@ -463,6 +452,7 @@ public final class DeathSimulation {
         }
 
         plugin.getNMSEntities().awardKillScore(sourceKiller, stackedEntity.getLivingEntity(), directKiller);
+        plugin.getNMSEntities().awardKilledByArrow(sourceKiller, stackedEntity.getLivingEntity(), directKiller);
     }
 
     private static void reduceKillerToolDurability(ItemStack damagerTool, Player killer) {
