@@ -21,6 +21,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -141,6 +143,14 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstra
     protected EntityResurrectEvent createEntityResurrectEvent(LivingEntity bukkitLivingEntity,
                                                               org.bukkit.inventory.EquipmentSlot equipmentSlot) {
         return new EntityResurrectEvent(bukkitLivingEntity, equipmentSlot);
+    }
+
+    @Override
+    protected void triggerDeathEffect(ServerLevel serverLevel, net.minecraft.world.entity.LivingEntity livingEntity,
+                                      MobEffectInstance mobEffectInstance) {
+        // The slimes of Oozing are spawned by WildStacker, as a stacked entity.
+        if (!mobEffectInstance.is(MobEffects.OOZING))
+            mobEffectInstance.onMobRemoved(serverLevel, livingEntity, Entity.RemovalReason.KILLED);
     }
 
     @Override

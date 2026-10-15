@@ -83,7 +83,9 @@ import org.bukkit.event.player.PlayerItemMendEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -462,6 +464,27 @@ public abstract class AbstractNMSEntities implements NMSEntities {
             LIVING_ENTITY_SKIP_DROP_EXPERIENCE.set(livingEntity, false);
         }
     }
+
+    @Override
+    public void handleDeathEffects(org.bukkit.entity.LivingEntity bukkitLivingEntity, int deathsAmount) {
+        LivingEntity livingEntity = ((CraftLivingEntity) bukkitLivingEntity).getHandle();
+
+        Collection<MobEffectInstance> activeEffects = livingEntity.getActiveEffects();
+        if (activeEffects.isEmpty())
+            return;
+
+        // We copy the effects, as triggering them may change the effects of the entity.
+        activeEffects = new LinkedList<>(activeEffects);
+
+        ServerLevel serverLevel = ((CraftWorld) bukkitLivingEntity.getWorld()).getHandle();
+
+        for (int i = 0; i < deathsAmount; ++i) {
+            for (MobEffectInstance mobEffectInstance : activeEffects)
+                triggerDeathEffect(serverLevel, livingEntity, mobEffectInstance);
+        }
+    }
+
+    protected abstract void triggerDeathEffect(ServerLevel serverLevel, LivingEntity livingEntity, MobEffectInstance mobEffectInstance);
 
     @Override
     public boolean callEntityBreedEvent(org.bukkit.entity.LivingEntity child,

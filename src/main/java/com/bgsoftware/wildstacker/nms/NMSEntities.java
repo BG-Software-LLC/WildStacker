@@ -86,6 +86,10 @@ public interface NMSEntities {
 
     void sendEntityDieEvent(LivingEntity livingEntity, int unstackAmount);
 
+    default void handleDeathEffects(LivingEntity livingEntity, int deathsAmount) {
+        // Implemented only in 1.20.5+, where effects that are triggered by the death of entities were added
+    }
+
     boolean callEntityBreedEvent(LivingEntity child, LivingEntity mother, LivingEntity father,
                                  @Nullable LivingEntity breeder, @Nullable ItemStack bredWith, int experience);
 

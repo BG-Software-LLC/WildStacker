@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.entity.logic;
 import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.wildstacker.WildStackerPlugin;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
+import com.bgsoftware.wildstacker.api.enums.SpawnCause;
 import com.bgsoftware.wildstacker.api.enums.StackSplit;
 import com.bgsoftware.wildstacker.api.enums.UnstackResult;
 import com.bgsoftware.wildstacker.api.objects.StackedEntity;
@@ -31,6 +32,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.HandlerList;
@@ -61,7 +63,17 @@ public final class DeathSimulation {
     @Nullable
     private static final PotionEffectType BAD_OMEN = PotionEffectType.getByName("BAD_OMEN");
     @Nullable
+    private static final PotionEffectType OOZING = PotionEffectType.getByName("OOZING");
+    @Nullable
     private static final EntityType WITHER_SKULL_TYPE = EntityUtils.getEntityTypeSafe("WITHER_SKULL");
+
+    // Effects other than Oozing are triggered for each death separately, as their outcome cannot be stacked.
+    // Stacks can be much larger than what vanilla can kill at once in one spot, therefore we limit the amount
+    // of deaths these effects are triggered for. 24 is the default max entity cramming of vanilla.
+    private static final int MAX_DEATH_EFFECTS_AMOUNT = 24;
+    // Oozing spawns 2 slimes of size 2 for each death.
+    private static final int OOZING_SLIMES_PER_DEATH = 2;
+    private static final int OOZING_SLIME_SIZE = 2;
 
     private static boolean sweepingEdgeHandled = false;
 
@@ -113,6 +125,7 @@ public final class DeathSimulation {
             result.setCancelled(true);
 
         int originalAmount = stackedEntity.getStackAmount();
+        boolean spawnCorpse = ((WStackedEntity) stackedEntity).isSpawnCorpse();
 
         if (stackedEntity.runUnstack(entitiesToKill, isSourceKillerPlayer ? sourceKiller : directKiller) != UnstackResult.SUCCESS)
             return result;
@@ -120,6 +133,8 @@ public final class DeathSimulation {
         int unstackAmount = originalAmount - stackedEntity.getStackAmount();
 
         stackedEntity.setFlag(EntityFlag.ATTACKED_ENTITY, true);
+
+        handleDeathEffects(stackedEntity, unstackAmount, spawnCorpse);
 
         int fireTicks;
         int lootBonusLevel;
@@ -310,6 +325,68 @@ public final class DeathSimulation {
         }
 
         return new Pair<>(entitiesToKill, damageToNextStack);
+    }
+
+    private static void handleDeathEffects(StackedEntity stackedEntity, int unstackAmount, boolean spawnCorpse) {
+        // Effects such as Oozing are triggered by the server only when an entity is actually killed.
+        // This happens once at most for each death: for the corpse, or for the entity itself when the entire
+        // stack was killed. We trigger the effects for the rest of the entities that were unstacked.
+        boolean isStackKilled = stackedEntity.getStackAmount() <= 0;
+        boolean hasCorpse = spawnCorpse && !isStackKilled && plugin.getSettings().spawnCorpses;
+        boolean hasKilledEntity = hasCorpse || (spawnCorpse && isStackKilled);
+
+        int deathsAmount = hasKilledEntity ? unstackAmount - 1 : unstackAmount;
+
+        if (deathsAmount <= 0)
+            return;
+
+        LivingEntity livingEntity = stackedEntity.getLivingEntity();
+        Location deathLocation = livingEntity.getLocation();
+        boolean hasOozing = OOZING != null && livingEntity.hasPotionEffect(OOZING);
+
+        Executor.sync(() -> {
+            // We do not spawn anything into a chunk that was unloaded in the meantime.
+            if (!deathLocation.getWorld().isChunkLoaded(deathLocation.getBlockX() >> 4, deathLocation.getBlockZ() >> 4))
+                return;
+
+            if (hasOozing) {
+                spawnOozingSlimes(deathLocation, (int) Math.min(Integer.MAX_VALUE,
+                        (long) deathsAmount * OOZING_SLIMES_PER_DEATH));
+            }
+
+            plugin.getNMSEntities().handleDeathEffects(livingEntity, Math.min(deathsAmount, MAX_DEATH_EFFECTS_AMOUNT));
+        }, 20L);
+    }
+
+    private static void spawnOozingSlimes(Location deathLocation, int slimesAmount) {
+        // Instead of spawning a slime for each death, the slimes are spawned as a stacked slime.
+        // It is spawned the same way vanilla does: half a block above where the entities died, facing a random direction.
+        Location location = deathLocation.clone().add(0, 0.5, 0);
+        location.setYaw(ThreadLocalRandom.current().nextFloat() * 360F);
+        location.setPitch(0F);
+
+        // The size is set after the slime is spawned, as spawning it randomizes its size.
+        Slime slime = plugin.getSystemManager().spawnEntityWithoutStacking(location, Slime.class,
+                SpawnCause.POTION_EFFECT, null, entity -> ((Slime) entity).setSize(OOZING_SLIME_SIZE));
+
+        // The spawn of the slime was cancelled.
+        if (slime == null || !slime.isValid())
+            return;
+
+        StackedEntity stackedSlime = WStackedEntity.of(slime);
+
+        // Slimes that cannot be stacked are spawned one by one.
+        int stackLimit = stackedSlime.isCached() ? stackedSlime.getStackLimit() : 1;
+
+        int slimesLeft = slimesAmount;
+        while (slimesLeft > stackLimit) {
+            stackedSlime.spawnDuplicate(stackLimit, SpawnCause.POTION_EFFECT);
+            slimesLeft -= stackLimit;
+        }
+
+        stackedSlime.setStackAmount(slimesLeft, true);
+        stackedSlime.updateNerfed();
+        Executor.sync(() -> stackedSlime.runStackAsync(null), 1L);
     }
 
     private static boolean handleFastKill(LivingEntity livingEntity, Player damager) {

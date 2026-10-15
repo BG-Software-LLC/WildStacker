@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -105,6 +106,11 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_17.Abstra
     protected EntityResurrectEvent createEntityResurrectEvent(org.bukkit.entity.LivingEntity bukkitLivingEntity,
                                                               org.bukkit.inventory.EquipmentSlot equipmentSlot) {
         return new EntityResurrectEvent(bukkitLivingEntity);
+    }
+
+    @Override
+    protected void triggerDeathEffect(ServerLevel serverLevel, LivingEntity livingEntity, MobEffectInstance mobEffectInstance) {
+        // Effects are not triggered by the death of entities in this version.
     }
 
     @Override
