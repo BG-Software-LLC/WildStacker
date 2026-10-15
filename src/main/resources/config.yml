@@ -68,6 +68,11 @@ kill-task:
   # You can split multiple commands using ",".
   # You can set it to '' in order to disable this feature.
   time-command: 'stacker timeleft'
+  # A list of times before the kill task runs when a remaining time message will be sent. (in seconds)
+  remaining-times:
+    - 60
+    - 30
+    - 10
   # All settings related to the kill-all task of entities.
   kill-entities:
     # A list of entities that will be cleared.
