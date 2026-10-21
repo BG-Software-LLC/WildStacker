@@ -3,6 +3,7 @@ package com.bgsoftware.wildstacker.utils.entity;
 import com.bgsoftware.wildstacker.api.enums.EntityFlag;
 import com.bgsoftware.wildstacker.utils.threads.Executor;
 import org.bukkit.entity.Entity;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -78,12 +79,15 @@ public final class EntityStorage {
     }
 
     public static void clearMetadata(UUID entityUUID) {
-        entityStorage.remove(entityUUID);
+        entityStorage.computeIfPresent(entityUUID, (uuid, flagsMap) -> {
+            flagsMap.cancelMetadataRemoval();
+            return null;
+        });
     }
 
     public static void cancelMetadataRemoval(Entity entity) {
         entityStorage.computeIfPresent(entity.getUniqueId(), (uuid, flagsMap) -> {
-            ++flagsMap.generation;
+            flagsMap.cancelMetadataRemoval();
             return flagsMap;
         });
     }
@@ -91,22 +95,47 @@ public final class EntityStorage {
     public static void clearMetadata(Entity entity, long delay) {
         UUID entityUUID = entity.getUniqueId();
         entityStorage.computeIfPresent(entityUUID, (uuid, flagsMap) -> {
-            long generation = flagsMap.generation;
-            Executor.sync(() -> entityStorage.computeIfPresent(entityUUID, (ignored, currentFlags) ->
-                    currentFlags == flagsMap && currentFlags.generation == generation ? null : currentFlags), delay);
+            flagsMap.cancelMetadataRemoval();
+            MetadataRemovalTask removalTask = new MetadataRemovalTask(entityUUID);
+            removalTask.task = Executor.syncTask(removalTask, delay);
+            flagsMap.removalTask = removalTask.task;
             return flagsMap;
         });
     }
 
     public static void clearCache() {
-        entityStorage.clear();
+        entityStorage.keySet().forEach(EntityStorage::clearMetadata);
+    }
+
+    private static class MetadataRemovalTask implements Runnable {
+
+        private final UUID entityUUID;
+        private BukkitTask task;
+
+        private MetadataRemovalTask(UUID entityUUID) {
+            this.entityUUID = entityUUID;
+        }
+
+        @Override
+        public void run() {
+            entityStorage.computeIfPresent(entityUUID, (uuid, flagsMap) ->
+                    flagsMap.removalTask == task ? null : flagsMap);
+        }
+
     }
 
     private static class FlagsMap {
 
-        private long generation;
+        private BukkitTask removalTask;
         private final ReadWriteLock lock = new ReentrantReadWriteLock();
         private final Object[] values = new Object[EntityFlag.values().length];
+
+        private void cancelMetadataRemoval() {
+            if (removalTask != null) {
+                removalTask.cancel();
+                removalTask = null;
+            }
+        }
 
         public Object get(EntityFlag entityFlag) {
             return getOrDefault(entityFlag, null);
