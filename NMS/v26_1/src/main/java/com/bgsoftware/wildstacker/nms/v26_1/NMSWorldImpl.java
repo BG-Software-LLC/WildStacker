@@ -1,10 +1,12 @@
 package com.bgsoftware.wildstacker.nms.v26_1;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -17,6 +19,8 @@ import org.bukkit.craftbukkit.block.CraftBlock;
 
 public class NMSWorldImpl extends com.bgsoftware.wildstacker.nms.v26_1.AbstractNMSWorld {
 
+    private static final boolean HAS_PAPER_CONFIG = new ReflectField<>(Level.class, Object.class, "paperConfig").isValid();
+
     @Override
     protected boolean checkSpawnPlacementsRules(EntityType entityType, ServerLevel serverLevel, BlockPos blockPos) {
         return SpawnPlacements.checkSpawnRules(entityType, serverLevel, EntitySpawnReason.SPAWNER, blockPos, serverLevel.getRandom());
@@ -24,11 +28,10 @@ public class NMSWorldImpl extends com.bgsoftware.wildstacker.nms.v26_1.AbstractN
 
     @Override
     public double getVillagerInfectionChance(World world) {
-        try {
-            return ((CraftWorld) world).getHandle().paperConfig().entities.behavior.zombieVillagerInfectionChance.or(-1.0D);
-        } catch (LinkageError ignored) {
+        if (!HAS_PAPER_CONFIG)
             return -1.0D;
-        }
+
+        return ((CraftWorld) world).getHandle().paperConfig().entities.behavior.zombieVillagerInfectionChance.or(-1.0D);
     }
 
     @Override

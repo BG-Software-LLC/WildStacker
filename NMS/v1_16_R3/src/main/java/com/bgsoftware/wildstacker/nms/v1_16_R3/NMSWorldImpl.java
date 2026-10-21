@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 
 public class NMSWorldImpl implements NMSWorld {
 
+    private static final boolean HAS_PAPER_CONFIG = new ReflectField<>(World.class, Object.class, "paperConfig").isValid();
+
     private static final ReflectField<Collection[]> ENTITY_SLICES = new ReflectField<>(Chunk.class, Collection[].class, "entitySlices");
 
     @Override
@@ -106,11 +108,10 @@ public class NMSWorldImpl implements NMSWorld {
 
     @Override
     public double getVillagerInfectionChance(org.bukkit.World world) {
-        try {
-            return ((CraftWorld) world).getHandle().paperConfig.zombieVillagerInfectionChance;
-        } catch (LinkageError ignored) {
+        if (!HAS_PAPER_CONFIG)
             return -1.0D;
-        }
+
+        return ((CraftWorld) world).getHandle().paperConfig.zombieVillagerInfectionChance;
     }
 
     @Override
