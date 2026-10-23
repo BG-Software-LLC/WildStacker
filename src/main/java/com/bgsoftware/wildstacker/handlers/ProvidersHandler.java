@@ -226,7 +226,13 @@ public final class ProvidersHandler {
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("MyPet")) {
-            Optional<EntityTypeProvider> entityTypeProvider = createInstance("EntityTypeProvider_MyPet");
+            Optional<EntityTypeProvider> entityTypeProvider;
+            try {
+                Class.forName("de.Keyle.MyPet.api.event.PetCallEvent");
+                entityTypeProvider = createInstance("EntityTypeProvider_MyPet4");
+            } catch (ClassNotFoundException error) {
+                entityTypeProvider = createInstance("EntityTypeProvider_MyPet3");
+            }
             entityTypeProvider.ifPresent(entityTypeProviders::add);
         }
     }
@@ -346,8 +352,14 @@ public final class ProvidersHandler {
             }
             handleEntityStackingWithDelay = true;
         }
-        if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet"))
-            registerHook("MyPetHook");
+        if (enable && isPlugin(toCheck, "MyPet") && pluginManager.isPluginEnabled("MyPet")) {
+            try {
+                Class.forName("de.Keyle.MyPet.api.event.PetCallEvent");
+                registerHook("MyPet4Hook");
+            } catch (ClassNotFoundException error) {
+                registerHook("MyPet3Hook");
+            }
+        }
         if (enable && isPlugin(toCheck, "EchoPet") && pluginManager.isPluginEnabled("EchoPet"))
             registerHook("EchoPetHook");
         if (enable && isPlugin(toCheck, "EpicSpawners") && pluginManager.isPluginEnabled("EpicSpawners")) {

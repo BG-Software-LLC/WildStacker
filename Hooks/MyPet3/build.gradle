@@ -1,4 +1,4 @@
-group 'Hooks:MyPet'
+group 'Hooks:MyPet3'
 
 dependencies {
     compileOnly 'de.keyle:MyPet:3.9'
@@ -7,7 +7,7 @@ dependencies {
     compileOnly project(":")
 }
 
-if (project.hasProperty('hook.compile_mypet') &&
-        !Boolean.valueOf(project.findProperty("hook.compile_mypet").toString())) {
+if (project.hasProperty('hook.compile_mypet3') &&
+        !Boolean.valueOf(project.findProperty("hook.compile_mypet3").toString())) {
     project.tasks.all { task -> task.enabled = false }
 }

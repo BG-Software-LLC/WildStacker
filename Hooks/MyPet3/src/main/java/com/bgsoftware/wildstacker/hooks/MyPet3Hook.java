@@ -15,7 +15,7 @@ import org.bukkit.event.Listener;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
-public final class MyPetHook {
+public final class MyPet3Hook {
 
     private static final ReflectMethod<Optional<MyPetBukkitEntity>> GET_ENTITY_METHOD =
             new ReflectMethod<>(MyPet.class, Optional.class, "getEntity");
