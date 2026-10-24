@@ -1,10 +1,12 @@
 package com.bgsoftware.wildstacker.nms.v1_20_3;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -18,9 +20,19 @@ import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
 
 public class NMSWorldImpl extends com.bgsoftware.wildstacker.nms.v1_20_3.AbstractNMSWorld {
 
+    private static final boolean HAS_PAPER_CONFIG = new ReflectField<>(Level.class, Object.class, "paperConfig").isValid();
+
     @Override
     protected boolean checkSpawnPlacementsRules(EntityType entityType, ServerLevel serverLevel, BlockPos blockPos) {
         return SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.SPAWNER, blockPos, serverLevel.getRandom());
+    }
+
+    @Override
+    public double getVillagerInfectionChance(World world) {
+        if (!HAS_PAPER_CONFIG)
+            return -1.0D;
+
+        return ((CraftWorld) world).getHandle().paperConfig().entities.behavior.zombieVillagerInfectionChance.or(-1.0D);
     }
 
     @Override

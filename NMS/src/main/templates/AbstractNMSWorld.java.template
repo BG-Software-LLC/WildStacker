@@ -106,6 +106,9 @@ public abstract class AbstractNMSWorld implements NMSWorld {
     }
 
     @Override
+    public abstract double getVillagerInfectionChance(World world);
+
+    @Override
     public Object getBlockData(Material type, short data) {
         BlockState blockState = CraftMagicNumbers.getBlock(type, (byte) data);
         return getBlockData(blockState);

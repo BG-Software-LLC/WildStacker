@@ -27,6 +27,8 @@ public interface NMSWorld {
 
     void startEntityListen(World world);
 
+    double getVillagerInfectionChance(World world);
+
     Object getBlockData(Material type, short data);
 
     boolean isRotatable(Block block);
