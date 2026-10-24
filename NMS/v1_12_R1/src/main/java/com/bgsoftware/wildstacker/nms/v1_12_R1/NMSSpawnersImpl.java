@@ -6,12 +6,10 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.StackedMobSpawner;
-import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_12_R1.spawner.TileEntityMobSpawnerWatcher;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_12_R1.BiomeBase;
 import net.minecraft.server.v1_12_R1.Biomes;
 import net.minecraft.server.v1_12_R1.Block;
@@ -24,6 +22,7 @@ import net.minecraft.server.v1_12_R1.EnumDifficulty;
 import net.minecraft.server.v1_12_R1.EnumSkyBlock;
 import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.Material;
+import net.minecraft.server.v1_12_R1.MinecraftKey;
 import net.minecraft.server.v1_12_R1.MobSpawnerAbstract;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.TileEntity;
@@ -31,7 +30,6 @@ import net.minecraft.server.v1_12_R1.TileEntityMobSpawner;
 import net.minecraft.server.v1_12_R1.World;
 import net.minecraft.server.v1_12_R1.WorldServer;
 import org.bukkit.Location;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_12_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.entity.EntityType;
@@ -216,15 +214,10 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
-    }
-
-    @Override
-    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
-        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
-                .getTileEntityAt(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
+    public void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
 
         if (mobSpawnerAbstract instanceof StackedMobSpawner) {
             ((StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
@@ -250,10 +243,29 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     @Override
-    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
-        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
-                .getTileEntityAt(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
+    public void setSpawnerDelay(Location location, int spawnDelay) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public void resetSpawnerType(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.setMobName(new MinecraftKey(EntityType.PIG.getName()));
+    }
+
+    @Override
+    public SpawnerCachedData readData(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return null;
+
         if (mobSpawnerAbstract instanceof StackedMobSpawner) {
             StackedMobSpawner stackedMobSpawner = (StackedMobSpawner) mobSpawnerAbstract;
             return new SpawnerCachedData(
@@ -279,6 +291,15 @@ public final class NMSSpawnersImpl implements NMSSpawners {
                     nbtTagCompound.getShort("Delay") / 20
             );
         }
+    }
+
+    private MobSpawnerAbstract getSpawner(Location location) {
+        if (location.getWorld() == null)
+            return null;
+
+        TileEntity tileEntity = ((CraftWorld) location.getWorld()).getTileEntityAt(
+                location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        return tileEntity instanceof TileEntityMobSpawner ? ((TileEntityMobSpawner) tileEntity).getSpawner() : null;
     }
 
 }

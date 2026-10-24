@@ -116,6 +116,7 @@ public final class SpawnersProvider_SilkSpawners implements SpawnersProvider {
     @Override
     public void handleSpawnerPlace(CreatureSpawner creatureSpawner, ItemStack itemStack) {
         creatureSpawner.setSpawnedType(getSpawnerType(itemStack));
+        creatureSpawner.update();
 
         Block block = creatureSpawner.getBlock();
 

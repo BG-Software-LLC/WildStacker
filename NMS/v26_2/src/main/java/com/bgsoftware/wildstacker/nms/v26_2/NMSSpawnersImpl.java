@@ -7,15 +7,23 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import org.bukkit.entity.EntityType;
 
 public class NMSSpawnersImpl extends com.bgsoftware.wildstacker.nms.v26_2.AbstractNMSSpawners {
+
+    @Override
+    protected void resetSpawnerType(SpawnerBlockEntity spawnerBlockEntity) {
+        spawnerBlockEntity.getSpawner().setEntityId(EntityTypes.PIG,
+                spawnerBlockEntity.getLevel(), spawnerBlockEntity.getLevel().getRandom(), spawnerBlockEntity.getBlockPos());
+    }
 
     @Override
     public void registerSpawnConditions() {

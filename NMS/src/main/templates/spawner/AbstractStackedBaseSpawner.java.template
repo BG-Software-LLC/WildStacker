@@ -79,6 +79,7 @@ public abstract class AbstractStackedBaseSpawner extends BaseSpawner {
             Debug.debug("StackedBaseSpawner", "init", "After set: " + spawnerBlockEntity.getSpawner());
 
         this.nextSpawnData = originalSpawner.nextSpawnData;
+        this.spawnPotentials = originalSpawner.spawnPotentials;
         this.minSpawnDelay = originalSpawner.minSpawnDelay;
         this.maxSpawnDelay = originalSpawner.maxSpawnDelay;
         this.spawnCount = originalSpawner.spawnCount;
