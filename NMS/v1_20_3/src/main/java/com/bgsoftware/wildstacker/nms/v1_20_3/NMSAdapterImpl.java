@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.craftbukkit.v1_20_R3.CraftRegistry;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -22,6 +23,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_20_3.Abstr
             new ReflectField<>(CraftRegistry.class, Map.class, "cache");
 
     private static final Enchantment GLOW_ENCHANT = initializeGlowEnchantment();
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {

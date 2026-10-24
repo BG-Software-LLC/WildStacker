@@ -306,7 +306,7 @@ public class SyncedCreatureSpawnerImpl extends CraftBlockEntityState<SpawnerBloc
         InclusiveRange<Integer> blockLight = rule.blockLightLimit();
         InclusiveRange<Integer> skyLight = rule.skyLightLimit();
 
-        return new SpawnRule(blockLight.maxInclusive(), blockLight.maxInclusive(), skyLight.minInclusive(), skyLight.maxInclusive());
+        return new SpawnRule(blockLight.minInclusive(), blockLight.maxInclusive(), skyLight.minInclusive(), skyLight.maxInclusive());
     }
 
 }

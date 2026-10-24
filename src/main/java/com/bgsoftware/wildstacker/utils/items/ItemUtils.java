@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -95,7 +96,7 @@ public final class ItemUtils {
         int amount = itemStack.getAmount();
 
         try {
-            if (plugin.getSettings().itemsStackingEnabled && canBeStacked(itemStack, location.getWorld())) {
+            if (canBeStacked(itemStack, location.getWorld())) {
                 ItemStack cloned = itemStack.clone();
                 cloned.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
                 plugin.getSystemManager().spawnItemWithAmount(location, cloned, amount);
@@ -127,8 +128,14 @@ public final class ItemUtils {
     }
 
     public static int getSpawnerItemAmount(ItemStack itemStack) {
-        int spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, 1);
-        return Math.max(1, spawnersAmount);
+        return getSpawnerItemAmountOptional(itemStack).orElse(1);
+    }
+
+    public static OptionalInt getSpawnerItemAmountOptional(ItemStack itemStack) {
+        Integer spawnersAmount = plugin.getNMSAdapter().getTag(itemStack, "spawners-amount", Integer.class, null);
+        if (spawnersAmount == null)
+            return OptionalInt.empty();
+        return OptionalInt.of(Math.max(1, spawnersAmount));
     }
 
     public static int getSpawnerUpgrade(ItemStack itemStack) {
@@ -390,6 +397,9 @@ public final class ItemUtils {
     }
 
     public static boolean canBeStacked(ItemStack itemStack, World world) {
+        if (!plugin.getSettings().itemsStackingEnabled)
+            return false;
+
         Material itemType = itemStack.getType();
         return !plugin.getSettings().blacklistedItems.contains(itemType) &&
                 (plugin.getSettings().whitelistedItems.size() == 0 || plugin.getSettings().whitelistedItems.contains(itemType)) &&

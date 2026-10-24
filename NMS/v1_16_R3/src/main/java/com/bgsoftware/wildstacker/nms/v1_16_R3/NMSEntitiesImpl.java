@@ -99,7 +99,6 @@ import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +114,7 @@ public final class NMSEntitiesImpl implements NMSEntities {
     private static final ReflectField<Integer> ENTITY_EXP = new ReflectField<>(EntityInsentient.class, int.class, "f");
     private static final ReflectField<Integer> LAST_DAMAGE_BY_PLAYER_TIME = new ReflectField<>(EntityLiving.class, int.class, "lastDamageByPlayerTime");
     private static final ReflectField<Boolean> ENTITY_LIVING_DEAD = new ReflectField<>(EntityLiving.class, boolean.class, "killed");
+    private static final ReflectField<List<Entity>> ENTITY_ARROW_PIERCED_AND_KILLED_ENTITIES = new ReflectField<>(EntityArrow.class, List.class, "am");
     private static final ReflectMethod<Boolean> ALWAYS_GIVES_EXP = new ReflectMethod<>(EntityLiving.class, "alwaysGivesExp");
     private static final ReflectMethod<Boolean> IS_DROP_EXPERIENCE = new ReflectMethod<>(EntityLiving.class, "isDropExperience");
     private static final ReflectMethod<SoundEffect> GET_SOUND_DEATH = new ReflectMethod<>(EntityLiving.class, "getSoundDeath");
@@ -487,10 +487,27 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack unused) {
-        EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-        EntityLiving targetEntity = ((CraftLivingEntity) target).getHandle();
-        CriterionTriggers.G.a(entityPlayer, Arrays.asList(targetEntity));
+    public void awardKilledByArrow(org.bukkit.entity.Player playerKiller,
+                                   org.bukkit.entity.Entity bukkitDamaged,
+                                   org.bukkit.entity.Entity directDamager) {
+        Entity damager = ((CraftEntity) directDamager).getHandle();
+
+        if (!(damager instanceof EntityArrow) || !((EntityArrow) damager).isShotFromCrossbow())
+            return;
+
+        EntityPlayer entityPlayer = ((CraftPlayer) playerKiller).getHandle();
+        Entity damaged = ((CraftEntity) bukkitDamaged).getHandle();
+
+        // Piercing arrows keep track of the entities they killed, so advancements that
+        // require multiple kills by the same arrow can be awarded.
+        List<Entity> piercedAndKilledEntities = ENTITY_ARROW_PIERCED_AND_KILLED_ENTITIES.get(damager);
+
+        if (piercedAndKilledEntities == null) {
+            CriterionTriggers.G.a(entityPlayer, Collections.singletonList(damaged));
+        } else {
+            piercedAndKilledEntities.add(damaged);
+            CriterionTriggers.G.a(entityPlayer, piercedAndKilledEntities);
+        }
     }
 
     @Override

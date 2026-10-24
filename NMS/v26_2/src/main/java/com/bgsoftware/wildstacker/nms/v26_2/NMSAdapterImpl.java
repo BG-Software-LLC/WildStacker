@@ -1,5 +1,6 @@
 package com.bgsoftware.wildstacker.nms.v26_2;
 
+import com.bgsoftware.common.reflection.ReflectField;
 import com.bgsoftware.common.reflection.ReflectMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -33,16 +34,25 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 
 public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.AbstractNMSAdapter {
 
+    private static final boolean SUPPORT_CUSTOM_DATA_UNSAFE = new ReflectMethod<>(CustomData.class, "getUnsafe").isValid();
+    private static final ReflectField<CompoundTag> CUSTOM_DATA_TAG = SUPPORT_CUSTOM_DATA_UNSAFE ? null :
+            new ReflectField<>(CustomData.class, CompoundTag.class, Modifier.PRIVATE | Modifier.FINAL, 1);
     private static final ReflectMethod<Void> ENTITY_ADD_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
             Entity.class, "addAdditionalSaveData", ValueOutput.class);
     private static final ReflectMethod<Void> ENTITY_READ_ADDITIONAL_SAVE_DATA = new ReflectMethod<>(
             Entity.class, "readAdditionalSaveData", ValueInput.class);
 
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {
@@ -120,7 +130,7 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
     @Override
     protected <T> T getTagInternal(ItemStack itemStack, String key, Class<T> valueType, Object def) {
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        CompoundTag compoundTag = customData == null ? null : customData.getUnsafe();
+        CompoundTag compoundTag = customData == null ? null : getCustomDataTag(customData);
 
         if (compoundTag == null || !compoundTag.contains(key))
             return valueType.cast(def);
@@ -162,12 +172,16 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v26_2.Abstrac
         SulfurCube sulfurCube = ((CraftSulfurCube) bukkitSulfurCube).getHandle();
         ItemStack bucketItem = sulfurCube.getBucketItemStack();
         sulfurCube.saveToBucketTag(bucketItem);
-        return CraftItemStack.asCraftMirror(bucketItem);
+        return asBukkitItemMirror(bucketItem);
     }
 
     @Override
     public boolean isSoftExplosion(EntityExplodeEvent event) {
         return event.getExplosionResult() == ExplosionResult.TRIGGER_BLOCK;
+    }
+
+    private static CompoundTag getCustomDataTag(CustomData customData) {
+        return SUPPORT_CUSTOM_DATA_UNSAFE ? customData.getUnsafe() : CUSTOM_DATA_TAG.get(customData);
     }
 
 }

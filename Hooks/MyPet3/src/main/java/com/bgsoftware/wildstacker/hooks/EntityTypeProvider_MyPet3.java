@@ -3,7 +3,7 @@ package com.bgsoftware.wildstacker.hooks;
 import de.Keyle.MyPet.api.entity.MyPetBukkitEntity;
 import org.bukkit.entity.Entity;
 
-public class EntityTypeProvider_MyPet implements EntityTypeProvider {
+public class EntityTypeProvider_MyPet3 implements EntityTypeProvider {
 
     @Override
     public String checkStackEntity(Entity entity) {

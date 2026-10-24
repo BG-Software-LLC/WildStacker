@@ -74,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -258,12 +259,12 @@ public final class EntitiesListener implements Listener {
         if (spawnEggData.entityType != null && EntityTypes.fromEntity(e.getEntity()) != spawnEggData.entityType)
             return;
 
-        int stackAmount = spawnEggData.stackAmount;
+        OptionalInt stackAmount = spawnEggData.stackAmount;
 
         EntityStorage.setMetadata(e.getEntity(), EntityFlag.SPAWN_CAUSE, SpawnCause.valueOf(e.getSpawnReason()));
         StackedEntity stackedEntity = WStackedEntity.of(e.getEntity());
-        stackedEntity.setStackAmount(stackAmount, false);
-        if (stackAmount > 1) {
+        if (stackAmount.isPresent()) {
+            stackedEntity.setStackAmount(stackAmount.getAsInt(), false);
             // Remove the name tag from the custom name of the egg
             e.getEntity().setCustomName(null);
             Executor.sync(stackedEntity::updateName, 1L);
@@ -462,12 +463,13 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityFeed(PlayerInteractEntityEvent e) {
-        if (!(e.getRightClicked() instanceof Animals) || ItemUtils.isOffHand(e))
+        if (!(e.getRightClicked() instanceof Animals))
             return;
 
-        ItemStack inHand = e.getPlayer().getItemInHand();
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+        ItemStack inHand = ItemUtils.getItemFromHand(e.getPlayer().getInventory(), usedHand);
 
-        if (!plugin.getNMSEntities().isAnimalFood((Animals) e.getRightClicked(), inHand))
+        if (inHand == null || !plugin.getNMSEntities().isAnimalFood((Animals) e.getRightClicked(), inHand))
             return;
 
         if (!EntityUtils.canBeBred((Animals) e.getRightClicked()))
@@ -533,7 +535,7 @@ public final class EntitiesListener implements Listener {
                 }, 50L);
             } else if (StackSplit.ENTITY_BREED.isEnabled()) {
                 stackedEntity.decreaseStackAmount(1, true);
-                StackedEntity duplicated = stackedEntity.spawnDuplicate(1, SpawnCause.BREEDING);
+                StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
                 plugin.getNMSEntities().setInLove((Animals) duplicated.getLivingEntity(), e.getPlayer(), true);
                 itemsAmountToRemove = 1;
             } else {
@@ -544,7 +546,6 @@ public final class EntitiesListener implements Listener {
 
             if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
                 int inHandItemsAmount = inHand.getAmount();
-                EquipmentSlot usedHand = ItemUtils.getHand(e);
 
                 if (itemsAmountToRemove >= inHandItemsAmount) {
                     ItemUtils.setItemInHand(e.getPlayer().getInventory(), usedHand, null);
@@ -714,7 +715,7 @@ public final class EntitiesListener implements Listener {
             return false;
 
         SpawnEggTrackedData trackedData = new SpawnEggTrackedData();
-        trackedData.stackAmount = ItemUtils.getSpawnerItemAmount(usedItem);
+        trackedData.stackAmount = ItemUtils.getSpawnerItemAmountOptional(usedItem);
         trackedData.upgradeId = ItemUtils.getSpawnerUpgrade(usedItem);
 
         if (Materials.isValidAndSpawnEgg(usedItem)) {
@@ -1133,7 +1134,7 @@ public final class EntitiesListener implements Listener {
 
     private static class SpawnEggTrackedData {
 
-        private int stackAmount;
+        private OptionalInt stackAmount;
         private int upgradeId;
         private EntityTypes entityType;
 

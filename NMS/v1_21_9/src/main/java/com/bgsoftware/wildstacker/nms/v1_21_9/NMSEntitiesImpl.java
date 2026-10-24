@@ -7,6 +7,7 @@ import com.bgsoftware.wildstacker.utils.entity.StackCheck;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
 import com.mojang.logging.LogUtils;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NumericTag;
@@ -22,6 +23,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -37,6 +40,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
@@ -68,6 +72,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -143,6 +148,14 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_9.Abst
     protected EntityResurrectEvent createEntityResurrectEvent(LivingEntity bukkitLivingEntity,
                                                               org.bukkit.inventory.EquipmentSlot equipmentSlot) {
         return new EntityResurrectEvent(bukkitLivingEntity, equipmentSlot);
+    }
+
+    @Override
+    protected void triggerDeathEffect(ServerLevel serverLevel, net.minecraft.world.entity.LivingEntity livingEntity,
+                                      MobEffectInstance mobEffectInstance) {
+        // The slimes of Oozing are spawned by WildStacker, as a stacked entity.
+        if (!mobEffectInstance.is(MobEffects.OOZING))
+            mobEffectInstance.onMobRemoved(serverLevel, livingEntity, Entity.RemovalReason.KILLED);
     }
 
     @Override
@@ -226,6 +239,9 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_9.Abst
             damageSource = damaged.damageSources().arrow(abstractArrow, abstractArrow.getOwner());
         } else if (damager instanceof Fireball fireball) {
             damageSource = damaged.damageSources().fireball(fireball, fireball.getOwner());
+        } else if (damager instanceof AbstractWindCharge abstractWindCharge) {
+            damageSource = damaged.damageSources().windCharge(abstractWindCharge,
+                    abstractWindCharge.getOwner() instanceof net.minecraft.world.entity.LivingEntity owner ? owner : null);
         } else if (damager instanceof net.minecraft.world.entity.LivingEntity livingEntity) {
             damageSource = damaged.damageSources().mobAttack(livingEntity);
         } else {
@@ -233,6 +249,12 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_21_9.Abst
         }
 
         serverPlayer.awardKillScore(damaged, damageSource);
+    }
+
+    @Override
+    protected void awardKilledByArrow(ServerPlayer serverPlayer, AbstractArrow abstractArrow,
+                                      Collection<Entity> victims) {
+        CriteriaTriggers.KILLED_BY_ARROW.trigger(serverPlayer, victims, abstractArrow.getWeaponItem());
     }
 
     @Override

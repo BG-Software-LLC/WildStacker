@@ -646,6 +646,10 @@ public final class WStackedEntity extends WAsyncStackedObject<LivingEntity> impl
         this.spawnCorpse = spawnCorpse;
     }
 
+    public boolean isSpawnCorpse() {
+        return spawnCorpse;
+    }
+
     @Override
     public int getId() {
         return cachedEntityId;

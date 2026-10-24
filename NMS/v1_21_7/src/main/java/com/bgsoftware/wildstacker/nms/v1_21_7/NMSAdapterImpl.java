@@ -21,6 +21,7 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.bukkit.ExplosionResult;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.OminousBottleMeta;
@@ -36,6 +37,11 @@ public class NMSAdapterImpl extends com.bgsoftware.wildstacker.nms.v1_21_7.Abstr
             Entity.class, "a", ValueInput.class);
 
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    @Override
+    protected org.bukkit.inventory.ItemStack asBukkitItemMirror(ItemStack itemStack) {
+        return CraftItemStack.asCraftMirror(itemStack);
+    }
 
     @Override
     protected void setTextureForItem(ItemStack itemStack, String texture) {

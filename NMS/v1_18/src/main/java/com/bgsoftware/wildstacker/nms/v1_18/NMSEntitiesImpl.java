@@ -4,6 +4,7 @@ import com.bgsoftware.common.reflection.ReflectMethod;
 import com.bgsoftware.wildstacker.api.enums.StackCheckResult;
 import com.bgsoftware.wildstacker.utils.legacy.EntityTypes;
 import com.bgsoftware.wildstacker.utils.pair.Pair;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NumericTag;
@@ -15,6 +16,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,6 +45,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.player.PlayerItemMendEvent;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_18.AbstractNMSEntities {
@@ -109,6 +112,11 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_18.Abstra
     }
 
     @Override
+    protected void triggerDeathEffect(ServerLevel serverLevel, LivingEntity livingEntity, MobEffectInstance mobEffectInstance) {
+        // Effects are not triggered by the death of entities in this version.
+    }
+
+    @Override
     public StackCheckResult areSimilar(EntityTypes entityType, org.bukkit.entity.LivingEntity en1,
                                        org.bukkit.entity.LivingEntity en2) {
         return StackCheckResult.SUCCESS;
@@ -150,6 +158,13 @@ public class NMSEntitiesImpl extends com.bgsoftware.wildstacker.nms.v1_18.Abstra
         }
 
         serverPlayer.awardKillScore(damaged, 0, damageSource);
+    }
+
+    @Override
+    protected void awardKilledByArrow(ServerPlayer serverPlayer, AbstractArrow abstractArrow,
+                                      Collection<Entity> victims) {
+        if (abstractArrow.shotFromCrossbow())
+            CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, victims);
     }
 
     @Override

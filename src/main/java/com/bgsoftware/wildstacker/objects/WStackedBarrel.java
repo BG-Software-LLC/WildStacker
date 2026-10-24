@@ -253,18 +253,7 @@ public final class WStackedBarrel extends WStackedHologramObject<Block> implemen
             if (range <= 0)
                 return Optional.empty();
 
-            Location location = getLocation();
-
-            int maxX = location.getBlockX() + range, maxY = location.getBlockY() + range, maxZ = location.getBlockZ() + range;
-            int minX = location.getBlockX() - range, minY = location.getBlockY() - range, minZ = location.getBlockZ() - range;
-
-            barrelStream = plugin.getSystemManager().getStackedBarrels().stream()
-                    .filter(stackedBarrel -> {
-                        Location loc = stackedBarrel.getLocation();
-                        return loc.getBlockX() >= minX && loc.getBlockX() <= maxX &&
-                                loc.getBlockY() >= minY && loc.getBlockY() <= maxY &&
-                                loc.getBlockZ() >= minZ && loc.getBlockZ() <= maxZ;
-                    });
+            barrelStream = plugin.getDataHandler().stackedBarrelStore.collectInRange(blockLocation, range).stream();
         }
 
         Optional<StackedBarrel> barrelOptional = GeneralUtils.getClosest(blockLocation, barrelStream

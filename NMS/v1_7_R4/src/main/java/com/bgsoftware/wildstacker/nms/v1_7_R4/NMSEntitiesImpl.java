@@ -374,7 +374,9 @@ public final class NMSEntitiesImpl implements NMSEntities {
     }
 
     @Override
-    public void awardCrossbowShot(Player player, LivingEntity target, org.bukkit.inventory.ItemStack crossBowItem) {
+    public void awardKilledByArrow(org.bukkit.entity.Player playerKiller,
+                                   org.bukkit.entity.Entity bukkitDamaged,
+                                   org.bukkit.entity.Entity directDamager) {
         // Do nothing
     }
 
