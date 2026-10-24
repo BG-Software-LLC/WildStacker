@@ -434,7 +434,8 @@ public final class EntitiesListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityNameTag(PlayerInteractEntityEvent e) {
-        ItemStack inHand = e.getPlayer().getInventory().getItemInHand();
+        EquipmentSlot usedHand = ItemUtils.getHand(e);
+        ItemStack inHand = ItemUtils.getItemFromHand(e.getPlayer().getInventory(), usedHand);
 
         if (inHand == null || inHand.getType() != Material.NAME_TAG || !inHand.hasItemMeta() || !inHand.getItemMeta().hasDisplayName()
                 || e.getRightClicked() instanceof EnderDragon || !EntityUtils.isStackable(e.getRightClicked()))
@@ -443,22 +444,27 @@ public final class EntitiesListener implements Listener {
         String displayName = inHand.getItemMeta().getDisplayName();
         StackedEntity stackedEntity = WStackedEntity.of(e.getRightClicked());
 
-        if (plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled()) {
-            Executor.sync(() -> {
-                if (stackedEntity.getStackAmount() > 1) {
-                    stackedEntity.setCustomName("");
-                    stackedEntity.decreaseStackAmount(1, true);
-                    StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
-                    duplicated.setCustomName(displayName);
-                    ((WStackedEntity) duplicated).setNameTag();
-                } else {
-                    ((WStackedEntity) stackedEntity).setNameTag();
-                    stackedEntity.runStackAsync(null);
-                }
-            }, 2L);
-        } else {
+        boolean shouldSplit = plugin.getSettings().entitiesStackingEnabled && StackSplit.NAME_TAG.isEnabled();
+        if (!shouldSplit || stackedEntity.getStackAmount() <= 1) {
             ((WStackedEntity) stackedEntity).setNameTag();
+            if (shouldSplit)
+                stackedEntity.runStackAsync(null);
+            return;
         }
+
+        Executor.sync(() -> {
+            if (stackedEntity.getStackAmount() <= 1) {
+                ((WStackedEntity) stackedEntity).setNameTag();
+                stackedEntity.runStackAsync(null);
+                return;
+            }
+
+            stackedEntity.setCustomName("");
+            stackedEntity.decreaseStackAmount(1, true);
+            StackedEntity duplicated = stackedEntity.spawnDuplicate(1);
+            duplicated.setCustomName(displayName);
+            ((WStackedEntity) duplicated).setNameTag();
+        }, 2L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -753,7 +759,7 @@ public final class EntitiesListener implements Listener {
             if (stackedItem != null)
                 plugin.getSystemManager().saveItem(stackedItem);
         }
-        Executor.sync(() -> EntityStorage.clearMetadata(entity), 100L);
+        EntityStorage.clearMetadata(entity, 100L);
     }
 
     private void handleEntitySpawn(LivingEntity entity, SpawnCause spawnCause) {
