@@ -261,14 +261,18 @@ public class StackedMobSpawner extends MobSpawnerAbstract {
                 spawnedEntities += increaseStackAmount;
 
                 if (minimumEntityRequirement > 1) {
-                    // We want to stack all nearby entities into target as well.
-                    increaseStackAmount += nearbyAndStackableCount.get();
-                    nearbyAndStackableEntities.forEach(nearbyEntity -> {
-                        if (nearbyEntity != targetEntity) {
-                            nearbyEntity.remove();
-                            nearbyEntity.spawnStackParticle(true);
-                        }
-                    });
+                    for (StackedEntity nearbyEntity : nearbyAndStackableEntities) {
+                        if (nearbyEntity == targetEntity)
+                            continue;
+
+                        int nearbyStackAmount = nearbyEntity.getStackAmount();
+                        if (nearbyStackAmount > targetEntityStackLimit - currentStackAmount - increaseStackAmount)
+                            continue;
+
+                        increaseStackAmount += nearbyStackAmount;
+                        nearbyEntity.remove();
+                        nearbyEntity.spawnStackParticle(true);
+                    }
                 }
 
                 targetEntity.increaseStackAmount(increaseStackAmount, true);
