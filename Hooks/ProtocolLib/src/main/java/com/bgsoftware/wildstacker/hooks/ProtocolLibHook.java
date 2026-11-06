@@ -15,6 +15,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -171,6 +172,21 @@ public final class ProtocolLibHook {
         }
 
         private void onPacketSendingInternal(PacketEvent event) {
+            // Looking up the entity of the packet accesses the world, which can only be done from the main thread.
+            // ProtocolLib may still call this listener from other threads, for example for packets inside bundles
+            // that other plugins send asynchronously.
+            if (!Bukkit.isPrimaryThread())
+                return;
+
+            SystemManager systemManager = ProtocolLibHook.plugin.getSystemManager();
+
+            boolean itemNamesToggledOff = systemManager.hasItemNamesToggledOff(event.getPlayer());
+            boolean entityNamesToggledOff = systemManager.hasEntityNamesToggledOff(event.getPlayer());
+
+            // No need to look up the entity if the player sees all names.
+            if (!itemNamesToggledOff && !entityNamesToggledOff)
+                return;
+
             PacketContainer packetContainer = event.getPacket();
             StructureModifier<Entity> entityModifier = packetContainer.getEntityModifier(event);
 
@@ -179,10 +195,8 @@ public final class ProtocolLibHook {
 
             Entity entity = entityModifier.read(0);
 
-            SystemManager systemManager = ProtocolLibHook.plugin.getSystemManager();
-
-            if ((entity instanceof Item && systemManager.hasItemNamesToggledOff(event.getPlayer())) ||
-                    (entity instanceof LivingEntity && systemManager.hasEntityNamesToggledOff(event.getPlayer()))) {
+            if ((entity instanceof Item && itemNamesToggledOff) ||
+                    (entity instanceof LivingEntity && entityNamesToggledOff)) {
                 packetHandler.handlePacketCustomNameUpdate(packetContainer, null);
             }
         }
