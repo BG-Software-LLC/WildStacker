@@ -6,12 +6,10 @@ import com.bgsoftware.wildstacker.api.spawning.SpawnCondition;
 import com.bgsoftware.wildstacker.api.upgrades.SpawnerUpgrade;
 import com.bgsoftware.wildstacker.nms.NMSSpawners;
 import com.bgsoftware.wildstacker.nms.v1_8_R3.spawner.StackedMobSpawner;
-import com.bgsoftware.wildstacker.nms.v1_8_R3.spawner.SyncedCreatureSpawnerImpl;
 import com.bgsoftware.wildstacker.nms.v1_8_R3.spawner.TileEntityMobSpawnerWatcher;
 import com.bgsoftware.wildstacker.objects.WStackedSpawner;
 import com.bgsoftware.wildstacker.utils.entity.EntityUtils;
 import com.bgsoftware.wildstacker.utils.spawners.SpawnerCachedData;
-import com.bgsoftware.wildstacker.utils.spawners.SyncedCreatureSpawner;
 import net.minecraft.server.v1_8_R3.BiomeBase;
 import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -27,7 +25,6 @@ import net.minecraft.server.v1_8_R3.TileEntityMobSpawner;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Location;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
@@ -192,15 +189,11 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     @Override
-    public SyncedCreatureSpawner createSyncedSpawner(CreatureSpawner creatureSpawner) {
-        return new SyncedCreatureSpawnerImpl(creatureSpawner.getBlock());
-    }
+    public void updateSpawner(Location location, SpawnerUpgrade spawnerUpgrade) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
 
-    @Override
-    public void updateSpawner(CreatureSpawner creatureSpawner, SpawnerUpgrade spawnerUpgrade) {
-        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
-                .getTileEntityAt(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
         if (mobSpawnerAbstract instanceof StackedMobSpawner) {
             ((StackedMobSpawner) mobSpawnerAbstract).minSpawnDelay = spawnerUpgrade.getMinSpawnDelay();
             ((StackedMobSpawner) mobSpawnerAbstract).maxSpawnDelay = spawnerUpgrade.getMaxSpawnDelay();
@@ -225,10 +218,29 @@ public final class NMSSpawnersImpl implements NMSSpawners {
     }
 
     @Override
-    public SpawnerCachedData readData(CreatureSpawner creatureSpawner) {
-        TileEntityMobSpawner tileEntityMobSpawner = (TileEntityMobSpawner) ((CraftWorld) creatureSpawner.getWorld())
-                .getTileEntityAt(creatureSpawner.getX(), creatureSpawner.getY(), creatureSpawner.getZ());
-        MobSpawnerAbstract mobSpawnerAbstract = tileEntityMobSpawner.getSpawner();
+    public void setSpawnerDelay(Location location, int spawnDelay) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.spawnDelay = spawnDelay;
+    }
+
+    @Override
+    public void resetSpawnerType(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return;
+
+        mobSpawnerAbstract.setMobName(EntityType.PIG.getName());
+    }
+
+    @Override
+    public SpawnerCachedData readData(Location location) {
+        MobSpawnerAbstract mobSpawnerAbstract = getSpawner(location);
+        if (mobSpawnerAbstract == null)
+            return null;
+
         if (mobSpawnerAbstract instanceof StackedMobSpawner) {
             StackedMobSpawner stackedMobSpawner = (StackedMobSpawner) mobSpawnerAbstract;
             return new SpawnerCachedData(
@@ -254,6 +266,15 @@ public final class NMSSpawnersImpl implements NMSSpawners {
                     nbtTagCompound.getShort("Delay") / 20
             );
         }
+    }
+
+    private MobSpawnerAbstract getSpawner(Location location) {
+        if (location.getWorld() == null)
+            return null;
+
+        TileEntity tileEntity = ((CraftWorld) location.getWorld()).getTileEntityAt(
+                location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        return tileEntity instanceof TileEntityMobSpawner ? ((TileEntityMobSpawner) tileEntity).getSpawner() : null;
     }
 
 }
