@@ -489,7 +489,7 @@ public final class SystemHandler implements SystemManager {
             Executor.sync(() -> {
                 plugin.getNMSEntities().playDeathSound(livingEntity);
                 livingEntity.setHealth(0);
-                Executor.sync(() -> EntityStorage.clearMetadata(livingEntity), 1L);
+                EntityStorage.clearMetadata(livingEntity, 1L);
             }, 2L);
         }
     }
@@ -773,6 +773,7 @@ public final class SystemHandler implements SystemManager {
 
         if (isEntitiesLoad) {
             for (Entity entity : loadedEntities) {
+                EntityStorage.cancelMetadataRemoval(entity);
                 String customName = plugin.getNMSEntities().getCustomName(entity);
 
                 // Checking for too long names
@@ -790,6 +791,7 @@ public final class SystemHandler implements SystemManager {
 
                 if (EntityUtils.isStackable(entity)) {
                     StackedEntity stackedEntity = WStackedEntity.of(entity);
+                    ((WStackedEntity) stackedEntity).restoreNameTag();
                     stackedEntity.updateNerfed();
                     stackedEntity.updateName();
                 }
