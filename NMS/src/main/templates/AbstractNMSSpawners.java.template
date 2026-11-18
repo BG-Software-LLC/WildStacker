@@ -32,15 +32,16 @@ import ${CRAFTBUKKIT_PACKAGE}.block.CraftBlockState;
 import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.BiPredicate;
 
 public abstract class AbstractNMSSpawners implements NMSSpawners {
 
     private static final ReflectField<List<TickingBlockEntity>> LEVEL_BLOCK_ENTITY_TICKERS =
             initializeLevelBlockEntityTickersField();
+    private static final ReflectField<List<TickingBlockEntity>> LEVEL_PENDING_BLOCK_ENTITY_TICKERS =
+            new ReflectField<>(Level.class, List.class, Modifier.PRIVATE | Modifier.FINAL, 1);
 
     private static final WildStackerPlugin plugin = WildStackerPlugin.getPlugin();
 
@@ -58,31 +59,13 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
             return;
 
         List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS.get(serverLevel);
+        updateStackedSpawners(bukkitWorld, levelChunk, chunkX, chunkZ, blockEntityTickers);
 
-        List<TickingBlockEntity> watchersToAdd = new LinkedList<>();
-        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
-
-        while (blockEntityIterator.hasNext()) {
-            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
-            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
-                continue;
-            BlockPos blockEntityPos = tickingBlockEntity.getPos();
-            int blockEntityChunkX = SectionPos.blockToSectionCoord(blockEntityPos.getX());
-            int blockEntityChunkZ = SectionPos.blockToSectionCoord(blockEntityPos.getZ());
-            if (blockEntityChunkX == chunkX && blockEntityChunkZ == chunkZ) {
-                BlockPos blockPos = tickingBlockEntity.getPos();
-                BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos);
-                if (blockEntity instanceof SpawnerBlockEntity) {
-                    StackedSpawner stackedSpawner = WStackedSpawner.of(bukkitWorld.getBlockAt(
-                            blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                    watchersToAdd.add(new SpawnerWatcherTickingBlockEntity(
-                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity));
-                    blockEntityIterator.remove();
-                }
-            }
-        }
-
-        blockEntityTickers.addAll(watchersToAdd);
+        // Chunks that finish loading while block entities are ticking have their tickers
+        // in the pending list until the next tick, so they must be watched there as well.
+        List<TickingBlockEntity> pendingBlockEntityTickers = LEVEL_PENDING_BLOCK_ENTITY_TICKERS.get(serverLevel);
+        if (pendingBlockEntityTickers != null)
+            updateStackedSpawners(bukkitWorld, levelChunk, chunkX, chunkZ, pendingBlockEntityTickers);
     }
 
     @Override
@@ -95,29 +78,12 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
         int blockZ = location.getBlockZ();
 
         List<TickingBlockEntity> blockEntityTickers = LEVEL_BLOCK_ENTITY_TICKERS.get(serverLevel);
+        if (updateStackedSpawner(stackedSpawner, serverLevel, blockX, blockY, blockZ, blockEntityTickers))
+            return;
 
-        TickingBlockEntity watcherToAdd = null;
-        Iterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.iterator();
-
-        while (blockEntityIterator.hasNext()) {
-            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
-            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity)
-                continue;
-
-            BlockPos blockPos = tickingBlockEntity.getPos();
-            if (blockPos.getX() == blockX && blockPos.getY() == blockY && blockPos.getZ() == blockZ) {
-                BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-                if (blockEntity instanceof SpawnerBlockEntity) {
-                    watcherToAdd = new SpawnerWatcherTickingBlockEntity(
-                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity);
-                    blockEntityIterator.remove();
-                    break;
-                }
-            }
-        }
-
-        if (watcherToAdd != null)
-            blockEntityTickers.add(watcherToAdd);
+        List<TickingBlockEntity> pendingBlockEntityTickers = LEVEL_PENDING_BLOCK_ENTITY_TICKERS.get(serverLevel);
+        if (pendingBlockEntityTickers != null)
+            updateStackedSpawner(stackedSpawner, serverLevel, blockX, blockY, blockZ, pendingBlockEntityTickers);
     }
 
     @Override
@@ -181,6 +147,54 @@ public abstract class AbstractNMSSpawners implements NMSSpawners {
         for (BlockEntity blockEntity : levelChunk.getBlockEntities().values()) {
             if (blockEntity instanceof SpawnerBlockEntity)
                 return true;
+        }
+
+        return false;
+    }
+
+    private static void updateStackedSpawners(World bukkitWorld, LevelChunk levelChunk, int chunkX, int chunkZ,
+                                              List<TickingBlockEntity> blockEntityTickers) {
+        ListIterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.listIterator();
+
+        while (blockEntityIterator.hasNext()) {
+            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
+            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity || tickingBlockEntity.isRemoved())
+                continue;
+
+            BlockPos blockPos = tickingBlockEntity.getPos();
+            int blockEntityChunkX = SectionPos.blockToSectionCoord(blockPos.getX());
+            int blockEntityChunkZ = SectionPos.blockToSectionCoord(blockPos.getZ());
+            if (blockEntityChunkX == chunkX && blockEntityChunkZ == chunkZ) {
+                BlockEntity blockEntity = levelChunk.getBlockEntity(blockPos);
+                if (blockEntity instanceof SpawnerBlockEntity) {
+                    StackedSpawner stackedSpawner = WStackedSpawner.of(bukkitWorld.getBlockAt(
+                            blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                    blockEntityIterator.set(new SpawnerWatcherTickingBlockEntity(
+                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity));
+                }
+            }
+        }
+    }
+
+    private static boolean updateStackedSpawner(StackedSpawner stackedSpawner, ServerLevel serverLevel,
+                                                int blockX, int blockY, int blockZ,
+                                                List<TickingBlockEntity> blockEntityTickers) {
+        ListIterator<TickingBlockEntity> blockEntityIterator = blockEntityTickers.listIterator();
+
+        while (blockEntityIterator.hasNext()) {
+            TickingBlockEntity tickingBlockEntity = blockEntityIterator.next();
+            if (tickingBlockEntity instanceof SpawnerWatcherTickingBlockEntity || tickingBlockEntity.isRemoved())
+                continue;
+
+            BlockPos blockPos = tickingBlockEntity.getPos();
+            if (blockPos.getX() == blockX && blockPos.getY() == blockY && blockPos.getZ() == blockZ) {
+                BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
+                if (blockEntity instanceof SpawnerBlockEntity) {
+                    blockEntityIterator.set(new SpawnerWatcherTickingBlockEntity(
+                            stackedSpawner, (SpawnerBlockEntity) blockEntity, tickingBlockEntity));
+                    return true;
+                }
+            }
         }
 
         return false;
