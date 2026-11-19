@@ -26,10 +26,14 @@ public final class Executor {
     }
 
     public static void sync(Runnable runnable, long delayedTime) {
-        if (shutdown)
-            return;
+        syncTask(runnable, delayedTime);
+    }
 
-        Bukkit.getScheduler().runTaskLater(plugin, runnable, delayedTime);
+    public static BukkitTask syncTask(Runnable runnable, long delayedTime) {
+        if (shutdown)
+            return null;
+
+        return Bukkit.getScheduler().runTaskLater(plugin, runnable, delayedTime);
     }
 
     public static void runAtEndOfTick(Runnable code) {

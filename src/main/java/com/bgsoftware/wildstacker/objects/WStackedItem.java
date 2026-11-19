@@ -145,7 +145,7 @@ public final class WStackedItem extends WAsyncStackedObject<Item> implements Sta
         Executor.sync(object::remove);
 
         EntityStorage.setMetadata(object, EntityFlag.REMOVED_ENTITY, true);
-        Executor.sync(() -> EntityStorage.clearMetadata(object), 100L);
+        EntityStorage.clearMetadata(object, 100L);
     }
 
     @Override
