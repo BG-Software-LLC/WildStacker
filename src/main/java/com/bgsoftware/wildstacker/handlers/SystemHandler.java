@@ -347,7 +347,7 @@ public final class SystemHandler implements SystemManager {
                 }
             } else if (stackedObject instanceof StackedSpawner) {
                 StackedSpawner stackedSpawner = (StackedSpawner) stackedObject;
-                if (GeneralUtils.isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getSpawner().getBlock())) {
+                if (GeneralUtils.isChunkLoaded(stackedSpawner.getLocation()) && !isStackedSpawner(stackedSpawner.getLocation().getBlock())) {
                     removeStackObject(stackedObject);
                 }
             } else if (stackedObject instanceof StackedBarrel) {

@@ -12,6 +12,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import org.bukkit.entity.EntityType;
@@ -19,6 +20,11 @@ import org.bukkit.entity.EntityType;
 import java.util.Objects;
 
 public class NMSSpawnersImpl extends com.bgsoftware.wildstacker.nms.v1_17.AbstractNMSSpawners {
+
+    @Override
+    protected void resetSpawnerType(SpawnerBlockEntity spawnerBlockEntity) {
+        spawnerBlockEntity.getSpawner().setEntityId(net.minecraft.world.entity.EntityType.PIG);
+    }
 
     @Override
     public void registerSpawnConditions() {

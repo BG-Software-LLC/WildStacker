@@ -8,6 +8,7 @@ import com.bgsoftware.wildstacker.utils.GeneralUtils;
 import com.bgsoftware.wildstacker.utils.files.FileUtils;
 import com.bgsoftware.wildstacker.utils.files.SoundWrapper;
 import com.bgsoftware.wildstacker.utils.items.ItemBuilder;
+import com.bgsoftware.wildstacker.utils.legacy.Materials;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -67,7 +68,8 @@ public final class SpawnerUpgradeMenu extends WildMenu {
     public void onPlayerClick(InventoryClickEvent e) {
         StackedSpawner stackedSpawner = this.stackedSpawner.get();
 
-        if (stackedSpawner == null) {
+        if (stackedSpawner == null ||
+                stackedSpawner.getLocation().getBlock().getType() != Materials.SPAWNER.toBukkitType()) {
             e.getWhoClicked().closeInventory();
             return;
         }
@@ -98,6 +100,11 @@ public final class SpawnerUpgradeMenu extends WildMenu {
         }
 
         stackedSpawner.setUpgrade(nextUpgrade, player);
+
+        if (stackedSpawner.getLocation().getBlock().getType() != Materials.SPAWNER.toBukkitType()) {
+            player.closeInventory();
+            return;
+        }
 
         if (successSound != null)
             successSound.playSound(player);
