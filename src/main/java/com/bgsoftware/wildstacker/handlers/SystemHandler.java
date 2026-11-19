@@ -192,6 +192,11 @@ public final class SystemHandler implements SystemManager {
     }
 
     @Override
+    public StackedItem getTrackedStackedItem(Item item) {
+        return dataHandler.stackedItemStore.get(item.getEntityId());
+    }
+
+    @Override
     public StackedSpawner getStackedSpawner(CreatureSpawner spawner) {
         return getStackedSpawner(spawner.getLocation());
     }

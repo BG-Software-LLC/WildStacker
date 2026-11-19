@@ -56,6 +56,12 @@ public interface SystemManager {
     StackedItem getStackedItem(Item item);
 
     /**
+     * Look up a currently registered stack, without registering the item.
+     * @return the stack or null when the item is not registered
+     */
+    StackedItem getTrackedStackedItem(Item item);
+
+    /**
      * Get the stacked spawner object of a creature-spawner.
      *
      * @param spawner The creature-spawner.

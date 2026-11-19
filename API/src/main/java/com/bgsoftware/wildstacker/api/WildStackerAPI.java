@@ -42,6 +42,13 @@ public final class WildStackerAPI {
     }
 
     /**
+     * Return the registered stack for the item, or null if there is none.
+     */
+    public static StackedItem getTrackedStackedItem(Item item) {
+        return instance.getSystemManager().getTrackedStackedItem(item);
+    }
+
+    /**
      * Get a stacked-amount for an item.
      *
      * @param item an item to check
