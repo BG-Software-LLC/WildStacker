@@ -167,7 +167,7 @@ public final class SystemHandler implements SystemManager {
 
     @Override
     public StackedItem getStackedItem(Item item) {
-        StackedItem stackedItem = dataHandler.stackedItemStore.get(item.getEntityId());
+        StackedItem stackedItem = getTrackedStackedItem(item);
         if (stackedItem != null) {
             return stackedItem;
         }
@@ -191,6 +191,7 @@ public final class SystemHandler implements SystemManager {
         return stackedItem;
     }
 
+    @Nullable
     @Override
     public StackedItem getTrackedStackedItem(Item item) {
         return dataHandler.stackedItemStore.get(item.getEntityId());

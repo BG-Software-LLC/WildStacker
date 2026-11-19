@@ -13,6 +13,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class WildStackerAPI {
 
@@ -44,6 +46,7 @@ public final class WildStackerAPI {
     /**
      * Return the registered stack for the item, or null if there is none.
      */
+    @Nullable
     public static StackedItem getTrackedStackedItem(Item item) {
         return instance.getSystemManager().getTrackedStackedItem(item);
     }

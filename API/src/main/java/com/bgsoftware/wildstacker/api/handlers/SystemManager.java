@@ -25,6 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,7 @@ public interface SystemManager {
      * Look up a currently registered stack, without registering the item.
      * @return the stack or null when the item is not registered
      */
+    @Nullable
     StackedItem getTrackedStackedItem(Item item);
 
     /**
