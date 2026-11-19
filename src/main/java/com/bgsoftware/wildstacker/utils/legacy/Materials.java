@@ -43,6 +43,7 @@ public enum Materials {
 
     private final String bukkitType;
     private final short bukkitData;
+    private volatile Material resolvedBukkitType;
 
     Materials(String bukkitType) {
         this(bukkitType, 0);
@@ -125,15 +126,22 @@ public enum Materials {
     }
 
     public Material toBukkitType() {
+        Material resolved = resolvedBukkitType;
+        if (resolved != null) {
+            return resolved;
+        }
+
         try {
             try {
-                return Material.valueOf(bukkitType);
+                resolved = Material.valueOf(bukkitType);
             } catch (IllegalArgumentException ex) {
-                return Material.valueOf(name());
+                resolved = Material.valueOf(name());
             }
         } catch (Exception ex) {
             throw new IllegalArgumentException("Couldn't cast " + name() + " into a bukkit enum. Contact Ome_R!");
         }
+        resolvedBukkitType = resolved;
+        return resolved;
     }
 
     public ItemStack toBukkitItem() {
